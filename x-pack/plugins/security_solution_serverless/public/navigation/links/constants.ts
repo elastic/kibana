@@ -30,6 +30,8 @@ export const SecurityPagePath = {
  * The path should not be used for links displayed in the main left navigation, since highlighting won't work.
  **/
 export enum ExternalPageName {
+  // Discover
+  discover = 'discover:',
   // Osquery
   osquery = 'osquery:',
   // Analytics

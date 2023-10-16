@@ -1078,7 +1078,7 @@ describe('Enterprise Search Managed Indices', () => {
         router: mockRouter.router,
       });
     });
-    const modelName = '.elser_model_2_SNAPSHOT';
+    const modelName = '.elser_model_2';
 
     it('fails validation without modelName', () => {
       const request = {
@@ -1142,7 +1142,7 @@ describe('Enterprise Search Managed Indices', () => {
         router: mockRouter.router,
       });
     });
-    const modelName = '.elser_model_2_SNAPSHOT';
+    const modelName = '.elser_model_2';
 
     it('fails validation without modelName', () => {
       const request = {
@@ -1205,7 +1205,7 @@ describe('Enterprise Search Managed Indices', () => {
         router: mockRouter.router,
       });
     });
-    const modelName = '.elser_model_2_SNAPSHOT';
+    const modelName = '.elser_model_2';
 
     it('fails validation without modelName', () => {
       const request = {

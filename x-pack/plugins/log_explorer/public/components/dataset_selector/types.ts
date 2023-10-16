@@ -27,6 +27,7 @@ import {
   UNCATEGORIZED_TAB_ID,
 } from './constants';
 import { LoadDataViews, ReloadDataViews, SearchDataViews } from '../../hooks/use_data_views';
+import { DiscoverEsqlUrlProps } from '../../hooks/use_esql';
 
 export interface DatasetSelectorProps {
   /* The generic data stream list */
@@ -39,6 +40,8 @@ export interface DatasetSelectorProps {
   dataViews: DataViewListItem[] | null;
   /* Any error occurred to show when the user preview the data views */
   dataViewsError: Error | null;
+  /* url props to navigate to discover ES|QL */
+  discoverEsqlUrlProps: DiscoverEsqlUrlProps;
   /* The integrations list, each integration includes its data streams */
   integrations: Integration[] | null;
   /* Any error occurred to show when the user preview the integrations */
@@ -48,6 +51,8 @@ export interface DatasetSelectorProps {
   isLoadingIntegrations: boolean;
   isLoadingUncategorized: boolean;
   isSearchingIntegrations: boolean;
+  /* Flag for determining whether ESQL is enabled or not */
+  isEsqlEnabled: boolean;
   /* Triggered when retrying to load the data views */
   onDataViewsReload: ReloadDataViews;
   /* Triggered when selecting a data view */

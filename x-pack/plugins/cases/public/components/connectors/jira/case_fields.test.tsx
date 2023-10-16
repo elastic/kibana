@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { omit } from 'lodash/fp';
-import { waitFor, screen, fireEvent, act, within } from '@testing-library/react';
+import { waitFor, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { connector, issues } from '../mock';
@@ -132,13 +132,11 @@ describe('Jira Fields', () => {
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
+    const input = screen.getByTestId('comboBoxSearchInput');
 
-    await act(async () => {
-      const event = { target: { value: 'parentId' } };
-      fireEvent.change(screen.getByTestId('comboBoxSearchInput'), event);
-    });
+    fireEvent.change(input, { target: { value: 'parentId' } });
 
-    expect(screen.getByText('parentId')).toBeInTheDocument();
+    expect(input).toHaveValue('parentId');
   });
 
   it('searches parent correctly', async () => {

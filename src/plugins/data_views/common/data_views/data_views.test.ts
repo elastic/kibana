@@ -460,6 +460,35 @@ describe('IndexPatterns', () => {
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
   });
 
+  describe('defaultDataViewExists', () => {
+    beforeEach(() => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+    });
+
+    test('return true if exists', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(true);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('return false if no default data view found', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(false);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+  });
+
   describe('getDefaultDataView', () => {
     beforeEach(() => {
       indexPatterns.clearCache();
@@ -470,8 +499,10 @@ describe('IndexPatterns', () => {
       uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
       savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
       savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      jest.spyOn(indexPatterns, 'refreshFields');
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      expect(indexPatterns.refreshFields).not.toBeCalled();
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);

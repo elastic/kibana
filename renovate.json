@@ -273,6 +273,23 @@
       "enabled": true
     },
     {
+      "groupName": "security solution modules",
+      "matchPackageNames": [
+        "zod",
+        "langchain"
+      ],
+      "reviewers": [
+        "Team: SecuritySolution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "platform security modules",
       "matchPackageNames": [
         "css.escape",

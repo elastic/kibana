@@ -32,6 +32,7 @@ import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
+import { nanosToMicros } from './nanos_to_micros';
 
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
@@ -89,7 +90,7 @@ export const buildNewAlert = <
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
         ...(legacyAlert.getState().duration
-          ? { [ALERT_DURATION]: legacyAlert.getState().duration }
+          ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
           : {}),
         ...(legacyAlert.getState().start
           ? {

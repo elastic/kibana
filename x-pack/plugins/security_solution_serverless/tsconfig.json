@@ -43,6 +43,9 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/usage-collection-plugin",
     "@kbn/cloud-defend-plugin",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/actions-plugin"
   ]
 }

@@ -780,6 +780,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   addLayer: (layerType: LayerType) => void;
   removeLayer: (layerId: string) => void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
+  isInlineEditing?: boolean;
 };
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {

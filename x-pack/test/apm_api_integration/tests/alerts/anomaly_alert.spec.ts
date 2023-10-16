@@ -17,10 +17,10 @@ import { waitForRuleStatus } from './helpers/wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-
   const supertest = getService('supertest');
   const ml = getService('ml');
   const es = getService('es');
+  const logger = getService('log');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
   // FLAKY https://github.com/elastic/kibana/issues/160298
@@ -68,8 +68,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await synthtraceEsClient.clean();
-        await deleteRuleById({ supertest, ruleId });
+        try {
+          await synthtraceEsClient.clean();
+          await deleteRuleById({ supertest, ruleId });
+        } catch (e) {
+          logger.info('Could not delete rule by id', e);
+        }
       });
 
       describe('with ml jobs', () => {

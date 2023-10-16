@@ -996,6 +996,20 @@
             "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.hideDataViewPicker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideDataViewPicker",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

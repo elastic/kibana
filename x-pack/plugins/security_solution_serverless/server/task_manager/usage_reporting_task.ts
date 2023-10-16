@@ -10,6 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+
 import { usageReportingService } from '../common/services';
 import type {
   MeteringCallback,
@@ -18,6 +19,8 @@ import type {
   UsageRecord,
 } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
+
+import { stateSchemaByVersion, emptyState } from './task_state';
 
 const SCOPE = ['serverlessSecurity'];
 const TIMEOUT = '1m';
@@ -58,6 +61,7 @@ export class SecurityUsageReportingTask {
         [taskType]: {
           title: taskTitle,
           timeout: TIMEOUT,
+          stateSchemaByVersion,
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             return {
               run: async () => {
@@ -94,9 +98,7 @@ export class SecurityUsageReportingTask {
         schedule: {
           interval,
         },
-        state: {
-          lastSuccessfulReport: null,
-        },
+        state: emptyState,
         params: { version: this.version },
       });
     } catch (e) {

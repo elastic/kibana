@@ -373,6 +373,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.ensurePopoverClosed();
         });
       });
+
+      it('should not have an option to create custom threshold alert', async () => {
+        await pageObjects.infraHome.clickAlertsAndRules();
+        await pageObjects.infraHome.ensurePopoverOpened();
+        await pageObjects.infraHome.ensureCustomThresholdAlertMenuItemIsMissing();
+        await pageObjects.infraHome.clickAlertsAndRules();
+      });
     });
 
     describe('Saved Views', () => {

@@ -28,6 +28,7 @@ import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
+import { nanosToMicros } from './nanos_to_micros';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
 
 interface BuildRecoveredAlertOpts<
@@ -95,7 +96,7 @@ export const buildRecoveredAlert = <
     [ALERT_STATUS]: 'recovered',
     // Set latest duration as recovered alerts should have updated duration
     ...(legacyAlert.getState().duration
-      ? { [ALERT_DURATION]: legacyAlert.getState().duration }
+      ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
       : {}),
     // Set end time
     ...(legacyAlert.getState().end && legacyAlert.getState().start

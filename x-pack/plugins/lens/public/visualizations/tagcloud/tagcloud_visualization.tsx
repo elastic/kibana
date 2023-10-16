@@ -16,11 +16,12 @@ import {
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
-import { PaletteRegistry, DEFAULT_COLOR_MAPPING_CONFIG, getColorsFromMapping } from '@kbn/coloring';
+import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import type { OperationMetadata, Visualization } from '../..';
+import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
@@ -102,13 +103,14 @@ export const getTagcloudVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state) {
+  initialize(addNewLayer, state, mainPalette) {
     return (
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         ...DEFAULT_STATE,
-        colorMapping: { ...DEFAULT_COLOR_MAPPING_CONFIG },
+        colorMapping:
+          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
       }
     );
   },
@@ -302,6 +304,7 @@ export const getTagcloudVisualization = ({
           setState={props.setState}
           frame={props.frame}
           panelRef={props.panelRef}
+          isInlineEditing={props.isInlineEditing}
         />
       );
     }

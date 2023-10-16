@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import styled from '@emotion/styled';
 import { EuiContextMenu, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
+import styled from '@emotion/styled';
+import React, { useMemo } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
+import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
   dataViewsLabel,
   DATA_VIEWS_PANEL_ID,
@@ -23,6 +24,8 @@ import {
 } from './constants';
 import { useDatasetSelector } from './state_machine/use_dataset_selector';
 import { DatasetsPopover } from './sub_components/datasets_popover';
+import { DataViewsPanelTitle } from './sub_components/data_views_panel_title';
+import { EsqlSelector } from './sub_components/esql_selector';
 import { SearchControls } from './sub_components/search_controls';
 import { SelectorActions } from './sub_components/selector_actions';
 import { DatasetSelectorProps } from './types';
@@ -32,8 +35,6 @@ import {
   createIntegrationStatusItem,
   createUncategorizedStatusItem,
 } from './utils';
-import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
-import { DataViewsPanelTitle } from './sub_components/data_views_panel_title';
 
 export function DatasetSelector({
   datasets,
@@ -41,8 +42,10 @@ export function DatasetSelector({
   datasetsError,
   dataViews,
   dataViewsError,
+  discoverEsqlUrlProps,
   integrations,
   integrationsError,
+  isEsqlEnabled,
   isLoadingDataViews,
   isLoadingIntegrations,
   isLoadingUncategorized,
@@ -278,6 +281,7 @@ export function DatasetSelector({
         data-test-subj="dataViewsContextMenu"
         size="s"
       />
+      {isEsqlEnabled && <EsqlSelector {...discoverEsqlUrlProps} />}
     </DatasetsPopover>
   );
 }

@@ -225,6 +225,7 @@ export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolic
     icon: o.icon,
     disabled: o.disabled,
     isBeta: o.isBeta,
+    testId: o.testId,
   }));
 
 export const getMaxPackageName = (

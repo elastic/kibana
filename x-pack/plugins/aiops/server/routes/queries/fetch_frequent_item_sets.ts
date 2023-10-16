@@ -15,8 +15,12 @@ import type { Logger } from '@kbn/logging';
 import { type SignificantTerm } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import { RANDOM_SAMPLER_SEED } from '../../../common/constants';
-import type { SignificantTermDuplicateGroup, ItemsetResult } from '../../../common/types';
+import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS_SETTINGS } from '../../../common/constants';
+import type {
+  SignificantTermDuplicateGroup,
+  ItemSet,
+  FetchFrequentItemSetsResponse,
+} from '../../../common/types';
 
 interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
@@ -74,7 +78,7 @@ export async function fetchFrequentItemSets(
   sampleProbability: number = 1,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
-) {
+): Promise<FetchFrequentItemSetsResponse> {
   // Sort significant terms by ascending p-value, necessary to apply the field limit correctly.
   const sortedSignificantTerms = significantTerms.slice().sort((a, b) => {
     return (a.pValue ?? 0) - (b.pValue ?? 0);
@@ -103,7 +107,7 @@ export async function fetchFrequentItemSets(
       frequent_item_sets: {
         minimum_set_size: 2,
         size: 200,
-        minimum_support: 0.001,
+        minimum_support: LOG_RATE_ANALYSIS_SETTINGS.FREQUENT_ITEMS_SETS_MINIMUM_SUPPORT,
         fields: getFrequentItemSetsAggFields(sortedSignificantTerms),
       },
     },
@@ -138,7 +142,7 @@ export async function fetchFrequentItemSets(
     emitError(`Failed to fetch frequent_item_sets.`);
     return {
       fields: [],
-      df: [],
+      itemSets: [],
       totalDocCount: 0,
     };
   }
@@ -158,10 +162,10 @@ export async function fetchFrequentItemSets(
   const fiss = frequentItemSets.fi.buckets;
   fiss.length = maximum;
 
-  const results: ItemsetResult[] = [];
+  const results: ItemSet[] = [];
 
   fiss.forEach((fis) => {
-    const result: ItemsetResult = {
+    const result: ItemSet = {
       set: {},
       size: 0,
       maxPValue: 0,
@@ -203,7 +207,7 @@ export async function fetchFrequentItemSets(
 
   return {
     fields: uniqueFields,
-    df: results,
+    itemSets: results,
     totalDocCount: totalDocCountFi,
   };
 }

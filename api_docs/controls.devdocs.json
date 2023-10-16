@@ -6047,6 +6047,68 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-common.generateNewControlIds",
+        "type": "Function",
+        "tags": [],
+        "label": "generateNewControlIds",
+        "description": [],
+        "signature": [
+          "(controlGroupInput?: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.PersistableControlGroupInput",
+            "text": "PersistableControlGroupInput"
+          },
+          " | undefined) => { panels: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlsPanels",
+            "text": "ControlsPanels"
+          },
+          "; controlStyle: ",
+          "ControlStyle",
+          "; ignoreParentSettings?: ",
+          "ParentIgnoreSettings",
+          " | undefined; chainingSystem: ",
+          "ControlGroupChainingSystem",
+          "; } | undefined"
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.generateNewControlIds.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.PersistableControlGroupInput",
+                "text": "PersistableControlGroupInput"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-common.getDefaultControlGroupInput",
         "type": "Function",
         "tags": [],

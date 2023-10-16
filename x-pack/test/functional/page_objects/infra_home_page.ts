@@ -359,6 +359,14 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('metrics-alert-menu');
     },
 
+    async ensureCustomThresholdAlertMenuItemIsVisible() {
+      await testSubjects.existOrFail('custom-threshold-alerts-menu-option');
+    },
+
+    async ensureCustomThresholdAlertMenuItemIsMissing() {
+      await testSubjects.missingOrFail('custom-threshold-alerts-menu-option');
+    },
+
     async dismissDatePickerTooltip() {
       const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
         timeout: 1000,
