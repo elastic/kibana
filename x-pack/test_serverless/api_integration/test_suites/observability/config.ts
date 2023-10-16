@@ -10,10 +10,14 @@ import { services } from './apm_api_integration/common/services';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
-  testFiles: [require.resolve('../common'), require.resolve('.')],
+  testFiles: [require.resolve('.')],
   junit: {
     reportName: 'Serverless Observability API Integration Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
   services,
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
+  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.ml.nlp.enabled=false'],
 });

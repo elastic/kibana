@@ -9,7 +9,7 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, waitFor, cleanup } from '@testing-library/react';
+import { render, waitFor, cleanup, screen } from '@testing-library/react';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { MaintenanceWindowCallout } from '.';
 import { fetchActiveMaintenanceWindows } from './api';
@@ -214,5 +214,57 @@ describe('MaintenanceWindowCallout', () => {
     });
 
     expect(await findByText('Maintenance window is running')).toBeInTheDocument();
+  });
+
+  it('should display the callout if the category ids contains the specified category', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['securitySolution']}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('maintenanceWindowCallout')).not.toBeInTheDocument();
+    });
+
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['securitySolution'],
+      },
+    ]);
+
+    render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['securitySolution']}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
+    });
+
+    render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
+    });
   });
 });

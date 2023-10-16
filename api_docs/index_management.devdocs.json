@@ -977,6 +977,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.splitSizeAndUnits",
+        "type": "Function",
+        "tags": [],
+        "label": "splitSizeAndUnits",
+        "description": [],
+        "signature": [
+          "(field: string) => { size: string; unit: string; }"
+        ],
+        "path": "x-pack/plugins/index_management/common/lib/data_stream_serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.splitSizeAndUnits.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/index_management/common/lib/data_stream_serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1617,7 +1650,7 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "{ delete_index: boolean; }"
+              "{ delete_index: boolean; manage_data_stream_lifecycle: boolean; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,

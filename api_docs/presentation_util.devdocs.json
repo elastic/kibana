@@ -626,6 +626,40 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.DashboardDrilldownOptionsComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "DashboardDrilldownOptionsComponent",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DashboardDrilldownOptionsProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.DashboardDrilldownOptionsComponent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.FloatingActions",
         "type": "Function",
         "tags": [],
@@ -688,7 +722,7 @@
         "signature": [
           "React.ExoticComponent<",
           "DashboardPickerProps",
-          "> & { readonly _result: (props: ",
+          "> & { readonly _result: ({ isDisabled, onChange, idsToOmit }: ",
           "DashboardPickerProps",
           ") => JSX.Element; }"
         ],
@@ -1492,119 +1526,6 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.PresentationDashboardsService",
-        "type": "Interface",
-        "tags": [],
-        "label": "PresentationDashboardsService",
-        "description": [],
-        "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.PresentationDashboardsService.findDashboards",
-            "type": "Function",
-            "tags": [],
-            "label": "findDashboards",
-            "description": [],
-            "signature": [
-              "(query: string, fields: string[]) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
-              "<",
-              "PartialDashboardAttributes",
-              ">[]>"
-            ],
-            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.PresentationDashboardsService.findDashboards.$1",
-                "type": "string",
-                "tags": [],
-                "label": "query",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.PresentationDashboardsService.findDashboards.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "fields",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.PresentationDashboardsService.findDashboardsByTitle",
-            "type": "Function",
-            "tags": [],
-            "label": "findDashboardsByTitle",
-            "description": [],
-            "signature": [
-              "(title: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
-              "<",
-              "PartialDashboardAttributes",
-              ">[]>"
-            ],
-            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.PresentationDashboardsService.findDashboardsByTitle.$1",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-public.PresentationLabsService",
         "type": "Interface",
         "tags": [],
@@ -1622,7 +1543,7 @@
             "label": "isProjectEnabled",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\") => boolean"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\") => boolean"
             ],
             "path": "src/plugins/presentation_util/public/services/labs/types.ts",
             "deprecated": false,
@@ -1636,7 +1557,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -1654,7 +1575,7 @@
             "label": "getProjectIDs",
             "description": [],
             "signature": [
-              "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+              "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\", \"labs:dashboard:linksPanel\"]"
             ],
             "path": "src/plugins/presentation_util/public/services/labs/types.ts",
             "deprecated": false,
@@ -1670,7 +1591,7 @@
             "label": "getProject",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\") => ",
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\") => ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -1691,7 +1612,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -1709,7 +1630,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"canvas\" | \"dashboard\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"canvas\" | \"dashboard\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -1749,7 +1670,7 @@
             "label": "setProjectStatus",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
             ],
             "path": "src/plugins/presentation_util/public/services/labs/types.ts",
             "deprecated": false,
@@ -1763,7 +1684,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -2634,6 +2555,21 @@
     "misc": [
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.DashboardDrilldownOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardDrilldownOptions",
+        "description": [],
+        "signature": [
+          "{ useCurrentFilters: boolean; useCurrentDateRange: boolean; openInNewTab: boolean; }"
+        ],
+        "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.ExpressionInputEditorRef",
         "type": "Type",
         "tags": [],
@@ -2823,7 +2759,64 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS",
+        "description": [],
+        "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS.openInNewTab",
+            "type": "boolean",
+            "tags": [],
+            "label": "openInNewTab",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS.useCurrentDateRange",
+            "type": "boolean",
+            "tags": [],
+            "label": "useCurrentDateRange",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS.useCurrentFilters",
+            "type": "boolean",
+            "tags": [],
+            "label": "useCurrentFilters",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "presentationUtil",
       "id": "def-public.PresentationUtilPluginSetup",
@@ -3086,7 +3079,7 @@
         "label": "getProjectIDs",
         "description": [],
         "signature": [
-          "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+          "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\", \"labs:dashboard:linksPanel\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3388,7 +3381,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+              "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
@@ -3602,7 +3595,7 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\" | \"labs:dashboard:linksPanel\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3695,7 +3688,7 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\", \"labs:dashboard:linksPanel\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3912,6 +3905,111 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DASHBOARD_CONTROLS.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"dashboard\"[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.DASHBOARD_LINKS_PANEL",
+            "type": "Object",
+            "tags": [],
+            "label": "[DASHBOARD_LINKS_PANEL]",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:linksPanel\""
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_LINKS_PANEL.solutions",
                 "type": "Array",
                 "tags": [],
                 "label": "solutions",

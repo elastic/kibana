@@ -71,6 +71,7 @@ describe('helpers', () => {
             type: 'date',
           },
         ],
+        sameFamily: [],
       };
 
       test('it returns a `PartitionedFieldMetadata` with an `incompatible` `@timestamp` when  `mappingsProperties` is undefined', () => {
@@ -301,7 +302,7 @@ describe('helpers', () => {
             ],
             hasEcsMetadata: true,
             isEcsCompliant: false,
-            isInSameFamily: true,
+            isInSameFamily: false,
           },
           {
             dashed_name: 'host-name',
@@ -620,7 +621,7 @@ describe('helpers', () => {
             ],
             hasEcsMetadata: true,
             isEcsCompliant: false,
-            isInSameFamily: true,
+            isInSameFamily: false,
           },
           {
             dashed_name: 'host-name',
@@ -657,6 +658,7 @@ describe('helpers', () => {
             isInSameFamily: false,
           },
         ],
+        sameFamily: [],
       });
     });
   });

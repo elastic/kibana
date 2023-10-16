@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, ReactElement, ReactNode, useEffect, useMemo } from 'react';
+import React, { Fragment, useEffect, useMemo } from 'react';
 
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { useNavigation as useNavigationServices } from '../../services';
-import type { ChromeProjectNavigationNodeEnhanced, NodeProps } from '../types';
 import { useInitNavNode } from '../hooks';
+import type { NodeProps } from '../types';
 import { useNavigation } from './navigation';
 
 export interface Props<
@@ -22,10 +22,6 @@ export interface Props<
   unstyled?: boolean;
 }
 
-function isReactElement(element: ReactNode): element is ReactElement {
-  return React.isValidElement(element);
-}
-
 function NavigationItemComp<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
@@ -33,7 +29,7 @@ function NavigationItemComp<
 >(props: Props<LinkId, Id, ChildrenId>) {
   const { cloudLinks } = useNavigationServices();
   const navigationContext = useNavigation();
-  const navNodeRef = React.useRef<ChromeProjectNavigationNodeEnhanced | null>(null);
+  const navNodeRef = React.useRef<ChromeProjectNavigationNode | null>(null);
 
   const { children, node } = useMemo(() => {
     const { children: _children, ...rest } = props;
@@ -44,14 +40,7 @@ function NavigationItemComp<
   }, [props]);
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 
-  let renderItem: (() => ReactElement) | undefined;
-
-  if (!unstyled && children && (typeof children === 'function' || isReactElement(children))) {
-    renderItem =
-      typeof children === 'function' ? () => children(navNodeRef.current) : () => children;
-  }
-
-  const { navNode } = useInitNavNode({ ...node, children, renderItem }, { cloudLinks });
+  const { navNode } = useInitNavNode({ ...node, children }, { cloudLinks });
 
   useEffect(() => {
     navNodeRef.current = navNode;

@@ -9,18 +9,19 @@ import { ElasticsearchClient, IRouter, KibanaRequest, Logger } from '@kbn/core/s
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { BaseMessage } from 'langchain/schema';
 
-import { mockActionResultData } from '../__mocks__/action_result_data';
+import { mockActionResponse } from '../__mocks__/action_result_data';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext } from '../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
 
 jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
-  executeCustomLlmChain: jest.fn().mockImplementation(
+  callAgentExecutor: jest.fn().mockImplementation(
     async ({
       connectorId,
     }: {
@@ -35,7 +36,7 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
       if (connectorId === 'mock-connector-id') {
         return {
           connector_id: 'mock-connector-id',
-          data: mockActionResultData,
+          data: mockActionResponse,
           status: 'ok',
         };
       } else {
@@ -54,6 +55,7 @@ const mockContext = {
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
+    savedObjects: coreMock.createRequestHandlerContext().savedObjects,
   },
 };
 
@@ -62,9 +64,23 @@ const mockRequest = {
   body: {
     params: {
       subActionParams: {
-        body: '{"messages":[{"role":"user","content":"\\n\\n\\n\\nWhat is my name?"},{"role":"assistant","content":"I\'m sorry, but I don\'t have the information about your name. You can tell me your name if you\'d like, and we can continue our conversation from there."},{"role":"user","content":"\\n\\nMy name is Andrew"},{"role":"assistant","content":"Hello, Andrew! It\'s nice to meet you. What would you like to talk about today?"},{"role":"user","content":"\\n\\nDo you know my name?"}]}',
+        messages: [
+          { role: 'user', content: '\\n\\n\\n\\nWhat is my name?' },
+          {
+            role: 'assistant',
+            content:
+              "I'm sorry, but I don't have the information about your name. You can tell me your name if you'd like, and we can continue our conversation from there.",
+          },
+          { role: 'user', content: '\\n\\nMy name is Andrew' },
+          {
+            role: 'assistant',
+            content:
+              "Hello, Andrew! It's nice to meet you. What would you like to talk about today?",
+          },
+          { role: 'user', content: '\\n\\nDo you know my name?' },
+        ],
       },
-      subAction: 'test',
+      subAction: 'invokeAI',
     },
   },
 };
@@ -75,6 +91,8 @@ const mockResponse = {
 };
 
 describe('postActionsConnectorExecuteRoute', () => {
+  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -87,7 +105,7 @@ describe('postActionsConnectorExecuteRoute', () => {
         expect(result).toEqual({
           body: {
             connector_id: 'mock-connector-id',
-            data: mockActionResultData,
+            data: mockActionResponse,
             status: 'ok',
           },
         });
@@ -95,7 +113,8 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
     );
   });
 
@@ -117,7 +136,8 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
     );
   });
 });

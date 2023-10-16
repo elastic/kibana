@@ -5,17 +5,28 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
+import { isEmpty } from 'lodash';
 import React from 'react';
-import { HOST_NAME } from '../../../../common/es_fields/apm';
-import { toKueryFilterFormat } from '../../../../common/utils/to_kuery_filter_format';
-import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
-import { HostnamesFilterWarning } from './host_names_filter_warning';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
+import { HOST_NAME } from '../../../../common/es_fields/apm';
+import { toKueryFilterFormat } from '../../../../common/utils/to_kuery_filter_format';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../hooks/use_fetcher';
+import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
+import { HostnamesFilterWarning } from './host_names_filter_warning';
 
 interface Props {
   serviceName: string;
@@ -86,11 +97,24 @@ export function ProfilingFlamegraph({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EmbeddableFlamegraph
-        data={data?.flamegraph}
-        isLoading={isPending(status)}
-        height="60vh"
-      />
+      {status === FETCH_STATUS.SUCCESS && isEmpty(data) ? (
+        <EuiEmptyPrompt
+          titleSize="s"
+          title={
+            <div>
+              {i18n.translate('xpack.apm.profiling.flamegraph.noDataFound', {
+                defaultMessage: 'No data found',
+              })}
+            </div>
+          }
+        />
+      ) : (
+        <EmbeddableFlamegraph
+          data={data?.flamegraph}
+          isLoading={isPending(status)}
+          height="60vh"
+        />
+      )}
     </>
   );
 }

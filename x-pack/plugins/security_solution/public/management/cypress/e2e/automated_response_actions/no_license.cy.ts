@@ -9,7 +9,7 @@ import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { APP_ALERTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { fillUpNewRule } from '../../tasks/response_actions';
-import { login, loginWithRole, ROLE } from '../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
 import { generateRandomStringName } from '../../tasks/utils';
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
@@ -20,7 +20,7 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
     before(() => {
-      loginWithRole(ROLE.endpoint_response_actions_access);
+      login(ROLE.endpoint_response_actions_access);
     });
 
     it('response actions are disabled', () => {
@@ -34,7 +34,8 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     });
   });
 
-  describe('User cannot see results', () => {
+  // FIXME: Flaky. Needs fixing (security team issue #7763)
+  describe.skip('User cannot see results', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);

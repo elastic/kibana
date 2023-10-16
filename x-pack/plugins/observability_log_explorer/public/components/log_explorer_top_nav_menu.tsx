@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
-import { type BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { type BehaviorSubject, distinctUntilChanged, filter, take } from 'rxjs';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { AppMountParameters } from '@kbn/core-application-browser';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -37,12 +36,13 @@ import {
   onboardingLinkTitle,
 } from '../../common/translations';
 import { getRouterLinkProps } from '../utils/get_router_link_props';
+import { ObservabilityLogExplorerAppMountParameters } from '../types';
 
 interface LogExplorerTopNavMenuProps {
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenu: ObservabilityLogExplorerAppMountParameters['setHeaderActionMenu'];
   services: KibanaReactContextValue<PluginKibanaContextValue>['services'];
   state$: BehaviorSubject<LogExplorerStateContainer>;
-  theme$: AppMountParameters['theme$'];
+  theme$: ObservabilityLogExplorerAppMountParameters['theme$'];
 }
 
 export const LogExplorerTopNavMenu = ({
@@ -111,6 +111,16 @@ const StatefulTopNav = ({
 }: LogExplorerTopNavMenuProps) => {
   const { euiTheme } = useEuiTheme();
 
+  /**
+   * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
+   * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
+   */
+  const [previousAppendExtension$] = useState(() =>
+    services.chrome.getBreadcrumbsAppendExtension$().pipe(filter(Boolean), take(1))
+  );
+
+  const previousAppendExtension = useObservable(previousAppendExtension$);
+
   useEffect(() => {
     const { chrome, i18n, theme } = services;
 
@@ -137,7 +147,13 @@ const StatefulTopNav = ({
         ),
       });
     }
-  }, [euiTheme, services]);
+
+    return () => {
+      if (chrome) {
+        chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
+      }
+    };
+  }, [euiTheme, services, previousAppendExtension]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>

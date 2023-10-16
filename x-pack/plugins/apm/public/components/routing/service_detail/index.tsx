@@ -39,6 +39,7 @@ import { ApmServiceWrapper } from './apm_service_wrapper';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
 import { ProfilingOverview } from '../../app/profiling_overview';
 import { SearchBar } from '../../shared/search_bar/search_bar';
+import { ServiceDashboards } from '../../app/service_dashboards';
 
 function page({
   title,
@@ -374,6 +375,20 @@ export const serviceDetailRoute = {
             showTransactionTypeSelector: false,
             showQueryInput: false,
           },
+        }),
+      },
+      '/services/{serviceName}/dashboards': {
+        ...page({
+          tab: 'dashboards',
+          title: i18n.translate('xpack.apm.views.dashboard.title', {
+            defaultMessage: 'Dashboards',
+          }),
+          element: <ServiceDashboards />,
+        }),
+        params: t.partial({
+          query: t.partial({
+            dashboardId: t.string,
+          }),
         }),
       },
       '/services/{serviceName}/': {

@@ -13,7 +13,7 @@ import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
@@ -68,6 +68,7 @@ describe('Search service', () => {
       data = searchService.start(mockCoreStart, {
         fieldFormats: {} as FieldFormatsStart,
         indexPatterns: {} as DataViewsContract,
+        inspector: {} as InspectorStartContract,
         screenshotMode: screenshotModePluginMock.createStartContract(),
         scriptedFieldsEnabled: true,
       });
@@ -142,7 +143,7 @@ describe('Search service', () => {
 
         expect(notifications.toasts.addWarning).toBeCalledTimes(1);
         expect(notifications.toasts.addWarning).toBeCalledWith({
-          title: 'The data might be incomplete or wrong.',
+          title: 'Results are partial and may be incomplete.',
           text: expect.any(Function),
         });
       });

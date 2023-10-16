@@ -65,6 +65,7 @@ class DocLinks {
   public cloudIndexManagement: string;
   public connectors: string;
   public connectorsAzureBlobStorage: string;
+  public connectorsBox: string;
   public connectorsClients: string;
   public connectorsConfluence: string;
   public connectorsContentExtraction: string;
@@ -81,6 +82,7 @@ class DocLinks {
   public connectorsNetworkDrive: string;
   public connectorsOneDrive: string;
   public connectorsOracle: string;
+  public connectorsOutlook: string;
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
   public connectorsSalesforce: string;
@@ -88,6 +90,8 @@ class DocLinks {
   public connectorsSharepoint: string;
   public connectorsSharepointOnline: string;
   public connectorsSlack: string;
+  public connectorsTeams: string;
+  public connectorsZoom: string;
   public connectorsWorkplaceSearch: string;
   public consoleGuide: string;
   public crawlerExtractionRules: string;
@@ -229,6 +233,7 @@ class DocLinks {
     this.cloudIndexManagement = '';
     this.connectors = '';
     this.connectorsAzureBlobStorage = '';
+    this.connectorsBox = '';
     this.connectorsConfluence = '';
     this.connectorsContentExtraction = '';
     this.connectorsClients = '';
@@ -245,6 +250,7 @@ class DocLinks {
     this.connectorsNetworkDrive = '';
     this.connectorsOneDrive = '';
     this.connectorsOracle = '';
+    this.connectorsOutlook = '';
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
     this.connectorsSalesforce = '';
@@ -252,6 +258,8 @@ class DocLinks {
     this.connectorsSharepoint = '';
     this.connectorsSharepointOnline = '';
     this.connectorsSlack = '';
+    this.connectorsTeams = '';
+    this.connectorsZoom = '';
     this.connectorsWorkplaceSearch = '';
     this.consoleGuide = '';
     this.crawlerExtractionRules = '';
@@ -394,6 +402,7 @@ class DocLinks {
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
+    this.connectorsBox = docLinks.links.enterpriseSearch.connectorsBox;
     this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
     this.connectorsContentExtraction = docLinks.links.enterpriseSearch.connectorsContentExtraction;
     this.connectorsClients = docLinks.links.enterpriseSearch.connectorsClients;
@@ -409,7 +418,9 @@ class DocLinks {
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsNative = docLinks.links.enterpriseSearch.connectorsNative;
     this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
+    this.connectorsOneDrive = docLinks.links.enterpriseSearch.connectorsOneDrive;
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
+    this.connectorsOutlook = docLinks.links.enterpriseSearch.connectorsOutlook;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
     this.connectorsSalesforce = docLinks.links.enterpriseSearch.connectorsSalesforce;
@@ -417,6 +428,8 @@ class DocLinks {
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
     this.connectorsSlack = docLinks.links.enterpriseSearch.connectorsSlack;
+    this.connectorsTeams = docLinks.links.enterpriseSearch.connectorsTeams;
+    this.connectorsZoom = docLinks.links.enterpriseSearch.connectorsZoom;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.consoleGuide = docLinks.links.console.guide;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;

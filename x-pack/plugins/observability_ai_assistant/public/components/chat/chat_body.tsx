@@ -189,6 +189,10 @@ export function ChatBody({
                 onFeedback={timeline.onFeedback}
                 onRegenerate={timeline.onRegenerate}
                 onStopGenerating={timeline.onStopGenerating}
+                onActionClick={(payload) => {
+                  setStickToBottom(true);
+                  return timeline.onActionClick(payload);
+                }}
               />
             </EuiPanel>
           </div>

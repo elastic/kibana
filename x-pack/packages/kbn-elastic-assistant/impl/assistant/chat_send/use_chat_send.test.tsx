@@ -44,7 +44,7 @@ export const testProps: UseChatSendProps = {
   setSelectedPromptContexts,
   setUserPrompt,
 };
-const robotMessage = 'Response message from the robot';
+const robotMessage = { response: 'Response message from the robot', isError: false };
 describe('use chat send', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -88,7 +88,7 @@ describe('use chat send', () => {
         `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
       );
       expect(appendMessageSend.message.role).toEqual('user');
-      expect(appendMessageResponse.message.content).toEqual(robotMessage);
+      expect(appendMessageResponse.message.content).toEqual(robotMessage.response);
       expect(appendMessageResponse.message.role).toEqual('assistant');
     });
   });

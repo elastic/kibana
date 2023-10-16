@@ -65,7 +65,7 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
             ...request.params,
           };
-      const { body, headers, meta } = id
+      const { body, headers } = id
         ? await client.asyncSearch.get(
             { ...params, id },
             { ...options.transport, signal: options.abortSignal, meta: true }
@@ -78,11 +78,7 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse(
-        { ...body, response },
-        headers?.warning,
-        meta?.request?.params
-      );
+      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
     };
 
     const cancel = async () => {
@@ -135,10 +131,8 @@ export const enhancedEsSearchStrategyProvider = (
       );
 
       const response = esResponse.body as estypes.SearchResponse<any>;
-      const requestParams = esResponse.meta?.request?.params;
       return {
         rawResponse: shimHitsTotal(response, options),
-        ...(requestParams ? { requestParams } : {}),
         ...getTotalLoaded(response),
       };
     } catch (e) {

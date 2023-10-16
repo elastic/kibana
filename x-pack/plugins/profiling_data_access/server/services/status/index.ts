@@ -12,7 +12,7 @@ import { getSetupState } from '../get_setup_state';
 import { RegisterServicesParams } from '../register_services';
 import { ProfilingSetupOptions, areResourcesSetup } from '../../../common/setup';
 
-interface HasSetupParams {
+export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   spaceId?: string;

@@ -1,0 +1,22 @@
+# These pipeline steps constitute the quality gate for your service within the production-noncanary environment.
+# Incorporate any necessary additional logic to validate the service's integrity.
+# A failure in this pipeline build will prevent further progression to the subsequent stage.
+
+steps:
+  - label: ":pipeline::kibana::seedling: Trigger SLO check"
+    trigger: "serverless-quality-gates" # https://buildkite.com/elastic/serverless-quality-gates
+    build:
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production-noncanary.yaml)"
+      env:
+        TARGET_ENV: production-noncanary
+        CHECK_SLO: true
+        CHECK_SLO_TAG: kibana
+    soft_fail: true
+
+  - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
+    trigger: "ess-k8s-production-e2e-tests" # https://buildkite.com/elastic/ess-k8s-production-e2e-tests
+    build:
+      env:
+        REGION_ID: aws-us-east-1
+        NAME_PREFIX: ci_test_kibana-promotion_
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production-noncanary.yaml)"

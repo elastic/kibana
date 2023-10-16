@@ -7,11 +7,22 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonNavigation']);
+export default function ({ getPageObjects }: FtrProviderContext) {
+  const PageObjects = getPageObjects([
+    'observabilityLogExplorer',
+    'svlCommonNavigation',
+    'svlCommonPage',
+  ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165943
-  describe.skip('Application', () => {
+  describe('Application', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.login();
+    });
+
+    after(async () => {
+      await PageObjects.svlCommonPage.forceLogout();
+    });
+
     it('is shown in the global search', async () => {
       await PageObjects.observabilityLogExplorer.navigateTo();
       await PageObjects.svlCommonNavigation.search.showSearch();

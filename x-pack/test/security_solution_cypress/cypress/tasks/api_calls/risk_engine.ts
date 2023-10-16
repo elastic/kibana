@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const deleteConfiguration = () => {
+export const deleteRiskEngineConfiguration = () => {
   cy.request({
     method: 'GET',
     url: `/api/saved_objects/_find?type=risk-engine-configuration`,

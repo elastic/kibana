@@ -5,12 +5,13 @@
  * 2.0.
  */
 import {
-  IContainer,
-  EmbeddableInput,
   EmbeddableFactoryDefinition,
+  EmbeddableInput,
+  IContainer,
 } from '@kbn/embeddable-plugin/public';
-import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { GetProfilingEmbeddableDependencies } from '../profiling_embeddable_provider';
 
 interface EmbeddableFlamegraphInput {
   data?: BaseFlameGraph;
@@ -24,13 +25,16 @@ export class EmbeddableFlamegraphFactory
 {
   readonly type = EMBEDDABLE_FLAMEGRAPH;
 
+  constructor(private getProfilingEmbeddableDependencies: GetProfilingEmbeddableDependencies) {}
+
   async isEditable() {
     return false;
   }
 
   async create(input: EmbeddableFlamegraphEmbeddableInput, parent?: IContainer) {
     const { EmbeddableFlamegraph } = await import('./embeddable_flamegraph');
-    return new EmbeddableFlamegraph(input, {}, parent);
+    const deps = await this.getProfilingEmbeddableDependencies();
+    return new EmbeddableFlamegraph(deps, input, parent);
   }
 
   getDisplayName() {

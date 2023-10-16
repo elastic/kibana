@@ -858,6 +858,14 @@ export function getFormBasedDatasource({
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
     },
+    injectReferencesToLayers: (state, references) => {
+      const layers =
+        references && state ? injectReferences(state, references).layers : state?.layers;
+      return {
+        ...state,
+        layers,
+      };
+    },
 
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const layers = references ? injectReferences(state, references).layers : state.layers;

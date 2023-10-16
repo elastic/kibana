@@ -8,9 +8,9 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   SLO_DESTINATION_INDEX_PATTERN,
-  SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
   SLO_SUMMARY_INGEST_PIPELINE_NAME,
+  SLO_SUMMARY_TRANSFORMS_VERSION,
   SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
 } from '../../../../assets/constants';
 import { groupBy } from './common';
@@ -143,10 +143,10 @@ export const SUMMARY_OCCURRENCES_30D_ROLLING: TransformPutTransformRequest = {
   },
   settings: {
     deduce_mappings: false,
-    max_page_search_size: 8000,
+    unattended: true,
   },
   _meta: {
-    version: SLO_RESOURCES_VERSION,
+    version: SLO_SUMMARY_TRANSFORMS_VERSION,
     managed: true,
     managed_by: 'observability',
   },

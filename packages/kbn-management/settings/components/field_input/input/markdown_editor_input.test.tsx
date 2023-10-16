@@ -33,9 +33,9 @@ jest.mock('../code_editor', () => ({
 }));
 
 describe('MarkdownEditorInput', () => {
-  const onChange = jest.fn();
+  const onInputChange = jest.fn();
   const defaultProps: CodeEditorInputProps = {
-    onChange,
+    onInputChange,
     type: 'markdown',
     field: {
       name,
@@ -51,7 +51,7 @@ describe('MarkdownEditorInput', () => {
   };
 
   beforeEach(() => {
-    onChange.mockClear();
+    onInputChange.mockClear();
   });
 
   it('renders without errors', () => {
@@ -65,11 +65,11 @@ describe('MarkdownEditorInput', () => {
     expect(input).toHaveValue(initialValue);
   });
 
-  it('calls the onChange prop when the value changes', () => {
+  it('calls the onInputChange prop when the value changes', () => {
     const { getByTestId } = render(<CodeEditorInput {...defaultProps} />);
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: '# New Markdown Title' } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
       type: 'markdown',
       unsavedValue: '# New Markdown Title',
     });

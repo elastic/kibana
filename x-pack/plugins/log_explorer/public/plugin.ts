@@ -40,12 +40,9 @@ export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExpl
   }
 
   public start(core: CoreStart, plugins: LogExplorerStartDeps) {
-    const { data, discover } = plugins;
-
     const LogExplorer = createLogExplorer({
       core,
-      data,
-      discover,
+      plugins,
     });
 
     return {

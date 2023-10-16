@@ -93,6 +93,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
         defaultMessage: 'Ingest data',
       })}
     >
+      <EuiSpacer size="l" />
       <EuiFormFieldset
         legend={{
           children: i18n.translate('searchApiPanels.welcomeBanner.ingestData.ingestLegendLabel', {

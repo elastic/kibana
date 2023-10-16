@@ -35,8 +35,8 @@ import {
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { updateLayer } from '.';
 import {
+  getAnnotationLayerTitle,
   isAnnotationsLayer,
-  isByReferenceAnnotationsLayer,
   isDataLayer,
   isReferenceLayer,
 } from '../visualization_helpers';
@@ -52,7 +52,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   if (isAnnotationsLayer(layer)) {
     return (
       <AnnotationsLayerHeader
-        title={isByReferenceAnnotationsLayer(layer) ? layer.__lastSaved.title : undefined}
+        title={getAnnotationLayerTitle(layer)}
         hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
       />
     );

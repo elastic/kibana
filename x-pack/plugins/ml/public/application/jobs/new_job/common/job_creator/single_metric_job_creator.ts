@@ -17,7 +17,7 @@ import {
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
-import {
+import type {
   Job,
   Datafeed,
   Detector,

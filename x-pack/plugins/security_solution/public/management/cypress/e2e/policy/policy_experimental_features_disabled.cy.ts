@@ -12,7 +12,8 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/e
 import { login } from '../../tasks/login';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 
-describe('Disabled experimental features on: ', () => {
+// We need a way to disable experimental features in the Cypress tests
+describe.skip('Disabled experimental features on: ', { tags: ['@ess', '@serverless'] }, () => {
   describe('Policy list', () => {
     describe('Renders policy list without protection updates feature flag', () => {
       let indexedPolicy: IndexedFleetEndpointPolicyResponse;

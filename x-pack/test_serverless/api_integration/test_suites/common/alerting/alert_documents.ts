@@ -7,6 +7,36 @@
 
 import expect from '@kbn/expect';
 import { unset } from 'lodash';
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_TIME_RANGE,
+  ALERT_URL,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
+  SPACE_IDS,
+  TAGS,
+  VERSION,
+} from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from './helpers/alerting_api_helper';
 import { waitForAlertInIndex, waitForNumRuleRuns } from './helpers/alerting_wait_for_helpers';
@@ -19,7 +49,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const objectRemover = new ObjectRemover(supertest);
 
-  describe('Alert documents', () => {
+  describe('Alert documents', function () {
+    // Timeout of 360000ms exceeded
+    this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;
@@ -70,18 +102,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(new Date(hits1['@timestamp'])).to.be.a(Date);
       // should be open, first time, but also seen sometimes active; timing?
-      expect(OPEN_OR_ACTIVE.has(hits1.event.action)).to.be(true);
-      expect(hits1.kibana.alert.flapping_history).to.be.an(Array);
-      expect(hits1.kibana.alert.maintenance_window_ids).to.be.an(Array);
-      expect(typeof hits1.kibana.alert.reason).to.be('string');
-      expect(typeof hits1.kibana.alert.rule.execution.uuid).to.be('string');
-      expect(typeof hits1.kibana.alert.duration).to.be('object');
-      expect(new Date(hits1.kibana.alert.start)).to.be.a(Date);
-      expect(typeof hits1.kibana.alert.time_range).to.be('object');
-      expect(typeof hits1.kibana.alert.uuid).to.be('string');
-      expect(typeof hits1.kibana.alert.url).to.be('string');
-      expect(typeof hits1.kibana.alert.duration.us).to.be('string');
-      expect(typeof hits1.kibana.version).to.be('string');
+      expect(OPEN_OR_ACTIVE.has(hits1[EVENT_ACTION])).to.be(true);
+      expect(hits1[ALERT_FLAPPING_HISTORY]).to.be.an(Array);
+      expect(hits1[ALERT_MAINTENANCE_WINDOW_IDS]).to.be.an(Array);
+      expect(typeof hits1[ALERT_REASON]).to.be('string');
+      expect(typeof hits1[ALERT_RULE_EXECUTION_UUID]).to.be('string');
+      expect(typeof hits1[ALERT_DURATION]).to.be('number');
+      expect(new Date(hits1[ALERT_START])).to.be.a(Date);
+      expect(typeof hits1[ALERT_TIME_RANGE]).to.be('object');
+      expect(typeof hits1[ALERT_UUID]).to.be('string');
+      expect(typeof hits1[ALERT_URL]).to.be('string');
+      expect(typeof hits1[VERSION]).to.be('string');
 
       // remove fields we aren't going to compare directly
       const fields = [
@@ -105,51 +136,39 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       const expected = {
-        event: {
-          kind: 'signal',
+        [EVENT_KIND]: 'signal',
+        [TAGS]: [],
+        [SPACE_IDS]: ['default'],
+        ['kibana.alert.title']: "rule 'always fire' matched query",
+        ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.value']: '0',
+        [ALERT_ACTION_GROUP]: 'query matched',
+        [ALERT_FLAPPING]: false,
+        [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_STATUS]: 'active',
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
+        [ALERT_RULE_CONSUMER]: 'alerts',
+        [ALERT_RULE_NAME]: 'always fire',
+        [ALERT_RULE_PARAMETERS]: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: '{"query":{"match_all":{}}}',
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+          excludeHitsFromPreviousRun: true,
+          aggType: 'count',
+          groupBy: 'all',
+          searchType: 'esQuery',
         },
-        tags: [],
-        kibana: {
-          space_ids: ['default'],
-          alert: {
-            title: "rule 'always fire' matched query",
-            evaluation: {
-              conditions: 'Number of matching documents is greater than -1',
-              value: 0,
-            },
-            action_group: 'query matched',
-            flapping: false,
-            duration: {},
-            instance: { id: 'query matched' },
-            status: 'active',
-            workflow_status: 'open',
-            rule: {
-              category: 'Elasticsearch query',
-              consumer: 'alerts',
-              name: 'always fire',
-              execution: {},
-              parameters: {
-                size: 100,
-                thresholdComparator: '>',
-                threshold: [-1],
-                index: ['alert-test-data'],
-                timeField: 'date',
-                esQuery: '{"query":{"match_all":{}}}',
-                timeWindowSize: 20,
-                timeWindowUnit: 's',
-                excludeHitsFromPreviousRun: true,
-                aggType: 'count',
-                groupBy: 'all',
-                searchType: 'esQuery',
-              },
-              producer: 'stackAlerts',
-              revision: 0,
-              rule_type_id: '.es-query',
-              tags: [],
-              uuid: ruleId,
-            },
-          },
-        },
+        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_REVISION]: 0,
+        [ALERT_RULE_TYPE_ID]: '.es-query',
+        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_UUID]: ruleId,
       };
 
       expect(hits1).to.eql(expected);
@@ -216,10 +235,10 @@ export default function ({ getService }: FtrProviderContext) {
       const hits2 = alResp2.hits.hits[0]._source as Record<string, any>;
 
       expect(hits2['@timestamp']).to.be.greaterThan(hits1['@timestamp']);
-      expect(OPEN_OR_ACTIVE.has(hits1?.event?.action)).to.be(true);
-      expect(hits2?.event?.action).to.be('active');
-      expect(parseInt(hits1?.kibana?.alert?.duration?.us, 10)).to.not.be.lessThan(0);
-      expect(hits2?.kibana?.alert?.duration?.us).not.to.be('0');
+      expect(OPEN_OR_ACTIVE.has(hits1[EVENT_ACTION])).to.be(true);
+      expect(hits2[EVENT_ACTION]).to.be('active');
+      expect(hits1[ALERT_DURATION]).to.not.be.lessThan(0);
+      expect(hits2[ALERT_DURATION]).not.to.be(0);
 
       // remove fields we know will be different
       const fields = [

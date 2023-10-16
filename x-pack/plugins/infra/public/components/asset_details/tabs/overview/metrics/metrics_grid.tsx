@@ -8,7 +8,10 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import type { XYConfig } from '../../../../../common/visualizations';
+import {
+  type XYConfig,
+  XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
+} from '../../../../../common/visualizations';
 import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
 import { Chart } from './chart';
 
@@ -55,6 +58,7 @@ export const MetricsGrid = ({
             logsDataView={logsDataView}
             metricsDataView={metricsDataView}
             data-test-subj={props['data-test-subj']}
+            visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
           />
         </EuiFlexItem>
       ))}

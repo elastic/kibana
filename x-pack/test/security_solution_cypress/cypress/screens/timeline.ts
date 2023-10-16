@@ -6,7 +6,7 @@
  */
 
 import type { TimelineFilter } from '../objects/timeline';
-import { getDataTestSubjectSelector } from '../helpers/common';
+import { getDataTestSubjectSelector, getDataTestSubjectSelectorStartWith } from '../helpers/common';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 
@@ -209,7 +209,7 @@ export const TIMELINE_FILTER = (filter: TimelineFilter) =>
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
 
-export const TIMELINE_TITLE_BY_ID = (id: string) => `[data-test-subj="title-${id}"]`;
+export const TIMELINE_TITLE_BY_ID = (id: string) => `[data-test-subj="timeline-title-${id}"]`;
 
 export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 
@@ -341,8 +341,16 @@ export const GET_TIMELINE_HEADER = (fieldName: string) => {
   return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
 };
 
-export const DISCOVER_TAB = getDataTestSubjectSelector('timelineTabs-discover');
+export const ESQL_TAB = getDataTestSubjectSelector('timelineTabs-esql');
 
 export const TIMELINE_DATE_PICKER_CONTAINER = getDataTestSubjectSelector(
   'timeline-date-picker-container'
 );
+
+export const OPEN_TIMELINE_MODAL_SEARCH_BAR = `${OPEN_TIMELINE_MODAL}  ${getDataTestSubjectSelector(
+  'search-bar'
+)}`;
+
+export const OPEN_TIMELINE_MODAL_TIMELINE_NAMES = `${OPEN_TIMELINE_MODAL} ${getDataTestSubjectSelectorStartWith(
+  'timeline-title-'
+)}`;

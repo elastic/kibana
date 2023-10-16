@@ -82,6 +82,10 @@
           "id": "kibDevDocsSecurityIntro"
         },
         {
+          "id": "kibDevFeaturePrivileges",
+          "label": "Feature Privileges"
+        },
+        {
           "id": "kibDevDocsSavedObjectsIntro",
           "label": "Saved objects"
         },
@@ -192,6 +196,9 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibSeptember2023ContributorNewsletter"
+        },
         {
           "id": "kibJuly2023ContributorNewsletter"
         },

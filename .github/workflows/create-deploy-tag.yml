@@ -19,7 +19,7 @@ concurrency:
 jobs:
   create-deploy-tag:
     # Temporary, we need a way to limit this to a GitHub team instead of specific users
-    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck","jbudz","mistic","delanni","Ikuni17"]', github.triggering_actor)
+    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck","jbudz","mistic","delanni","Ikuni17","pheyos","dmlemeshko"]', github.triggering_actor)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -55,6 +55,7 @@ jobs:
       - name: Post Slack success message
         if: success()
         uses: slackapi/slack-github-action@v1.24.0
+        continue-on-error: true
         with:
           payload: |
             {
@@ -102,7 +103,8 @@ jobs:
               "<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|GitHub Workflow run>",
               "<https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${{ env.TAG_NAME }}|Kibana Serverless Release pipeline>",
               "<https://argo-workflows.us-central1.gcp.qa.cld.elstc.co/workflows?label=hash%3D${{ env.COMMIT }}|Argo Workflow> (use Elastic Cloud Staging VPN)",
-              "<https://platform-logging.kb.us-central1.gcp.foundit.no/app/dashboards#/view/f710d7d0-00b9-11ee-93d2-8df4bca5a4c9?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))&service-name=kibana&_a=(controlGroupInput:(chainingSystem:HIERARCHICAL,controlStyle:oneLine,ignoreParentSettings:(ignoreFilters:!f,ignoreQuery:!f,ignoreTimerange:!f,ignoreValidations:!f),panels:('18201b8e-3aae-4459-947d-21e007b6a3a5':(explicitInput:(dataViewId:'logs-*',enhancements:(),fieldName:commit-hash,id:'18201b8e-3aae-4459-947d-21e007b6a3a5',selectedOptions:!('${{ env.COMMIT }}'),title:commit-hash),grow:!t,order:1,type:optionsListControl,width:medium),'41060e65-ce4c-414e-b8cf-492ccb19245f':(explicitInput:(dataViewId:'logs-*',enhancements:(),fieldName:service-name,id:'41060e65-ce4c-414e-b8cf-492ccb19245f',selectedOptions:!(kibana),title:service-name),grow:!t,order:0,type:optionsListControl,width:medium),ed96828e-efe9-43ad-be3f-0e04218f79af:(explicitInput:(dataViewId:'logs-*',enhancements:(),fieldName:to-env,id:ed96828e-efe9-43ad-be3f-0e04218f79af,selectedOptions:!(qa),title:to-env),grow:!t,order:2,type:optionsListControl,width:medium))))|GPCTL Deployment Status dashboard>",
+              "<https://overview.qa.cld.elstc.co/app/dashboards#/view/serverless-tooling-gpctl-deployment-status?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))&service-name=kibana&_a=(controlGroupInput:(chainingSystem:HIERARCHICAL,controlStyle:oneLine,ignoreParentSettings:(ignoreFilters:!f,ignoreQuery:!f,ignoreTimerange:!f,ignoreValidations:!f),panels:('18201b8e-3aae-4459-947d-21e007b6a3a5':(explicitInput:(dataViewId:'serverless.logs-*',enhancements:(),fieldName:commit-hash,id:'18201b8e-3aae-4459-947d-21e007b6a3a5',selectedOptions:!('${{ env.COMMIT }}'),title:commit-hash),grow:!t,order:1,type:optionsListControl,width:medium),'41060e65-ce4c-414e-b8cf-492ccb19245f':(explicitInput:(dataViewId:'serverless.logs-*',enhancements:(),fieldName:service-name,id:'41060e65-ce4c-414e-b8cf-492ccb19245f',selectedOptions:!(kibana),title:service-name),grow:!t,order:0,type:optionsListControl,width:medium),ed96828e-efe9-43ad-be3f-0e04218f79af:(explicitInput:(dataViewId:'serverless.logs-*',enhancements:(),fieldName:to-env,id:ed96828e-efe9-43ad-be3f-0e04218f79af,selectedOptions:!(qa),title:to-env),grow:!t,order:2,type:optionsListControl,width:medium))))|GPCTL Deployment Status dashboard for nonprod >",
+              "<https://overview.elastic-cloud.com/app/dashboards#/view/serverless-tooling-gpctl-deployment-status?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))&service-name=kibana&_a=(controlGroupInput:(chainingSystem:HIERARCHICAL,controlStyle:oneLine,ignoreParentSettings:(ignoreFilters:!f,ignoreQuery:!f,ignoreTimerange:!f,ignoreValidations:!f),panels:('18201b8e-3aae-4459-947d-21e007b6a3a5':(explicitInput:(dataViewId:'serverless.logs-*',enhancements:(),fieldName:commit-hash,id:'18201b8e-3aae-4459-947d-21e007b6a3a5',selectedOptions:!('${{ env.COMMIT }}'),title:commit-hash),grow:!t,order:1,type:optionsListControl,width:medium),'41060e65-ce4c-414e-b8cf-492ccb19245f':(explicitInput:(dataViewId:'serverless.logs-*',enhancements:(),fieldName:service-name,id:'41060e65-ce4c-414e-b8cf-492ccb19245f',selectedOptions:!(kibana),title:service-name),grow:!t,order:0,type:optionsListControl,width:medium),ed96828e-efe9-43ad-be3f-0e04218f79af:(explicitInput:(dataViewId:'serverless.logs-*',enhancements:(),fieldName:to-env,id:ed96828e-efe9-43ad-be3f-0e04218f79af,selectedOptions:!(production),title:to-env),grow:!t,order:2,type:optionsListControl,width:medium))))|GPCTL Deployment Status dashboard>",
               "<https://buildkite.com/elastic/kibana-tests/builds?branch=main|Quality Gate pipeline>"
             ]
       - name: Post Slack failure message

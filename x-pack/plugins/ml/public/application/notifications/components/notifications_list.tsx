@@ -40,7 +40,7 @@ import type {
   NotificationItem,
 } from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {
   [ML_NOTIFICATIONS_MESSAGE_LEVEL.ERROR]: 'danger',
@@ -67,11 +67,7 @@ export const NotificationsList: FC = () => {
     },
   } = useMlKibana();
 
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 
   const { displayErrorToast } = useToastNotificationService();
 

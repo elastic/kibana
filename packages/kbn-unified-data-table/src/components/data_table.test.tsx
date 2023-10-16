@@ -324,27 +324,36 @@ describe('UnifiedDataTable', () => {
   });
 
   it('should render provided in renderDocumentView DocumentView on expand clicked', async () => {
+    const expandedDoc = {
+      id: 'test',
+      raw: {
+        _index: 'test_i',
+        _id: 'test',
+      },
+      flattened: { test: jest.fn() },
+    };
+    const columnTypesOverride = { testField: 'number ' };
+    const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+      <div data-test-subj="test-document-view">{hit.id}</div>
+    ));
+
     const component = await getComponent({
       ...getProps(),
-      expandedDoc: {
-        id: 'test',
-        raw: {
-          _index: 'test_i',
-          _id: 'test',
-        },
-        flattened: { test: jest.fn() },
-      },
+      expandedDoc,
       setExpandedDoc: jest.fn(),
-      renderDocumentView: (
-        hit: DataTableRecord,
-        displayedRows: DataTableRecord[],
-        displayedColumns: string[]
-      ) => <div data-test-subj="test-document-view">{hit.id}</div>,
+      columnTypes: columnTypesOverride,
+      renderDocumentView: renderDocumentViewMock,
       externalControlColumns: [testLeadingControlColumn],
     });
 
     findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
     expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
+    expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
+      expandedDoc,
+      getProps().rows,
+      ['_source'],
+      columnTypesOverride
+    );
   });
 
   describe('externalAdditionalControls', () => {
@@ -430,6 +439,62 @@ describe('UnifiedDataTable', () => {
       const gridExpandBtn = findTestSubject(component, 'docTableExpandToggleColumn').first();
       const tourStep = gridExpandBtn.getDOMNode().getAttribute('id');
       expect(tourStep).toEqual('test-expand');
+    });
+  });
+
+  describe('gridStyleOverride', () => {
+    it('should render the grid with the default style if no gridStyleOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+      });
+
+      const grid = findTestSubject(component, 'docTable');
+
+      expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--paddingLarge')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
+    });
+    it('should render the grid with style override if gridStyleOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        gridStyleOverride: {
+          stripes: false,
+          rowHover: 'none',
+          border: 'none',
+        },
+      });
+
+      const grid = findTestSubject(component, 'docTable');
+
+      expect(grid.hasClass('euiDataGrid--stripes')).toBeFalsy();
+      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeFalsy();
+      expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
+    });
+  });
+  describe('rowLineHeightOverride', () => {
+    it('should render the grid with the default row line height if no rowLineHeightOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+      });
+
+      const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
+      expect(gridRowCell.prop('style')).toMatchObject({
+        lineHeight: '1.6em',
+      });
+    });
+    it('should render the grid with row line height override if rowLineHeightOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        rowLineHeightOverride: '24px',
+      });
+
+      const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
+      expect(gridRowCell.prop('style')).toMatchObject({
+        lineHeight: '24px',
+      });
     });
   });
 });

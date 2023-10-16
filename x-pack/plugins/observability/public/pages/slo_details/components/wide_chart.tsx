@@ -17,11 +17,11 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
-import React, { useRef } from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import moment from 'moment';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
+import moment from 'moment';
+import React, { useRef } from 'react';
 
 import { ChartData } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
@@ -83,6 +83,11 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
         ticks={4}
         position={Position.Left}
         tickFormat={(d) => numeral(d).format(percentFormat)}
+        domain={{
+          fit: true,
+          min: NaN,
+          max: NaN,
+        }}
       />
       <ChartComponent
         color={color}

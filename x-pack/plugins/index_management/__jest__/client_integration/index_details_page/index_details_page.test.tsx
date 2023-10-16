@@ -42,6 +42,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const requestOptions = {
+  asSystemRequest: undefined,
+  body: undefined,
+  query: undefined,
+  version: undefined,
+};
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -120,12 +126,10 @@ describe('<IndexDetailsPage />', () => {
 
     it('loads index stats from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/stats/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/stats/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('renders index stats', async () => {
@@ -208,7 +212,7 @@ describe('<IndexDetailsPage />', () => {
   it('loads index details from the API', async () => {
     expect(httpSetup.get).toHaveBeenLastCalledWith(
       `${INTERNAL_API_BASE_PATH}/indices/${testIndexName}`,
-      { asSystemRequest: undefined, body: undefined, query: undefined, version: undefined }
+      requestOptions
     );
   });
 
@@ -310,12 +314,10 @@ describe('<IndexDetailsPage />', () => {
     });
     it('loads mappings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/mapping/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('displays the mappings in the code block', async () => {
@@ -372,12 +374,10 @@ describe('<IndexDetailsPage />', () => {
 
     it('loads settings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/settings/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('displays the settings in the code block', async () => {
@@ -458,12 +458,7 @@ describe('<IndexDetailsPage />', () => {
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
         expect(httpSetup.get).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/settings/${testIndexName}`,
-          {
-            asSystemRequest: undefined,
-            body: undefined,
-            query: undefined,
-            version: undefined,
-          }
+          requestOptions
         );
       });
 
@@ -623,6 +618,71 @@ describe('<IndexDetailsPage />', () => {
         body: JSON.stringify({ indices: [testIndexName] }),
       });
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+  });
+
+  describe('index name with a percent sign', () => {
+    const percentSignName = 'test%';
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(encodeURIComponent(percentSignName), {
+        ...testIndexMock,
+        name: percentSignName,
+      });
+      httpRequestsMockHelpers.setLoadIndexSettingsResponse(
+        encodeURIComponent(percentSignName),
+        testIndexSettings
+      );
+
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          initialEntry: `/indices/index_details?indexName=${encodeURIComponent(percentSignName)}`,
+        });
+      });
+      testBed.component.update();
+    });
+    it('loads the index details with the encoded index name', () => {
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('loads mappings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/mapping/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('loads settings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('updates settings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      await testBed.actions.settings.clickEditModeSwitch();
+      const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+      await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
+      await testBed.actions.settings.saveSettings();
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${encodeURIComponent(percentSignName)}`,
+        {
+          asSystemRequest: undefined,
+          body: JSON.stringify({ 'index.priority': '2' }),
+          query: undefined,
+          version: undefined,
+        }
+      );
+    });
+    it('loads stats with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/stats/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
     });
   });
 });

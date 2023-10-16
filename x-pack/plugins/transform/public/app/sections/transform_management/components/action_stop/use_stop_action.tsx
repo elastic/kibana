@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { useTransformCapabilities, useStopTransforms } from '../../../../hooks';
@@ -30,13 +31,16 @@ export const useStopAction = (forceDisable: boolean) => {
   const stopAndCloseModal = useCallback(
     (transformSelection: TransformListRow[]) => {
       setModalVisible(false);
-      stopTransforms(transformSelection.map((t) => ({ id: t.id, state: t.stats.state })));
+      stopTransforms(
+        transformSelection.map((t) => ({ id: t.id, state: t.stats ? t.stats.state : 'waiting' }))
+      );
     },
     [stopTransforms]
   );
 
   const clickHandler = useCallback(
-    (i: TransformListRow) => stopTransforms([{ id: i.id, state: i.stats.state }]),
+    (t: TransformListRow) =>
+      stopTransforms([{ id: t.id, state: t.stats ? t.stats.state : 'waiting' }]),
     [stopTransforms]
   );
 
@@ -45,8 +49,10 @@ export const useStopAction = (forceDisable: boolean) => {
       name: (item: TransformListRow) => (
         <StopActionName items={[item]} forceDisable={forceDisable} />
       ),
-      available: (item: TransformListRow) => item.stats.state !== TRANSFORM_STATE.STOPPED,
+      available: (item: TransformListRow) =>
+        isTransformListRowWithStats(item) ? item.stats.state !== TRANSFORM_STATE.STOPPED : true,
       enabled: (item: TransformListRow) =>
+        isTransformListRowWithStats(item) &&
         !isStopActionDisabled([item], canStartStopTransform, forceDisable),
       description: stopActionNameText,
       icon: 'stop',

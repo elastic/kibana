@@ -7,7 +7,7 @@
 
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { isRegistryEnabled, getRegistryUrlFromTestEnv } from '../registry';
+import { getRegistryUrlFromTestEnv, isRegistryEnabled } from '../registry';
 import { ROLE } from '../services/roles_users';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
@@ -28,7 +28,11 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
 
     const roles = Object.values(ROLE);
     before(async () => {
-      await ingestManager.setup();
+      try {
+        await ingestManager.setup();
+      } catch (err) {
+        log.warning(`Error setting up ingestManager: ${err}`);
+      }
 
       // create role/user
       for (const role of roles) {

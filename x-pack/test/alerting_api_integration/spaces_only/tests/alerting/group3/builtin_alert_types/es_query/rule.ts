@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
+import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -162,14 +163,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         const aadDocs = await getAllAADDocs(1);
 
-        const alertDoc = aadDocs.body.hits.hits[0]._source.kibana.alert;
-        expect(alertDoc.reason).to.match(messagePattern);
-        expect(alertDoc.title).to.be("rule 'always fire' matched query");
-        expect(alertDoc.evaluation.conditions).to.be(
+        const alertDoc = aadDocs.body.hits.hits[0]._source;
+        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+        expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+        expect(alertDoc['kibana.alert.evaluation.conditions']).to.be(
           'Number of matching documents is greater than -1'
         );
-        expect(alertDoc.evaluation.value).greaterThan(0);
-        expect(alertDoc.url).to.contain('/s/space1/app/');
+        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+        expect(value).greaterThan(0);
+        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
       })
     );
 

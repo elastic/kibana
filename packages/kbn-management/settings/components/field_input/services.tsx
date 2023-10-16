@@ -27,7 +27,7 @@ export const FieldInputProvider: FC<FieldInputServices> = ({ children, ...servic
  */
 export const FieldInputKibanaProvider: FC<FieldInputKibanaDependencies> = ({
   children,
-  toasts,
+  notifications: { toasts },
 }) => {
   return (
     <FieldInputContext.Provider

@@ -5,23 +5,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "profiling",
-        "id": "def-public.ProfilingLocators",
-        "type": "Type",
-        "tags": [],
-        "label": "ProfilingLocators",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/plugins/profiling/public/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "profiling",

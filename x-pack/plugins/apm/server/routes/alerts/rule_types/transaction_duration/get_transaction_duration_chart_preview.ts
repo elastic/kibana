@@ -24,7 +24,7 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
@@ -89,7 +89,9 @@ export async function getTransactionDurationChartPreview({
         ...termFilterQuery,
         ...getParsedFilterQuery(searchConfiguration?.query?.query as string),
         ...rangeQuery(start, end),
-        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
+        ...getBackwardCompatibleDocumentTypeFilter(
+          searchAggregatedTransactions
+        ),
       ] as QueryDslQueryContainer[],
     },
   };

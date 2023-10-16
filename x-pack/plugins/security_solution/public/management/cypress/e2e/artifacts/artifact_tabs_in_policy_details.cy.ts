@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
 import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
@@ -16,27 +17,21 @@ import {
   yieldFirstPolicyID,
 } from '../../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
-import {
-  getRoleWithArtifactReadPrivilege,
-  login,
-  loginWithCustomRole,
-  loginWithRole,
-  ROLE,
-} from '../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 
 const loginWithPrivilegeAll = () => {
-  loginWithRole(ROLE.endpoint_security_policy_manager);
+  login(ROLE.endpoint_policy_manager);
 };
 
 const loginWithPrivilegeRead = (privilegePrefix: string) => {
   const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
-  loginWithCustomRole('roleWithArtifactReadPrivilege', roleWithArtifactReadPrivilege);
+  login.withCustomRole({ name: 'roleWithArtifactReadPrivilege', ...roleWithArtifactReadPrivilege });
 };
 
 const loginWithPrivilegeNone = (privilegePrefix: string) => {
   const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
-  loginWithCustomRole('roleWithoutArtifactPrivilege', roleWithoutArtifactPrivilege);
+  login.withCustomRole({ name: 'roleWithoutArtifactPrivilege', ...roleWithoutArtifactPrivilege });
 };
 
 const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
@@ -65,7 +60,8 @@ const visitArtifactTab = (tabId: string) => {
 
 describe(
   'Artifact tabs in Policy Details page',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] }, // broken due to disabled Native Role Management
+  // FIXME: Test needs to be refactored for serverless so that it uses a standard set of users that are also available in serverless
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     before(() => {
       login();

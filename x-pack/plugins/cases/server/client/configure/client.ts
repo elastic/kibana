@@ -48,6 +48,8 @@ import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
+import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import { validateCustomFieldTypesInRequest } from './validators';
 
 /**
  * Defines the internal helper functions.
@@ -250,11 +252,18 @@ export async function update(
   try {
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
+    validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
+
     const { version, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
       configurationId,
+    });
+
+    validateCustomFieldTypesInRequest({
+      requestCustomFields: request.customFields,
+      originalCustomFields: configuration.attributes.customFields,
     });
 
     await authorization.ensureAuthorized({
@@ -339,7 +348,7 @@ export async function update(
   }
 }
 
-async function create(
+export async function create(
   configRequest: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
@@ -355,6 +364,10 @@ async function create(
   try {
     const validatedConfigurationRequest =
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+
+    validateDuplicatedCustomFieldKeysInRequest({
+      requestCustomFields: validatedConfigurationRequest.customFields,
+    });
 
     let error = null;
 
@@ -428,6 +441,7 @@ async function create(
       unsecuredSavedObjectsClient,
       attributes: {
         ...validatedConfigurationRequest,
+        customFields: validatedConfigurationRequest.customFields ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,

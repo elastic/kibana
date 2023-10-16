@@ -30,6 +30,7 @@ interface Props {
   dataBounds: InfraWaffleMapBounds;
   bottomMargin: number;
   staticHeight: boolean;
+  detailsItemId: string | null;
 }
 
 export const Map: React.FC<Props> = ({
@@ -43,6 +44,7 @@ export const Map: React.FC<Props> = ({
   dataBounds,
   bottomMargin,
   staticHeight,
+  detailsItemId,
 }) => {
   const sortedNodes = sortNodes(options.sort, nodes);
   const map = nodesToWaffleMap(sortedNodes);
@@ -70,6 +72,7 @@ export const Map: React.FC<Props> = ({
                       bounds={bounds}
                       nodeType={nodeType}
                       currentTime={currentTime}
+                      detailsItemId={detailsItemId}
                     />
                   );
                 }
@@ -85,6 +88,7 @@ export const Map: React.FC<Props> = ({
                       bounds={bounds}
                       nodeType={nodeType}
                       currentTime={currentTime}
+                      detailsItemId={detailsItemId}
                     />
                   );
                 }

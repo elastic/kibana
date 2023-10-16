@@ -12,7 +12,7 @@ import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useIsServerless } from '../../../../serverless_context';
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListRow } from '../../../../common';
@@ -21,10 +21,10 @@ import { useDocumentationLinks, useRefreshTransformList } from '../../../../hook
 
 import { StatsBar, TransformStatsBarStats } from '../stats_bar';
 
-function createTranformStats(
+function createTransformStats(
   transformNodes: number,
   transformsList: TransformListRow[],
-  hideNodeInfo: boolean
+  showNodeInfo: boolean
 ): TransformStatsBarStats {
   const transformStats: TransformStatsBarStats = {
     total: {
@@ -64,7 +64,7 @@ function createTranformStats(
     },
   };
 
-  if (!hideNodeInfo) {
+  if (showNodeInfo) {
     transformStats.nodes = {
       label: i18n.translate('xpack.transform.statsBar.transformNodesLabel', {
         defaultMessage: 'Nodes',
@@ -94,10 +94,12 @@ function createTranformStats(
       transformStats.batch.value++;
     }
 
-    if (transform.stats.state === TRANSFORM_STATE.FAILED) {
-      failedTransforms++;
-    } else if (transform.stats.state === TRANSFORM_STATE.STARTED) {
-      startedTransforms++;
+    if (transform.stats) {
+      if (transform.stats.state === TRANSFORM_STATE.FAILED) {
+        failedTransforms++;
+      } else if (transform.stats.state === TRANSFORM_STATE.STARTED) {
+        startedTransforms++;
+      }
     }
   });
 
@@ -123,19 +125,19 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
   transformNodes,
   transformsList,
 }) => {
-  const hideNodeInfo = useIsServerless();
+  const { showNodeInfo } = useEnabledFeatures();
   const refreshTransformList = useRefreshTransformList();
   const { esNodeRoles } = useDocumentationLinks();
 
-  const transformStats: TransformStatsBarStats = createTranformStats(
+  const transformStats: TransformStatsBarStats = createTransformStats(
     transformNodes,
     transformsList,
-    hideNodeInfo
+    showNodeInfo
   );
 
   return (
     <>
-      {!hideNodeInfo && transformNodes === 0 && (
+      {showNodeInfo && transformNodes === 0 && (
         <>
           <EuiCallOut
             title={

@@ -2807,7 +2807,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", { uiActions, fieldFormats, dataViews, screenshotMode }: ",
+              ", { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: ",
               "DataStartDependencies",
               ") => ",
               {
@@ -2848,7 +2848,7 @@
                 "id": "def-public.DataPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ uiActions, fieldFormats, dataViews, screenshotMode }",
+                "label": "{ uiActions, fieldFormats, dataViews, inspector, screenshotMode }",
                 "description": [],
                 "signature": [
                   "DataStartDependencies"
@@ -4917,158 +4917,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.isCompleteResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isCompleteResponse",
-        "description": [],
-        "signature": [
-          "(response?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> | undefined) => boolean"
-        ],
-        "path": "src/plugins/data/common/search/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.isCompleteResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "true if response is completed successfully"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.isErrorResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isErrorResponse",
-        "description": [
-          "\nFrom https://github.com/elastic/elasticsearch/issues/55572: \"When is_running is false, the query has stopped, which\nmay happen due to ... the search failed, in which case is_partial is set to true to indicate that any results that\nmay be included in the search response come only from a subset of the shards that the query should have hit.\""
-        ],
-        "signature": [
-          "(response?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> | undefined) => boolean"
-        ],
-        "path": "src/plugins/data/common/search/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.isErrorResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "true if response had an error while executing in ES"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.isPartialResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isPartialResponse",
-        "description": [],
-        "signature": [
-          "(response?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> | undefined) => boolean"
-        ],
-        "path": "src/plugins/data/common/search/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.isPartialResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "true if request is still running an/d response contains partial results"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.isQuery",
         "type": "Function",
         "tags": [],
@@ -5109,6 +4957,56 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.isRunningResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "isRunningResponse",
+        "description": [],
+        "signature": [
+          "(response?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<any> | undefined) => boolean"
+        ],
+        "path": "src/plugins/data/common/search/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.isRunningResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<any> | undefined"
+            ],
+            "path": "src/plugins/data/common/search/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "true if request is still running"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.isTimeRange",
         "type": "Function",
         "tags": [],
@@ -5139,41 +5037,6 @@
               "unknown"
             ],
             "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.OpenIncompleteResultsModalButton",
-        "type": "Function",
-        "tags": [],
-        "label": "OpenIncompleteResultsModalButton",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "OpenIncompleteResultsModalButtonProps",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/data/public/incomplete_results_modal/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.OpenIncompleteResultsModalButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "OpenIncompleteResultsModalButtonProps"
-            ],
-            "path": "src/plugins/data/public/incomplete_results_modal/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -7942,6 +7805,20 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8214,23 +8091,6 @@
             ],
             "signature": [
               "RawResponse"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.requestParams",
-            "type": "Object",
-            "tags": [],
-            "label": "requestParams",
-            "description": [
-              "\nHTTP request parameters from elasticsearch transport client t"
-            ],
-            "signature": [
-              "ConnectionRequestParams",
-              " | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
@@ -8834,18 +8694,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-browser",
                 "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
               },
@@ -8858,44 +8706,20 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
                 "plugin": "fleet",
@@ -8908,6 +8732,22 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "osquery",
@@ -8996,26 +8836,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "alerting",
@@ -12837,6 +12657,10 @@
               "path": "src/plugins/dashboard/public/services/data/data_service.ts"
             },
             {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
+            },
+            {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },
@@ -12849,8 +12673,8 @@
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
             },
             {
-              "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/data_drift/charts/default_value_formatter.ts"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -13301,10 +13125,6 @@
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
-              },
-              {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
@@ -13327,6 +13147,10 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/custom_threshold/components/alert_details_app_section.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13409,16 +13233,16 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
-              },
-              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13553,18 +13377,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
-              },
-              {
                 "plugin": "savedObjectsManagement",
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
@@ -13617,8 +13429,72 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -13701,62 +13577,6 @@
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
-              },
-              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
@@ -13809,6 +13629,10 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
@@ -13841,6 +13665,10 @@
                 "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
               },
@@ -13854,11 +13682,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "transform",
@@ -14011,10 +13835,6 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -14437,6 +14257,22 @@
             "returnComment": [
               "index pattern string"
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataView.getAllowHidden",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllowHidden",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -17245,6 +17081,24 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.defaultDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultDataViewExists",
+            "description": [
+              "\nReturns whether a default data view exists."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.getDefaultDataView",
             "type": "Function",
             "tags": [],
@@ -17411,7 +17265,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -17530,6 +17384,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.allowHidden",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "allowHidden",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -21046,10 +20914,6 @@
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
-              },
-              {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
@@ -21072,6 +20936,10 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/custom_threshold/components/alert_details_app_section.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -21154,16 +21022,16 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
-              },
-              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -21298,18 +21166,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
-              },
-              {
                 "plugin": "savedObjectsManagement",
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
@@ -21362,8 +21218,72 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -21446,62 +21366,6 @@
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
-              },
-              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
@@ -21554,6 +21418,10 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
@@ -21586,6 +21454,10 @@
                 "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
               },
@@ -21599,11 +21471,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "transform",
@@ -21756,10 +21624,6 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -22182,6 +22046,22 @@
             "returnComment": [
               "index pattern string"
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataView.getAllowHidden",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllowHidden",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -25861,6 +25741,24 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.defaultDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultDataViewExists",
+            "description": [
+              "\nReturns whether a default data view exists."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.getDefaultDataView",
             "type": "Function",
             "tags": [],
@@ -27067,6 +26965,22 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewAttributes.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [
+              "\nAllow hidden and system indices when loading field list"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -27316,6 +27230,20 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -27493,7 +27421,7 @@
                 "section": "def-common.FieldAttrs",
                 "text": "FieldAttrs"
               },
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
             "deprecated": false,
@@ -27755,18 +27683,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-browser",
                 "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
               },
@@ -27779,44 +27695,20 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
                 "plugin": "fleet",
@@ -27829,6 +27721,22 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "osquery",
@@ -27917,26 +27825,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "alerting",
@@ -28579,7 +28467,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
+          ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28660,7 +28548,7 @@
             "section": "def-common.FieldAttrs",
             "text": "FieldAttrs"
           },
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

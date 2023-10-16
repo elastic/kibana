@@ -14,7 +14,7 @@ import { NavigationServices } from '../../types';
 type Arguments = NavigationServices;
 export type Params = Pick<
   Arguments,
-  'navIsOpen' | 'recentlyAccessed$' | 'navLinks$' | 'onProjectNavigationChange'
+  'navIsOpen' | 'recentlyAccessed$' | 'activeNodes$' | 'navLinks$' | 'onProjectNavigationChange'
 >;
 
 export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices> {
@@ -43,7 +43,7 @@ export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices>
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
       navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
       onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
-      activeNodes$: new BehaviorSubject([]),
+      activeNodes$: params.activeNodes$ ?? new BehaviorSubject([]),
       cloudLinks: {
         billingAndSub: {
           title: 'Billing & Subscriptions',

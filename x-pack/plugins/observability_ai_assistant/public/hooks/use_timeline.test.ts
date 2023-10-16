@@ -171,6 +171,8 @@ describe('useTimeline', () => {
             return subject;
           }),
           executeFunction: jest.fn(),
+          hasFunction: jest.fn(),
+          hasRenderFunction: jest.fn(),
         },
         onChatUpdate: jest.fn().mockImplementation((messages) => {
           props = { ...props, messages };
@@ -437,6 +439,7 @@ describe('useTimeline', () => {
           expect(props.chatService.executeFunction).toHaveBeenCalledWith({
             name: 'my_function',
             args: '{}',
+            connectorId: 'foo',
             messages: [
               {
                 '@timestamp': expect.any(String),

@@ -46,6 +46,7 @@ import {
   isSortableByColumn,
   isPercentileRankSortable,
   isPercentileSortable,
+  getOtherBucketSwitchDefault,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -733,6 +734,7 @@ The top values of a specified field ranked by the chosen metric.
                   params: {
                     ...currentColumn.params,
                     size: value,
+                    otherBucket: getOtherBucketSwitchDefault(currentColumn, value),
                   },
                 },
               } as Record<string, TermsIndexPatternColumn>,

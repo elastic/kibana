@@ -5,21 +5,37 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { CasesSetup } from '@kbn/cases-plugin/server';
+import type { MlFeatures } from '../../common/constants/app';
 import {
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
 } from '../../common/constants/cases';
-import type { MlFeatures } from '../types';
 
-export function registerCasesPersistableState(cases: CasesSetup, enabledFeatures: MlFeatures) {
+export function registerCasesPersistableState(
+  cases: CasesSetup,
+  enabledFeatures: MlFeatures,
+  logger: Logger
+) {
   if (enabledFeatures.ad === true) {
-    cases.attachmentFramework.registerPersistableState({
-      id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
-    });
-
-    cases.attachmentFramework.registerPersistableState({
-      id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
-    });
+    try {
+      cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+      });
+    } catch (error) {
+      logger.warn(
+        `ML failed to register cases persistable state for ${CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}`
+      );
+    }
+    try {
+      cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+      });
+    } catch (error) {
+      logger.warn(
+        `ML failed to register cases persistable state for ${CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS}`
+      );
+    }
   }
 }

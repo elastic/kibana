@@ -29,7 +29,6 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import type { ConnectionRequestParams } from '@elastic/transport';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
@@ -52,7 +51,7 @@ import {
   IAsyncSearchOptions,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   ISearchOptions,
   ISearchOptionsSerializable,
   pollSearch,
@@ -305,37 +304,17 @@ export class SearchInterceptor {
 
     const cancel = () => id && !isSavedToBackground && sendCancelRequest();
 
-    // Async search requires a series of requests
-    // 1) POST /<index pattern>/_async_search/
-    // 2..n) GET /_async_search/<async search identifier>
-    //
-    // First request contains useful request params for tools like Inspector.
-    // Preserve and project first request params into responses.
-    let firstRequestParams: ConnectionRequestParams;
-
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
       tap((response) => {
-        if (!firstRequestParams && response.requestParams) {
-          firstRequestParams = response.requestParams;
-        }
-
         id = response.id;
 
-        if (isCompleteResponse(response)) {
+        if (!isRunningResponse(response)) {
           searchTracker?.complete();
         }
-      }),
-      map((response) => {
-        return firstRequestParams
-          ? {
-              ...response,
-              requestParams: firstRequestParams,
-            }
-          : response;
       }),
       catchError((e: Error) => {
         searchTracker?.error();

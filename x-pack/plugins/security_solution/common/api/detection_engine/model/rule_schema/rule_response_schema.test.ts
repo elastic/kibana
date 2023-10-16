@@ -16,6 +16,7 @@ import {
   getSavedQuerySchemaMock,
   getThreatMatchingSchemaMock,
   getRulesEqlSchemaMock,
+  getEsqlRuleSchemaMock,
 } from './rule_response_schema.mock';
 
 describe('Rule response schema', () => {
@@ -167,6 +168,41 @@ describe('Rule response schema', () => {
     });
   });
 
+  describe('esql rule type', () => {
+    test('it should NOT validate a type of "esql" with "index" defined', () => {
+      const payload = { ...getEsqlRuleSchemaMock(), index: ['logs-*'] };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "index,["logs-*"]"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should NOT validate a type of "esql" with "filters" defined', () => {
+      const payload = { ...getEsqlRuleSchemaMock(), filters: [] };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "filters,[]"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should NOT validate a type of "esql" with a "saved_id" dependent', () => {
+      const payload = { ...getEsqlRuleSchemaMock(), saved_id: 'id' };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "saved_id"']);
+      expect(message.schema).toEqual({});
+    });
+  });
+
   describe('data_view_id', () => {
     test('it should validate a type of "query" with "data_view_id" defined', () => {
       const payload = { ...getRulesSchemaMock(), data_view_id: 'logs-*' };
@@ -223,6 +259,17 @@ describe('Rule response schema', () => {
 
     test('it should NOT validate a type of "machine_learning" with "data_view_id" defined', () => {
       const payload = { ...getRulesMlSchemaMock(), data_view_id: 'logs-*' };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should NOT validate a type of "esql" with "data_view_id" defined', () => {
+      const payload = { ...getEsqlRuleSchemaMock(), data_view_id: 'logs-*' };
 
       const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);

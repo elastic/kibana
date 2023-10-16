@@ -83,6 +83,7 @@ import {
   addTimeline,
   showCallOutUnauthorizedMsg,
   saveTimeline,
+  updateSavedSearchId,
 } from './actions';
 import type { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -118,6 +119,8 @@ const timelineActionsType = [
   updateSort.type,
   updateRange.type,
   upsertColumn.type,
+
+  updateSavedSearchId.type,
 ];
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
@@ -346,6 +349,7 @@ const timelineInput: TimelineInput = {
   savedQueryId: null,
   sort: null,
   status: null,
+  savedSearchId: null,
 };
 
 export const convertTimelineAsInput = (

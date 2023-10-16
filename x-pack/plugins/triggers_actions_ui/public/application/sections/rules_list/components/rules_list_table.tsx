@@ -50,6 +50,7 @@ import {
   TriggersActionsUiConfig,
   RuleTypeRegistryContract,
   SnoozeSchedule,
+  BulkOperationResponse,
 } from '../../../../types';
 import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
@@ -125,8 +126,8 @@ export interface RulesListTableProps {
   onTagClose?: (rule: RuleTableItem) => void;
   onPercentileOptionsChange?: (options: EuiSelectableOption[]) => void;
   onRuleChanged: () => Promise<void>;
-  onEnableRule: (rule: RuleTableItem) => Promise<void>;
-  onDisableRule: (rule: RuleTableItem) => Promise<void>;
+  onEnableRule: (rule: RuleTableItem) => Promise<BulkOperationResponse>;
+  onDisableRule: (rule: RuleTableItem) => Promise<BulkOperationResponse>;
   onSnoozeRule: (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => Promise<void>;
   onUnsnoozeRule: (rule: RuleTableItem, scheduleIds?: string[]) => Promise<void>;
   onSelectAll: () => void;
@@ -193,8 +194,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onManageLicenseClick = EMPTY_HANDLER,
     onPercentileOptionsChange = EMPTY_HANDLER,
     onRuleChanged,
-    onEnableRule = EMPTY_HANDLER,
-    onDisableRule = EMPTY_HANDLER,
+    onEnableRule,
+    onDisableRule,
     onSnoozeRule = EMPTY_HANDLER,
     onUnsnoozeRule = EMPTY_HANDLER,
     onSelectAll = EMPTY_HANDLER,
@@ -413,14 +414,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-lastExecutionDateTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
               {
                 defaultMessage: 'Start time of the last run.',
               }
             )}
           >
             <span>
-              Last run{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitle',
+                { defaultMessage: 'Last run' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>
@@ -569,14 +573,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-durationTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitleTooltip',
               {
                 defaultMessage: 'The length of time it took for the rule to run (mm:ss).',
               }
             )}
           >
             <span>
-              Duration{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
+                { defaultMessage: 'Duration' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>
@@ -639,14 +646,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-successRatioTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitleTooltip',
               {
                 defaultMessage: 'How often this rule runs successfully.',
               }
             )}
           >
             <span>
-              Success ratio{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
+                { defaultMessage: 'Success ratio' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>

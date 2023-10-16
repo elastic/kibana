@@ -426,7 +426,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"readOnly\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -434,7 +434,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"readOnly\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -456,7 +456,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"readOnly\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -464,7 +464,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"readOnly\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -603,15 +603,7 @@
               },
               "[] | undefined; refreshInterval?: number | undefined; iconType?: ",
               "IconType",
-              " | undefined; showQueryInput?: boolean | undefined; dataTestSubj?: string | undefined; timeHistory?: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.TimeHistoryContract",
-                "text": "TimeHistoryContract"
-              },
-              " | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; filtersForSuggestions?: ",
+              " | undefined; showQueryInput?: boolean | undefined; dataTestSubj?: string | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; filtersForSuggestions?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -621,7 +613,7 @@
               },
               "[] | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
-              "[] | undefined; prependFilterBar?: React.ReactNode; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; savedQuery?: ",
+              "[] | undefined; prependFilterBar?: React.ReactNode; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; savedQuery?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -701,13 +693,21 @@
                 "section": "def-public.DataViewPickerProps",
                 "text": "DataViewPickerProps"
               },
-              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
+              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; hideTextBasedRunQueryLabel?: boolean | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
               "OnSaveTextLanguageQueryProps",
               ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
               " | undefined; suggestionsAbstraction?: ",
               "SuggestionsAbstraction",
-              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; onFiltersUpdated?: ((filters: ",
+              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; timeHistory?: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.TimeHistoryContract",
+                "text": "TimeHistoryContract"
+              },
+              " | undefined; onFiltersUpdated?: ((filters: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2296,8 +2296,11 @@
         "label": "StatefulSearchBarProps",
         "description": [],
         "signature": [
+          "Omit<",
           "SearchBarOwnProps",
-          "<QT> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
+          "<QT>, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; saveQueryMenuVisibility?: ",
+          "SavedQueryMenuVisibility",
+          " | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

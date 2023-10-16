@@ -8,7 +8,7 @@
 
 import {
   FieldDefinition,
-  OnChangeFn,
+  OnInputChangeFn,
   SettingType,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
@@ -31,7 +31,9 @@ export interface FieldInputServices {
  */
 export interface FieldInputKibanaDependencies {
   /** The portion of the {@link ToastsStart} contract used by this component. */
-  toasts: Pick<ToastsStart, 'addDanger'>;
+  notifications: {
+    toasts: Pick<ToastsStart, 'addDanger'>;
+  };
 }
 
 /**
@@ -44,6 +46,6 @@ export interface InputProps<T extends SettingType> {
   >;
   unsavedChange?: UnsavedFieldChange<T>;
   isSavingEnabled: boolean;
-  /** The `onChange` handler. */
-  onChange: OnChangeFn<T>;
+  /** The `onInputChange` handler. */
+  onInputChange: OnInputChangeFn<T>;
 }

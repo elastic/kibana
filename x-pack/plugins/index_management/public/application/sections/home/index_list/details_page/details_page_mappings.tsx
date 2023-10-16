@@ -61,10 +61,9 @@ export const DetailsPageMappings: FunctionComponent<{ indexName: string }> = ({ 
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.mappings.errorDescription"
-                defaultMessage="There was an error loading mappings for index {indexName}: {error}"
+                defaultMessage="We encountered an error loading mappings for index {indexName}. Make sure that the index name in the URL is correct and try again."
                 values={{
                   indexName,
-                  error: error.error,
                 }}
               />
             </EuiText>
@@ -138,7 +137,7 @@ export const DetailsPageMappings: FunctionComponent<{ indexName: string }> = ({ 
           >
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
-              defaultMessage="Learn more"
+              defaultMessage="Learn more about mappings"
             />
           </EuiLink>
         </EuiPanel>

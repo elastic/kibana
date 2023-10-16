@@ -30,10 +30,6 @@
     {
       "name": "slo",
       "description": "SLO APIs enable you to define, manage and track service-level objectives"
-    },
-    {
-      "name": "composite slo",
-      "description": "Composite SLO APIs enable you to define, manage and track a group of SLOs."
     }
   ],
   "paths": {
@@ -160,7 +156,8 @@
             "description": "The number of SLOs to return per page",
             "schema": {
               "type": "integer",
-              "default": 25
+              "default": 25,
+              "maximum": 5000
             },
             "example": 25
           },
