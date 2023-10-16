@@ -35,6 +35,7 @@ export const AgentPolicyBaseSchema = {
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
     )
   ),
+  keep_monitoring_alive: schema.maybe(schema.boolean({ defaultValue: false })),
   data_output_id: schema.maybe(schema.nullable(schema.string())),
   monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
   download_source_id: schema.maybe(schema.nullable(schema.string())),
