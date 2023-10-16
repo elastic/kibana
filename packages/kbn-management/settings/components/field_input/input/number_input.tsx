@@ -7,7 +7,10 @@
  */
 
 import React from 'react';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
+
+import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
+
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
@@ -20,24 +23,23 @@ export type NumberInputProps = InputProps<'number'>;
  * Component for manipulating a `number` field.
  */
 export const NumberInput = ({
-  ariaDescribedBy,
-  ariaLabel,
-  id,
-  isDisabled: disabled = false,
-  name,
-  onChange: onChangeProp,
-  value: valueProp,
+  field,
+  unsavedChange,
+  isSavingEnabled,
+  onInputChange,
 }: NumberInputProps) => {
-  const onChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-    onChangeProp({ value: Number(event.target.value) });
+  const onChange: EuiFieldNumberProps['onChange'] = (event) => {
+    const inputValue = Number(event.target.value);
+    onUpdate({ type: field.type, unsavedValue: inputValue });
+  };
 
-  // nit: we have to do this because, while the `UiSettingsService` might return
-  // `null`, the {@link EuiFieldNumber} component doesn't accept `null` as a
-  // value.
-  //
-  // @see packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts
-  //
-  const value = valueProp === null ? undefined : valueProp;
+  const onUpdate = useUpdate({ onInputChange, field });
+
+  const { id, name, ariaAttributes } = field;
+  const { ariaLabel, ariaDescribedBy } = ariaAttributes;
+  const [rawValue] = getFieldInputValue(field, unsavedChange);
+
+  const value = rawValue === null ? undefined : rawValue;
 
   return (
     <EuiFieldNumber
@@ -45,7 +47,8 @@ export const NumberInput = ({
       aria-label={ariaLabel}
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
       fullWidth
-      {...{ disabled, name, value, onChange }}
+      disabled={!isSavingEnabled}
+      {...{ name, value, onChange }}
     />
   );
 };

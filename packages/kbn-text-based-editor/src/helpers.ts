@@ -10,6 +10,7 @@ import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export interface MonacoError {
   message: string;
@@ -171,4 +172,13 @@ export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string 
     return pipe.replaceAll('\n', '').trim();
   });
   return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
+};
+
+export const getIndicesForAutocomplete = async (dataViews: DataViewsPublicPluginStart) => {
+  const indices = await dataViews.getIndices({
+    showAllIndices: false,
+    pattern: '*',
+    isRollupIndex: () => false,
+  });
+  return indices.filter((index) => !index.name.startsWith('.')).map((i) => i.name);
 };

@@ -24,6 +24,7 @@ import { getAgentById } from '../../services/agents';
 import type { Agent } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
+import { getLatestAvailableVersion } from '../../services/agents/versions';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -35,6 +36,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
+  const latestAgentVersion = await getLatestAvailableVersion();
   try {
     checkKibanaVersion(version, kibanaVersion, force);
   } catch (err) {
@@ -73,7 +75,7 @@ export const postAgentUpgradeHandler: RequestHandler<
         },
       });
     }
-    if (!force && !isAgentUpgradeable(agent, kibanaVersion, version)) {
+    if (!force && !isAgentUpgradeable(agent, latestAgentVersion, version)) {
       return response.customError({
         statusCode: 400,
         body: {

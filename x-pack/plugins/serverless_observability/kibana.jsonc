@@ -22,7 +22,6 @@
       "observabilityShared",
       "kibanaReact",
       "management",
-      "ml",
       "cloud"
     ],
     "optionalPlugins": [],

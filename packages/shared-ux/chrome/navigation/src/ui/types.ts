@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+
+import type { EuiAccordionProps } from '@elastic/eui';
 import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
-
 import type { RecentlyAccessedProps } from './components';
 
 export type NonEmptyArray<T> = [T, ...T[]];
@@ -46,26 +47,10 @@ export interface NodePropsEnhanced<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   /**
-   * This function correspond to the same "itemRender" function that can be passed to
-   * the EuiSideNavItemType (see navigation_section_ui.tsx)
-   */
-  renderItem?: () => ReactElement;
-  /**
    * Forces the node to be active. This is used to force a collapisble nav group to be open
    * even if the URL does not match any of the nodes in the group.
    */
   isActive?: boolean;
-}
-
-/**
- * @internal
- */
-export interface ChromeProjectNavigationNodeEnhanced extends ChromeProjectNavigationNode {
-  /**
-   * This function correspond to the same "itemRender" function that can be passed to
-   * the EuiSideNavItemType (see navigation_section_ui.tsx)
-   */
-  renderItem?: () => ReactElement;
 }
 
 /** The preset that can be pass to the NavigationBucket component */
@@ -101,6 +86,10 @@ export interface GroupDefinition<
    * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
    */
   defaultIsCollapsed?: boolean;
+  /*
+   * Pass props to the EUI accordion component used to represent a nav group
+   */
+  accordionProps?: Partial<EuiAccordionProps>;
   preset?: NavigationGroupPreset;
 }
 
@@ -172,7 +161,7 @@ export type UnRegisterFunction = (id: string) => void;
  *
  * A function to register a navigation node on its parent.
  */
-export type RegisterFunction = (navNode: ChromeProjectNavigationNodeEnhanced) => {
+export type RegisterFunction = (navNode: ChromeProjectNavigationNode) => {
   /** The function to unregister the node. */
   unregister: UnRegisterFunction;
   /** The full path of the node in the navigation tree. */

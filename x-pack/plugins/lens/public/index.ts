@@ -9,6 +9,7 @@ import { LensPlugin } from './plugin';
 
 export type {
   EmbeddableComponentProps,
+  EmbeddableComponent,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 export type {
@@ -104,7 +105,12 @@ export type {
   ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
 
-export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
+export type {
+  LensEmbeddableInput,
+  LensSavedObjectAttributes,
+  Embeddable,
+  LensEmbeddableOutput,
+} from './embeddable';
 
 export type { ChartInfo } from './chart_info_api';
 

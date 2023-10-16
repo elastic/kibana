@@ -25,7 +25,7 @@ import { ApiKey } from '@kbn/security-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { MANAGEMENT_API_KEYS } from '../../routes';
+import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import { CreateApiKeyResponse } from './types';
 import './api_key.scss';
@@ -82,20 +82,21 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.serverlessSearch.apiKey.panel.title', {
-                defaultMessage: 'Prepare an API Key',
+                defaultMessage: 'Add an API Key',
               })}
             </h3>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText size="s">
             {i18n.translate('xpack.serverlessSearch.apiKey.panel.description', {
               defaultMessage:
-                'An API key is a private, unique identifier for authentication and authorization.',
+                'Use an existing key, or create a new one and copy it somewhere safe.',
             })}
           </EuiText>
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   <span>
                     <EuiButton

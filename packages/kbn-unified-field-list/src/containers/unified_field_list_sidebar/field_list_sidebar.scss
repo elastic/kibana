@@ -3,12 +3,19 @@
   margin: 0 !important;
   flex-grow: 1;
   padding: 0;
-  width: $euiSize * 19;
   height: 100%;
 
   &--collapsed {
     width: auto;
     padding: $euiSizeS $euiSizeS 0;
+  }
+
+  &.unifiedFieldListSidebar--fullWidth {
+    min-width: 0 !important;
+  }
+
+  &:not(.unifiedFieldListSidebar--fullWidth) {
+    width: $euiSize * 19;
   }
 
   @include euiBreakpoint('xs', 's') {

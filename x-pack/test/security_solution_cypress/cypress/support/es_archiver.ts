@@ -18,17 +18,30 @@ export const esArchiver = (
 ): EsArchiver => {
   const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
 
-  const isServerless = config.env.IS_SERVERLESS;
+  const isSnapshotServerless = config.env.IS_SERVERLESS;
+  const isCloudServerless = config.env.CLOUD_SERVERLESS;
+
+  const serverlessCloudUser = {
+    username: 'elastic',
+    password: config.env.ELASTICSEARCH_PASSWORD,
+  };
+
+  let authOverride;
+  if (!isSnapshotServerless) {
+    authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesSuperuser;
+  }
 
   const client = createEsClientForTesting({
     esUrl: Url.format(config.env.ELASTICSEARCH_URL),
     // Use system indices user so tests can write to system indices
-    authOverride: !isServerless ? systemIndicesSuperuser : undefined,
+    authOverride,
   });
+
+  const kibanaUrl = config.env.KIBANA_URL || config.env.BASE_URL;
 
   const kbnClient = new KbnClient({
     log,
-    url: config.env.BASE_URL as string,
+    url: kibanaUrl as string,
     ...(config.env.ELASTICSEARCH_URL.includes('https')
       ? { certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)] }
       : {}),

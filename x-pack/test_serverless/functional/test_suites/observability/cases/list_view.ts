@@ -18,7 +18,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
 
-  describe('Cases list', () => {
+  describe('Cases list', function () {
+    // multiple errors in after hook due to delete permission
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();

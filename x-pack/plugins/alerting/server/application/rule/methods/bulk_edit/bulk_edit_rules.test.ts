@@ -102,6 +102,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 const paramsModifier = jest.fn();
 
@@ -239,10 +241,12 @@ describe('bulkEdit()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     });
 
     (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
@@ -736,6 +740,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -745,6 +750,7 @@ describe('bulkEdit()', () => {
           mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
           shouldWrite: true,
         },
+        validLegacyConsumers: [],
       });
       const existingAction = {
         frequency: {
@@ -2350,7 +2356,9 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
+        validLegacyConsumers: [],
       });
 
       const result = await rulesClient.bulkEdit({
@@ -2394,7 +2402,9 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
+        validLegacyConsumers: [],
       });
 
       const result = await rulesClient.bulkEdit({

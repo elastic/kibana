@@ -166,6 +166,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
             pipelineName={formState.pipelineName}
             pipelineCreated={formState.pipelineCreated}
             pipelineError={formState.pipelineError}
+            sourceIndex={sourceIndex}
           />
         )}
       </EuiFlyoutBody>

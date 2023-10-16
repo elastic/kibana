@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { ComponentType, useRef, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityOnboardingPluginContextValue } from '../../plugin';
 import { breadcrumbsApp } from '../../application/app';
 import { Provider as WizardProvider } from '../../components/app/custom_logs';
 import {
@@ -16,6 +18,7 @@ import {
   FilmstripTransition,
   TransitionState,
 } from '../../components/shared/filmstrip_transition';
+import { ObservabilityOnboardingHeaderActionMenu } from '../../components/app/header_action_menu';
 
 interface Props {
   children: React.ReactNode;
@@ -43,6 +46,12 @@ function AnimatedTransitionsWizard({ children }: Props) {
   const [title, setTitle] = useState<string>();
   const TransitionComponent = useRef<ComponentType>(() => null);
 
+  const {
+    services: { config },
+  } = useKibana<ObservabilityOnboardingPluginContextValue>();
+
+  const isServerless = config.serverless.enabled;
+
   function onChangeStep({
     direction,
     stepTitle,
@@ -68,39 +77,49 @@ function AnimatedTransitionsWizard({ children }: Props) {
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSpacer size="l" />
-          <EuiTitle
-            size="l"
-            data-test-subj="obltOnboardingStreamLogFilePageHeader"
-          >
-            <h1>
-              {title
-                ? title
-                : i18n.translate(
-                    'xpack.observability_onboarding.title.collectCustomLogs',
-                    {
-                      defaultMessage: 'Stream log files to Elastic',
-                    }
-                  )}
-            </h1>
-          </EuiTitle>
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem grow={false}>
+              <EuiTitle
+                size="l"
+                data-test-subj="obltOnboardingStreamLogFilePageHeader"
+              >
+                <h1>
+                  {title
+                    ? title
+                    : i18n.translate(
+                        'xpack.observability_onboarding.title.collectCustomLogs',
+                        {
+                          defaultMessage: 'Stream log files to Elastic',
+                        }
+                      )}
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            {isServerless && (
+              <EuiFlexItem
+                grow={false}
+                css={{ position: 'absolute', right: 10 }}
+              >
+                <ObservabilityOnboardingHeaderActionMenu />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ width: '50%' }}>
           <FilmstripTransition
             duration={TRANSITION_DURATION}
             transition={transition}
           >
-            <FilmstripFrame position="left">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'back' ? <TransitionComponent.current /> : null
+            <FilmstripFrame
+              position={
+                transition === 'ready'
+                  ? 'center'
+                  : transition === 'back'
+                  ? 'left'
+                  : 'right'
               }
-            </FilmstripFrame>
-            <FilmstripFrame position="center">{children}</FilmstripFrame>
-            <FilmstripFrame position="right">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'next' ? <TransitionComponent.current /> : null
-              }
+            >
+              {children}
             </FilmstripFrame>
           </FilmstripTransition>
         </EuiFlexItem>

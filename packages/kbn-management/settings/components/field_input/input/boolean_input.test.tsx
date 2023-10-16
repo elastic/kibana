@@ -13,42 +13,63 @@ import { BooleanInput } from './boolean_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 import { wrap } from '../mocks';
+import { InputProps } from '../types';
 
 const name = 'Some boolean field';
 const id = 'some:boolean:field';
 
 describe('BooleanInput', () => {
-  const defaultProps = {
-    id,
-    name,
-    ariaLabel: name,
-    onChange: jest.fn(),
+  const onInputChange = jest.fn();
+  const defaultProps: InputProps<'boolean'> = {
+    onInputChange,
+    field: {
+      name,
+      type: 'boolean',
+      ariaAttributes: {
+        ariaLabel: name,
+      },
+      id,
+      isOverridden: false,
+      defaultValue: false,
+    },
+    isSavingEnabled: true,
   };
 
   beforeEach(() => {
-    defaultProps.onChange.mockClear();
-  });
-
-  it('renders true', () => {
-    render(wrap(<BooleanInput value={true} {...defaultProps} />));
-    expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toBeChecked();
+    onInputChange.mockClear();
   });
 
   it('renders false', () => {
-    render(wrap(<BooleanInput value={false} {...defaultProps} />));
+    render(wrap(<BooleanInput {...defaultProps} />));
     expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).not.toBeChecked();
   });
 
-  it('calls onChange when toggled', () => {
-    render(wrap(<BooleanInput value={true} {...defaultProps} />));
+  it('renders true', () => {
+    render(
+      wrap(<BooleanInput {...defaultProps} field={{ ...defaultProps.field, defaultValue: true }} />)
+    );
+    expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toBeChecked();
+  });
+
+  it('renders unsaved value if present', () => {
+    render(
+      wrap(
+        <BooleanInput {...defaultProps} unsavedChange={{ type: 'boolean', unsavedValue: true }} />
+      )
+    );
+    expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toBeChecked();
+  });
+
+  it('calls onInputChange when toggled', () => {
+    render(wrap(<BooleanInput {...defaultProps} />));
     const input = screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    expect(defaultProps.onChange).not.toHaveBeenCalled();
+    expect(defaultProps.onInputChange).not.toHaveBeenCalled();
 
     act(() => {
       fireEvent.click(input);
     });
 
-    expect(defaultProps.onChange).toBeCalledWith({ value: false });
+    expect(defaultProps.onInputChange).toBeCalledWith({ type: 'boolean', unsavedValue: true });
 
     act(() => {
       fireEvent.click(input);

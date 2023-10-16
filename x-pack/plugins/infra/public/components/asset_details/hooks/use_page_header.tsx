@@ -18,6 +18,7 @@ import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links';
@@ -107,10 +108,32 @@ const useRightSideItems = (links?: LinkOptions[]) => {
   return { rightSideItems };
 };
 
+const useFeatureFlagTabs = () => {
+  const { featureFlags } = usePluginConfig();
+  const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
+    () => ({
+      [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
+    }),
+    [featureFlags.osqueryEnabled]
+  );
+
+  const isTabEnabled = useCallback(
+    (tabItem: Tab) => {
+      return featureFlagControlledTabs[tabItem.id] ?? true;
+    },
+    [featureFlagControlledTabs]
+  );
+
+  return {
+    isTabEnabled,
+  };
+};
+
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { euiTheme } = useEuiTheme();
+  const { isTabEnabled } = useFeatureFlagTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {
@@ -148,7 +171,7 @@ const useTabs = (tabs: Tab[]) => {
 
   const tabEntries: TabItem[] = useMemo(
     () =>
-      tabs.map(({ name, ...tab }) => {
+      tabs.filter(isTabEnabled).map(({ name, ...tab }) => {
         if (tab.id === ContentTabIds.LINK_TO_APM) {
           return getTabToApmTraces(name);
         }
@@ -161,7 +184,7 @@ const useTabs = (tabs: Tab[]) => {
           label: name,
         };
       }),
-    [activeTabId, getTabToApmTraces, onTabClick, tabs]
+    [activeTabId, isTabEnabled, getTabToApmTraces, onTabClick, tabs]
   );
 
   return { tabEntries };

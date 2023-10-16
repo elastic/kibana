@@ -65,7 +65,7 @@ export const initializeCspIndices = async (
   }
 };
 
-const createBenchmarkScoreIndex = async (
+export const createBenchmarkScoreIndex = async (
   esClient: ElasticsearchClient,
   cloudSecurityPostureConfig: CloudSecurityPostureConfig,
   logger: Logger
@@ -77,7 +77,7 @@ const createBenchmarkScoreIndex = async (
 
     const settings: IndexTemplateSettings = {
       index: {
-        default_pipeline: latestFindingsPipelineIngestConfig.id,
+        default_pipeline: scorePipelineIngestConfig.id,
       },
       lifecycle: { name: '' },
     };

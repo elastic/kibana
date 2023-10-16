@@ -6,26 +6,30 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { EuiPanel } from '@elastic/eui';
 import { UiSettingsType } from '@kbn/core-ui-settings-common';
-import { SettingType, UiSettingMetadata } from '@kbn/management-settings-types';
 import {
-  useFieldDefinition,
-  getDefaultValue,
-} from '@kbn/management-settings-field-definition/storybook';
+  OnInputChangeFn,
+  SettingType,
+  UiSettingMetadata,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
 
+import { getFieldDefinition } from '@kbn/management-settings-field-definition';
+import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
 import { FieldInputProvider } from '../services';
 import { FieldInput as Component, FieldInput } from '../field_input';
-import { InputProps, OnChangeFn } from '../types';
+import { InputProps } from '../types';
 
 /**
  * Props for a {@link FieldInput} Storybook story.
  */
-export type StoryProps<T extends SettingType> = Pick<InputProps<T>, 'value' | 'isDisabled'>;
+export type StoryProps<T extends SettingType> = Pick<InputProps<T>, 'isSavingEnabled'> &
+  Pick<UiSettingMetadata<T>, 'value' | 'userValue'>;
 
 /**
  * Interface defining available {@link https://storybook.js.org/docs/react/writing-stories/parameters parameters}
@@ -42,16 +46,10 @@ interface Params {
  */
 export interface Args {
   /** True if the field is disabled, false otherwise. */
-  isDisabled: boolean;
+  isSavingEnabled: boolean;
+  userValue: unknown;
+  value: unknown;
 }
-
-/**
- * Default argument values for a {@link FieldInput} Storybook story.
- */
-export const storyArgs = {
-  /** True if the field is disabled, false otherwise. */
-  isDisabled: false,
-};
 
 /**
  * Utility function for returning a {@link FieldInput} Storybook story
@@ -65,10 +63,13 @@ export const getStory = (title: string, description: string) =>
     title: `Settings/Field Input/${title}`,
     description,
     argTypes: {
-      isDisabled: {
-        name: 'Is field disabled?',
+      isSavingEnabled: {
+        name: 'Is saving enabled?',
       },
       value: {
+        name: 'Default value',
+      },
+      userValue: {
         name: 'Current saved value',
       },
     },
@@ -90,30 +91,45 @@ export const getStory = (title: string, description: string) =>
  * @returns A Storybook Story.
  */
 export const getInputStory = (type: SettingType, params: Params = {}) => {
-  const Story = ({ value, isDisabled = false }: StoryProps<typeof type>) => {
+  const Story = ({ userValue, value, isSavingEnabled }: StoryProps<typeof type>) => {
+    const [unsavedChange, setUnsavedChange] = useState<
+      UnsavedFieldChange<typeof type> | undefined
+    >();
+
     const setting: UiSettingMetadata<typeof type> = {
       type,
       value,
-      userValue: value,
+      userValue,
       ...params.settingFields,
     };
 
-    const [field, unsavedChange, onChangeFn] = useFieldDefinition(setting);
+    const field = getFieldDefinition({
+      id: setting.name?.split(' ').join(':').toLowerCase() || setting.type,
+      setting,
+    });
 
-    const onChange: OnChangeFn<typeof type> = (newChange) => {
-      onChangeFn(newChange);
+    const onInputChange: OnInputChangeFn<typeof type> = (newChange) => {
+      setUnsavedChange(newChange);
+
+      action('onInputChange')({
+        type,
+        unsavedValue: newChange?.unsavedValue,
+        savedValue: field.savedValue,
+      });
     };
-    return (
-      <FieldInput
-        {...{ field, isInvalid: unsavedChange.isInvalid, unsavedChange, onChange, isDisabled }}
-      />
-    );
+
+    return <FieldInput {...{ field, unsavedChange, onInputChange, isSavingEnabled }} />;
+  };
+
+  Story.argTypes = {
+    ...params.argTypes,
   };
 
   Story.args = {
+    isSavingEnabled: true,
     value: getDefaultValue(type),
+    userValue: getUserValue(type),
     ...params.argTypes,
-    ...storyArgs,
   };
 
   return Story;

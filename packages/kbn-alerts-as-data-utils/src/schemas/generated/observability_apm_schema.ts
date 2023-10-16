@@ -26,19 +26,19 @@ export const IsoDateString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 export type IsoDateStringC = typeof IsoDateString;
-export const schemaDate = IsoDateString;
-export const schemaDateArray = rt.array(IsoDateString);
-export const schemaDateRange = rt.partial({
-  gte: schemaDate,
-  lte: schemaDate,
-});
-export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaUnknown = rt.unknown;
 export const schemaUnknownArray = rt.array(rt.unknown);
 export const schemaString = rt.string;
 export const schemaStringArray = rt.array(schemaString);
 export const schemaNumber = rt.number;
 export const schemaNumberArray = rt.array(schemaNumber);
+export const schemaDate = rt.union([IsoDateString, schemaNumber]);
+export const schemaDateArray = rt.array(schemaDate);
+export const schemaDateRange = rt.partial({
+  gte: schemaDate,
+  lte: schemaDate,
+});
+export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaStringOrNumber = rt.union([schemaString, schemaNumber]);
 export const schemaStringOrNumberArray = rt.array(schemaStringOrNumber);
 export const schemaBoolean = rt.boolean;
@@ -70,36 +70,24 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const ObservabilityApmAlertRequired = rt.type({
 });
 const ObservabilityApmAlertOptional = rt.partial({
-  agent: rt.partial({
-    name: schemaString,
-  }),
-  error: rt.partial({
-    grouping_key: schemaString,
-    grouping_name: schemaString,
-  }),
-  kibana: rt.partial({
-    alert: rt.partial({
-      evaluation: rt.partial({
-        threshold: schemaStringOrNumber,
-        value: schemaStringOrNumber,
-        values: schemaStringOrNumberArray,
-      }),
-    }),
-  }),
-  processor: rt.partial({
-    event: schemaString,
-  }),
-  service: rt.partial({
-    environment: schemaString,
-    language: rt.partial({
-      name: schemaString,
-    }),
-    name: schemaString,
-  }),
-  transaction: rt.partial({
-    name: schemaString,
-    type: schemaString,
-  }),
+  'agent.name': schemaString,
+  'error.grouping_key': schemaString,
+  'error.grouping_name': schemaString,
+  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.value': schemaStringOrNumber,
+  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
+  'kibana.alert.group': rt.array(
+    rt.partial({
+      field: schemaString,
+      value: schemaString,
+    })
+  ),
+  'processor.event': schemaString,
+  'service.environment': schemaString,
+  'service.language.name': schemaString,
+  'service.name': schemaString,
+  'transaction.name': schemaString,
+  'transaction.type': schemaString,
 });
 
 // prettier-ignore

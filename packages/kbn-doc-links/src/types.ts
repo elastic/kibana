@@ -14,6 +14,7 @@ export interface DocLinksMeta {
   elasticWebsiteUrl: string;
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
+  searchLabsUrl: string;
 }
 
 /**
@@ -110,6 +111,8 @@ export interface DocLinks {
     readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
+    readonly aiSearchDoc: string;
+    readonly aiSearchHelp: string;
     readonly apiKeys: string;
     readonly behavioralAnalytics: string;
     readonly behavioralAnalyticsCORS: string;
@@ -119,6 +122,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsAzureBlobStorage: string;
+    readonly connectorsBox: string;
     readonly connectorsClients: string;
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
@@ -135,14 +139,16 @@ export interface DocLinks {
     readonly connectorsNetworkDrive: string;
     readonly connectorsOneDrive: string;
     readonly connectorsOracle: string;
+    readonly connectorsOutlook: string;
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
     readonly connectorsSalesforce: string;
     readonly connectorsServiceNow: string;
     readonly connectorsSharepoint: string;
     readonly connectorsSharepointOnline: string;
+    readonly connectorsTeams: string;
     readonly connectorsSlack: string;
-    readonly connectorsWorkplaceSearch: string;
+    readonly connectorsZoom: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
@@ -150,10 +156,6 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly elser: string;
     readonly engines: string;
-    readonly esre: string;
-    readonly esreFaq: string;
-    readonly esreHelp: string;
-    readonly esreLearn: string;
     readonly indexApi: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
@@ -170,6 +172,8 @@ export interface DocLinks {
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
     readonly searchApplicationsSearch: string;
+    readonly searchLabs: string;
+    readonly searchLabsRepo: string;
     readonly searchTemplates: string;
     readonly start: string;
     readonly supportedNlpModels: string;
@@ -322,6 +326,7 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
+    readonly artifactControl: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
@@ -389,6 +394,7 @@ export interface DocLinks {
     searchPreference: string;
     securityApis: string;
     simulatePipeline: string;
+    tasks: string;
     timeUnits: string;
     unfreezeIndex: string;
     updateTransform: string;
@@ -408,6 +414,7 @@ export interface DocLinks {
     monitorUptimeSynthetics: string;
     userExperience: string;
     createAlerts: string;
+    syntheticsAlerting: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
@@ -514,6 +521,8 @@ export interface DocLinks {
     agentPolicy: string;
     api: string;
     uninstallAgent: string;
+    installAndUninstallIntegrationAssets: string;
+    elasticAgentInputConfiguration: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -573,6 +582,7 @@ export interface DocLinks {
     readonly elasticsearch: string;
   };
   readonly serverlessClients: {
+    readonly clientLib: string;
     readonly goApiReference: string;
     readonly goGettingStarted: string;
     readonly httpApis: string;
@@ -596,8 +606,14 @@ export interface DocLinks {
     readonly integrationsConnectorClient: string;
     readonly integrationsLogstash: string;
   };
+  readonly serverlessSecurity: {
+    readonly apiKeyPrivileges: string;
+  };
   readonly synthetics: {
     readonly featureRoles: string;
+  };
+  readonly esql: {
+    readonly statsBy: string;
   };
   readonly telemetry: {
     readonly settings: string;

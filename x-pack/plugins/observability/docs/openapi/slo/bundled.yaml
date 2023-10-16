@@ -17,8 +17,6 @@ security:
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
-  - name: composite slo
-    description: Composite SLO APIs enable you to define, manage and track a group of SLOs.
 paths:
   /s/{spaceId}/api/observability/slos:
     post:
@@ -99,6 +97,7 @@ paths:
           schema:
             type: integer
             default: 25
+            maximum: 5000
           example: 25
         - name: sortBy
           in: query

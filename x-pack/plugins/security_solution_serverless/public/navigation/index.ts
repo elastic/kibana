@@ -6,31 +6,54 @@
  */
 
 import { APP_PATH, SecurityPageName } from '@kbn/security-solution-plugin/common';
-import type { ServerlessSecurityPublicConfig } from '../types';
+import type { CoreSetup } from '@kbn/core/public';
+import type {
+  SecuritySolutionServerlessPluginSetupDeps,
+  ServerlessSecurityPublicConfig,
+} from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { SecurityPagePath } from './links/constants';
-import { subscribeNavigationTree } from './navigation_tree';
+import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
+import { getDefaultNavigationComponent } from './default_navigation';
+import { getProjectAppLinksSwitcher } from './links/app_links';
+import { formatProjectDeepLinks } from './links/deep_links';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 const SECURITY_PROJECT_SETTINGS_PATH = `${APP_PATH}${
   SecurityPagePath[SecurityPageName.projectSettings]
 }`;
 
-export const configureNavigation = (
-  services: Services,
-  serverConfig: ServerlessSecurityPublicConfig
+export const setupNavigation = (
+  _core: CoreSetup,
+  { securitySolution }: SecuritySolutionServerlessPluginSetupDeps,
+  experimentalFeatures: ExperimentalFeatures
 ) => {
-  const { serverless, securitySolution, management } = services;
-  securitySolution.setIsSidebarEnabled(false);
+  securitySolution.setAppLinksSwitcher(getProjectAppLinksSwitcher(experimentalFeatures));
+  securitySolution.setDeepLinksFormatter(formatProjectDeepLinks);
+};
 
-  if (!serverConfig.developer.disableManagementUrlRedirect) {
-    management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
-  }
-
+export const startNavigation = (services: Services, config: ServerlessSecurityPublicConfig) => {
+  const { serverless, management } = services;
   serverless.setProjectHome(APP_PATH);
-  serverless.setSideNavComponent(getSecuritySideNavComponent(services));
 
-  subscribeNavigationTree(services);
+  const projectNavigationTree = new ProjectNavigationTree(services);
+
+  if (services.experimentalFeatures.platformNavEnabled) {
+    projectNavigationTree.getNavigationTree$().subscribe((navigationTree) => {
+      serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
+    });
+  } else {
+    if (!config.developer.disableManagementUrlRedirect) {
+      management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
+    }
+    projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
+      serverless.setNavigation({ navigationTree: chromeNavigationTree });
+    });
+    serverless.setSideNavComponent(getSecuritySideNavComponent(services));
+  }
+  management.setIsSidebarEnabled(false);
+
   subscribeBreadcrumbs(services);
 };

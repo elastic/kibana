@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NetworkDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 
 const getAggs = (type: string, ip: string) => {
   return {

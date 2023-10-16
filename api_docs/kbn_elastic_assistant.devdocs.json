@@ -127,7 +127,7 @@
           "\nModal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever\ncomponent currently has focus and any specific context it may provide through the SAssInterface."
         ],
         "signature": [
-          "React.NamedExoticComponent<Props>"
+          "React.NamedExoticComponent<unknown> & { readonly type: () => JSX.Element; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/assistant_overlay/index.tsx",
         "deprecated": false,
@@ -159,7 +159,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, assistantAvailability, assistantLangChain, assistantTelemetry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, docLinks, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, }: React.PropsWithChildren<",
+          "({ actionTypeRegistry, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, docLinks, basePath, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, modelEvaluatorEnabled, nameSpace, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, }: React.PropsWithChildren<",
           "AssistantProviderProps",
           ">) => JSX.Element"
         ],
@@ -172,7 +172,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  assistantAvailability,\n  assistantLangChain,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  docLinks,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
+            "label": "{\n  actionTypeRegistry,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  modelEvaluatorEnabled = false,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -258,6 +258,24 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.useAssistantContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useAssistantContext",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseAssistantContext"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -727,7 +745,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: ",
+              "{ connectorId?: string | undefined; connectorTypeTitle?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: ",
               "OpenAiProviderType",
               " | undefined; model?: string | undefined; }"
             ],
@@ -829,6 +847,92 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.DeleteKnowledgeBaseResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteKnowledgeBaseResponse",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.DeleteKnowledgeBaseResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.GetKnowledgeBaseStatusResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetKnowledgeBaseStatusResponse",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.GetKnowledgeBaseStatusResponse.elser_exists",
+            "type": "boolean",
+            "tags": [],
+            "label": "elser_exists",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.GetKnowledgeBaseStatusResponse.esql_exists",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "esql_exists",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.GetKnowledgeBaseStatusResponse.index_exists",
+            "type": "boolean",
+            "tags": [],
+            "label": "index_exists",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.GetKnowledgeBaseStatusResponse.pipeline_exists",
+            "type": "boolean",
+            "tags": [],
+            "label": "pipeline_exists",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.Message",
         "type": "Interface",
         "tags": [],
@@ -876,6 +980,20 @@
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Message.isError",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isError",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.Message.presentation",
             "type": "Object",
             "tags": [],
@@ -886,6 +1004,31 @@
               " | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.PostKnowledgeBaseResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "PostKnowledgeBaseResponse",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.PostKnowledgeBaseResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

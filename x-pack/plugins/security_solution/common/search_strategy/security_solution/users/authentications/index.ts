@@ -17,18 +17,13 @@ import type {
   Hit,
   TotalHit,
 } from '../../../common';
-import type { CommonFields, RequestOptionsPaginated } from '../..';
+import type { CommonFields } from '../..';
 
 export interface UserAuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
-}
-
-export interface UserAuthenticationsRequestOptions extends RequestOptionsPaginated {
-  defaultIndex: string[];
-  stackByField: AuthStackByField;
 }
 
 export enum AuthStackByField {

@@ -591,6 +591,22 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-common.GroupDefinition.accordionProps",
+            "type": "Object",
+            "tags": [],
+            "label": "accordionProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiAccordionProps",
+              "> | undefined"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
             "id": "def-common.GroupDefinition.preset",
             "type": "CompoundType",
             "tags": [],

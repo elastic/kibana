@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
@@ -150,7 +151,10 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
-          <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+          <MaintenanceWindowCallout
+            kibanaServices={kibanaServices}
+            categories={[DEFAULT_APP_CATEGORIES.security.id]}
+          />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

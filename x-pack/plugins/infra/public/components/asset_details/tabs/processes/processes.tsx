@@ -23,11 +23,7 @@ import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
-import {
-  SortBy,
-  useProcessList,
-  ProcessListContextProvider,
-} from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
+import { SortBy, useProcessList, ProcessListContextProvider } from '../../hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';

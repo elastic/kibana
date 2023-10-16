@@ -1,6 +1,6 @@
 # These pipeline steps constitute the quality gate for your service within the QA environment.
-# Incorporate any necessary additional logic to validate the service's integrity. A failure in
-# this pipeline build will prevent further progression to the subsequent stage.
+# Incorporate any necessary additional logic to validate the service's integrity.
+# A failure in this pipeline build will prevent further progression to the subsequent stage.
 
 steps:
   - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
@@ -9,13 +9,18 @@ steps:
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
+        EC_ENV: qa
+        EC_REGION: aws-eu-west-1
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
-
-  - group: ":female-detective: Security Solution Tests"
-    key: "security"
-    steps:
-      - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/pipeline.sh
+  
+  # TODO: Uncomment this code when the integration is ready. 
+  # - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
+  #   trigger: security-serverless-quality-gate # https://buildkite.com/elastic/security-serverless-quality-gate
+  #   soft_fail: true # Remove this when tests are fixed
+  #   build:
+  #     env:
+  #       ENVIRONMENT: ${ENVIRONMENT}
+  #     message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
   - label: ":pipeline::ship::seedling: Trigger Fleet serverless smoke tests for ${ENVIRONMENT}"
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests

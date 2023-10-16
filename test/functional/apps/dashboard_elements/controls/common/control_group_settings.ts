@@ -14,15 +14,11 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const { dashboardControls, common, dashboard } = getPageObjects([
-    'dashboardControls',
-    'dashboard',
-    'common',
-  ]);
+  const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
   describe('Dashboard control group settings', () => {
     before(async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await dashboard.saveDashboard('Test Control Group Settings');

@@ -18,7 +18,7 @@
     "../../typings/**/*",
     "../../packages/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["security_solution_cypress/cypress/**/*", "target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*" ],
+  "exclude": ["security_solution_cypress/cypress/**/*", "target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*","security_solution_api_integration/**/*" ],
   "kbn_references": [
     { "path": "../../test/tsconfig.json" },
     "@kbn/core",
@@ -126,7 +126,6 @@
     "@kbn/maps-vector-tile-utils",
     "@kbn/server-route-repository",
     "@kbn/core-http-common",
-    "@kbn/slo-schema",
     "@kbn/lens-plugin",
     "@kbn/notifications-plugin",
     "@kbn/logs-shared-plugin",
@@ -141,5 +140,11 @@
     "@kbn/aiops-utils",
     "@kbn/stack-alerts-plugin",
     "@kbn/apm-data-access-plugin",
+    "@kbn/coloring",
+    "@kbn/profiling-utils",
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/ecs",
+    "@kbn/coloring",
+    "@kbn/es",
   ]
 }

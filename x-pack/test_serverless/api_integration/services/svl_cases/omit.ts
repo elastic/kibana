@@ -9,15 +9,15 @@ import { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function SvlCasesOmitServiceProvider({}: FtrProviderContext) {
-  interface CommonSavedObjectAttributes {
-    id?: string | null;
-    created_at?: string | null;
-    updated_at?: string | null;
-    version?: string | null;
-    [key: string]: unknown;
-  }
+export interface CommonSavedObjectAttributes {
+  id?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  version?: string | null;
+  [key: string]: unknown;
+}
 
+export function SvlCasesOmitServiceProvider({}: FtrProviderContext) {
   const savedObjectCommonAttributes = ['created_at', 'updated_at', 'version', 'id'];
 
   return {

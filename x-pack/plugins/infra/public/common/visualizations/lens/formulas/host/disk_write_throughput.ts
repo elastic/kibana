@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const diskWriteThroughput: FormulaValueConfig = {
-  label: 'Disk Write Throughput',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.diskWriteThroughput', {
+    defaultMessage: 'Disk Write Throughput',
+  }),
   value: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
   format: {
     id: 'bytes',

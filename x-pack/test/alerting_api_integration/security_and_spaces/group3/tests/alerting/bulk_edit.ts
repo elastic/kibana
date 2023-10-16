@@ -13,8 +13,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -85,7 +84,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEdit a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEdit', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -178,7 +177,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEdit a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEdit', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -249,7 +248,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'bulkEdit',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -310,7 +309,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'bulkEdit',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -321,17 +320,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'bulkEdit',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              expect(response.statusCode).to.eql(403);
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
@@ -390,7 +378,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'bulkEdit',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'

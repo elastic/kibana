@@ -8,8 +8,10 @@
 import { IToasts } from '@kbn/core/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
-import { isDatasetSelection } from '../../../utils/dataset_selection';
+import { IDatasetsClient } from '../../../services/datasets';
+import { isDatasetSelection } from '../../../../common/dataset_selection';
 import { createAndSetDataView } from './data_view_service';
+import { validateSelection } from './selection_service';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   createCreateDataViewFailedNotifier,
@@ -33,7 +35,7 @@ import {
 export const createPureLogExplorerProfileStateMachine = (
   initialContext: LogExplorerProfileContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCAFQ1AMwEs8wA6AVwDtrWAXagQz2oC9IAYgDaABgC6iUDlSxqnVMykgsiAIwAOAMz0NorVoDsAVi0a1x0QE4ATADYANCACe6zfVMbjeu-rWi7DQAWAF8QpzRMXAJiMgoaOno2eW5ePjYoADEKAFsAVUI8QQhFBjYAN1QAawZI7HwiEnIqWjKOVP4M7NR8woQK1ABjLgVmMXFx5Rk5UeVVBEsNekMrQK0bYKC7fztHF3VDII8vDTXDNUNtu2MwiPR6mKb41qT2nk7mLNyCopIKQno+BGlCIOXodWijTiLUSyU473Sn26vTw-WYlWGo3GkyQIGmKUUc0Qi2Wq20GyCWx2e1cCHM9CCXmuekMokO2y0txAEIasWaCTaKQRGQAIiMuAA1ahgADuxVKr0qNXB90hfOesLeaVF4qlsrRGJG1EU2IkU1kBKUuPmdhsTlpxjUR00Nis+g0NjUVis3i5PMe0IFryF2s+YvYkulcr+REBeGBoJVUV5Txhgvhoag4cj+oGmONYwkOOkFtm1uJdv2CDUFzsHkOjpshhsWguahsftVKcDLzhHURUAAwop2BQ8KQuMwwHhYPKp4rqrUuwH+b2tR8hyOxxOpzODUMjSai2bcfiy6B5qZjAyjIzDOYbNYm-bEFYDPRrJZNJpvI+NJ3kxXDV037DJh2YUdUHHSdp1nGMASBdgQUIMF-ShVdNRDDdwMg6Dd1gfd8yPCYTxLGYCyJBYtGvIJbw0e92yfQwXwQIJvXoN9jCsIIAiMV1XQAh50OA4MM34SB6AgcVYDAdgAGVpzAQZRiSCA6EEPJSBFABBAAVDAAH0dN07S5IwXSDLM5AMEHXSAEkAHkADlizxUsKPLatrCOZt720LRRFdIIbErWlmzUZZjEMaLNHMbRzkEtVUyDPsEQkqSIxk+TFOUgtVPU4zTPMyyMGs2zHKcgyACUMDk3SHJqgzMm0uzkDyGrXLPDyL3UbzlibDR-MC7iQpY8xDF0LjqNsIx6LURLuwwkC0ogSTpNkhS6FyxQmBwDKdQjPU5RKecBmVND1TTUT+3S9bsq2lTGD2o0w11KNCMPQsSMkU93MJTz21Megm18QJLnbRkaVfNQdFWURggMKKtnvBagKu1K0luzKNpyx7ns4V7DqjQR4LjBMUKTITLpS9cBFWjKuCyzalLx-bCZzGUPqxY8frIy1KPbdxLC0WxaLY8WghY20lmuBtRB41tHw7cJuWXYT0dpiTBi3KCAHEKCe2AmFYTWIEEOynLs+ztOQOyAC1DMHZzdKqhzkAM3XXc0gztNIOzOr+q0eurQGPEZCwBqbIJLhY-xWQ4rRGUpa5PXWVH1ZprC6fobWILHfXUEN-KwA0rS9IwEUjL07SDIlOyMAAdQD8j-uDmHLg4wLG3sN0rCdWPqKWGtKW9Aw+9tdPqbXLOtZ1vAC6L6g1JLzTjMd53Xfd0htKc0q5Ob-mAYMHRtiCYxAlOMwgn7qsazsCb9DsWjH3htRdkn5Lp7E7Pc9whecCNk9Nmm485QR3LBOcbQlRLkAhnL+N1Vq-3zgbABu1gE4W3DBPceZPqml5m5FuQcVBuBsNeYw4djCR0ODHW+noJqUN8GfeGoh9AGA-j2TC39Z6gPnigwB+MwJz3ATOEmhB-hkyQomC6n9OEIJznPf+-D0FCKwQRHB3NvrmkIQLUO5DzCUPvFHGhtIYb+HoLaOwWhdjGG8CYfQYQVbMFQBAOAyhpEcLAFow+wcAC0UMEA+OvN6YJITQmchVu4paxsMbiQgF488xDWKhTcPQow3Fz4rBhi2dhUSYkDmRD8eJ3VEkDV0IcKw4VAotkCCxbiH5r7aECI6YI2hQgRLVlPWRwp2ZHSKa3RJKwrAeD7jWfwidgqrFqUceijpWQ-m-PfHJIk8mCJ4cI+Av1tGeXsDLXwFhyGGGoosSWVZGRDMCByYKVwmxWCWRrGecTNneIGZSegFg7H8SbCYfxZ8T6nBhlct+Ny7B3Mzlw+md1mbbSIV1fp8wVg2DeVFSwnzornxYuQiKbYEUGBbIcUF8CVprWxvdFmeUl50D6UQ+YwRRBIo+bYL56KqwpzeTWUhpg-zUXCXcWBnTlqYwhSSqFrMXpZjerKKlAsthDLfNsUWdgKnXysCxQ5EVtjeFMOPDJbTeVUxkQK2J8ieGKKlZ5BF9KUWMrRf4qw2gGRsU0MyGGXhbntL5Qa66RKkF6z4dE02Zrg4+iWIcRk6xvQsI0G+WOfUbA8W0BcEaFhdWqw9R4r1grjV-z9RSzxTyEnzDfmY9JrZmyWPPtHWOnprzaFMEClOrSCVdMzT63hhdUFALFRgsBqjA2JNpZa4aIUbWxzfkMzQjIPTNjjefZWYQgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCAFQ1AMwEs8wA6AVwDtrWAXagQz2oC9IAYgDaABgC6iUDlSxqnVMykgsiAIwAOAMz0NagEwBWUdoBsWgOxaAnEYA0IAJ7rt9UxesWD+2xf2WAXwCHNExcAmIyCho6ejZ5bl4+NigAMQoAWwBVQjxBCEUGNgA3VABrBlDsfCIScipaIo5E-hT01GzchBLUAGMuBWYxcWHlGTlB5VUEYw1dfQ1RQ30LC0NrbX0HZwQ1CwAWemtDLTV991FTPWWtIJD0aoi66Ma45p5W5jTMnLySCkI9HwA0oRAy9Cq4VqUQasXinA+yS+7U6eG6zFK-UGw1GSBA4wSiimiFm80Wy1W60220QenoxlEjP2J32alEmmsdxAkJqkXqMSaCURKQAIgMuAA1ahgADu+UKb1KFQhDyhfJecPeSVF4qlsvRmIG1EUOIkY1khKUeOmPkM9D8pkMFm0bMpFhpM3Obi0tqdxk0Fi5PKeMIFbyF2q+YvYkulcv+RCBeBBYJVYV5z1hgoRkag0dj+p6WONQwkuOkFsm1sQtvt+kdztOojdHquonoah91h9WkWS1MQdVGdDr3hLSRUAAwop2BQ8KQuMwwHhYPKl4rypUhyH+aOtZ8pzO5wulyuDX0jSay2a8QSq6BphZTNZ6Po1O+jMy++YPScLEdLi0UwDG7Z9jkHdMdw1bNxxSadmFnVB50XZdVwTQFgXYUFCHBYNoV3TUIwPeDEOQ09YHPYsrxGG8KwmEtiQQJ8XzfD9DC-RkfycRB9msdt9kuBYNA0Dxlg0Adgm5bd8Og8McwPABlGN2DAEiuDYEg1yaJUt0gmSszk2CviUgZVJndSl0ISjL1LGjJFvSsGOrBAtC0Q4tFEc5DHE-YPI0XjTA9NRDCdI4rhEvR9HrEKIMefSwzHYVjOUsyEIszT0KTFMcLTOL1QMxLcxMlS1I0qyixs017Loy1GNc9zPMdHy-ICoLDDZehzg0Wx3z4vtbkkvD8oS-cBAgegIHFWAwHYBTlzAXpBnoYoPkmzhjPmxaS0EZAAEkFIAFQwAA5AB9A6AHlTsnAAJABBY6AHEMAU8t8UcolnOE-9fLWZ9NEsAwgtc9ttG6p0fQsQCNFitVMxGoixomqaZrmugtsUZbVqNDb0cGQQslIEU7qO07iYOu6FIwA7Tqp5AMEnA7dou463rvJyH1pETOssQx-u0Lwtm43Yzjtbz1jZGwDg2Ab7j04a90RyBkZjabZs2paVt4NaUjRhb8fJynqdpjB6cZ5mzoAJRey7rdO1I7t25AsmttmPqtTmEG+nm-usAHBba9rOp67trGffz-Nh4cCJgxFlbWrg1b1jHmDiCA6AJomSYwMmSaNmm6YZpmWbd+jPs9s5PFff19jWZsDH2IWdk7MP7UdUx-GbdxTGbKOoIK0b45R9W8ZLNOM8NqmC9NouLdO63Douu2Hadl2MFL2rnMr-8jHZWvjEFxvgcZehTn0fZIr48WYcG6SFcI+SkYTpONbHxgcB1qNdTjLSN2VIb4aK0fkPVWqNX6Y3fp-PM39CwYgvNia81V3plw9ioGsbI1CvnfJ5SwtdTB4OBmoF83k+KmHcCcNyN85Z5UAQ-ccIDE5gNHhAj+ONoExj1PGQgAIspYVTAAkcdC47jWfkw-Wb9WHrXYQWGU1kEF2XNCgxib52RYLZL9PBBDhadncPQEwfF-BXGWKIBYfd4pAPoSI4eyclqQLYcVVKMYyq-x6P-O+tDY5JAYS-Zhqc7FSIcaVSyciSxVUUZvT2KjMGsRwQcJ8Wjm7sUwdYEOlgnxOk5LfeWHjDLCJVowke4iWFQMCeZZxmVMLYVwu4wRnj+DeLESnJgkjdYpSCSQEJ1EN73jQQgFR+h6TnGsL5TQQlz5BWCnMEwEsTGeSipk6hcNam5K8eNXoR4kKPQoO-WATBWCDwgIIXax1dpMzuntAAWjnScLMDqWwusgU6j17mE1OndUgu1ukc16bYQ4ngyHuDDs2ICgVtFrB+syICfse5QxsGY++dSkbrIQnOLZqAdnjzAIIQ2p0JS7QwAAdVOoTcmGARRfPLr098T5T6+T4s6RYWhvIen0J5O0TLgpkPWN3FY8KcmFXqWsjZeA0UYuoOnLFJLs7XVufcx5pAHqm1erRZBESqWdh0EsWu-kiG1zWEFDQJxdAbHaqIYZVxnQSUWdHWSAqkXCtFTgXZ-i4LCpPKhFxcC3HZOWXa5WyLSKOudS0r4JFjwoTPBVeRFLUHTF+UcJ8ZCPAwpBUFPi7kNjnGlm+c1fLfUHPoAG1F2ynXNKgWGpC7qVyCAqcmPhOUBExxWYKwtDqS3BvLW6iNFEo2hMQeEnpcbz4JoBcm4FZC01V0NWoHuYd8F9SCJJZgqAIBwGUI26CA7vnTAALSgp2Duu0KTj0npPVFPNTaWB+ogFuyl0wj7aI0AMwFBxOx8ydG+C9trRptB+LkW9saazOmNf5aZ+CfTMjai+PYngjCdgOJ5bQX6B6Ix1BwuMAHGLuFbPg0+6xTV6EuMyK1UkfVNrta6lFlbu2YecsYAZjciGms8qyVlhhfxRQ7F2KW58Fh+2QwjR+rTTLtMILRz22HtHtRYhyN87gpZMoExY4R4nensR0E6PQz5WTsm+h6Tw7ZvIwuZBSZ8stSM0PzUrKxoDCkp1U9MCW9JnQzuGRgvT2ilhTMNSk8+axOz7CU0I1Z+SfFFNTlrcV9jwGoPZnexA5hiEue0+5kSx9-xgxScJXiWqFkWaWeRgtoi7NLXFXQBz6gjDPq8H7KkAkbDpd0DYfs6wTGdiC4ihpJWJFQPzJwiruwRIMf8rxXyzZmSdmPi+VyfFJawfEoYDrzan7WJi2W+xbSymWQG4Y0wnURvNYg0yiZ-ksHn20LxXsIUSMbpQ8AoVVGRXtoG05zTrmdOaDS9oshL5hkUL9D3KKVD8s2ru5Y1tj2g17OvQNtYcwZ2smy+Qp8WggrOnbCHYCLmNX6CW9eiHgb22YoG2cDqrJWR+Dwf6DQaaTG6GluJNy13nR44LUWzZROXWhq7eRAbiXnNabc7pr7zdDV7cQ+1CbthnyBkXUAA */
   createMachine<LogExplorerProfileContext, LogExplorerProfileEvent, LogExplorerProfileTypeState>(
     {
       context: initialContext,
@@ -96,8 +98,26 @@ export const createPureLogExplorerProfileStateMachine = (
           type: 'parallel',
           states: {
             datasetSelection: {
-              initial: 'idle',
+              initial: 'validatingSelection',
               states: {
+                validatingSelection: {
+                  invoke: {
+                    src: 'validateSelection',
+                  },
+                  on: {
+                    LISTEN_TO_CHANGES: {
+                      target: 'idle',
+                    },
+                    UPDATE_DATASET_SELECTION: {
+                      target: 'updatingDataView',
+                      actions: ['storeDatasetSelection'],
+                    },
+                    DATASET_SELECTION_RESTORE_FAILURE: {
+                      target: 'updatingDataView',
+                      actions: ['notifyDatasetSelectionRestoreFailed'],
+                    },
+                  },
+                },
                 idle: {
                   invoke: {
                     src: 'listenUrlChange',
@@ -218,12 +238,14 @@ export const createPureLogExplorerProfileStateMachine = (
 
 export interface LogExplorerProfileStateMachineDependencies {
   initialContext?: LogExplorerProfileContext;
+  datasetsClient: IDatasetsClient;
   stateContainer: DiscoverStateContainer;
   toasts: IToasts;
 }
 
 export const createLogExplorerProfileStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
+  datasetsClient,
   stateContainer,
   toasts,
 }: LogExplorerProfileStateMachineDependencies) =>
@@ -240,6 +262,7 @@ export const createLogExplorerProfileStateMachine = ({
       subscribeControlGroup: subscribeControlGroup({ stateContainer }),
       updateControlPanels: updateControlPanels({ stateContainer }),
       updateStateContainer: updateStateContainer({ stateContainer }),
+      validateSelection: validateSelection({ datasetsClient }),
     },
   });
 

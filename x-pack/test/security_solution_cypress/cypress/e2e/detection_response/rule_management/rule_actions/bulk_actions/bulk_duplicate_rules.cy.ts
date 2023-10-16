@@ -17,7 +17,8 @@ import {
   duplicateSelectedRulesWithNonExpiredExceptions,
 } from '../../../../../tasks/rules_bulk_actions';
 import { goToExceptionsTab, viewExpiredExceptionItems } from '../../../../../tasks/rule_details';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
@@ -103,7 +104,7 @@ describe(
         ]);
       });
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
     });
 

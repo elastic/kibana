@@ -10,18 +10,18 @@ import {
   JSON_TAB_TEST_ID,
   OVERVIEW_TAB_TEST_ID,
   TABLE_TAB_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/right/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/right/test_ids';
 import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
-  FLYOUT_HEADER_CHAT_BUTTON_TEST_ID,
-  FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID,
-  FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID,
-  FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID,
-  FLYOUT_HEADER_SEVERITY_VALUE_TEST_ID,
-  FLYOUT_HEADER_STATUS_BUTTON_TEST_ID,
+  CHAT_BUTTON_TEST_ID,
+  RISK_SCORE_TITLE_TEST_ID,
+  RISK_SCORE_VALUE_TEST_ID,
+  SEVERITY_TITLE_TEST_ID,
+  SEVERITY_VALUE_TEST_ID,
+  STATUS_BUTTON_TEST_ID,
   FLYOUT_HEADER_TITLE_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/right/components/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_BODY = getDataTestSubjectSelector(FLYOUT_BODY_TEST_ID);
@@ -43,24 +43,18 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB =
   getDataTestSubjectSelector(OVERVIEW_TAB_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB = getDataTestSubjectSelector(TABLE_TAB_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_JSON_TAB = getDataTestSubjectSelector(JSON_TAB_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS = getDataTestSubjectSelector(
-  FLYOUT_HEADER_STATUS_BUTTON_TEST_ID
-);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE = getDataTestSubjectSelector(
-  FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID
-);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE = getDataTestSubjectSelector(
-  FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID
-);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY = getDataTestSubjectSelector(
-  FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID
-);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE = getDataTestSubjectSelector(
-  FLYOUT_HEADER_SEVERITY_VALUE_TEST_ID
-);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON = getDataTestSubjectSelector(
-  FLYOUT_HEADER_CHAT_BUTTON_TEST_ID
-);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS =
+  getDataTestSubjectSelector(STATUS_BUTTON_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE =
+  getDataTestSubjectSelector(RISK_SCORE_TITLE_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE =
+  getDataTestSubjectSelector(RISK_SCORE_VALUE_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY =
+  getDataTestSubjectSelector(SEVERITY_TITLE_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE =
+  getDataTestSubjectSelector(SEVERITY_VALUE_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON =
+  getDataTestSubjectSelector(CHAT_BUTTON_TEST_ID);
 
 /* Footer */
 

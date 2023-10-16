@@ -9,7 +9,7 @@
 import { EuiHeader } from '@elastic/eui';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ProjectHeader, Props as ProjectHeaderProps } from './header';
@@ -29,6 +29,7 @@ describe('Header', () => {
     helpMenuLinks$: Rx.of([]),
     homeHref$: Rx.of('app/home'),
     projectsUrl$: Rx.of('/projects/'),
+    projectName$: Rx.of('My Project'),
     kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),
     navControlsLeft$: Rx.of([]),
@@ -44,33 +45,8 @@ describe('Header', () => {
       </ProjectHeader>
     );
 
-    expect(await screen.findByTestId('toggleNavButton')).toBeVisible();
+    expect(await screen.findByTestId('euiCollapsibleNavButton')).toBeVisible();
     expect(await screen.findByText('Hello, world!')).toBeVisible();
-  });
-
-  it('can collapse and uncollapse', async () => {
-    render(
-      <ProjectHeader {...mockProps}>
-        <EuiHeader>Hello, goodbye!</EuiHeader>
-      </ProjectHeader>
-    );
-
-    expect(await screen.findByTestId('toggleNavButton')).toBeVisible();
-    expect(await screen.findByText('Hello, goodbye!')).toBeVisible(); // title is shown
-
-    const toggleNav = async () => {
-      fireEvent.click(await screen.findByTestId('toggleNavButton')); // click
-
-      expect(await screen.findByText('Hello, goodbye!')).not.toBeVisible();
-
-      fireEvent.click(await screen.findByTestId('toggleNavButton')); // click again
-
-      expect(await screen.findByText('Hello, goodbye!')).toBeVisible(); // title is shown
-    };
-
-    await toggleNav();
-    await toggleNav();
-    await toggleNav();
   });
 
   it('displays the link to projects', async () => {
@@ -80,7 +56,8 @@ describe('Header', () => {
       </ProjectHeader>
     );
 
-    const projectsLink = await screen.getByTestId('projectsLink');
+    const projectsLink = screen.getByTestId('projectsLink');
     expect(projectsLink).toHaveAttribute('href', '/projects/');
+    expect(projectsLink).toHaveTextContent('My Project');
   });
 });

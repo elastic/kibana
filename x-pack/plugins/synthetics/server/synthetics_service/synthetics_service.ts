@@ -14,7 +14,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { Subject } from 'rxjs';
+import { concatMap, Subject } from 'rxjs';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -377,45 +377,49 @@ export class SyntheticsService {
 
     let output: ServiceData['output'] | null = null;
 
-    subject.subscribe(async (monitors) => {
-      try {
-        if (monitors.length === 0 || !this.config.manifestUrl) {
-          return;
-        }
+    subject
+      .pipe(
+        concatMap(async (monitors) => {
+          try {
+            if (monitors.length === 0 || !this.config.manifestUrl) {
+              return;
+            }
 
-        if (!output) {
-          output = await this.getOutput();
+            if (!output) {
+              output = await this.getOutput();
 
-          if (!output) {
+              if (!output) {
+                sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+                  reason: 'API key is not valid.',
+                  message: 'Failed to push configs. API key is not valid.',
+                  type: 'invalidApiKey',
+                  stackVersion: service.server.stackVersion,
+                });
+                return;
+              }
+            }
+
+            this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+
+            service.syncErrors = await this.apiClient.syncMonitors({
+              monitors,
+              output,
+              license,
+            });
+          } catch (e) {
             sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-              reason: 'API key is not valid.',
-              message: 'Failed to push configs. API key is not valid.',
-              type: 'invalidApiKey',
+              reason: 'Failed to push configs to service',
+              message: e?.message,
+              type: 'pushConfigsError',
+              code: e?.code,
+              status: e.status,
               stackVersion: service.server.stackVersion,
             });
-            return;
+            this.logger.error(e);
           }
-        }
-
-        this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
-
-        service.syncErrors = await this.apiClient.syncMonitors({
-          monitors,
-          output,
-          license,
-        });
-      } catch (e) {
-        sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-          reason: 'Failed to push configs to service',
-          message: e?.message,
-          type: 'pushConfigsError',
-          code: e?.code,
-          status: e.status,
-          stackVersion: service.server.stackVersion,
-        });
-        this.logger.error(e);
-      }
-    });
+        })
+      )
+      .subscribe();
 
     await this.getMonitorConfigs(subject);
   }
@@ -479,25 +483,29 @@ export class SyntheticsService {
     const license = await this.getLicense();
     const subject = new Subject<MonitorFields[]>();
 
-    subject.subscribe(async (monitors) => {
-      const hasPublicLocations = monitors.some((config) =>
-        config.locations.some(({ isServiceManaged }) => isServiceManaged)
-      );
+    subject
+      .pipe(
+        concatMap(async (monitors) => {
+          const hasPublicLocations = monitors.some((config) =>
+            config.locations.some(({ isServiceManaged }) => isServiceManaged)
+          );
 
-      if (hasPublicLocations) {
-        const output = await this.getOutput();
-        if (!output) {
-          return;
-        }
+          if (hasPublicLocations) {
+            const output = await this.getOutput();
+            if (!output) {
+              return;
+            }
 
-        const data = {
-          output,
-          monitors,
-          license,
-        };
-        return await this.apiClient.delete(data);
-      }
-    });
+            const data = {
+              output,
+              monitors,
+              license,
+            };
+            return await this.apiClient.delete(data);
+          }
+        })
+      )
+      .subscribe();
 
     await this.getMonitorConfigs(subject);
   }
@@ -608,7 +616,7 @@ export class SyntheticsService {
       await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>({
         type: syntheticsParamType,
         perPage: 1000,
-        namespaces: spaceId ? [spaceId] : undefined,
+        namespaces: spaceId ? [spaceId] : [ALL_SPACES_ID],
       });
 
     for await (const response of finder.find()) {

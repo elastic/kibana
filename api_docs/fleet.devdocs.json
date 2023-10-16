@@ -4813,6 +4813,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.AgentClient.getLatestAgentAvailableVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getLatestAgentAvailableVersion",
+            "description": [
+              "\nReturn the latest agent available version"
+            ],
+            "signature": [
+              "(includeCurrentVersion?: boolean | undefined) => Promise<string>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentClient.getLatestAgentAvailableVersion.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeCurrentVersion",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -18648,6 +18682,20 @@
             "path": "x-pack/plugins/fleet/common/authz.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetAuthz.endpointExceptionsPrivileges",
+            "type": "Object",
+            "tags": [],
+            "label": "endpointExceptionsPrivileges",
+            "description": [],
+            "signature": [
+              "{ actions: { crudEndpointExceptions: boolean; showEndpointExceptions: boolean; }; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/authz.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -19670,34 +19718,6 @@
             "description": [],
             "signature": [
               "string | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.FullAgentPolicyOutputPermissions",
-        "type": "Interface",
-        "tags": [],
-        "label": "FullAgentPolicyOutputPermissions",
-        "description": [],
-        "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.FullAgentPolicyOutputPermissions.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[packagePolicyName: string]: { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }",
-            "description": [],
-            "signature": [
-              "[packagePolicyName: string]:  { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -23940,7 +23960,7 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"assets\" | \"internal\" | \"elasticsearch\" | \"readme\" | \"data_streams\">"
+          ", \"internal\" | \"elasticsearch\" | \"assets\" | \"readme\" | \"data_streams\">"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -24465,6 +24485,23 @@
             "text": "Output"
           },
           ", \"type\" | \"hosts\" | \"ca_sha256\"> & { [key: string]: any; proxy_url?: string | undefined; proxy_headers?: any; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FullAgentPolicyOutputPermissions",
+        "type": "Type",
+        "tags": [],
+        "label": "FullAgentPolicyOutputPermissions",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          "SecurityRoleDescriptor",
+          "; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
         "deprecated": false,
@@ -26916,7 +26953,9 @@
           "\ndefines endpoint package privileges\nthe key is the name of the packagePrivilege (ie. 'readSecuritySolution')\nthe value object is for mapping kibana privileges and capabilities\nsee x-pack/plugins/fleet/server/services/security/security.ts for example of how object values are used"
         ],
         "signature": [
-          "{ [x: string]: PrivilegeMapObject; }"
+          "{ [x: string]: ",
+          "PrivilegeMapObject",
+          "; }"
         ],
         "path": "x-pack/plugins/fleet/common/constants/authz.ts",
         "deprecated": false,
@@ -27094,6 +27133,17 @@
             "type": "string",
             "tags": [],
             "label": "BULK_ASSETS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.INPUTS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INPUTS_PATTERN",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,

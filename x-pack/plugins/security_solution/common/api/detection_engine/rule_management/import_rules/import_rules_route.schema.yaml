@@ -7,7 +7,7 @@ paths:
     summary: Imports rules from an `.ndjson` file
     post:
       operationId: ImportRules
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       summary: Import rules
       description: Imports rules from an `.ndjson` file, including actions and exception lists.
       tags:
@@ -45,6 +45,13 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: as_new_list
+          in: query
+          required: false
+          description: Generates a new list ID for each imported exception list.
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: Indicates a successful call.
@@ -52,3 +59,51 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
+                required:
+                  - exceptions_success
+                  - exceptions_success_count
+                  - exceptions_errors
+                  - rules_count
+                  - success
+                  - success_count
+                  - errors
+                  - action_connectors_errors
+                  - action_connectors_warnings
+                  - action_connectors_success
+                  - action_connectors_success_count
+                properties:
+                  exceptions_success:
+                    type: boolean
+                  exceptions_success_count:
+                    type: integer
+                    minimum: 0
+                  exceptions_errors:
+                    type: array
+                    items:
+                      $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'
+                  rules_count:
+                    type: integer
+                    minimum: 0
+                  success:
+                    type: boolean
+                  success_count:
+                    type: integer
+                    minimum: 0
+                  errors:
+                    type: array
+                    items:
+                      $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'
+                  action_connectors_errors:
+                    type: array
+                    items:
+                      $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'
+                  action_connectors_warnings:
+                    type: array
+                    items:
+                      $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'
+                  action_connectors_success:
+                    type: boolean
+                  action_connectors_success_count:
+                    type: integer
+                    minimum: 0

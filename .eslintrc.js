@@ -606,6 +606,8 @@ module.exports = {
         'x-pack/test_serverless/**/config*.ts',
         'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
+        'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
+        'x-pack/test/security_solution_api_integration/**/config*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -908,6 +910,7 @@ module.exports = {
     },
     {
       files: [
+        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/infra/**/*.{js,mjs,ts,tsx}',
@@ -921,6 +924,8 @@ module.exports = {
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
       },
     },
     {

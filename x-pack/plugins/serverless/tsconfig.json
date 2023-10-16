@@ -17,7 +17,6 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/kibana-react-plugin",
-    "@kbn/management-plugin",
     "@kbn/serverless-project-switcher",
     "@kbn/serverless-types",
     "@kbn/utils",

@@ -40,12 +40,12 @@ describe('<Navigation />', () => {
       const { findByTestId } = render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
           <Navigation>
-            <Navigation.Group id="group1">
+            <Navigation.Group id="group1" defaultIsCollapsed={false}>
               <Navigation.Item id="item1" title="Item 1" href="https://foo" />
               <Navigation.Item id="item2" title="Item 2" href="https://foo" />
-              <Navigation.Group id="group1A" title="Group1A">
+              <Navigation.Group id="group1A" title="Group1A" defaultIsCollapsed={false}>
                 <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
-                <Navigation.Group id="group1A_1" title="Group1A_1">
+                <Navigation.Group id="group1A_1" title="Group1A_1" defaultIsCollapsed={false}>
                   <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
                 </Navigation.Group>
               </Navigation.Group>
@@ -62,10 +62,10 @@ describe('<Navigation />', () => {
       expect(await findByTestId(/nav-item-group1.item2/)).toBeVisible();
       expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
       expect(await findByTestId(/nav-item-group1.group1A.item1/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A.group1A_1/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).toBeVisible();
 
       // Click the last group to expand and show the last depth
-      (await findByTestId(/nav-item-group1.group1A.group1A_1/)).click();
+      (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
 
       expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
 
@@ -76,56 +76,56 @@ describe('<Navigation />', () => {
 
       expect(navTree.navigationTree).toEqual([
         {
-          id: 'group1',
-          path: ['group1'],
-          title: '',
-          isActive: false,
           children: [
             {
-              id: 'item1',
-              title: 'Item 1',
               href: 'https://foo',
+              id: 'item1',
               isActive: false,
               path: ['group1', 'item1'],
+              title: 'Item 1',
             },
             {
-              id: 'item2',
-              title: 'Item 2',
               href: 'https://foo',
+              id: 'item2',
               isActive: false,
               path: ['group1', 'item2'],
+              title: 'Item 2',
             },
             {
-              id: 'group1A',
-              title: 'Group1A',
-              isActive: false,
-              path: ['group1', 'group1A'],
               children: [
                 {
-                  id: 'item1',
                   href: 'https://foo',
-                  title: 'Group 1A Item 1',
+                  id: 'item1',
                   isActive: false,
                   path: ['group1', 'group1A', 'item1'],
+                  title: 'Group 1A Item 1',
                 },
                 {
-                  id: 'group1A_1',
-                  title: 'Group1A_1',
-                  isActive: false,
-                  path: ['group1', 'group1A', 'group1A_1'],
                   children: [
                     {
-                      id: 'item1',
-                      title: 'Group 1A_1 Item 1',
-                      isActive: false,
                       href: 'https://foo',
+                      id: 'item1',
+                      isActive: false,
                       path: ['group1', 'group1A', 'group1A_1', 'item1'],
+                      title: 'Group 1A_1 Item 1',
                     },
                   ],
+                  id: 'group1A_1',
+                  isActive: true,
+                  path: ['group1', 'group1A', 'group1A_1'],
+                  title: 'Group1A_1',
                 },
               ],
+              id: 'group1A',
+              isActive: true,
+              path: ['group1', 'group1A'],
+              title: 'Group1A',
             },
           ],
+          id: 'group1',
+          isActive: true,
+          path: ['group1'],
+          title: '',
         },
       ]);
     });
@@ -250,8 +250,8 @@ describe('<Navigation />', () => {
           onProjectNavigationChange={onProjectNavigationChange}
         >
           <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
+            <Navigation.Group id="root" defaultIsCollapsed={false}>
+              <Navigation.Group id="group1" defaultIsCollapsed={false}>
                 {/* Title from deeplink */}
                 <Navigation.Item<any> id="item1" link="item1" />
                 {/* Should not appear */}
@@ -279,13 +279,13 @@ describe('<Navigation />', () => {
           id: 'root',
           path: ['root'],
           title: '',
-          isActive: false,
+          isActive: true,
           children: [
             {
               id: 'group1',
               path: ['root', 'group1'],
               title: '',
-              isActive: false,
+              isActive: true,
               children: [
                 {
                   id: 'item1',
@@ -326,11 +326,11 @@ describe('<Navigation />', () => {
           onProjectNavigationChange={onProjectNavigationChange}
         >
           <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
+            <Navigation.Group id="root" defaultIsCollapsed={false}>
+              <Navigation.Group id="group1" defaultIsCollapsed={false}>
                 <Navigation.Item<any> id="item1" link="notRegistered" />
               </Navigation.Group>
-              <Navigation.Group id="group2">
+              <Navigation.Group id="group2" defaultIsCollapsed={false}>
                 <Navigation.Item<any> id="item1" link="item1" />
               </Navigation.Group>
             </Navigation.Group>
@@ -352,128 +352,39 @@ describe('<Navigation />', () => {
 
       expect(navTree.navigationTree).toEqual([
         {
-          id: 'root',
-          path: ['root'],
-          title: '',
-          isActive: false,
           children: [
             {
               id: 'group1',
+              isActive: true,
               path: ['root', 'group1'],
               title: '',
-              isActive: false,
             },
             {
-              id: 'group2',
-              path: ['root', 'group2'],
-              title: '',
-              isActive: false,
               children: [
                 {
+                  deepLink: {
+                    baseUrl: '',
+                    href: '',
+                    id: 'item1',
+                    title: 'Title from deeplink',
+                    url: '',
+                  },
                   id: 'item1',
+                  isActive: false,
                   path: ['root', 'group2', 'item1'],
                   title: 'Title from deeplink',
-                  isActive: false,
-                  deepLink: {
-                    id: 'item1',
-                    title: 'Title from deeplink',
-                    baseUrl: '',
-                    url: '',
-                    href: '',
-                  },
                 },
               ],
+              id: 'group2',
+              isActive: true,
+              path: ['root', 'group2'],
+              title: '',
             },
           ],
-        },
-      ]);
-    });
-
-    test('should render custom react element', async () => {
-      const navLinks$: Observable<ChromeNavLink[]> = of([
-        {
-          id: 'item1',
-          title: 'Title from deeplink',
-          baseUrl: '',
-          url: '',
-          href: '',
-        },
-      ]);
-
-      const onProjectNavigationChange = jest.fn();
-
-      const { findByTestId } = render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                <Navigation.Item<any> link="item1">
-                  <div data-test-subj="my-custom-element">Custom element</div>
-                </Navigation.Item>
-                <Navigation.Item id="item2" title="Children prop" href="http://foo">
-                  {(navNode) => <div data-test-subj="my-other-custom-element">{navNode.title}</div>}
-                </Navigation.Item>
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
-      );
-
-      await act(async () => {
-        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
-      });
-
-      expect(await findByTestId('my-custom-element')).toBeVisible();
-      expect(await findByTestId('my-other-custom-element')).toBeVisible();
-      expect((await findByTestId('my-other-custom-element')).textContent).toBe('Children prop');
-
-      expect(onProjectNavigationChange).toHaveBeenCalled();
-      const lastCall =
-        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-      const [navTree] = lastCall;
-
-      expect(navTree.navigationTree).toEqual([
-        {
           id: 'root',
+          isActive: true,
           path: ['root'],
           title: '',
-          isActive: false,
-          children: [
-            {
-              id: 'group1',
-              path: ['root', 'group1'],
-              title: '',
-              isActive: false,
-              children: [
-                {
-                  id: 'item1',
-                  path: ['root', 'group1', 'item1'],
-                  title: 'Title from deeplink',
-                  renderItem: expect.any(Function),
-                  isActive: false,
-                  deepLink: {
-                    id: 'item1',
-                    title: 'Title from deeplink',
-                    baseUrl: '',
-                    url: '',
-                    href: '',
-                  },
-                },
-                {
-                  id: 'item2',
-                  href: 'http://foo',
-                  path: ['root', 'group1', 'item2'],
-                  title: 'Children prop',
-                  isActive: false,
-                  renderItem: expect.any(Function),
-                },
-              ],
-            },
-          ],
         },
       ]);
     });
@@ -649,11 +560,11 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
-      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+        /nav-item-isActive/
       );
-      expect(await findByTestId(/nav-item-group1.item2/)).not.toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).not.toMatch(
+        /nav-item-isActive/
       );
 
       await act(async () => {
@@ -673,11 +584,11 @@ describe('<Navigation />', () => {
         ]);
       });
 
-      expect(await findByTestId(/nav-item-group1.item1/)).not.toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).not.toMatch(
+        /nav-item-isActive/
       );
-      expect(await findByTestId(/nav-item-group1.item2/)).toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).toMatch(
+        /nav-item-isActive/
       );
     });
 
@@ -730,8 +641,8 @@ describe('<Navigation />', () => {
 
       jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
 
-      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+        /nav-item-isActive/
       );
     });
   });
@@ -743,7 +654,7 @@ describe('<Navigation />', () => {
       const { findByTestId } = render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
           <Navigation>
-            <Navigation.Group id="group1">
+            <Navigation.Group id="group1" defaultIsCollapsed={false}>
               <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
               <Navigation.Item id="cloudLink2" cloudLink="performance" />
               <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
@@ -756,13 +667,13 @@ describe('<Navigation />', () => {
       expect(await findByTestId(/nav-item-group1.cloudLink2/)).toBeVisible();
       expect(await findByTestId(/nav-item-group1.cloudLink3/)).toBeVisible();
 
-      expect(await (await findByTestId(/nav-item-group1.cloudLink1/)).textContent).toBe(
+      expect((await findByTestId(/nav-item-group1.cloudLink1/)).textContent).toBe(
         'Mock Users & RolesExternal link'
       );
-      expect(await (await findByTestId(/nav-item-group1.cloudLink2/)).textContent).toBe(
+      expect((await findByTestId(/nav-item-group1.cloudLink2/)).textContent).toBe(
         'Mock PerformanceExternal link'
       );
-      expect(await (await findByTestId(/nav-item-group1.cloudLink3/)).textContent).toBe(
+      expect((await findByTestId(/nav-item-group1.cloudLink3/)).textContent).toBe(
         'Mock Billing & SubscriptionsExternal link'
       );
     });

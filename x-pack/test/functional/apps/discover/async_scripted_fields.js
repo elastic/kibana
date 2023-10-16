@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
           'dscNoResultsInterceptedWarningsCallout_warningTitle'
         );
         log.debug(shardMessage);
-        expect(shardMessage).to.be('The data might be incomplete or wrong.');
+        expect(shardMessage).to.be('Results are partial and may be incomplete.');
       });
     });
 
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.saveSearch('search with warning');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 

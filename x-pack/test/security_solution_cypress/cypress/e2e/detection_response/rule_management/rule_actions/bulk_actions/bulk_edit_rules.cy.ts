@@ -48,6 +48,7 @@ import {
   clickAddIndexPatternsMenuItem,
   checkPrebuiltRulesCannotBeModified,
   checkMachineLearningRulesCannotBeModified,
+  checkEsqlRulesCannotBeModified,
   waitForMixedRulesBulkEditModal,
   openBulkEditAddTagsForm,
   openBulkEditDeleteTagsForm,
@@ -74,7 +75,8 @@ import {
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
 import {
@@ -85,6 +87,7 @@ import {
 
 import {
   getEqlRule,
+  getEsqlRule,
   getNewThreatIndicatorRule,
   getNewRule,
   getNewThresholdRule,
@@ -165,7 +168,7 @@ describe(
         })
       );
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
     });
 
@@ -671,3 +674,78 @@ describe(
     });
   }
 );
+
+// ES|QL rule type is supported  only in ESS environment
+// Adding 2 use cases only for this rule type, while it is disabled on serverless
+// Created these limited separate scenarios, is done for purpose not duplicating existing tests with new rule type added only for ESS env
+// as they will fail when enabled on serverless
+// Having 2 sets of complete scenarios for both envs would have a high maintenance cost
+// When ES|QL enabled on serverless this rule type can be added to complete set of tests, with minimal changes to tests itself (adding creation of new rule, change number of expected rules, etc)
+describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () => {
+  before(() => {
+    cleanKibana();
+  });
+  beforeEach(() => {
+    login();
+    // Make sure persisted rules table state is cleared
+    resetRulesTableState();
+    deleteAlertsAndRules();
+    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
+    cy.task('esArchiverResetKibana');
+
+    createRule(
+      getEsqlRule({
+        tags: ['test-default-tag-1', 'test-default-tag-2'],
+        enabled: false,
+      })
+    );
+    visitRulesManagementTable();
+    disableAutoRefresh();
+  });
+
+  describe('Tags actions', () => {
+    // ensures bulk edit action is applied to the rule type
+    it('Add tags to ES|QL rule', { tags: ['@ess'] }, () => {
+      getRulesManagementTableRows().then((rows) => {
+        const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
+        const resultingTags = [...prePopulatedTags, ...tagsToBeAdded];
+
+        // check if only pre-populated tags exist in the tags filter
+        checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+
+        selectAllRules();
+
+        // open add tags form and add 2 new tags
+        openBulkEditAddTagsForm();
+        typeTags(tagsToBeAdded);
+        submitBulkEditForm();
+        waitForBulkEditActionToFinish({ updatedCount: rows.length });
+
+        // check if all rules have been updated with new tags
+        testAllTagsBadges(resultingTags);
+
+        // check that new tags were added to tags filter
+        // tags in tags filter sorted alphabetically
+        const resultingTagsInFilter = [...resultingTags].sort();
+        checkTagsInTagsFilter(resultingTagsInFilter, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+      });
+    });
+  });
+
+  describe('Index patterns', () => {
+    it(
+      'Index pattern action applied to ES|QL rules, user cancels action',
+      { tags: ['@ess'] },
+      () => {
+        selectAllRules();
+        clickAddIndexPatternsMenuItem();
+
+        // confirm editing custom rules, that are not Machine Learning
+        checkEsqlRulesCannotBeModified(1);
+
+        // user cancels action and modal disappears
+        cancelConfirmationModal();
+      }
+    );
+  });
+});

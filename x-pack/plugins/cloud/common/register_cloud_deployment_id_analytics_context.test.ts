@@ -42,4 +42,19 @@ describe('registerCloudDeploymentIdAnalyticsContext', () => {
       deploymentId: 'uuid-of-my-deployment',
     });
   });
+
+  test('it registers the context provider and emits the cloudId and projectId', async () => {
+    registerCloudDeploymentMetadataAnalyticsContext(analytics, {
+      id: 'cloud_id',
+      serverless: {
+        project_id: 'a-project-id',
+      },
+    });
+    expect(analytics.registerContextProvider).toHaveBeenCalledTimes(1);
+    const [{ context$ }] = analytics.registerContextProvider.mock.calls[0];
+    await expect(firstValueFrom(context$)).resolves.toEqual({
+      cloudId: 'cloud_id',
+      projectId: 'a-project-id',
+    });
+  });
 });

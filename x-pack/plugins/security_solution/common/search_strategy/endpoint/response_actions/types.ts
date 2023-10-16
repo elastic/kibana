@@ -17,8 +17,7 @@ export enum SortOrder {
 }
 
 export interface RequestBasicOptions extends IEsSearchRequest {
-  factoryQueryType?: ResponseActionsQueries;
-  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
+  factoryQueryType: ResponseActionsQueries;
 }
 
 export type ResponseActionsSearchHit = estypes.SearchHit<

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { last } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Subscription } from 'rxjs';
 import usePrevious from 'react-use/lib/usePrevious';
-import { i18n } from '@kbn/i18n';
+import { isObservable, Observable, Subscription } from 'rxjs';
 import {
   ContextDefinition,
   MessageRole,
@@ -20,8 +20,8 @@ import {
 } from '../../common/types';
 import type { ChatPromptEditorProps } from '../components/chat/chat_prompt_editor';
 import type { ChatTimelineProps } from '../components/chat/chat_timeline';
+import { ChatActionClickType } from '../components/chat/types';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
-import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 import type { ObservabilityAIAssistantChatService, PendingMessage } from '../types';
 import {
   getTimelineItemsfromConversation,
@@ -37,7 +37,7 @@ export function createNewConversation({
 }): ConversationCreateRequest {
   return {
     '@timestamp': new Date().toISOString(),
-    messages: [getAssistantSetupMessage({ contexts })],
+    messages: [],
     conversation: {
       title: EMPTY_CONVERSATION_TITLE,
     },
@@ -49,7 +49,7 @@ export function createNewConversation({
 
 export type UseTimelineResult = Pick<
   ChatTimelineProps,
-  'onEdit' | 'onFeedback' | 'onRegenerate' | 'onStopGenerating' | 'items'
+  'onEdit' | 'onFeedback' | 'onRegenerate' | 'onStopGenerating' | 'onActionClick' | 'items'
 > &
   Pick<ChatPromptEditorProps, 'onSubmit'>;
 
@@ -98,6 +98,8 @@ export function useTimeline({
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage>();
 
+  const [isFunctionLoading, setIsFunctionLoading] = useState(false);
+
   const prevConversationId = usePrevious(conversationId);
   useEffect(() => {
     if (prevConversationId !== conversationId && pendingMessage?.error) {
@@ -105,56 +107,77 @@ export function useTimeline({
     }
   }, [conversationId, pendingMessage?.error, prevConversationId]);
 
-  function chat(nextMessages: Message[]): Promise<Message[]> {
+  function chat(
+    nextMessages: Message[],
+    response$: Observable<PendingMessage> | undefined = undefined
+  ): Promise<Message[]> {
     const controller = new AbortController();
 
-    return new Promise<PendingMessage | undefined>((resolve, reject) => {
-      if (!connectorId) {
-        reject(new Error('Can not add a message without a connector'));
-        return;
+    return new Promise<PendingMessage | undefined>(async (resolve, reject) => {
+      try {
+        if (!connectorId) {
+          reject(new Error('Can not add a message without a connector'));
+          return;
+        }
+
+        const isStartOfConversation =
+          nextMessages.some((message) => message.message.role === MessageRole.Assistant) === false;
+
+        if (isStartOfConversation && chatService.hasFunction('recall')) {
+          nextMessages = nextMessages.concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: 'recall',
+                arguments: JSON.stringify({ queries: [], contexts: [] }),
+                trigger: MessageRole.User,
+              },
+            },
+          });
+        }
+
+        onChatUpdate(nextMessages);
+        const lastMessage = last(nextMessages);
+        if (lastMessage?.message.function_call?.name) {
+          // the user has edited a function suggestion, no need to talk to the LLM
+          resolve(undefined);
+          return;
+        }
+
+        response$ =
+          response$ ||
+          chatService!.chat({
+            messages: nextMessages,
+            connectorId,
+          });
+        let pendingMessageLocal = pendingMessage;
+        const nextSubscription = response$.subscribe({
+          next: (nextPendingMessage) => {
+            pendingMessageLocal = nextPendingMessage;
+            setPendingMessage(() => nextPendingMessage);
+          },
+          error: reject,
+          complete: () => {
+            const error = pendingMessageLocal?.error;
+            if (error) {
+              notifications.toasts.addError(error, {
+                title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
+                  defaultMessage: 'Failed to load response from the AI Assistant',
+                }),
+              });
+            }
+            resolve(pendingMessageLocal!);
+          },
+        });
+        setSubscription(() => {
+          controllerRef.current = controller;
+          return nextSubscription;
+        });
+      } catch (error) {
+        reject(error);
       }
-
-      onChatUpdate(nextMessages);
-
-      const lastMessage = last(nextMessages);
-
-      if (lastMessage?.message.function_call?.name) {
-        // the user has edited a function suggestion, no need to talk to
-        resolve(undefined);
-        return;
-      }
-
-      const response$ = chatService!.chat({
-        messages: nextMessages,
-        connectorId,
-      });
-
-      let pendingMessageLocal = pendingMessage;
-
-      const nextSubscription = response$.subscribe({
-        next: (nextPendingMessage) => {
-          pendingMessageLocal = nextPendingMessage;
-          setPendingMessage(() => nextPendingMessage);
-        },
-        error: reject,
-        complete: () => {
-          const error = pendingMessageLocal?.error;
-
-          if (error) {
-            notifications.toasts.addError(error, {
-              title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
-                defaultMessage: 'Failed to load response from the AI Assistant',
-              }),
-            });
-          }
-          resolve(pendingMessageLocal!);
-        },
-      });
-
-      setSubscription(() => {
-        controllerRef.current = controller;
-        return nextSubscription;
-      });
     }).then(async (reply) => {
       if (reply?.error) {
         return nextMessages;
@@ -181,13 +204,23 @@ export function useTimeline({
       if (lastMessage?.message.function_call?.name) {
         const name = lastMessage.message.function_call.name;
 
+        setIsFunctionLoading(true);
+
         try {
-          const message = await chatService!.executeFunction({
+          let message = await chatService!.executeFunction({
             name,
             args: lastMessage.message.function_call.arguments,
             messages: messagesAfterChat.slice(0, -1),
             signal: controller.signal,
+            connectorId: connectorId!,
           });
+
+          let nextResponse$: Observable<PendingMessage> | undefined;
+
+          if (isObservable(message)) {
+            nextResponse$ = message;
+            message = { content: '', data: '' };
+          }
 
           return await chat(
             messagesAfterChat.concat({
@@ -198,7 +231,8 @@ export function useTimeline({
                 content: JSON.stringify(message.content),
                 data: JSON.stringify(message.data),
               },
-            })
+            }),
+            nextResponse$
           );
         } catch (error) {
           return await chat(
@@ -214,6 +248,8 @@ export function useTimeline({
               },
             })
           );
+        } finally {
+          setIsFunctionLoading(false);
         }
       }
 
@@ -247,8 +283,20 @@ export function useTimeline({
       return nextItems;
     }
 
-    return conversationItems;
-  }, [conversationItems, pendingMessage, currentUser]);
+    if (!isFunctionLoading) {
+      return conversationItems;
+    }
+
+    return conversationItems.map((item, index) => {
+      if (index < conversationItems.length - 1) {
+        return item;
+      }
+      return {
+        ...item,
+        loading: true,
+      };
+    });
+  }, [conversationItems, pendingMessage, currentUser, isFunctionLoading]);
 
   useEffect(() => {
     return () => {
@@ -284,6 +332,29 @@ export function useTimeline({
     onSubmit: async (message) => {
       const nextMessages = await chat(messages.concat(message));
       onChatComplete(nextMessages);
+    },
+    onActionClick: async (payload) => {
+      switch (payload.type) {
+        case ChatActionClickType.executeEsqlQuery:
+          const nextMessages = await chat(
+            messages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'execute_query',
+                  arguments: JSON.stringify({
+                    query: payload.query,
+                  }),
+                  trigger: MessageRole.User,
+                },
+              },
+            })
+          );
+          onChatComplete(nextMessages);
+          break;
+      }
     },
   };
 }

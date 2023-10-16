@@ -13,11 +13,17 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import {
+  ObservabilityLogExplorerLocators,
+  SingleDatasetLocatorDefinition,
+  AllDatasetsLocatorDefinition,
+} from '../common/locators';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
 import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../common/constants';
 import { logExplorerAppTitle } from '../common/translations';
 import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
 import type {
+  ObservabilityLogExplorerAppMountParameters,
   ObservabilityLogExplorerPluginSetup,
   ObservabilityLogExplorerPluginStart,
   ObservabilityLogExplorerSetupDeps,
@@ -28,6 +34,7 @@ export class ObservabilityLogExplorerPlugin
   implements Plugin<ObservabilityLogExplorerPluginSetup, ObservabilityLogExplorerPluginStart>
 {
   private config: ObservabilityLogExplorerConfig;
+  private locators?: ObservabilityLogExplorerLocators;
 
   constructor(context: PluginInitializerContext<ObservabilityLogExplorerConfig>) {
     this.config = context.config.get();
@@ -37,6 +44,9 @@ export class ObservabilityLogExplorerPlugin
     core: CoreSetup<ObservabilityLogExplorerStartDeps, ObservabilityLogExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogExplorerSetupDeps
   ) {
+    const { share } = _pluginsSetup;
+    const useHash = core.uiSettings.get('state:storeInSessionStorage');
+
     core.application.register({
       id: OBSERVABILITY_LOG_EXPLORER_APP_ID,
       title: logExplorerAppTitle,
@@ -46,7 +56,8 @@ export class ObservabilityLogExplorerPlugin
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
       searchable: true,
-      mount: async (appMountParams) => {
+      keywords: ['logs', 'log', 'explorer', 'logs explorer'],
+      mount: async (appMountParams: ObservabilityLogExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
 
         return renderObservabilityLogExplorer(
@@ -58,7 +69,26 @@ export class ObservabilityLogExplorerPlugin
       },
     });
 
-    return {};
+    // Register Locators
+    const singleDatasetLocator = share.url.locators.create(
+      new SingleDatasetLocatorDefinition({
+        useHash,
+      })
+    );
+    const allDatasetsLocator = share.url.locators.create(
+      new AllDatasetsLocatorDefinition({
+        useHash,
+      })
+    );
+
+    this.locators = {
+      singleDatasetLocator,
+      allDatasetsLocator,
+    };
+
+    return {
+      locators: this.locators,
+    };
   }
 
   public start(_core: CoreStart, _pluginsStart: ObservabilityLogExplorerStartDeps) {
