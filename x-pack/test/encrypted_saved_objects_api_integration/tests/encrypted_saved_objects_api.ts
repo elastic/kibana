@@ -575,45 +575,45 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('migrations', () => {
-      before(async () => {
-        // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
-        await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
-        await esArchiver.load(
-          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
-        );
-      });
-
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
-        );
-      });
-
-      function getGetApiUrl({ objectId, spaceId }: { objectId: string; spaceId?: string }) {
+      function getGetApiUrl({ type, objectId, spaceId }: { type: string, objectId: string; spaceId?: string }) {
         const spacePrefix = spaceId ? `/s/${spaceId}` : '';
-        return `${spacePrefix}/api/saved_objects/get-decrypted-as-internal-user/saved-object-with-migration/${objectId}`;
+        return `${spacePrefix}/api/saved_objects/get-decrypted-as-internal-user/${type}/${objectId}`;
       }
 
       // For brevity, each encrypted saved object has the same decrypted attributes after migrations/conversion.
       // An assertion based on this ensures all encrypted fields can still be decrypted after migrations/conversion have been applied.
       const expectedDecryptedAttributes = {
         encryptedAttribute: 'this is my secret api key',
-        nonEncryptedAttribute: 'elastic-migrated', // this field was migrated in 7.8.0
-        additionalEncryptedAttribute: 'elastic-migrated-encrypted', // this field was added in 7.9.0
+        nonEncryptedAttribute: 'elastic-migrated', // this field was migrated in 7.8.0 or model version 1
+        additionalEncryptedAttribute: 'elastic-migrated-encrypted', // this field was added in 7.9.0 or model version 2
       };
 
       // In these test cases, we simulate a scenario where some existing objects that are migrated when Kibana starts up. Note that when a
       // document migration is triggered, the saved object "convert" transform is also applied by the Core migration algorithm.
       describe('handles index migration correctly', () => {
+        before(async () => {
+          // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
+          await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
+          await esArchiver.load(
+            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+          );
+        });
+
         describe('in the default space', () => {
           it('for a saved object that needs to be migrated before it is converted', async () => {
-            const getApiUrl = getGetApiUrl({ objectId: '74f3e6d7-b7bb-477d-ac28-92ee22728e6e' });
+            const getApiUrl = getGetApiUrl({ type: 'saved-object-with-migration', objectId: '74f3e6d7-b7bb-477d-ac28-92ee22728e6e' });
             const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
             expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
           });
 
           it('for a saved object that does not need to be migrated before it is converted', async () => {
-            const getApiUrl = getGetApiUrl({ objectId: '362828f0-eef2-11eb-9073-11359682300a' });
+            const getApiUrl = getGetApiUrl({ type: 'saved-object-with-migration', objectId: '362828f0-eef2-11eb-9073-11359682300a' });
             const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
             expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
           });
@@ -624,6 +624,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('for a saved object that needs to be migrated before it is converted', async () => {
             const getApiUrl = getGetApiUrl({
+              type: 'saved-object-with-migration',
               objectId: 'a98e22f8-530e-5d69-baf7-97526796f3a6', // This ID is not found in the data.json file, it is dynamically generated when the object is converted; the original ID is a67c6950-eed8-11eb-9a62-032b4e4049d1
               spaceId,
             });
@@ -633,6 +634,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('for a saved object that does not need to be migrated before it is converted', async () => {
             const getApiUrl = getGetApiUrl({
+              type: 'saved-object-with-migration',
               objectId: '41395c74-da7a-5679-9535-412d550a6cf7', // This ID is not found in the data.json file, it is dynamically generated when the object is converted; the original ID is 36448a90-eef2-11eb-9073-11359682300a
               spaceId,
             });
@@ -646,6 +648,20 @@ export default function ({ getService }: FtrProviderContext) {
       // `migrationVersion` field is included below. Note that when a document migration is triggered, the saved object "convert" transform
       // is *not* applied by the Core migration algorithm.
       describe('handles document migration correctly', () => {
+        before(async () => {
+          // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
+          await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
+          await esArchiver.load(
+            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+          );
+        });
+
         function getCreateApiUrl({ spaceId }: { spaceId?: string } = {}) {
           const spacePrefix = spaceId ? `/s/${spaceId}` : '';
           return `${spacePrefix}/api/saved_objects/saved-object-with-migration`;
@@ -668,7 +684,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
           const { id: objectId } = savedObject;
 
-          const getApiUrl = getGetApiUrl({ objectId });
+          const getApiUrl = getGetApiUrl({type: 'saved-object-with-migration', objectId });
           const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
           expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
         });
@@ -683,12 +699,48 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
           const { id: objectId } = savedObject;
 
-          const getApiUrl = getGetApiUrl({ objectId, spaceId });
+          const getApiUrl = getGetApiUrl({ type: 'saved-object-with-migration', objectId, spaceId });
           const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
           expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
         });
       });
-    });
+
+      // In these test cases, we simulate a scenario where some existing model version objects need to migrated. This happens because they
+      // have an outdated model version number. This also means that the encryptedSavedObjects.createModelVersion wrapper is used to
+      // facilitate the migration (see x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
+      describe('handles model version transforms correctly', () => {
+        before(async () => {
+          await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
+          await esArchiver.load(
+            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_model_version'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_model_version'
+          );
+        });
+
+        it('in the default space', async () => {
+          const getApiUrl = getGetApiUrl({ type: 'saved-object-mv', objectId: 'e35debe0-6c54-11ee-88d4-47e62f05d6ef' });
+          const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
+          expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
+          const pass = 1;
+          expect(pass).to.equal(1);
+        });
+
+        it('in a custom space', async () => {
+          const getApiUrl = getGetApiUrl({
+            type: 'saved-object-mv',
+            objectId: 'fd176460-6c56-11ee-b81b-d9ea3824cff5',
+            spaceId: 'custom-space',
+          });
+          const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
+          expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
+        });
+      });
+    })
 
     describe('key rotation', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
