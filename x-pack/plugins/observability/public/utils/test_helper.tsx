@@ -39,7 +39,6 @@ const defaultConfig: ConfigSchema = {
     },
     thresholdRule: { enabled: false },
   },
-  compositeSlo: { enabled: false },
 };
 
 const queryClient = new QueryClient({
