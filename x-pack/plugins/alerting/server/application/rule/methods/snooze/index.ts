@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { SnoozeParams } from './snooze_rule';
+export type { SnoozeRuleOptions } from './types';
 export { snoozeRule } from './snooze_rule';
