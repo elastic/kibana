@@ -7,7 +7,7 @@
 
 import { encode } from 'gpt-tokenizer';
 import { isEmpty, omitBy } from 'lodash';
-import { Transform } from 'stream';
+import { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { CreateChatCompletionRequest } from 'openai';
 
@@ -15,7 +15,7 @@ export async function getTokenCountFromOpenAIStream({
   responseStream,
   body,
 }: {
-  responseStream: Transform;
+  responseStream: Readable;
   body: string;
 }): Promise<{
   total: number;

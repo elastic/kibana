@@ -13,8 +13,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { IncomingMessage } from 'http';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import {
   validateParams,
   validateConfig,
@@ -354,7 +353,7 @@ export class ActionExecutor {
             },
           };
 
-          if (result.data instanceof IncomingMessage) {
+          if (result.data instanceof Readable) {
             getTokenCountFromOpenAIStream({
               responseStream: result.data.pipe(new PassThrough()),
               body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
