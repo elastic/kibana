@@ -18,7 +18,7 @@ import {
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
-import { MountPointPortal } from '@kbn/kibana-react-plugin/public';
+import { MountPointPortal } from '@kbn/react-kibana-mount';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
@@ -138,14 +138,19 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
       'kbnTopNavMenu__wrapper--hidden': visible === false,
     });
     if (setMenuMountPoint) {
+      const badgesEl = renderBadges();
+      const menuEl = renderMenu(menuClassName);
       return (
         <>
-          <MountPointPortal setMountPoint={setMenuMountPoint}>
-            <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
-              {renderBadges()}
-              {renderMenu(menuClassName)}
-            </span>
-          </MountPointPortal>
+          {(badgesEl || menuEl) && (
+            <MountPointPortal setMountPoint={setMenuMountPoint}>
+              <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
+                {badgesEl}
+                {menuEl}
+              </span>
+            </MountPointPortal>
+          )}
+
           {renderSearchBar()}
         </>
       );
