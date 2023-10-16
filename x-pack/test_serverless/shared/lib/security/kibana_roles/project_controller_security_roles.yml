@@ -564,8 +564,8 @@ endpoint_operations_analyst:
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
         - .internal.alerts-security.alerts-*
-        - .lists-*
-        - .items-*
+        - .lists*
+        - .items*
       privileges:
         - read
         - write

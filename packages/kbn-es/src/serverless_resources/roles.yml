@@ -497,7 +497,7 @@ endpoint_operations_analyst:
       privileges:
         - read
     - names:
-        - .alerts-security.alerts-*
+        - .alerts-security*
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
