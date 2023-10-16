@@ -54,8 +54,6 @@ export class DashboardPageControls extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
   private readonly common = this.ctx.getPageObject('common');
-  private readonly header = this.ctx.getPageObject('header');
-  private readonly settings = this.ctx.getPageObject('settings');
 
   /* -----------------------------------------------------------
      General controls functions
