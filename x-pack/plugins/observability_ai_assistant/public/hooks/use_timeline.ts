@@ -56,6 +56,7 @@ export type UseTimelineResult = Pick<
 export function useTimeline({
   messages,
   connectors,
+  conversationId,
   currentUser,
   chatService,
   startedFrom,
@@ -63,6 +64,7 @@ export function useTimeline({
   onChatComplete,
 }: {
   messages: Message[];
+  conversationId?: string;
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   chatService: ObservabilityAIAssistantChatService;
@@ -98,15 +100,13 @@ export function useTimeline({
 
   const [isFunctionLoading, setIsFunctionLoading] = useState(false);
 
-  const prevMessagesLength = usePrevious(messages.length);
+  const prevConversationId = usePrevious(conversationId);
 
   useEffect(() => {
-    // This means we reset the conversation.
-    if (messages.length === 1 && prevMessagesLength && prevMessagesLength > 1) {
+    if (prevConversationId !== conversationId && pendingMessage?.error) {
       setPendingMessage(undefined);
-      setIsFunctionLoading(false);
     }
-  }, [prevMessagesLength, messages.length]);
+  }, [conversationId, pendingMessage?.error, prevConversationId]);
 
   function chat(
     nextMessages: Message[],
