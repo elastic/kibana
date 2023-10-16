@@ -15,6 +15,7 @@ import {
   CUSTOM_KQL_DEFAULT_VALUES,
   CUSTOM_METRIC_DEFAULT_VALUES,
   HISTOGRAM_DEFAULT_VALUES,
+  TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
 import { CreateSLOForm } from '../types';
 
@@ -132,8 +133,13 @@ function transformPartialIndicatorState(
         type: 'sli.metric.custom' as const,
         params: Object.assign({}, CUSTOM_METRIC_DEFAULT_VALUES.params, indicator.params ?? {}),
       };
+    case 'sli.metric.timeslice':
+      return {
+        type: 'sli.metric.timeslice' as const,
+        params: Object.assign({}, TIMESLICE_METRIC_DEFAULT_VALUES.params, indicator.params ?? {}),
+      };
     default:
-      assertNever(indicatorType as never);
+      assertNever(indicatorType);
   }
 }
 
