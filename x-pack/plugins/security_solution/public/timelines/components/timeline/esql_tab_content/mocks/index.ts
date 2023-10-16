@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DiscoverInTimelineTrigger } from '../../../../../actions/constants';
-export { MockDiscoverTabContent } from './discover_tab_content';
+import { EsqlInTimelineTrigger } from '../../../../../actions/constants';
+export { MockEsqlTabContent } from './esql_tab_content';
 
 export const mockApplyFilterTrigger = {
   exec: jest.fn().mockResolvedValue(undefined),
@@ -16,7 +16,7 @@ export const mockPreventDefault = jest.fn();
 
 export const mockUIActionsGetTrigger = jest.fn().mockImplementation((triggerName: string) => {
   switch (triggerName) {
-    case DiscoverInTimelineTrigger.HISTOGRAM_TRIGGER:
+    case EsqlInTimelineTrigger.HISTOGRAM_TRIGGER:
       return mockApplyFilterTrigger;
     default:
       return undefined;

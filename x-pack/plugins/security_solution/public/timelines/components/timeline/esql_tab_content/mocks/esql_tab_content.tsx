@@ -8,10 +8,10 @@
 import React from 'react';
 import { EmbeddedDiscoverContainer } from '../styles';
 
-export function MockDiscoverTabContent() {
+export function MockEsqlTabContent() {
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
-      {'Mock Discover Tab Content'}
+      {'Mock ESQL Tab Content'}
     </EmbeddedDiscoverContainer>
   );
 }
