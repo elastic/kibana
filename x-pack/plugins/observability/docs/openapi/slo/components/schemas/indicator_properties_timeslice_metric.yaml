@@ -35,7 +35,7 @@ properties:
           - metrics
           - equation
           - comparator
-          - threshld
+          - threshold
         properties:
           metrics:
             description: List of metrics with their name, aggregation type, and field.
