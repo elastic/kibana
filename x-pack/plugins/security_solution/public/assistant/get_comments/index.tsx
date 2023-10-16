@@ -14,6 +14,7 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react/dist/emotion-react.cjs';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import { StreamComment } from './stream_obs';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
@@ -91,7 +92,14 @@ export const getComments = ({
     if (message.reader) {
       return {
         ...messageProps,
-        children: <EuiText>{'hello world i need to make this a stream here dawg'}</EuiText>,
+        children: (
+          <StreamComment
+            reader={message.reader}
+            index={index}
+            lastCommentRef={lastCommentRef}
+            isLastComment={index === currentConversation.messages.length - 1}
+          />
+        ),
       };
     }
     return {

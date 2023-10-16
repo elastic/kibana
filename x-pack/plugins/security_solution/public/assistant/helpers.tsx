@@ -84,7 +84,7 @@ export const augmentMessageCodeBlocks = (
   const cbd = currentConversation.messages.map(({ content }) =>
     analyzeMarkdown(
       getMessageContentWithReplacements({
-        messageContent: content,
+        messageContent: content ?? '', // TODO: streaming??
         replacements: currentConversation.replacements,
       })
     )
