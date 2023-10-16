@@ -863,7 +863,7 @@ components:
             - last_value
             - cardinality
         field:
-          description: The field of the metric. Required for sum, avg, max, min, std_deviation, last_value, percentile
+          description: The field of the metric.
           type: string
           example: processor.processed
         filter:
@@ -885,19 +885,13 @@ components:
           example: A
           pattern: ^[A-Z]$
         aggregation:
-          description: The aggregation type of the metric. Only valid option is "sum"
+          description: The aggregation type of the metric. Only valid option is "percentile"
           type: string
-          example: sum
+          example: percentile
           enum:
-            - sum
-            - avg
-            - min
-            - max
-            - std_deviation
-            - last_value
-            - cardinality
+            - percentile
         field:
-          description: The field of the metric. Required for sum, avg, max, min, std_deviation, last_value, percentile
+          description: The field of the metric.
           type: string
           example: processor.processed
         percentile:
@@ -962,13 +956,13 @@ components:
               example: timestamp
             metric:
               description: |
-                An object defining the metrics, equation, and threhsold to determine if it's a good slice or not
+                An object defining the metrics, equation, and threshold to determine if it's a good slice or not
               type: object
               required:
                 - metrics
                 - equation
                 - comparator
-                - threshld
+                - threshold
               properties:
                 metrics:
                   description: List of metrics with their name, aggregation type, and field.
