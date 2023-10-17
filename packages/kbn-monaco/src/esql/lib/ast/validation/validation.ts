@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { uniqBy } from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import capitalize from 'lodash/capitalize';
 import { nonNullable } from '../ast_helpers';
 import type { ESQLCallbacks } from '../autocomplete/types';
