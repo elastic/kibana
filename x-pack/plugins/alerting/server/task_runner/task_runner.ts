@@ -515,7 +515,8 @@ export class TaskRunner<
               logger: this.logger,
               flappingSettings,
               ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
-              getTimeRange: (timeWindow) => getTimeRange(queryDelaySettings, timeWindow),
+              getTimeRange: (timeWindow) =>
+                getTimeRange(this.logger, queryDelaySettings, timeWindow),
             })
           );
 
