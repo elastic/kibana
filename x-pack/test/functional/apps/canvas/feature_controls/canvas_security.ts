@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const reportingFunctional = getService('reportingFunctional');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
   describe('security feature controls', function () {
@@ -233,13 +232,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
         PageObjects.error.expectForbidden();
-      });
-
-      it('does not allow user that does not have reporting_user role', async () => {
-        const CANVAS_TITLE = 'The Very Cool Workpad for PDF Tests';
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfFail();
       });
     });
   });

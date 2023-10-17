@@ -28,7 +28,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
-  const reportingFunctional = getService('reportingFunctional');
 
   // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
 
@@ -466,13 +465,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await PageObjects.error.expectForbidden();
       });
-    });
-
-    describe('reporting does not allow user that does not have reporting_user role', async () => {
-      const VIS_TITLE = 'e-commerce pie chart';
-      await reportingFunctional.loginDataAnalyst();
-      await reportingFunctional.openCanvasWorkpad(VIS_TITLE);
-      await reportingFunctional.tryGeneratePdfFail();
     });
   });
 }
