@@ -59,13 +59,13 @@ docker manifest create \
   --amend "$KIBANA_IMAGE-amd64"
 docker manifest push "$KIBANA_IMAGE"
 
-# if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   docker manifest create \
     "$KIBANA_BASE_IMAGE:latest" \
     --amend "$KIBANA_IMAGE-arm64" \
     --amend "$KIBANA_IMAGE-amd64"
   docker manifest push "$KIBANA_BASE_IMAGE:latest"
-# fi
+fi
 
 docker logout docker.elastic.co
 
