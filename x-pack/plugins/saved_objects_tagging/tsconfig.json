@@ -22,7 +22,6 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/ebt-tools",
-    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": [
     "target/**/*",

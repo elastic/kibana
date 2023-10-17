@@ -15,7 +15,6 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-file-image",
     "@kbn/shared-ux-router",
-    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": [
     "target/**/*",
