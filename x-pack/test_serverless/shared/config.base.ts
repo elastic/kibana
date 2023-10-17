@@ -137,6 +137,8 @@ export default async () => {
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+        // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
       ],
     },
 
