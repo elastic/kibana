@@ -138,4 +138,38 @@ describe('Unsaved listing', () => {
       ).toHaveBeenCalledTimes(2);
     });
   });
+
+  it('does not remove unsaved changes when fetch is cancelled', async () => {
+    (
+      pluginServices.getServices().dashboardContentManagement.findDashboards.findByIds as jest.Mock
+    ).mockResolvedValue([
+      {
+        id: 'cancelledId',
+        status: 'cancelled',
+      },
+      {
+        id: 'failedId',
+        status: 'error',
+        error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+      },
+    ]);
+
+    const props = makeDefaultProps();
+
+    props.unsavedDashboardIds = [
+      'dashboardUnsavedOne',
+      'dashboardUnsavedTwo',
+      'dashboardUnsavedThree',
+      'cancelledId',
+      'failedId',
+    ];
+    const { component } = mountWith({ props });
+    waitFor(() => {
+      component.update();
+      expect(pluginServices.getServices().dashboardBackup.clearState).not.toBeCalledWith(
+        'cancelledId'
+      );
+      expect(pluginServices.getServices().dashboardBackup.clearState).toBeCalledWith('failedId');
+    });
+  });
 });

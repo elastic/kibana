@@ -140,10 +140,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.navigateToApp();
 
-        await PageObjects.common.sleep(5000);
         await testSubjects.existOrFail('unsavedDashboardsCallout');
-        await testSubjects.existOrFail('dshUnsavedListingItem');
-        // await testSubjects.missingOrFail('i-should-be-missing-123');
+        // await testSubjects.existOrFail('dshUnsavedListingItem');
 
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();

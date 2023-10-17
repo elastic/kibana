@@ -63,7 +63,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async navigateToApp() {
-    await this.common.navigateToApp(this.APP_ID, { shouldLoginIfPrompted: false });
+    await this.common.navigateToApp(this.APP_ID);
   }
 
   public async navigateToAppFromAppsMenu() {
@@ -184,9 +184,7 @@ export class DashboardPageObject extends FtrService {
    */
   public async onDashboardLandingPage() {
     this.log.debug(`onDashboardLandingPage`);
-    const test = await this.listingTable.onListingPage('dashboard');
-    // await this.testSubjects.missingOrFail('i-should-be-missing-123');
-    return test;
+    return await this.listingTable.onListingPage('dashboard');
   }
 
   public async expectExistsDashboardLandingPage() {
@@ -221,8 +219,6 @@ export class DashboardPageObject extends FtrService {
         );
       }
     });
-    // await this.testSubjects.missingOrFail('i-should-be-missing-123');
-
     await this.expectExistsDashboardLandingPage();
   }
 
@@ -586,7 +582,6 @@ export class DashboardPageObject extends FtrService {
     this.log.debug(`Load Saved Dashboard ${dashboardName}`);
 
     await this.gotoDashboardLandingPage();
-    // await this.testSubjects.missingOrFail('i-should-be-missing-123');
 
     await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {

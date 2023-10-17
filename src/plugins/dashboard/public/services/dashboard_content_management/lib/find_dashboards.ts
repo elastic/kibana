@@ -68,6 +68,7 @@ export async function searchDashboards({
 export type FindDashboardsByIdResponse = { id: string } & (
   | { status: 'success'; attributes: DashboardAttributes; references: Reference[] }
   | { status: 'error'; error: SavedObjectError }
+  | { status: 'cancelled' }
 );
 
 export async function findDashboardById(
@@ -85,11 +86,8 @@ export async function findDashboardById(
   //   };
   // }
 
-  // let response;
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
-    console.log('find');
-    // throw new Error('here');
     const response = await contentManagement.client.get<
       DashboardCrudTypes['GetIn'],
       DashboardCrudTypes['GetOut']
@@ -97,35 +95,29 @@ export async function findDashboardById(
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     });
-    if (response.item.error) throw new Error(response.item.error.message);
 
-    dashboardContentManagementCache.addDashboard(response);
+    if (response.item.error) {
+      throw response.item.error;
+    }
+
+    // dashboardContentManagementCache.addDashboard(response);
     return {
       id,
       status: 'success',
       attributes: response.item.attributes,
     } as FindDashboardsByIdResponse;
   } catch (e) {
-    console.log('CATCH!!!!', e, e.body, e.message);
-    if (isHttpFetchError(e) && e.message === 'Failed to fetch') {
-      console.log('IS HTTP FETCH ERROR 123', e, e.body, e.message, e.cause);
-      // return { status: 'error', error: 'THIS IS AN ERROR', id } as FindDashboardsByIdResponse;
-      // return { status: 'error', error: e, id };
+    console.log('CAUGHT', { ...e });
+    if (isHttpFetchError(e) && (!e.response || e.message === 'Failed to fetch')) {
+      /** Cancelled requests should be handled differently than saved object not found errors */
+      return { status: 'cancelled', id };
     }
-    return { status: 'error', error: e.body || e.message, id } as FindDashboardsByIdResponse;
+    return {
+      status: 'error',
+      error: e.body,
+      id,
+    };
   }
-  // try {
-  //   throw new Error('here 2');
-
-  //   dashboardContentManagementCache.addDashboard(response);
-  // } catch (e) {
-  //   // swallow any error thrown here
-  // }
-  // return {
-  //   id,
-  //   status: 'success',
-  //   attributes: response.item.attributes,
-  // } as FindDashboardsByIdResponse;
 }
 
 export async function findDashboardsByIds(

@@ -48,12 +48,10 @@ export class CommonPageObject extends FtrService {
     insertTimestamp: boolean,
     disableWelcomePrompt: boolean
   ) {
-    this.log.debug('loginIfPrompted');
     // Disable the welcome screen. This is relevant for environments
     // which don't allow to use the yml setting, e.g. cloud production.
     // It is done here so it applies to logins but also to a login re-use.
     if (disableWelcomePrompt) {
-      this.log.debug('DISABLE WELCOME PROMPT!!!');
       await this.browser.setLocalStorageItem('home:welcome:show', 'false');
     }
 
@@ -112,7 +110,6 @@ export class CommonPageObject extends FtrService {
       // accept alert if it pops up
       const alert = await this.browser.getAlert();
       await alert?.accept();
-      this.log.debug('--- HAS ALERT: ', alert === undefined);
 
       const currentUrl = shouldLoginIfPrompted
         ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
@@ -123,7 +120,6 @@ export class CommonPageObject extends FtrService {
         disableWelcomePrompt &&
         (await this.isWelcomeScreen())
       ) {
-        this.log.debug('DISABLE WELCOME PROMPT 2!!!');
         await this.browser.setLocalStorageItem('home:welcome:show', 'false');
         // Force a new navigation again
         const msg = `Found the Welcome page in ${currentUrl}. Skipping it...`;
@@ -295,7 +291,6 @@ export class CommonPageObject extends FtrService {
         await this.sleep(700);
         this.log.debug('returned from get, calling refresh');
         await this.browser.refresh();
-
         let currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
           : await this.browser.getCurrentUrl();
@@ -312,7 +307,6 @@ export class CommonPageObject extends FtrService {
           disableWelcomePrompt &&
           (await this.isWelcomeScreen())
         ) {
-          this.log.debug('DISABLE WELCOME PROMPT 3!!!');
           await this.browser.setLocalStorageItem('home:welcome:show', 'false');
           const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
           this.log.debug(msg);
@@ -348,7 +342,6 @@ export class CommonPageObject extends FtrService {
         await this.sleep(501);
         const currentUrl = await this.browser.getCurrentUrl();
         this.log.debug('in navigateTo url = ' + currentUrl);
-        // await this.testSubjects.missingOrFail('i-should-be-missing-123');
         if (lastUrl !== currentUrl) {
           lastUrl = currentUrl;
           throw new Error('URL changed, waiting for it to settle');

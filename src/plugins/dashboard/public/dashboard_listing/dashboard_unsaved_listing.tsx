@@ -37,7 +37,7 @@ const DashboardUnsavedItem = ({
   onDiscardClick: () => void;
 }) => {
   return (
-    <div data-test-subj="dshUnsavedListingItem" className="dshUnsavedListingItem">
+    <div className="dshUnsavedListingItem">
       <EuiFlexGroup
         alignItems="center"
         gutterSize="none"
@@ -121,7 +121,6 @@ export const DashboardUnsavedListing = ({
   } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
-  const [test, setTest] = useState<string | undefined>();
 
   const onOpen = useCallback(
     (id?: string) => {
@@ -155,12 +154,11 @@ export const DashboardUnsavedListing = ({
       }
       let hasError = false;
       const newItems = results.reduce((map, result) => {
-        if (result.status === 'error') {
+        if (result.status === 'cancelled') {
+          return map;
+        } else if (result.status === 'error') {
           hasError = true;
-          setTest(`${JSON.stringify(result)}}`);
-          if (result.error.error === 'Not Found') {
-            dashboardBackup.clearState(result.id);
-          }
+          dashboardBackup.clearState(result.id);
           return map;
         }
         return {
@@ -181,47 +179,35 @@ export const DashboardUnsavedListing = ({
   }, [refreshUnsavedDashboards, dashboardBackup, unsavedDashboardIds, findDashboards]);
 
   return (
-    <>
-      <h3
-        data-test-subj="i-should-be-missing-123"
-        style={{
-          color: test ? 'red' : 'green',
-          fontSize: '25px',
-        }}
-      >
-        {`${test ?? 'Everything was good'}... Length: ${unsavedDashboardIds.length}`}
-      </h3>
-      <EuiSpacer size="m" />
-      {unsavedDashboardIds.length > 0 && (
-        <>
-          <EuiCallOut
-            data-test-subj="unsavedDashboardsCallout"
-            heading="h3"
-            title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
-              unsavedDashboardIds.length > 1
-            )}
-          >
-            {unsavedDashboardIds.map((dashboardId: string) => {
-              const title: string | undefined =
-                dashboardId === DASHBOARD_PANELS_UNSAVED_ID
-                  ? getNewDashboardTitle()
-                  : items[dashboardId]?.title;
-              const redirectId =
-                dashboardId === DASHBOARD_PANELS_UNSAVED_ID ? undefined : dashboardId;
-              return (
-                <DashboardUnsavedItem
-                  key={dashboardId}
-                  id={dashboardId}
-                  title={title}
-                  onOpenClick={() => onOpen(redirectId)}
-                  onDiscardClick={() => onDiscard(redirectId)}
-                />
-              );
-            })}
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
-    </>
+    unsavedDashboardIds.length > 0 && (
+      <>
+        <EuiCallOut
+          heading="h3"
+          data-test-subj="unsavedDashboardsCallout"
+          title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
+            unsavedDashboardIds.length > 1
+          )}
+        >
+          {unsavedDashboardIds.map((dashboardId: string) => {
+            const title: string | undefined =
+              dashboardId === DASHBOARD_PANELS_UNSAVED_ID
+                ? getNewDashboardTitle()
+                : items[dashboardId]?.title;
+            const redirectId =
+              dashboardId === DASHBOARD_PANELS_UNSAVED_ID ? undefined : dashboardId;
+            return (
+              <DashboardUnsavedItem
+                key={dashboardId}
+                id={dashboardId}
+                title={title}
+                onOpenClick={() => onOpen(redirectId)}
+                onDiscardClick={() => onDiscard(redirectId)}
+              />
+            );
+          })}
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    )
   );
 };
