@@ -42,7 +42,7 @@ export const InactiveLicenseSlate = () => {
   return (
     <EuiPage>
       <EuiPageBody component="div">
-        <EuiPageSection alignment="center">
+        <EuiPageSection alignment="center" grow={true} color="plain">
           <EuiCallOut
             title={i18n.translate('xpack.grokDebugger.licenseErrorMessageTitle', {
               defaultMessage: 'License error',
