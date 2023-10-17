@@ -10,6 +10,8 @@ import React, { useMemo } from 'react';
 import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
 import { Chart, Settings, Heatmap, ScaleType, Tooltip } from '@elastic/charts';
 
+import { usePingStatusesIsLoading } from '../hooks/use_ping_statuses';
+
 import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
 import { MonitorStatusLegend } from './monitor_status_legend';
@@ -33,6 +35,7 @@ export const MonitorStatusPanel = ({
   const { euiTheme, colorMode } = useEuiTheme();
   const { timeBins, handleResize, getTimeBinByXValue, xDomain, intervalByWidth } =
     useMonitorStatusData({ from, to });
+  const isPingStatusesLoading = usePingStatusesIsLoading();
 
   const heatmap = useMemo(() => {
     return getMonitorStatusChartTheme(euiTheme, brushable);
@@ -61,7 +64,10 @@ export const MonitorStatusPanel = ({
             >
               <Tooltip
                 customTooltip={({ values }) => (
-                  <MonitorStatusCellTooltip timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)} />
+                  <MonitorStatusCellTooltip
+                    timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)}
+                    isLoading={isPingStatusesLoading}
+                  />
                 )}
               />
               <Settings
