@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { fetchMappings } from '../lib';
 import { buildResponse } from '../lib/build_response';
-import { GET_INDEX_MAPPINGS } from '../../common/constants';
+import { GET_INDEX_MAPPINGS, INTERNAL_API_VERSION } from '../../common/constants';
 import { GetIndexMappingsParams } from '../schemas/get_index_mappings';
 import { buildRouteValidation } from '../schemas/common';
 
@@ -22,7 +22,7 @@ export const getIndexMappingsRoute = (router: IRouter) => {
     })
     .addVersion(
       {
-        version: '1',
+        version: INTERNAL_API_VERSION,
         validate: { request: { params: buildRouteValidation(GetIndexMappingsParams) } },
       },
       async (context, request, response) => {

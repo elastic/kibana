@@ -27,6 +27,7 @@ import type {
 } from './types';
 
 const EMPTY_INDEX_NAMES: string[] = [];
+export const INTERNAL_API_VERSION = '1';
 
 export const getIndexNames = ({
   ilmExplain,

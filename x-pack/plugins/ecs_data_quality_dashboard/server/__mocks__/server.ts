@@ -14,6 +14,7 @@ import { requestMock } from './request';
 import { responseMock as responseFactoryMock } from './response';
 import { requestContextMock } from './request_context';
 import { responseAdapter } from './test_adapters';
+import { INTERNAL_API_VERSION } from '../../common/constants';
 
 interface Route {
   config: AddVersionOpts<unknown, unknown, unknown>;
@@ -76,7 +77,7 @@ const getRoute = (routerMock: MockServer['router'], request: KibanaRequest): Rou
     routerMock,
     request.route.method,
     request.route.path,
-    typeof request.headers.version === 'string' ? request.headers.version : ''
+    INTERNAL_API_VERSION
   );
 
   return { config: versionConfig, handler: routeHandler };
@@ -129,7 +130,6 @@ class MockServer {
     const validatedRequest = requestMock.create({
       path: request.route.path,
       method: request.route.method,
-      headers: config.version ? { version: config.version } : {},
       body: this.maybeValidate(request.body, validations.body),
       query: this.maybeValidate(request.query, validations.query),
       params: this.maybeValidate(request.params, validations.params),

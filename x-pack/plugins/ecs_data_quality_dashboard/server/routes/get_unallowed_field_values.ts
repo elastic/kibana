@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { getUnallowedFieldValues } from '../lib';
 import { buildResponse } from '../lib/build_response';
-import { GET_UNALLOWED_FIELD_VALUES } from '../../common/constants';
+import { GET_UNALLOWED_FIELD_VALUES, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetUnallowedFieldValuesBody } from '../schemas/get_unallowed_field_values';
 
@@ -22,7 +22,7 @@ export const getUnallowedFieldValuesRoute = (router: IRouter) => {
     })
     .addVersion(
       {
-        version: '1',
+        version: INTERNAL_API_VERSION,
         validate: { request: { body: buildRouteValidation(GetUnallowedFieldValuesBody) } },
       },
       async (context, request, response) => {

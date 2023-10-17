@@ -26,9 +26,6 @@ describe('getIndexMappingsRoute route', () => {
     params: {
       pattern: 'auditbeat-*',
     },
-    headers: {
-      version: '1',
-    },
   });
 
   beforeEach(() => {
@@ -74,9 +71,6 @@ describe('request validation', () => {
       path: GET_INDEX_MAPPINGS,
       params: {
         pattern: 123,
-      },
-      headers: {
-        version: '1',
       },
     });
     const result = server.validate(request);

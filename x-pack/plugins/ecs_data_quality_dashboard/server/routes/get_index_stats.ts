@@ -11,7 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { fetchStats, fetchAvailableIndices } from '../lib';
 import { buildResponse } from '../lib/build_response';
-import { GET_INDEX_STATS } from '../../common/constants';
+import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetIndexStatsParams, GetIndexStatsQuery } from '../schemas/get_index_stats';
 
@@ -23,7 +23,7 @@ export const getIndexStatsRoute = (router: IRouter) => {
     })
     .addVersion(
       {
-        version: '1',
+        version: INTERNAL_API_VERSION,
         validate: {
           request: {
             params: buildRouteValidation(GetIndexStatsParams),

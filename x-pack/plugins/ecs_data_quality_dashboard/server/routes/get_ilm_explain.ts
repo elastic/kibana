@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { GET_ILM_EXPLAIN } from '../../common/constants';
+import { GET_ILM_EXPLAIN, INTERNAL_API_VERSION } from '../../common/constants';
 import { fetchILMExplain } from '../lib';
 import { buildResponse } from '../lib/build_response';
 import { buildRouteValidation } from '../schemas/common';
@@ -22,7 +22,7 @@ export const getILMExplainRoute = (router: IRouter) => {
     })
     .addVersion(
       {
-        version: '1',
+        version: INTERNAL_API_VERSION,
         validate: {
           request: {
             params: buildRouteValidation(GetILMExplainParams),

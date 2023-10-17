@@ -32,9 +32,6 @@ describe('getIndexStatsRoute route', () => {
       startDate: `now-7d`,
       endDate: `now`,
     },
-    headers: {
-      version: '1',
-    },
   });
 
   beforeEach(() => {
@@ -76,9 +73,6 @@ describe('getIndexStatsRoute route', () => {
       query: {
         isILMAvailable: false,
       },
-      headers: {
-        version: '1',
-      },
     });
 
     const mockIndices = { 'auditbeat-7.15.1-2022.12.06-000001': {} };
@@ -103,9 +97,6 @@ describe('getIndexStatsRoute route', () => {
         isILMAvailable: false,
         startDate: `now-7d`,
         endDate: `now`,
-      },
-      headers: {
-        version: '1',
       },
     });
 
@@ -149,9 +140,6 @@ describe('request validation', () => {
       path: GET_INDEX_STATS,
       params: {
         pattern: 123,
-      },
-      headers: {
-        version: '1',
       },
     });
     const result = server.validate(request);

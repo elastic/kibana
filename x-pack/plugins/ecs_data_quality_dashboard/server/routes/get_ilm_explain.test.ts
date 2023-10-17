@@ -26,9 +26,6 @@ describe('getILMExplainRoute route', () => {
     params: {
       pattern: '.internal.alerts-security.alerts-default-000001',
     },
-    headers: {
-      version: '1',
-    },
   });
 
   beforeEach(() => {
@@ -107,9 +104,6 @@ describe('request validation', () => {
       path: GET_ILM_EXPLAIN,
       params: {
         pattern: 123,
-      },
-      headers: {
-        version: '1',
       },
     });
     const result = server.validate(request);
