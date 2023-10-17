@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 
 export function mapAttributes<T>(obj: SavedObjectUnsanitizedDoc<T>, mapper: (attributes: T) => T) {
   return Object.assign(obj, {

@@ -13,9 +13,9 @@ import type {
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
 
-import { mapAttributes } from './utilities';
 import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
+import { mapAttributes } from './utilities';
 
 export interface CreateEsoModelVersionFnOpts {
   modelVersion: SavedObjectsModelVersion;
