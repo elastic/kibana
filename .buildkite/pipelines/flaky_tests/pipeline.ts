@@ -162,10 +162,11 @@ for (const testSuite of testSuites) {
           `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
         );
       }
+      const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: { queue: group.queue },
+        agents: { queue: agentQueue },
         depends_on: 'build',
         parallelism: testSuite.count,
         concurrency,

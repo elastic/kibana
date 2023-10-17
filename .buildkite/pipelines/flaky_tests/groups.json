@@ -2,63 +2,51 @@
   "groups": [
     {
       "key": "cypress/security_solution",
-      "name": "Security Solution - Cypress",
-      "queue": "n2-4-spot"
+      "name": "Security Solution - Cypress"
     },
     {
       "key": "cypress/security_serverless",
-      "name": "[Serverless] Security Solution - Cypress",
-      "queue": "n2-4-spot"
+      "name": "[Serverless] Security Solution - Cypress"
     },
     {
       "key": "cypress/security_solution_investigations",
-      "name": "Security Solution Investigations - Cypress",
-      "queue": "n2-4-spot"
+      "name": "Security Solution Investigations - Cypress"
     },
     {
       "key": "cypress/security_serverless_investigations",
-      "name": "[Serverless] Security Solution Investigations - Cypress",
-      "queue": "n2-4-spot"
+      "name": "[Serverless] Security Solution Investigations - Cypress"
     },
     {
       "key": "cypress/security_solution_explore",
-      "name": "Security Solution Explore - Cypress",
-      "queue": "n2-4-spot"
+      "name": "Security Solution Explore - Cypress"
     },
     {
       "key": "cypress/security_serverless_explore",
-      "name": "[Serverless] Security Solution Explore - Cypress",
-      "queue": "n2-4-spot"
+      "name": "[Serverless] Security Solution Explore - Cypress"
     },
     {
       "key": "cypress/defend_workflows",
-      "name": "Security Solution Defend Workflows - Cypress",
-      "queue": "n2-4-virt"
+      "name": "Security Solution Defend Workflows - Cypress"
     },
     {
       "key": "cypress/defend_workflows_serverless",
-      "name": "[Serverless] Security Solution Defend Workflows - Cypress",
-      "queue": "n2-4-virt"
+      "name": "[Serverless] Security Solution Defend Workflows - Cypress"
     },
     {
       "key": "cypress/osquery_cypress",
-      "name": "Osquery - Cypress",
-      "queue": "n2-4-spot"
+      "name": "Osquery - Cypress"
     },
     {
       "key": "cypress/security_serverless_osquery",
-      "name": "[Serverless] Osquery - Cypress",
-      "queue": "n2-4-spot"
+      "name": "[Serverless] Osquery - Cypress"
     },
     {
       "key": "cypress/fleet_cypress",
-      "name": "Fleet - Cypress",
-      "queue": "n2-4-spot"
+      "name": "Fleet - Cypress"
     },
     {
       "key": "cypress/apm_cypress",
-      "name": "APM - Cypress",
-      "queue": "n2-4-spot"
+      "name": "APM - Cypress"
     }
   ]
 }
