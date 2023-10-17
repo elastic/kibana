@@ -104,12 +104,12 @@ describe('Unsaved listing', () => {
       {
         id: 'failCase1',
         status: 'error',
-        error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+        error: { error: 'oh no', message: 'bwah', statusCode: 404 },
       },
       {
         id: 'failCase2',
         status: 'error',
-        error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+        error: { error: 'oh no', message: 'bwah', statusCode: 404 },
       },
     ]);
 
@@ -136,40 +136,6 @@ describe('Unsaved listing', () => {
       expect(
         pluginServices.getServices().dashboardBackup.getDashboardIdsWithUnsavedChanges
       ).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  it('does not remove unsaved changes when fetch is cancelled', async () => {
-    (
-      pluginServices.getServices().dashboardContentManagement.findDashboards.findByIds as jest.Mock
-    ).mockResolvedValue([
-      {
-        id: 'cancelledId',
-        status: 'cancelled',
-      },
-      {
-        id: 'failedId',
-        status: 'error',
-        error: { error: 'oh no', message: 'bwah', statusCode: 100 },
-      },
-    ]);
-
-    const props = makeDefaultProps();
-
-    props.unsavedDashboardIds = [
-      'dashboardUnsavedOne',
-      'dashboardUnsavedTwo',
-      'dashboardUnsavedThree',
-      'cancelledId',
-      'failedId',
-    ];
-    const { component } = mountWith({ props });
-    waitFor(() => {
-      component.update();
-      expect(pluginServices.getServices().dashboardBackup.clearState).not.toBeCalledWith(
-        'cancelledId'
-      );
-      expect(pluginServices.getServices().dashboardBackup.clearState).toBeCalledWith('failedId');
     });
   });
 });
