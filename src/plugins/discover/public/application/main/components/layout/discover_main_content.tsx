@@ -8,8 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
-import useObservable from 'react-use/lib/useObservable';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -21,9 +20,6 @@ import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { ErrorCallout } from '../../../../components/common/error_callout';
-import { useDataState } from '../../hooks/use_data_state';
-import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 
 const DROP_PROPS = {
   value: {
@@ -76,13 +72,13 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  const dataState = useDataState(stateContainer.dataState.data$.main$);
-  const documents = useObservable(stateContainer.dataState.data$.documents$);
   const isDropAllowed = Boolean(onDropFieldToTable);
 
-  const viewModeToggle = !isPlainRecord ? (
-    <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
-  ) : undefined;
+  const viewModeToggle = useMemo(() => {
+    return !isPlainRecord ? (
+      <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+    ) : undefined;
+  }, [viewMode, setDiscoverViewMode, isPlainRecord]);
 
   return (
     <DragDrop
@@ -100,25 +96,6 @@ export const DiscoverMainContent = ({
           responsive={false}
           data-test-subj="dscMainContent"
         >
-          {viewMode === VIEW_MODE.AGGREGATED_LEVEL && (
-            <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
-          )}
-          {dataState.error && (
-            <ErrorCallout
-              title={i18n.translate('discover.documentsErrorTitle', {
-                defaultMessage: 'Search error',
-              })}
-              error={dataState.error}
-              inline
-              data-test-subj="discoverMainError"
-            />
-          )}
-          <SelectedVSAvailableCallout
-            isPlainRecord={isPlainRecord}
-            textBasedQueryColumns={documents?.textBasedQueryColumns}
-            selectedColumns={columns}
-          />
-
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
@@ -128,13 +105,16 @@ export const DiscoverMainContent = ({
               onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
             />
           ) : (
-            <FieldStatisticsTab
-              dataView={dataView}
-              columns={columns}
-              stateContainer={stateContainer}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              trackUiMetric={trackUiMetric}
-            />
+            <>
+              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+              <FieldStatisticsTab
+                dataView={dataView}
+                columns={columns}
+                stateContainer={stateContainer}
+                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                trackUiMetric={trackUiMetric}
+              />
+            </>
           )}
         </EuiFlexGroup>
       </DropOverlayWrapper>

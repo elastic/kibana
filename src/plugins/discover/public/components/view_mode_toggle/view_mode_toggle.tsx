@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { DOC_TABLE_LEGACY, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
@@ -23,12 +23,12 @@ export const DocumentViewModeToggle = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
-
-  const isFieldStatisticsActive = viewMode === VIEW_MODE.AGGREGATED_LEVEL;
+  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
   const tabsCss = css`
-    padding: 0 ${isFieldStatisticsActive ? euiTheme.size.s : 0};
-    margin-top: ${isFieldStatisticsActive ? '19px' : 0};
+    padding: 0 ${includesNormalTabsStyle ? euiTheme.size.s : 0};
+    margin-top: ${includesNormalTabsStyle ? '17px' : 0};
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -39,10 +39,10 @@ export const DocumentViewModeToggle = ({
 
   return (
     <EuiTabs
-      size="s"
+      size="m"
       css={tabsCss}
       data-test-subj="dscViewModeToggle"
-      bottomBorder={isFieldStatisticsActive}
+      bottomBorder={includesNormalTabsStyle}
     >
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}

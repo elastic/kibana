@@ -13,6 +13,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -38,6 +39,8 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
@@ -60,6 +63,8 @@ import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout'
 import { getRenderCustomToolbarWithViewModeToggle } from '../../../../components/discover_grid/render_custom_toolbar';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
+import { ErrorCallout } from '../../../../components/common/error_callout';
+import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 
 const containerStyles = css`
   position: relative;
@@ -243,20 +248,96 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
+  const dataState = useDataState(stateContainer.dataState.data$.main$);
+  const documents = useObservable(stateContainer.dataState.data$.documents$);
+
+  const callouts = useMemo(
+    () => (
+      <>
+        {dataState.error && (
+          <ErrorCallout
+            title={i18n.translate('discover.documentsErrorTitle', {
+              defaultMessage: 'Search error',
+            })}
+            error={dataState.error}
+            inline
+            data-test-subj="discoverMainError"
+          />
+        )}
+        <SelectedVSAvailableCallout
+          isPlainRecord={isTextBasedQuery}
+          textBasedQueryColumns={documents?.textBasedQueryColumns}
+          selectedColumns={currentColumns}
+        />
+        {!!documentState.interceptedWarnings?.length && (
+          <SearchResponseWarnings
+            variant="callout"
+            interceptedWarnings={documentState.interceptedWarnings}
+            data-test-subj="dscInterceptedWarningsCallout"
+          />
+        )}
+      </>
+    ),
+    [
+      dataState.error,
+      isTextBasedQuery,
+      currentColumns,
+      documents?.textBasedQueryColumns,
+      documentState.interceptedWarnings,
+    ]
+  );
+
+  const gridAnnouncementCallout = useMemo(() => {
+    if (hideAnnouncements || isLegacy) {
+      return null;
+    }
+
+    return !isTextBasedQuery ? (
+      <DiscoverTourProvider isPlainRecord={isTextBasedQuery}>
+        <DocumentExplorerUpdateCallout />
+      </DiscoverTourProvider>
+    ) : null;
+  }, [hideAnnouncements, isLegacy, isTextBasedQuery]);
+
+  const loadingIndicator = useMemo(
+    () =>
+      isDataLoading ? (
+        <EuiProgress
+          data-test-subj="discoverDataGridUpdating"
+          size="xs"
+          color="accent"
+          position="absolute"
+          css={progressStyle}
+        />
+      ) : null,
+    [isDataLoading]
+  );
+
   const renderCustomToolbar = useMemo(
-    () => getRenderCustomToolbarWithViewModeToggle(viewModeToggle),
-    [viewModeToggle]
+    () =>
+      getRenderCustomToolbarWithViewModeToggle(
+        viewModeToggle,
+        <>
+          {callouts}
+          {gridAnnouncementCallout}
+          {loadingIndicator}
+        </>
+      ),
+    [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
-      <div className="dscDocuments__loading">
-        <EuiText size="xs" color="subdued">
-          <EuiLoadingSpinner />
-          <EuiSpacer size="s" />
-          <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
-        </EuiText>
-      </div>
+      <>
+        <EuiHorizontalRule />
+        <div className="dscDocuments__loading">
+          <EuiText size="xs" color="subdued">
+            <EuiLoadingSpinner />
+            <EuiSpacer size="s" />
+            <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
+          </EuiText>
+        </div>
+      </>
     );
   }
 
@@ -267,42 +348,39 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
-      {!!documentState.interceptedWarnings?.length && (
-        <SearchResponseWarnings
-          variant="callout"
-          interceptedWarnings={documentState.interceptedWarnings}
-          data-test-subj="dscInterceptedWarningsCallout"
-        />
-      )}
-      {isLegacy && rows && rows.length > 0 && (
+      {isLegacy && (
         <>
-          {!hideAnnouncements && <DocumentExplorerCallout />}
-          <DocTableInfiniteMemoized
-            columns={currentColumns}
-            dataView={dataView}
-            rows={rows}
-            sort={sort || []}
-            isLoading={isDataLoading}
-            searchDescription={savedSearch.description}
-            sharedItemTitle={savedSearch.title}
-            isPlainRecord={isTextBasedQuery}
-            onAddColumn={onAddColumn}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onMoveColumn={onMoveColumn}
-            onRemoveColumn={onRemoveColumn}
-            onSort={!isTextBasedQuery ? onSort : undefined}
-            useNewFieldsApi={useNewFieldsApi}
-            dataTestSubj="discoverDocTable"
-          />
+          <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+          <div className="dscTable__legacyDocsTab">
+            {callouts}
+            {rows && rows.length > 0 && (
+              <>
+                {!hideAnnouncements && <DocumentExplorerCallout />}
+                <DocTableInfiniteMemoized
+                  columns={currentColumns}
+                  dataView={dataView}
+                  rows={rows}
+                  sort={sort || []}
+                  isLoading={isDataLoading}
+                  searchDescription={savedSearch.description}
+                  sharedItemTitle={savedSearch.title}
+                  isPlainRecord={isTextBasedQuery}
+                  onAddColumn={onAddColumn}
+                  onFilter={onAddFilter as DocViewFilterFn}
+                  onMoveColumn={onMoveColumn}
+                  onRemoveColumn={onRemoveColumn}
+                  onSort={!isTextBasedQuery ? onSort : undefined}
+                  useNewFieldsApi={useNewFieldsApi}
+                  dataTestSubj="discoverDocTable"
+                />
+              </>
+            )}
+            {loadingIndicator}
+          </div>
         </>
       )}
       {!isLegacy && (
         <>
-          {!hideAnnouncements && !isTextBasedQuery && (
-            <DiscoverTourProvider isPlainRecord={isTextBasedQuery}>
-              <DocumentExplorerUpdateCallout />
-            </DiscoverTourProvider>
-          )}
           <div className="unifiedDataTable">
             <CellActionsProvider
               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
@@ -353,15 +431,6 @@ function DiscoverDocumentsComponent({
             </CellActionsProvider>
           </div>
         </>
-      )}
-      {isDataLoading && (
-        <EuiProgress
-          data-test-subj="discoverDataGridUpdating"
-          size="xs"
-          color="accent"
-          position="absolute"
-          css={progressStyle}
-        />
       )}
     </EuiFlexItem>
   );

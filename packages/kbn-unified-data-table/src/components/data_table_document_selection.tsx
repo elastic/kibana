@@ -200,8 +200,9 @@ export function DataTableDocumentToolbarBtn({
           <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="unifiedDataTable.selectedDocumentsButtonLabel"
-                defaultMessage="Selected documents"
+                id="unifiedDataTable.selectedRowsButtonLabel"
+                defaultMessage="Selected"
+                description="Selected documents"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { renderCustomToolbar, getRenderCustomToolbarInEmbeddable } from './render_custom_toolbar';
+import React from 'react';
+import {
+  renderCustomToolbar,
+  getRenderCustomToolbarWithViewModeToggle,
+  getRenderCustomToolbarInEmbeddable,
+} from './render_custom_toolbar';
 
 describe('renderCustomToolbar', () => {
   it('should render successfully', () => {
@@ -30,6 +35,25 @@ describe('renderCustomToolbar', () => {
       renderCustomToolbar({
         toolbarProps: {
           hasRoomForGridControls: false,
+          columnControl: 'column',
+          columnSortingControl: 'columnSorting',
+          displayControl: 'display',
+          fullScreenControl: 'fullScreen',
+          keyboardShortcutsControl: 'keyboard',
+        },
+        gridProps: { additionalControls: 'additional' },
+      })
+    ).toMatchSnapshot();
+  });
+
+  it('should render correctly with an element', () => {
+    expect(
+      getRenderCustomToolbarWithViewModeToggle(
+        <div>left</div>,
+        <div>bottom</div>
+      )({
+        toolbarProps: {
+          hasRoomForGridControls: true,
           columnControl: 'column',
           columnSortingControl: 'columnSorting',
           displayControl: 'display',

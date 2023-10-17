@@ -1,9 +1,6 @@
 .dscGridToolbar {
   padding: $euiSizeS;
-
-  &--bottomBorder {
-    border-bottom: $euiBorderThin;
-  }
+  border-bottom: $euiBorderThin;
 }
 
 .dscGridToolbarControlButton .euiDataGrid__controlBtn {
@@ -61,5 +58,9 @@
 }
 
 .dscGridToolbar .euiTabs {
-  transform: translateY(10px);
+  transform: translateY(9px);
+}
+
+.dscGridToolbarBottom {
+  position: relative; // for placing a loading indicator correctly
 }
