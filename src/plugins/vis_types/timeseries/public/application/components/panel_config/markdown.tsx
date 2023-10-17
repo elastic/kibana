@@ -65,7 +65,7 @@ export class MarkdownPanelConfig extends Component<
     const lessSrc = `#markdown-${model.id} {${value}}`;
     lessC.render(
       lessSrc,
-      { compress: true, javascriptEnabled: false },
+      { compress: true, javascriptEnabled: false, disablePluginRule: true },
       (e: unknown, output: any) => {
         const parts: Writable<Pick<TimeseriesVisParams, 'markdown_less' | 'markdown_css'>> = {
           markdown_less: value,
