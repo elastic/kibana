@@ -84,13 +84,35 @@ describe('useTimeline', () => {
             {
               message: {
                 role: MessageRole.User,
-                content: 'Hello',
+                content: 'hello',
               },
             },
             {
               message: {
                 role: MessageRole.Assistant,
-                content: 'Goodbye',
+                content: '',
+                function_call: {
+                  name: 'recall',
+                  trigger: MessageRole.User,
+                },
+              },
+            },
+            {
+              message: {
+                name: 'recall',
+                role: MessageRole.User,
+                content: '',
+              },
+            },
+            {
+              message: {
+                content: 'goodbye',
+                function_call: {
+                  name: '',
+                  arguments: '',
+                  trigger: MessageRole.Assistant,
+                },
+                role: MessageRole.Assistant,
               },
             },
           ],
@@ -99,48 +121,98 @@ describe('useTimeline', () => {
           },
           chatService: {
             chat: () => {},
+            hasRenderFunction: () => {},
           },
         } as unknown as HookProps,
       });
     });
     it('renders the correct timeline items', () => {
-      expect(hookResult.result.current.items.length).toEqual(3);
+      expect(hookResult.result.current.items.length).toEqual(4);
 
       expect(hookResult.result.current.items[1]).toEqual({
-        actions: {
-          canCopy: true,
-          canEdit: true,
-          canRegenerate: false,
-          canGiveFeedback: false,
-        },
-        display: {
-          collapsed: false,
-          hide: false,
-        },
-        role: MessageRole.User,
-        content: 'Hello',
-        loading: false,
+        actions: { canCopy: true, canEdit: true, canGiveFeedback: false, canRegenerate: false },
+        content: 'hello',
+        currentUser: undefined,
+        display: { collapsed: false, hide: false },
+        element: undefined,
+        function_call: undefined,
         id: expect.any(String),
+        loading: false,
+        role: MessageRole.User,
         title: '',
       });
 
-      expect(hookResult.result.current.items[2]).toEqual({
-        display: {
-          collapsed: false,
-          hide: false,
+      expect(hookResult.result.current.items[3]).toEqual({
+        actions: { canCopy: true, canEdit: false, canGiveFeedback: false, canRegenerate: true },
+        content: 'goodbye',
+        currentUser: undefined,
+        display: { collapsed: false, hide: false },
+        element: undefined,
+        function_call: {
+          arguments: '',
+          name: '',
+          trigger: MessageRole.Assistant,
         },
-        actions: {
-          canCopy: true,
-          canEdit: false,
-          canRegenerate: true,
-          canGiveFeedback: false,
-        },
-        role: MessageRole.Assistant,
-        content: 'Goodbye',
-        loading: false,
         id: expect.any(String),
+        loading: false,
+        role: MessageRole.Assistant,
         title: '',
       });
+
+      // Items that are function calls are collapsed into an array.
+
+      // 'title' is a <FormattedMessage /> component. This throws Jest for a loop.
+      const collapsedItemsWithoutTitle = (
+        hookResult.result.current.items[2] as ChatTimelineItem[]
+      ).map(({ title, ...rest }) => rest);
+
+      expect(collapsedItemsWithoutTitle).toEqual([
+        {
+          display: {
+            collapsed: true,
+            hide: false,
+          },
+          actions: {
+            canCopy: true,
+            canEdit: true,
+            canRegenerate: false,
+            canGiveFeedback: false,
+          },
+          currentUser: undefined,
+          function_call: {
+            name: 'recall',
+            trigger: MessageRole.User,
+          },
+          role: MessageRole.User,
+          content: `\`\`\`
+{
+  \"name\": \"recall\"
+}
+\`\`\``,
+          loading: false,
+          id: expect.any(String),
+        },
+        {
+          display: {
+            collapsed: true,
+            hide: false,
+          },
+          actions: {
+            canCopy: true,
+            canEdit: false,
+            canRegenerate: false,
+            canGiveFeedback: false,
+          },
+          currentUser: undefined,
+          function_call: undefined,
+          role: MessageRole.User,
+          content: `\`\`\`
+{}
+\`\`\``,
+          loading: false,
+          id: expect.any(String),
+        },
+      ]);
     });
   });
 
@@ -456,7 +528,7 @@ describe('useTimeline', () => {
                 '@timestamp': expect.any(String),
                 message: {
                   content: 'Hello',
-                  role: 'user',
+                  role: MessageRole.User,
                 },
               },
             ],
