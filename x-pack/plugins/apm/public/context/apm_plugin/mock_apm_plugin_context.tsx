@@ -17,7 +17,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
@@ -127,11 +126,6 @@ const mockPlugin = {
   },
 };
 
-export const infraLocatorsMock: InfraLocators = {
-  logsLocator: sharePluginMock.createLocator(),
-  nodeLogsLocator: sharePluginMock.createLocator(),
-};
-
 export const observabilityLogExplorerLocatorsMock = {
   allDatasetsLocator: sharePluginMock.createLocator(),
   singleDatasetLocator: sharePluginMock.createLocator(),
@@ -159,9 +153,6 @@ export const mockApmPluginContextValue = {
   plugins: mockPlugin,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   corePlugins: mockCorePlugins,
-  infra: {
-    locators: infraLocatorsMock,
-  },
   deps: {},
   share: sharePluginMock.createSetupContract(),
   unifiedSearch: mockUnifiedSearch,
