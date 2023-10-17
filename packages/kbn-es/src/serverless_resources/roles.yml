@@ -393,6 +393,7 @@ soc_manager:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
+        - feature_indexPatterns.all # Detections Data Views
       resources: "*"
 
 detections_admin:
@@ -482,6 +483,7 @@ platform_engineer:
         - feature_fleet.all
         - feature_fleetv2.all
         - feature_osquery.all
+        - feature_indexPatterns.all # Detections Data Views
       resources: "*"
 
 endpoint_operations_analyst:

@@ -92,7 +92,6 @@ class DocLinks {
   public connectorsSlack: string;
   public connectorsTeams: string;
   public connectorsZoom: string;
-  public connectorsWorkplaceSearch: string;
   public consoleGuide: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
@@ -260,7 +259,6 @@ class DocLinks {
     this.connectorsSlack = '';
     this.connectorsTeams = '';
     this.connectorsZoom = '';
-    this.connectorsWorkplaceSearch = '';
     this.consoleGuide = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
@@ -418,6 +416,7 @@ class DocLinks {
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsNative = docLinks.links.enterpriseSearch.connectorsNative;
     this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
+    this.connectorsOneDrive = docLinks.links.enterpriseSearch.connectorsOneDrive;
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsOutlook = docLinks.links.enterpriseSearch.connectorsOutlook;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
@@ -429,7 +428,6 @@ class DocLinks {
     this.connectorsSlack = docLinks.links.enterpriseSearch.connectorsSlack;
     this.connectorsTeams = docLinks.links.enterpriseSearch.connectorsTeams;
     this.connectorsZoom = docLinks.links.enterpriseSearch.connectorsZoom;
-    this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.consoleGuide = docLinks.links.console.guide;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
