@@ -177,6 +177,7 @@
     "@kbn/core-application-common",
     "@kbn/openapi-generator",
     "@kbn/es",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/unified-doc-viewer-plugin"
   ]
 }

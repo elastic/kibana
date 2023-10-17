@@ -54,7 +54,13 @@ type Props = Omit<
 export const defaultExpression = {
   aggType: Aggregators.CUSTOM,
   comparator: Comparator.GT,
-  threshold: [],
+  metrics: [
+    {
+      name: 'A',
+      aggType: Aggregators.COUNT,
+    },
+  ],
+  threshold: [1000],
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
@@ -171,7 +177,7 @@ export default function Expressions(props: Props) {
     } else {
       return {
         metrics: [],
-        aggregation: 'avg',
+        aggregation: 'count',
       };
     }
   }, [metadata]);

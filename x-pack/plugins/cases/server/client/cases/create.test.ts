@@ -448,7 +448,7 @@ describe('create', () => {
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       },
       {
         key: 'second_key',
@@ -640,7 +640,7 @@ describe('create', () => {
               {
                 key: 'duplicated_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['this is a text field value', 'this is second'],
+                value: 'this is a text field value',
               },
               {
                 key: 'duplicated_key',
@@ -687,7 +687,7 @@ describe('create', () => {
               {
                 key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['this is a text field value', 'this is second'],
+                value: 'this is a text field value',
               },
             ],
           },
@@ -713,7 +713,7 @@ describe('create', () => {
               {
                 key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['foobar'],
+                value: 'foobar',
               },
             ],
           },
@@ -742,7 +742,7 @@ describe('create', () => {
         {
           key: 'first_customField_key',
           type: CustomFieldTypes.TEXT,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
         {
           key: 'second_customField_key',
