@@ -24,10 +24,6 @@ export const findingsMockData = [
       type: 'process',
     },
     cluster_id: 'Upper case cluster id',
-    event: {
-      ingested: '2023-08-19T18:20:41Z',
-      created: '2023-08-19T18:17:15.609124281Z',
-    },
   },
   {
     resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
@@ -44,10 +40,6 @@ export const findingsMockData = [
       type: 'process',
     },
     cluster_id: 'Another Upper case cluster id',
-    event: {
-      ingested: '2023-08-19T18:20:41Z',
-      created: '2023-08-19T18:17:15.609124281Z',
-    },
   },
 ];
 

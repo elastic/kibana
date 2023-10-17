@@ -75,7 +75,7 @@ export default function ({ getService }) {
         try {
           panels = JSON.parse(resp.body.attributes.panelsJSON);
         } catch (error) {
-          throw new Error('Unable to parse panelsJSON from dashboard saved object');
+          throw 'Unable to parse panelsJSON from dashboard saved object';
         }
         expect(panels.length).to.be(1);
         expect(panels[0].type).to.be('map');

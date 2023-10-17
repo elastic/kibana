@@ -13,9 +13,9 @@ import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 
-import { ordered, readableFactory, complete } from './load_utils';
+import { ordered, readableFactory, complete, warningToUpdateArchive } from './load_utils';
 import { createStats, createCreateIndexStream, indexDocRecordsWritable$ } from '../lib';
-
+import soOverrideAllowedList from '../fixtures/override_saved_objects_index/exception_list.json';
 export async function loadAction({
   inputDir,
   skipExisting,
@@ -34,6 +34,9 @@ export async function loadAction({
   kbnClient: KbnClient;
 }) {
   const name = relative(REPO_ROOT, inputDir);
+  const isArchiveInExceptionList = soOverrideAllowedList.includes(name);
+  if (isArchiveInExceptionList) log.warning(warningToUpdateArchive(name));
+
   const stats = createStats(name, log);
   const readable$Fns = readableFactory(log)(inputDir)(name);
   const mode = {
@@ -45,7 +48,14 @@ export async function loadAction({
     // order, so that createIndexStream can track the state of indexes
     // across archives and properly skip docs from existing indexes
     concatStreamProviders((await ordered(inputDir)).map(readable$Fns), mode),
-    createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
+    createCreateIndexStream({
+      client,
+      stats,
+      skipExisting,
+      docsOnly,
+      isArchiveInExceptionList,
+      log,
+    }),
     indexDocRecordsWritable$(client, stats, useCreate),
   ]);
 

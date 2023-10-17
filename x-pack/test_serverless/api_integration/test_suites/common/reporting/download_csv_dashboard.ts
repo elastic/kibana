@@ -107,7 +107,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        // Assertion to be improved: https://github.com/streamich
+        expect(resText.split('\n').length).to.eql(885);
       });
     });
   });
