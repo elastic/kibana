@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('should navigate to Home when navlink is clicked inside the defined category group', async () => {
       await appsMenu.clickLink('DL Home', { category: 'securitySolution' });
-
+      await navigateToAppLinks('dlAppHome');
       await waitForUrlToBe('/app/dl/home');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('dlAppHome');
