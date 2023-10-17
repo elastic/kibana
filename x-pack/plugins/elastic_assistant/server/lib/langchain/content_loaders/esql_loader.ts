@@ -9,6 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { join, resolve } from 'path';
+import { fromRoot } from '@kbn/repo-info';
 
 import * as fs from 'fs';
 
@@ -24,18 +25,25 @@ import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
  */
 export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Promise<boolean> => {
   try {
-    const docsLoader = new DirectoryLoader(
-      join(__dirname, '../../../knowledge_base/esql/docs'),
-      {
-        '.asciidoc': (path) => new TextLoader(path),
-      },
-      true
-    );
+    // If `isDist`, from `packages/core/apps/core-apps-server-internal/src/bundle_routes/register_bundle_routes.ts`
+    // /usr/share/kibana/node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/docs
     const joinPath = join(__dirname, '../../../knowledge_base/esql/language_definition');
     const resolvePath = resolve(__dirname, '../../../knowledge_base/esql/language_definition');
+    const resolveJoinPath = resolve(joinPath);
+    const fromRootPathDocs = fromRoot(
+      'node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/docs'
+    );
+    const fromRootPathLanguage = fromRoot(
+      'node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/language_definition'
+    );
+    const fromRootPathExample = fromRoot(
+      'node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/example_queries'
+    );
 
     logger.info(`esql_loader joinPath\n${joinPath}`);
     logger.info(`esql_loader resolvePath\n${resolvePath}`);
+    logger.info(`esql_loader resolveJoinPath\n${resolveJoinPath}`);
+    logger.info(`esql_loader fromRootPathDocs\n${fromRootPathDocs}`);
 
     if (fs.existsSync(resolvePath)) {
       logger.info(`esql_loader the resolvePath exists`);
@@ -43,8 +51,16 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       logger.info(`esql_loader the resolvePath does NOT exist`);
     }
 
+    const docsLoader = new DirectoryLoader(
+      fromRootPathDocs,
+      {
+        '.asciidoc': (path) => new TextLoader(path),
+      },
+      true
+    );
+
     const languageLoader = new DirectoryLoader(
-      join(__dirname, '../../../knowledge_base/esql/language_definition'),
+      fromRootPathLanguage,
       {
         '.g4': (path) => new TextLoader(path),
         '.tokens': (path) => new TextLoader(path),
@@ -53,7 +69,7 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
     );
 
     const exampleQueriesLoader = new DirectoryLoader(
-      join(__dirname, '../../../knowledge_base/esql/example_queries'),
+      fromRootPathExample,
       {
         '.asciidoc': (path) => new TextLoader(path),
       },
