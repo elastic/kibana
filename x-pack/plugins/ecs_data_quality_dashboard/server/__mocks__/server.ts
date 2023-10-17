@@ -5,13 +5,7 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import type {
-  IRouter,
-  RouteMethod,
-  RequestHandler,
-  RouteConfig,
-  KibanaRequest,
-} from '@kbn/core/server';
+import type { IRouter, RouteMethod, RequestHandler, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
@@ -22,14 +16,14 @@ import { requestContextMock } from './request_context';
 import { responseAdapter } from './test_adapters';
 
 interface Route {
-  config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;
+  config: AddVersionOpts<unknown, unknown, unknown>;
   handler: RequestHandler;
 }
 
 interface RegisteredVersionedRoute {
   routeConfig: VersionedRouteConfig<RouterMethod>;
-  versionConfig: AddVersionOpts<any, any, any>;
-  routeHandler: RequestHandler<any, any, any, any, any>;
+  versionConfig: AddVersionOpts<unknown, unknown, unknown>;
+  routeHandler: RequestHandler;
 }
 
 type RouterMethod = Extract<keyof IRouter, RouteMethod>;
@@ -77,21 +71,15 @@ const getRoute = (routerMock: MockServer['router'], request: KibanaRequest): Rou
   if (!route && !versionedRoute) {
     throw new Error('No route registered!');
   }
-  console.log(3, '00000-----', versionedRoute, request.headers.version);
 
-  if (versionedRoute && typeof request.headers.version === 'string') {
-    const { routeConfig, routeHandler, versionConfig } = getRegisteredVersionedRouteMock(
-      routerMock,
-      request.route.method,
-      request.route.path,
-      request.headers.version
-    );
+  const { routeHandler, versionConfig } = getRegisteredVersionedRouteMock(
+    routerMock,
+    request.route.method,
+    request.route.path,
+    typeof request.headers.version === 'string' ? request.headers.version : ''
+  );
 
-    return { config: { ...routeConfig, ...versionConfig }, handler: routeHandler };
-  } else {
-    const [config, handler] = route;
-    return { config, handler };
-  }
+  return { config: versionConfig, handler: routeHandler };
 };
 
 const buildResultMock = () => ({ ok: jest.fn((x) => x), badRequest: jest.fn((x) => x) });
@@ -110,11 +98,7 @@ class MockServer {
   }
 
   public async inject(request: KibanaRequest, context: RequestHandlerContext = this.contextMock) {
-    console.log(request.route.method, request.route.path, request.headers.version, '------');
-
     const validatedRequest = this.validateRequest(request);
-
-    console.log(2, '------');
 
     const [rejection] = this.resultMock.badRequest.mock.calls;
     if (rejection) {
@@ -137,8 +121,7 @@ class MockServer {
 
   private validateRequest(request: KibanaRequest): KibanaRequest {
     const config = this.getRoute(request).config;
-    console.log('--validateRequest---', config);
-    const validations = config.validate.request;
+    const validations = config.validate && config.validate?.request;
     if (!validations) {
       return request;
     }

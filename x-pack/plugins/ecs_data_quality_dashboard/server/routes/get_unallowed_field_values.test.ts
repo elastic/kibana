@@ -30,6 +30,9 @@ describe('getUnallowedFieldValuesRoute route', () => {
         allowedValues: ['process'],
       },
     ],
+    headers: {
+      version: '1',
+    },
   });
 
   beforeEach(() => {
@@ -124,6 +127,9 @@ describe('request validation', () => {
           allowedValues: [{ name: 'process' }],
         },
       ],
+      headers: {
+        version: '1',
+      },
     });
     const result = server.validate(request);
 

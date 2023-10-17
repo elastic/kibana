@@ -406,6 +406,7 @@ describe('helpers', () => {
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: abortController.signal,
+          version: '1',
         }
       );
     });
