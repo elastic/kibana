@@ -82,7 +82,7 @@ Object {
       },
       "script": Object {
         "lang": "painless",
-        "source": "params.A + params.B + params.C + params.D + params.E",
+        "source": "(params.A + params.B + params.C + params.D + params.E) / params.A",
       },
     },
   },

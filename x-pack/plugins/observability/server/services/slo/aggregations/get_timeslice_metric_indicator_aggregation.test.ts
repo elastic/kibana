@@ -39,7 +39,7 @@ describe('GetTimesliceMetricIndicatorAggregation', () => {
           field: 'test.field',
         },
       ],
-      'A + B + C + D + E'
+      '(A + B + C + D + E) / A'
     );
     const getIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(indicator);
     expect(getIndicatorAggregation.execute('_metric')).toMatchSnapshot();
