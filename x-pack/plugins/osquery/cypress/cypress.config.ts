@@ -22,7 +22,7 @@ const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as 
 export default defineCypressConfig({
   reporter: '../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: './public/management/reporter_config.json',
+    configFile: './cypress/reporter_config.json',
   },
 
   defaultCommandTimeout: 60000,
