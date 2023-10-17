@@ -188,7 +188,7 @@ export class DataRecognizer {
     });
   }
 
-  private async _loadConfigs(moduleTypeFilters?: string[]): Promise<Config[]> {
+  private async _loadConfigs(moduleTagFilters?: string[]): Promise<Config[]> {
     if (this._configCache !== null) {
       return this._configCache;
     }
@@ -226,7 +226,7 @@ export class DataRecognizer {
     this._configCache = filterConfigs(
       [...localConfigs, ...savedObjectConfigs],
       this._compatibleModuleType,
-      moduleTypeFilters ?? []
+      moduleTagFilters ?? []
     );
 
     return this._configCache;
@@ -242,17 +242,17 @@ export class DataRecognizer {
   }
 
   // get the manifest.json file for a specified id, e.g. "nginx"
-  private async _findConfig(id: string, moduleTypeFilters?: string[]) {
-    const configs = await this._loadConfigs(moduleTypeFilters);
+  private async _findConfig(id: string, moduleTagFilters?: string[]) {
+    const configs = await this._loadConfigs(moduleTagFilters);
     return configs.find((i) => i.module.id === id);
   }
 
   // called externally by an endpoint
   public async findMatches(
     indexPattern: string,
-    moduleTypeFilters?: string[]
+    moduleTagFilters?: string[]
   ): Promise<RecognizeResult[]> {
-    const manifestFiles = await this._loadConfigs(moduleTypeFilters);
+    const manifestFiles = await this._loadConfigs(moduleTagFilters);
     const results: RecognizeResult[] = [];
 
     await Promise.all(
@@ -321,8 +321,8 @@ export class DataRecognizer {
     return body.hits.total.value > 0;
   }
 
-  public async listModules(moduleTypeFilters?: string[]): Promise<Module[]> {
-    const manifestFiles = await this._loadConfigs(moduleTypeFilters);
+  public async listModules(moduleTagFilters?: string[]): Promise<Module[]> {
+    const manifestFiles = await this._loadConfigs(moduleTagFilters);
     manifestFiles.sort((a, b) => a.module.id.localeCompare(b.module.id)); // sort as json files are read from disk and could be in any order.
 
     const configs: Array<Module | FileBasedModule> = [];
@@ -330,7 +330,7 @@ export class DataRecognizer {
       if (config.isSavedObject) {
         configs.push(config.module);
       } else {
-        configs.push(await this.getModule(config.module.id, moduleTypeFilters));
+        configs.push(await this.getModule(config.module.id, moduleTagFilters));
       }
     }
     // casting return as Module[] so not to break external plugins who rely on this function
@@ -341,11 +341,11 @@ export class DataRecognizer {
   // called externally by an endpoint
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
-  public async getModule(id: string, moduleTypeFilters?: string[], prefix = ''): Promise<Module> {
+  public async getModule(id: string, moduleTagFilters?: string[], prefix = ''): Promise<Module> {
     let module: FileBasedModule | Module | null = null;
     let dirName: string | null = null;
 
-    const config = await this._findConfig(id, moduleTypeFilters);
+    const config = await this._findConfig(id, moduleTagFilters);
     if (config !== undefined) {
       module = config.module;
       dirName = config.dirName ?? null;
@@ -1423,10 +1423,10 @@ export function dataRecognizerFactory(
 export function filterConfigs(
   configs: Config[],
   compatibleModuleType: CompatibleModule | null,
-  moduleTypeFilters: string[]
+  moduleTagFilters: string[]
 ) {
   let filteredConfigs: Config[] = [];
-  if (compatibleModuleType === null && moduleTypeFilters.length === 0) {
+  if (compatibleModuleType === null && moduleTagFilters.length === 0) {
     filteredConfigs = configs;
   } else {
     const filteredForCompatibleModule =
@@ -1440,7 +1440,7 @@ export function filterConfigs(
             return module.tags.includes(compatibleModuleType!);
           });
     const filteredForModuleTypeFilters =
-      moduleTypeFilters.length === 0
+      moduleTagFilters.length === 0
         ? filteredForCompatibleModule
         : filteredForCompatibleModule.filter(({ module }) => {
             if (module.tags === undefined || module.tags.length === 0) {
@@ -1448,7 +1448,7 @@ export function filterConfigs(
               // if the module has no tags, it should be filtered out from the results
               return false;
             }
-            return intersection(module.tags, moduleTypeFilters).length > 0;
+            return intersection(module.tags, moduleTagFilters).length > 0;
           });
     filteredConfigs = filteredForModuleTypeFilters;
   }

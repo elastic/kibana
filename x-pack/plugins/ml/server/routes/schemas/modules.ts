@@ -100,6 +100,6 @@ export const recognizeModulesSchema = schema.object({
   indexPatternTitle: schema.string(),
 });
 
-export const moduleTypeSchema = schema.object({
-  types: schema.maybe(schema.string()),
+export const moduleFilterSchema = schema.object({
+  filter: schema.maybe(schema.string()),
 });

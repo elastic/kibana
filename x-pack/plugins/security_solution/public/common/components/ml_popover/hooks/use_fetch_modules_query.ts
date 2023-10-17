@@ -20,7 +20,7 @@ export const useFetchModulesQuery = (
 ) => {
   return useQuery<Module[]>(
     [GET_MODULES_QUERY_KEY, queryArgs],
-    async ({ signal }) => getModules({ signal, ...queryArgs }),
+    async ({ signal }) => getModules({ signal, moduleFilter: 'security', ...queryArgs }),
     {
       refetchIntervalInBackground: false,
       staleTime: ONE_MINUTE * 5,

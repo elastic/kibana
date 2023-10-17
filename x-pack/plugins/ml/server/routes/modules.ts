@@ -12,7 +12,7 @@ import { wrapError } from '../client/error_wrapper';
 import { dataRecognizerFactory } from '../models/data_recognizer';
 import {
   moduleIdParamSchema,
-  moduleTypeSchema,
+  moduleFilterSchema,
   optionalModuleIdParamSchema,
   recognizeModulesSchema,
   setupModuleBodySchema,
@@ -68,7 +68,7 @@ export function dataRecognizer(
         validate: {
           request: {
             params: recognizeModulesSchema,
-            query: moduleTypeSchema,
+            query: moduleFilterSchema,
           },
         },
       },
@@ -84,7 +84,7 @@ export function dataRecognizer(
         }) => {
           try {
             const { indexPatternTitle } = request.params;
-            const types = request.query.types?.split(',');
+            const filter = request.query.filter?.split(',');
             const soClient = (await context.core).savedObjects.client;
             const dataViewsService = await getDataViewsService();
 
@@ -97,7 +97,7 @@ export function dataRecognizer(
               request,
               compatibleModuleType
             );
-            const results = await dr.findMatches(indexPatternTitle, types);
+            const results = await dr.findMatches(indexPatternTitle, filter);
 
             return response.ok({ body: results });
           } catch (e) {
@@ -229,7 +229,7 @@ export function dataRecognizer(
         validate: {
           request: {
             params: optionalModuleIdParamSchema,
-            query: moduleTypeSchema,
+            query: moduleFilterSchema,
           },
         },
       },
@@ -245,7 +245,7 @@ export function dataRecognizer(
         }) => {
           try {
             let { moduleId } = request.params;
-            const types = request.query.types?.split(',');
+            const filter = request.query.filter?.split(',');
             if (moduleId === '') {
               // if the endpoint is called with a trailing /
               // the moduleId will be an empty string.
@@ -266,8 +266,8 @@ export function dataRecognizer(
 
             const results =
               moduleId === undefined
-                ? await dr.listModules(types)
-                : await dr.getModule(moduleId, types);
+                ? await dr.listModules(filter)
+                : await dr.getModule(moduleId, filter);
 
             return response.ok({ body: results });
           } catch (e) {

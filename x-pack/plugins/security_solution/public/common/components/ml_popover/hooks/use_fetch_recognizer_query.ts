@@ -20,7 +20,7 @@ export const useFetchRecognizerQuery = (
 ) => {
   return useQuery<RecognizerModule[]>(
     [GET_RECOGNIZER_QUERY_KEY, queryArgs],
-    async ({ signal }) => checkRecognizer({ signal, moduleType: 'security', ...queryArgs }),
+    async ({ signal }) => checkRecognizer({ signal, moduleFilter: 'security', ...queryArgs }),
     {
       refetchIntervalInBackground: false,
       staleTime: ONE_MINUTE * 5,

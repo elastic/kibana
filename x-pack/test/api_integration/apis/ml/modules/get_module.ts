@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body, status } = await supertest
       .get(`/internal/ml/modules/get_module/${module}`)
       .query({
-        types: moduleTypes.length ? moduleTypes.join(',') : undefined,
+        filter: moduleTypes.length ? moduleTypes.join(',') : undefined,
       })
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(getCommonRequestHeader('1'));
