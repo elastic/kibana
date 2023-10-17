@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../common/types/api';
 
@@ -34,6 +34,7 @@ import { BetaConnectorCallout } from '../../../../shared/beta/beta_connector_cal
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { HttpLogic } from '../../../../shared/http/http_logic';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 
@@ -49,20 +50,20 @@ import { IndexViewLogic } from '../index_view_logic';
 import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
-import { ConnectorConfigurationConfig } from './connector_configuration_config';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
 import { BETA_CONNECTORS, CONNECTORS, getConnectorTemplate } from './constants';
 import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { hasDocumentLevelSecurityFeature, index, recheckIndexLoading } = useValues(IndexViewLogic);
+  const { index, recheckIndexLoading } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { recheckIndex } = useActions(IndexViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
+  const { http } = useValues(HttpLogic);
 
   if (!isConnectorIndex(index)) {
     return <></>;
@@ -197,14 +198,10 @@ export const ConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: (
-                    <ConnectorConfigurationConfig
-                      configuration={index.connector.configuration}
-                      connectorStatus={index.connector.status}
-                      error={index.connector.error || ''}
-                      hasDocumentLevelSecurity={hasDocumentLevelSecurityFeature}
+                    <ConnectorConfigurationComponent
+                      connector={index.connector}
                       hasPlatinumLicense={hasPlatinumLicense}
                       isLoading={status === Status.LOADING}
-                      isNative={index.connector.is_native}
                       saveConfig={(configuration) =>
                         makeRequest({
                           configuration,
@@ -212,6 +209,10 @@ export const ConnectorConfiguration: React.FC = () => {
                           indexName: index.name,
                         })
                       }
+                      subscriptionLink={docLinks.licenseManagement}
+                      stackManagementLink={http.basePath.prepend(
+                        '/app/management/stack/license_management'
+                      )}
                     >
                       {!index.connector.status ||
                       index.connector.status === ConnectorStatus.CREATED ? (
@@ -260,7 +261,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                         />
                       )}
-                    </ConnectorConfigurationConfig>
+                    </ConnectorConfigurationComponent>
                   ),
                   status:
                     index.connector.status === ConnectorStatus.CONNECTED

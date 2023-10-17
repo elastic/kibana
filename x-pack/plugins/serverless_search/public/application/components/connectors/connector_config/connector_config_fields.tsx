@@ -7,19 +7,27 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConnectorConfiguration, ConnectorStatus } from '@kbn/search-connectors';
-import React from 'react';
+import { Connector, ConnectorConfigurationComponent } from '@kbn/search-connectors';
+import { useQueryClient } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
+import { useConnector } from '../../../hooks/api/use_connector';
+import { useEditConnectorConfiguration } from '../../../hooks/api/use_connector_configuration';
 
 interface ConnectorConfigFieldsProps {
-  configuration: ConnectorConfiguration;
-  connectorId: string;
-  status: ConnectorStatus;
+  connector: Connector;
 }
 
-export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({
-  configuration,
-  connectorId,
-}) => {
+export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({ connector }) => {
+  const { data, isLoading, isSuccess, mutate, reset } = useEditConnectorConfiguration(connector.id);
+  const { queryKey } = useConnector(connector.id);
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.setQueryData(queryKey, { connector: { ...connector, configuration: data } });
+      queryClient.invalidateQueries(queryKey);
+      reset();
+    }
+  }, [data, isSuccess, connector, queryClient, queryKey, reset]);
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiFlexItem>
@@ -39,7 +47,14 @@ export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({
           })}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem />
+      <EuiFlexItem>
+        <ConnectorConfigurationComponent
+          connector={connector}
+          hasPlatinumLicense={false}
+          isLoading={isLoading}
+          saveConfig={mutate}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

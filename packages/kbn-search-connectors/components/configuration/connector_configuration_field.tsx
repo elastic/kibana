@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import {
   EuiAccordion,
@@ -23,27 +24,25 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { DisplayType } from '@kbn/search-connectors';
+import { DisplayType } from '../..';
 
-import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
-
-import { ConfigEntryView } from './connector_configuration_config';
-import { DocumentLevelSecurityPanel } from './document_level_security/document_level_security_panel';
-import { ensureBooleanType, ensureStringType } from './utils/connector_configuration_utils';
+import { ConfigEntryView, LicenseContext } from './connector_configuration';
+import { DocumentLevelSecurityPanel } from './document_level_security_panel';
+import { ensureBooleanType, ensureStringType } from '../../utils/connector_configuration_utils';
+import { PlatinumLicensePopover } from './platinum_license_popover';
 
 interface ConnectorConfigurationFieldProps {
   configEntry: ConfigEntryView;
-  hasPlatinumLicense: boolean;
   isLoading: boolean;
   setConfigValue: (value: number | string | boolean) => void;
 }
 
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
   configEntry,
-  hasPlatinumLicense,
   isLoading,
   setConfigValue,
 }) => {
+  const { hasPlatinumLicense, stackManagementLink, subscriptionLink } = useContext(LicenseContext);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
@@ -156,7 +155,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                       button={
                         <EuiButtonIcon
                           aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
+                            'xpack.serverlessSearch.connectors.openPopoverLabel',
                             {
                               defaultMessage: 'Open licensing popover',
                             }
@@ -167,6 +166,8 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                       }
                       closePopover={() => setIsPopoverOpen(false)}
                       isPopoverOpen={isPopoverOpen}
+                      stackManagementHref={stackManagementLink}
+                      subscriptionLink={subscriptionLink}
                     />
                   </EuiFlexItem>
                 )}

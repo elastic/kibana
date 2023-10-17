@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,13 +13,13 @@ import {
   Dependency,
   FieldType,
   isConfigEntry,
-} from '@kbn/search-connectors';
+} from '..';
 
-import { isCategoryEntry } from '../../../../../../../common/connectors/is_category_entry';
+import { ConfigEntryView, ConfigView } from '../components/configuration/connector_configuration';
 
-import { isNotNullish } from '../../../../../../../common/utils/is_not_nullish';
+import { isCategoryEntry } from './is_category_entry';
 
-import type { ConfigEntryView, ConfigView } from '../connector_configuration_logic';
+import { isNotNullish } from './is_not_nullish';
 
 export type ConnectorConfigEntry = ConnectorConfigProperties & { key: string };
 
@@ -153,6 +154,13 @@ export const sortAndFilterConnectorConfiguration = (
   config: ConnectorConfiguration,
   isNative: boolean
 ): ConfigView => {
+  if (!config) {
+    return {
+      advancedConfigurations: [],
+      categories: [],
+      unCategorizedItems: [],
+    };
+  }
   // This casting is ugly but makes all of the iteration below work for TypeScript
   // extract_full_html is only defined for crawlers, who don't use this config screen
   // we explicitly filter it out as well

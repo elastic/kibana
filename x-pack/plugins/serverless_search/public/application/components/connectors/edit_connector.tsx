@@ -16,8 +16,6 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +31,7 @@ import { EditServiceType } from './edit_service_type';
 import { EditDescription } from './edit_description';
 import { DeleteConnectorModal } from './delete_connector_modal';
 import { ConnectorConfiguration } from './connector_config/connector_configuration';
+import { useConnector } from '../../hooks/api/use_connector';
 
 export const EditConnector: React.FC = () => {
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
@@ -43,14 +42,9 @@ export const EditConnector: React.FC = () => {
   useEffect(() => setDeleteModalIsOpen(false), [id, setDeleteModalIsOpen]);
   const {
     application: { navigateToUrl },
-    http,
   } = useKibanaServices();
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: [`fetchConnector${id}`],
-    queryFn: () =>
-      http.fetch<{ connector: Connector }>(`/internal/serverless_search/connector/${id}`),
-  });
+  const { data, isLoading, refetch } = useConnector(id);
 
   if (isLoading) {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">

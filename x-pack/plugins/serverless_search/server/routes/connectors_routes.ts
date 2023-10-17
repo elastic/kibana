@@ -244,9 +244,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
       );
 
       return response.ok({
-        body: {
-          result,
-        },
+        body: result,
         headers: { 'content-type': 'application/json' },
       });
     }

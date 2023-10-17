@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -24,7 +25,7 @@ export const DocumentLevelSecurityPanel: React.FC<DocumentLevelSecurityPanelProp
         <EuiTitle>
           <h4>
             {i18n.translate(
-              'xpack.enterpriseSearch.connector.documentLevelSecurity.enablePanel.heading',
+              'xpack.serverlessSearch.connector.documentLevelSecurity.enablePanel.heading',
               { defaultMessage: 'Document Level Security' }
             )}
           </h4>
@@ -33,7 +34,7 @@ export const DocumentLevelSecurityPanel: React.FC<DocumentLevelSecurityPanelProp
         <EuiText size="s">
           <p>
             {i18n.translate(
-              'xpack.enterpriseSearch.connector.documentLevelSecurity.enablePanel.description',
+              'xpack.serverlessSearch.connector.documentLevelSecurity.enablePanel.description',
               {
                 defaultMessage:
                   'Enables you to control which documents users can access, based on their permissions. This ensures search results only return relevant, authorized information for users, based on their roles.',

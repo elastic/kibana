@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -21,16 +22,17 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConfigView } from './connector_configuration_config';
+import { ConfigView } from './connector_configuration';
 import { ConnectorConfigurationFormItems } from './connector_configuration_form_items';
 
 interface ConnectorConfigurationForm {
   cancelEditing: () => void;
   configView: ConfigView;
   hasDocumentLevelSecurity: boolean;
-  hasPlatinumLicense: boolean;
   isLoading: boolean;
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
+  stackManagementHref?: string;
+  subscriptionLink?: string;
 }
 
 function configViewToConfigValues(
@@ -50,14 +52,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
   cancelEditing,
   configView,
   hasDocumentLevelSecurity,
-  hasPlatinumLicense,
   isLoading,
   saveConfig,
 }) => {
   const [configValues, setConfigValues] = useState<
     Record<string, string | number | boolean | null>
   >({});
-  useEffect(() => setConfigValues(configViewToConfigValues(configView)), [configView]);
+  useEffect(() => {
+    setConfigValues(configViewToConfigValues(configView));
+  }, [configView]);
 
   return (
     <EuiForm
@@ -68,11 +71,13 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
       component="form"
     >
       <ConnectorConfigurationFormItems
-        hasPlatinumLicense={hasPlatinumLicense}
         isLoading={isLoading}
         items={configView.unCategorizedItems}
         hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
-        setConfigEntry={(key, value) => setConfigValues({ ...configValues, [key]: value })}
+        setConfigEntry={(key, value) => {
+          setConfigValues({ ...configValues, [key]: value });
+        }}
+        values={configValues}
       />
       {configView.categories.map((category, index) => (
         <React.Fragment key={index}>
@@ -82,11 +87,13 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
           </EuiTitle>
           <EuiSpacer />
           <ConnectorConfigurationFormItems
-            hasPlatinumLicense={hasPlatinumLicense}
             isLoading={isLoading}
             items={category.configEntries}
             hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
-            setConfigEntry={(key, value) => setConfigValues({ ...configValues, [key]: value })}
+            setConfigEntry={(key, value) => {
+              setConfigValues({ ...configValues, [key]: value });
+            }}
+            values={configValues}
           />
         </React.Fragment>
       ))}
@@ -96,18 +103,20 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
           <EuiTitle size="xs">
             <h4>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.config.advancedConfigurations.title',
+                'xpack.serverlessSearch.configurationConnector.config.advancedConfigurations.title',
                 { defaultMessage: 'Advanced Configurations' }
               )}
             </h4>
           </EuiTitle>
           <EuiPanel color="subdued">
             <ConnectorConfigurationFormItems
-              hasPlatinumLicense={hasPlatinumLicense}
               isLoading={isLoading}
               items={configView.advancedConfigurations}
               hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
-              setConfigEntry={(key, value) => setConfigValues({ ...configValues, [key]: value })}
+              setConfigEntry={(key, value) => {
+                setConfigValues({ ...configValues, [key]: value });
+              }}
+              values={configValues}
             />
           </EuiPanel>
         </React.Fragment>
@@ -123,7 +132,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               isLoading={isLoading}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.config.submitButton.title',
+                'xpack.serverlessSearch.configurationConnector.config.submitButton.title',
                 {
                   defaultMessage: 'Save configuration',
                 }
@@ -139,7 +148,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               }}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.config.cancelEditingButton.title',
+                'xpack.serverlessSearch.configurationConnector.config.cancelEditingButton.title',
                 {
                   defaultMessage: 'Cancel',
                 }
