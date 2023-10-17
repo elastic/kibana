@@ -133,6 +133,7 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
               )
             );
           }}
+          locale={i18n.getLocale()}
         />
         <Metric id={`${slo?.id}-${slo?.instanceId}`} data={[metricData]} />
       </Chart>
