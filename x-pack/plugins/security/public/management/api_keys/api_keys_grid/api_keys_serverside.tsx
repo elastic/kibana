@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn, Query, SearchFilterConfig } from '@elastic/eui';
 import {
   Criteria,
   EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiInMemoryTable,
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  Query,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
