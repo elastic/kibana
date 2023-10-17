@@ -57,6 +57,7 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [
@@ -132,6 +133,7 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [
@@ -188,6 +190,7 @@ export class GetPreviewData {
     const timestampField = indicator.params.timestampField;
     const options = {
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
@@ -230,6 +233,7 @@ export class GetPreviewData {
     const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(indicator);
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
@@ -273,6 +277,7 @@ export class GetPreviewData {
     );
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
@@ -307,6 +312,7 @@ export class GetPreviewData {
     const timestampField = indicator.params.timestampField;
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
