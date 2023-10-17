@@ -23,7 +23,6 @@
     "@kbn/ml-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/observability-plugin",
-    "@kbn/logs-shared-plugin",
     "@kbn/core-http-server",
     "@kbn/datemath",
     "@kbn/es-types",

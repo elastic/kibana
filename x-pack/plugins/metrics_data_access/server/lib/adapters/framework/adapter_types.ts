@@ -24,7 +24,6 @@ import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plu
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { LogsSharedPluginSetup, LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
 import { VersionedRouteConfig } from '@kbn/core-http-server';
 import { MetricsDataPluginSetup } from '../../../types';
 
@@ -40,14 +39,12 @@ export interface InfraServerPluginSetupDeps {
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
   ml?: MlPluginSetup;
-  logsShared: LogsSharedPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
-  logsShared: LogsSharedPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {
