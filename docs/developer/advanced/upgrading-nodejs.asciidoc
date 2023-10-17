@@ -46,8 +46,8 @@ The only difference between the offical Node.js build and our custom build, is t
 [[start-new-nodejs-build]]
 ==== How to start a new build
 
-To generate a new custom Node.js build, start the "https://buildkite.com/elastic/kibana-custom-node-dot-js-builds#new[custom node.js builds]" Buildkite pipeline.
-Remember so set the custom `OVERRIDE_TARGET_VERSION` environment variable to the desired Node.js version - e.g. `OVERRIDE_TARGET_VERSION=18.18.2`.
+To generate a new custom Node.js build, https://buildkite.com/elastic/kibana-custom-node-dot-js-builds#new[start a new build] on our dedicated Buildkite pipeline (requires Elastic employee permissions).
+Give it a clear name (e.g. `Node 18.18.2`) and remember so set the custom `OVERRIDE_TARGET_VERSION` environment variable to the desired Node.js version - e.g. `OVERRIDE_TARGET_VERSION=18.18.2`.
 You find the "Environment Variables" field by expanding "Options >" in the "New Build" dialog.
 
 === Backporting
