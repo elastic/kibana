@@ -86,9 +86,9 @@ export interface AiopsAppDependencies {
    */
   unifiedSearch: UnifiedSearchPublicPluginStart;
   /**
-   * Unified search.
+   * Usage collection.
    */
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
   /**
    * Used to create deep links to other plugins.
    */
