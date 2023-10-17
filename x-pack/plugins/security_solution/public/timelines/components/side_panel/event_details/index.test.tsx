@@ -73,6 +73,18 @@ jest.mock(
   }
 );
 
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_get_user_profiles', () => {
+  return {
+    useGetUserProfiles: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
+  };
+});
+
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_suggest_users', () => {
+  return {
+    useSuggestUsers: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
+  };
+});
+
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
