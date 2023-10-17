@@ -27,5 +27,6 @@
     "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/metrics-data-access-plugin",
   ]
 }
