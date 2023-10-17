@@ -12,10 +12,17 @@ import { FlyoutFooter } from '../../../timelines/components/side_panel/event_det
 import { useRightPanelContext } from './context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
 
+interface PanelFooterProps {
+  /**
+   * Boolean that indicates whether footer is read only and action should be hidden
+   */
+  isReadOnly: boolean;
+}
+
 /**
  *
  */
-export const PanelFooter: FC = () => {
+export const PanelFooter: FC<PanelFooterProps> = ({ isReadOnly }) => {
   const { closeFlyout, openRightPanel } = useExpandableFlyoutContext();
   const {
     eventId,
@@ -50,7 +57,7 @@ export const PanelFooter: FC = () => {
       detailsEcsData={dataAsNestedObject}
       handleOnEventClosed={closeFlyout}
       isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-      isReadOnly={false}
+      isReadOnly={isReadOnly}
       loadingEventDetails={false}
       onAddIsolationStatusClick={showHostIsolationPanelCallback}
       scopeId={scopeId}

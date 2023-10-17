@@ -111,6 +111,15 @@ describe('<Description />', () => {
       expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
     });
 
+    it('should render rule preview button as disabled if flyout is in preview', () => {
+      const { getByTestId } = renderDescription({
+        ...panelContextValue([{ ...ruleUuid, values: [] }, ruleName, ruleDescription]),
+        isPreview: true,
+      });
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
+    });
+
     it('should open preview panel when clicking on button', () => {
       const panelContext = panelContextValue([ruleUuid, ruleDescription, ruleName]);
 

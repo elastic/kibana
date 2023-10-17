@@ -40,7 +40,7 @@ export interface HeaderTitleProps {
  * Document details flyout right section header
  */
 export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) => {
-  const { dataFormattedForFieldBrowser, eventId, indexName } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, eventId, indexName, isPreview } = useRightPanelContext();
   const { isAlert, ruleName, timestamp } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
@@ -120,10 +120,12 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
         </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" gutterSize={isAlert ? 'm' : 'none'}>
-        <EuiFlexItem grow={false}>
-          <DocumentStatus />
-        </EuiFlexItem>
+      <EuiFlexGroup direction="row">
+        {isAlert && !isPreview && (
+          <EuiFlexItem grow={false}>
+            <DocumentStatus />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
         </EuiFlexItem>

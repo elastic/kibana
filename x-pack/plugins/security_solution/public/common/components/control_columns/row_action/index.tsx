@@ -98,9 +98,7 @@ const RowActionComponent = ({
       },
     };
 
-    // TODO remove when https://github.com/elastic/security-team/issues/7760 is merged
-    // excluding rule preview page as some sections in new flyout are not applicable when user is creating a new rule
-    if (isSecurityFlyoutEnabled && tableId !== TableId.rulePreview) {
+    if (isSecurityFlyoutEnabled) {
       openFlyout({
         right: {
           id: RightPanelKey,

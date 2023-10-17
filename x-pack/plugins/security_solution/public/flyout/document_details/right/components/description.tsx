@@ -27,7 +27,8 @@ import { PreviewPanelKey, type PreviewPanelProps, RulePreviewPanel } from '../..
  * If the document is an alert we show the rule description. If the document is of another type, we show -.
  */
 export const Description: FC = () => {
-  const { dataFormattedForFieldBrowser, scopeId, eventId, indexName } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
+    useRightPanelContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
@@ -71,7 +72,7 @@ export const Description: FC = () => {
               defaultMessage: 'Show rule summary',
             }
           )}
-          disabled={isEmpty(ruleName) || isEmpty(ruleId)}
+          disabled={isEmpty(ruleName) || isEmpty(ruleId) || isPreview}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel"
@@ -80,7 +81,7 @@ export const Description: FC = () => {
         </EuiButtonEmpty>
       </EuiFlexItem>
     ),
-    [ruleName, openRulePreview, ruleId]
+    [ruleName, openRulePreview, ruleId, isPreview]
   );
 
   const alertRuleDescription =

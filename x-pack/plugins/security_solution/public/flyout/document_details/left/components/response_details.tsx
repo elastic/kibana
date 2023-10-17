@@ -24,7 +24,7 @@ const ExtendedFlyoutWrapper = styled.div`
  * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
  */
 export const ResponseDetails: React.FC = () => {
-  const { searchHit, dataAsNestedObject } = useLeftPanelContext();
+  const { searchHit, dataAsNestedObject, isPreview } = useLeftPanelContext();
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
@@ -38,7 +38,12 @@ export const ResponseDetails: React.FC = () => {
     ecsData: dataAsNestedObject,
   });
 
-  return (
+  return isPreview ? (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.left.response.previewMessage"
+      defaultMessage="Response is not available in alert preview."
+    />
+  ) : (
     <div data-test-subj={RESPONSE_DETAILS_TEST_ID}>
       <EuiTitle size="xxxs">
         <h5>
