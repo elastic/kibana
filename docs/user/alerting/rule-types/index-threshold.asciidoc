@@ -1,10 +1,12 @@
 [[rule-type-index-threshold]]
-== Index threshold
-
-:frontmatter-description: An index threshold rule generates alerts when an aggregated query meets a threshold. 
+== Create an index threshold rule
+:frontmatter-description: Generate alerts when an aggregated query meets a threshold. 
 :frontmatter-tags-products: [kibana,alerting] 
-:frontmatter-tags-content-type: [overview] 
+:frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [analyze]
+++++
+<titleabbrev>Index threshold</titleabbrev>
+++++
 
 The index threshold rule type runs an {es} query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
 

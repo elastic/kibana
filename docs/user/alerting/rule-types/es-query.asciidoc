@@ -1,10 +1,12 @@
 [[rule-type-es-query]]
-== {es} query
-
-:frontmatter-description: Create an {es} query rule, which generates alerts when your query meets a threshold.
+== Create an {es} query rule
+:frontmatter-description: Generate alerts when an {es} query meets a threshold.
 :frontmatter-tags-products: [kibana,alerting]
-:frontmatter-tags-content-type: [overview]
+:frontmatter-tags-content-type: [how-to]
 :frontmatter-tags-user-goals: [analyze]
+++++
+<titleabbrev>{es} query</titleabbrev>
+++++
 
 The {es} query rule type runs a user-configured query, compares the number of 
 matches to a configured threshold, and schedules actions to run when the 
