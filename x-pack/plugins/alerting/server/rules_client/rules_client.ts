@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
@@ -63,7 +64,6 @@ import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
-import { getTags, GetTagsParams } from './methods/get_tags';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import {
   bulkUntrackAlerts,
@@ -193,7 +193,7 @@ export class RulesClient {
     return this.context.auditLogger;
   }
 
-  public getTags = (params: GetTagsParams) => getTags(this.context, params);
+  public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 
