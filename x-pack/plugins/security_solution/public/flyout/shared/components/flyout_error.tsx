@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FLYOUT_ERROR_TEST_ID } from '../test_ids';
+import { FLYOUT_ERROR_TEST_ID } from './test_ids';
 
 /**
  * Use this when you need to show an error state in the flyout
