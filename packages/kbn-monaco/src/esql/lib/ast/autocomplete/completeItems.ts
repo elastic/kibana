@@ -57,21 +57,3 @@ export const pipeCompleteItem: AutocompleteCommandDefinition = {
   }),
   sortText: 'B',
 };
-
-export const noPolicyCompleteItem: AutocompleteCommandDefinition = {
-  label: i18n.translate('monaco.esql.autocomplete.noPoliciesLabel', {
-    defaultMessage: 'No available policy',
-  }),
-  insertText: '',
-  kind: 26,
-  detail: i18n.translate('monaco.esql.autocomplete.noPoliciesLabelsFound', {
-    defaultMessage: 'Click to create',
-  }),
-  sortText: 'D',
-  command: {
-    id: 'esql.policies.create',
-    title: i18n.translate('monaco.esql.autocomplete.createNewPolicy', {
-      defaultMessage: 'Click to create',
-    }),
-  },
-};
