@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -30,6 +30,7 @@ import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 import { ProcessesExplanationMessage } from '../../components/processes_explanation';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -37,6 +38,7 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 }));
 
 export const Processes = () => {
+  const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
@@ -46,7 +48,10 @@ export const Processes = () => {
     searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
 
-  const currentTimestamp = getDateRangeInTimestamp().to;
+  const toTimestamp = useMemo(() => getDateRangeInTimestamp().to, [getDateRangeInTimestamp]);
+  const state = useIntersectingState(ref, {
+    currentTimestamp: toTimestamp,
+  });
 
   const [sortBy, setSortBy] = useState<SortBy>({
     name: 'cpu',
@@ -63,7 +68,7 @@ export const Processes = () => {
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, currentTimestamp, sortBy, parseSearchString(searchText));
+  } = useProcessList(hostTerm, state.currentTimestamp, sortBy, parseSearchString(searchText));
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
@@ -93,8 +98,8 @@ export const Processes = () => {
   }, [setUrlState]);
 
   return (
-    <ProcessListContextProvider hostTerm={hostTerm} to={currentTimestamp}>
-      <EuiFlexGroup direction="column" gutterSize="m">
+    <ProcessListContextProvider hostTerm={hostTerm} to={state.currentTimestamp}>
+      <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
         <EuiFlexItem grow={false}>
           <SummaryTable
             isLoading={loading && !response}
@@ -155,7 +160,7 @@ export const Processes = () => {
         <EuiFlexItem grow={false}>
           {!error ? (
             <ProcessesTable
-              currentTime={currentTimestamp}
+              currentTime={state.currentTimestamp}
               isLoading={loading || !response}
               processList={response?.processList ?? []}
               sortBy={sortBy}
