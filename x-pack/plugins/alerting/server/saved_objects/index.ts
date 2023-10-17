@@ -18,7 +18,7 @@ import {
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
 } from '@kbn/core-saved-objects-server';
-import { rawRuleSchema } from '../raw_rule_schema';
+import { rawRuleSchemaV1, rawRuleSchemaV2, rawRuleSchemaV3 } from './schemas/raw_rule';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { maintenanceWindowMappings } from './maintenance_window_mapping';
@@ -87,21 +87,21 @@ export const modelVersions: CustomSavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
-      create: rawRuleSchema,
+      create: rawRuleSchemaV1,
     },
     minimumCompatibleVersion: (rawRule) => 1,
   },
   '2': {
     changes: [],
     schemas: {
-      create: rawRuleSchema,
+      create: rawRuleSchemaV2,
     },
     minimumCompatibleVersion: (rawRule) => 1,
   },
   '3': {
     changes: [],
     schemas: {
-      create: rawRuleSchema,
+      create: rawRuleSchemaV3,
     },
     minimumCompatibleVersion: (rawRule) => 1,
   },
