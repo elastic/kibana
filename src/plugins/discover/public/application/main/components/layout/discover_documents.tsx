@@ -342,17 +342,21 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
-      <EuiScreenReaderOnly>
-        <h2 id="documentsAriaLabel">
-          <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
-        </h2>
-      </EuiScreenReaderOnly>
+    <>
       {isLegacy && (
         <>
           <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
-          <div className="dscTable__legacyDocsTab">
-            {callouts}
+          {callouts}
+        </>
+      )}
+      <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
+        <EuiScreenReaderOnly>
+          <h2 id="documentsAriaLabel">
+            <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
+          </h2>
+        </EuiScreenReaderOnly>
+        {isLegacy && (
+          <>
             {rows && rows.length > 0 && (
               <>
                 {!hideAnnouncements && <DocumentExplorerCallout />}
@@ -376,63 +380,63 @@ function DiscoverDocumentsComponent({
               </>
             )}
             {loadingIndicator}
-          </div>
-        </>
-      )}
-      {!isLegacy && (
-        <>
-          <div className="unifiedDataTable">
-            <CellActionsProvider
-              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-            >
-              <DiscoverGridMemoized
-                ariaLabelledBy="documentsAriaLabel"
-                columns={currentColumns}
-                columnTypes={columnTypes}
-                expandedDoc={expandedDoc}
-                dataView={dataView}
-                loadingState={
-                  isDataLoading
-                    ? DataLoadingState.loading
-                    : isMoreDataLoading
-                    ? DataLoadingState.loadingMore
-                    : DataLoadingState.loaded
-                }
-                rows={rows}
-                sort={(sort as SortOrder[]) || []}
-                sampleSize={sampleSize}
-                searchDescription={savedSearch.description}
-                searchTitle={savedSearch.title}
-                setExpandedDoc={setExpandedDoc}
-                showTimeCol={showTimeCol}
-                settings={grid}
-                onFilter={onAddFilter as DocViewFilterFn}
-                onSetColumns={onSetColumns}
-                onSort={!isTextBasedQuery ? onSort : undefined}
-                onResize={onResizeDataGrid}
-                useNewFieldsApi={useNewFieldsApi}
-                rowHeightState={rowHeight}
-                onUpdateRowHeight={onUpdateRowHeight}
-                isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
-                isPlainRecord={isTextBasedQuery}
-                rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
-                onUpdateRowsPerPage={onUpdateRowsPerPage}
-                onFieldEdited={onFieldEdited}
-                configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
-                showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
-                maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-                renderDocumentView={renderDocumentView}
-                renderCustomToolbar={renderCustomToolbar}
-                services={services}
-                totalHits={totalHits}
-                onFetchMoreRecords={onFetchMoreRecords}
-                componentsTourSteps={TOUR_STEPS}
-              />
-            </CellActionsProvider>
-          </div>
-        </>
-      )}
-    </EuiFlexItem>
+          </>
+        )}
+        {!isLegacy && (
+          <>
+            <div className="unifiedDataTable">
+              <CellActionsProvider
+                getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+              >
+                <DiscoverGridMemoized
+                  ariaLabelledBy="documentsAriaLabel"
+                  columns={currentColumns}
+                  columnTypes={columnTypes}
+                  expandedDoc={expandedDoc}
+                  dataView={dataView}
+                  loadingState={
+                    isDataLoading
+                      ? DataLoadingState.loading
+                      : isMoreDataLoading
+                      ? DataLoadingState.loadingMore
+                      : DataLoadingState.loaded
+                  }
+                  rows={rows}
+                  sort={(sort as SortOrder[]) || []}
+                  sampleSize={sampleSize}
+                  searchDescription={savedSearch.description}
+                  searchTitle={savedSearch.title}
+                  setExpandedDoc={setExpandedDoc}
+                  showTimeCol={showTimeCol}
+                  settings={grid}
+                  onFilter={onAddFilter as DocViewFilterFn}
+                  onSetColumns={onSetColumns}
+                  onSort={!isTextBasedQuery ? onSort : undefined}
+                  onResize={onResizeDataGrid}
+                  useNewFieldsApi={useNewFieldsApi}
+                  rowHeightState={rowHeight}
+                  onUpdateRowHeight={onUpdateRowHeight}
+                  isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
+                  isPlainRecord={isTextBasedQuery}
+                  rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
+                  onUpdateRowsPerPage={onUpdateRowsPerPage}
+                  onFieldEdited={onFieldEdited}
+                  configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+                  showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
+                  maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+                  renderDocumentView={renderDocumentView}
+                  renderCustomToolbar={renderCustomToolbar}
+                  services={services}
+                  totalHits={totalHits}
+                  onFetchMoreRecords={onFetchMoreRecords}
+                  componentsTourSteps={TOUR_STEPS}
+                />
+              </CellActionsProvider>
+            </div>
+          </>
+        )}
+      </EuiFlexItem>
+    </>
   );
 }
 

@@ -69,10 +69,6 @@ discover-app {
   min-height: 0;
 }
 
-.dscTable__legacyDocsTab {
-  position: relative; // for placing a loading indicator correctly
-}
-
 .dscDocuments__loading {
   display: flex;
   flex-direction: column;

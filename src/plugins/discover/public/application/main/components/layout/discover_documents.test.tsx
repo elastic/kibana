@@ -41,7 +41,7 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
-    viewModeToggle: undefined,
+    viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
     stateContainer,
@@ -79,6 +79,8 @@ describe('Discover documents layout', () => {
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
     expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'dscGridToolbarBottom').exists()).toBe(true);
+    expect(findTestSubject(component, 'viewModeToggle').exists()).toBe(true);
   });
 
   test('should set rounded width to state on resize column', () => {
