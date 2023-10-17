@@ -7,17 +7,14 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import type { ExpandedDetailType } from '../../../../../../common/types';
-import { getScopedActions } from '../../../../../helpers';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   contextId: string;
@@ -46,11 +43,13 @@ const UserNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
 
   const isInTimelineContext = userName && eventContext?.timelineID;
+  const { openRightPanel } = useExpandableFlyoutContext();
+
   const openUserDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -58,31 +57,42 @@ const UserNameComponent: React.FC<Props> = ({
       if (onClick) {
         onClick();
       }
+
       if (eventContext && isInTimelineContext) {
-        const { timelineID, tabType } = eventContext;
-        const updatedExpandedDetail: ExpandedDetailType = {
-          panelView: 'userDetail',
+        openRightPanel({
+          id: 'user-details',
           params: {
             userName,
+            contextID: contextId,
+            // const contextID = `${scopeId}-${activeTab}`;
+            scopeId: TimelineId.detectionsAlertDetailsPage,
+            isDraggable,
           },
-        };
-        const scopedActions = getScopedActions(timelineID);
-        if (scopedActions) {
-          dispatch(
-            scopedActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              id: timelineID,
-              tabType: tabType as TimelineTabs,
-            })
-          );
-        }
+        });
 
-        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-        }
+        // const { timelineID, tabType } = eventContext;
+        // const updatedExpandedDetail: ExpandedDetailType = {
+        //   panelView: 'userDetail',
+        //   params: {
+        //     userName,
+        //   },
+        // };
+        // const scopedActions = getScopedActions(timelineID);
+        // if (scopedActions) {
+        //   dispatch(
+        //     scopedActions.toggleDetailPanel({
+        //       ...updatedExpandedDetail,
+        //       id: timelineID,
+        //       tabType: tabType as TimelineTabs,
+        //     })
+        //   );
+        // }
+        // if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
+        //   activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+        // }
       }
     },
-    [onClick, eventContext, isInTimelineContext, userName, dispatch]
+    [onClick, eventContext, isInTimelineContext, openRightPanel, userName, contextId, isDraggable]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
