@@ -37,7 +37,15 @@ export interface HeaderTitleProps {
    * If false, update the margin-top to compensate the fact that the expand detail button is not displayed
    */
   flyoutIsExpandable: boolean;
+
+  /**
+   * Scope ID
+   */
   scopeId: string;
+
+  /**
+   * Promise to trigger a data refresh
+   */
   refetchFlyoutData: () => Promise<void>;
 }
 

@@ -28,13 +28,24 @@ import {
 import { AssigneesPopover } from './assignees_popover';
 
 export interface AssigneesProps {
+  /**
+   * Id of the document
+   */
   eventId: string;
+
+  /**
+   * The array of ids of the users assigned to the alert
+   */
   alertAssignees: string[];
+
+  /**
+   * Callback to handle the successful assignees update
+   */
   onAssigneesUpdated?: () => void;
 }
 
 /**
- * Document details assignees displayed in flyout right section header
+ * Document assignees details displayed in flyout right section header
  */
 export const Assignees: FC<AssigneesProps> = memo(
   ({ eventId, alertAssignees, onAssigneesUpdated }) => {
@@ -98,12 +109,12 @@ export const Assignees: FC<AssigneesProps> = memo(
       <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs" data-test-subj={ASSIGNEES_TITLE_TEST_ID}>
-            <h5>
+            <h3>
               <FormattedMessage
                 id="xpack.securitySolution.flyout.right.header.assignedTitle"
                 defaultMessage="Assigned:"
               />
-            </h5>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

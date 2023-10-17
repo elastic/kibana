@@ -12,9 +12,15 @@ import type { inputsModel } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 
 export interface UseRefetchScopeQueryParams {
+  /**
+   * Scope ID
+   */
   scopeId: string;
 }
 
+/**
+ * Hook to refetch data within specified scope
+ */
 export const useRefetchByScope = ({ scopeId }: UseRefetchScopeQueryParams) => {
   const getGlobalQueries = inputsSelectors.globalQuery();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
