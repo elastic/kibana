@@ -8,7 +8,7 @@
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import { cloneDeep, find } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
 import { ServerlessRoleName } from '../types';
 
