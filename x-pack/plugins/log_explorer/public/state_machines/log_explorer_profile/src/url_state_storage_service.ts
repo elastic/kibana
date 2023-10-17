@@ -19,6 +19,7 @@ import {
 import {
   DATA_GRID_COLUMNS_PREFERENCES,
   DATA_GRID_DEFAULT_COLUMNS,
+  LOG_LEVEL_FIELD,
 } from '../../../../common/constants';
 import {
   ControlPanelRT,
@@ -182,7 +183,7 @@ export const updateStateContainer =
     LogExplorerProfileEvent
   > =>
   async () => {
-    const { columns, grid, rowHeight } = stateContainer.appState.getState();
+    const { breakdownField, columns, grid, rowHeight } = stateContainer.appState.getState();
     const stateUpdates: DiscoverAppState = {};
 
     // Update data grid columns list
@@ -200,6 +201,9 @@ export const updateStateContainer =
 
     // Configure rowHeight preference
     stateUpdates.rowHeight = rowHeight ?? ROWS_HEIGHT_OPTIONS.single;
+
+    // Configure breakdown field preference
+    stateUpdates.breakdownField = breakdownField ?? LOG_LEVEL_FIELD;
 
     // Finally batch update state app state
     stateContainer.appState.update(stateUpdates, true);

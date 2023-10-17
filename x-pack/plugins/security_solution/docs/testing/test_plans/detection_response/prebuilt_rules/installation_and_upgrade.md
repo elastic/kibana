@@ -431,7 +431,7 @@ And user should see a CTA that leads to the Rule Management page
 
 ### Rule installation workflow: filtering, sorting, pagination
 
-TODO: add scenarios
+TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 
 ### Rule installation workflow: misc cases
 
@@ -515,7 +515,7 @@ And user should NOT see the Rule Updates table
 
 ### Rule upgrade workflow: filtering, sorting, pagination
 
-TODO: add scenarios
+TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 
 ### Rule upgrade workflow: misc cases
 

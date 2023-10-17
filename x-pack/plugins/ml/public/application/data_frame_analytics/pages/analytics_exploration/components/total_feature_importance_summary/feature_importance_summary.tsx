@@ -298,6 +298,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
                   // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                   theme={theme}
                   showLegend={showLegend}
+                  locale={i18n.getLocale()}
                 />
 
                 <Axis
