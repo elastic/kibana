@@ -43,6 +43,7 @@ describe('useActions', () => {
           "align": "right",
           "name": "Actions",
           "render": [Function],
+          "shouldDisplay": true,
         },
       }
     `);
@@ -383,13 +384,20 @@ describe('useActions', () => {
       });
     });
 
-    it('returns null if the user does not have update or delete permissions', async () => {
+    it('sets shouldDisplay to false if the user does not have update or delete permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
       const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: appMockRender.AppWrapper,
       });
 
-      expect(result.current.actions).toBe(null);
+      expect(result.current.actions).toMatchInlineSnapshot(`
+        Object {
+          "align": "right",
+          "name": "Actions",
+          "render": [Function],
+          "shouldDisplay": false,
+        }
+      `);
     });
 
     it('disables the action correctly', async () => {

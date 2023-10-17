@@ -102,6 +102,7 @@ describe('AllCasesListGeneric', () => {
     isSelectorView: false,
     userProfiles: new Map(),
     currentUserProfile: undefined,
+    selectedColumns: [],
   };
 
   const removeMsFromDate = (value: string) => moment(value).format('YYYY-MM-DDTHH:mm:ss[Z]');

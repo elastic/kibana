@@ -14,7 +14,12 @@ import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import type { CasesFindResponseUI, CasesUI, CaseUI } from '../../../common/ui/types';
+import type {
+  CasesColumnSelection,
+  CasesFindResponseUI,
+  CasesUI,
+  CaseUI,
+} from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -35,6 +40,8 @@ interface CasesTableProps {
   tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
   deselectCases: () => void;
+  selectedColumns: CasesColumnSelection[];
+  onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
 }
 
 const Div = styled.div`
@@ -57,6 +64,8 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   tableRef,
   tableRowProps,
   deselectCases,
+  selectedColumns,
+  onSelectedColumnsChange,
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
@@ -84,6 +93,8 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         totalCases={data.total ?? 0}
         selectedCases={selectedCases}
         deselectCases={deselectCases}
+        selectedColumns={selectedColumns}
+        onSelectedColumnsChange={onSelectedColumnsChange}
       />
       <EuiBasicTable
         className={classnames({ isSelectorView })}

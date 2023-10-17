@@ -19,6 +19,7 @@ import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../.
 import { renderHook } from '@testing-library/react-hooks';
 import { CaseStatuses } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { DEFAULT_CASES_TABLE_COLUMNS } from '../../../common/constants';
 
 describe('useCasesColumns ', () => {
   let appMockRender: AppMockRenderer;
@@ -27,6 +28,7 @@ describe('useCasesColumns ', () => {
     userProfiles: userProfilesMap,
     isSelectorView: false,
     showSolutionColumn: true,
+    selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
   };
 
   beforeEach(() => {

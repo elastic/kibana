@@ -27,21 +27,20 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type { ActionConnector } from '../../../common/types/domain';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import type { CaseUI } from '../../../common/ui/types';
-import { OWNER_INFO } from '../../../common/constants';
+import { CaseSeverity } from '../../../common/types/domain';
+import type { CasesColumnSelection, CaseUI } from '../../../common/ui/types';
+import { OWNER_INFO, SELECTOR_VIEW_CASES_TABLE_COLUMNS } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
-import { ALERTS } from '../../common/translations';
 import { useActions } from './use_actions';
+import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
-import { useCasesFeatures } from '../../common/use_cases_features';
 import { AssigneesColumn } from './assignees_column';
 
 type CasesColumns =
@@ -73,6 +72,7 @@ export interface GetCasesColumn {
   filterStatus: string;
   userProfiles: Map<string, UserProfileWithAvatar>;
   isSelectorView: boolean;
+  selectedColumns: CasesColumnSelection[];
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
   showSolutionColumn?: boolean;
@@ -84,15 +84,14 @@ export interface UseCasesColumnsReturnValue {
 }
 
 export const useCasesColumns = ({
-  filterStatus,
   userProfiles,
   isSelectorView,
   connectors = [],
   onRowClick,
-  showSolutionColumn,
   disableActions = false,
+  selectedColumns,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
-  const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
+  const casesColumnsConfig = useCasesColumnsConfiguration();
   const { actions } = useActions({ disableActions });
 
   const assignCaseAction = useCallback(
@@ -104,10 +103,13 @@ export const useCasesColumns = ({
     [onRowClick]
   );
 
-  const columns: CasesColumns[] = [
-    {
-      field: 'title',
-      name: i18n.NAME,
+  // Some elements do not have a field on purpose.
+  // They are supposed to be EuiTableComputedColumnType
+  // and don't match specific Case attributes.
+  const columnsDict: Record<string, CasesColumns> = {
+    title: {
+      field: casesColumnsConfig.title.field,
+      name: casesColumnsConfig.title.name,
       sortable: true,
       render: (title: string, theCase: CaseUI) => {
         if (theCase.id != null && theCase.title != null) {
@@ -125,23 +127,17 @@ export const useCasesColumns = ({
       },
       width: !isSelectorView ? '20%' : '55%',
     },
-  ];
-
-  if (caseAssignmentAuthorized && !isSelectorView) {
-    columns.push({
-      field: 'assignees',
-      name: i18n.ASSIGNEES,
+    assignees: {
+      field: casesColumnsConfig.assignees.field,
+      name: casesColumnsConfig.assignees.name,
       render: (assignees: CaseUI['assignees']) => (
         <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
       ),
       width: '180px',
-    });
-  }
-
-  if (!isSelectorView) {
-    columns.push({
-      field: 'tags',
-      name: i18n.TAGS,
+    },
+    tags: {
+      field: casesColumnsConfig.tags.field,
+      name: casesColumnsConfig.tags.name,
       render: (tags: CaseUI['tags']) => {
         if (tags != null && tags.length > 0) {
           const clampedBadges = (
@@ -185,27 +181,21 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
       width: '15%',
-    });
-  }
-
-  if (isAlertsEnabled && !isSelectorView) {
-    columns.push({
+    },
+    totalAlerts: {
+      field: casesColumnsConfig.totalAlerts.field,
+      name: casesColumnsConfig.totalAlerts.name,
       align: RIGHT_ALIGNMENT,
-      field: 'totalAlerts',
-      name: ALERTS,
       render: (totalAlerts: CaseUI['totalAlerts']) =>
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
           : getEmptyTagValue(),
       width: !isSelectorView ? '80px' : '55px',
-    });
-  }
-
-  if (showSolutionColumn && !isSelectorView) {
-    columns.push({
+    },
+    owner: {
+      field: casesColumnsConfig.owner.field,
+      name: casesColumnsConfig.owner.name,
       align: RIGHT_ALIGNMENT,
-      field: 'owner',
-      name: i18n.SOLUTION,
       render: (caseOwner: CasesOwners) => {
         const ownerInfo = OWNER_INFO[caseOwner];
         return ownerInfo ? (
@@ -219,38 +209,31 @@ export const useCasesColumns = ({
           getEmptyTagValue()
         );
       },
-    });
-  }
-
-  if (!isSelectorView) {
-    columns.push({
+    },
+    totalComment: {
+      field: casesColumnsConfig.totalComment.field,
+      name: casesColumnsConfig.totalComment.name,
       align: RIGHT_ALIGNMENT,
-      field: 'totalComment',
-      name: i18n.COMMENTS,
       render: (totalComment: CaseUI['totalComment']) =>
         totalComment != null
           ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
           : getEmptyTagValue(),
-    });
-  }
-
-  columns.push({
-    field: 'category',
-    name: i18n.CATEGORY,
-    sortable: true,
-    render: (category: CaseUI['category']) => {
-      if (category != null) {
-        return <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>;
-      }
-      return getEmptyTagValue();
     },
-    width: '100px',
-  });
-
-  if (filterStatus === CaseStatuses.closed) {
-    columns.push({
-      field: 'closedAt',
-      name: i18n.CLOSED_ON,
+    category: {
+      field: casesColumnsConfig.category.field,
+      name: casesColumnsConfig.category.name,
+      sortable: true,
+      render: (category: CaseUI['category']) => {
+        if (category != null) {
+          return <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>;
+        }
+        return getEmptyTagValue();
+      },
+      width: '100px',
+    },
+    closedAt: {
+      field: casesColumnsConfig.closedAt.field,
+      name: casesColumnsConfig.closedAt.name,
       sortable: true,
       render: (closedAt: CaseUI['closedAt']) => {
         if (closedAt != null) {
@@ -262,11 +245,10 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-    });
-  } else {
-    columns.push({
-      field: 'createdAt',
-      name: i18n.CREATED_ON,
+    },
+    createdAt: {
+      field: casesColumnsConfig.createdAt.field,
+      name: casesColumnsConfig.createdAt.name,
       sortable: true,
       render: (createdAt: CaseUI['createdAt']) => {
         if (createdAt != null) {
@@ -278,13 +260,10 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-    });
-  }
-
-  if (!isSelectorView) {
-    columns.push({
-      field: 'updatedAt',
-      name: i18n.UPDATED_ON,
+    },
+    updatedAt: {
+      field: casesColumnsConfig.updatedAt.field,
+      name: casesColumnsConfig.updatedAt.name,
       sortable: true,
       render: (updatedAt: CaseUI['updatedAt']) => {
         if (updatedAt != null) {
@@ -296,58 +275,52 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-    });
-  }
-
-  if (!isSelectorView) {
-    columns.push(
-      {
-        name: i18n.EXTERNAL_INCIDENT,
-        render: (theCase: CaseUI) => {
-          if (theCase.id != null) {
-            return <ExternalServiceColumn theCase={theCase} connectors={connectors} />;
-          }
-          return getEmptyTagValue();
-        },
-        width: isSelectorView ? '80px' : undefined,
-      },
-      {
-        field: 'status',
-        name: i18n.STATUS,
-        sortable: true,
-        render: (status: CaseUI['status']) => {
-          if (status != null) {
-            return <Status status={status} />;
-          }
-
-          return getEmptyTagValue();
-        },
-      }
-    );
-  }
-  columns.push({
-    field: 'severity',
-    name: i18n.SEVERITY,
-    sortable: true,
-    render: (severity: CaseUI['severity']) => {
-      if (severity != null) {
-        const severityData = severities[severity ?? CaseSeverity.LOW];
-        return (
-          <EuiHealth
-            data-test-subj={`case-table-column-severity-${severity}`}
-            color={severityData.color}
-          >
-            {severityData.label}
-          </EuiHealth>
-        );
-      }
-      return getEmptyTagValue();
     },
-    width: '90px',
-  });
+    externalIncident: {
+      // no field
+      name: casesColumnsConfig.externalIncident.name,
+      render: (theCase: CaseUI) => {
+        if (theCase.id != null) {
+          return <ExternalServiceColumn theCase={theCase} connectors={connectors} />;
+        }
+        return getEmptyTagValue();
+      },
+      width: isSelectorView ? '80px' : undefined,
+    },
+    status: {
+      field: casesColumnsConfig.status.field,
+      name: casesColumnsConfig.status.name,
+      sortable: true,
+      render: (status: CaseUI['status']) => {
+        if (status != null) {
+          return <Status status={status} />;
+        }
 
-  if (isSelectorView) {
-    columns.push({
+        return getEmptyTagValue();
+      },
+    },
+    severity: {
+      field: casesColumnsConfig.severity.field,
+      name: casesColumnsConfig.severity.name,
+      sortable: true,
+      render: (severity: CaseUI['severity']) => {
+        if (severity != null) {
+          const severityData = severities[severity ?? CaseSeverity.LOW];
+          return (
+            <EuiHealth
+              data-test-subj={`case-table-column-severity-${severity}`}
+              color={severityData.color}
+            >
+              {severityData.label}
+            </EuiHealth>
+          );
+        }
+        return getEmptyTagValue();
+      },
+      width: '90px',
+    },
+    assignCaseAction: {
+      // no field
       align: RIGHT_ALIGNMENT,
       render: (theCase: CaseUI) => {
         if (theCase.id != null) {
@@ -365,11 +338,30 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-    });
-  }
+    },
+    actions: {
+      // no field
+      ...actions,
+    },
+  };
 
-  if (!isSelectorView && actions) {
-    columns.push(actions);
+  const columns: CasesColumns[] = [];
+
+  if (isSelectorView) {
+    SELECTOR_VIEW_CASES_TABLE_COLUMNS.forEach(({ field }) => {
+      columns.push(columnsDict[field]);
+    });
+  } else {
+    selectedColumns.forEach(({ field, isChecked }) => {
+      if (
+        field in columnsDict &&
+        field in casesColumnsConfig &&
+        casesColumnsConfig[field].canDisplay &&
+        isChecked
+      ) {
+        columns.push(columnsDict[field]);
+      }
+    });
   }
 
   return { columns };

@@ -309,3 +309,8 @@ export interface CasesCapabilities {
   [PUSH_CASES_CAPABILITY]: boolean;
   [CASES_CONNECTORS_CAPABILITY]: boolean;
 }
+
+export interface CasesColumnSelection {
+  field: string;
+  isChecked: boolean;
+}

@@ -16,13 +16,14 @@ import type {
   CaseStatusWithAllStatus,
   FilterOptions,
   CasesUI,
+  CasesColumnSelection,
 } from '../../../common/ui/types';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import type { EuiBasicTableOnChange, Solution } from './types';
 
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
-import { OWNER_INFO } from '../../../common/constants';
+import { DEFAULT_CASES_TABLE_COLUMNS, OWNER_INFO } from '../../../common/constants';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
@@ -209,6 +210,10 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       ]
     );
 
+    const [selectedColumns, setSelectedColumns] = useState<CasesColumnSelection[]>(
+      DEFAULT_CASES_TABLE_COLUMNS
+    );
+
     const { columns } = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       userProfiles: userProfiles ?? new Map(),
@@ -217,6 +222,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       onRowClick,
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
       disableActions: selectedCases.length > 0,
+      selectedColumns,
     });
 
     const pagination = useMemo(
@@ -302,6 +308,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           tableRef={tableRef}
           tableRowProps={tableRowProps}
           deselectCases={deselectCases}
+          selectedColumns={selectedColumns}
+          onSelectedColumnsChange={setSelectedColumns}
         />
       </>
     );

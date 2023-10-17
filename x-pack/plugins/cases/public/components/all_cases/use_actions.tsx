@@ -20,7 +20,6 @@ import { useStatusAction } from '../actions/status/use_status_action';
 import { useRefreshCases } from './use_on_refresh_cases';
 import * as i18n from './translations';
 import { statuses } from '../status';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { useSeverityAction } from '../actions/severity/use_severity_action';
 import { severities } from '../severity/config';
 import { useTagsAction } from '../actions/tags/use_tags_action';
@@ -223,7 +222,7 @@ ActionColumnComponent.displayName = 'ActionColumnComponent';
 const ActionColumn = React.memo(ActionColumnComponent);
 
 interface UseBulkActionsReturnValue {
-  actions: EuiTableComputedColumnType<CaseUI> | null;
+  actions: EuiTableComputedColumnType<CaseUI>;
 }
 
 interface UseBulkActionsProps {
@@ -231,20 +230,13 @@ interface UseBulkActionsProps {
 }
 
 export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
-  const { permissions } = useCasesContext();
-  const shouldShowActions = permissions.update || permissions.delete;
-
   return {
-    actions: shouldShowActions
-      ? {
-          name: i18n.ACTIONS,
-          align: 'right',
-          render: (theCase: CaseUI) => {
-            return (
-              <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
-            );
-          },
-        }
-      : null,
+    actions: {
+      name: i18n.ACTIONS,
+      align: 'right',
+      render: (theCase: CaseUI) => {
+        return <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />;
+      },
+    },
   };
 };
