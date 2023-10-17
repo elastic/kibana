@@ -18,7 +18,7 @@ import {
   EuiCallOut,
   EuiLoadingLogo,
   EuiOverlayMask,
-  EuiPageBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiSpacer,
   EuiStepsHorizontal,
@@ -543,7 +543,7 @@ export class JobCreateUi extends Component {
     }
 
     return (
-      <EuiPageBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageSection restrictWidth>
         <EuiPageHeader
           bottomBorder
           pageTitle={
@@ -569,7 +569,7 @@ export class JobCreateUi extends Component {
         {this.renderNavigation()}
 
         {savingFeedback}
-      </EuiPageBody>
+      </EuiPageSection>
     );
   }
 
