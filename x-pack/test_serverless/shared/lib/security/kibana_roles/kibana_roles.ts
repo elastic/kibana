@@ -26,7 +26,7 @@ export type YamlRoleDefinitions = Record<
   {
     cluster: string[] | null;
     indices: RoleIndexPrivilege[];
-    applications: Array<IApplication>;
+    applications: IApplication[];
   }
 >;
 
