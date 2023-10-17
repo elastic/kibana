@@ -352,7 +352,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(403);
       });
 
-      it('should respond 400 if trying to upgrade a recently upgraded agent', async () => {
+      it('should respond 429 if trying to upgrade a recently upgraded agent', async () => {
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -371,13 +371,20 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        await supertest
+        const response = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: fleetServerVersion,
           })
-          .expect(400);
+          .expect(429);
+
+        expect(response.body.message).to.contain('was upgraded less than 10 minutes ago');
+
+        // We don't know how long this test will take to run, so we can't really assert on the actual elapsed time here
+        expect(response.body.message).to.match(/please wait \d{2}m\d{2}s/i);
+
+        expect(response.header['retry-after']).to.match(/^\d+$/);
       });
 
       it('should respond 400 if trying to upgrade a recently upgraded agent with force flag', async () => {

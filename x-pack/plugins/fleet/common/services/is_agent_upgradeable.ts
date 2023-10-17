@@ -35,7 +35,7 @@ export function isAgentUpgradeable(
     return false;
   }
   // check that the agent has not been upgraded more recently than the monitoring period
-  if (hasAgentBeenUpgradedRecently(agent)) {
+  if (hasAgentBeenUpgradedRecently(agent).hasBeenUpgradedRecently) {
     return false;
   }
   if (versionToUpgrade !== undefined) {
@@ -63,11 +63,20 @@ const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
   return semverGt(versionToUpgradeNumber, agentVersionNumber);
 };
 
-export function hasAgentBeenUpgradedRecently(agent: Agent) {
+export function hasAgentBeenUpgradedRecently(agent: Agent): {
+  hasBeenUpgradedRecently: boolean;
+  timeToWaitMs: number;
+} {
   if (!agent.upgraded_at) {
-    return false;
+    return {
+      hasBeenUpgradedRecently: false,
+      timeToWaitMs: 0,
+    };
   }
 
   const elaspedSinceUpgradeInMillis = Date.now() - Date.parse(agent.upgraded_at);
-  return elaspedSinceUpgradeInMillis / 6e4 < AGENT_UPGRADE_COOLDOWN_IN_MIN;
+  const timeToWaitMs = AGENT_UPGRADE_COOLDOWN_IN_MIN * 6e4 - elaspedSinceUpgradeInMillis;
+  const hasBeenUpgradedRecently = elaspedSinceUpgradeInMillis / 6e4 < AGENT_UPGRADE_COOLDOWN_IN_MIN;
+
+  return { hasBeenUpgradedRecently, timeToWaitMs };
 }

@@ -29,6 +29,7 @@ import type { Agent } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
 import { getLatestAvailableVersion } from '../../services/agents/versions';
+import moment from 'moment';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -71,11 +72,20 @@ export const postAgentUpgradeHandler: RequestHandler<
       }
     }
 
-    if (hasAgentBeenUpgradedRecently(agent)) {
+    const { hasBeenUpgradedRecently, timeToWaitMs } = hasAgentBeenUpgradedRecently(agent);
+    const timeToWaitString = moment
+      .utc(moment.duration(timeToWaitMs).asMilliseconds())
+      .format('mm[m]ss[s]');
+
+    if (hasBeenUpgradedRecently) {
       return response.customError({
-        statusCode: 400,
+        statusCode: 429,
         body: {
-          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago`,
+          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago. Please wait ${timeToWaitString} before trying again.`,
+        },
+        headers: {
+          // retry-after expects seconds
+          'retry-after': (timeToWaitMs / 1000).toString(),
         },
       });
     }

@@ -198,16 +198,20 @@ describe('hasAgentBeenUpgradedRecently', () => {
   it('returns true if the agent was upgraded less than 10 minutes ago', () => {
     expect(
       hasAgentBeenUpgradedRecently(getAgent({ version: '7.9.0', minutesSinceUpgrade: 9 }))
+        .hasBeenUpgradedRecently
     ).toBe(true);
   });
 
   it('returns false if the agent was upgraded more than 10 minutes ago', () => {
     expect(
       hasAgentBeenUpgradedRecently(getAgent({ version: '7.9.0', minutesSinceUpgrade: 11 }))
+        .hasBeenUpgradedRecently
     ).toBe(false);
   });
 
   it('returns false if the agent does not have an upgrade_at field', () => {
-    expect(hasAgentBeenUpgradedRecently(getAgent({ version: '7.9.0' }))).toBe(false);
+    expect(
+      hasAgentBeenUpgradedRecently(getAgent({ version: '7.9.0' })).hasBeenUpgradedRecently
+    ).toBe(false);
   });
 });
