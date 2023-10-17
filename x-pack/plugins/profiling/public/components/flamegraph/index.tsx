@@ -140,6 +140,8 @@ export function FlameGraph({
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const totalSeconds = primaryFlamegraph.TotalSeconds;
                       const nodeID = primaryFlamegraph.ID[valueIndex];
+                      const inline = primaryFlamegraph.Inline[valueIndex];
+                      const parentLabel = primaryFlamegraph.Label[valueIndex - 1];
 
                       const comparisonNode = columnarData.comparisonNodesById[nodeID];
 
@@ -162,6 +164,8 @@ export function FlameGraph({
                             toggleShowInformationWindow();
                             setHighlightedVmIndex(valueIndex);
                           }}
+                          inline={inline}
+                          parentLabel={parentLabel}
                         />
                       );
                     }}

@@ -7,6 +7,7 @@
 import { TooltipContainer } from '@elastic/charts';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -16,15 +17,16 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
-import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
   isRoot: boolean;
@@ -40,6 +42,8 @@ interface Props {
   comparisonTotalSamples?: number;
   comparisonTotalSeconds?: number;
   onShowMoreClick?: () => void;
+  inline: boolean;
+  parentLabel: string;
 }
 
 export function FlameGraphTooltip({
@@ -56,6 +60,8 @@ export function FlameGraphTooltip({
   comparisonTotalSamples,
   comparisonTotalSeconds,
   onShowMoreClick,
+  inline,
+  parentLabel,
 }: Props) {
   const theme = useEuiTheme();
   const calculateImpactEstimates = useCalculateImpactEstimate();
@@ -89,7 +95,28 @@ export function FlameGraphTooltip({
               <EuiText>{label}</EuiText>
             </EuiTitle>
           </EuiFlexItem>
+
           <EuiHorizontalRule margin="none" style={{ background: theme.euiTheme.border.color }} />
+          {inline && (
+            <EuiCallOut
+              css={css`
+                p {
+                  display: flex;
+                }
+              `}
+              color="primary"
+              title={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.profiling.flameGraphTooltip.inlineCallout', {
+                    defaultMessage: 'This function has been inlined by {parentLabel}',
+                    values: { parentLabel },
+                  })}
+                </EuiText>
+              }
+              size="s"
+              iconType="iInCircle"
+            />
+          )}
           {isRoot === false && (
             <>
               <TooltipRow
