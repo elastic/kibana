@@ -12,12 +12,12 @@ import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_u
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/166007
-  describe.skip('Browser apps', () => {
+  describe('Browser apps', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('discover app', () => {
@@ -35,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.header.waitUntilLoadingHasFinished();
         logs = await readLogFile();
       });
@@ -117,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-        await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.dashboard.waitForRenderComplete();
         await PageObjects.header.waitUntilLoadingHasFinished();
         logs = await readLogFile();
@@ -207,12 +208,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        describe.skip('lnsMetric', () => {
+        describe('lnsMetric', () => {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await assertLogContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsLegacyMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
+                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
               ),
               logs,
             });
@@ -234,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   description: '[Flights] Global Flight Dashboard',
                   child: {
                     type: 'lens',
-                    name: 'lnsLegacyMetric',
+                    name: 'lnsMetric',
                     id: 'b766e3b8-4544-46ed-99e6-9ecc4847e2a2',
                     description: '',
                     url: '/app/lens#/edit_by_value',
@@ -364,37 +365,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe.skip('propagates context for TSVB visualizations', () => {
-        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId('agg_based:metrics:bcb63b50-4c89-11e8-b3d7-01146121b73d'),
-            logs,
-          });
-        });
-
-        it('propagates to Kibana logs', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: checkExecutionContextEntry({
-              name: 'dashboards',
-              url: '/app/dashboards',
-              type: 'application',
-              page: 'app',
-              description: '[Flights] Global Flight Dashboard',
-              child: {
-                type: 'agg_based',
-                name: 'metrics',
-                id: 'bcb63b50-4c89-11e8-b3d7-01146121b73d',
-                description: '[Flights] Delays & Cancellations',
-                url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
-              },
-            }),
-            logs,
-          });
-        });
-      });
-
       describe('propagates context for Vega visualizations', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await assertLogContains({
@@ -426,84 +396,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
                   description: '[Flights] Airport Connections (Hover Over Airport)',
                   url: '/app/visualize#/edit/ed78a660-53a0-11e8-acbd-0be0ad9d822b',
-                },
-              },
-            }),
-            logs,
-          });
-        });
-      });
-
-      describe.skip('propagates context for Tag Cloud visualization', () => {
-        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId(
-              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:tagcloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
-            ),
-            logs,
-          });
-        });
-
-        it('propagates to Kibana logs', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: checkExecutionContextEntry({
-              name: 'dashboards',
-              url: '/app/dashboards',
-              type: 'application',
-              child: {
-                name: 'dashboards',
-                url: '/app/dashboards',
-                type: 'dashboard',
-                page: 'app',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                child: {
-                  type: 'agg_based',
-                  name: 'tagcloud',
-                  id: '293b5a30-4c8f-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Destination Weather',
-                  url: '/app/visualize#/edit/293b5a30-4c8f-11e8-b3d7-01146121b73d',
-                },
-              },
-            }),
-            logs,
-          });
-        });
-      });
-
-      describe.skip('propagates context for Vertical bar visualization', () => {
-        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId(
-              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:histogram:9886b410-4c8b-11e8-b3d7-01146121b73d'
-            ),
-            logs,
-          });
-        });
-
-        it('propagates to Kibana logs', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: checkExecutionContextEntry({
-              type: 'application',
-              name: 'dashboards',
-              url: '/app/dashboards',
-              child: {
-                type: 'dashboard',
-                name: 'dashboards',
-                url: '/app/dashboards',
-                page: 'app',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                child: {
-                  type: 'agg_based',
-                  name: 'histogram',
-                  id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Delay Buckets',
-                  url: '/app/visualize#/edit/9886b410-4c8b-11e8-b3d7-01146121b73d',
                 },
               },
             }),
