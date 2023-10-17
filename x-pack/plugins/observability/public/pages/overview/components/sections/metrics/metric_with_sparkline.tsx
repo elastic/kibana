@@ -8,7 +8,6 @@
 import { Chart, Settings, AreaSeries, TooltipType, Tooltip } from '@elastic/charts';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiTextColor } from '@elastic/eui';
 import React, { useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
@@ -40,11 +39,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
     return (
       <EuiTextColor color="subdued">
         <EuiIcon type="visLine" />
-         
-        <FormattedMessage
-          id="xpack.observability.metricWithSparkline.nATextColorLabel"
-          defaultMessage="N/A"
-        />
+        &nbsp;N/A
       </EuiTextColor>
     );
   }
