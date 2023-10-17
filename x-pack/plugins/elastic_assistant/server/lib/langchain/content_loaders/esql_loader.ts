@@ -33,12 +33,12 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
     const fromRootPathDocs = fromRoot(
       'node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/docs'
     );
-    const fromRootPathLanguage = fromRoot(
-      'node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/language_definition'
-    );
-    const fromRootPathExample = fromRoot(
-      'node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/example_queries'
-    );
+    // const fromRootPathLanguage = fromRoot(
+    //   'node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/language_definition'
+    // );
+    // const fromRootPathExample = fromRoot(
+    //   'node_modules/@kbn/elastic-assistant-plugin/server/knowledge_base/esql/example_queries'
+    // );
 
     logger.info(`esql_loader joinPath\n${joinPath}`);
     logger.info(`esql_loader resolvePath\n${resolvePath}`);
@@ -51,16 +51,16 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       logger.info(`esql_loader the resolvePath does NOT exist`);
     }
 
-    const docsLoader = new DirectoryLoader(
-      fromRootPathDocs,
-      {
-        '.asciidoc': (path) => new TextLoader(path),
-      },
-      true
-    );
+    // const docsLoader = new DirectoryLoader(
+    //   fromRootPathDocs,
+    //   {
+    //     '.asciidoc': (path) => new TextLoader(path),
+    //   },
+    //   true
+    // );
 
     const languageLoader = new DirectoryLoader(
-      fromRootPathLanguage,
+      resolve(__dirname, '../../../knowledge_base/esql/language_definition'),
       {
         '.g4': (path) => new TextLoader(path),
         '.tokens': (path) => new TextLoader(path),
@@ -69,14 +69,14 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
     );
 
     const exampleQueriesLoader = new DirectoryLoader(
-      fromRootPathExample,
+      resolve(__dirname, '../../../knowledge_base/esql/example_queries'),
       {
         '.asciidoc': (path) => new TextLoader(path),
       },
       true
     );
 
-    const docs = await docsLoader.load();
+    // const docs = await docsLoader.load();
     const languageDocs = await languageLoader.load();
     const rawExampleQueries = await exampleQueriesLoader.load();
 
