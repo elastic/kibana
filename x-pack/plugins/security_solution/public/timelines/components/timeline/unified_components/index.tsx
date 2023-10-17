@@ -112,7 +112,6 @@ export const SAMPLE_SIZE_SETTING = 500;
 
 interface Props {
   columns: ColumnHeaderOptions[];
-  // renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: string;
   itemsPerPage: number;
@@ -193,7 +192,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 
   const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
-  const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
+  const [, setMainContainer] = useState<HTMLDivElement | null>(null);
 
   const { timeline: { filterManager } = timelineDefaults } = useSelector((state: State) =>
     timelineBodySelector(state, timelineId)
@@ -262,8 +261,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      console.log(field)
-      console.log(values)
       if (dataView && filterManager) {
         const fieldName = typeof field === 'string' ? field : field.name;
         popularizeField(dataView, fieldName, dataViews, capabilities);

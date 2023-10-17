@@ -24,6 +24,7 @@ import { UnifiedDataTable, useColumns, DataLoadingState } from '@kbn/unified-dat
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { getAllFieldsByName } from '../../../../common/containers/source';
 import { StatefulEventContext } from '../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ExpandedDetailTimeline,
@@ -55,7 +56,7 @@ import { Actions } from '../../../../common/components/header_actions/actions';
 import { getColumnHeaderUnified } from '../body/column_headers/helpers';
 import { eventIsPinned } from '../body/helpers';
 import { NOTES_BUTTON_CLASS_NAME } from '../properties/helpers';
-import { getFormattedFields } from '../body/renderers/formatted_field';
+import { getFormattedFields } from '../body/renderers/formatted_field_udt';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
 import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
@@ -289,7 +290,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
-
     if (
       expandedDetail[TimelineTabs.query]?.panelView &&
       timelineId === TimelineId.active &&
@@ -297,21 +297,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     ) {
       activeTimeline.toggleExpandedDetail({});
     }
+    setExpandedDoc(undefined);
   }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
-
-  const renderDetailsPanel = useCallback(
-    () => (
-      <DetailsPanel
-        browserFields={browserFields}
-        handleOnPanelClosed={handleOnPanelClosed}
-        runtimeMappings={runtimeMappings}
-        tabType={TimelineTabs.query}
-        scopeId={timelineId}
-        isFlyoutView
-      />
-    ),
-    [browserFields, handleOnPanelClosed, runtimeMappings, timelineId]
-  );
 
   const onSetExpandedDoc = useCallback(
     (newDoc?: DataTableRecord) => {
@@ -553,14 +540,17 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
+  const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+
   const customColumnRenderers = useMemo(
     () =>
       getFormattedFields({
         dataTableRows: discoverGridRows,
         scopeId: 'timeline',
         headers: columns,
+        browserFieldsByName,
       }),
-    [columns, discoverGridRows]
+    [browserFieldsByName, columns, discoverGridRows]
   );
 
   const handleFetchMoreRecords = useCallback(() => {
@@ -630,7 +620,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           }}
           visibleCellActions={3}
           externalCustomRenderers={customColumnRenderers}
-          renderDocumentView={renderDetailsPanel}
+          renderDocumentView={() => <></>}
           externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
           externalAdditionalControls={additionalControls}
           // trailingControlColumns={trailingControlColumns}
@@ -646,6 +636,16 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           showMultiFields={true}
           cellActionsMetadata={cellActionsMetadata}
         />
+        {showExpandedDetails && (
+          <DetailsPanel
+            browserFields={browserFields}
+            handleOnPanelClosed={handleOnPanelClosed}
+            runtimeMappings={runtimeMappings}
+            tabType={TimelineTabs.query}
+            scopeId={timelineId}
+            isFlyoutView
+          />
+        )}
       </StyledTimelineUnifiedDataTable>
     </StatefulEventContext.Provider>
   );
