@@ -33,9 +33,9 @@ export class APIKeysAPIClient {
     return await this.http.get<GetAPIKeysResult>(apiKeysUrl);
   }
 
-  public async queryApiKeys() {
+  public async queryApiKeys(params?: any) {
     return await this.http.post<QueryApiKeyResult>(`${apiKeysUrl}/_query`, {
-      body: JSON.stringify({ size: 100 }),
+      body: JSON.stringify(params || {}),
     });
   }
 

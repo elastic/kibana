@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, Query, SearchFilterConfig } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, Query, SearchFilterConfig } from '@elastic/eui';
 import {
+  Criteria,
   EuiBadge,
   EuiButton,
   EuiCallOut,
@@ -16,13 +17,14 @@ import {
   EuiHealth,
   EuiInMemoryTable,
   EuiLink,
+  EuiSearchBar,
   EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -61,7 +63,8 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
   const readOnly = !useCapabilities('api_keys').save;
 
   useEffect(() => {
-    queryApiKeysFn();
+    queryApiKeysFn({});
+    // queryApiKeysFn();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state.value) {
@@ -89,7 +92,14 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
   }
 
   const [
-    { apiKeys, canManageCrossClusterApiKeys, canManageApiKeys, canManageOwnApiKeys },
+    {
+      apiKeys,
+      canManageCrossClusterApiKeys,
+      canManageApiKeys,
+      canManageOwnApiKeys,
+      total: totalItemCount,
+    },
+
     currentUser,
   ] = state.value;
 
@@ -106,7 +116,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
             onSuccess={(createApiKeyResponse) => {
               history.push({ pathname: '/' });
               setCreatedApiKey(createApiKeyResponse);
-              getApiKeys();
+              queryApiKeysFn();
             }}
             onCancel={() => history.push({ pathname: '/' })}
             canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
@@ -126,7 +136,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
             });
 
             setOpenedApiKey(undefined);
-            getApiKeys();
+            queryApiKeysFn();
           }}
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
@@ -218,7 +228,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
                   onDelete={(apiKeysToDelete) =>
                     invalidateApiKeyPrompt(
                       apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                      getApiKeys
+                      queryApiKeysFn
                     )
                   }
                   currentUser={currentUser}
@@ -228,6 +238,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
                   canManageOwnApiKeys={canManageOwnApiKeys}
                   readOnly={readOnly}
                   loading={state.loading}
+                  totalItemCount={totalItemCount}
                 />
               )}
             </InvalidateProvider>
@@ -313,6 +324,7 @@ export interface ApiKeysTableProps {
   canManageOwnApiKeys: boolean;
   onClick(apiKey: CategorizedApiKey): void;
   onDelete(apiKeys: CategorizedApiKey[]): void;
+  totalItemCount?: number;
 }
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
@@ -325,9 +337,47 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   canManageOwnApiKeys = false,
   readOnly = false,
   loading = false,
+  totalItemCount = 0,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
+  const initialQuery = EuiSearchBar.Query.MATCH_ALL;
+  const [searchQuery, setQuery] = useState(initialQuery);
+  const [searchError, setError] = useState(null);
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [showPerPageOptions, setShowPerPageOptions] = useState(true);
+
+  const onTableChange = ({ page }: Criteria<CategorizedApiKey>) => {
+    if (page) {
+      const { index: pageIndexV, size: pageSizeV } = page;
+      setPageIndex(pageIndexV);
+      setPageSize(pageSizeV);
+    }
+  };
+  const onSearchQueryChange = ({ query, error }) => {
+    if (error) {
+      setError(error);
+    } else {
+      setError(null);
+      setQuery(query);
+      let esQueryDsl;
+      let esQueryString;
+
+      try {
+        esQueryDsl = EuiSearchBar.Query.toESQuery(query);
+      } catch (e) {
+        esQueryDsl = e.toString();
+      }
+      try {
+        esQueryString = EuiSearchBar.Query.toESQueryString(query);
+      } catch (e) {
+        esQueryString = e.toString();
+      }
+      console.log({ esQueryDsl, esQueryString });
+    }
+  };
 
   const { categorizedApiKeys, typeFilters, usernameFilters, expiredFilters } = useMemo(
     () => categorizeApiKeys(apiKeys),
@@ -483,59 +533,116 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       ],
     });
   }
+  const findApiKeys = (apiKeysList: CategorizedApiKey[], pageIndex: number, pageSize: number) => {
+    let pageOfItems;
 
+    if (!pageIndex && !pageSize) {
+      pageOfItems = apiKeysList;
+    } else {
+      const startIndex = pageIndex * pageSize;
+      pageOfItems = apiKeysList.slice(
+        startIndex,
+        Math.min(startIndex + pageSize, apiKeysList.length)
+      );
+    }
+
+    return {
+      pageOfItems,
+    };
+  };
+
+  const { pageOfItems } = findApiKeys(categorizedApiKeys, pageIndex, pageSize);
+
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount,
+    pageSizeOptions: [10, 0],
+    showPerPageOptions,
+  };
   return (
-    <EuiInMemoryTable
-      items={categorizedApiKeys}
-      itemId="id"
-      columns={columns}
-      search={
-        categorizedApiKeys.length > 0
-          ? {
-              toolsLeft: selectedItems.length ? (
-                <EuiButton
-                  onClick={() => onDelete(selectedItems)}
-                  color="danger"
-                  iconType="trash"
-                  data-test-subj="bulkInvalidateActionButton"
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
-                    defaultMessage="Delete {count, plural, one {API key} other {# API keys}}"
-                    values={{
-                      count: selectedItems.length,
-                    }}
-                  />
-                </EuiButton>
-              ) : undefined,
-              box: {
-                incremental: true,
-              },
-              filters,
-            }
-          : undefined
-      }
-      sorting={{
-        sort: {
-          field: 'creation',
-          direction: 'desc',
-        },
-      }}
-      selection={
-        readOnly
-          ? undefined
-          : {
-              selectable: deletable,
-              onSelectionChange: setSelectedItems,
-            }
-      }
-      pagination={{
-        initialPageSize: 10,
-        pageSizeOptions: [10, 25, 50],
-      }}
-      loading={loading}
-      isSelectable={canManageOwnApiKeys}
-    />
+    <>
+      {/* <EuiInMemoryTable
+        items={categorizedApiKeys}
+        itemId="id"
+        columns={columns}
+        search={
+          categorizedApiKeys.length > 0
+            ? {
+                toolsLeft: selectedItems.length ? (
+                  <EuiButton
+                    onClick={() => onDelete(selectedItems)}
+                    color="danger"
+                    iconType="trash"
+                    data-test-subj="bulkInvalidateActionButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
+                      defaultMessage="Delete {count, plural, one {API key} other {# API keys}}"
+                      values={{
+                        count: selectedItems.length,
+                      }}
+                    />
+                  </EuiButton>
+                ) : undefined,
+                box: {
+                  incremental: true,
+                },
+                filters,
+              }
+            : undefined
+        }
+        sorting={{
+          sort: {
+            field: 'creation',
+            direction: 'desc',
+          },
+        }}
+        selection={
+          readOnly
+            ? undefined
+            : {
+                selectable: deletable,
+                onSelectionChange: setSelectedItems,
+              }
+        }
+        pagination={{
+          initialPageSize: 10,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        loading={loading}
+        isSelectable={canManageOwnApiKeys}
+      /> */}
+
+      <EuiSearchBar
+        defaultQuery={initialQuery}
+        box={{
+          placeholder: 'Search...',
+          incremental: true,
+        }}
+        filters={filters}
+        onChange={onSearchQueryChange}
+      />
+      <EuiSpacer />
+
+      <EuiBasicTable
+        items={pageOfItems}
+        itemId="id"
+        columns={columns}
+        loading={loading}
+        pagination={pagination}
+        onChange={onTableChange}
+        selection={
+          readOnly
+            ? undefined
+            : {
+                selectable: deletable,
+                onSelectionChange: setSelectedItems,
+              }
+        }
+        isSelectable={canManageOwnApiKeys}
+      />
+    </>
   );
 };
 
