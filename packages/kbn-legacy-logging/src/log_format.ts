@@ -56,7 +56,7 @@ export abstract class BaseLogFormat extends Stream.Transform {
 
   abstract format(data: Record<string, any>): string;
 
-  filter(data: Record<string, unknown>) {
+  filterData(data: Record<string, unknown>) {
     if (!this.config.filter) {
       return data;
     }
@@ -64,7 +64,7 @@ export abstract class BaseLogFormat extends Stream.Transform {
   }
 
   _transform(event: AnyEvent, enc: string, next: Stream.TransformCallback) {
-    const data = this.filter(this.readEvent(event));
+    const data = this.filterData(this.readEvent(event));
     this.push(this.format(data) + '\n');
     next();
   }
