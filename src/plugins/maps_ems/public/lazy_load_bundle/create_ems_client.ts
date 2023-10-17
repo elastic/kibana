@@ -26,14 +26,18 @@ export function createEMSClient(
 
   if (!isServerless && kbnSemVer) {
     landingPageUrl = `${landingPageUrl}/v${kbnSemVer.major}.${kbnSemVer.minor}`;
-  } else {
+  }
+
+  if (isServerless) {
     headers.append(ELASTIC_HTTP_VERSION_HEADER, DEFAULT_EMS_REST_VERSION);
   }
 
+  const version = isServerless ? DEFAULT_EMS_REST_VERSION : kbnVersion;
+
   return new EMSClient({
     language: i18n.getLocale(),
-    appVersion: isServerless ? DEFAULT_EMS_REST_VERSION : kbnVersion,
-    emsVersion: isServerless ? DEFAULT_EMS_REST_VERSION : kbnVersion,
+    appVersion: version,
+    emsVersion: version,
     appName: EMS_APP_NAME,
     tileApiUrl: emsSettings!.getEMSTileApiUrl(),
     fileApiUrl: emsSettings!.getEMSFileApiUrl(),
