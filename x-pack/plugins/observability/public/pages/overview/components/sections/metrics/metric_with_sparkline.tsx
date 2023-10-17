@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 import { ThemeContext } from 'styled-components';
 
+import { i18n } from '@kbn/i18n';
 import { NumberOrNull } from '../../../../..';
 
 interface Props {
@@ -47,7 +48,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
       <EuiFlexItem grow={false}>
         <Chart size={{ height: 18, width: 40 }}>
           <Tooltip type={TooltipType.None} />
-          <Settings theme={theme} showLegend={false} />
+          <Settings theme={theme} showLegend={false} locale={i18n.getLocale()} />
           <AreaSeries
             id={id}
             data={timeseries}

@@ -120,6 +120,17 @@ export const getRuleExecutor = ({
           );
 
           const alertId = instanceId;
+          const alert = alertWithLifecycle({
+            id: alertId,
+            fields: {
+              [ALERT_REASON]: reason,
+              [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
+              [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
+              [SLO_ID_FIELD]: slo.id,
+              [SLO_REVISION_FIELD]: slo.revision,
+              [SLO_INSTANCE_ID_FIELD]: instanceId,
+            },
+          });
           const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
@@ -142,19 +153,6 @@ export const getRuleExecutor = ({
             sloName: slo.name,
             sloInstanceId: instanceId,
           };
-
-          const alert = alertWithLifecycle({
-            id: alertId,
-
-            fields: {
-              [ALERT_REASON]: reason,
-              [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
-              [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
-              [SLO_ID_FIELD]: slo.id,
-              [SLO_REVISION_FIELD]: slo.revision,
-              [SLO_INSTANCE_ID_FIELD]: instanceId,
-            },
-          });
 
           alert.scheduleActions(windowDef.actionGroup, context);
           alert.replaceState({ alertState: AlertStates.ALERT });

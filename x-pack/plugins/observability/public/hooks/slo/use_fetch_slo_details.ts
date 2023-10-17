@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ALL_VALUE, GetSLOResponse } from '@kbn/slo-schema';
 import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { ALL_VALUE, GetSLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -21,7 +21,7 @@ export interface UseFetchSloDetailsResponse {
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  slo: GetSLOResponse | undefined;
+  data: GetSLOResponse | undefined;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
   ) => Promise<QueryObserverResult<GetSLOResponse | undefined, unknown>>;
@@ -65,7 +65,7 @@ export function useFetchSloDetails({
   );
 
   return {
-    slo: data,
+    data,
     isLoading,
     isInitialLoading,
     isRefetching,

@@ -188,7 +188,7 @@ describe('SLO Edit Page', () => {
         .spyOn(Router, 'useLocation')
         .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-      useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+      useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
       render(<SloEditPage />);
 
@@ -219,7 +219,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
         render(<SloEditPage />);
 
@@ -229,7 +229,7 @@ describe('SLO Edit Page', () => {
 
     describe('when no sloId route param is provided', () => {
       beforeEach(() => {
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
       });
 
       it('renders the SLO Edit page in pristine state', async () => {
@@ -290,7 +290,7 @@ describe('SLO Edit Page', () => {
     describe('when a sloId route param is provided', () => {
       it('prefills the form with the SLO values', async () => {
         const slo = buildSlo({ id: '123Foo' });
-        useFetchSloMock.mockReturnValue({ isLoading: false, isInitialLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, isInitialLoading: false, data: slo });
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123Foo' });
 
         jest
@@ -322,7 +322,7 @@ describe('SLO Edit Page', () => {
       it('calls the updateSlo hook if all required values are filled in', async () => {
         const slo = buildSlo({ id: '123' });
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         const { queryByTestId } = render(<SloEditPage />);
 
@@ -345,7 +345,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         useFetchApmSuggestionsMock.mockReturnValue({
           suggestions: ['cartService'],
@@ -382,7 +382,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         const { getByTestId } = render(<SloEditPage />);
 
@@ -404,7 +404,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         const { getByTestId } = render(<SloEditPage />);
 
@@ -430,7 +430,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: 'create-rule=true', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         const { getByTestId } = render(<SloEditPage />);
 

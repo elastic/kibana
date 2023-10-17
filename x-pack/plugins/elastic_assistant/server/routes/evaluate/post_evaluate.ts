@@ -7,11 +7,11 @@
 
 import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
 import { v4 as uuidv4 } from 'uuid';
+
+import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
-
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { EVALUATE } from '../../../common/constants';
 import { PostEvaluateBody, PostEvaluatePathQuery } from '../../schemas/evaluate/post_evaluate';
@@ -126,6 +126,7 @@ export const postEvaluateRoute = (
                 llmType,
                 logger,
                 request: skeletonRequest,
+                kbResource: ESQL_RESOURCE,
               })
             );
           });
