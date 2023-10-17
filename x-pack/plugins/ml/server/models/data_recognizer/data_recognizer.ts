@@ -1439,7 +1439,7 @@ export function filterConfigs(
             }
             return module.tags.includes(compatibleModuleType!);
           });
-    const filteredForModuleTypeFilters =
+    const filteredForModuleTags =
       moduleTagFilters.length === 0
         ? filteredForCompatibleModule
         : filteredForCompatibleModule.filter(({ module }) => {
@@ -1450,7 +1450,7 @@ export function filterConfigs(
             }
             return intersection(module.tags, moduleTagFilters).length > 0;
           });
-    filteredConfigs = filteredForModuleTypeFilters;
+    filteredConfigs = filteredForModuleTags;
   }
   return filteredConfigs;
 }
