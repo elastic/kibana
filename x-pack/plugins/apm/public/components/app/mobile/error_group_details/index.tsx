@@ -32,6 +32,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorSampler } from './error_sampler';
 import { ErrorDistribution } from './distribution';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
@@ -103,14 +104,14 @@ export function ErrorGroupDetails() {
       comparisonEnabled,
       errorId,
     },
-  } = useApmParams('/services/{serviceName}/errors/{groupId}');
+  } = useApmParams('/mobile-services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   useBreadcrumb(
     () => ({
       title: groupId,
-      href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
+      href: apmRouter.link('/mobile-services/{serviceName}/errors/{groupId}', {
         path: {
           serviceName,
           groupId,
@@ -211,20 +212,29 @@ export function ErrorGroupDetails() {
 
       <EuiSpacer size={'m'} />
       <EuiFlexGroup>
-        <EuiFlexItem grow={3}>
-          <EuiPanel hasBorder={true}>
-            <ErrorDistribution
-              fetchStatus={errorDistributionStatus}
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-                {
-                  defaultMessage: 'Error occurrences',
-                }
-              )}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
+        <ChartPointerEventContextProvider>
+          <EuiFlexItem grow={3}>
+            <EuiPanel hasBorder={true}>
+              <ErrorDistribution
+                fetchStatus={errorDistributionStatus}
+                distribution={errorDistributionData}
+                title={i18n.translate(
+                  'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                  {
+                    defaultMessage: 'Error occurrences',
+                  }
+                )}
+                height={300}
+                tip={i18n.translate(
+                  'xpack.apm.serviceDetails.metrics.errorRateChart.tip',
+                  {
+                    defaultMessage: `Error rate is measured in transactions per minute.`,
+                  }
+                )}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </ChartPointerEventContextProvider>
         {!isOpenTelemetryAgent && !isRumAgent && (
           <EuiFlexItem grow={2}>
             <EuiPanel hasBorder={true}>

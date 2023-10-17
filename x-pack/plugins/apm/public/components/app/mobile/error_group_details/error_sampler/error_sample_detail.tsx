@@ -102,7 +102,7 @@ export function ErrorSampleDetails({
   const {
     path: { groupId },
     query,
-  } = useApmParams('/services/{serviceName}/errors/{groupId}');
+  } = useApmParams('/mobile-services/{serviceName}/errors/{groupId}');
 
   const { kuery } = query;
 
