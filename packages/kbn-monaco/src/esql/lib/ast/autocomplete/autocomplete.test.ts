@@ -12,7 +12,7 @@ import { suggest } from './autocomplete';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';
 import { AstListener } from '../ast_factory';
-import { mathCommandDefinition } from './completeItems';
+import { mathCommandDefinition } from './complete_items';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';

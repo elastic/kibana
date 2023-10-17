@@ -15,7 +15,7 @@ import { getFunctionSignatures, getCommandSignature } from '../definitions/helpe
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { FunctionDefinition, CommandDefinition } from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
-import { buildDocumentation, buildFunctionDocumentation } from './documentationUtil';
+import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 
 const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
 

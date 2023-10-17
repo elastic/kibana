@@ -40,7 +40,7 @@ import {
   getBuiltinCompatibleFunctionDefinition,
   mathCommandDefinition,
   pipeCompleteItem,
-} from './completeItems';
+} from './complete_items';
 import {
   buildFieldsDefinitions,
   buildPoliciesDefinitions,
