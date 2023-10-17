@@ -60,9 +60,13 @@ const timelineChangedTypes = [
   updateRange.type,
   upsertColumn.type,
 ].reduce((allTypes, currentType) => {
+  // Mapping the array to a lookup object:
+  // { 'action_type': true }
+  // Given the amount of actions that are coming through,
+  // this speeds up the filtering significantly
   allTypes[currentType] = true;
   return allTypes;
-}, {} as { [key: string]: boolean });
+}, {} as { [eventType: string]: boolean });
 
 /**
  * Maps actions that mark a timeline change to `setChanged` actions.
@@ -70,7 +74,9 @@ const timelineChangedTypes = [
  */
 export const createTimelineChangedEpic = (): Epic<Action, Action> => (action$) => {
   return action$.pipe(
+    // Only apply mapping to some actions
     filter((action) => timelineChangedTypes[action.type]),
+    // Map the action to a `changed` action
     map((action) =>
       setChanged({
         id: get('payload.id', action) as string,

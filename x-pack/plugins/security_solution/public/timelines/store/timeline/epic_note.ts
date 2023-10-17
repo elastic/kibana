@@ -30,7 +30,10 @@ import type { ActionTimeline, TimelineById } from './types';
 import { persistNote } from '../../containers/notes/api';
 import type { ResponseNote } from '../../../../common/api/timeline';
 
-export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
+export const timelineNoteActionsType = {
+  [addNote.type]: true,
+  [addNoteToEvent.type]: true,
+};
 
 export const epicPersistNote = (
   action: ActionTimeline,
@@ -125,7 +128,7 @@ export const createTimelineNoteEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) =>
     action$.pipe(
-      filter((action) => timelineNoteActionsType.includes(action.type)),
+      filter((action) => timelineNoteActionsType[action.type]),
       switchMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
         return empty();

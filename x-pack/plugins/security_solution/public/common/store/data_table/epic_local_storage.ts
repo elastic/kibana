@@ -48,7 +48,14 @@ const tableActionTypes = [
   updateTotalCount.type,
   updateIsLoading.type,
   toggleDetailPanel.type,
-];
+].reduce((allTypes, currentType) => {
+  // Mapping the array to a lookup object:
+  // { 'action_type': true }
+  // Given the amount of actions that are coming through,
+  // this speeds up the filtering significantly
+  allTypes[currentType] = true;
+  return allTypes;
+}, {} as { [eventType: string]: boolean });
 
 export const createDataTableLocalStorageEpic =
   <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
@@ -58,7 +65,7 @@ export const createDataTableLocalStorageEpic =
       delay(500),
       withLatestFrom(table$),
       tap(([action, tableById]) => {
-        if (tableActionTypes.includes(action.type)) {
+        if (tableActionTypes[action.type]) {
           if (storage) {
             const tableId: TableIdLiteral = get('payload.id', action);
             addTableInStorage(storage, tableId, tableById[tableId]);

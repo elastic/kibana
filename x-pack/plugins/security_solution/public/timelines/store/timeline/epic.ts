@@ -155,7 +155,7 @@ export const createTimelineEpic =
           const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
           const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
-          if (timelineNoteActionsType.includes(action.type)) {
+          if (timelineNoteActionsType[action.type]) {
             return epicPersistNote(
               action,
               timeline,
@@ -165,9 +165,9 @@ export const createTimelineEpic =
               notes$,
               allTimelineQuery$
             );
-          } else if (timelinePinnedEventActionsType.includes(action.type)) {
+          } else if (timelinePinnedEventActionsType[action.type]) {
             return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
-          } else if (timelineFavoriteActionsType.includes(action.type)) {
+          } else if (timelineFavoriteActionsType[action.type]) {
             return epicPersistTimelineFavorite(
               action,
               timeline,

@@ -28,7 +28,7 @@ import type { ResponseFavoriteTimeline } from '../../../../common/api/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 
-export const timelineFavoriteActionsType = [updateIsFavorite.type];
+export const timelineFavoriteActionsType = { [updateIsFavorite.type]: true };
 
 export const epicPersistTimelineFavorite = (
   action: ActionTimeline,
@@ -108,7 +108,7 @@ export const createTimelineFavoriteEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) => {
     return action$.pipe(
-      filter((action) => timelineFavoriteActionsType.includes(action.type)),
+      filter((action) => timelineFavoriteActionsType[action.type]),
       mergeMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
         return empty();
