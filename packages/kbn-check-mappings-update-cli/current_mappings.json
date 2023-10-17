@@ -1645,6 +1645,9 @@
       "overrides": {
         "type": "flattened",
         "index": false
+      },
+      "keep_monitoring_alive": {
+        "type": "boolean"
       }
     }
   },
