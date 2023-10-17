@@ -10,11 +10,12 @@ source .buildkite/scripts/steps/functional/common_cypress.sh
 # by exporting a var like:
 # export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 node scripts/build_kibana_platform_plugins.js
-is_test_execution_step
 
 export JOB=kibana-osquery-cypress-serverless
 
 echo "--- Security Osquery Serverless Cypress"
 
+cd x-pack/plugins/osquery
+
 set +e
-yarn --cwd x-pack/plugins/osquery cypress:serverless:run; status=$?; yarn junit:merge || :; exit $status
+yarn cypress:serverless:run; status=$?; yarn junit:merge || :; exit $status
