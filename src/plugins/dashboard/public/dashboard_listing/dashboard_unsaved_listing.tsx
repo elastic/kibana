@@ -179,36 +179,33 @@ export const DashboardUnsavedListing = ({
     };
   }, [refreshUnsavedDashboards, dashboardBackup, unsavedDashboardIds, findDashboards]);
 
-  return (
-    unsavedDashboardIds.length > 0 && (
-      <>
-        <EuiCallOut
-          heading="h3"
-          data-test-subj="unsavedDashboardsCallout"
-          title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
-            unsavedDashboardIds.length > 1
-          )}
-        >
-          {unsavedDashboardIds.map((dashboardId: string) => {
-            const title: string | undefined =
-              dashboardId === DASHBOARD_PANELS_UNSAVED_ID
-                ? getNewDashboardTitle()
-                : items[dashboardId]?.title;
-            const redirectId =
-              dashboardId === DASHBOARD_PANELS_UNSAVED_ID ? undefined : dashboardId;
-            return (
-              <DashboardUnsavedItem
-                key={dashboardId}
-                id={dashboardId}
-                title={title}
-                onOpenClick={() => onOpen(redirectId)}
-                onDiscardClick={() => onDiscard(redirectId)}
-              />
-            );
-          })}
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    )
+  return unsavedDashboardIds.length === 0 ? null : (
+    <>
+      <EuiCallOut
+        heading="h3"
+        data-test-subj="unsavedDashboardsCallout"
+        title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
+          unsavedDashboardIds.length > 1
+        )}
+      >
+        {unsavedDashboardIds.map((dashboardId: string) => {
+          const title: string | undefined =
+            dashboardId === DASHBOARD_PANELS_UNSAVED_ID
+              ? getNewDashboardTitle()
+              : items[dashboardId]?.title;
+          const redirectId = dashboardId === DASHBOARD_PANELS_UNSAVED_ID ? undefined : dashboardId;
+          return (
+            <DashboardUnsavedItem
+              key={dashboardId}
+              id={dashboardId}
+              title={title}
+              onOpenClick={() => onOpen(redirectId)}
+              onDiscardClick={() => onDiscard(redirectId)}
+            />
+          );
+        })}
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
   );
 };
