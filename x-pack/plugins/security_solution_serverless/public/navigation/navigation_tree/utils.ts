@@ -33,5 +33,4 @@ const HIDDEN_BREADCRUMBS = new Set<ProjectPageName>([
 export const isBreadcrumbHidden = (id: ProjectPageName): boolean =>
   HIDDEN_BREADCRUMBS.has(id) ||
   /* management sub-pages set their breadcrumbs themselves, the main Management breadcrumb is configured with our navigationTree definition */
-  (id.startsWith(ExternalPageName.management) &&
-    id !== ExternalPageName.management); 
+  (id.startsWith(ExternalPageName.management) && id !== ExternalPageName.management);

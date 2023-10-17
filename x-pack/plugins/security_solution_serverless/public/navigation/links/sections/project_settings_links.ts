@@ -15,7 +15,7 @@ export const createProjectSettingsLinksFromManage = (manageLink: LinkItem): Link
   const entityAnalyticsLink = manageLink.links?.find(
     ({ id }) => id === SecurityPageName.entityAnalyticsManagement
   );
-  return entityAnalyticsLink ? [{...entityAnalyticsLink, sideNavDisabled: true}] : [];
+  return entityAnalyticsLink ? [{ ...entityAnalyticsLink, sideNavDisabled: true }] : [];
 };
 
 export const projectSettingsNavLinks: ProjectNavigationLink[] = [
