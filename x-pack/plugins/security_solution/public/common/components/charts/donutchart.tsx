@@ -21,6 +21,7 @@ import { isEmpty } from 'lodash';
 import type { FlattenSimpleInterpolation } from 'styled-components';
 import styled from 'styled-components';
 
+import { i18n } from '@kbn/i18n';
 import { useThemes } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
@@ -199,6 +200,7 @@ export const DonutChart = ({
               theme={[donutTheme, theme]}
               baseTheme={baseTheme}
               onElementClick={onElementClicked}
+              locale={i18n.getLocale()}
             />
             <Partition
               id="donut-chart"
