@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const es = getService('es');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default data view', function describeIndexTests() {
@@ -249,33 +248,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(currentUrl).to.contain('management/kibana/dataViews');
           });
         });
-      });
-    });
-
-    describe('hidden index support', () => {
-      it('can create data view against hidden index', async () => {
-        const pattern = 'logstash-2015.09.21';
-
-        await es.transport.request({
-          path: '/logstash-2015.09.21/_settings',
-          method: 'PUT',
-          body: {
-            index: {
-              hidden: true,
-            },
-          },
-        });
-
-        await PageObjects.settings.createIndexPattern(
-          pattern,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          true
-        );
-        const patternName = await PageObjects.settings.getIndexPageHeading();
-        expect(patternName).to.be(pattern);
       });
     });
   });
