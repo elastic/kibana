@@ -69,8 +69,6 @@ export type ConnectorConfiguration = Record<
   extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
   use_document_level_security?: ConnectorConfigProperties;
   use_text_extraction_service?: ConnectorConfigProperties;
-  enumerate_all_sites?: ConnectorConfigProperties; // This only exist for Sharepoint Online
-  fetch_subsites?: ConnectorConfigProperties; // This only exist for Sharepoint Online
 };
 
 export interface ConnectorScheduling {
@@ -211,7 +209,7 @@ export interface SchedulingConfiguraton {
 
 export interface Connector {
   api_key_id: string | null;
-  configuration: ConnectorConfiguration;
+  configuration: ConnectorConfiguration | SharepointOnlineConfiguration;
   custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
   error: string | null;
@@ -272,8 +270,13 @@ export interface ConnectorSyncJob {
 export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;
 
 export interface NativeConnector {
-  configuration: ConnectorConfiguration;
+  configuration: ConnectorConfiguration | SharepointOnlineConfiguration;
   features: Connector['features'];
   name: string;
   serviceType: string;
 }
+
+export type SharepointOnlineConfiguration = ConnectorConfiguration & {
+  enumerate_all_sites?: ConnectorConfigProperties;
+  fetch_subsites?: ConnectorConfigProperties;
+};

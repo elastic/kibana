@@ -745,7 +745,6 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: ['advanced'],
         validations: [],
         value: 3,
-        display_value: 3,
       },
       use_text_extraction_service: {
         default_value: null,
