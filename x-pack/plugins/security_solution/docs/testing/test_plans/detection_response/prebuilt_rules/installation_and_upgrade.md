@@ -566,7 +566,7 @@ And the Investigation Guide tab should NOT be displayed
 
 ### Rule installation workflow: filtering, sorting, pagination
 
-TODO: add scenarios
+TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 
 ### Rule installation workflow: misc cases
 
@@ -709,7 +709,7 @@ And the Investigation Guide tab should NOT be displayed
 
 ### Rule upgrade workflow: filtering, sorting, pagination
 
-TODO: add scenarios
+TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 
 ### Rule upgrade workflow: misc cases
 
