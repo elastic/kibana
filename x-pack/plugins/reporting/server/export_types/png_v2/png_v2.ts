@@ -104,7 +104,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
 
         return generatePngObservable(
           () =>
-            this.startDeps.reporting.getScreenshots({
+            this.startDeps.reporting.getScreenshots!({
               format: 'png',
               headers,
               layout: { ...payload.layout, id: 'preserve_layout' },

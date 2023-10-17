@@ -37,7 +37,6 @@ describe('rule_type_registry_deprecated_consumers', () => {
           "siem.newTermsRule",
           "siem.notifications",
           "slo.rules.burnRate",
-          "metrics.alert.anomaly",
           "logs.alert.document.count",
           "metrics.alert.inventory.threshold",
           "metrics.alert.threshold",
