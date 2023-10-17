@@ -50,6 +50,7 @@ steps:
           FTR_CONFIGS_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/ftr_configs.sh'
           FTR_CONFIG_PATTERNS: '**/test_serverless/**'
           FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
+          FUNCTIONAL_MAX_MINUTES: 25
           LIMIT_CONFIG_TYPE: 'functional'
         retry:
           automatic:
