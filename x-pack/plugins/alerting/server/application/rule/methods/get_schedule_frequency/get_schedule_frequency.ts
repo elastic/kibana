@@ -85,7 +85,11 @@ interface ValidateScheduleLimitParams {
   updatedInterval: string | string[];
 }
 
-export const validateScheduleLimit = async (params: ValidateScheduleLimitParams) => {
+export type ValidateScheduleLimitResult = { interval: number; intervalAvailable: number } | null;
+
+export const validateScheduleLimit = async (
+  params: ValidateScheduleLimitParams
+): Promise<ValidateScheduleLimitResult> => {
   const { context, prevInterval = [], updatedInterval = [] } = params;
 
   const prevIntervalArray = Array.isArray(prevInterval) ? prevInterval : [prevInterval];
@@ -108,8 +112,11 @@ export const validateScheduleLimit = async (params: ValidateScheduleLimitParams)
   const computedRemainingSchedulesPerMinute = remainingSchedulesPerMinute + prevSchedulePerMinute;
 
   if (computedRemainingSchedulesPerMinute < updatedSchedulesPerMinute) {
-    throw new Error(
-      `Run limit reached: The rule has ${updatedSchedulesPerMinute} runs per minute; there are only ${computedRemainingSchedulesPerMinute} runs per minute available.`
-    );
+    return {
+      interval: updatedSchedulesPerMinute,
+      intervalAvailable: remainingSchedulesPerMinute,
+    };
   }
+
+  return null;
 };

@@ -30,7 +30,7 @@ import {
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-describe('Fleet preconfiguration reset', () => {
+describe('Fleet cloud preconfiguration', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
 
@@ -143,8 +143,7 @@ describe('Fleet preconfiguration reset', () => {
         expect(agentPolicies.saved_objects.find((so) => so.id === 'default-policy')).toBeDefined();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/133470
-      it.skip('Create correct .fleet-policies', async () => {
+      it('Create correct .fleet-policies', async () => {
         const res = await kbnServer.coreStart.elasticsearch.client.asInternalUser.search({
           index: AGENT_POLICY_INDEX,
           q: `policy_id:policy-elastic-agent-on-cloud`,
@@ -324,6 +323,9 @@ describe('Fleet preconfiguration reset', () => {
                       ],
                     },
                   ],
+                },
+                'elastic-cloud-fleet-server': {
+                  indices: [],
                 },
               },
             },

@@ -40,6 +40,7 @@ const RuleName = ({ name, ruleId }: RuleNameProps) => {
       onClick={() => {
         openRulePreview(ruleId);
       }}
+      data-test-subj="ruleName"
     >
       {name}
     </EuiLink>
@@ -120,7 +121,14 @@ const createUpgradeButtonColumn = (
         onClick={() => upgradeOneRule(ruleId)}
         data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
       >
-        {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
+        {isRuleUpgrading ? (
+          <EuiLoadingSpinner
+            size="s"
+            data-test-subj={`upgradeSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
+          />
+        ) : (
+          i18n.UPDATE_RULE_BUTTON
+        )}
       </EuiButtonEmpty>
     );
   },
