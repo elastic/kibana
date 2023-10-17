@@ -17,6 +17,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const svlCases = getService('svlCases');
   const find = getService('find');
+  const retry = getService('retry');
+  const header = getPageObject('header');
 
   describe('Cases persistable attachments', () => {
     describe('lens visualization', () => {
@@ -25,7 +27,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await svlSecNavigation.navigateToLandingPage();
 
         await testSubjects.click('solutionSideNavItemLink-dashboards');
+        await header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('createDashboardButton', async () => {
+          return await testSubjects.exists('createDashboardButton');
+        });
+
         await testSubjects.click('createDashboardButton');
+        await header.waitUntilLoadingHasFinished();
 
         await lens.createAndAddLensFromDashboard({});
         await dashboard.waitForRenderComplete();
