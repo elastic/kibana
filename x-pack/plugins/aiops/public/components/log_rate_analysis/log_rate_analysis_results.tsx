@@ -176,7 +176,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream(
+  } = useFetchStream<AiopsApiLogRateAnalysis['body'], typeof streamReducer>(
     http,
     '/internal/aiops/log_rate_analysis',
     '1',
@@ -188,6 +188,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.getIndexPattern(),
       grouping: true,
+      compressResponse: true,
+      flushFix: true,
       // If analysis type is `spike`, pass on window parameters as is,
       // if it's `dip`, swap baseline and deviation.
       ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
