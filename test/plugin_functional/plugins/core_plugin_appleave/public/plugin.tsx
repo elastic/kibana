@@ -26,7 +26,7 @@ export class CoreAppLeavePlugin
       title: 'AppLeave 2',
       async mount(params) {
         const { renderApp } = await import('./application');
-        params.onAppLeave((actions) => actions.default());
+        params.onAppLeave((actions) => actions.confirm('confirm-message', 'confirm-title'));
         return renderApp('AppLeave 2', params);
       },
     });
