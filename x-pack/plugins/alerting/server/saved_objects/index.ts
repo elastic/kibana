@@ -14,6 +14,7 @@ import type {
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { legacyMigrationToUnsafeTransform } from '@kbn/core-saved-objects-base-server-internal';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { maintenanceWindowMappings } from './maintenance_window_mapping';
@@ -104,6 +105,25 @@ export function setupSavedObjects(
       },
       isExportable<RawRule>(ruleSavedObject: SavedObject<RawRule>) {
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
+      },
+    },
+    modelVersions: {
+      1: {
+        changes: [
+          {
+            type: 'unsafe_transform',
+            transformFn: legacyMigrationToUnsafeTransform(
+              encryptedSavedObjects.createMigration({
+                //  eslint-disable-next-line @typescript-eslint/no-explicit-any
+                isMigrationNeededPredicate: (() => true) as any,
+                migration: (doc, context) => {
+                  return doc;
+                },
+                shouldMigrateIfDecryptionFails: true, // maybe?
+              })
+            ),
+          },
+        ],
       },
     },
   });
