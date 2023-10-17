@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { SERVERLESS_ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -34,8 +34,8 @@ describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServer
   });
 
   beforeEach(() => {
-    login(ROLES.t1_analyst);
-    visitRulesManagementTable(ROLES.t1_analyst);
+    login(SERVERLESS_ROLES.t1_analyst);
+    visitRulesManagementTable(SERVERLESS_ROLES.t1_analyst);
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 

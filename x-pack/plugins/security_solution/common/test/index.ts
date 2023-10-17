@@ -9,9 +9,20 @@ import type roleDefinitions from '@kbn/es/src/serverless_resources/roles.json';
 
 export type SecurityRoleName = keyof typeof roleDefinitions;
 
+export enum SERVERLESS_ROLES {
+  t1_analyst = 't1_analyst',
+  t2_analyst = 't2_analyst',
+  t3_analyst = 't3_analyst',
+  rule_author = 'rule_author',
+  soc_manager = 'soc_manager',
+  detections_admin = 'detections_admin',
+  platform_engineer = 'platform_engineer',
+}
+
 // For the source of these roles please consult the PR these were introduced https://github.com/elastic/kibana/pull/81866#issue-511165754
 export enum ROLES {
   soc_manager = 'soc_manager',
+  reader = 'reader',
   t1_analyst = 't1_analyst',
   t2_analyst = 't2_analyst',
   t3_analyst = 't3_analyst',
