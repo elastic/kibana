@@ -27,7 +27,7 @@ const everythingIndicator = createTimesliceMetricIndicator(
 
 describe('Timeslice Metric Transform Generator', () => {
   describe('validation', () => {
-    it('throws when the budgeting method is occorances', () => {
+    it('throws when the budgeting method is occurrences', () => {
       const anSLO = createSLO({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field' }],
