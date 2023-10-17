@@ -39,6 +39,7 @@ import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
+import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
@@ -310,7 +311,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         defaultMessage: 'Data stream options',
       }),
       items: [
-        ...(!dataStream?.ilmPolicyName && dataStream?.privileges?.manage_data_stream_lifecycle
+        ...(!isDataStreamFullyManagedByILM(dataStream) &&
+        dataStream?.privileges?.manage_data_stream_lifecycle
           ? [
               {
                 key: 'editDataRetention',
@@ -364,7 +366,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         />
       )}
 
-      {isEditingDataRetention && (
+      {isEditingDataRetention && dataStream && (
         <EditDataRetentionModal
           onClose={(data) => {
             if (data && data?.hasUpdatedDataRetention) {
@@ -373,10 +375,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               setIsEditingDataRetention(false);
             }
           }}
-          dataStreamName={dataStreamName}
-          lifecycle={dataStream?.lifecycle}
-          hasIlmPolicyWithDeletePhase={dataStream?.hasIlmPolicyWithDeletePhase}
-          dataStreamManagedBy={dataStream?.nextGenerationManagedBy}
+          ilmPolicyLink={ilmPolicyLink}
+          dataStream={dataStream}
         />
       )}
 

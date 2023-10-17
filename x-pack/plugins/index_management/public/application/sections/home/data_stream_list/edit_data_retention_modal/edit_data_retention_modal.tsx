@@ -37,16 +37,14 @@ import {
 
 import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
-import { isDataStreamUnmanaged } from '../../../../lib/data_streams';
+import { isDataStreamUnmanaged, isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
 import { updateDataRetention } from '../../../../services/api';
 
 interface Props {
-  lifecycle: DataStream['lifecycle'];
-  dataStreamName: string;
-  hasIlmPolicyWithDeletePhase?: boolean;
-  dataStreamManagedBy?: DataStream['nextGenerationManagedBy'];
+  dataStream: DataStream;
+  ilmPolicyLink: string;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
@@ -152,13 +150,13 @@ const configurationFormSchema: FormSchema = {
   },
 };
 
-export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
-  lifecycle,
-  dataStreamName,
-  hasIlmPolicyWithDeletePhase,
-  dataStreamManagedBy,
-  onClose,
-}) => {
+export const EditDataRetentionModal: React.FunctionComponent<Props> = ({ dataStream, onClose }) => {
+  const lifecycle = dataStream?.lifecycle;
+  const dataStreamName = dataStream?.name as string;
+  const dataStreamManagedBy = dataStream?.nextGenerationManagedBy;
+  const hasIlmPolicyWithDeletePhase = dataStream?.hasIlmPolicyWithDeletePhase;
+
+  const dslWithIlmIndices = isDSLWithILMIndices(dataStream);
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
     services: { notificationService },
@@ -235,6 +233,32 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
+          {dslWithIlmIndices && (
+            <>
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMTitle',
+                  { defaultMessage: 'Some indices are managed by ILM' }
+                )}
+                color="warning"
+                iconType="warning"
+                data-test-subj="someIndicesAreManagedByILMCallout"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
+                    defaultMessage="The following indices are managed by ILM: {managedByILM}. Updating data retention will not affect these indices, instead you will have to update the ILM policy."
+                    values={{
+                      managedByIlm: <strong>{dslWithIlmIndices.ilmIndices.join(', ')}</strong>,
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+
+              <EuiSpacer />
+            </>
+          )}
+
           {isDataStreamUnmanaged(dataStreamManagedBy) && (
             <>
               <EuiCallOut

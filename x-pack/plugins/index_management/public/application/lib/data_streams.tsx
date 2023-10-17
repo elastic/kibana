@@ -82,3 +82,28 @@ export const isDataStreamUnmanaged = (
 ) => {
   return nextGenerationManagedBy === 'Unmanaged';
 };
+
+export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
+  return (
+    dataStream?.nextGenerationManagedBy === 'Index Lifecycle Management' &&
+    dataStream?.indices?.every((index) => index.managedBy === 'Index Lifecycle Management')
+  );
+};
+
+export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {
+  if (dataStream?.nextGenerationManagedBy === 'Data Stream Lifecycle') {
+    const ilmIndices = dataStream?.indices?.filter(
+      (index) => index.managedBy === 'Index Lifecycle Management'
+    );
+    const dslIndices = dataStream?.indices?.filter(
+      (index) => index.managedBy === 'Data Stream Lifecycle'
+    );
+
+    return {
+      ilmIndices,
+      dslIndices,
+    };
+  }
+
+  return;
+};

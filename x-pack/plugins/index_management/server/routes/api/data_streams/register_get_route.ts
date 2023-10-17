@@ -157,8 +157,6 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
         const [{ data_streams: dataStreams }, { data_streams: dataStreamsStats }] =
           await Promise.all([getDataStreams(client, name), getDataStreamsStats(client, name)]);
 
-        console.log(JSON.stringify(dataStreams, null, 2));
-
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
           let hasIlmPolicyWithDeletePhase;
