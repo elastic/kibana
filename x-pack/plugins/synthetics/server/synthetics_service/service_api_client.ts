@@ -18,7 +18,12 @@ import {
   DataStreamConfig,
 } from './formatters/public_formatters/convert_to_data_stream';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
-import { MonitorFields, PublicLocations, ServiceLocationErrors } from '../../common/runtime_types';
+import {
+  MonitorFields,
+  PublicLocations,
+  ServiceLocation,
+  ServiceLocationErrors,
+} from '../../common/runtime_types';
 import { ServiceConfig } from '../../common/config';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
@@ -32,6 +37,7 @@ export interface ServiceData {
   endpoint?: 'monitors' | 'runOnce' | 'sync';
   isEdit?: boolean;
   license: LicenseGetLicenseInformation;
+  location?: ServiceLocation;
 }
 
 export interface ServicePayload {
@@ -168,7 +174,7 @@ export class ServiceAPIClient {
     }
   }
 
-  processServiceData({ monitors, ...restOfData }: ServiceData) {
+  processServiceData({ monitors, location, ...restOfData }: ServiceData) {
     // group monitors by location
     const monitorsByLocation: Array<{
       location: { id: string; url: string };
@@ -176,12 +182,14 @@ export class ServiceAPIClient {
       data: ServicePayload;
     }> = [];
     this.locations.forEach(({ id, url }) => {
-      const locMonitors = monitors.filter(({ locations }) =>
-        locations?.find((loc) => loc.id === id && loc.isServiceManaged)
-      );
-      if (locMonitors.length > 0) {
-        const data = this.getRequestData({ ...restOfData, monitors: locMonitors });
-        monitorsByLocation.push({ location: { id, url }, monitors: locMonitors, data });
+      if (!location || location.id === id) {
+        const locMonitors = monitors.filter(({ locations }) =>
+          locations?.find((loc) => loc.id === id && loc.isServiceManaged)
+        );
+        if (locMonitors.length > 0) {
+          const data = this.getRequestData({ ...restOfData, monitors: locMonitors });
+          monitorsByLocation.push({ location: { id, url }, monitors: locMonitors, data });
+        }
       }
     });
     return monitorsByLocation;
@@ -279,7 +287,9 @@ export class ServiceAPIClient {
     result: AxiosResponse<any> | ServicePayload
   ) {
     if ('status' in result || 'request' in result) {
-      this.logger.debug(result.data);
+      if (result.data) {
+        this.logger.debug(result.data);
+      }
       this.logger.debug(
         `Successfully called service location ${url}${result.request?.path} with method ${method} with ${numMonitors} monitors`
       );

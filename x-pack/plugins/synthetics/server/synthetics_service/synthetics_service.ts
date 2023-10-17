@@ -410,6 +410,7 @@ export class SyntheticsService {
               monitors: locMonitors,
               output,
               license,
+              location,
             });
 
             this.syncErrors = [...(this.syncErrors ?? []), ...(syncErrors ?? [])];
@@ -445,7 +446,9 @@ export class SyntheticsService {
 
         formattedConfigs.forEach((monitor) => {
           monitor.locations.forEach((location) => {
-            bucketsByLocation[location.id].push(monitor);
+            if (location.isServiceManaged) {
+              bucketsByLocation[location.id]?.push(monitor);
+            }
           });
         });
 

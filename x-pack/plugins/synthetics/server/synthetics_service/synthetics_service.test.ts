@@ -491,6 +491,11 @@ describe('SyntheticsService', () => {
           num = -1;
         }
         num++;
+        if (locations?.[num + 1]) {
+          return {
+            attributes: getFakePayload([locations[num], locations[num + 1]]),
+          };
+        }
         return {
           attributes: getFakePayload([locations[num]]),
         };
@@ -502,8 +507,8 @@ describe('SyntheticsService', () => {
 
       await service.pushConfigs();
 
-      expect(syncSpy).toHaveBeenCalledTimes(40);
-      expect(axios).toHaveBeenCalledTimes(40);
+      expect(syncSpy).toHaveBeenCalledTimes(72);
+      expect(axios).toHaveBeenCalledTimes(72);
     });
   });
 });
