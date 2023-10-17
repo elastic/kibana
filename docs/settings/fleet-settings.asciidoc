@@ -95,6 +95,8 @@ List of agent policies that are configured when the {fleet} app starts.
     String identifying this policy's namespace.
   `monitoring_enabled`::: 
     List of keywords that specify the monitoring data to collect. Valid values include `['logs']`, `['metrics']`, and `['logs', 'metrics']`.
+  `keep_monitoring_alive`:::
+    If `true`, monitoring will be enabled, but logs/metrics collection will be disabled. Use this if you want to keep agent's monitoring server alive even when logs/metrics aren't being collected.
   `is_managed`::: 
     If `true`, this policy is not editable by the user and can only be changed by updating the {kib} config.
   `is_default`::: 
