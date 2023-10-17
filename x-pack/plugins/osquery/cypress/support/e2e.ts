@@ -95,7 +95,7 @@ Cypress.on('uncaught:exception', () => false);
 
 // Login as a Platform Engineer to properly initialize Security Solution App
 before(() => {
-  cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
+  cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/alerts');
   cy.getBySel('globalLoadingIndicator').should('exist');
   cy.getBySel('globalLoadingIndicator').should('not.exist');

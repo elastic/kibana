@@ -533,10 +533,6 @@ platform_engineer:
       privileges:
         - all
       resources: "*"
-    - application: indexPatterns
-      privileges:
-        - all
-      resources: "*"
 
 endpoint_operations_analyst:
   cluster:
