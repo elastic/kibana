@@ -45,7 +45,6 @@ export const getILMExplainRoute = (router: IRouter, logger: Logger) => {
           const error = transformError(err);
 
           logger.error(error.message);
-          console.log('logger-----', logger);
           return resp.error({
             body: error.message,
             statusCode: error.statusCode,

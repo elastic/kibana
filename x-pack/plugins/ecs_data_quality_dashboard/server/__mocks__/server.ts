@@ -50,14 +50,6 @@ export const getRegisteredVersionedRouteMock = (
 };
 
 const getRoute = (routerMock: MockServer['router'], request: KibanaRequest): Route => {
-  const routeCalls = [
-    ...routerMock.get.mock.calls,
-    ...routerMock.post.mock.calls,
-    ...routerMock.put.mock.calls,
-    ...routerMock.patch.mock.calls,
-    ...routerMock.delete.mock.calls,
-  ];
-
   const versionedRouteCalls = [
     ...routerMock.versioned.get.mock.calls,
     ...routerMock.versioned.post.mock.calls,
@@ -66,10 +58,9 @@ const getRoute = (routerMock: MockServer['router'], request: KibanaRequest): Rou
     ...routerMock.versioned.delete.mock.calls,
   ];
 
-  const [route] = routeCalls;
   const [versionedRoute] = versionedRouteCalls;
 
-  if (!route && !versionedRoute) {
+  if (!versionedRoute) {
     throw new Error('No route registered!');
   }
 
