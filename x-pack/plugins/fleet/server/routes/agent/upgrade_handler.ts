@@ -85,7 +85,7 @@ export const postAgentUpgradeHandler: RequestHandler<
         },
         headers: {
           // retry-after expects seconds
-          'retry-after': (timeToWaitMs / 1000).toString(),
+          'retry-after': Math.ceil(timeToWaitMs / 1000).toString(),
         },
       });
     }
