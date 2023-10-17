@@ -1,12 +1,8 @@
 get:
   summary: Retrieves all connectors.
-  operationId: getConnectorsWithSpaceId
-  description: >
-    You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+  operationId: getConnectors
   tags:
     - connectors
-  parameters:
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.

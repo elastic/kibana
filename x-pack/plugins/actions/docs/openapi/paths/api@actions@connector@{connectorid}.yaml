@@ -1,13 +1,10 @@
 get:
   summary: Retrieves a connector by ID.
-  operationId: getConnectorWithSpaceId
-  description: >
-    You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+  operationId: getConnector
   tags:
     - connectors
   parameters:
     - $ref: '../components/parameters/connector_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -27,16 +24,12 @@ get:
 
 delete:
   summary: Deletes a connector.
-  operationId: deleteConnectorWithSpaceId
-  description: >
-    You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
-    WARNING: When you delete a connector, it cannot be recovered.
+  operationId: deleteConnector
   tags:
     - connectors
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/connector_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '204':
       description: Indicates a successful call.
@@ -49,17 +42,16 @@ delete:
 
 post:
   summary: Creates a connector.
-  operationId: createConnectorIdWithSpaceId
-  description: >
-    You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+  operationId: createConnectorId
   tags:
     - connectors
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: connectorId
-      description: A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated.
+      description: >
+        A UUID v1 or v4 identifier for the connector.
+        If you omit this parameter, an identifier is randomly generated.
       required: true
       schema:
         type: string
@@ -90,15 +82,12 @@ post:
 
 put:
   summary: Updates the attributes for a connector.
-  operationId: updateConnectorWithSpaceId
-  description: >
-    You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+  operationId: updateConnector
   tags:
     - connectors
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/connector_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true
     content:
