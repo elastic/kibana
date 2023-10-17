@@ -18,7 +18,11 @@ export function cypressRunTests(spec?: string) {
   return async ({ getService }: FtrProviderContext) => {
     const result = await cypressStart(getService, cypress.run, spec);
 
-    if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+    if (
+      (result as CypressCommandLine.CypressFailedRunResult)?.status ===
+        'failed' ||
+      (result as CypressCommandLine.CypressRunResult)?.totalFailed
+    ) {
       throw new Error(`APM Cypress tests failed`);
     }
   };

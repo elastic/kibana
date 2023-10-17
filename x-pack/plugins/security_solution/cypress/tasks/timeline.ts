@@ -90,6 +90,8 @@ export const addDescriptionToTimeline = (description: string) => {
 
 export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('exist');
+  cy.get(TIMELINE_TITLE_INPUT).should('be.visible');
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
@@ -98,6 +100,8 @@ export const addNameToTimeline = (name: string) => {
 
 export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('exist');
+  cy.get(TIMELINE_TITLE_INPUT).should('be.visible');
   cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
   cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);

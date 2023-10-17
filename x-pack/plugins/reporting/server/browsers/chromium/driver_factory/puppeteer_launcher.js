@@ -18,7 +18,8 @@ export async function launch(
   binaryPath,
   chromiumArgs,
   viewport,
-  browserTimezone
+  browserTimezone,
+  protocolTimeout
 ) {
   return await puppeteer.launch({
     pipe: !browserConfig.inspect,
@@ -32,5 +33,6 @@ export async function launch(
       TZ: browserTimezone,
     },
     headless: 'new',
+    protocolTimeout,
   });
 }

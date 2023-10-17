@@ -29,7 +29,7 @@ export class Cache {
   private readonly pathRoot: string;
   private readonly prefix: string;
   private readonly log?: Writable;
-  private readonly timer: NodeJS.Timer;
+  private readonly timer: NodeJS.Timeout;
 
   constructor(config: { pathRoot: string; dir: string; prefix: string; log?: Writable }) {
     if (!Path.isAbsolute(config.pathRoot)) {
