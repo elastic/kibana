@@ -37,7 +37,7 @@ describe('Alerts timeline', { tags: ['@ess'] }, () => {
 
   context('Privileges: read only', () => {
     beforeEach(() => {
-      loadDetectionsPage(ROLES.reader);
+      loadDetectionsPage(ROLES.t1_analyst);
     });
 
     it('should not allow user with read only privileges to attach alerts to existing cases', () => {

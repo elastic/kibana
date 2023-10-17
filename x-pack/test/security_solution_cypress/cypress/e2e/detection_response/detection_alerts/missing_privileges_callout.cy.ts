@@ -24,8 +24,8 @@ import {
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 const loadPageAsReadOnlyUser = (url: string) => {
-  login(ROLES.reader);
-  visit(url, { role: ROLES.reader });
+  login(ROLES.t1_analyst);
+  visit(url, { role: ROLES.t1_analyst });
   waitForPageTitleToBeShown();
 };
 

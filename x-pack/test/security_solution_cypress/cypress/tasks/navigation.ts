@@ -7,8 +7,8 @@
 
 import { encode } from '@kbn/rison';
 
-import type { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
+import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
 import { constructUrlWithUser, getUrlWithRoute, User } from './login';
 
@@ -16,7 +16,7 @@ export const visit = (
   url: string,
   options?: {
     visitOptions?: Partial<Cypress.VisitOptions>;
-    role?: ROLES;
+    role?: SecurityRoleName;
   }
 ) => {
   cy.visit(options?.role ? getUrlWithRoute(options.role, url) : url, {
@@ -35,7 +35,7 @@ export const visitWithTimeRange = (
   url: string,
   options?: {
     visitOptions?: Partial<Cypress.VisitOptions>;
-    role?: ROLES;
+    role?: SecurityRoleName;
   }
 ) => {
   const timerangeConfig = {

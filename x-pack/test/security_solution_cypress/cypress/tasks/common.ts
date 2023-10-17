@@ -25,7 +25,10 @@ export const API_AUTH = Object.freeze({
   pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
 
-export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+export const API_HEADERS = Object.freeze({
+  'kbn-xsrf': 'cypress-creds',
+  'x-elastic-internal-origin': 'security-solution',
+});
 
 export const rootRequest = <T = unknown>(
   options: Partial<Cypress.RequestOptions>

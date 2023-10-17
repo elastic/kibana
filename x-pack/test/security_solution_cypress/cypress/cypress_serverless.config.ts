@@ -22,6 +22,7 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
   env: {
+    IS_SERVERLESS: true,
     grepFilterSpecs: true,
     grepTags: '@serverless --@brokenInServerless --@skipInServerless',
   },

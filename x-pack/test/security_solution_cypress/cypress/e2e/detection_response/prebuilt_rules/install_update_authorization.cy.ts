@@ -57,20 +57,18 @@ const RULE_2 = createRuleAssetSavedObject({
 });
 
 const loadPageAsReadOnlyUser = (url: string) => {
-  login(ROLES.reader);
-  visit(url, { role: ROLES.reader });
+  login(ROLES.t1_analyst);
+  visit(url, { role: ROLES.t1_analyst });
 };
 
 const loginPageAsWriteAuthorizedUser = (url: string) => {
-  login(ROLES.hunter);
+  login(ROLES.t3_analyst);
   visit(url);
 };
 
-// TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
