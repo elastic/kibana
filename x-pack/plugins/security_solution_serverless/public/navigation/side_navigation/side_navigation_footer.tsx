@@ -44,13 +44,13 @@ export const SideNavigationFooter: React.FC<{
     <>
       {categories.map((category, index) => {
         const categoryItems = category.linkIds.reduce<ProjectSideNavItem[]>((acc, linkId) => {
-          const item = items.find(({id}) => id === linkId);
+          const item = items.find(({ id }) => id === linkId);
           if (item) {
             acc.push(item);
           }
           return acc;
         }, []);
-        
+
         if (category.type === 'standalone') {
           return (
             <SideNavigationFooterStandalone

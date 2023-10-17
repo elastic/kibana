@@ -6,17 +6,16 @@
  */
 
 import type { LinkItem } from '@kbn/security-solution-plugin/public';
-import { SecurityPageName } from '../../../../../../packages/security-solution/navigation';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { ExternalPageName } from '../constants';
 import type { ProjectNavigationLink } from '../types';
 import * as i18n from './project_settings_translations';
-
 
 export const createProjectSettingsLinksFromManage = (manageLink: LinkItem): LinkItem[] => {
   const entityAnalyticsLink = manageLink.links?.find(
     ({ id }) => id === SecurityPageName.entityAnalyticsManagement
   );
-  return entityAnalyticsLink? [entityAnalyticsLink] : [];
+  return entityAnalyticsLink ? [entityAnalyticsLink] : [];
 };
 
 export const projectSettingsNavLinks: ProjectNavigationLink[] = [
