@@ -11,7 +11,7 @@ import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
 import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
-import { PolicyList } from '../policy_list';
+import { PolicyList, policyListErrorMessage } from '../policy_list';
 import type { GetPolicyListResponse } from '../../types';
 import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../common/constants';
@@ -45,6 +45,22 @@ describe('When on the policy list page', () => {
     jest.clearAllMocks();
   });
 
+  describe('on get policy list api failure', () => {
+    beforeEach(async () => {
+      getPackagePolicies.mockRejectedValueOnce(new Error('mock list failure'));
+      render();
+    });
+    afterEach(() => {
+      getPackagePolicies.mockReset();
+    });
+
+    it('should show table with error state', async () => {
+      expect(renderResult.getByTestId('policyListTable')).toBeTruthy();
+      await waitFor(() => {
+        expect(renderResult.getByText(policyListErrorMessage)).toBeTruthy();
+      });
+    });
+  });
   describe('and there are no policies', () => {
     beforeEach(async () => {
       getPackagePolicies.mockResolvedValue(
@@ -86,7 +102,7 @@ describe('When on the policy list page', () => {
     });
 
     beforeEach(async () => {
-      getPackagePolicies.mockReturnValue(policies);
+      getPackagePolicies.mockResolvedValue(policies);
       render();
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();

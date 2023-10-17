@@ -43,7 +43,10 @@ export interface CustomEquationEditorProps {
   dataView: DataViewBase;
 }
 
-const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
+const NEW_METRIC = {
+  name: 'A',
+  aggType: Aggregators.COUNT as CustomMetricAggTypes,
+};
 const MAX_VARIABLES = 26;
 const CHAR_CODE_FOR_A = 65;
 const CHAR_CODE_FOR_Z = CHAR_CODE_FOR_A + MAX_VARIABLES;
