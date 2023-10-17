@@ -179,7 +179,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Global packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
+      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       navigateTo('/app/osquery/packs');
     });
 

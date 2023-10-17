@@ -15,7 +15,7 @@ import {
 } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe.skip('Reader - only READ', { tags: ['@ess'] }, () => {
+describe('Reader - only READ', { tags: ['@ess'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;
