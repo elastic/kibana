@@ -34,7 +34,6 @@
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/fleet-plugin",
-    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": [
     "target/**/*",
