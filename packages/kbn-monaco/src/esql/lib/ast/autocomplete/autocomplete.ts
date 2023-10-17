@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '../../../../monaco_imports';
 import type { AutocompleteCommandDefinition, ESQLCallbacks } from './types';
-import { nonNullable } from '../ast_walker';
+import { nonNullable } from '../ast_helpers';
 import {
   getColumnHit,
   getCommandDefinition,
