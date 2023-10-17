@@ -8,8 +8,8 @@
 
 import { uniqBy } from 'lodash';
 import capitalize from 'lodash/capitalize';
+import { nonNullable } from '../ast_helpers';
 import type { ESQLCallbacks } from '../autocomplete/types';
-import { nonNullable } from '../ast_walker';
 import { CommandOptionsDefinition, SignatureArgType } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
