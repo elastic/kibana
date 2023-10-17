@@ -22,12 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import {
-  KibanaErrorBoundary,
-  KibanaErrorBoundaryProvider,
-} from '@kbn/shared-ux-error-boundary';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
 import { breadcrumbsApp } from '../../../application/app';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
@@ -107,16 +102,6 @@ export function Home() {
                 }
               )}
             </p>
-            <KibanaErrorBoundaryProvider>
-              <KibanaErrorBoundary>
-                <p>
-                  <FormattedMessage
-                    id="xpack.observability_onboarding.home.p.helloLabel"
-                    defaultMessage="Hello"
-                  />
-                </p>
-              </KibanaErrorBoundary>
-            </KibanaErrorBoundaryProvider>
           </EuiText>
           <EuiSpacer />
         </EuiFlexItem>
