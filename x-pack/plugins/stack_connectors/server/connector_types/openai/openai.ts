@@ -198,7 +198,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     return {
       message:
         'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.',
-      ...(res.usage ? { usage: res.usage } : { usage: {} }),
+      ...(res.usage
+        ? { usage: res.usage }
+        : { usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } }),
     };
   }
 }
