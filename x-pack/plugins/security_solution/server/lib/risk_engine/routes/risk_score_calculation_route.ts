@@ -23,14 +23,14 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
   router.versioned
     .post({
       path: RISK_SCORE_CALCULATION_URL,
-      access: 'public',
+      access: 'internal',
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: { request: { body: buildRouteValidation(riskScoreCalculationRequestSchema) } },
       },
       async (context, request, response) => {
