@@ -8,10 +8,6 @@ xpack.fleet.internal.disableProxies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
-# fleet_server package installed to publish agent metrics
-xpack.fleet.packages:
-  - name: fleet_server
-    version: latest
 
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'

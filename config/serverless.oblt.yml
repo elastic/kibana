@@ -47,6 +47,9 @@ xpack.fleet.internal.registry.excludePackages: [
 xpack.fleet.packages:
   - name: apm
     version: latest
+# fleet_server package installed to publish agent metrics
+  - name: fleet_server
+    version: latest  
 ## Disable APM UI components and API calls
 xpack.apm.featureFlags.agentConfigurationAvailable: false
 xpack.apm.featureFlags.configurableIndicesAvailable: false
