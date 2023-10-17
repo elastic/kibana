@@ -72,14 +72,14 @@ describe('Unenroll agent from fleet changing agent policy', { tags: ['@ess'] }, 
   describe('When agent tamper protection is disabled but then is switched to a policy with it enabled', () => {
     let createdHost: CreateAndEnrollEndpointHostResponse;
 
-    before(() => {
+    beforeEach(() => {
       // Create and enroll a new Endpoint host
       return createEndpointHost(policy.policy_id).then((host) => {
         createdHost = host as CreateAndEnrollEndpointHostResponse;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       if (createdHost) {
         cy.task('destroyEndpointHost', createdHost);
       }
@@ -108,14 +108,14 @@ describe('Unenroll agent from fleet changing agent policy', { tags: ['@ess'] }, 
   describe('When agent tamper protection is enabled but then is switched to a policy with it disabled', () => {
     let createdHost: CreateAndEnrollEndpointHostResponse;
 
-    before(() => {
+    beforeEach(() => {
       // Create and enroll a new Endpoint host
       return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
         createdHost = host as CreateAndEnrollEndpointHostResponse;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       if (createdHost) {
         cy.task('destroyEndpointHost', createdHost);
       }
@@ -140,14 +140,14 @@ describe('Unenroll agent from fleet changing agent policy', { tags: ['@ess'] }, 
   describe('When agent tamper protection is enabled but then is switched to a policy with it also enabled', () => {
     let createdHost: CreateAndEnrollEndpointHostResponse;
 
-    before(() => {
+    beforeEach(() => {
       // Create and enroll a new Endpoint host
       return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
         createdHost = host as CreateAndEnrollEndpointHostResponse;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       if (createdHost) {
         cy.task('destroyEndpointHost', createdHost);
       }
