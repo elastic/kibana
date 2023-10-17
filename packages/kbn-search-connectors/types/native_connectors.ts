@@ -444,6 +444,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         value: 50,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: false,
         depends_on: [],
@@ -1204,6 +1219,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         value: 100,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: false,
         depends_on: [],
@@ -1844,6 +1874,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: [],
         validations: [],
         value: '',
+      },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
       },
     },
     features: {
@@ -2552,6 +2597,56 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      enumerate_all_sites: {
+        default_value: true,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesLabel',
+          { defaultMessage: 'Enumerate all sites?' }
+        ),
+        options: [],
+        order: 6,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesTooltip',
+          {
+            defaultMessage:
+              'If enabled, sites will be fetched in bulk, then filtered down to the configured list of sites. This is efficient when syncing many sites. If disabled, each configured site will be fetched with an individual request. This is efficient when syncing fewer sites.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_subsites: {
+        default_value: false,
+        depends_on: [{ field: 'enumerate_all_sites', value: false }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesLabel',
+          {
+            defaultMessage: 'Fetch sub-sites of configured sites?',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesTooltip',
+          {
+            defaultMessage:
+              'Whether subsites of the configured site(s) should be automatically fetched.',
           }
         ),
         type: FieldType.BOOLEAN,

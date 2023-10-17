@@ -68,7 +68,9 @@ export type ConnectorConfiguration = Record<
 > & {
   extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
   use_document_level_security?: ConnectorConfigProperties;
-  use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
+  use_text_extraction_service?: ConnectorConfigProperties;
+  enumerate_all_sites?: ConnectorConfigProperties; // This only exist for Sharepoint Online
+  fetch_subsites?: ConnectorConfigProperties; // This only exist for Sharepoint Online
 };
 
 export interface ConnectorScheduling {
