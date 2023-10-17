@@ -27,13 +27,13 @@ check_rules_nodejs_version(minimum_version_string = "3.8.0")
 # we can update that rule.
 node_repositories(
   node_repositories = {
-    "18.17.1-darwin_amd64": ("node-v18.17.1-darwin-x64.tar.gz", "node-v18.17.1-darwin-x64", "b3e083d2715f07ec3f00438401fb58faa1e0bdf3c7bde9f38b75ed17809d92fa"),
-    "18.17.1-darwin_arm64": ("node-v18.17.1-darwin-arm64.tar.gz", "node-v18.17.1-darwin-arm64", "18ca716ea57522b90473777cb9f878467f77fdf826d37beb15a0889fdd74533e"),
-    "18.17.1-linux_arm64": ("node-v18.17.1-linux-arm64.tar.xz", "node-v18.17.1-linux-arm64", "2743722f164df953b11663a6c25f9cf35769bf500e712e21a6c20e896177da30"),
-    "18.17.1-linux_amd64": ("node-v18.17.1-linux-x64.tar.xz", "node-v18.17.1-linux-x64", "4612954fef461bb05ba952112636bd11e51c0a59db94e6c4b26328fee4d4d9ab"),
-    "18.17.1-windows_amd64": ("node-v18.17.1-win-x64.zip", "node-v18.17.1-win-x64", "afc83f5cf6e8b45a4d3fb842904f604dcd271fefada31ad6654f8302f8da28c9"),
+    "18.18.2-darwin_amd64": ("node-v18.18.2-darwin-x64.tar.gz", "node-v18.18.2-darwin-x64", "5bb8da908ed590e256a69bf2862238c8a67bc4600119f2f7721ca18a7c810c0f"),
+    "18.18.2-darwin_arm64": ("node-v18.18.2-darwin-arm64.tar.gz", "node-v18.18.2-darwin-arm64", "9f982cc91b28778dd8638e4f94563b0c2a1da7aba62beb72bd427721035ab553"),
+    "18.18.2-linux_arm64": ("node-v18.18.2-linux-arm64.tar.xz", "node-v18.18.2-linux-arm64", "8a5a03f6a742159c9aa0ae3a99b368cd938cf62f3a5522a2e5acbe6313710efe"),
+    "18.18.2-linux_amd64": ("node-v18.18.2-linux-x64.tar.xz", "node-v18.18.2-linux-x64", "f7cf590bc7153f3beaa9e1138d00e50d74df223f0bec61f63e7df65f7315b76a"),
+    "18.18.2-windows_amd64": ("node-v18.18.2-win-x64.zip", "node-v18.18.2-win-x64", "3bb0e51e579a41a22b3bf6cb2f3e79c03801aa17acbe0ca00fc555d1282e7acd"),
   },
-  node_version = "18.17.1",
+  node_version = "18.18.2",
   node_urls = [
     "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v{version}/{filename}",
   ],
