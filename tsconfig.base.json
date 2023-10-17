@@ -852,6 +852,8 @@
       "@kbn/health-gateway-server/*": ["packages/kbn-health-gateway-server/*"],
       "@kbn/hello-world-plugin": ["examples/hello_world"],
       "@kbn/hello-world-plugin/*": ["examples/hello_world/*"],
+      "@kbn/high-cardinality-indexer-plugin": ["x-pack/plugins/high_cardinality_indexer"],
+      "@kbn/high-cardinality-indexer-plugin/*": ["x-pack/plugins/high_cardinality_indexer/*"],
       "@kbn/home-plugin": ["src/plugins/home"],
       "@kbn/home-plugin/*": ["src/plugins/home/*"],
       "@kbn/home-sample-data-card": ["packages/home/sample_data_card"],

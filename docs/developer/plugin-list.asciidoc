@@ -592,6 +592,10 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 which are particularly useful for ingesting logs.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/high_cardinality_indexer/README.md[high_cardinality_indexer]
+|This plugin helps users to easily create fake data with high cardinality. It is useful for testing and benchmarking.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/index_lifecycle_management/README.md[indexLifecycleManagement]
 |You can test that the Frozen badge, phase filtering, and lifecycle information is surfaced in
 Index Management by running this series of requests in Console:

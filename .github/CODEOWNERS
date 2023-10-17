@@ -429,6 +429,7 @@ packages/kbn-handlebars @elastic/kibana-security
 packages/kbn-hapi-mocks @elastic/kibana-core
 packages/kbn-health-gateway-server @elastic/kibana-core
 examples/hello_world @elastic/kibana-core
+x-pack/plugins/high_cardinality_indexer @elastic/actionable-observability
 src/plugins/home @elastic/kibana-core
 packages/home/sample_data_card @elastic/appex-sharedux
 packages/home/sample_data_tab @elastic/appex-sharedux

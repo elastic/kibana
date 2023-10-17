@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/high-cardinality-indexer-plugin",
+  "owner": "@elastic/actionable-observability",
+  "plugin": {
+    "id": "high_cardinality_indexer",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "high_cardinality_indexer"],
+    "requiredPlugins": ["kibanaReact", "observabilityShared"],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

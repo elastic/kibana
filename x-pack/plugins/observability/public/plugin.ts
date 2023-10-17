@@ -287,6 +287,7 @@ export class Plugin
     coreSetup.application.register(app);
 
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
+
     const registerSloEmbeddableFactory = async () => {
       const { SloOverviewEmbeddableFactoryDefinition } = await import(
         './embeddable/slo/overview/slo_embeddable_factory'
