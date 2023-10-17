@@ -16,16 +16,17 @@ const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_r
 
 const ROLE_NAMES = Object.values(ServerlessRoleName);
 
+interface IApplication {
+  application: string;
+  privileges: string[];
+  resources: string;
+}
 export type YamlRoleDefinitions = Record<
   ServerlessRoleName,
   {
     cluster: string[] | null;
     indices: RoleIndexPrivilege[];
-    applications: Array<{
-      application: string;
-      privileges: string[];
-      resources: string;
-    }>;
+    applications: Array<IApplication>;
   }
 >;
 
@@ -48,10 +49,19 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
         `Un-expected role [${roleName}] found in YAML file [${ROLES_YAML_FILE_PATH}]`
       );
     }
-    const mapKibanaFeatureToEsPrivileges = (kibanaFeatures: string[]): FeaturesPrivileges => {
+    const mapApplicationToKibanaFeaturePrivileges = (
+      application: IApplication
+    ): FeaturesPrivileges => {
+      console.log({ application });
+      if (application.resources !== '*') {
+        throw new Error(
+          `YAML role definition parser does not currently support 'application.resource = ${application.resources}' for ${application.application} `
+        );
+      }
+
       const features: FeaturesPrivileges = {};
 
-      kibanaFeatures.forEach((value) => {
+      application.privileges.forEach((value) => {
         const [feature, permission] = value.split('.');
         const featureKey = feature.split('_')[1];
 
@@ -70,7 +80,7 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
       return features;
     };
 
-    const feature = mapKibanaFeatureToEsPrivileges(definition.applications[0].privileges);
+    const feature = mapApplicationToKibanaFeaturePrivileges(definition.applications[0]);
 
     const kibanaRole: Role = {
       name: roleName,
