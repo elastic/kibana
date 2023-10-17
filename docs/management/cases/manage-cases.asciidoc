@@ -6,8 +6,6 @@
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [analyze]
 
-preview::[]
-
 [[open-case]]
 === Open a new case
 
@@ -90,8 +88,7 @@ cases.
 
 For hosted {kib} on {ess}:
 
-. Add the email addresses to the monitoring email allowlist. Follow the steps in
-{cloud}/ec-watcher.html#ec-watcher-allowlist[Send alerts by email].
+. Add the email domains to the {cloud}/ec-organizations-notifications-domain-allowlist.html[notifications domain allowlist].
 +
 --
 You do not need to take any more steps to configure an email connector or update

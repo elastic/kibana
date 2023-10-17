@@ -50,6 +50,7 @@ export function GroupedIndexDetailsChart({ data = [] }: Props) {
                 color: 'transparent',
               },
             }}
+            locale={i18n.getLocale()}
           />
           <Partition
             layout="sunburst"

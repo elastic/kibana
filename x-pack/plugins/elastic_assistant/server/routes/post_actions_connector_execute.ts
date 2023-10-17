@@ -16,6 +16,7 @@ import {
   PostActionsConnectorExecutePathParams,
 } from '../schemas/post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 
 export const postActionsConnectorExecuteRoute = (
@@ -58,6 +59,7 @@ export const postActionsConnectorExecuteRoute = (
           logger,
           request,
           elserId,
+          kbResource: ESQL_RESOURCE,
         });
 
         return response.ok({
