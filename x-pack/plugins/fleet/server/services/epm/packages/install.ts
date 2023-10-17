@@ -95,7 +95,7 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
-import { getBundledPackageByPkgKey, getBundledPackages } from './bundled_packages';
+import { getBundledPackageByPkgKey } from './bundled_packages';
 import { withPackageSpan } from './utils';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
 import { INITIAL_VERSION } from './custom_integrations/constants';
