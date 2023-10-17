@@ -31,11 +31,11 @@ export const executeAction = async ({
     actionId: connectorId,
     params: request.body.params,
   });
-  const content = get('data', actionResult) as unknown as { message: string };
-  if (typeof content.message === 'string') {
+  const content = get('data.message', actionResult);
+  if (typeof content === 'string') {
     return {
       connector_id: connectorId,
-      data: content.message, // the response from the actions framework
+      data: content, // the response from the actions framework
       status: 'ok',
     };
   }
