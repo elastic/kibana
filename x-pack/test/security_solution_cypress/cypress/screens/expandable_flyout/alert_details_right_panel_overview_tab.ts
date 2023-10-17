@@ -43,7 +43,7 @@ import {
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
   RESPONSE_BUTTON_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/right/components/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 /* About section */
