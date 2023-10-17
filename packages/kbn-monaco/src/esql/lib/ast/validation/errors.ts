@@ -36,14 +36,14 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unknownColumn':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongArgumentColumnType', {
+        message: i18n.translate('monaco.esql.validation.unknownColumn', {
           defaultMessage: 'Unknown column [{name}]',
           values: { name: out.name },
         }),
       };
     case 'unknownIndex':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongArgumentColumnType', {
+        message: i18n.translate('monaco.esql.validation.unknownIndex', {
           defaultMessage: 'Unknown index [{name}]',
           values: { name: out.name },
         }),
