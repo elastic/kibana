@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
+import type { InventoryItemType } from './types';
 import type { LogsLocatorParams } from './logs_locator';
 
 export const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
