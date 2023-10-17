@@ -7,8 +7,8 @@
 
 import { getNewRule } from '../../objects/rule';
 import {
-  HOST_RISK_HEADER_COLIMN,
-  USER_RISK_HEADER_COLIMN,
+  HOST_RISK_HEADER_COLUMN,
+  USER_RISK_HEADER_COLUMN,
   HOST_RISK_COLUMN,
   USER_RISK_COLUMN,
   ACTION_COLUMN,
@@ -72,8 +72,8 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless
         cy.get(ALERTS_COUNT)
           .invoke('text')
           .should('match', /^[1-9].+$/); // Any number of alerts
-        cy.get(HOST_RISK_HEADER_COLIMN).contains('host.risk.calculated_level');
-        cy.get(USER_RISK_HEADER_COLIMN).contains('user.risk.calculated_level');
+        cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
+        cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
         cy.get(HOST_RISK_COLUMN).contains('Low');
         scrollAlertTableColumnIntoView(USER_RISK_COLUMN);
@@ -116,8 +116,8 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless
         cy.get(ALERTS_COUNT)
           .invoke('text')
           .should('match', /^[1-9].+$/); // Any number of alerts
-        cy.get(HOST_RISK_HEADER_COLIMN).contains('host.risk.calculated_level');
-        cy.get(USER_RISK_HEADER_COLIMN).contains('user.risk.calculated_level');
+        cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
+        cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
         cy.get(HOST_RISK_COLUMN).contains('Critical');
         scrollAlertTableColumnIntoView(USER_RISK_COLUMN);
