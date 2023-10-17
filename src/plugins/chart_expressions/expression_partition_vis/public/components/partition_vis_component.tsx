@@ -591,6 +591,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 onRenderChange={onRenderChange}
                 ariaLabel={props.visParams.ariaLabel}
                 ariaUseDefaultSummary={!props.visParams.ariaLabel}
+                locale={i18n.getLocale()}
                 {...settingsOverrides}
               />
               <Partition
