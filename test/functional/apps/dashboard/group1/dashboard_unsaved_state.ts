@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe.skip('view mode state', () => {
+    describe('view mode state', () => {
       before(async () => {
         await queryBar.setQuery(testQuery);
         await filterBar.addFilter({ field: 'bytes', operation: 'exists' });
@@ -139,16 +139,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.navigateToApp();
-
-        await testSubjects.existOrFail('unsavedDashboardsCallout');
-        // await testSubjects.existOrFail('dshUnsavedListingItem');
-
+        if (await PageObjects.dashboard.onDashboardLandingPage()) {
+          await testSubjects.existOrFail('unsavedDashboardsCallout');
+        }
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(currentPanelCount).to.eql(unsavedPanelCount);
       });
 
-      it.skip('can discard changes', async () => {
+      it('can discard changes', async () => {
         unsavedPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
 
@@ -157,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(currentPanelCount).to.eql(originalPanelCount);
       });
 
-      it.skip('resets to original panel count after switching to view mode and discarding changes', async () => {
+      it('resets to original panel count after switching to view mode and discarding changes', async () => {
         await addPanels();
         await PageObjects.header.waitUntilLoadingHasFinished();
         unsavedPanelCount = await PageObjects.dashboard.getPanelCount();
@@ -170,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(PageObjects.dashboard.getIsInViewMode()).to.eql(true);
       });
 
-      it.skip('does not show unsaved changes badge after saving', async () => {
+      it('does not show unsaved changes badge after saving', async () => {
         await PageObjects.dashboard.switchToEditMode();
         await addPanels();
         await PageObjects.header.waitUntilLoadingHasFinished();
