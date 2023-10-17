@@ -326,7 +326,7 @@ const columns: Array<{
       defaultMessage: 'CPU',
     }),
     sortable: true,
-    render: (value: number) => FORMATTERS.percent(value),
+    render: (value: number | null) => (value === null ? 'N/A' : FORMATTERS.percent(value)),
   },
   {
     field: 'memory',

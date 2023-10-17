@@ -10,7 +10,7 @@ import { STATE_NAMES } from './states';
 
 export interface Process {
   command: string;
-  cpu: number;
+  cpu: number | null;
   memory: number;
   startTime: number;
   state: keyof typeof STATE_NAMES;

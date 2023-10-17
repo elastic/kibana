@@ -188,7 +188,7 @@ export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) =
                     <CodeListItem>{item.user}</CodeListItem>
                   </EuiDescriptionListDescription>
                 </EuiFlexItem>
-                <ProcessRowCharts command={item.command} />
+                <ProcessRowCharts command={item.command} hasCpuData={item.cpu !== null} />
               </EuiFlexGrid>
               {supportAIAssistant && <ContextualInsightProcessRow command={item.command} />}
             </ExpandedRowDescriptionList>

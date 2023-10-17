@@ -84,7 +84,7 @@ const summaryPropertyRT = rt.union([rt.number, rt.string]);
 export const ProcessListAPIResponseRT = rt.type({
   processList: rt.array(
     rt.type({
-      cpu: rt.number,
+      cpu: rt.union([rt.null, rt.number]),
       memory: rt.number,
       startTime: rt.number,
       pid: rt.number,

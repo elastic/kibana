@@ -15,10 +15,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { IconChartLine } from '@kbn/chart-icons';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { css } from '@emotion/react';
 import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useProcessListRowChart } from '../../hooks/use_process_list_row_chart';
 import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
@@ -31,9 +33,10 @@ import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer
 
 interface Props {
   command: string;
+  hasCpuData: boolean;
 }
 
-export const ProcessRowCharts = ({ command }: Props) => {
+export const ProcessRowCharts = ({ command, hasCpuData }: Props) => {
   const { loading, error, response } = useProcessListRowChart(command);
 
   const isLoading = loading || !response;
@@ -42,8 +45,21 @@ export const ProcessRowCharts = ({ command }: Props) => {
     <EuiEmptyPrompt iconType="warning" title={<EuiText>{failedToLoadChart}</EuiText>} />
   ) : isLoading ? (
     <EuiLoadingChart />
-  ) : (
+  ) : hasCpuData ? (
     <ProcessChart timeseries={response!.cpu} color={Color.color2} label={cpuMetricLabel} />
+  ) : (
+    <div
+      css={css`
+         {
+          height: 140px;
+          display: flex;
+          justify-content: center;
+        }
+      `}
+    >
+      <EmptyPlaceholder icon={IconChartLine} />
+      {/* TODO Tooltip */}
+    </div>
   );
   const memoryChart = error ? (
     <EuiEmptyPrompt iconType="warning" title={<EuiText>{failedToLoadChart}</EuiText>} />
@@ -103,7 +119,14 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
     : { max: 0, min: 0 };
 
   return (
-    <ChartContainer>
+    <div
+      css={css`
+         {
+          width: 100%;
+          height: 140px;
+        }
+      `}
+    >
       <Chart>
         <MetricExplorerSeriesChart
           type={MetricsExplorerChartType.area}
@@ -129,14 +152,9 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
         <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
         <Settings baseTheme={chartTheme.baseTheme} theme={chartTheme.theme} />
       </Chart>
-    </ChartContainer>
+    </div>
   );
 };
-
-const ChartContainer = euiStyled.div`
-  width: 100%;
-  height: 140px;
-`;
 
 const cpuMetricLabel = i18n.translate(
   'xpack.infra.metrics.nodeDetails.processes.expandedRowLabelCPU',
