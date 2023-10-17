@@ -15,13 +15,16 @@ const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 export const indexPatternTypes = Object.values(dataTypes);
 
 export function getIndexPatternSavedObjects() {
-  return indexPatternTypes.map((indexPatternType) => ({
+  return Object.entries(dataTypes).map(([name, indexPatternType]) => ({
+    // Add an additional CCR compatible index pattern to the end of each pattern
+    // e.g. `logs-*,*:logs-*`
     id: `${indexPatternType}-*`,
     type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
     // workaround until https://github.com/elastic/kibana/issues/164454 is fixed
     typeMigrationVersion: '8.0.0',
     attributes: {
-      title: `${indexPatternType}-*`,
+      title: `${indexPatternType}-*,*:${indexPatternType}-*`,
+      name,
       timeFieldName: '@timestamp',
       allowNoIndex: true,
     },
@@ -29,8 +32,7 @@ export function getIndexPatternSavedObjects() {
 }
 
 export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjectsClientContract) {
-  const logger = appContextService.getLogger();
-  // get all user installed packages
+  const logger = appContextService.getLogger(); // get all user installed packages
   const installedPackagesRes = await getPackageSavedObjects(savedObjectsClient);
   const installedPackagesSavedObjects = installedPackagesRes.saved_objects.filter(
     (so) => so.attributes.install_status === installationStatuses.Installed
