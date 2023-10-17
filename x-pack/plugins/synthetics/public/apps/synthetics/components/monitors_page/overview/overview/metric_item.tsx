@@ -120,6 +120,7 @@ export const MetricItem = ({
               }
             }}
             baseTheme={DARK_THEME}
+            locale={i18n.getLocale()}
           />
           <Metric
             id={`${monitor.configId}-${monitor.location?.id}`}
