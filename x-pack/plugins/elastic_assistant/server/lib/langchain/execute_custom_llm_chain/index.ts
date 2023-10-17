@@ -24,6 +24,7 @@ export const callAgentExecutor = async ({
   logger,
   request,
   elserId,
+  kbResource,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
@@ -39,7 +40,13 @@ export const callAgentExecutor = async ({
   });
 
   // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger, elserId);
+  const esStore = new ElasticsearchStore(
+    esClient,
+    KNOWLEDGE_BASE_INDEX_PATTERN,
+    logger,
+    elserId,
+    kbResource
+  );
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
 
   const tools: Tool[] = [

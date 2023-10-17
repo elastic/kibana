@@ -103,7 +103,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
   });
 
   it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {
-    createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
+    createAndInstallMockedPrebuiltRules(prebuiltRules);
 
     filterByElasticRules();
     selectAllRules();
@@ -117,7 +117,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
   it('exports only custom rules', function () {
     const expectedNumberCustomRulesToBeExported = 1;
 
-    createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
+    createAndInstallMockedPrebuiltRules(prebuiltRules);
 
     selectAllRules();
     bulkExportRules();
@@ -170,7 +170,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
       // one rule with exception, one without it
       const expectedNumberCustomRulesToBeExported = 2;
 
-      createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
+      createAndInstallMockedPrebuiltRules(prebuiltRules);
       reload();
       selectAllRules();
       bulkExportRules();
