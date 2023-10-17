@@ -138,7 +138,8 @@ export const fetchFleetAgents = async (
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   hostname: string,
-  timeoutMs: number = 30000
+  timeoutMs: number = 30000,
+  logger?: ToolingLog
 ): Promise<Agent> => {
   const started = new Date();
   const hasTimedOut = (): boolean => {
@@ -155,7 +156,8 @@ export const waitForHostToEnroll = async (
           kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online) or (status:degraded)`,
           showInactive: false,
         }).then((response) => response.items[0]),
-      RETRYABLE_TRANSIENT_ERRORS
+      RETRYABLE_TRANSIENT_ERRORS,
+      logger
     );
 
     if (!found) {
