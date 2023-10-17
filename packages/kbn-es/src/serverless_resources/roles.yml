@@ -117,6 +117,7 @@ t1_analyst:
         - metrics-endpoint.metadata_current_*
         - ".fleet-agents*"
         - ".fleet-actions*"
+        - "risk-score.risk-score-*"
       privileges:
         - read
   applications:
@@ -157,6 +158,7 @@ t2_analyst:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - "risk-score.risk-score-*"
       privileges:
         - read
   applications:
@@ -204,6 +206,7 @@ t3_analyst:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - "risk-score.risk-score-*"
       privileges:
         - read
   applications:
@@ -256,6 +259,7 @@ threat_intelligence_analyst:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - "risk-score.risk-score-*"
       privileges:
         - read
   applications:
@@ -307,6 +311,7 @@ rule_author:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - "risk-score.risk-score-*"
       privileges:
         - read
   applications:
@@ -363,6 +368,7 @@ soc_manager:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - risk-score.risk-score-*
       privileges:
         - read
   applications:
@@ -390,7 +396,7 @@ soc_manager:
       resources: "*"
 
 detections_admin:
-  cluster:
+  cluster: ["manage_index_templates", "manage_transform"]
   indices:
     - names:
         - apm-*-transaction*
@@ -417,6 +423,10 @@ detections_admin:
         - .fleet-actions*
       privileges:
         - read
+    - names:
+        - risk-score.risk-score-*
+      privileges:
+        - all
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -449,6 +459,7 @@ platform_engineer:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - risk-score.risk-score-*
       privileges:
         - all
   applications:
@@ -480,6 +491,7 @@ endpoint_operations_analyst:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - risk-score.risk-score-*
       privileges:
         - read
     - names:
@@ -535,6 +547,7 @@ endpoint_policy_manager:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - risk-score.risk-score-*
       privileges:
         - read
     - names:
