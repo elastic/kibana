@@ -160,8 +160,7 @@ export const schemas: Record<string, FormSchema> = {
     },
     allowAutoCreate: {
       type: FIELD_TYPES.TOGGLE,
-      // TODO: add translations
-      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldAllowAutoCreateLabel', {
         defaultMessage: 'Allow auto create (optional)',
       }),
       defaultValue: false,

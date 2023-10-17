@@ -191,8 +191,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               {/* Allow auto create */}
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  // TODO: update translation
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.mappingLabel"
+                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
                   defaultMessage="Allow auto create"
                 />
               </EuiDescriptionListTitle>

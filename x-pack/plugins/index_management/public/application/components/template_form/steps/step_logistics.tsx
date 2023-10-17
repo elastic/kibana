@@ -113,14 +113,16 @@ function getFieldsMeta(esDocsBase: string) {
       testSubject: 'versionField',
     },
     allowAutoCreate: {
-      // TODO: add translations
-      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateTitle', {
         defaultMessage: 'Allow auto create',
       }),
-      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {
-        defaultMessage:
-          'Indices can be automatically created even if auto-creation of indices is disabled via actions.auto_create_index.',
-      }),
+      description: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateDescription',
+        {
+          defaultMessage:
+            'Indices can be automatically created even if auto-creation of indices is disabled via actions.auto_create_index.',
+        }
+      ),
       testSubject: 'allowAutoCreateField',
     },
   };
