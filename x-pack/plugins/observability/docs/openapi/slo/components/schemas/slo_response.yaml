@@ -37,14 +37,16 @@ properties:
         sli.apm.transactionErrorRate: './indicator_properties_apm_availability.yaml'
         sli.kql.custom: './indicator_properties_custom_kql.yaml'
         sli.apm.transactionDuration: './indicator_properties_apm_latency.yaml'
-        sli.metric.custom: 'indicator_properties_custom_metric.yaml'
-        sli.histogram.custom: 'indicator_properties_histogram.yaml'
+        sli.metric.custom: './indicator_properties_custom_metric.yaml'
+        sli.histogram.custom: './indicator_properties_histogram.yaml'
+        sli.metric.timeslice: './indicator_properties_timeslice_metric.yaml'
     oneOf:
       - $ref: "indicator_properties_custom_kql.yaml"
       - $ref: "indicator_properties_apm_availability.yaml"
       - $ref: "indicator_properties_apm_latency.yaml"
       - $ref: "indicator_properties_custom_metric.yaml"
       - $ref: "indicator_properties_histogram.yaml"
+      - $ref: "indicator_properties_timeslice_metric.yaml"
   timeWindow:
     $ref: "time_window.yaml"
   budgetingMethod:
