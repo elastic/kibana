@@ -124,6 +124,7 @@ export function DataPreviewChart() {
                 noResults={
                   <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
                 }
+                locale={i18n.getLocale()}
               />
 
               <Axis
