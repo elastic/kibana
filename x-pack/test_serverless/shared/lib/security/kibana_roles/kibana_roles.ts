@@ -52,7 +52,6 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
     const mapApplicationToKibanaFeaturePrivileges = (
       application: IApplication
     ): FeaturesPrivileges => {
-      console.log({ application });
       if (application.resources !== '*') {
         throw new Error(
           `YAML role definition parser does not currently support 'application.resource = ${application.resources}' for ${application.application} `
