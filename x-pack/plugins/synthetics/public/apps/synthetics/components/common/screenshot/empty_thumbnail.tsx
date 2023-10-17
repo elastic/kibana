@@ -49,6 +49,7 @@ export const EmptyThumbnail = ({
   const noDataMessage = unavailableMessage ?? SCREENSHOT_NOT_AVAILABLE;
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       data-test-subj="stepScreenshotPlaceholder"
       role="img"
@@ -61,6 +62,14 @@ export const EmptyThumbnail = ({
         background: useEuiBackgroundColor('subdued'),
         border: euiTheme.border.thin,
         ...(borderRadius ? { borderRadius } : {}),
+        // We don't want the placeholder to be clickable
+        pointerEvents: 'none',
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+      onKeyDown={(e) => {
+        e.stopPropagation();
       }}
     >
       {isLoading && animateLoading ? (
