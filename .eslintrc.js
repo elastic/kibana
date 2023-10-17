@@ -924,6 +924,23 @@ module.exports = {
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
+      },
+    },
+    {
+      files: [
+        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/infra/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_ai_assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_onboarding/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_shared/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
       },
