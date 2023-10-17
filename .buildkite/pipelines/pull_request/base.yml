@@ -212,13 +212,6 @@ steps:
       automatic: false
     soft_fail: true
 
-  - command: .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
-    label: 'Security Solution OpenAPI codegen'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
-    parallelism: 1
-
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
     label: 'Osquery Cypress Tests, burning changed specs'
     agents:
