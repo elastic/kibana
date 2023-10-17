@@ -60,7 +60,7 @@ import {
 } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { getRenderCustomToolbarWithViewModeToggle } from '../../../../components/discover_grid/render_custom_toolbar';
+import { getRenderCustomToolbarWithElements } from '../../../../components/discover_grid/render_custom_toolbar';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { ErrorCallout } from '../../../../components/common/error_callout';
@@ -315,14 +315,16 @@ function DiscoverDocumentsComponent({
 
   const renderCustomToolbar = useMemo(
     () =>
-      getRenderCustomToolbarWithViewModeToggle(
-        viewModeToggle,
-        <>
-          {callouts}
-          {gridAnnouncementCallout}
-          {loadingIndicator}
-        </>
-      ),
+      getRenderCustomToolbarWithElements({
+        leftSide: viewModeToggle,
+        bottomSection: (
+          <>
+            {callouts}
+            {gridAnnouncementCallout}
+            {loadingIndicator}
+          </>
+        ),
+      }),
     [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 

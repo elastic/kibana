@@ -12,7 +12,6 @@ import type {
   UnifiedDataTableRenderCustomToolbarProps,
   UnifiedDataTableRenderCustomToolbar,
 } from '@kbn/unified-data-table';
-import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import './render_custom_toolbar.scss';
 
 interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarProps {
@@ -113,32 +112,18 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
 /**
  * Render custom element on the left side and all controls to the right
  */
-export const getRenderCustomToolbarWithViewModeToggle = (
-  viewModeToggle: React.ReactElement | undefined,
-  callouts: React.ReactElement | undefined
-): UnifiedDataTableRenderCustomToolbar => {
+export const getRenderCustomToolbarWithElements = ({
+  leftSide,
+  bottomSection,
+}: {
+  leftSide?: React.ReactElement;
+  bottomSection?: React.ReactElement;
+}): UnifiedDataTableRenderCustomToolbar => {
   const reservedSpace = <></>;
   return (props) =>
     renderCustomToolbar({
       ...props,
-      leftSide: viewModeToggle || reservedSpace,
-      bottomSection: callouts,
-    });
-};
-
-/**
- * Render total hits number on the left side and all controls to the right
- * @param totalHitCount
- */
-export const getRenderCustomToolbarInEmbeddable = (
-  totalHitCount: number | undefined
-): UnifiedDataTableRenderCustomToolbar => {
-  return (props) =>
-    renderCustomToolbar({
-      ...props,
-      leftSide:
-        typeof totalHitCount === 'number' ? (
-          <TotalDocuments totalHitCount={totalHitCount} />
-        ) : undefined,
+      leftSide: leftSide || reservedSpace,
+      bottomSection,
     });
 };
