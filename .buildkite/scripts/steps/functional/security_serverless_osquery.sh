@@ -15,4 +15,5 @@ export JOB=kibana-osquery-cypress-serverless
 
 echo "--- Security Osquery Serverless Cypress"
 
-yarn --cwd x-pack/plugins/osquery cypress:serverless:run
+set +e
+yarn --cwd x-pack/plugins/osquery cypress:serverless:run; status=$?; yarn junit:merge || :; exit $status
