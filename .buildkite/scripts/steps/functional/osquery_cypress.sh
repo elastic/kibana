@@ -7,6 +7,7 @@ source .buildkite/scripts/steps/functional/common_cypress.sh
 
 .buildkite/scripts/bootstrap.sh
 node scripts/build_kibana_platform_plugins.js
+is_test_execution_step
 
 export JOB=kibana-osquery-cypress
 
