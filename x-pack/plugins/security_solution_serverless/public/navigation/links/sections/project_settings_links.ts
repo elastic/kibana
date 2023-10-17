@@ -15,7 +15,7 @@ export const createProjectSettingsLinksFromManage = (manageLink: LinkItem): Link
   const entityAnalyticsLink = manageLink.links?.find(
     ({ id }) => id === SecurityPageName.entityAnalyticsManagement
   );
-  return entityAnalyticsLink ? [entityAnalyticsLink] : [];
+  return entityAnalyticsLink ? [{...entityAnalyticsLink, sideNavDisabled: true}] : [];
 };
 
 export const projectSettingsNavLinks: ProjectNavigationLink[] = [
@@ -32,7 +32,21 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
     title: i18n.CLOUD_USERS_ROLES_TITLE,
   },
   {
+    id: ExternalPageName.cloudPerformance,
+    title: i18n.CLOUD_PERFORMANCE_TITLE,
+  },
+  {
     id: ExternalPageName.cloudBilling,
     title: i18n.CLOUD_BILLING_TITLE,
+  },
+  {
+    id: ExternalPageName.maps,
+    title: i18n.CLOUD_MAPS_TITLE,
+    disabled: true, // the link will be available in the navigationTree (breadcrumbs) but not appear in the sideNav
+  },
+  {
+    id: ExternalPageName.visualize,
+    title: i18n.CLOUD_VISUALIZE_TITLE,
+    disabled: true, // the link will be available in the navigationTree (breadcrumbs) but not appear in the sideNav
   },
 ];

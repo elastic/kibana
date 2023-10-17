@@ -23,8 +23,8 @@ const isBottomNavItem = (id: string) =>
   id === ExternalPageName.devTools ||
   id === ExternalPageName.management ||
   id === ExternalPageName.integrationsSecurity ||
-  id === SecurityPageName.entityAnalyticsManagement ||
   id === ExternalPageName.cloudUsersAndRoles ||
+  id === ExternalPageName.cloudPerformance ||
   id === ExternalPageName.cloudBilling;
 
 /**

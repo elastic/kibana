@@ -29,8 +29,8 @@ const categories: FooterCategory[] = [
     linkIds: [
       ExternalPageName.management,
       ExternalPageName.integrationsSecurity,
-      SecurityPageName.entityAnalyticsManagement,
       ExternalPageName.cloudUsersAndRoles,
+      ExternalPageName.cloudPerformance,
       ExternalPageName.cloudBilling,
     ],
   },
