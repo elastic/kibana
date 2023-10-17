@@ -87,14 +87,10 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
     });
 
     logger.info(
-      `Loading ${docs.length} ES|QL docs, ${languageDocs.length} language docs, and ${requiredExampleQueries.length} example queries into the Knowledge Base`
+      `Loading ES|QL docs, ${languageDocs.length} language docs, and ${requiredExampleQueries.length} example queries into the Knowledge Base`
     );
 
-    const response = await esStore.addDocuments([
-      ...docs,
-      ...languageDocs,
-      ...requiredExampleQueries,
-    ]);
+    const response = await esStore.addDocuments([...languageDocs, ...requiredExampleQueries]);
 
     logger.info(
       `Loaded ${
