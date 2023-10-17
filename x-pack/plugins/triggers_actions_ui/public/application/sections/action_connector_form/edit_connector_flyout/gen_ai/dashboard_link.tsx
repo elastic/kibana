@@ -37,7 +37,7 @@ export const DashboardLink: React.FC<Props> = ({ connectorId, connectorName }) =
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.editConnectorForm.genAi.dashboardLink"
         values={{ connectorName }}
-        defaultMessage={'View Usage Dashboard for "{ connectorName }" Connector'}
+        defaultMessage="View Usage Dashboard for { connectorName } Connector"
       />
     </EuiLink>
   ) : null;

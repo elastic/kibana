@@ -216,7 +216,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       isMounted.current = false;
     };
   }, []);
-  console.log('connector', connector);
+
   return (
     <>
       <EuiFlyout
