@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
+  EuiPanel,
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
@@ -125,94 +126,96 @@ export class UploadLicense extends React.PureComponent {
     const { currentLicenseType, applying, telemetry, history } = this.props;
 
     return (
-      <EuiPageSection alignment="center" color="subdued">
-        <EuiTitle size="m">
-          <h1>
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-              defaultMessage="Upload your license"
-            />
-          </h1>
-        </EuiTitle>
-
-        <EuiSpacer />
-
-        {this.acknowledgeModal()}
-
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
-              defaultMessage="Your license key is a JSON file with a signature attached."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
-              defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
-              values={{
-                currentLicenseType: <strong>{currentLicenseType.toUpperCase()}</strong>,
-              }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiForm isInvalid={!!this.errorMessage()} error={this.errorMessage()}>
-          <EuiFilePicker
-            fullWidth
-            id="licenseFile"
-            initialPromptText={
+      <EuiPageSection alignment="center" grow={true}>
+        <EuiPanel color="subdued" paddingSize="l">
+          <EuiTitle size="m">
+            <h1>
               <FormattedMessage
-                id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                defaultMessage="Select or drag your license file"
+                id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                defaultMessage="Upload your license"
               />
-            }
-            onChange={this.handleFile}
-          />
+            </h1>
+          </EuiTitle>
 
-          <EuiSpacer size="m" />
-          {shouldShowTelemetryOptIn(telemetry) && (
-            <TelemetryOptIn
-              isOptingInToTelemetry={this.state.isOptingInToTelemetry}
-              onOptInChange={this.onOptInChange}
-              telemetry={telemetry}
-            />
-          )}
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="cancelUploadButton"
-                {...reactRouterNavigate(history, '/home')}
-              >
+          <EuiSpacer />
+
+          {this.acknowledgeModal()}
+
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
+                defaultMessage="Your license key is a JSON file with a signature attached."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
+                defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
+                values={{
+                  currentLicenseType: <strong>{currentLicenseType.toUpperCase()}</strong>,
+                }}
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer />
+          <EuiForm isInvalid={!!this.errorMessage()} error={this.errorMessage()}>
+            <EuiFilePicker
+              fullWidth
+              id="licenseFile"
+              initialPromptText={
                 <FormattedMessage
-                  id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
-                  defaultMessage="Cancel"
+                  id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                  defaultMessage="Select or drag your license file"
                 />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="uploadLicenseButton"
-                fill
-                isLoading={applying}
-                onClick={this.submit}
-              >
-                {applying ? (
+              }
+              onChange={this.handleFile}
+            />
+
+            <EuiSpacer size="m" />
+            {shouldShowTelemetryOptIn(telemetry) && (
+              <TelemetryOptIn
+                isOptingInToTelemetry={this.state.isOptingInToTelemetry}
+                onOptInChange={this.onOptInChange}
+                telemetry={telemetry}
+              />
+            )}
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="cancelUploadButton"
+                  {...reactRouterNavigate(history, '/home')}
+                >
                   <FormattedMessage
-                    id="xpack.licenseMgmt.uploadLicense.uploadingButtonLabel"
-                    defaultMessage="Uploading…"
+                    id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                    defaultMessage="Cancel"
                   />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
-                    defaultMessage="Upload"
-                  />
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiForm>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="uploadLicenseButton"
+                  fill
+                  isLoading={applying}
+                  onClick={this.submit}
+                >
+                  {applying ? (
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.uploadLicense.uploadingButtonLabel"
+                      defaultMessage="Uploading…"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                      defaultMessage="Upload"
+                    />
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiForm>
+        </EuiPanel>
       </EuiPageSection>
     );
   }
