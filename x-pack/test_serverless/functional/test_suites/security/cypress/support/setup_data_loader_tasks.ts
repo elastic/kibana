@@ -13,14 +13,9 @@ import {
   YamlRoleDefinitions,
 } from '../../../../../shared/lib';
 
-interface AdditionalDefinitions {
-  roleDefinitions?: YamlRoleDefinitions;
-  additionalRoleName?: string;
-}
 export const setupUserDataLoader = (
   on: Cypress.PluginEvents,
-  config: Cypress.PluginConfigOptions,
-  { roleDefinitions, additionalRoleName }: AdditionalDefinitions
+  config: Cypress.PluginConfigOptions
 ) => {
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
@@ -34,7 +29,7 @@ export const setupUserDataLoader = (
 
   const roleAndUserLoaderPromise: Promise<SecurityRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
-      return new SecurityRoleAndUserLoader(kbnClient, log, roleDefinitions);
+      return new SecurityRoleAndUserLoader(kbnClient, log);
     }
   );
 
@@ -44,7 +39,7 @@ export const setupUserDataLoader = (
      * @param name
      */
     loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
-      return (await roleAndUserLoaderPromise).load(name, additionalRoleName);
+      return (await roleAndUserLoaderPromise).load(name);
     },
   });
 };

@@ -6,6 +6,8 @@
  */
 
 export enum ServerlessRoleName {
+  VIEWER = 'viewer',
+  EDITOR = 'editor',
   T1_ANALYST = 't1_analyst',
   T2_ANALYST = 't2_analyst',
   T3_ANALYST = 't3_analyst',
@@ -16,5 +18,4 @@ export enum ServerlessRoleName {
   PLATFORM_ENGINEER = 'platform_engineer',
   ENDPOINT_OPERATIONS_ANALYST = 'endpoint_operations_analyst',
   ENDPOINT_POLICY_MANAGER = 'endpoint_policy_manager',
-  READER = 'reader', // custom role to test lack of permissions
 }

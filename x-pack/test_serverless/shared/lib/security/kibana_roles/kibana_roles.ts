@@ -8,11 +8,14 @@
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep, find } from 'lodash';
 import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
 import { ServerlessRoleName } from '../types';
 
-const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');
+const ROLES_YAML_FILE_PATH = path.join(
+  __dirname,
+  '../../../../../../packages/kbn-es/src/serverless_resources/roles.yml'
+);
 
 const ROLE_NAMES = Object.values(ServerlessRoleName);
 
@@ -33,21 +36,38 @@ const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as 
 
 export type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
 
-export const getServerlessSecurityKibanaRoleDefinitions = (
-  additionalRoleDefinitions?: YamlRoleDefinitions
-): ServerlessSecurityRoles => {
+export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurityRoles => {
   const definitions = cloneDeep(roleDefinitions);
-  const mergedDefinitions: YamlRoleDefinitions = merge(
-    definitions,
-    additionalRoleDefinitions || {}
-  );
 
-  return Object.entries(mergedDefinitions).reduce((roles, [roleName, definition]) => {
+  return Object.entries(definitions).reduce((roles, [roleName, definition]) => {
     if (!ROLE_NAMES.includes(roleName as ServerlessRoleName)) {
       throw new Error(
         `Un-expected role [${roleName}] found in YAML file [${ROLES_YAML_FILE_PATH}]`
       );
     }
+    const mapKibanaFeatureToEsPrivileges = (kibanaFeatures: string[]): FeaturesPrivileges => {
+      const features = {};
+
+      kibanaFeatures.forEach((value) => {
+        const [feature, permission] = value.split('.');
+        const featureKey = feature.split('_')[1];
+
+        if (!features[featureKey]) {
+          features[featureKey] = [];
+        }
+
+        if (permission) {
+          features[featureKey].push(permission);
+        }
+      });
+
+      return features;
+    };
+
+    const kibanaFeature = find(
+      definition.applications,
+      (application) => application.application === 'kibana-.kibana'
+    );
 
     const kibanaRole: Role = {
       name: roleName,
@@ -60,16 +80,7 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
         {
           base: [],
           spaces: ['*'],
-          feature: definition.applications.reduce((features, application) => {
-            if (application.resources !== '*') {
-              throw new Error(
-                `YAML role definition parser does not currently support 'application.resource = ${application.resources}' for ${application.application} `
-              );
-            }
-
-            features[application.application] = application.privileges;
-            return features;
-          }, {} as FeaturesPrivileges),
+          feature: mapKibanaFeatureToEsPrivileges(kibanaFeature.privileges),
         },
       ],
     };

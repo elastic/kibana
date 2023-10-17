@@ -47,7 +47,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
-  async load(name: keyof R, additionalRoleName?: string): Promise<LoadedRoleAndUser> {
+  async load(name: keyof R): Promise<LoadedRoleAndUser> {
     const role = this.roles[name];
 
     if (!role) {
@@ -55,12 +55,8 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         `Unknown role: [${String(name)}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
       );
     }
-
     const roleName = role.name;
     const roleNames = [roleName];
-    if (additionalRoleName) {
-      roleNames.push(additionalRoleName);
-    }
     await this.createRole(role);
     await this.createUser(roleName, 'changeme', roleNames);
 
@@ -132,6 +128,6 @@ export class SecurityRoleAndUserLoader extends RoleAndUserLoader<ServerlessSecur
     logger: ToolingLog,
     additionalRoleDefinitions?: YamlRoleDefinitions
   ) {
-    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions(additionalRoleDefinitions));
+    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions());
   }
 }
