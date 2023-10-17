@@ -68,8 +68,7 @@
     "@kbn/no-data-page-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/core-lifecycle-browser",
-    "@kbn/logging",
-    "@kbn/core-http-browser"
+    "@kbn/logging"
   ],
   "exclude": ["target/**/*"]
 }

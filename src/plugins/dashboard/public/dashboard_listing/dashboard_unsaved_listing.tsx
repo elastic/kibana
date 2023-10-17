@@ -154,11 +154,12 @@ export const DashboardUnsavedListing = ({
       }
       let hasError = false;
       const newItems = results.reduce((map, result) => {
-        if (result.status === 'cancelled') {
-          return map;
-        } else if (result.status === 'error') {
+        if (result.status === 'error') {
           hasError = true;
-          dashboardBackup.clearState(result.id);
+          if (result.error.statusCode === 404) {
+            // Save object not found error
+            dashboardBackup.clearState(result.id);
+          }
           return map;
         }
         return {

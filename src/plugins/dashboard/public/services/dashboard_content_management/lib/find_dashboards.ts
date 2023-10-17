@@ -7,7 +7,6 @@
  */
 
 import { Reference } from '@kbn/content-management-utils';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
 import {
@@ -68,7 +67,6 @@ export async function searchDashboards({
 export type FindDashboardsByIdResponse = { id: string } & (
   | { status: 'success'; attributes: DashboardAttributes; references: Reference[] }
   | { status: 'error'; error: SavedObjectError }
-  | { status: 'cancelled' }
 );
 
 export async function findDashboardById(
@@ -76,15 +74,15 @@ export async function findDashboardById(
   id: string
 ): Promise<FindDashboardsByIdResponse> {
   /** If the dashboard exists in the cache, then return the result from that */
-  // const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
-  // if (cachedDashboard) {
-  //   return {
-  //     id,
-  //     status: 'success',
-  //     attributes: cachedDashboard.item.attributes,
-  //     references: cachedDashboard.item.references,
-  //   };
-  // }
+  const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
+  if (cachedDashboard) {
+    return {
+      id,
+      status: 'success',
+      attributes: cachedDashboard.item.attributes,
+      references: cachedDashboard.item.references,
+    };
+  }
 
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
@@ -95,26 +93,21 @@ export async function findDashboardById(
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     });
-
     if (response.item.error) {
       throw response.item.error;
     }
 
-    // dashboardContentManagementCache.addDashboard(response);
+    dashboardContentManagementCache.addDashboard(response);
     return {
       id,
       status: 'success',
       attributes: response.item.attributes,
-    } as FindDashboardsByIdResponse;
+      references: response.item.references,
+    };
   } catch (e) {
-    console.log('CAUGHT', { ...e });
-    if (isHttpFetchError(e) && (!e.response || e.message === 'Failed to fetch')) {
-      /** Cancelled requests should be handled differently than saved object not found errors */
-      return { status: 'cancelled', id };
-    }
     return {
       status: 'error',
-      error: e.body,
+      error: e.body || e.message,
       id,
     };
   }
