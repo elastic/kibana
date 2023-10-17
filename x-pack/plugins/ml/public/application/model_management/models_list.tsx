@@ -35,6 +35,7 @@ import {
   BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
+  DeploymentState,
   ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
@@ -349,7 +350,7 @@ export const ModelsList: FC<Props> = ({
         );
         if (elasticModels.length > 0) {
           for (const model of elasticModels) {
-            if (model.state === MODEL_STATE.STARTED) {
+            if (Object.values(DEPLOYMENT_STATE).includes(model.state as DeploymentState)) {
               // no need to check for the download status if the model has been deployed
               continue;
             }
