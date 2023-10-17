@@ -57,7 +57,19 @@ import {
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
 } from '../../antlr/esql_parser';
-import { createSource, createColumn, createOption, nonNullable, createFunction, createLiteral, createTimeUnit, createFakeMultiplyLiteral, createList, createNumericLiteral, sanifyIdentifierString } from './ast_helpers';
+import {
+  createSource,
+  createColumn,
+  createOption,
+  nonNullable,
+  createFunction,
+  createLiteral,
+  createTimeUnit,
+  createFakeMultiplyLiteral,
+  createList,
+  createNumericLiteral,
+  sanifyIdentifierString,
+} from './ast_helpers';
 import type {
   ESQLLiteral,
   ESQLColumn,
@@ -65,7 +77,6 @@ import type {
   ESQLCommandOption,
   ESQLAstItem,
 } from './types';
-
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
   return ctx.getRuleContexts(SourceIdentifierContext).map((sourceCtx) => createSource(sourceCtx));
@@ -488,4 +499,3 @@ function visitDissectOptions(ctx: CommandOptionsContext | undefined) {
   }
   return options;
 }
-
