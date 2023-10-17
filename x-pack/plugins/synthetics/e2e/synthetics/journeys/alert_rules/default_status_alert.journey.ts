@@ -198,6 +198,6 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.waitForTimeout(10 * 1000);
 
     await page.click('[aria-label="View in app"]');
-    await page.click(byTestId('/app/synthetics/monitors'));
+    await page.click(byTestId('breadcrumb /app/synthetics/monitors'));
   });
 });
