@@ -16,6 +16,7 @@ export interface AgentExecutorParams {
   actions: ActionsPluginStart;
   connectorId: string;
   esClient: ElasticsearchClient;
+  kbResource: string | undefined;
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
