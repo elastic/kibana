@@ -58,7 +58,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('#Single Host Flyout', () => {
       before(async () => {
-        // await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -134,7 +133,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('#Page Content', () => {
         before(async () => {
-          // await setHostViewEnabled(true);
           await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
           await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.timePicker.setAbsoluteRange(
