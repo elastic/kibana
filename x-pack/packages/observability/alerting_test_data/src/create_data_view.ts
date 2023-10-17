@@ -6,9 +6,8 @@
  */
 
 import axios from 'axios';
-import { HEADERS, KIBANA_DEFAULT_URL, PASSWORD, USERNAME } from './constants';
-
-const DATA_VIEW_CREATION_API = `${KIBANA_DEFAULT_URL}/api/content_management/rpc/create`;
+import { HEADERS, PASSWORD, USERNAME } from './constants';
+import { getKibanaUrl } from './get_kibana_url';
 
 export const createDataView = async ({
   indexPattern,
@@ -17,6 +16,7 @@ export const createDataView = async ({
   indexPattern: string;
   id: string;
 }) => {
+  const DATA_VIEW_CREATION_API = `${await getKibanaUrl()}/api/content_management/rpc/create`;
   const dataViewParams = {
     contentTypeId: 'index-pattern',
     data: {

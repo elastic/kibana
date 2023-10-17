@@ -6,15 +6,16 @@
  */
 
 import axios from 'axios';
-import { HEADERS, KIBANA_DEFAULT_URL, PASSWORD, USERNAME } from './constants';
+import { HEADERS, PASSWORD, USERNAME } from './constants';
+import { getKibanaUrl } from './get_kibana_url';
 
-const RULE_CREATION_API = `${KIBANA_DEFAULT_URL}/api/alerting/rule`;
-
-export const createRule = async (ruleParams: any) =>
-  axios.post(RULE_CREATION_API, ruleParams, {
+export const createRule = async (ruleParams: any) => {
+  const RULE_CREATION_API = `${await getKibanaUrl()}/api/alerting/rule`;
+  return axios.post(RULE_CREATION_API, ruleParams, {
     headers: HEADERS,
     auth: {
       username: USERNAME,
       password: PASSWORD,
     },
   });
+};

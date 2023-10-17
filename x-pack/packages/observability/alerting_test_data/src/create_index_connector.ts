@@ -6,11 +6,11 @@
  */
 
 import axios from 'axios';
-import { ALERT_ACTION_INDEX, HEADERS, KIBANA_DEFAULT_URL, PASSWORD, USERNAME } from './constants';
-
-const INDEX_CONNECTOR_API = `${KIBANA_DEFAULT_URL}/api/actions/connector`;
+import { ALERT_ACTION_INDEX, HEADERS, PASSWORD, USERNAME } from './constants';
+import { getKibanaUrl } from './get_kibana_url';
 
 export const createIndexConnector = async () => {
+  const INDEX_CONNECTOR_API = `${await getKibanaUrl()}/api/actions/connector`;
   const indexConnectorParams = {
     name: 'Test Index Connector',
     config: {
