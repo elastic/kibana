@@ -25,13 +25,13 @@ import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Promise<boolean> => {
   try {
     const docsLoader = new DirectoryLoader(
-      resolve(__dirname, '../../../knowledge_base/esql/docs'),
+      join(__dirname, '../../../knowledge_base/esql/docs'),
       {
         '.asciidoc': (path) => new TextLoader(path),
       },
       true
     );
-    const joinPath = resolve(join(__dirname, '../../../knowledge_base/esql/language_definition'));
+    const joinPath = join(__dirname, '../../../knowledge_base/esql/language_definition');
     const resolvePath = resolve(__dirname, '../../../knowledge_base/esql/language_definition');
 
     logger.info(`esql_loader joinPath\n${joinPath}`);
@@ -44,7 +44,7 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
     }
 
     const languageLoader = new DirectoryLoader(
-      resolve(__dirname, '../../../knowledge_base/esql/language_definition'),
+      join(__dirname, '../../../knowledge_base/esql/language_definition'),
       {
         '.g4': (path) => new TextLoader(path),
         '.tokens': (path) => new TextLoader(path),
@@ -53,7 +53,7 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
     );
 
     const exampleQueriesLoader = new DirectoryLoader(
-      resolve(__dirname, '../../../knowledge_base/esql/example_queries'),
+      join(__dirname, '../../../knowledge_base/esql/example_queries'),
       {
         '.asciidoc': (path) => new TextLoader(path),
       },
