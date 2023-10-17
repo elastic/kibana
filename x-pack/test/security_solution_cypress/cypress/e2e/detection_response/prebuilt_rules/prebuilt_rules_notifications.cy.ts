@@ -14,6 +14,7 @@ import {
 import { deleteFirstRule } from '../../../tasks/alerts_detection_rules';
 import {
   installAllPrebuiltRulesRequest,
+  installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import {
@@ -54,8 +55,8 @@ describe(
       });
 
       it('should NOT display install or update notifications when latest rules are installed', () => {
-        createAndInstallMockedPrebuiltRules({ rules: [RULE_1], installToKibana: true });
         visitRulesManagementTable();
+        createAndInstallMockedPrebuiltRules([RULE_1]);
 
         /* Assert that there are no installation or update notifications */
         /* Add Elastic Rules button should not contain a number badge */
@@ -67,7 +68,7 @@ describe(
 
     describe('Notifications', () => {
       beforeEach(() => {
-        createAndInstallMockedPrebuiltRules({ rules: [RULE_1], installToKibana: false });
+        installPrebuiltRuleAssets([RULE_1]);
       });
 
       describe('Rules installation notification when no rules have been installed', () => {
@@ -96,11 +97,8 @@ describe(
               rule_id: 'rule_3',
             });
 
-            createAndInstallMockedPrebuiltRules({
-              rules: [RULE_2, RULE_3],
-              installToKibana: false,
-            });
             visitRulesManagementTable();
+            installPrebuiltRuleAssets([RULE_2, RULE_3]);
           });
         });
 
@@ -136,9 +134,8 @@ describe(
               rule_id: 'rule_1',
               version: 2,
             });
-            createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
+            installPrebuiltRuleAssets([UPDATED_RULE]);
             visitRulesManagementTable();
-            cy.reload();
           });
         });
 
@@ -167,10 +164,7 @@ describe(
               rule_id: 'rule_1',
               version: 2,
             });
-            createAndInstallMockedPrebuiltRules({
-              rules: [RULE_2, UPDATED_RULE],
-              installToKibana: false,
-            });
+            installPrebuiltRuleAssets([RULE_2, UPDATED_RULE]);
             visitRulesManagementTable();
           });
         });
