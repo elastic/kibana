@@ -26,6 +26,8 @@ import type {
   GetBulkAssetsRequest,
   GetBulkAssetsResponse,
   GetVerificationKeyIdResponse,
+  GetInputsTemplatesRequest,
+  GetInputsTemplatesResponse,
 } from '../../types';
 import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
@@ -313,3 +315,19 @@ export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
     body,
   });
 };
+
+export function useGetInputsTemplatesQuery(
+  { pkgName, pkgVersion }: GetInputsTemplatesRequest['params'],
+  query: GetInputsTemplatesRequest['query']
+) {
+  return useQuery<GetInputsTemplatesResponse, RequestError>(
+    ['inputsTemplates', pkgName, pkgVersion, query],
+    () =>
+      sendRequestForRq<GetInputsTemplatesResponse>({
+        path: epmRouteService.getInputsTemplatesPath(pkgName, pkgVersion),
+        method: 'get',
+        query,
+        version: API_VERSIONS.public.v1,
+      })
+  );
+}

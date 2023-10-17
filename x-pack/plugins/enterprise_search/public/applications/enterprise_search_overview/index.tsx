@@ -21,6 +21,8 @@ import { SetupGuide } from './components/setup_guide';
 import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
 
 export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
+  access = {},
+  workplaceSearch,
   enterpriseSearchVersion,
   kibanaVersion,
 }) => {
@@ -29,6 +31,8 @@ export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
   const incompatibleVersions = !!(
     config.host && isVersionMismatch(enterpriseSearchVersion, kibanaVersion)
   );
+  const isWorkplaceSearchAdmin = !!workplaceSearch?.account?.isAdmin;
+
   const showView = () => {
     if (incompatibleVersions) {
       return (
@@ -39,7 +43,7 @@ export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
       );
     }
 
-    return <ProductSelector />;
+    return <ProductSelector isWorkplaceSearchAdmin={isWorkplaceSearchAdmin} access={access} />;
   };
 
   return (
