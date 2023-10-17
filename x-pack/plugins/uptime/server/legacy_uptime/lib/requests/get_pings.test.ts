@@ -163,7 +163,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,
@@ -225,7 +225,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,
@@ -287,7 +287,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,
@@ -354,7 +354,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,
@@ -462,7 +462,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,

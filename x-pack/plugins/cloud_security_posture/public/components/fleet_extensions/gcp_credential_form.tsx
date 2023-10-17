@@ -177,12 +177,14 @@ const credentialOptionsList = [
       defaultMessage: 'Credentials File',
     }),
     value: 'credentials-file',
+    'data-test-subj': 'credentials_file_option_test_id',
   },
   {
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
       defaultMessage: 'Credentials JSON',
     }),
     value: 'credentials-json',
+    'data-test-subj': 'credentials_json_option_test_id',
   },
 ];
 
@@ -233,6 +235,7 @@ const getSetupFormatOptions = (): Array<{
   id: SetupFormatGCP;
   label: string;
   disabled: boolean;
+  testId: string;
 }> => [
   {
     id: SETUP_ACCESS_CLOUD_SHELL,
@@ -240,6 +243,7 @@ const getSetupFormatOptions = (): Array<{
       defaultMessage: 'Google Cloud Shell',
     }),
     disabled: false,
+    testId: 'gcpGoogleCloudShellOptionTestId',
   },
   {
     id: SETUP_ACCESS_MANUAL,
@@ -247,6 +251,7 @@ const getSetupFormatOptions = (): Array<{
       defaultMessage: 'Manual',
     }),
     disabled: false,
+    testId: 'gcpManualOptionTestId',
   },
 ];
 
