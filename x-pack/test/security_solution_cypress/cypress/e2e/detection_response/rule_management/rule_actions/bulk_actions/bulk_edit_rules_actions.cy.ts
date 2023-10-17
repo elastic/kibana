@@ -145,7 +145,7 @@ describe(
         rule_id: 'rule_2',
       });
 
-      createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
+      createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
     });
 
     context('Restricted action privileges', () => {
