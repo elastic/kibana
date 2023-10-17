@@ -20,6 +20,7 @@ import {
   CustomTooltip as CustomChartTooltip,
   Tooltip,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
@@ -99,6 +100,7 @@ export const WaterfallBarChart = ({
           theme={theme}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}
+          locale={i18n.getLocale()}
         />
 
         <Axis
