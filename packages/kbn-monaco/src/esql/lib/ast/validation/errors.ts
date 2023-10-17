@@ -145,7 +145,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unknownAggregateFunction':
       return {
-        message: i18n.translate('moanco.esql.validation.unknowAggregateFunction', {
+        message: i18n.translate('monaco.esql.validation.unknowAggregateFunction', {
           defaultMessage: '{command} expects an aggregate function, found [{value}]',
           values: {
             command: out.command,
