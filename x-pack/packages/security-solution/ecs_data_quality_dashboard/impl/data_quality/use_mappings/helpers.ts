@@ -29,6 +29,7 @@ export async function fetchMappings({
       {
         method: 'GET',
         signal: abortController.signal,
+        version: '1',
       }
     );
   } catch (e) {

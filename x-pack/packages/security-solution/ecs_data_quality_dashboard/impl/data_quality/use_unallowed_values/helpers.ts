@@ -81,6 +81,7 @@ export async function fetchUnallowedValues({
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
       signal: abortController.signal,
+      version: '1',
     });
   } catch (e) {
     throw new Error(

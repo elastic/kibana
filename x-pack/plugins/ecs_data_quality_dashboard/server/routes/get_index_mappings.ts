@@ -15,31 +15,36 @@ import { GetIndexMappingsParams } from '../schemas/get_index_mappings';
 import { buildRouteValidation } from '../schemas/common';
 
 export const getIndexMappingsRoute = (router: IRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: GET_INDEX_MAPPINGS,
-      validate: { params: buildRouteValidation(GetIndexMappingsParams) },
-    },
-    async (context, request, response) => {
-      const resp = buildResponse(response);
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { params: buildRouteValidation(GetIndexMappingsParams) } },
+      },
+      async (context, request, response) => {
+        const resp = buildResponse(response);
 
-      try {
-        const { client } = (await context.core).elasticsearch;
-        const decodedIndexName = decodeURIComponent(request.params.pattern);
+        try {
+          const { client } = (await context.core).elasticsearch;
+          const decodedIndexName = decodeURIComponent(request.params.pattern);
 
-        const mappings = await fetchMappings(client, decodedIndexName);
+          const mappings = await fetchMappings(client, decodedIndexName);
 
-        return response.ok({
-          body: mappings,
-        });
-      } catch (err) {
-        const error = transformError(err);
+          return response.ok({
+            body: mappings,
+          });
+        } catch (err) {
+          const error = transformError(err);
 
-        return resp.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return resp.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

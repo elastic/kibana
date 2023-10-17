@@ -15,30 +15,35 @@ import { buildRouteValidation } from '../schemas/common';
 import { GetUnallowedFieldValuesBody } from '../schemas/get_unallowed_field_values';
 
 export const getUnallowedFieldValuesRoute = (router: IRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: GET_UNALLOWED_FIELD_VALUES,
-      validate: { body: buildRouteValidation(GetUnallowedFieldValuesBody) },
-    },
-    async (context, request, response) => {
-      const resp = buildResponse(response);
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { body: buildRouteValidation(GetUnallowedFieldValuesBody) } },
+      },
+      async (context, request, response) => {
+        const resp = buildResponse(response);
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-      try {
-        const items = request.body;
+        try {
+          const items = request.body;
 
-        const { responses } = await getUnallowedFieldValues(esClient, items);
-        return response.ok({
-          body: responses,
-        });
-      } catch (err) {
-        const error = transformError(err);
+          const { responses } = await getUnallowedFieldValues(esClient, items);
+          return response.ok({
+            body: responses,
+          });
+        } catch (err) {
+          const error = transformError(err);
 
-        return resp.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return resp.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
