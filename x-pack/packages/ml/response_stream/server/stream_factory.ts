@@ -85,6 +85,9 @@ export function streamFactory<T = unknown>(
   // Flag will be set when the "drain" listener is active so we can avoid setting multiple listeners.
   let waitForDrain = false;
 
+  // Just send the flushFix on the first chunk
+  let sendFlushFix = true;
+
   // Instead of a flag this is an array where we check if we are waiting on any callback from writing to the stream.
   // It needs to be an array to avoid running into race conditions.
   const waitForCallbacks: number[] = [];
@@ -152,9 +155,12 @@ export function streamFactory<T = unknown>(
           ? `${JSON.stringify({
               ...d,
               // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-              ...(flushFix ? { flushPayload } : {}),
+              ...(flushFix && sendFlushFix ? { flushPayload } : {}),
             })}${DELIMITER}`
           : d;
+
+      // Set the `sendFlushFix` flag to false after the first chunk.
+      sendFlushFix = false;
 
       waitForCallbacks.push(1);
       const writeOk = stream.write(line, () => {
