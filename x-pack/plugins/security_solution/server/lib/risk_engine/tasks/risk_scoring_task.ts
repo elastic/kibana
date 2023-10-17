@@ -17,7 +17,6 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AfterKeys, IdentifierType } from '../../../../common/risk_engine';
 import type { StartPlugins } from '../../../plugin';
@@ -71,18 +70,12 @@ export const registerRiskScoringTask = ({
     getStartServices().then(([coreStart, _]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
-      // the risk engine seems to be using alerts-as-data innards for it's
-      // own purposes.  It appears the client is using ILM, and this won't work
-      // on serverless, so we hardcode "not using datastreams" here, since that
-      // code will have to change someday ...
-      const dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts: false });
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,
         esClient,
         namespace,
         soClient,
-        dataStreamAdapter,
       });
 
       return riskScoreServiceFactory({
@@ -256,8 +249,9 @@ export const runTask = async ({
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
     };
-
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
+
+    riskScoreService.scheduleLatestTransformNow();
 
     if (isCancelled()) {
       log('task was cancelled');

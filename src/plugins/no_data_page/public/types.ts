@@ -7,7 +7,7 @@
  */
 
 export interface NoDataPagePluginSetup {
-  getAnalyticsNoDataPageFlavor: () => 'kibana' | 'serverless_search';
+  getAnalyticsNoDataPageFlavor: () => 'kibana' | 'serverless_search' | 'serverless_observability';
 }
 
 export type NoDataPagePluginStart = NoDataPagePluginSetup;

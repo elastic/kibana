@@ -731,6 +731,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         onErrorClick={onErrorClick}
                         refreshErrors={onTextLangQuerySubmit}
                         detectTimestamp={detectTimestamp}
+                        hideRunQueryText={hideRunQueryText}
                       />
                     )}
                   </div>

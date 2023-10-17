@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { Subscription, distinctUntilChanged, skip } from 'rxjs';
+import { Subscription, distinctUntilChanged, skip, switchMap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -104,8 +104,12 @@ export class LinksEmbeddable
     // By-value panels should update the componentState when input changes
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged(deepEqual), skip(1))
-        .subscribe(async () => await this.initializeSavedLinks())
+        .pipe(
+          distinctUntilChanged(deepEqual),
+          skip(1),
+          switchMap(async () => await this.initializeSavedLinks())
+        )
+        .subscribe()
     );
   }
 

@@ -606,6 +606,8 @@ module.exports = {
         'x-pack/test_serverless/**/config*.ts',
         'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
+        'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
+        'x-pack/test/security_solution_api_integration/**/config*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -922,6 +924,25 @@ module.exports = {
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
+      },
+    },
+    {
+      files: [
+        'x-pack/plugins/aiops/**/*.{tsx}',
+        'x-pack/plugins/apm/**/*.{tsx}',
+        'x-pack/plugins/exploratory_view/**/*.{tsx}',
+        'x-pack/plugins/infra/**/*.{tsx}',
+        'x-pack/plugins/observability/**/*.{tsx}',
+        'x-pack/plugins/observability_ai_assistant/**/*.{tsx}',
+        'x-pack/plugins/observability_onboarding/**/*.{tsx}',
+        'x-pack/plugins/observability_shared/**/*.{tsx}',
+        'x-pack/plugins/profiling/**/*.{tsx}',
+        'x-pack/plugins/synthetics/**/*.{tsx}',
+        'x-pack/plugins/ux/**/*.{tsx}',
+      ],
+      rules: {
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
       },
     },
     {

@@ -1148,7 +1148,7 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
 };
 
 export const customFieldsMock: CaseUICustomField[] = [
-  { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: ['My text test value 1'] },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: 'My text test value 1' },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
 ];
 

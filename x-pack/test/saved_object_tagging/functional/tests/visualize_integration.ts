@@ -123,7 +123,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('creating', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/89958
+    describe.skip('creating', () => {
       before(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         // delete all visualizations to create new ones explicitly

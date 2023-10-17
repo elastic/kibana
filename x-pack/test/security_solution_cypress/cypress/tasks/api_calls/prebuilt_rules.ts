@@ -13,9 +13,10 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common/d
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
+import { rootRequest } from '../common';
 
 export const getPrebuiltRulesStatus = () => {
-  return cy.request<PrePackagedRulesStatusResponse>({
+  return rootRequest<PrePackagedRulesStatusResponse>({
     method: 'GET',
     url: 'api/detection_engine/rules/prepackaged/_status',
     headers: {
@@ -39,7 +40,7 @@ export const SAMPLE_PREBUILT_RULE = createRuleAssetSavedObject({
  * instead of all rules available in the `security_detection_engine` package
  */
 export const installAllPrebuiltRulesRequest = () =>
-  cy.request<PerformRuleInstallationResponseBody>({
+  rootRequest<PerformRuleInstallationResponseBody>({
     method: 'POST',
     url: PERFORM_RULE_INSTALLATION_URL,
     headers: {
@@ -49,6 +50,30 @@ export const installAllPrebuiltRulesRequest = () =>
     },
     body: {
       mode: 'ALL_RULES',
+    },
+  });
+
+/* Install specific prebuilt rules. Should be available as security-rule saved objects
+/* as a prerequisite for this request to succeed.
+ * Use in combination with `preventPrebuiltRulesPackageInstallation` and
+ * `createNewRuleAsset` to create mocked prebuilt rules and install only those
+ * instead of all rules available in the `security_detection_engine` package
+ */
+export const installSpecificPrebuiltRulesRequest = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) =>
+  rootRequest<PerformRuleInstallationResponseBody>({
+    method: 'POST',
+    url: PERFORM_RULE_INSTALLATION_URL,
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '1',
+    },
+    body: {
+      mode: 'SPECIFIC_RULES',
+      rules: rules.map((rule) => ({
+        rule_id: rule['security-rule'].rule_id,
+        version: rule['security-rule'].version,
+      })),
     },
   });
 
@@ -123,48 +148,44 @@ export const bulkCreateRuleAssets = ({
   index?: string;
   rules?: Array<typeof SAMPLE_PREBUILT_RULE>;
 }) => {
-  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_bulk`;
+  cy.log(
+    'Bulk Install prebuilt rules',
+    rules?.map((rule) => rule['security-rule'].rule_id).join(', ')
+  );
+  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_bulk?refresh`;
 
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
     const indexOperation = {
       index: {
         _index: index,
-        _id: rule['security-rule'].rule_id,
+        _id: `security-rule:${rule['security-rule'].rule_id}`,
       },
     };
 
     const documentData = JSON.stringify(rule);
-
     return body.concat(JSON.stringify(indexOperation), '\n', documentData, '\n');
   }, '');
 
-  cy.request({
+  rootRequest({
     method: 'PUT',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_mapping?refresh`,
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_mapping`,
     body: {
       dynamic: true,
     },
     headers: {
       'Content-Type': 'application/json',
-      'x-elastic-internal-origin': 'security-solution',
     },
   });
 
   cy.waitUntil(
     () => {
-      return cy
-        .request({
-          method: 'POST',
-          url,
-          headers: {
-            'kbn-xsrf': 'cypress-creds',
-            'x-elastic-internal-origin': 'security-solution',
-            'Content-Type': 'application/json',
-          },
-          failOnStatusCode: false,
-          body: bulkIndexRequestBody,
-        })
-        .then((response) => response.status === 200);
+      return rootRequest({
+        method: 'POST',
+        url,
+        headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+        failOnStatusCode: false,
+        body: bulkIndexRequestBody,
+      }).then((response) => response.status === 200);
     },
     { interval: 500, timeout: 12000 }
   );
@@ -172,7 +193,7 @@ export const bulkCreateRuleAssets = ({
 
 export const getRuleAssets = (index: string | undefined = '.kibana_security_solution') => {
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search?size=10000`;
-  return cy.request({
+  return rootRequest({
     method: 'GET',
     url,
     headers: {
@@ -194,6 +215,7 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
 /* Used primarily to prevent the unwanted installation of "real" prebuilt rules
 /* during e2e tests, and allow for manual installation of mock rules instead. */
 export const preventPrebuiltRulesPackageInstallation = () => {
+  cy.log('Prevent prebuilt rules package installation');
   cy.intercept('POST', '/api/fleet/epm/packages/_bulk*', {});
   cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*', {});
 };
@@ -202,42 +224,31 @@ export const preventPrebuiltRulesPackageInstallation = () => {
  * Install prebuilt rule assets. After installing these assets become available to be installed
  * as prebuilt rules. Prebuilt rule assets can be generated via `createRuleAssetSavedObject()` helper function.
  *
- * It's also important to take into account that business logic tries to fetch prebuilt rules Fleet package
+ * It's also important to take into account that the business logic tries to fetch prebuilt rules Fleet package
  * and you need to add `preventPrebuiltRulesPackageInstallation()` to `beforeEach` section (before visit commands)
- * to avoid actually pulling a real Fleet package and have only provided prebuilt rule assets for testing.
+ * to avoid actually pulling a real Fleet package and have only the mocked prebuilt rule assets for testing.
  */
 export const installPrebuiltRuleAssets = (ruleAssets: Array<typeof SAMPLE_PREBUILT_RULE>): void => {
   cy.log('Create mocked available to install prebuilt rules', ruleAssets.length);
   preventPrebuiltRulesPackageInstallation();
-  // TODO: use this bulk method once the issue with Cypress is fixed
-  // bulkCreateRuleAssets({ rules });
-  ruleAssets.forEach((rule) => {
-    createNewRuleAsset({ rule });
-  });
+
+  bulkCreateRuleAssets({ rules: ruleAssets });
 };
 
 /**
  * Prevent the installation of the `security_detection_engine` package from Fleet.
  * The create a `security-rule` asset for each rule provided in the `rules` array.
- * Optionally install the rules to Kibana, with a flag defaulting to true
- * Explicitly set the `installToKibana` flag to false in cases when needing to
- * make mock rules available for installation or update, but do those operations manually
  *
  * * @param {Array} rules - Rule assets to be created and optionally installed
  *
- * * @param {string} installToKibana - Flag to decide whether to install the rules as 'alerts' SO. Defaults to true.
  */
-export const createAndInstallMockedPrebuiltRules = ({
-  rules: ruleAssets,
-  installToKibana = true,
-}: {
-  rules: Array<typeof SAMPLE_PREBUILT_RULE>;
-  installToKibana?: boolean;
-}) => {
+export const createAndInstallMockedPrebuiltRules = (
+  ruleAssets: Array<typeof SAMPLE_PREBUILT_RULE>
+) => {
+  preventPrebuiltRulesPackageInstallation();
+  // Install assets into ES as `security-rule` SOs
   installPrebuiltRuleAssets(ruleAssets);
 
-  if (installToKibana) {
-    cy.log('Install prebuilt rules', ruleAssets.length);
-    return installAllPrebuiltRulesRequest();
-  }
+  // Install rules into Kibana as `alerts` SOs
+  return installSpecificPrebuiltRulesRequest(ruleAssets);
 };

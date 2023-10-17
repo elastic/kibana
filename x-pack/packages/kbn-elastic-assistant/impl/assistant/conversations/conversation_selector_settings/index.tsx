@@ -18,20 +18,16 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { Conversation, Prompt } from '../../../..';
+import { Conversation } from '../../../..';
 import { UseAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
 interface Props {
-  allSystemPrompts: Prompt[];
   conversations: UseAssistantContext['conversations'];
   onConversationDeleted: (conversationId: string) => void;
   onConversationSelectionChange: (conversation?: Conversation | string) => void;
   selectedConversationId?: string;
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
 }
 
 const getPreviousConversationId = (conversationIds: string[], selectedConversationId = '') => {
@@ -58,13 +54,10 @@ export type ConversationSelectorSettingsOption = EuiComboBoxOptionOption<{
  */
 export const ConversationSelectorSettings: React.FC<Props> = React.memo(
   ({
-    allSystemPrompts,
     conversations,
     onConversationDeleted,
     onConversationSelectionChange,
     selectedConversationId,
-    defaultConnectorId,
-    defaultProvider,
   }) => {
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
 
@@ -74,6 +67,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
         label: conversation.id,
+        'data-test-subj': conversation.id,
       }));
     });
 
@@ -195,6 +189,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
                   iconType="cross"
                   aria-label={i18n.DELETE_CONVERSATION}
                   color="danger"
+                  data-test-subj="delete-conversation"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     onDelete(label);
@@ -235,6 +230,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
           prepend={
             <EuiButtonIcon
               iconType="arrowLeft"
+              data-test-subj="arrowLeft"
               aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
               onClick={onLeftArrowClick}
               disabled={conversationIds.length <= 1}
@@ -243,6 +239,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
           append={
             <EuiButtonIcon
               iconType="arrowRight"
+              data-test-subj="arrowRight"
               aria-label={i18n.NEXT_CONVERSATION_TITLE}
               onClick={onRightArrowClick}
               disabled={conversationIds.length <= 1}
