@@ -96,7 +96,9 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
           setDashboardCheckComplete(true);
           setIsLoading(false);
           toasts.addDanger({
-            title: 'Error finding Generative AI Token Usage Dashboard.',
+            title: i18n.translate('xpack.triggersActionsUI.genAi.dashbaord.error', {
+              defaultMessage: 'Error finding Generative AI Token Usage Dashboard.',
+            }),
             text: error.message,
           });
         }
