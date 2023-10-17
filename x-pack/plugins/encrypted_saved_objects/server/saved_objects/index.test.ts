@@ -156,7 +156,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
-        namespaces: ['some-ns', 'some-ns2'],
+        namespaces: ['some-ns'],
       };
       mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
         close: jest.fn(),

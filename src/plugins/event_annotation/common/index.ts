@@ -37,6 +37,7 @@ export type {
   EventAnnotationGroupSearchOut,
   EventAnnotationGroupDeleteIn,
   EventAnnotationGroupDeleteOut,
+  EventAnnotationGroupCrudTypes,
 } from './content_management';
 export { CONTENT_ID } from './content_management';
 export { ANNOTATIONS_LISTING_VIEW_ID } from './constants';
