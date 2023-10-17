@@ -20,10 +20,9 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
   });
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
 
@@ -43,7 +42,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await waitForUrlToBe('/app/appleave1');
 
         await appsMenu.clickLink('AppLeave 2');
-        await testSubjects.existOrFail('appLeaveConfirmModal');
+
+        await PageObjects.common.expectConfirmModalOpenState(true);
         await PageObjects.common.clickConfirmOnModal();
 
         const currentUrl = await browser.getCurrentUrl();
@@ -56,7 +56,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await waitForUrlToBe('/app/appleave1');
 
         await appsMenu.clickLink('AppLeave 2');
-        await testSubjects.existOrFail('appLeaveConfirmModal');
+
+        await PageObjects.common.expectConfirmModalOpenState(true);
         await PageObjects.common.clickCancelOnModal(false);
 
         const currentUrl = await browser.getCurrentUrl();
