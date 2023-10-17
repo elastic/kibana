@@ -456,40 +456,34 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     recognizeIndex({
       indexPatternTitle,
-      moduleTypes,
+      filter,
     }: {
       indexPatternTitle: string;
-      moduleTypes?: string[];
+      filter?: string[];
     }) {
       return httpService.http<RecognizeResult[]>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/${indexPatternTitle}`,
         method: 'GET',
         version: '1',
-        query: { type: moduleTypes?.join(',') },
+        query: { filter: filter?.join(',') },
       });
     },
 
-    listDataRecognizerModules(moduleTypes?: string[]) {
+    listDataRecognizerModules(filter?: string[]) {
       return httpService.http<any>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/get_module`,
         method: 'GET',
         version: '1',
-        query: { type: moduleTypes?.join(',') },
+        query: { filter: filter?.join(',') },
       });
     },
 
-    getDataRecognizerModule({
-      moduleId,
-      moduleTypes,
-    }: {
-      moduleId: string;
-      moduleTypes?: string[];
-    }) {
+    getDataRecognizerModule({ moduleId, filter }: { moduleId: string; filter?: string[] }) {
       return httpService.http<Module>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/${moduleId}`,
         method: 'GET',
         version: '1',
-        query: { type: moduleTypes?.join(',') },
+        query: { filter: filter?.join(',') },
       });
     },
 

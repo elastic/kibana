@@ -50,14 +50,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function executeGetModuleRequest(
     module: string,
-    moduleTypes: string[],
+    filter: string[],
     user: USER,
     rspCode: number
   ) {
     const { body, status } = await supertest
       .get(`/internal/ml/modules/get_module/${module}`)
       .query({
-        filter: moduleTypes.length ? moduleTypes.join(',') : undefined,
+        filter: filter.length ? filter.join(',') : undefined,
       })
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(getCommonRequestHeader('1'));
