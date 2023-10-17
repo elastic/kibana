@@ -15,7 +15,7 @@ import type {
 
 import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
-import { mapAttributes } from './utilities';
+import { mapAttributes } from './saved_objects/map_attributes';
 
 export interface CreateEsoModelVersionFnOpts {
   modelVersion: SavedObjectsModelVersion;

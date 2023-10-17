@@ -16,7 +16,7 @@ import type {
 import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 import { normalizeNamespace } from './saved_objects';
-import { mapAttributes } from './utilities';
+import { mapAttributes } from './saved_objects/map_attributes';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
   doc: SavedObjectUnsanitizedDoc<InputAttributes> | SavedObjectUnsanitizedDoc<MigratedAttributes>,
