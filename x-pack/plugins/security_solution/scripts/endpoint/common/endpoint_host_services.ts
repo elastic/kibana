@@ -191,7 +191,7 @@ const createVagrantVm = async ({
         CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
         CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
       },
-      // stdio: ['inherit', 'inherit', 'inherit'],
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
   } catch (e) {
     log.error(e);
@@ -313,13 +313,13 @@ const enrollHostWithFleet = async ({
 
   log.info(`Enrolling elastic agent with Fleet`);
   if (process.env.CI) {
-    log.verbose(`Command: vagrant ${agentInstallArguments.join(' ')}`);
+    log.info(`Command: vagrant ${agentInstallArguments.join(' ')}`);
 
     await execa(`vagrant`, ['ssh', '--', `cd ${vmDirName} && ${agentInstallArguments.join(' ')}`], {
       env: {
         VAGRANT_CWD,
       },
-      // stdio: ['inherit', 'inherit', 'inherit'],
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
   } else {
     log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
