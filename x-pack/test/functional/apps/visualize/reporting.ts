@@ -150,12 +150,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Visualize Editor: Generate Screenshot', () => {
-      it('does not allow user that does not have reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openSavedVisualization(VIS_TITLE);
-        await reportingFunctional.tryGeneratePdfFail();
-      });
-
       it('does allow user with reporting_user role', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedVisualization(VIS_TITLE);

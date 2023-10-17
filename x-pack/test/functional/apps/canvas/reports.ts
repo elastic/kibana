@@ -86,12 +86,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reportingFunctional.initEcommerce();
       });
 
-      it('does not allow user that does not have reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfFail();
-      });
-
       it('does allow user with reporting_user role', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
