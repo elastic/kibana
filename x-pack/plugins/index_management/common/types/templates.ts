@@ -42,6 +42,7 @@ export interface TemplateDeserialized {
   composedOf?: string[]; // Composable template only
   version?: number;
   priority?: number; // Composable template only
+  allowAutoCreate?: boolean;
   order?: number; // Legacy template only
   ilmPolicy?: {
     name: string;
