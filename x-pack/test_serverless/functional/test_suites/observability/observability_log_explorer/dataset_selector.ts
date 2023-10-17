@@ -14,6 +14,9 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
+const expectedDataViews = ['logs-*', 'metrics-*'];
+const sortedExpectedDataViews = expectedDataViews.slice().sort();
+
 const uncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
 const expectedUncategorized = uncategorized.map((dataset) => dataset.split('-')[1]);
 
@@ -21,9 +24,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'observabilityLogExplorer', 'svlCommonPage']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'observabilityLogExplorer',
+    'svlCommonPage',
+  ]);
 
-  describe('Dataset Selector', () => {
+  const noIntegrationsTitle = 'No integrations found';
+  const noUncategorizedTitle = 'No data streams found';
+
+  describe('Dataset Selector', function () {
+    // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="datasetSelectorPopoverButton"])
+    this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.removeInstalledPackages();
@@ -33,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.forceLogout();
     });
 
-    describe('without installed integrations or uncategorized data streams', () => {
+    describe('as consistent behavior', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
       });
@@ -43,36 +56,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.openDatasetSelector();
       });
 
-      describe('when open on the first navigation level', () => {
-        it('should always display the "All log datasets" entry as the first item', async () => {
-          const allLogDatasetButton =
-            await PageObjects.observabilityLogExplorer.getAllLogDatasetsButton();
-          const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+      it('should always display the Integrations, Uncategorized and Data Views top level tabs', async () => {
+        const integrationsTab = await PageObjects.observabilityLogExplorer.getIntegrationsTab();
+        const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+        const dataViewsTab = await PageObjects.observabilityLogExplorer.getDataViewsTab();
 
-          const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
-          const firstEntryTitle = await menuEntries[0].getVisibleText();
+        expect(await integrationsTab.isDisplayed()).to.be(true);
+        expect(await integrationsTab.getVisibleText()).to.be('Integrations');
+        expect(await uncategorizedTab.isDisplayed()).to.be(true);
+        expect(await uncategorizedTab.getVisibleText()).to.be('Uncategorized');
+        expect(await dataViewsTab.isDisplayed()).to.be(true);
+        expect(await dataViewsTab.getVisibleText()).to.be('Data Views');
+      });
 
-          expect(allLogDatasetTitle).to.be('All log datasets');
-          expect(allLogDatasetTitle).to.be(firstEntryTitle);
-        });
+      it('should always display the "Show all logs" action', async () => {
+        const allLogDatasetButton =
+          await PageObjects.observabilityLogExplorer.getAllLogDatasetsButton();
 
-        it('should always display the unmanaged datasets entry as the second item', async () => {
-          const unamanagedDatasetButton =
-            await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-          const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+        const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
 
-          const unmanagedDatasetTitle = await unamanagedDatasetButton.getVisibleText();
-          const secondEntryTitle = await menuEntries[1].getVisibleText();
+        expect(allLogDatasetTitle).to.be('Show all logs');
+      });
 
-          expect(unmanagedDatasetTitle).to.be('Uncategorized');
-          expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
-        });
-
+      describe('when open on the integrations tab', () => {
         it('should display an error prompt if could not retrieve the integrations', async function () {
           // Skip the test in case network condition utils are not available
           try {
             await retry.try(async () => {
-              await PageObjects.observabilityLogExplorer.assertNoIntegrationsPromptExists();
+              await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+                noIntegrationsTitle
+              );
             });
 
             await PageObjects.common.sleep(5000);
@@ -80,7 +93,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.observabilityLogExplorer.typeSearchFieldWith('a');
 
             await retry.try(async () => {
-              await PageObjects.observabilityLogExplorer.assertNoIntegrationsErrorExists();
+              await PageObjects.observabilityLogExplorer.assertListStatusErrorPromptExistsWithTitle(
+                noIntegrationsTitle
+              );
             });
 
             await browser.restoreNetworkConditions();
@@ -89,24 +104,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         });
 
-        // Skip: failing assertion
-        // Issue: https://github.com/elastic/kibana/issues/165138
-        it.skip('should display an empty prompt for no integrations', async () => {
-          const { integrations } = await PageObjects.observabilityLogExplorer.getIntegrations();
-          expect(integrations.length).to.be(0);
+        it('should display an empty prompt for no integrations', async () => {
+          const menuEntries = await PageObjects.observabilityLogExplorer
+            .getIntegrationsContextMenu()
+            .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
-          await PageObjects.observabilityLogExplorer.assertNoIntegrationsPromptExists();
+          expect(menuEntries.length).to.be(0);
+          await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+            noIntegrationsTitle
+          );
         });
       });
 
-      describe('when navigating into Uncategorized data streams', () => {
-        it('should display a loading skeleton while loading', async function () {
+      describe('when open on the uncategorized tab', () => {
+        it('should display a loading skeleton while loading uncategorized datasets', async function () {
           // Skip the test in case network condition utils are not available
           try {
             await browser.setNetworkConditions('SLOW_3G'); // Almost stuck network conditions
-            const unamanagedDatasetButton =
-              await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-            await unamanagedDatasetButton.click();
+            const uncategorizedTab =
+              await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+            await uncategorizedTab.click();
 
             await PageObjects.observabilityLogExplorer.assertLoadingSkeletonExists();
 
@@ -116,22 +133,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         });
 
-        it('should display an error prompt if could not retrieve the data streams', async function () {
+        it('should display an error prompt if could not retrieve the datasets', async function () {
+          const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+          await uncategorizedTab.click();
+
           // Skip the test in case network condition utils are not available
           try {
-            const unamanagedDatasetButton =
-              await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-            await unamanagedDatasetButton.click();
-
             await retry.try(async () => {
-              await PageObjects.observabilityLogExplorer.assertNoDataStreamsPromptExists();
+              await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+                noUncategorizedTitle
+              );
             });
 
+            await PageObjects.common.sleep(5000);
             await browser.setNetworkConditions('OFFLINE');
             await PageObjects.observabilityLogExplorer.typeSearchFieldWith('a');
 
             await retry.try(async () => {
-              await PageObjects.observabilityLogExplorer.assertNoDataStreamsErrorExists();
+              await PageObjects.observabilityLogExplorer.assertListStatusErrorPromptExistsWithTitle(
+                noUncategorizedTitle
+              );
             });
 
             await browser.restoreNetworkConditions();
@@ -140,17 +161,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         });
 
-        it('should display an empty prompt for no data streams', async () => {
-          const unamanagedDatasetButton =
-            await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-          await unamanagedDatasetButton.click();
+        it('should display an empty prompt for no uncategorized data streams', async () => {
+          const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+          await uncategorizedTab.click();
 
-          const unamanagedDatasetEntries =
-            await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+          const uncategorizedEntries = await PageObjects.observabilityLogExplorer
+            .getUncategorizedContextMenu()
+            .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
-          expect(unamanagedDatasetEntries.length).to.be(0);
+          expect(uncategorizedEntries.length).to.be(0);
 
-          await PageObjects.observabilityLogExplorer.assertNoDataStreamsPromptExists();
+          await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+            noUncategorizedTitle
+          );
         });
       });
     });
@@ -173,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await cleanupIntegrationsSetup();
       });
 
-      describe('when open on the first navigation level', () => {
+      describe('when open on the integrations tab', () => {
         before(async () => {
           await PageObjects.observabilityLogExplorer.navigateTo();
         });
@@ -181,30 +204,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeEach(async () => {
           await browser.refresh();
           await PageObjects.observabilityLogExplorer.openDatasetSelector();
-        });
-
-        it('should always display the "All log datasets" entry as the first item', async () => {
-          const allLogDatasetButton =
-            await PageObjects.observabilityLogExplorer.getAllLogDatasetsButton();
-          const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-          const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
-          const firstEntryTitle = await menuEntries[0].getVisibleText();
-
-          expect(allLogDatasetTitle).to.be('All log datasets');
-          expect(allLogDatasetTitle).to.be(firstEntryTitle);
-        });
-
-        it('should always display the unmanaged datasets entry as the second item', async () => {
-          const unamanagedDatasetButton =
-            await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-          const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-          const unmanagedDatasetTitle = await unamanagedDatasetButton.getVisibleText();
-          const secondEntryTitle = await menuEntries[1].getVisibleText();
-
-          expect(unmanagedDatasetTitle).to.be('Uncategorized');
-          expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
         });
 
         it('should display a list of installed integrations', async () => {
@@ -264,7 +263,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(integrations.length).to.be(0);
           });
 
-          await PageObjects.observabilityLogExplorer.assertNoIntegrationsPromptExists();
+          await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+            noIntegrationsTitle
+          );
         });
 
         it('should load more integrations by scrolling to the end of the list', async () => {
@@ -297,9 +298,157 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           cleanupAdditionalSetup();
         });
+
+        describe('clicking on integration and moving into the second navigation level', () => {
+          before(async () => {
+            await PageObjects.observabilityLogExplorer.navigateTo();
+          });
+
+          beforeEach(async () => {
+            await browser.refresh();
+            await PageObjects.observabilityLogExplorer.openDatasetSelector();
+          });
+
+          it('should display a list of available datasets', async () => {
+            await retry.try(async () => {
+              const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
+              await nodes[0].click();
+            });
+
+            await retry.try(async () => {
+              const [panelTitleNode, integrationDatasetEntries] =
+                await PageObjects.observabilityLogExplorer
+                  .getIntegrationsContextMenu()
+                  .then((menu) =>
+                    Promise.all([
+                      PageObjects.observabilityLogExplorer.getPanelTitle(menu),
+                      PageObjects.observabilityLogExplorer.getPanelEntries(menu),
+                    ])
+                  );
+
+              expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+              expect(await integrationDatasetEntries[0].getVisibleText()).to.be('access');
+              expect(await integrationDatasetEntries[1].getVisibleText()).to.be('error');
+            });
+          });
+
+          it('should sort the datasets list by the clicked sorting option', async () => {
+            await retry.try(async () => {
+              const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
+              await nodes[0].click();
+            });
+
+            await retry.try(async () => {
+              const panelTitleNode = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+              expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+            });
+
+            // Test ascending order
+            await PageObjects.observabilityLogExplorer.clickSortButtonBy('asc');
+            await retry.try(async () => {
+              const menuEntries = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+              expect(await menuEntries[0].getVisibleText()).to.be('access');
+              expect(await menuEntries[1].getVisibleText()).to.be('error');
+            });
+
+            // Test descending order
+            await PageObjects.observabilityLogExplorer.clickSortButtonBy('desc');
+            await retry.try(async () => {
+              const menuEntries = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+              expect(await menuEntries[0].getVisibleText()).to.be('error');
+              expect(await menuEntries[1].getVisibleText()).to.be('access');
+            });
+
+            // Test back ascending order
+            await PageObjects.observabilityLogExplorer.clickSortButtonBy('asc');
+            await retry.try(async () => {
+              const menuEntries = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+              expect(await menuEntries[0].getVisibleText()).to.be('access');
+              expect(await menuEntries[1].getVisibleText()).to.be('error');
+            });
+          });
+
+          it('should filter the datasets list by the typed dataset name', async () => {
+            await retry.try(async () => {
+              const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
+              await nodes[0].click();
+            });
+
+            await retry.try(async () => {
+              const panelTitleNode = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+              expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+            });
+
+            await retry.try(async () => {
+              const menuEntries = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+              expect(await menuEntries[0].getVisibleText()).to.be('access');
+              expect(await menuEntries[1].getVisibleText()).to.be('error');
+            });
+
+            await PageObjects.observabilityLogExplorer.typeSearchFieldWith('err');
+
+            await retry.try(async () => {
+              const menuEntries = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+              expect(menuEntries.length).to.be(1);
+              expect(await menuEntries[0].getVisibleText()).to.be('error');
+            });
+          });
+
+          it('should update the current selection with the clicked dataset', async () => {
+            await retry.try(async () => {
+              const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
+              await nodes[0].click();
+            });
+
+            await retry.try(async () => {
+              const panelTitleNode = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+              expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+            });
+
+            await retry.try(async () => {
+              const menuEntries = await PageObjects.observabilityLogExplorer
+                .getIntegrationsContextMenu()
+                .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+              expect(await menuEntries[0].getVisibleText()).to.be('access');
+              menuEntries[0].click();
+            });
+
+            await retry.try(async () => {
+              const selectorButton =
+                await PageObjects.observabilityLogExplorer.getDatasetSelectorButton();
+
+              expect(await selectorButton.getVisibleText()).to.be('[Apache HTTP Server] access');
+            });
+          });
+        });
       });
 
-      describe('when clicking on integration and moving into the second navigation level', () => {
+      describe('when open on the uncategorized tab', () => {
         before(async () => {
           await PageObjects.observabilityLogExplorer.navigateTo();
         });
@@ -307,143 +456,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeEach(async () => {
           await browser.refresh();
           await PageObjects.observabilityLogExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogExplorer
+            .getUncategorizedTab()
+            .then((tab) => tab.click());
         });
 
         it('should display a list of available datasets', async () => {
           await retry.try(async () => {
-            const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
-            await nodes[0].click();
-          });
-
-          await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
-            expect(await menuEntries[0].getVisibleText()).to.be('access');
-            expect(await menuEntries[1].getVisibleText()).to.be('error');
-          });
-        });
-
-        it('should sort the datasets list by the clicked sorting option', async () => {
-          await retry.try(async () => {
-            const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
-            await nodes[0].click();
-          });
-
-          await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-
-            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
-          });
-
-          // Test ascending order
-          await PageObjects.observabilityLogExplorer.clickSortButtonBy('asc');
-          await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-            expect(await menuEntries[0].getVisibleText()).to.be('access');
-            expect(await menuEntries[1].getVisibleText()).to.be('error');
-          });
-
-          // Test descending order
-          await PageObjects.observabilityLogExplorer.clickSortButtonBy('desc');
-          await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-            expect(await menuEntries[0].getVisibleText()).to.be('error');
-            expect(await menuEntries[1].getVisibleText()).to.be('access');
-          });
-
-          // Test back ascending order
-          await PageObjects.observabilityLogExplorer.clickSortButtonBy('asc');
-          await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-            expect(await menuEntries[0].getVisibleText()).to.be('access');
-            expect(await menuEntries[1].getVisibleText()).to.be('error');
-          });
-        });
-
-        it('should filter the datasets list by the typed dataset name', async () => {
-          await retry.try(async () => {
-            const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
-            await nodes[0].click();
-          });
-
-          await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-
-            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
-          });
-
-          await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-            expect(await menuEntries[0].getVisibleText()).to.be('access');
-            expect(await menuEntries[1].getVisibleText()).to.be('error');
-          });
-
-          await PageObjects.observabilityLogExplorer.typeSearchFieldWith('err');
-
-          await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-            expect(menuEntries.length).to.be(1);
-            expect(await menuEntries[0].getVisibleText()).to.be('error');
-          });
-        });
-
-        it('should update the current selection with the clicked dataset', async () => {
-          await retry.try(async () => {
-            const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
-            await nodes[0].click();
-          });
-
-          await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-
-            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
-          });
-
-          await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-            expect(await menuEntries[0].getVisibleText()).to.be('access');
-            menuEntries[0].click();
-          });
-
-          await retry.try(async () => {
-            const selectorButton =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorButton();
-
-            expect(await selectorButton.getVisibleText()).to.be('[Apache HTTP Server] access');
-          });
-        });
-      });
-
-      describe('when navigating into Uncategorized data streams', () => {
-        before(async () => {
-          await PageObjects.observabilityLogExplorer.navigateTo();
-        });
-
-        beforeEach(async () => {
-          await browser.refresh();
-          await PageObjects.observabilityLogExplorer.openDatasetSelector();
-        });
-
-        it('should display a list of available datasets', async () => {
-          const button = await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-          await button.click();
-
-          await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) =>
+                Promise.all([
+                  PageObjects.observabilityLogExplorer.getPanelTitle(menu),
+                  PageObjects.observabilityLogExplorer.getPanelEntries(menu),
+                ])
+              );
 
             expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
@@ -453,12 +480,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should sort the datasets list by the clicked sorting option', async () => {
-          const button = await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-          await button.click();
-
           await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
 
             expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
           });
@@ -466,7 +491,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // Test ascending order
           await PageObjects.observabilityLogExplorer.clickSortButtonBy('asc');
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
@@ -476,7 +503,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // Test descending order
           await PageObjects.observabilityLogExplorer.clickSortButtonBy('desc');
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[2]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
@@ -486,7 +515,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // Test back ascending order
           await PageObjects.observabilityLogExplorer.clickSortButtonBy('asc');
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
@@ -495,18 +526,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should filter the datasets list by the typed dataset name', async () => {
-          const button = await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-          await button.click();
-
           await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
 
             expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
           });
 
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
@@ -516,7 +547,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogExplorer.typeSearchFieldWith('retail');
 
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
             expect(menuEntries.length).to.be(1);
             expect(await menuEntries[0].getVisibleText()).to.be('retail');
@@ -524,18 +557,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should update the current selection with the clicked dataset', async () => {
-          const button = await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-          await button.click();
-
           await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
 
             expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
           });
 
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getUncategorizedContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             menuEntries[0].click();
@@ -546,6 +579,138 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await PageObjects.observabilityLogExplorer.getDatasetSelectorButton();
 
             expect(await selectorButton.getVisibleText()).to.be(expectedUncategorized[0]);
+          });
+        });
+      });
+
+      describe('when open on the data views tab', () => {
+        before(async () => {
+          await PageObjects.observabilityLogExplorer.navigateTo();
+        });
+
+        beforeEach(async () => {
+          await browser.refresh();
+          await PageObjects.observabilityLogExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogExplorer.getDataViewsTab().then((tab) => tab.click());
+        });
+
+        it('should display a list of available data views', async () => {
+          await retry.try(async () => {
+            const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) =>
+                Promise.all([
+                  PageObjects.observabilityLogExplorer.getPanelTitle(menu),
+                  PageObjects.observabilityLogExplorer.getPanelEntries(menu),
+                ])
+              );
+
+            expect(
+              await PageObjects.observabilityLogExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+          });
+        });
+
+        it('should sort the data views list by the clicked sorting option', async () => {
+          await retry.try(async () => {
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+            expect(
+              await PageObjects.observabilityLogExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+          });
+
+          // Test descending order
+          await PageObjects.observabilityLogExplorer.clickSortButtonBy('desc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+          });
+
+          // Test back ascending order
+          await PageObjects.observabilityLogExplorer.clickSortButtonBy('asc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+          });
+        });
+
+        it('should filter the datasets list by the typed data view name', async () => {
+          await retry.try(async () => {
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+            expect(
+              await PageObjects.observabilityLogExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+          });
+
+          await PageObjects.observabilityLogExplorer.typeSearchFieldWith('logs');
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(menuEntries.length).to.be(1);
+            expect(await menuEntries[0].getVisibleText()).to.be('logs-*');
+          });
+        });
+
+        it('should navigate to Discover with the clicked data view preselected', async () => {
+          await retry.try(async () => {
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+            expect(
+              await PageObjects.observabilityLogExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+            menuEntries[1].click();
+          });
+
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
+              expectedDataViews[1]
+            );
           });
         });
       });
@@ -567,9 +732,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogExplorer
+              .getIntegrationsContextMenu()
+              .then((menu) =>
+                Promise.all([
+                  PageObjects.observabilityLogExplorer.getPanelTitle(menu),
+                  PageObjects.observabilityLogExplorer.getPanelEntries(menu),
+                ])
+              );
 
             expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
             expect(await menuEntries[0].getVisibleText()).to.be('access');
@@ -580,9 +750,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogExplorer.openDatasetSelector();
 
           await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogExplorer
+              .getIntegrationsContextMenu()
+              .then((menu) =>
+                Promise.all([
+                  PageObjects.observabilityLogExplorer.getPanelTitle(menu),
+                  PageObjects.observabilityLogExplorer.getPanelEntries(menu),
+                ])
+              );
 
             expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
             expect(await menuEntries[0].getVisibleText()).to.be('access');
@@ -608,12 +783,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('when switching between integration panels', () => {
+      describe('when switching between tabs or integration panels', () => {
         before(async () => {
           await PageObjects.observabilityLogExplorer.navigateTo();
         });
 
-        it('should remember the latest search and restore its results for each integration', async () => {
+        it('should remember the latest search and restore its results', async () => {
           await PageObjects.observabilityLogExplorer.openDatasetSelector();
           await PageObjects.observabilityLogExplorer.clearSearchField();
 
@@ -627,9 +802,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await retry.try(async () => {
-            const panelTitleNode =
-              await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogExplorer
+              .getIntegrationsContextMenu()
+              .then((menu) =>
+                Promise.all([
+                  PageObjects.observabilityLogExplorer.getPanelTitle(menu),
+                  PageObjects.observabilityLogExplorer.getPanelEntries(menu),
+                ])
+              );
 
             expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
             expect(await menuEntries[0].getVisibleText()).to.be('access');
@@ -639,15 +819,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogExplorer.typeSearchFieldWith('err');
 
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getIntegrationsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
             expect(menuEntries.length).to.be(1);
             expect(await menuEntries[0].getVisibleText()).to.be('error');
           });
 
           // Navigate back to integrations
-          const panelTitleNode =
-            await PageObjects.observabilityLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+          const panelTitleNode = await PageObjects.observabilityLogExplorer
+            .getIntegrationsContextMenu()
+            .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
           panelTitleNode.click();
 
           await retry.try(async () => {
@@ -662,7 +845,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await retry.try(async () => {
-            const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getIntegrationsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
             const searchValue = await PageObjects.observabilityLogExplorer.getSearchFieldValue();
             expect(searchValue).to.eql('err');

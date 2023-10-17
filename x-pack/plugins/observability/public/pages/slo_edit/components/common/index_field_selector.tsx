@@ -6,7 +6,6 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
@@ -42,7 +41,7 @@ export function IndexFieldSelector({
     <EuiFlexItem>
       <EuiFormRow label={label} isInvalid={getFieldState(name).invalid}>
         <Controller
-          defaultValue={ALL_VALUE}
+          defaultValue=""
           name={name}
           control={control}
           rules={{ required: isRequired }}
@@ -61,7 +60,7 @@ export function IndexFieldSelector({
                   return field.onChange(selected[0].value);
                 }
 
-                field.onChange(ALL_VALUE);
+                field.onChange('');
               }}
               options={options}
               onSearchChange={(searchValue: string) => {

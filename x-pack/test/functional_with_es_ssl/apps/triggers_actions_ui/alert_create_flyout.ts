@@ -14,6 +14,7 @@ import { generateUniqueKey } from '../../lib/get_test_data';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const comboBox = getService('comboBox');
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
@@ -45,11 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click(`.es-query-SelectOption`);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
-    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await indexComboBox.click();
-    await indexComboBox.type('k');
-    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-    await filterSelectItem.click();
+    await comboBox.set('thresholdIndexesComboBox', 'k');
     await testSubjects.click('thresholdAlertTimeFieldSelect');
     await retry.try(async () => {
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
@@ -72,7 +69,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await rules.common.cancelRuleCreation();
   }
 
-  describe('create alert', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/167443
+  // FLAKY: https://github.com/elastic/kibana/issues/167444
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');

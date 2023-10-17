@@ -38,7 +38,6 @@
     "@kbn/management-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/core-http-browser",

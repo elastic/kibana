@@ -35,7 +35,7 @@ beforeEach(() => {
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     elasticsearchClientPromise: Promise.resolve(clusterClient),
-    esNames: getEsNames('kibana', '1.2.3'),
+    esNames: getEsNames('kibana'),
     wait: () => Promise.resolve(true),
   });
 });
@@ -50,7 +50,7 @@ describe('indexDocument', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       body: [{ create: {} }, { message: 'foo' }],
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -103,7 +103,7 @@ describe('buffering documents', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       body: expectedBody,
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -124,12 +124,12 @@ describe('buffering documents', () => {
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(1, {
       body: expectedBody,
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
       body: [{ create: {} }, { message: `foo 100` }],
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -158,7 +158,7 @@ describe('buffering documents', () => {
       }
 
       expect(clusterClient.bulk).toHaveBeenNthCalledWith(i + 1, {
-        index: 'kibana-event-log-1.2.3',
+        index: 'kibana-event-log-ds',
         body: expectedBody,
       });
     }

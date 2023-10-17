@@ -29,27 +29,18 @@ axios.create = jest.fn(() => axios);
 const requestMock = request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
 
-const channels = [
-  {
-    id: 'channel_id_1',
-    name: 'general',
-    is_channel: true,
-    is_archived: false,
-    is_private: true,
-  },
-  {
-    id: 'channel_id_2',
-    name: 'privat',
-    is_channel: true,
-    is_archived: false,
-    is_private: false,
-  },
-];
+const channel = {
+  id: 'channel_id_1',
+  name: 'general',
+  is_channel: true,
+  is_archived: false,
+  is_private: true,
+};
 
-const getChannelsResponse = createAxiosResponse({
+const getValidChannelIdResponse = createAxiosResponse({
   data: {
     ok: true,
-    channels,
+    channel,
   },
 });
 
@@ -105,30 +96,30 @@ describe('Slack API service', () => {
     });
   });
 
-  describe('getChannels', () => {
+  describe('validChannelId', () => {
     test('should get slack channels', async () => {
-      requestMock.mockImplementation(() => getChannelsResponse);
-      const res = await service.getChannels();
+      requestMock.mockImplementation(() => getValidChannelIdResponse);
+      const res = await service.validChannelId('channel_id_1');
       expect(res).toEqual({
         actionId: SLACK_API_CONNECTOR_ID,
         data: {
           ok: true,
-          channels,
+          channel,
         },
         status: 'ok',
       });
     });
 
     test('should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => getChannelsResponse);
+      requestMock.mockImplementation(() => getValidChannelIdResponse);
 
-      await service.getChannels();
+      await service.validChannelId('channel_id_1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
         configurationUtilities,
         method: 'get',
-        url: 'conversations.list?exclude_archived=true&types=public_channel,private_channel&limit=1000',
+        url: 'conversations.info?channel=channel_id_1',
       });
     });
 
@@ -137,7 +128,7 @@ describe('Slack API service', () => {
         throw new Error('request fail');
       });
 
-      expect(await service.getChannels()).toEqual({
+      expect(await service.validChannelId('channel_id_1')).toEqual({
         actionId: SLACK_API_CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
@@ -147,7 +138,7 @@ describe('Slack API service', () => {
   });
 
   describe('postMessage', () => {
-    test('should call request with correct arguments', async () => {
+    test('should call request with only channels argument', async () => {
       requestMock.mockImplementation(() => postMessageResponse);
 
       await service.postMessage({ channels: ['general', 'privat'], text: 'a message' });
@@ -160,6 +151,42 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'chat.postMessage',
         data: { channel: 'general', text: 'a message' },
+      });
+    });
+
+    test('should call request with only channelIds argument', async () => {
+      requestMock.mockImplementation(() => postMessageResponse);
+
+      await service.postMessage({
+        channels: ['general', 'privat'],
+        channelIds: ['QWEERTYU987', 'POIUYT123'],
+        text: 'a message',
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        logger,
+        configurationUtilities,
+        method: 'post',
+        url: 'chat.postMessage',
+        data: { channel: 'QWEERTYU987', text: 'a message' },
+      });
+    });
+
+    test('should call request with channels && channelIds  argument', async () => {
+      requestMock.mockImplementation(() => postMessageResponse);
+
+      await service.postMessage({ channelIds: ['QWEERTYU987', 'POIUYT123'], text: 'a message' });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        logger,
+        configurationUtilities,
+        method: 'post',
+        url: 'chat.postMessage',
+        data: { channel: 'QWEERTYU987', text: 'a message' },
       });
     });
 

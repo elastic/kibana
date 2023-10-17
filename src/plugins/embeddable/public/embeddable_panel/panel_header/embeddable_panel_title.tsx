@@ -65,7 +65,12 @@ export const EmbeddablePanelTitle = ({
         anchorClassName="embPanel__titleTooltipAnchor"
       >
         <span className="embPanel__titleInner">
-          {titleComponent} <EuiIcon type="iInCircle" color="subdued" />
+          {titleComponent}{' '}
+          <EuiIcon
+            type="iInCircle"
+            color="subdued"
+            data-test-subj="embeddablePanelTitleDescriptionIcon"
+          />
         </span>
       </EuiToolTip>
     );

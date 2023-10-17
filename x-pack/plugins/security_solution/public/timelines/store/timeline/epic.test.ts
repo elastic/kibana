@@ -175,6 +175,7 @@ describe('Epic Timeline', () => {
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',
+        savedSearchId: null,
       };
 
       expect(
@@ -309,6 +310,7 @@ describe('Epic Timeline', () => {
           },
         },
         savedQueryId: 'my endgame timeline query',
+        savedSearchId: null,
         sort: [
           {
             columnId: '@timestamp',

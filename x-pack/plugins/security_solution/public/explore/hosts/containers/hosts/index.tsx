@@ -8,24 +8,21 @@
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { HostsRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { inputsModel, State } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { hostsModel } from '../../store';
 import { hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
-import type {
-  HostsEdges,
-  PageInfoPaginated,
-  HostsRequestOptions,
-} from '../../../../../common/search_strategy';
+import type { HostsEdges, PageInfoPaginated } from '../../../../../common/search_strategy';
 import { HostsQueries } from '../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export const ID = 'hostsAllQuery';
 
@@ -65,9 +62,9 @@ export const useAllHost = ({
     getHostsSelector(state, type)
   );
 
-  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
 
-  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
+  const [hostsRequest, setHostRequest] = useState<HostsRequestOptionsInput | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -133,7 +130,7 @@ export const useAllHost = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: HostsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: HostsQueries.hosts,
@@ -148,7 +145,7 @@ export const useAllHost = ({
           direction,
           field: sortField,
         },
-        isNewRiskScoreModuleAvailable,
+        isNewRiskScoreModuleInstalled,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
@@ -164,7 +161,7 @@ export const useAllHost = ({
     limit,
     startDate,
     sortField,
-    isNewRiskScoreModuleAvailable,
+    isNewRiskScoreModuleInstalled,
   ]);
 
   useEffect(() => {

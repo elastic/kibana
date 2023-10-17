@@ -36,7 +36,7 @@ import { useDashboardHref } from '../../../../common/hooks/use_dashboard_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
 import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
@@ -59,7 +59,6 @@ const RiskDetailsTabBodyComponent: React.FC<
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
   );
-  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
     riskEntity === RiskScoreEntity.host
@@ -135,10 +134,6 @@ const RiskDetailsTabBodyComponent: React.FC<
     isDeprecated: isDeprecated && !loading,
   };
 
-  if (riskScoreEngineStatus?.isUpdateAvailable) {
-    return <RiskScoreUpdatePanel />;
-  }
-
   if (status.isDisabled || status.isDeprecated) {
     return (
       <EnableRiskScore
@@ -156,7 +151,8 @@ const RiskDetailsTabBodyComponent: React.FC<
 
   return (
     <>
-      {isNewRiskScoreModuleAvailable ? (
+      {riskScoreEngineStatus?.isUpdateAvailable && <RiskScoreUpdatePanel />}
+      {riskScoreEngineStatus?.isNewRiskScoreModuleInstalled ? (
         <StyledEuiFlexGroup gutterSize="s">
           <EuiFlexItem>
             {data?.[0] && (
@@ -171,51 +167,52 @@ const RiskDetailsTabBodyComponent: React.FC<
           </EuiFlexItem>
         </StyledEuiFlexGroup>
       ) : (
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem grow={2}>
-            <RiskScoreOverTime
-              from={startDate}
-              loading={loading}
-              queryId={queryId}
-              riskEntity={riskEntity}
-              riskScore={data}
-              title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
-              to={endDate}
-              toggleQuery={toggleOverTimeQuery}
-              toggleStatus={overTimeToggleStatus}
-            />
-          </EuiFlexItem>
+        <>
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem grow={2}>
+              <RiskScoreOverTime
+                from={startDate}
+                loading={loading}
+                queryId={queryId}
+                riskEntity={riskEntity}
+                riskScore={data}
+                title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
+                to={endDate}
+                toggleQuery={toggleOverTimeQuery}
+                toggleStatus={overTimeToggleStatus}
+              />
+            </EuiFlexItem>
 
-          <EuiFlexItem grow={1}>
-            <TopRiskScoreContributors
-              loading={loading}
-              queryId={queryId}
-              toggleStatus={contributorsToggleStatus}
-              toggleQuery={toggleContributorsQuery}
-              rules={rules}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem grow={1}>
+              <TopRiskScoreContributors
+                loading={loading}
+                queryId={queryId}
+                toggleStatus={contributorsToggleStatus}
+                toggleQuery={toggleContributorsQuery}
+                rules={rules}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <StyledEuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={buttonHref}
+                isDisabled={!buttonHref}
+                data-test-subj={`risky-${riskEntity}s-view-dashboard-button`}
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+              >
+                {i18n.VIEW_DASHBOARD_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <RiskInformationButtonEmpty riskEntity={riskEntity} />
+            </EuiFlexItem>
+          </StyledEuiFlexGroup>
+        </>
       )}
-
-      <StyledEuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            href={buttonHref}
-            isDisabled={!buttonHref}
-            data-test-subj={`risky-${riskEntity}s-view-dashboard-button`}
-            target="_blank"
-            iconType="popout"
-            iconSide="right"
-          >
-            {i18n.VIEW_DASHBOARD_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <RiskInformationButtonEmpty riskEntity={riskEntity} />
-        </EuiFlexItem>
-      </StyledEuiFlexGroup>
     </>
   );
 };

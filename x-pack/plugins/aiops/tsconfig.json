@@ -63,6 +63,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/cases-plugin",
     "@kbn/react-kibana-mount",
+    "@kbn/ml-chi2test",
+    "@kbn/usage-collection-plugin",
   ],
   "exclude": [
     "target/**/*",

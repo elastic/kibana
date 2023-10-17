@@ -24,12 +24,14 @@ import { getRoleTranslation } from '../../utils/get_role_translation';
 import type { Feedback } from '../feedback_buttons';
 import { Message } from '../../../common';
 import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
+import { ChatActionClickHandler } from './types';
 
 export interface ChatItemProps extends ChatTimelineItem {
   onEditSubmit: (message: Message) => Promise<void>;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
+  onActionClick: ChatActionClickHandler;
 }
 
 const normalMessageClassName = css`
@@ -76,6 +78,7 @@ export function ChatItem({
   onFeedbackClick,
   onRegenerateClick,
   onStopGeneratingClick,
+  onActionClick,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
@@ -128,6 +131,7 @@ export function ChatItem({
         functionCall={functionCall}
         loading={loading}
         onSubmit={handleInlineEditSubmit}
+        onActionClick={onActionClick}
       />
     ) : null;
 
@@ -147,9 +151,7 @@ export function ChatItem({
 
   return (
     <EuiComment
-      timelineAvatar={
-        <ChatItemAvatar loading={loading && !content} currentUser={currentUser} role={role} />
-      }
+      timelineAvatar={<ChatItemAvatar loading={loading} currentUser={currentUser} role={role} />}
       username={getRoleTranslation(role)}
       event={title}
       actions={

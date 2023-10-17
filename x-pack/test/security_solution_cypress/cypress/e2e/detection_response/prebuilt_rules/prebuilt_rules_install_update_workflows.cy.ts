@@ -24,8 +24,8 @@ import {
   getRuleAssets,
   createAndInstallMockedPrebuiltRules,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
-import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
+import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
+import { login } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
@@ -38,11 +38,11 @@ import {
   assertRuleUpgradeAvailableAndUpgradeAll,
   ruleUpdatesTabClick,
 } from '../../../tasks/prebuilt_rules';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       login();
@@ -50,7 +50,7 @@ describe(
       deleteAlertsAndRules();
       cy.task('esArchiverResetKibana');
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
     });
 
     describe('Installation of prebuilt rules package via Fleet', () => {
@@ -229,7 +229,7 @@ describe(
           rules: [UPDATED_RULE_1, UPDATED_RULE_2],
           installToKibana: false,
         });
-        reload();
+        cy.reload();
       });
 
       it('should upgrade prebuilt rules one by one', () => {

@@ -76,7 +76,7 @@ export function AddDataView() {
       steps: [
         {
           title: i18n.translate('xpack.profiling.tabs.kubernetesRepositoryStep', {
-            defaultMessage: 'Configure the Universal Profiling host-agent Helm repository:',
+            defaultMessage: 'Configure the Universal Profiling Agent Helm repository:',
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
@@ -545,7 +545,7 @@ EOF`}
           <EuiSpacer />
           <EuiText>
             {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
-              defaultMessage: 'Select an option below to deploy the host-agent.',
+              defaultMessage: 'Select an option below to deploy the Universal Profiling Agent.',
             })}
           </EuiText>
           <EuiSpacer />

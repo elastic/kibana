@@ -36,6 +36,7 @@ export class CreateSLO {
     }
 
     try {
+      await this.transformManager.preview(sloTransformId);
       await this.transformManager.start(sloTransformId);
     } catch (err) {
       await Promise.all([

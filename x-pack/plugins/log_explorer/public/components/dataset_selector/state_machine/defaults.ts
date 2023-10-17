@@ -7,7 +7,7 @@
 
 import { AllDatasetSelection } from '../../../../common/dataset_selection';
 import { HashedCache } from '../../../../common/hashed_cache';
-import { INTEGRATION_PANEL_ID } from '../constants';
+import { INTEGRATIONS_PANEL_ID, INTEGRATIONS_TAB_ID } from '../constants';
 import { DatasetsSelectorSearchParams } from '../types';
 import { DefaultDatasetsSelectorContext } from './types';
 
@@ -19,6 +19,7 @@ export const defaultSearch: DatasetsSelectorSearchParams = {
 export const DEFAULT_CONTEXT: DefaultDatasetsSelectorContext = {
   selection: AllDatasetSelection.create(),
   searchCache: new HashedCache(),
-  panelId: INTEGRATION_PANEL_ID,
+  panelId: INTEGRATIONS_PANEL_ID,
+  tabId: INTEGRATIONS_TAB_ID,
   search: defaultSearch,
 };

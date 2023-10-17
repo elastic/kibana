@@ -20,6 +20,7 @@ import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@k
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
@@ -36,7 +37,6 @@ import {
   transformSloResponseToCreateSloForm,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SloBadges } from './badges/slo_badges';
-import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloSummary } from './slo_summary';
 
 export interface SloListItemProps {

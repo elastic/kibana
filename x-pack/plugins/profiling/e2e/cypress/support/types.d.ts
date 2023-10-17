@@ -27,5 +27,6 @@ declare namespace Cypress {
       dataTestSubj?: 'profilingUnifiedSearchBar' | 'profilingComparisonUnifiedSearchBar';
       waitForSuggestion?: boolean;
     }): void;
+    updateAdvancedSettings(settings: Record<string, unknown>): void;
   }
 }

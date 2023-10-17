@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SearchResponse, AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import { AcknowledgedResponseBase, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
@@ -103,6 +103,16 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
         body: schema.object({
           indices: schema.arrayOf(schema.string()),
           name: schema.maybe(schema.string()),
+          template: schema.maybe(
+            schema.object({
+              script: schema.object({
+                source: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
+                lang: schema.string(),
+                params: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+                options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+              }),
+            })
+          ),
         }),
         params: schema.object({
           engine_name: schema.string(),
@@ -115,12 +125,27 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
+        const script = request.body.template?.script;
         const engine = (await client.asCurrentUser.searchApplication.put({
           ...request.query,
           name: request.params.engine_name,
           search_application: {
             indices: request.body.indices,
             name: request.params.engine_name,
+            template:
+              script == null
+                ? undefined
+                : {
+                    script: {
+                      source:
+                        typeof script.source === 'string'
+                          ? script.source
+                          : JSON.stringify(script.source),
+                      lang: script.lang,
+                      params: script.params,
+                      options: script.options,
+                    },
+                  },
             updated_at_millis: Date.now(),
           },
         })) as EnterpriseSearchApplicationUpsertResponse;

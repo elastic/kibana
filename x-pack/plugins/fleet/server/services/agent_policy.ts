@@ -83,7 +83,7 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages } from './epm/packages';
-import { getAgentsByKuery, getLatestAvailableVersion } from './agents';
+import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
@@ -1029,6 +1029,7 @@ class AgentPolicyService {
   public async getFullAgentConfigMap(
     soClient: SavedObjectsClientContract,
     id: string,
+    agentVersion: string,
     options?: { standalone: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
@@ -1048,7 +1049,6 @@ class AgentPolicyService {
         },
       };
 
-      const agentVersion = await getLatestAvailableVersion();
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
@@ -1060,9 +1060,9 @@ class AgentPolicyService {
 
   public async getFullAgentManifest(
     fleetServer: string,
-    enrolToken: string
+    enrolToken: string,
+    agentVersion: string
   ): Promise<string | null> {
-    const agentVersion = await getLatestAvailableVersion();
     const updateManifestVersion = elasticAgentManagedManifest.replace('VERSION', agentVersion);
     let updateManifest = updateManifestVersion;
     if (fleetServer !== '') {

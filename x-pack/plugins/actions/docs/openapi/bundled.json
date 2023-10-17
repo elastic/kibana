@@ -58,6 +58,9 @@
                 "description": "The properties vary depending on the connector type.",
                 "oneOf": [
                   {
+                    "$ref": "#/components/schemas/create_connector_request_bedrock"
+                  },
+                  {
                     "$ref": "#/components/schemas/create_connector_request_cases_webhook"
                   },
                   {
@@ -110,6 +113,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/create_connector_request_tines"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_torq"
                   },
                   {
                     "$ref": "#/components/schemas/create_connector_request_webhook"
@@ -336,6 +342,9 @@
                 "description": "The properties vary depending on the connector type.",
                 "oneOf": [
                   {
+                    "$ref": "#/components/schemas/create_connector_request_bedrock"
+                  },
+                  {
                     "$ref": "#/components/schemas/create_connector_request_cases_webhook"
                   },
                   {
@@ -388,6 +397,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/create_connector_request_tines"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_torq"
                   },
                   {
                     "$ref": "#/components/schemas/create_connector_request_webhook"
@@ -461,6 +473,9 @@
                 "description": "The properties vary depending on the connector type.",
                 "oneOf": [
                   {
+                    "$ref": "#/components/schemas/create_connector_request_bedrock"
+                  },
+                  {
                     "$ref": "#/components/schemas/update_connector_request_cases_webhook"
                   },
                   {
@@ -507,6 +522,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/update_connector_request_teams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_tines"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_torq"
                   },
                   {
                     "$ref": "#/components/schemas/update_connector_request_webhook"
@@ -1411,6 +1432,76 @@
       }
     },
     "schemas": {
+      "config_properties_bedrock": {
+        "title": "Connector request properties for an Amazon Bedrock connector",
+        "description": "Defines properties for connectors when type is `.bedrock`.",
+        "type": "object",
+        "required": [
+          "apiUrl"
+        ],
+        "properties": {
+          "apiUrl": {
+            "type": "string",
+            "description": "The Amazon Bedrock request URL."
+          },
+          "defaultModel": {
+            "type": "string",
+            "description": "The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.\n",
+            "default": "anthropic.claude-v2"
+          }
+        }
+      },
+      "secrets_properties_bedrock": {
+        "title": "Connector secrets properties for an Amazon Bedrock connector",
+        "description": "Defines secrets for connectors when type is `.bedrock`.",
+        "type": "object",
+        "required": [
+          "accessKey",
+          "secret"
+        ],
+        "properties": {
+          "accessKey": {
+            "type": "string",
+            "description": "The AWS access key for authentication."
+          },
+          "secret": {
+            "type": "string",
+            "description": "The AWS secret for authentication."
+          }
+        }
+      },
+      "create_connector_request_bedrock": {
+        "title": "Create Amazon Bedrock connector request",
+        "description": "The Amazon Bedrock connector uses axios to send a POST request to Amazon Bedrock.",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_bedrock"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".bedrock"
+            ],
+            "example": ".bedrock"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "example": "my-connector"
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_bedrock"
+          }
+        }
+      },
       "config_properties_cases_webhook": {
         "title": "Connector request properties for Webhook - Case Management connector",
         "required": [
@@ -1756,7 +1847,7 @@
         }
       },
       "config_properties_genai": {
-        "title": "Connector request properties for a generative AI connector",
+        "title": "Connector request properties for an OpenAI connector",
         "description": "Defines properties for connectors when type is `.gen-ai`.",
         "oneOf": [
           {
@@ -1809,7 +1900,7 @@
         }
       },
       "secrets_properties_genai": {
-        "title": "Connector secrets properties for a generative AI connector",
+        "title": "Connector secrets properties for an OpenAI connector",
         "description": "Defines secrets for connectors when type is `.gen-ai`.",
         "type": "object",
         "properties": {
@@ -1820,8 +1911,8 @@
         }
       },
       "create_connector_request_genai": {
-        "title": "Create generative AI connector request",
-        "description": "The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.\n",
+        "title": "Create OpenAI connector request",
+        "description": "The OpenAI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.\n",
         "type": "object",
         "required": [
           "config",
@@ -2789,13 +2880,34 @@
         "title": "Connector request properties for a Tines connector",
         "description": "Defines properties for connectors when type is `.tines`.",
         "type": "object",
-        "additionalProperties": true
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "description": "The Tines tenant URL. If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.\n",
+            "type": "string"
+          }
+        }
       },
       "secrets_properties_tines": {
         "title": "Connector secrets properties for a Tines connector",
         "description": "Defines secrets for connectors when type is `.tines`.",
         "type": "object",
-        "additionalProperties": true
+        "required": [
+          "email",
+          "token"
+        ],
+        "properties": {
+          "email": {
+            "description": "The email used to sign in to Tines.",
+            "type": "string"
+          },
+          "token": {
+            "description": "The Tines API token.",
+            "type": "string"
+          }
+        }
       },
       "create_connector_request_tines": {
         "title": "Create Tines connector request",
@@ -2826,6 +2938,66 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_tines"
+          }
+        }
+      },
+      "config_properties_torq": {
+        "title": "Connector request properties for a Torq connector",
+        "description": "Defines properties for connectors when type is `.torq`.",
+        "type": "object",
+        "required": [
+          "webhookIntegrationUrl"
+        ],
+        "properties": {
+          "webhookIntegrationUrl": {
+            "description": "The endpoint URL of the Elastic Security integration in Torq.",
+            "type": "string"
+          }
+        }
+      },
+      "secrets_properties_torq": {
+        "title": "Connector secrets properties for a Torq connector",
+        "description": "Defines secrets for connectors when type is `.torq`.",
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "description": "The secret of the webhook authentication header.",
+            "type": "string"
+          }
+        }
+      },
+      "create_connector_request_torq": {
+        "title": "Create Torq connector request",
+        "description": "The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.\n",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_torq"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".torq"
+            ],
+            "example": ".torq"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "example": "my-connector"
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_torq"
           }
         }
       },
@@ -3776,6 +3948,50 @@
           }
         }
       },
+      "connector_response_properties_torq": {
+        "title": "Connector response properties for a Torq connector",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_torq"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".torq"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the connector."
+          },
+          "is_deprecated": {
+            "$ref": "#/components/schemas/is_deprecated"
+          },
+          "is_missing_secrets": {
+            "$ref": "#/components/schemas/is_missing_secrets"
+          },
+          "is_preconfigured": {
+            "$ref": "#/components/schemas/is_preconfigured"
+          },
+          "is_system_action": {
+            "$ref": "#/components/schemas/is_system_action"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          }
+        }
+      },
       "connector_response_properties_webhook": {
         "title": "Connector response properties for a Webhook connector",
         "type": "object",
@@ -3918,6 +4134,9 @@
           },
           {
             "$ref": "#/components/schemas/connector_response_properties_tines"
+          },
+          {
+            "$ref": "#/components/schemas/connector_response_properties_torq"
           },
           {
             "$ref": "#/components/schemas/connector_response_properties_webhook"
@@ -4221,6 +4440,48 @@
           }
         }
       },
+      "update_connector_request_tines": {
+        "title": "Update Tines connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_tines"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_tines"
+          }
+        }
+      },
+      "update_connector_request_torq": {
+        "title": "Update Torq connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_torq"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_torq"
+          }
+        }
+      },
       "update_connector_request_webhook": {
         "title": "Update Webhook connector request",
         "type": "object",
@@ -4268,6 +4529,7 @@
         "type": "string",
         "description": "The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.",
         "enum": [
+          ".bedrock",
           ".cases-webhook",
           ".d3security",
           ".email",
@@ -4286,6 +4548,7 @@
           ".swimlane",
           ".teams",
           ".tines",
+          ".torq",
           ".webhook",
           ".xmatters"
         ],

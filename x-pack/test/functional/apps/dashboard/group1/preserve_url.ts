@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'spaceSelector', 'header']);
-  const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
@@ -38,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
       await PageObjects.common.navigateToApp('home');
-      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await PageObjects.dashboard.navigateToAppFromAppsMenu();
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const activeTitle = await globalNav.getLastBreadcrumb();
@@ -55,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await PageObjects.dashboard.navigateToAppFromAppsMenu();
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard in another space');
 
       await PageObjects.spaceSelector.openSpacesNav();
@@ -63,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('default');
 
       // default space
-      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await PageObjects.dashboard.navigateToAppFromAppsMenu();
       await PageObjects.dashboard.waitForRenderComplete();
       const activeTitleDefaultSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleDefaultSpace).to.be('A Dashboard');
@@ -73,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await PageObjects.dashboard.navigateToAppFromAppsMenu();
       await PageObjects.dashboard.waitForRenderComplete();
       const activeTitleOtherSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleOtherSpace).to.be('A Dashboard in another space');

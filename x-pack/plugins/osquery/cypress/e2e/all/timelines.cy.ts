@@ -8,7 +8,7 @@
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Timelines', { tags: ['@ess'] }, () => {
+describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
   });

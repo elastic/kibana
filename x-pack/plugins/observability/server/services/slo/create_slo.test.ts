@@ -55,6 +55,7 @@ describe('CreateSLO', () => {
       expect(mockTransformManager.install).toHaveBeenCalledWith(
         expect.objectContaining({ ...sloParams, id: 'unique-id' })
       );
+      expect(mockTransformManager.preview).toHaveBeenCalledWith('slo-transform-id');
       expect(mockTransformManager.start).toHaveBeenCalledWith('slo-transform-id');
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
       expect(esClientMock.index.mock.calls[0]).toMatchSnapshot();
@@ -97,6 +98,16 @@ describe('CreateSLO', () => {
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
       await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform install error');
+      expect(mockRepository.deleteById).toBeCalled();
+    });
+
+    it('removes the transform and deletes the SLO when transform preview fails', async () => {
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+      mockTransformManager.preview.mockRejectedValue(new Error('Transform preview error'));
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform preview error');
+      expect(mockTransformManager.uninstall).toBeCalledWith('slo-transform-id');
       expect(mockRepository.deleteById).toBeCalled();
     });
 

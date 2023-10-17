@@ -16,4 +16,4 @@ import { SanitizedRule } from '../../common';
  * originally registered to {@link PluginSetupContract.registerNavigation}.
  *
  */
-export type AlertNavigationHandler = (rule: SanitizedRule) => string;
+export type AlertNavigationHandler = (rule: SanitizedRule) => string | undefined;

@@ -151,6 +151,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       indexName: '.ds-auditbeat-8.6.1-2023.02.07-000001',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
+      sameFamily: 0,
     },
     'auditbeat-custom-index-1': {
       docsCount: 4,
@@ -160,6 +161,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       indexName: 'auditbeat-custom-index-1',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
+      sameFamily: 0,
     },
     'auditbeat-custom-empty-index-1': {
       docsCount: 0,
@@ -169,6 +171,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       indexName: 'auditbeat-custom-empty-index-1',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
+      sameFamily: 0,
     },
   },
   sizeInBytes: 18820446,

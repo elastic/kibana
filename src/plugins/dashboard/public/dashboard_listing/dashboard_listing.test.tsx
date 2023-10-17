@@ -88,6 +88,7 @@ test('when showWriteControls is true, table list view is passed editing function
       createItem: expect.any(Function),
       deleteItems: expect.any(Function),
       editItem: expect.any(Function),
+      itemIsEditable: expect.any(Function),
     }),
     expect.any(Object) // react context
   );

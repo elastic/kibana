@@ -6,11 +6,7 @@
  */
 
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import {
-  getBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilter,
-  cleanupCredentials,
-} from './helpers';
+import { getBenchmarkFromPackagePolicy, getBenchmarkFilter, cleanupCredentials } from './helpers';
 
 describe('test helper methods', () => {
   it('get default integration type from inputs with multiple enabled types', () => {
@@ -60,9 +56,18 @@ describe('test helper methods', () => {
     const typeK8s = getBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
     expect(typeK8s).toMatch('cis_k8s');
   });
+
   it('get benchmark type filter based on a benchmark id', () => {
-    const typeFilter = getBenchmarkTypeFilter('cis_eks');
+    const typeFilter = getBenchmarkFilter('cis_eks');
     expect(typeFilter).toMatch('csp-rule-template.attributes.metadata.benchmark.id: "cis_eks"');
+  });
+
+  it('should return a string with the correct filter when given a benchmark type and section', () => {
+    const typeAndSectionFilter = getBenchmarkFilter('cis_k8s', 'API Server');
+
+    expect(typeAndSectionFilter).toMatch(
+      'csp-rule-template.attributes.metadata.benchmark.id: "cis_k8s" AND csp-rule-template.attributes.metadata.section: "API Server"'
+    );
   });
 
   describe('cleanupCredentials', () => {

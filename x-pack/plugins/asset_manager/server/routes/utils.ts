@@ -7,6 +7,12 @@
 
 import { RequestHandlerContext } from '@kbn/core/server';
 
-export async function getEsClientFromContext<T extends RequestHandlerContext>(context: T) {
-  return (await context.core).elasticsearch.client.asCurrentUser;
+export async function getClientsFromContext<T extends RequestHandlerContext>(context: T) {
+  const coreContext = await context.core;
+
+  return {
+    coreContext,
+    elasticsearchClient: coreContext.elasticsearch.client.asCurrentUser,
+    savedObjectsClient: coreContext.savedObjects.client,
+  };
 }

@@ -56,6 +56,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
   maxScheduledPerMinute: 1000,
   internalSavedObjectsRepository,
 };
@@ -78,10 +80,12 @@ describe('aggregate()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myType',
       name: 'myType',
+      category: 'test',
       producer: 'myApp',
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     },
   ]);
   beforeEach(() => {
@@ -159,6 +163,7 @@ describe('aggregate()', () => {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           recoveryActionGroup: RecoveredActionGroup,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
@@ -166,6 +171,7 @@ describe('aggregate()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );

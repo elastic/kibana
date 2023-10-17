@@ -72,6 +72,7 @@ const ruleType: NormalizedRuleType<
     name: 'Recovered',
   },
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   validate: {
     params: schema.any(),
@@ -81,6 +82,7 @@ const ruleType: NormalizedRuleType<
     mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
   },
   autoRecoverAlerts: false,
+  validLegacyConsumers: [],
 };
 const rule = {
   id: '1',

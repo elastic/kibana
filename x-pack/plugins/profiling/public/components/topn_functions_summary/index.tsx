@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { TopNFunctions } from '@kbn/profiling-utils';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
   baselineTopNFunctions?: TopNFunctions;
@@ -38,6 +38,8 @@ export function TopNFunctionsSummary({
   baselineDuration,
   comparisonDuration,
 }: Props) {
+  const calculateImpactEstimates = useCalculateImpactEstimate();
+
   const baselineScaledTotalSamples = baselineTopNFunctions
     ? baselineTopNFunctions.TotalCount * baselineScaleFactor
     : 0;
@@ -87,6 +89,7 @@ export function TopNFunctionsSummary({
     baselineDuration,
     baselineScaledTotalSamples,
     baselineTopNFunctions,
+    calculateImpactEstimates,
     comparisonDuration,
     comparisonScaledTotalSamples,
     comparisonTopNFunctions,

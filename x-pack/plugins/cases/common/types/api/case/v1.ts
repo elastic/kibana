@@ -21,6 +21,8 @@ import {
   MAX_BULK_GET_CASES,
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -28,6 +30,7 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
+import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -40,10 +43,30 @@ import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
+const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
+  fieldName: 'value',
+  min: 1,
+  max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+});
+
+const CaseCustomFieldTextWithValidationRt = rt.strict({
+  key: rt.string,
+  type: CustomFieldTextTypeRt,
+  value: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
+});
+
+const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
+
+const CustomFieldsRt = limitedArraySchema({
+  codec: CustomFieldRt,
+  fieldName: 'customFields',
+  min: 0,
+  max: MAX_CUSTOM_FIELDS_PER_CASE,
+});
+
 /**
  * Create case
  */
-
 export const CasePostRequestRt = rt.intersection([
   rt.strict({
     /**
@@ -104,6 +127,10 @@ export const CasePostRequestRt = rt.intersection([
         limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
         rt.null,
       ]),
+      /**
+       * The list of custom field values of the case.
+       */
+      customFields: CustomFieldsRt,
     })
   ),
 ]);
@@ -358,6 +385,10 @@ export const CasePatchRequestRt = rt.intersection([
         limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
         rt.null,
       ]),
+      /**
+       * Custom fields of the case
+       */
+      customFields: CustomFieldsRt,
     })
   ),
   /**
@@ -448,3 +479,4 @@ export type GetReportersResponse = rt.TypeOf<typeof GetReportersResponseRt>;
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
+export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;

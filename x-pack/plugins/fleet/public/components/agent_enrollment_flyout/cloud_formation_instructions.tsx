@@ -18,15 +18,18 @@ import type { CloudSecurityIntegration } from './types';
 interface Props {
   enrollmentAPIKey?: string;
   cloudSecurityIntegration: CloudSecurityIntegration;
+  fleetServerHost: string;
 }
 
 export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
   cloudSecurityIntegration,
+  fleetServerHost,
 }) => {
-  const { isLoading, cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
+  const { cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
     enrollmentAPIKey,
     cloudFormationProps: cloudSecurityIntegration?.cloudFormationProps,
+    fleetServerHost,
   });
 
   if (error && isError) {
@@ -42,7 +45,7 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
     <EuiSkeletonText
       lines={3}
       size="m"
-      isLoading={isLoading || cloudSecurityIntegration?.isLoading}
+      isLoading={cloudSecurityIntegration?.isLoading}
       contentAriaLabel={i18n.translate(
         'xpack.fleet.agentEnrollment.cloudFormation.loadingAriaLabel',
         {

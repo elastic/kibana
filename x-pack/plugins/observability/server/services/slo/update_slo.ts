@@ -36,10 +36,27 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
 
-    await this.deleteObsoleteSLORevisionData(originalSlo);
+    const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     await this.repository.save(updatedSlo);
-    await this.transformManager.install(updatedSlo);
-    await this.transformManager.start(getSLOTransformId(updatedSlo.id, updatedSlo.revision));
+
+    try {
+      await this.transformManager.install(updatedSlo);
+    } catch (err) {
+      await this.repository.save(originalSlo);
+      throw err;
+    }
+
+    try {
+      await this.transformManager.preview(updatedSloTransformId);
+      await this.transformManager.start(updatedSloTransformId);
+    } catch (err) {
+      await Promise.all([
+        this.transformManager.uninstall(updatedSloTransformId),
+        this.repository.save(originalSlo),
+      ]);
+
+      throw err;
+    }
 
     await this.esClient.index({
       index: SLO_SUMMARY_TEMP_INDEX_NAME,
@@ -48,13 +65,21 @@ export class UpdateSLO {
       refresh: true,
     });
 
+    await this.deleteOriginalSLO(originalSlo);
+
     return this.toResponse(updatedSlo);
   }
 
-  private async deleteObsoleteSLORevisionData(originalSlo: SLO) {
-    const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    await this.transformManager.stop(originalSloTransformId);
-    await this.transformManager.uninstall(originalSloTransformId);
+  private async deleteOriginalSLO(originalSlo: SLO) {
+    try {
+      const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
+      await this.transformManager.stop(originalSloTransformId);
+      await this.transformManager.uninstall(originalSloTransformId);
+    } catch (err) {
+      // Any errors here should not prevent moving forward.
+      // Worst case we keep rolling up data for the previous revision number.
+    }
+
     await this.deleteRollupData(originalSlo.id, originalSlo.revision);
     await this.deleteSummaryData(originalSlo.id, originalSlo.revision);
   }

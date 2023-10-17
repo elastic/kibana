@@ -42,7 +42,7 @@ export function useGetPreviewData(isValid: boolean, indicator: Indicator): UseGe
           }
         );
 
-        return response;
+        return Array.isArray(response) ? response : [];
       },
       retry: false,
       refetchOnWindowFocus: false,

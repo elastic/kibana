@@ -172,7 +172,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "[{ id: \"root\"; children: [{ link: \"dev_tools:console\"; }, { link: \"dev_tools:searchprofiler\"; }, { link: \"dev_tools:grokdebugger\"; }, { link: \"dev_tools:painless_lab\"; }]; }]"
+              "[{ link: \"dev_tools:console\"; }, { link: \"dev_tools:searchprofiler\"; }, { link: \"dev_tools:grokdebugger\"; }, { link: \"dev_tools:painless_lab\"; }]"
             ],
             "path": "packages/default-nav/devtools/default_navigation.ts",
             "deprecated": false,

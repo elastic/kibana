@@ -37,6 +37,9 @@ export async function waitUntilClusterReady({
   let attempt = 0;
   const start = Date.now();
 
+  // The loop will continue until timeout even if SIGINT is signaled, so force exit
+  process.on('SIGINT', () => process.exit());
+
   log.info(`waiting for ES cluster to report a ${expectedStatus} status`);
 
   const isReady = checkStatus(expectedStatus);

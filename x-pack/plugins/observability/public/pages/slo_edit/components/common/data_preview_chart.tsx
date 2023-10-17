@@ -134,6 +134,11 @@ export function DataPreviewChart() {
                 ticks={5}
                 position={Position.Left}
                 tickFormat={(d) => numeral(d).format(percentFormat)}
+                domain={{
+                  fit: true,
+                  min: NaN,
+                  max: NaN,
+                }}
               />
 
               <Axis

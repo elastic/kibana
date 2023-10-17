@@ -27,7 +27,6 @@ import { getElasticsearchMetricQuery } from './metric_query';
 export type GetDataResponse = Record<
   string,
   {
-    warn: boolean;
     trigger: boolean;
     value: number | null;
     bucketKey: BucketKey;
@@ -49,9 +48,6 @@ interface Aggs {
     };
   };
   aggregatedValue?: AggregatedValue;
-  shouldWarn?: {
-    value: number;
-  };
   shouldTrigger?: {
     value: number;
   };
@@ -98,7 +94,6 @@ const getValue = (aggregatedValue: AggregatedValue, params: MetricExpressionPara
 const NO_DATA_RESPONSE = {
   [UNGROUPED_FACTORY_KEY]: {
     value: null,
-    warn: false,
     trigger: false,
     bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
@@ -143,7 +138,6 @@ export const getData = async (
       for (const bucket of groupings.buckets) {
         const key = Object.values(bucket.key).join(',');
         const {
-          shouldWarn,
           shouldTrigger,
           missingGroup,
           currentPeriod,
@@ -163,7 +157,6 @@ export const getData = async (
         if (missingGroup && missingGroup.value > 0) {
           previous[key] = {
             trigger: false,
-            warn: false,
             value: null,
             bucketKey: bucket.key,
           };
@@ -179,7 +172,6 @@ export const getData = async (
 
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
-            warn: (shouldWarn && shouldWarn.value > 0) || false,
             value,
             bucketKey: bucket.key,
             container: containerList,
@@ -210,7 +202,6 @@ export const getData = async (
       const {
         currentPeriod,
         aggregatedValue: aggregatedValueForRate,
-        shouldWarn,
         shouldTrigger,
       } = aggs.all.buckets.all;
 
@@ -224,20 +215,15 @@ export const getData = async (
           : aggregatedValue != null
           ? getValue(aggregatedValue, params)
           : null;
-      // There is an edge case where there is no results and the shouldWarn/shouldTrigger
+      // There is an edge case where there is no results and the shouldTrigger
       // bucket scripts will be missing. This is only an issue for document count because
       // the value will end up being ZERO, for other metrics it will be null. In this case
       // we need to do the evaluation in Node.js
       if (aggs.all && params.aggType === Aggregators.COUNT && value === 0) {
         const trigger = comparatorMap[params.comparator](value, params.threshold);
-        const warn =
-          params.warningThreshold && params.warningComparator
-            ? comparatorMap[params.warningComparator](value, params.warningThreshold)
-            : false;
         return {
           [UNGROUPED_FACTORY_KEY]: {
             value,
-            warn,
             trigger,
             bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
           },
@@ -246,7 +232,6 @@ export const getData = async (
       return {
         [UNGROUPED_FACTORY_KEY]: {
           value,
-          warn: (shouldWarn && shouldWarn.value > 0) || false,
           trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
           bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
         },

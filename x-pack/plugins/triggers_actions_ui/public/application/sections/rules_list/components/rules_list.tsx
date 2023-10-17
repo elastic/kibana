@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import React, {
   lazy,
   useEffect,
@@ -90,6 +92,7 @@ import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggre
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
+import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 
 import {
   getConfirmDeletionButtonText,
@@ -107,6 +110,7 @@ const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
+  filterConsumers?: string[];
   filteredRuleTypes?: string[];
   lastResponseFilter?: string[];
   lastRunOutcomeFilter?: string[];
@@ -146,6 +150,7 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
+  filterConsumers,
   filteredRuleTypes = EMPTY_ARRAY,
   lastResponseFilter,
   lastRunOutcomeFilter,
@@ -241,6 +246,7 @@ export const RulesList = ({
     ruleTypesState,
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
+    authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     isSuccess: isLoadRuleTypesSuccess,
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
@@ -263,6 +269,7 @@ export const RulesList = ({
 
   // Fetch rules
   const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
+    filterConsumers,
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -275,12 +282,14 @@ export const RulesList = ({
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
+      filterConsumers,
       filters: computedFilter,
       enabled: canLoadRules,
       refresh,
     });
 
   const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
+    authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     filters,
     hasDefaultRuleTypesFiltersOn,
@@ -544,15 +553,15 @@ export const RulesList = ({
   };
 
   const onDisableRule = useCallback(
-    async (rule: RuleTableItem) => {
-      await bulkDisableRules({ http, ids: [rule.id] });
+    (rule: RuleTableItem) => {
+      return bulkDisableRules({ http, ids: [rule.id] });
     },
     [bulkDisableRules]
   );
 
   const onEnableRule = useCallback(
-    async (rule: RuleTableItem) => {
-      await bulkEnableRules({ http, ids: [rule.id] });
+    (rule: RuleTableItem) => {
+      return bulkEnableRules({ http, ids: [rule.id] });
     },
     [bulkEnableRules]
   );
@@ -669,7 +678,23 @@ export const RulesList = ({
       : await bulkEnableRules({ http, ids: selectedIds });
 
     setIsEnablingRules(false);
-    showToast({ action: 'ENABLE', errors, total });
+
+    const circuitBreakerError = errors.find(
+      (error) => !!parseRuleCircuitBreakerErrorMessage(error.message).details
+    );
+
+    if (circuitBreakerError) {
+      const parsedError = parseRuleCircuitBreakerErrorMessage(circuitBreakerError.message);
+      toasts.addDanger({
+        title: parsedError.summary,
+        text: toMountPoint(
+          <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>
+        ),
+      });
+    } else {
+      showToast({ action: 'ENABLE', errors, total });
+    }
+
     await refreshRules();
     onClearSelection();
   };

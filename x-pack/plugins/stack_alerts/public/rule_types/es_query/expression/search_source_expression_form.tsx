@@ -24,9 +24,9 @@ import {
   isGroupAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
 import { Comparator } from '../../../../common/comparator_types';
-import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
 import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
@@ -328,7 +328,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             onClearSavedQuery={onClearSavedQuery}
             onSavedQueryUpdated={onSavedQuery}
             onSaved={onSavedQuery}
-            showSaveQuery
+            saveQueryMenuVisibility="allowed_by_app_privilege"
             showQueryInput
             showFilterBar
             showDatePicker={false}

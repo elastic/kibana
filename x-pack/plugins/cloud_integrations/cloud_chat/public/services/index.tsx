@@ -6,9 +6,11 @@
  */
 
 import React, { FC, createContext, useContext } from 'react';
+import type { ChatVariant } from '../../common/types';
 
 export interface ChatConfig {
   chatURL: string;
+  chatVariant: ChatVariant;
   user: {
     jwt: string;
     id: string;

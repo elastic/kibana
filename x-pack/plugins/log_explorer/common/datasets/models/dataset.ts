@@ -75,8 +75,8 @@ export class Dataset {
   public static createAllLogsDataset() {
     return new Dataset({
       name: 'logs-*-*' as IndexPattern,
-      title: 'All log datasets',
-      iconType: 'editorChecklist',
+      title: 'All logs',
+      iconType: 'pagesSelect',
     });
   }
 

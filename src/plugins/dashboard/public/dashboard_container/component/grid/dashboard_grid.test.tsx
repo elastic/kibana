@@ -21,12 +21,19 @@ jest.mock('./dashboard_grid_item', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     DashboardGridItem: require('react').forwardRef(
       (props: DashboardGridItemProps, ref: HTMLDivElement) => {
-        const className =
+        const className = `${
           props.expandedPanelId === undefined
             ? 'regularPanel'
             : props.expandedPanelId === props.id
             ? 'expandedPanel'
-            : 'hiddenPanel';
+            : 'hiddenPanel'
+        } ${
+          props.focusedPanelId
+            ? props.focusedPanelId === props.id
+              ? 'focusedPanel'
+              : 'blurredPanel'
+            : ''
+        }`;
         return (
           <div className={className} id={`mockDashboardGridItem_${props.id}`}>
             mockDashboardGridItem
@@ -39,16 +46,18 @@ jest.mock('./dashboard_grid_item', () => {
 
 const createAndMountDashboardGrid = () => {
   const dashboardContainer = buildMockDashboard({
-    panels: {
-      '1': {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-        type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '1' },
-      },
-      '2': {
-        gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
-        type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '2' },
+    overrides: {
+      panels: {
+        '1': {
+          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+          type: CONTACT_CARD_EMBEDDABLE,
+          explicitInput: { id: '1' },
+        },
+        '2': {
+          gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
+          type: CONTACT_CARD_EMBEDDABLE,
+          explicitInput: { id: '2' },
+        },
       },
     },
   });
@@ -100,4 +109,22 @@ test('DashboardGrid renders expanded panel', async () => {
 
   expect(component.find('#mockDashboardGridItem_1').hasClass('regularPanel')).toBe(true);
   expect(component.find('#mockDashboardGridItem_2').hasClass('regularPanel')).toBe(true);
+});
+
+test('DashboardGrid renders focused panel', async () => {
+  const { dashboardContainer, component } = createAndMountDashboardGrid();
+  dashboardContainer.setFocusedPanelId('2');
+  component.update();
+  // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
+  expect(component.find('GridItem').length).toBe(2);
+
+  expect(component.find('#mockDashboardGridItem_1').hasClass('blurredPanel')).toBe(true);
+  expect(component.find('#mockDashboardGridItem_2').hasClass('focusedPanel')).toBe(true);
+
+  dashboardContainer.setFocusedPanelId(undefined);
+  component.update();
+  expect(component.find('GridItem').length).toBe(2);
+
+  expect(component.find('#mockDashboardGridItem_1').hasClass('blurredPanel')).toBe(false);
+  expect(component.find('#mockDashboardGridItem_2').hasClass('focusedPanel')).toBe(false);
 });

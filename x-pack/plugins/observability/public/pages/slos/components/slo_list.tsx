@@ -21,7 +21,7 @@ export function SloList({ autoRefresh }: Props) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortField | undefined>('status');
 
-  const { isInitialLoading, isLoading, isRefetching, isError, sloList, refetch } = useFetchSloList({
+  const { isLoading, isRefetching, isError, sloList } = useFetchSloList({
     page: activePage + 1,
     kqlQuery: query,
     sortBy: sort,
@@ -38,34 +38,23 @@ export function SloList({ autoRefresh }: Props) {
 
   const handlePageClick = (pageNumber: number) => {
     setActivePage(pageNumber);
-    refetch();
   };
 
   const handleChangeQuery = (newQuery: string) => {
     setActivePage(0);
     setQuery(newQuery);
-    refetch();
   };
 
   const handleChangeSort = (newSort: SortField | undefined) => {
     setActivePage(0);
     setSort(newSort);
-    refetch();
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
         <SloListSearchFilterSortBar
-          loading={
-            isInitialLoading ||
-            isLoading ||
-            isRefetching ||
-            isCreatingSlo ||
-            isCloningSlo ||
-            isUpdatingSlo ||
-            isDeletingSlo
-          }
+          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
         />

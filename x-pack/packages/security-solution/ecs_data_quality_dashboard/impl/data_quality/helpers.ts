@@ -180,7 +180,11 @@ export const getEnrichedFieldMetadata = ({
     const ecsExpectedType = ecsMetadata[field].type;
     const isEcsCompliant =
       isMappingCompatible({ ecsExpectedType, type }) && indexInvalidValues.length === 0;
-    const isInSameFamily = getIsInSameFamily({ ecsExpectedType, type });
+
+    const isInSameFamily =
+      !isMappingCompatible({ ecsExpectedType, type }) &&
+      indexInvalidValues.length === 0 &&
+      getIsInSameFamily({ ecsExpectedType, type });
 
     return {
       ...ecsMetadata[field],
@@ -223,26 +227,31 @@ export const getPartitionedFieldMetadata = (
       ecsCompliant: x.isEcsCompliant ? [...acc.ecsCompliant, x] : acc.ecsCompliant,
       custom: !x.hasEcsMetadata ? [...acc.custom, x] : acc.custom,
       incompatible:
-        x.hasEcsMetadata && !x.isEcsCompliant ? [...acc.incompatible, x] : acc.incompatible,
+        x.hasEcsMetadata && !x.isEcsCompliant && !x.isInSameFamily
+          ? [...acc.incompatible, x]
+          : acc.incompatible,
+      sameFamily: x.isInSameFamily ? [...acc.sameFamily, x] : acc.sameFamily,
     }),
     {
       all: [],
       ecsCompliant: [],
       custom: [],
       incompatible: [],
+      sameFamily: [],
     }
   );
 
 export const getPartitionedFieldMetadataStats = (
   partitionedFieldMetadata: PartitionedFieldMetadata
 ): PartitionedFieldMetadataStats => {
-  const { all, ecsCompliant, custom, incompatible } = partitionedFieldMetadata;
+  const { all, ecsCompliant, custom, incompatible, sameFamily } = partitionedFieldMetadata;
 
   return {
     all: all.length,
     ecsCompliant: ecsCompliant.length,
     custom: custom.length,
     incompatible: incompatible.length,
+    sameFamily: sameFamily.length,
   };
 };
 
@@ -369,8 +378,23 @@ export const getTotalPatternIndicesChecked = (patternRollup: PatternRollup | und
   }
 };
 
+export const getTotalPatternSameFamily = (
+  results: Record<string, DataQualityCheckResult> | undefined
+): number | undefined => {
+  if (results == null) {
+    return undefined;
+  }
+
+  const allResults = Object.values(results);
+
+  return allResults.reduce<number>((acc, { sameFamily }) => acc + (sameFamily ?? 0), 0);
+};
+
 export const getIncompatibleStatColor = (incompatible: number | undefined): string | undefined =>
   incompatible != null && incompatible > 0 ? getFillColor('incompatible') : undefined;
+
+export const getSameFamilyStatColor = (sameFamily: number | undefined): string | undefined =>
+  sameFamily != null && sameFamily > 0 ? getFillColor('same-family') : undefined;
 
 export const getErrorSummary = ({
   error,

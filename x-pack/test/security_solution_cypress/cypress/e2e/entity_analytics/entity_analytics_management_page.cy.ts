@@ -19,13 +19,14 @@ import {
 
 import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
 import { RiskScoreEntity } from '../../tasks/risk_scores/common';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import { cleanKibana } from '../../tasks/common';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
-  deleteConfiguration,
+  deleteRiskEngineConfiguration,
   interceptRiskPreviewError,
   interceptRiskPreviewSuccess,
   interceptRiskInitError,
@@ -34,8 +35,7 @@ import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 import {
   riskEngineStatusChange,
-  updateRiskEngine,
-  updateRiskEngineConfirm,
+  upgradeRiskEngine,
   previewErrorButtonClick,
 } from '../../tasks/entity_analytics';
 
@@ -43,9 +43,6 @@ import {
 describe(
   'Entity analytics management page',
   {
-    env: {
-      ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled', 'riskScoringPersistence'] },
-    },
     tags: ['@ess', '@serverless', '@brokenInServerless'],
   },
   () => {
@@ -57,7 +54,7 @@ describe(
     beforeEach(() => {
       login();
       createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
-      deleteConfiguration();
+      deleteRiskEngineConfiguration();
       visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
     });
 
@@ -146,10 +143,7 @@ describe(
 
         cy.get(RISK_SCORE_STATUS).should('not.exist');
 
-        updateRiskEngine();
-        updateRiskEngineConfirm();
-
-        cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+        upgradeRiskEngine();
 
         deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default' });
       });

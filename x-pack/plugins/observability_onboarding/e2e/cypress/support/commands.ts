@@ -107,9 +107,9 @@ Cypress.Commands.add('installCustomIntegration', (integrationName: string) => {
       force: true,
       integrationName,
       datasets: [
-        { name: 'access', type: 'logs' },
-        { name: 'error', type: 'metrics' },
-        { name: 'warning', type: 'logs' },
+        { name: `${integrationName}.access`, type: 'logs' },
+        { name: `${integrationName}.error`, type: 'metrics' },
+        { name: `${integrationName}.warning`, type: 'logs' },
       ],
     },
     headers: {

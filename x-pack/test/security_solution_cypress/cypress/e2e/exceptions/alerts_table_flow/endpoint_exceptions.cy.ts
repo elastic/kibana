@@ -13,11 +13,10 @@ import {
   openAddEndpointExceptionFromFirstAlert,
   waitForAlerts,
 } from '../../../tasks/alerts';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { ruleDetailsUrl } from '../../../urls/navigation';
 import {
   addExceptionEntryFieldValueAndSelectSuggestion,
   addExceptionEntryFieldValueValue,
@@ -34,7 +33,11 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../screens/exceptions';
-import { goToEndpointExceptionsTab, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import {
+  goToEndpointExceptionsTab,
+  visitRuleDetailsPage,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967
@@ -53,9 +56,7 @@ describe.skip(
       deleteAlertsAndRules();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      createRule(getEndpointRule()).then((rule) =>
-        visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
-      );
+      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

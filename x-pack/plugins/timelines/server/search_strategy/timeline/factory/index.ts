@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { TimelineFactoryQueryTypes } from '../../../../common/search_strategy/timeline';
-import { TimelineFactory } from './types';
 import { timelineEventsFactory } from './events';
 
-export const timelineFactory: Record<
-  TimelineFactoryQueryTypes,
-  TimelineFactory<TimelineFactoryQueryTypes>
-> = {
+export const timelineFactory = {
   ...timelineEventsFactory,
-};
+} as const;

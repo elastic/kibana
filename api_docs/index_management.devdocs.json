@@ -977,6 +977,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.splitSizeAndUnits",
+        "type": "Function",
+        "tags": [],
+        "label": "splitSizeAndUnits",
+        "description": [],
+        "signature": [
+          "(field: string) => { size: string; unit: string; }"
+        ],
+        "path": "x-pack/plugins/index_management/common/lib/data_stream_serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.splitSizeAndUnits.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/index_management/common/lib/data_stream_serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1493,13 +1526,14 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.DataStream.lifecycle",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "lifecycle",
             "description": [],
             "signature": [
+              "(",
               "IndicesDataLifecycleWithRollover",
-              " | undefined"
+              " & { enabled?: boolean | undefined; }) | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -1617,9 +1651,112 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "{ delete_index: boolean; }"
+              "{ delete_index: boolean; manage_data_stream_lifecycle: boolean; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.FieldFromIndicesRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldFromIndicesRequest",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.FieldFromIndicesRequest.commonFields",
+            "type": "Array",
+            "tags": [],
+            "label": "commonFields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.FieldItem",
+                "text": "FieldItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.FieldFromIndicesRequest.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexWithFields",
+                "text": "IndexWithFields"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.FieldItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldItem",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.FieldItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.FieldItem.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.FieldItem.normalizedType",
+            "type": "string",
+            "tags": [],
+            "label": "normalizedType",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1983,6 +2120,52 @@
       },
       {
         "parentPluginId": "indexManagement",
+        "id": "def-common.IndexWithFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexWithFields",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexWithFields.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexWithFields.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.FieldItem",
+                "text": "FieldItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
         "id": "def-common.LegacyTemplateSerialized",
         "type": "Interface",
         "tags": [],
@@ -2200,6 +2383,20 @@
             "description": [],
             "signature": [
               "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.SerializedEnrichPolicy.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
             "deprecated": false,

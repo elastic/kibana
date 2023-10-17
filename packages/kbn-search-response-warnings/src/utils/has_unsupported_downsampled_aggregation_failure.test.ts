@@ -40,6 +40,7 @@ describe('hasUnsupportedDownsampledAggregationFailure', () => {
             ],
           },
         },
+        openInInspector: () => {},
       })
     ).toBe(false);
   });
@@ -74,6 +75,7 @@ describe('hasUnsupportedDownsampledAggregationFailure', () => {
             ],
           },
         },
+        openInInspector: () => {},
       })
     ).toBe(true);
   });

@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiText,
   useIsWithinMinBreakpoint,
@@ -163,28 +164,49 @@ export const TestRunsTable = ({
         ),
       },
     },
-    ...(!isBrowserMonitor
-      ? [
-          {
-            align: 'left',
-            field: 'monitor.ip',
-            name: i18n.translate('xpack.synthetics.pingList.ipAddressColumnLabel', {
-              defaultMessage: 'IP',
-            }),
-          },
-        ]
-      : []),
     {
       align: 'left',
       valign: 'middle',
       field: 'monitor.status',
       name: RESULT_LABEL,
       sortable: true,
-      render: (status: string) => <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />,
+      render: (status: string, test: Ping) => {
+        const attemptNo = test.summary?.attempt ?? 1;
+        const isFinalAttempt = test.summary?.final_attempt ?? false;
+        if (!isFinalAttempt || attemptNo === 1) {
+          return <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />;
+        }
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem>
+              <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiIconTip
+                data-test-subj="isRetestIcon"
+                type="refresh"
+                content={FINAL_ATTEMPT_LABEL}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
       mobileOptions: {
         show: false,
       },
     },
+    ...(!isBrowserMonitor
+      ? [
+          {
+            align: 'left',
+            field: 'monitor.ip',
+            sortable: true,
+            name: i18n.translate('xpack.synthetics.pingList.ipAddressColumnLabel', {
+              defaultMessage: 'IP',
+            }),
+          },
+        ]
+      : []),
     {
       align: 'left',
       field: 'error.message',
@@ -279,15 +301,7 @@ export const TestRunsTable = ({
         columns={columns}
         error={pingsError?.body?.message}
         items={sortedPings}
-        noItemsMessage={
-          pingsLoading
-            ? i18n.translate('xpack.synthetics.monitorDetails.loadingTestRuns', {
-                defaultMessage: 'Loading test runs...',
-              })
-            : i18n.translate('xpack.synthetics.monitorDetails.noDataFound', {
-                defaultMessage: 'No data found',
-              })
-        }
+        noItemsMessage={pingsLoading ? LOADING_TEST_RUNS : NO_DATA_FOUND}
         tableLayout={'auto'}
         sorting={sorting}
         onChange={handleTableChange}
@@ -298,7 +312,7 @@ export const TestRunsTable = ({
                 pageIndex: page.index,
                 pageSize: page.size,
                 totalItemCount: total,
-                pageSizeOptions: [10, 20, 50], // TODO Confirm with Henry,
+                pageSizeOptions: [5, 10, 20, 50],
               }
             : undefined
         }
@@ -389,6 +403,10 @@ const SCREENSHOT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary
   defaultMessage: 'Screenshot',
 });
 
+const FINAL_ATTEMPT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.finalAttempt', {
+  defaultMessage: 'This is a retest since retry on failure is enabled.',
+});
+
 const RESULT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.result', {
   defaultMessage: 'Result',
 });
@@ -399,4 +417,12 @@ const MESSAGE_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.me
 
 const DURATION_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.duration', {
   defaultMessage: 'Duration',
+});
+
+const LOADING_TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.loadingTestRuns', {
+  defaultMessage: 'Loading test runs...',
+});
+
+const NO_DATA_FOUND = i18n.translate('xpack.synthetics.monitorDetails.noDataFound', {
+  defaultMessage: 'No data found',
 });

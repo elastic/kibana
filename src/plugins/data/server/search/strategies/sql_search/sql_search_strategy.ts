@@ -69,7 +69,7 @@ export const sqlSearchStrategyProvider = (
         ));
       }
 
-      if (!body.is_partial && !body.is_running && body.cursor && !keepCursor) {
+      if (!body.is_running && body.cursor && !keepCursor) {
         try {
           await client.sql.clearCursor({ cursor: body.cursor });
         } catch (error) {

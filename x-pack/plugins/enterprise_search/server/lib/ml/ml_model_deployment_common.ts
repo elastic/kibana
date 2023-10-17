@@ -11,8 +11,6 @@ import {
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 
-export const acceptableModelNames = ['.elser_model_1', '.elser_model_1_SNAPSHOT'];
-
 export function isNotFoundExceptionError(error: unknown): boolean {
   return (
     isResourceNotFoundException(error as ElasticsearchResponseError) ||
@@ -20,21 +18,4 @@ export function isNotFoundExceptionError(error: unknown): boolean {
     // @ts-expect-error error types incorrect
     error?.statusCode === 404
   );
-}
-
-export function throwIfNotAcceptableModelName(modelName: string) {
-  if (!acceptableModelNames.includes(modelName)) {
-    const notFoundError: ElasticsearchResponseError = {
-      meta: {
-        body: {
-          error: {
-            type: 'resource_not_found_exception',
-          },
-        },
-        statusCode: 404,
-      },
-      name: 'ResponseError',
-    };
-    throw notFoundError;
-  }
 }

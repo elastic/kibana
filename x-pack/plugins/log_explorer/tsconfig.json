@@ -22,6 +22,8 @@
     "@kbn/core-application-browser",
     "@kbn/share-plugin",
     "@kbn/unified-data-table",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/discover-utils",
     "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]

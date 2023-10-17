@@ -43,6 +43,7 @@ export const TRANSFORM_REACT_QUERY_KEYS = {
   GET_TRANSFORM_NODES: 'transform.get_transform_nodes',
   GET_TRANSFORM_AUDIT_MESSAGES: 'transform.get_transform_audit_messages',
   GET_TRANSFORM_STATS: 'transform.get_transform_stats',
+  GET_TRANSFORMS_STATS: 'transform.get_transforms_stats',
   GET_TRANSFORMS: 'transform.get_transforms',
   GET_TRANSFORMS_PREVIEW: 'transform.get_transforms_preview',
 } as const;

@@ -156,9 +156,10 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
-    "@kbn/cloud-chat-plugin",
     "@kbn/alerts-ui-shared",
+    "@kbn/text-based-editor",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
@@ -170,8 +171,13 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
     "@kbn/security-solution-features",
-    "@kbn/handlebars",
     "@kbn/content-management-plugin",
-    "@kbn/subscription-tracking"
+    "@kbn/discover-utils",
+    "@kbn/subscription-tracking",
+    "@kbn/core-application-common",
+    "@kbn/openapi-generator",
+    "@kbn/es",
+    "@kbn/react-kibana-mount",
+    "@kbn/unified-doc-viewer-plugin"
   ]
 }

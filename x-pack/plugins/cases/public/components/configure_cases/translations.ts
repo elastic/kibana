@@ -150,7 +150,7 @@ export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
 );
 
 export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
-  defaultMessage: 'Configure cases',
+  defaultMessage: 'Settings',
 });
 
 export const CASES_WEBHOOK_MAPPINGS = i18n.translate(

@@ -32,11 +32,12 @@ import {
   activateViewSelected,
   activateViewAll,
 } from '../../../tasks/fields_browser';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 const defaultHeaders = [
   { id: '@timestamp' },
@@ -50,7 +51,7 @@ const defaultHeaders = [
 ];
 
 // Flaky in serverless tests
-describe('Fields Browser', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -58,7 +59,7 @@ describe('Fields Browser', { tags: ['@ess', '@serverless', '@brokenInServerless'
   context('Fields Browser rendering', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
@@ -125,7 +126,7 @@ describe('Fields Browser', { tags: ['@ess', '@serverless', '@brokenInServerless'
   context('Editing the timeline', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();

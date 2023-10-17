@@ -9,25 +9,26 @@
 import * as rt from 'io-ts';
 
 export const integrationNameRT = rt.string;
+export type IntegrationName = rt.TypeOf<typeof integrationNameRT>;
 
-const datasetTypes = rt.keyof({
+const datasetTypesRT = rt.keyof({
   logs: null,
   metrics: null,
 });
 
-const dataset = rt.exact(
+export const datasetRT = rt.exact(
   rt.type({
     name: rt.string,
-    type: datasetTypes,
+    type: datasetTypesRT,
   })
 );
 
-export type Dataset = rt.TypeOf<typeof dataset>;
+export type Dataset = rt.TypeOf<typeof datasetRT>;
 
 export const customIntegrationOptionsRT = rt.exact(
   rt.type({
     integrationName: integrationNameRT,
-    datasets: rt.array(dataset),
+    datasets: rt.array(datasetRT),
   })
 );
 

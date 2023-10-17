@@ -20,7 +20,10 @@ import { KnownTypeToValue, SettingType } from './setting_type';
  * representing a UiSetting).
  * @public
  */
-export interface FieldDefinition<T extends SettingType, V = KnownTypeToValue<T> | null> {
+export interface FieldDefinition<
+  T extends SettingType = SettingType,
+  V = KnownTypeToValue<T> | null
+> {
   /** UX ARIA attributes derived from the setting. */
   ariaAttributes: {
     /** The `aria-label` attribute for the field input. */

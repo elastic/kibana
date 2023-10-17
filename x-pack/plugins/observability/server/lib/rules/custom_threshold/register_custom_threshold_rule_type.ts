@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -22,7 +24,6 @@ import {
   observabilityPaths,
 } from '../../../../common';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -69,7 +70,6 @@ export function thresholdRuleType(
     comparator: oneOfLiterals(Object.values(Comparator)),
     timeUnit: schema.string(),
     timeSize: schema.number(),
-    warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
   };
 
   const nonCountCriterion = schema.object({
@@ -121,7 +121,7 @@ export function thresholdRuleType(
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
-      defaultMessage: 'Custom threshold (BETA)',
+      defaultMessage: 'Custom threshold (Technical Preview)',
     }),
     validate: {
       params: schema.object(
@@ -147,7 +147,7 @@ export function thresholdRuleType(
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
-        { name: 'groupings', description: groupByKeysActionVariableDescription },
+        { name: 'group', description: groupByKeysActionVariableDescription },
         {
           name: 'alertDetailsUrl',
           description: alertDetailUrlActionVariableDescription,
@@ -179,6 +179,7 @@ export function thresholdRuleType(
         };
       },
     },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: observabilityFeatureId,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>

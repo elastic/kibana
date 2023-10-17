@@ -13,6 +13,7 @@ import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import type { UserActionBuilderArgs } from './types';
+import { casesConfigurationsMock } from '../../containers/configure/mock';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const userAction = getUserAction('title', UserActionActions.update);
@@ -63,6 +64,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     caseData: basicCase,
+    casesConfiguration: casesConfigurationsMock,
     comments: basicCase.comments,
     index: 0,
     alertData,

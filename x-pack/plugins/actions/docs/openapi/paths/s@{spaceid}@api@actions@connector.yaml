@@ -16,6 +16,7 @@ post:
           title: Create connector request body properties
           description: The properties vary depending on the connector type.
           oneOf:
+            - $ref: '../components/schemas/create_connector_request_bedrock.yaml'
             - $ref: '../components/schemas/create_connector_request_cases_webhook.yaml'
             - $ref: '../components/schemas/create_connector_request_d3security.yaml'
             - $ref: '../components/schemas/create_connector_request_email.yaml'
@@ -34,6 +35,7 @@ post:
             - $ref: '../components/schemas/create_connector_request_swimlane.yaml'
             - $ref: '../components/schemas/create_connector_request_teams.yaml'
             - $ref: '../components/schemas/create_connector_request_tines.yaml'
+            - $ref: '../components/schemas/create_connector_request_torq.yaml'
             - $ref: '../components/schemas/create_connector_request_webhook.yaml'
             - $ref: '../components/schemas/create_connector_request_xmatters.yaml'
           discriminator:
