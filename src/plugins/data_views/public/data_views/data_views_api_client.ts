@@ -35,7 +35,13 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     body?: string,
     forceRefresh?: boolean
   ): Promise<T | undefined> {
-    const headers = forceRefresh ? { cache: 'reload' } : undefined;
+    console.log('HERE', new Date().getMinutes());
+    if (new Date().getMinutes() % 2 === 0) {
+      forceRefresh = true;
+    }
+    // const headers = forceRefresh ? { cache: 'reload' } : undefined;
+    const headers = forceRefresh ? { 'Cache-Control': 'no-cache' } : undefined;
+
     const request = body
       ? this.http.post<T>(url, { query, body, version })
       : this.http.fetch<T>(url, { query, version, headers });

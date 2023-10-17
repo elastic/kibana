@@ -309,11 +309,8 @@ export interface GetFieldsOptions {
   indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
   fields?: string[];
-<<<<<<< HEAD
   allowHidden?: boolean;
   forceRefresh?: boolean;
-=======
->>>>>>> main
 }
 
 /**

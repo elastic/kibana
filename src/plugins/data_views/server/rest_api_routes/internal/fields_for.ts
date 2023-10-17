@@ -161,13 +161,16 @@ const handler: (
 
       const headers: Record<string, string> = {
         'content-type': 'application/json',
+        Etag: '123456',
+        'If-None-Match': '123456',
         // Etag?
         // Expires
       };
 
       if (cacheHeader) {
         // revalidates if 5 minutes passed, otherwise caches for a year
-        headers['cache-control'] = 'private, max-age=31536000, stale-while-revalidate=86400';
+        // headers['cache-control'] = 'private, max-age=31536000, stale-while-revalidate=86400';
+        headers['cache-control'] = 'max-age=31536000, stale-while-revalidate=86400';
       }
 
       return response.ok({
