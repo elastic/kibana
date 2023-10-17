@@ -348,7 +348,7 @@ export function suggestions({
       ...suggestion,
       hide:
         // avoid to suggest the same shape if already used
-        state?.shape === suggestion.state.shape ||
+        (state && state.shape === suggestion.state.shape) ||
         shouldHideSuggestion ||
         incompleteConfiguration ||
         suggestion.hide,
