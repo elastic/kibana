@@ -25,6 +25,17 @@ export const esqlSearchStrategyProvider = (
    * @returns `Observable<IEsSearchResponse<any>>`
    */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
+    const abortController = new AbortController();
+    // We found out that there are cases where we are not aborting correctly
+    // For this reasons we want to manually cancel he abort signal after 2 mins
+
+    abortSignal?.addEventListener('abort', () => {
+      abortController.abort();
+    });
+
+    // Also abort after two mins
+    setTimeout(() => abortController.abort(), ES_TIMEOUT_IN_MS);
+
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
@@ -43,12 +54,9 @@ export const esqlSearchStrategyProvider = (
             },
           },
           {
-            signal: abortSignal,
+            signal: abortController.signal,
             meta: true,
-            // this is a temporary solution for ES|QL queries.
-            // we found out that they are not aborted correctly
-            // so we change the ES timeout to 2mins
-            // and remove the retries
+            // we don't want the ES client to retry (default value is 3)
             maxRetries: 0,
             requestTimeout: ES_TIMEOUT_IN_MS,
           }
