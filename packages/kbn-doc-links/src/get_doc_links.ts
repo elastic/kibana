@@ -167,7 +167,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
       connectorsSlack: `${ENTERPRISE_SEARCH_DOCS}connectors-slack.html`,
       connectorsTeams: `${ENTERPRISE_SEARCH_DOCS}connectors-teams.html`,
-      connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}workplace-search-connectors.html`,
       connectorsZoom: `${ENTERPRISE_SEARCH_DOCS}connectors-zoom.html`,
       crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
@@ -765,6 +764,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       api: `${FLEET_DOCS}fleet-api-docs.html`,
       uninstallAgent: `${SECURITY_SOLUTION_DOCS}uninstall-agent.html`,
       installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
+      elasticAgentInputConfiguration: `${FLEET_DOCS}elastic-agent-input-configuration.html`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
