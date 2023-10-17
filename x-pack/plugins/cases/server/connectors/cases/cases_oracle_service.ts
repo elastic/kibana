@@ -7,13 +7,24 @@
 
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
+import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
+import { isSOError } from '../../common/utils';
 import { CryptoService } from './crypto_service';
-import type { OracleKey, OracleRecord, OracleRecordCreateRequest } from './types';
+import type {
+  BulkGetRecordsResponse,
+  OracleKey,
+  OracleRecord,
+  OracleRecordCreateRequest,
+} from './types';
 
 type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
 
 export class CasesOracleService {
   private readonly log: Logger;
+  /**
+   * TODO: Think about permissions etc.
+   * Should we authorize based on the owner?
+   */
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private cryptoService: CryptoService;
 
@@ -55,6 +66,16 @@ export class CasesOracleService {
     );
 
     return this.getRecordResponse(oracleRecord);
+  }
+
+  public async bulkGetRecord(ids: string[]): Promise<BulkGetRecordsResponse> {
+    this.log.debug(`Getting oracle records with ID: ${ids}`);
+
+    const oracleRecords = (await this.unsecuredSavedObjectsClient.bulkGet<OracleRecordAttributes>(
+      ids.map((id) => ({ id, type: CASE_ORACLE_SAVED_OBJECT }))
+    )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
+
+    return this.getBulkRecordsResponse(oracleRecords);
   }
 
   public async createRecord(
@@ -115,4 +136,16 @@ export class CasesOracleService {
     createdAt: oracleRecord.attributes.createdAt,
     updatedAt: oracleRecord.attributes.updatedAt,
   });
+
+  private getBulkRecordsResponse(
+    oracleRecords: SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>
+  ): BulkGetRecordsResponse {
+    return oracleRecords.saved_objects.map((oracleRecord) => {
+      if (isSOError(oracleRecord)) {
+        return { ...oracleRecord.error };
+      }
+
+      return this.getRecordResponse(oracleRecord);
+    });
+  }
 }

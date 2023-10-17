@@ -7,15 +7,16 @@
 
 import type { ExclusiveUnion } from '@elastic/eui';
 import type { TypeOf } from '@kbn/config-schema';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type {
   CasesConnectorConfigSchema,
   CasesConnectorSecretsSchema,
-  CasesConnectorParamsSchema,
+  CasesConnectorRunParamsSchema,
 } from './schema';
 
 export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;
 export type CasesConnectorSecrets = TypeOf<typeof CasesConnectorSecretsSchema>;
-export type CasesConnectorParams = TypeOf<typeof CasesConnectorParamsSchema>;
+export type CasesConnectorRunParams = TypeOf<typeof CasesConnectorRunParamsSchema>;
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
@@ -23,7 +24,7 @@ interface OracleKeyAllRequired {
   ruleId: string;
   spaceId: string;
   owner: string;
-  grouping: Record<string, string>;
+  grouping: Record<string, unknown>;
 }
 
 type OracleKeyWithOptionalKey = Optional<OracleKeyAllRequired, 'ruleId'>;
@@ -47,3 +48,5 @@ export interface OracleRecordCreateRequest {
   rules: Array<{ id: string }>;
   grouping: Record<string, unknown>;
 }
+
+export type BulkGetRecordsResponse = Array<OracleRecord | SavedObjectError>;

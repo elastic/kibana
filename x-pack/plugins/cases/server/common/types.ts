@@ -52,3 +52,6 @@ export type FileAttachmentRequest = Omit<
 export type AttachmentSavedObject = SavedObject<AttachmentAttributes>;
 
 export type SOWithErrors<T> = Omit<SavedObject<T>, 'attributes'> & { error: SavedObjectError };
+export interface SavedObjectsBulkResponseWithErrors<T> {
+  saved_objects: Array<SavedObject<T> | SOWithErrors<T>>;
+}
