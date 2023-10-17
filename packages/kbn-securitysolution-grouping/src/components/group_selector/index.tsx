@@ -57,7 +57,10 @@ const GroupSelectorComponent = ({
           },
           ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
             'data-test-subj': `panel-${o.key}`,
-            disabled: groupsSelected.length === maxGroupingLevels && !isGroupSelected(o.key),
+            disabled:
+              maxGroupingLevels > 1 &&
+              groupsSelected.length === maxGroupingLevels &&
+              !isGroupSelected(o.key),
             name: o.label,
             onClick: () => onGroupChange(o.key),
             icon: isGroupSelected(o.key) ? 'check' : 'empty',
@@ -66,7 +69,7 @@ const GroupSelectorComponent = ({
             'data-test-subj': `panel-custom`,
             name: i18n.CUSTOM_FIELD,
             icon: 'empty',
-            disabled: groupsSelected.length === maxGroupingLevels,
+            disabled: maxGroupingLevels > 1 && groupsSelected.length === maxGroupingLevels,
             panel: 'customPanel',
             hasPanel: true,
           },

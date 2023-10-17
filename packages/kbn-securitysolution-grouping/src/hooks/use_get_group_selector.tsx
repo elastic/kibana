@@ -120,10 +120,14 @@ export const useGetGroupSelector = ({
         return;
       }
 
-      const newSelectedGroups = isNoneGroup([groupSelection])
-        ? [groupSelection]
-        : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
-      setSelectedGroups(newSelectedGroups);
+      if (maxGroupingLevels === 1) {
+        setSelectedGroups([groupSelection]);
+      } else {
+        const newSelectedGroups = isNoneGroup([groupSelection])
+          ? [groupSelection]
+          : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
+        setSelectedGroups(newSelectedGroups);
+      }
 
       // built-in telemetry: UI-counter
       tracker?.(
@@ -133,7 +137,7 @@ export const useGetGroupSelector = ({
 
       onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
     },
-    [groupingId, onGroupChange, selectedGroups, setSelectedGroups, tracker]
+    [groupingId, maxGroupingLevels, onGroupChange, selectedGroups, setSelectedGroups, tracker]
   );
 
   useEffect(() => {
