@@ -53,6 +53,8 @@ export const createUserAndRole = async (
       return postRoleAndUser(ROLES.t1_analyst, t1AnalystRole, t1AnalystUser, getService);
     case ROLES.t2_analyst:
       return postRoleAndUser(ROLES.t2_analyst, t2AnalystRole, t2AnalystUser, getService);
+    case ROLES.t3_analyst:
+      throw new Error('t3_analyst role is currently unsupported');
     case ROLES.hunter:
       return postRoleAndUser(ROLES.hunter, hunterRole, hunterUser, getService);
     case ROLES.hunter_no_actions:

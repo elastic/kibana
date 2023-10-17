@@ -74,7 +74,7 @@ export const visitWithTimeRange = (
   });
 };
 
-export const visitTimeline = (timelineId: string, role?: ROLES) => {
+export const visitTimeline = (timelineId: string, role?: SecurityRoleName) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
     onBeforeLoad: disableNewFeaturesTours,
