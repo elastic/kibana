@@ -4807,8 +4807,6 @@
     "presentationUtil.labs.components.titleLabel": "实验",
     "presentationUtil.labs.enableByValueEmbeddableDescription": "在 Canvas 中启用按值嵌入的支持",
     "presentationUtil.labs.enableByValueEmbeddableName": "按值嵌入",
-    "presentationUtil.labs.enableDashboardControlsProjectDescription": "为仪表板启用控件系统，这允许仪表板作者更轻松地为其用户构建交互式元素。",
-    "presentationUtil.labs.enableDashboardControlsProjectName": "启用仪表板控件",
     "presentationUtil.labs.enableDeferBelowFoldProjectDescription": "“折叠”下的任何面板即可通过滚动访问的窗口底部隐藏的区域，将不会立即加载，而仅在进入视区时加载",
     "presentationUtil.labs.enableDeferBelowFoldProjectName": "推迟加载“折叠”下的面板",
     "presentationUtil.saveModalDashboard.addToDashboardLabel": "添加到仪表板",
