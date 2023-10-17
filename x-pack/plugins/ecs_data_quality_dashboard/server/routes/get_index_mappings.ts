@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { fetchMappings } from '../lib';
@@ -14,7 +14,7 @@ import { GET_INDEX_MAPPINGS, INTERNAL_API_VERSION } from '../../common/constants
 import { GetIndexMappingsParams } from '../schemas/get_index_mappings';
 import { buildRouteValidation } from '../schemas/common';
 
-export const getIndexMappingsRoute = (router: IRouter) => {
+export const getIndexMappingsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .get({
       path: GET_INDEX_MAPPINGS,
@@ -39,6 +39,7 @@ export const getIndexMappingsRoute = (router: IRouter) => {
           });
         } catch (err) {
           const error = transformError(err);
+          logger.error(error.message);
 
           return resp.error({
             body: error.message,

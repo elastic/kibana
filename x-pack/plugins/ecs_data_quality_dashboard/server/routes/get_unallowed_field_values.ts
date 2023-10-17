@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { getUnallowedFieldValues } from '../lib';
@@ -14,7 +14,7 @@ import { GET_UNALLOWED_FIELD_VALUES, INTERNAL_API_VERSION } from '../../common/c
 import { buildRouteValidation } from '../schemas/common';
 import { GetUnallowedFieldValuesBody } from '../schemas/get_unallowed_field_values';
 
-export const getUnallowedFieldValuesRoute = (router: IRouter) => {
+export const getUnallowedFieldValuesRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .post({
       path: GET_UNALLOWED_FIELD_VALUES,
@@ -38,6 +38,7 @@ export const getUnallowedFieldValuesRoute = (router: IRouter) => {
           });
         } catch (err) {
           const error = transformError(err);
+          logger.error(error.message);
 
           return resp.error({
             body: error.message,

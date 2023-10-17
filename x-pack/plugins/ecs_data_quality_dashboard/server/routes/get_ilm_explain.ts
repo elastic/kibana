@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { GET_ILM_EXPLAIN, INTERNAL_API_VERSION } from '../../common/constants';
@@ -14,7 +14,7 @@ import { buildResponse } from '../lib/build_response';
 import { buildRouteValidation } from '../schemas/common';
 import { GetILMExplainParams } from '../schemas/get_ilm_explain';
 
-export const getILMExplainRoute = (router: IRouter) => {
+export const getILMExplainRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .get({
       path: GET_ILM_EXPLAIN,
@@ -44,6 +44,8 @@ export const getILMExplainRoute = (router: IRouter) => {
         } catch (err) {
           const error = transformError(err);
 
+          logger.error(error.message);
+          console.log('logger-----', logger);
           return resp.error({
             body: error.message,
             statusCode: error.statusCode,

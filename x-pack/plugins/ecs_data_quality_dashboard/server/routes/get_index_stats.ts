@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
@@ -15,7 +15,7 @@ import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetIndexStatsParams, GetIndexStatsQuery } from '../schemas/get_index_stats';
 
-export const getIndexStatsRoute = (router: IRouter) => {
+export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .get({
       path: GET_INDEX_STATS,
@@ -88,6 +88,8 @@ export const getIndexStatsRoute = (router: IRouter) => {
           }
         } catch (err) {
           const error = transformError(err);
+          logger.error(error.message);
+
           return resp.error({
             body: error.message,
             statusCode: error.statusCode,
