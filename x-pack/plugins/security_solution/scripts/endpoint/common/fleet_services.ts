@@ -165,7 +165,9 @@ export const waitForHostToEnroll = async (
   }
 
   if (!found) {
-    throw new Error(`Timed out waiting for host [${hostname}] to show up in Fleet`);
+    throw new Error(
+      `Timed out waiting for host [${hostname}] to show up in Fleet in ${timeoutMs} ms`
+    );
   }
 
   return found;

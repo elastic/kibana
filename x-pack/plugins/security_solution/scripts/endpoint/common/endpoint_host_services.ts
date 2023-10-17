@@ -191,7 +191,7 @@ const createVagrantVm = async ({
         CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
         CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
       },
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ['inherit', 'inherit', 'inherit'],
     });
   } catch (e) {
     log.error(e);
@@ -319,7 +319,7 @@ const enrollHostWithFleet = async ({
       env: {
         VAGRANT_CWD,
       },
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ['inherit', 'inherit', 'inherit'],
     });
   } else {
     log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
