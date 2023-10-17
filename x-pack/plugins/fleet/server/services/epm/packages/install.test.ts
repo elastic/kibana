@@ -332,7 +332,7 @@ describe('install', () => {
       expect(response.status).toEqual('already_installed');
     });
 
-    it('should not allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
+    it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValueOnce({
         internal: {
           fleetServerStandalone: true,
@@ -347,8 +347,7 @@ describe('install', () => {
         esClient: {} as ElasticsearchClient,
       });
 
-      expect(response.error).toBeDefined();
-      expect(response.error?.message).toMatch(/fleet_server installation is not authorized/);
+      expect(response.status).toEqual('installed');
     });
   });
 
