@@ -11,7 +11,7 @@ import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { ChatItem } from './chat_item';
 import { ChatWelcomePanel } from './chat_welcome_panel';
-import { ChatCollapsedItems } from './chat_collapsed_items';
+import { ChatConsolidatedItems } from './chat_consolidated_items';
 import type { Feedback } from '../feedback_buttons';
 import { type Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
@@ -67,7 +67,7 @@ export function ChatTimeline({
       ) : (
         items.map((item, index) =>
           Array.isArray(item) ? (
-            <ChatCollapsedItems
+            <ChatConsolidatedItems
               key={index}
               consolidatedItem={item}
               onFeedback={onFeedback}

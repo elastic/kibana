@@ -43,7 +43,7 @@ const avatarStyle = css`
   cursor: 'pointer';
 `;
 
-export function ChatCollapsedItems({
+export function ChatConsolidatedItems({
   consolidatedItem,
   onFeedback,
   onRegenerate,
