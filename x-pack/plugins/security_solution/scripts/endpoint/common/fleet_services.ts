@@ -152,7 +152,7 @@ export const waitForHostToEnroll = async (
       async () =>
         fetchFleetAgents(kbnClient, {
           perPage: 1,
-          kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
+          kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online) or (status:degraded)`,
           showInactive: false,
         }).then((response) => response.items[0]),
       RETRYABLE_TRANSIENT_ERRORS

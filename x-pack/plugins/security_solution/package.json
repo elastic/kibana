@@ -12,7 +12,7 @@
     "cypress:changed-specs-only": "yarn cypress:dw run --changed-specs-only --env burn=2",
     "cypress:dw": "NODE_OPTIONS=--openssl-legacy-provider node ./scripts/start_cypress_parallel --config-file ./public/management/cypress/cypress.config.ts --ftr-config-file ../../test/defend_workflows_cypress/cli_config",
     "cypress:dw:open": "yarn cypress:dw open",
-    "cypress:dw:run": "yarn cypress:dw run",
+    "cypress:dw:run": "yarn cypress:dw run --spec ./public/management/cypress/e2e/artifacts/artifacts.cy.ts",
     "cypress:dw:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ./scripts/start_cypress_parallel --config-file ./public/management/cypress/cypress_serverless.config.ts --ftr-config-file ../../test/defend_workflows_cypress/serverless_config",
     "cypress:dw:serverless:open": "yarn cypress:dw:serverless open",
     "cypress:dw:serverless:run": "yarn cypress:dw:serverless run",
