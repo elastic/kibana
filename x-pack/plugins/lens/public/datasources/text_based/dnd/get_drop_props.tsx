@@ -26,7 +26,7 @@ export const getDropProps = (
   const sourceField = layer.allColumns.find((f) => f.columnId === source.id);
   const hasNumberTypeColumns = layer.allColumns?.some((c) => c?.meta?.type === 'number');
   const columnCanUsedInMetricDimension =
-        !hasNumberTypeColumns || layer.allColumns.length > MAX_NUM_OF_COLUMNS;
+    !hasNumberTypeColumns || layer.allColumns.length > MAX_NUM_OF_COLUMNS;
 
   if (isDraggedField(source)) {
     const nextLabel = source.humanData.label;
@@ -48,12 +48,14 @@ export const getDropProps = (
       }
       return { dropTypes: ['reorder'], nextLabel };
     }
-    
+
     const sourceFieldCanMoveToMetricDimension =
-                columnCanUsedInMetricDimension ||
-                (hasNumberTypeColumns && sourceField?.meta?.type === 'number');
-              
-   const targetFieldCanMoveToMetricDimension = columnCanUsedInMetricDimension || (hasNumberTypeColumns && targetField?.meta?.type === 'number');
+      columnCanUsedInMetricDimension ||
+      (hasNumberTypeColumns && sourceField?.meta?.type === 'number');
+
+    const targetFieldCanMoveToMetricDimension =
+      columnCanUsedInMetricDimension ||
+      (hasNumberTypeColumns && targetField?.meta?.type === 'number');
 
     const isMoveable =
       !target?.isMetricDimension ||
@@ -62,7 +64,7 @@ export const getDropProps = (
     if (targetColumn) {
       const isSwappable =
         (isMoveable && !source?.isMetricDimension) ||
-        (source.isMetricDimension &&targetFieldCanMoveToMetricDimension);
+        (source.isMetricDimension && targetFieldCanMoveToMetricDimension);
       if (isMoveable) {
         if (isSwappable) {
           return {
