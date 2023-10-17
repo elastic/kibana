@@ -37,7 +37,7 @@ import {
 /**
  * All action types that will mark a timeline as changed
  */
-const timelineChangedTypes = [
+const timelineChangedTypes = new Set([
   applyKqlFilterQuery.type,
   addProvider.type,
   dataProviderEdited.type,
@@ -59,14 +59,7 @@ const timelineChangedTypes = [
   updateSort.type,
   updateRange.type,
   upsertColumn.type,
-].reduce((allTypes, currentType) => {
-  // Mapping the array to a lookup object:
-  // { 'action_type': true }
-  // Given the amount of actions that are coming through,
-  // this speeds up the filtering significantly
-  allTypes[currentType] = true;
-  return allTypes;
-}, {} as { [eventType: string]: boolean });
+]);
 
 /**
  * Maps actions that mark a timeline change to `setChanged` actions.
@@ -75,7 +68,7 @@ const timelineChangedTypes = [
 export const createTimelineChangedEpic = (): Epic<Action, Action> => (action$) => {
   return action$.pipe(
     // Only apply mapping to some actions
-    filter((action) => timelineChangedTypes[action.type]),
+    filter((action) => timelineChangedTypes.has(action.type)),
     // Map the action to a `changed` action
     map((action) =>
       setChanged({

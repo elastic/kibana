@@ -28,10 +28,7 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 import type { ActionTimeline, TimelineById } from './types';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
 
-export const timelinePinnedEventActionsType = {
-  [pinEvent.type]: true,
-  [unPinEvent.type]: true,
-};
+export const timelinePinnedEventActionsType = new Set([pinEvent.type, unPinEvent.type]);
 
 export const epicPersistPinnedEvent = (
   action: ActionTimeline,
@@ -132,7 +129,7 @@ export const createTimelinePinnedEventEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) =>
     action$.pipe(
-      filter((action) => timelinePinnedEventActionsType[action.type]),
+      filter((action) => timelinePinnedEventActionsType.has(action.type)),
       mergeMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
         return EMPTY;
