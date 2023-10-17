@@ -24,7 +24,7 @@ import {
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
-
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   type ChangePointType,
   COMPOSITE_AGG_SIZE,
@@ -122,7 +122,7 @@ export function useChangePointResults(
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer,
   splitFieldCardinality: number | null,
-  embeddedOrigin: string = 'aiops'
+  embeddingOrigin: string = AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE
 ) {
   const {
     notifications: { toasts },
@@ -194,7 +194,7 @@ export function useChangePointResults(
 
         if (usageCollection?.reportUiCounter) {
           usageCollection.reportUiCounter(
-            embeddedOrigin,
+            embeddingOrigin,
             METRIC_TYPE.COUNT,
             CHANGE_POINT_DETECTION_EVENT.RUN
           );
@@ -207,7 +207,7 @@ export function useChangePointResults(
 
         if (usageCollection?.reportUiCounter) {
           usageCollection.reportUiCounter(
-            embeddedOrigin,
+            embeddingOrigin,
             METRIC_TYPE.COUNT,
             CHANGE_POINT_DETECTION_EVENT.SUCCESS
           );
@@ -280,7 +280,7 @@ export function useChangePointResults(
       } catch (e) {
         if (usageCollection?.reportUiCounter) {
           usageCollection.reportUiCounter(
-            embeddedOrigin,
+            embeddingOrigin,
             METRIC_TYPE.COUNT,
             CHANGE_POINT_DETECTION_EVENT.ERROR
           );
@@ -293,7 +293,7 @@ export function useChangePointResults(
       }
     },
     [
-      embeddedOrigin,
+      embeddingOrigin,
       isSingleMetric,
       totalAggPages,
       dataView,
