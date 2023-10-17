@@ -1,0 +1,184 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Actions List Schema",
+    "version": "2023-10-31"
+  },
+  "paths": {
+    "/api/endpoint/action": {
+      "get": {
+        "summary": "Get Actions List schema",
+        "operationId": "EndpointGetActionsList",
+        "x-codegen-enabled": false,
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ListRequestQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ListRequestQuery": {
+        "type": "object",
+        "properties": {
+          "agentIds": {
+            "$ref": "#/components/schemas/AgentIds"
+          },
+          "commands": {
+            "$ref": "#/components/schemas/Commands"
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          },
+          "pageSize": {
+            "type": "integer",
+            "default": 10,
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "Number of items per page"
+          },
+          "startDate": {
+            "$ref": "#/components/schemas/StartDate"
+          },
+          "endDate": {
+            "$ref": "#/components/schemas/EndDate"
+          },
+          "userIds": {
+            "$ref": "#/components/schemas/UserIds"
+          },
+          "types": {
+            "$ref": "#/components/schemas/Types"
+          },
+          "withOutputs": {
+            "$ref": "#/components/schemas/WithOutputs"
+          }
+        }
+      },
+      "AgentIds": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          {
+            "type": "string",
+            "minLength": 1
+          }
+        ],
+        "minLength": 1
+      },
+      "Command": {
+        "type": "string",
+        "enum": [
+          "isolate",
+          "unisolate",
+          "kill-process",
+          "suspend-process",
+          "running-processes",
+          "get-file",
+          "execute",
+          "upload"
+        ],
+        "minLength": 1,
+        "description": "The command to be executed (cannot be an empty string)"
+      },
+      "Commands": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Command"
+        }
+      },
+      "Page": {
+        "type": "integer",
+        "default": 1,
+        "minimum": 1,
+        "description": "Page number"
+      },
+      "StartDate": {
+        "type": "string",
+        "description": "Start date"
+      },
+      "EndDate": {
+        "type": "string",
+        "description": "End date"
+      },
+      "UserIds": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          {
+            "type": "string",
+            "minLength": 1
+          }
+        ],
+        "description": "User IDs"
+      },
+      "Type": {
+        "type": "string",
+        "enum": [
+          "automated",
+          "manual"
+        ]
+      },
+      "Types": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Type"
+        },
+        "minLength": 1,
+        "maxLength": 2
+      },
+      "WithOutputs": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          {
+            "type": "string",
+            "minLength": 1
+          }
+        ],
+        "description": "With Outputs"
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

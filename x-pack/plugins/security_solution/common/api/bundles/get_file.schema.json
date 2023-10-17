@@ -1,0 +1,128 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Get File Schema",
+    "version": "2023-10-31"
+  },
+  "paths": {
+    "/api/endpoint/action/get_file": {
+      "post": {
+        "summary": "Get File Action",
+        "operationId": "EndpointGetFileAction",
+        "x-codegen-enabled": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetFileActionRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetFileActionRequestBody": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseActionSchema"
+          },
+          {
+            "type": "object",
+            "required": [
+              "parameters",
+              "file"
+            ],
+            "properties": {
+              "parameters": {
+                "required": [
+                  "path"
+                ],
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "EndpointIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "description": "List of endpoint IDs (cannot contain empty strings)"
+      },
+      "AlertIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "description": "If defined, any case associated with the given IDs will be updated (cannot contain empty strings)"
+      },
+      "CaseIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "description": "Case IDs to be updated (cannot contain empty strings)"
+      },
+      "Comment": {
+        "type": "string",
+        "description": "Optional comment"
+      },
+      "Parameters": {
+        "type": "object",
+        "description": "Optional parameters object"
+      },
+      "BaseActionSchema": {
+        "type": "object",
+        "properties": {
+          "endpoint_ids": {
+            "$ref": "#/components/schemas/EndpointIds"
+          },
+          "alert_ids": {
+            "$ref": "#/components/schemas/AlertIds"
+          },
+          "case_ids": {
+            "$ref": "#/components/schemas/CaseIds"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/Comment"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/Parameters"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

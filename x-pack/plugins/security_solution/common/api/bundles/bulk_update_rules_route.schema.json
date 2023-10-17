@@ -1,0 +1,112 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Bulk Update API endpoint",
+    "version": "2023-10-31"
+  },
+  "paths": {
+    "/api/detection_engine/rules/_bulk_update": {
+      "put": {
+        "operationId": "UpdateRulesBulk",
+        "x-codegen-enabled": false,
+        "deprecated": true,
+        "description": "Updates multiple rules using the `PUT` method.",
+        "tags": [
+          "Bulk API"
+        ],
+        "requestBody": {
+          "description": "A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to modify.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RuleUpdateProps"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkCrudRulesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RuleUpdateProps": {
+        "type": "object"
+      },
+      "RuleResponse": {
+        "type": "object"
+      },
+      "RuleSignatureId": {
+        "type": "string",
+        "description": "Could be any string, not necessarily a UUID"
+      },
+      "ErrorSchema": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rule_id": {
+            "$ref": "#/components/schemas/RuleSignatureId"
+          },
+          "list_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "item_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "status_code",
+              "message"
+            ],
+            "properties": {
+              "status_code": {
+                "type": "integer",
+                "minimum": 400
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "BulkCrudRulesResponse": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/RuleResponse"
+            },
+            {
+              "$ref": "#/components/schemas/ErrorSchema"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

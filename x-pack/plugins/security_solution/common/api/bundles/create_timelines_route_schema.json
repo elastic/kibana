@@ -1,0 +1,665 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Elastic Security - Timeline - Create Timelines API",
+    "version": "8.9.0"
+  },
+  "servers": [
+    {
+      "url": "http://{kibana_host}:{port}",
+      "variables": {
+        "kibana_host": {
+          "default": "localhost"
+        },
+        "port": {
+          "default": "5601"
+        }
+      }
+    }
+  ],
+  "externalDocs": {
+    "url": "https://www.elastic.co/guide/en/security/current/timeline-api-create.html",
+    "description": "Documentation"
+  },
+  "paths": {
+    "/api/timeline": {
+      "post": {
+        "operationId": "createTimelines",
+        "description": "Creates a new timeline.",
+        "tags": [
+          "access:securitySolution"
+        ],
+        "requestBody": {
+          "description": "The required timeline fields used to create a new timeline along with optional fields that will be created if not provided.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "timeline"
+                ],
+                "properties": {
+                  "status": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/TimelineStatus"
+                      },
+                      {
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "timelineId": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "templateTimelineId": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "templateTimelineVersion": {
+                    "type": "number",
+                    "nullable": true
+                  },
+                  "timelineType": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/TimelineType"
+                      },
+                      {
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "version": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "timeline": {
+                    "$ref": "#/components/schemas/SavedTimeline"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates the timeline was successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "persistTimeline": {
+                          "type": "object",
+                          "properties": {
+                            "timeline": {
+                              "$ref": "#/components/schemas/TimelineResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Indicates that there was an error in the timeline creation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TimelineStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "draft",
+          "immutable"
+        ],
+        "default": "draft",
+        "description": "The status of the timeline. Valid values are `active`, `draft`, and `immutable`."
+      },
+      "TimelineType": {
+        "type": "string",
+        "enum": [
+          "default",
+          "template"
+        ],
+        "default": "default",
+        "description": "The type of timeline to create. Valid values are `default` and `template`."
+      },
+      "ColumnHeaderResult": {
+        "type": "object",
+        "properties": {
+          "aggregatable": {
+            "type": "boolean"
+          },
+          "category": {
+            "type": "string"
+          },
+          "columnHeaderType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "example": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "indexes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "placeholder": {
+            "type": "string"
+          },
+          "searchable": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "QueryMatchResult": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "displayField": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "displayValue": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          }
+        }
+      },
+      "DataProviderResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "kqlQuery": {
+            "type": "string"
+          },
+          "queryMatch": {
+            "$ref": "#/components/schemas/QueryMatchResult"
+          },
+          "and": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataProviderResult"
+            }
+          },
+          "type": {
+            "$ref": "#/components/schemas/DataProviderType"
+          }
+        }
+      },
+      "DataProviderType": {
+        "type": "string",
+        "enum": [
+          "default",
+          "template"
+        ],
+        "default": "default",
+        "description": "The type of data provider to create. Valid values are `default` and `template`."
+      },
+      "RowRendererId": {
+        "type": "string",
+        "enum": [
+          "alert",
+          "alerts",
+          "auditd",
+          "auditd_file",
+          "library",
+          "netflow",
+          "plain",
+          "registry",
+          "suricata",
+          "system",
+          "system_dns",
+          "system_endgame_process",
+          "system_file",
+          "system_fim",
+          "system_security_event",
+          "system_socket",
+          "threat_match",
+          "zeek"
+        ]
+      },
+      "FavoriteTimelineResult": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "favoriteDate": {
+            "type": "number"
+          }
+        }
+      },
+      "FilterTimelineResult": {
+        "type": "object",
+        "properties": {
+          "exists": {
+            "type": "boolean"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "alias": {
+                "type": "string"
+              },
+              "controlledBy": {
+                "type": "string"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "field": {
+                "type": "string"
+              },
+              "formattedValue": {
+                "type": "string"
+              },
+              "index": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "negate": {
+                "type": "boolean"
+              },
+              "params": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          },
+          "match_all": {
+            "type": "string"
+          },
+          "missing": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "range": {
+            "type": "string"
+          },
+          "script": {
+            "type": "string"
+          }
+        }
+      },
+      "SerializedFilterQueryResult": {
+        "type": "object",
+        "properties": {
+          "filterQuery": {
+            "type": "object",
+            "properties": {
+              "kuery": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string"
+                  },
+                  "expression": {
+                    "type": "string"
+                  }
+                }
+              },
+              "serializedQuery": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Sort": {
+        "type": "object",
+        "properties": {
+          "columnId": {
+            "type": "string"
+          },
+          "sortDirection": {
+            "type": "string"
+          }
+        }
+      },
+      "SavedTimeline": {
+        "type": "object",
+        "properties": {
+          "columns": {
+            "$ref": "#/components/schemas/ColumnHeaderResult"
+          },
+          "created": {
+            "type": "number"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "dataProviders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataProviderResult"
+            }
+          },
+          "dataViewId": {
+            "type": "string"
+          },
+          "dateRange": {
+            "type": "object",
+            "properties": {
+              "end": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "start": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "eqlOptions": {
+            "type": "object",
+            "properties": {
+              "eventCategoryField": {
+                "type": "string"
+              },
+              "tiebreakerField": {
+                "type": "string"
+              },
+              "timestampField": {
+                "type": "string"
+              }
+            }
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "excludedRowRendererIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RowRendererId"
+            }
+          },
+          "favorite": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FavoriteTimelineResult"
+            }
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterTimelineResult"
+            }
+          },
+          "kqlMode": {
+            "type": "string"
+          },
+          "kqlQuery": {
+            "$ref": "#/components/schemas/SerializedFilterQueryResult"
+          },
+          "indexNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "savedQueryId": {
+            "type": "string"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "draft",
+              "immutable"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "templateTimelineId": {
+            "type": "string"
+          },
+          "templateTimelineVersion": {
+            "type": "number"
+          },
+          "timelineType": {
+            "$ref": "#/components/schemas/TimelineType"
+          },
+          "updated": {
+            "type": "number"
+          },
+          "updatedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "BareNote": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "timelineId": {
+            "type": "string"
+          },
+          "created": {
+            "type": "number"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updated": {
+            "type": "number"
+          },
+          "updatedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "Note": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BareNote"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "noteId": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "timelineVersion": {
+                "nullable": true,
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PinnedEvent": {
+        "type": "object",
+        "properties": {
+          "pinnedEventId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "timelineId": {
+            "type": "string"
+          },
+          "created": {
+            "type": "number"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updated": {
+            "type": "number"
+          },
+          "updatedBy": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "timelineVersion": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelineResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SavedTimeline"
+          },
+          {
+            "type": "object",
+            "required": [
+              "savedObjectId",
+              "version"
+            ],
+            "properties": {
+              "eventIdToNoteIds": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Note"
+                }
+              },
+              "notes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Note"
+                }
+              },
+              "noteIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pinnedEventIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pinnedEventsSaveObject": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PinnedEvent"
+                }
+              },
+              "savedObjectId": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

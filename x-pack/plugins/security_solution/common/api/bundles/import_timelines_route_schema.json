@@ -1,0 +1,226 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Elastic Security - Timeline - Import Timelines API",
+    "version": "8.9.0"
+  },
+  "servers": [
+    {
+      "url": "http://{kibana_host}:{port}",
+      "variables": {
+        "kibana_host": {
+          "default": "localhost"
+        },
+        "port": {
+          "default": "5601"
+        }
+      }
+    }
+  ],
+  "externalDocs": {
+    "url": "https://www.elastic.co/guide/en/security/current/timeline-api-import.html",
+    "description": "Documentation"
+  },
+  "paths": {
+    "/api/timeline/_import": {
+      "post": {
+        "operationId": "importTimelines",
+        "description": "Imports timelines.",
+        "tags": [
+          "access:securitySolution"
+        ],
+        "requestBody": {
+          "description": "The timelines to import as a readable stream.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "object",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Readable"
+                      },
+                      {
+                        "properties": {
+                          "hapi": {
+                            "type": "object",
+                            "properties": {
+                              "filename": {
+                                "type": "string"
+                              },
+                              "headers": {
+                                "type": "object"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates the import of timelines was successful.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ImportTimelineResult"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Indicates the import of timelines was unsuccessful because of an invalid file extension.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "body": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Indicates that we were unable to locate the saved object client necessary to handle the import.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Indicates the import of timelines was unsuccessful.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "body": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Readable": {
+        "type": "object",
+        "properties": {
+          "_maxListeners": {
+            "type": {}
+          },
+          "_readableState": {
+            "type": {}
+          },
+          "_read": {
+            "type": {}
+          },
+          "readable": {
+            "type": "boolean"
+          },
+          "_events": {
+            "type": {}
+          },
+          "_eventsCount": {
+            "type": "number"
+          },
+          "_data": {
+            "type": {}
+          },
+          "_position": {
+            "type": "number"
+          },
+          "_encoding": {
+            "type": "string"
+          }
+        }
+      },
+      "ImportTimelineResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "success_count": {
+            "type": "number"
+          },
+          "timelines_installed": {
+            "type": "number"
+          },
+          "timelines_updated": {
+            "type": "number"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

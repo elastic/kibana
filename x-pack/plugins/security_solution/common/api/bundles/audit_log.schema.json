@@ -1,0 +1,104 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Audit Log Schema",
+    "version": "2023-10-31"
+  },
+  "paths": {
+    "/api/endpoint/action_log/{agent_id}": {
+      "get": {
+        "summary": "Get action audit log schema",
+        "operationId": "EndpointGetActionAuditLog",
+        "x-codegen-enabled": false,
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AuditLogRequestQuery"
+            }
+          },
+          {
+            "name": "query",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AuditLogRequestParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuditLogRequestQuery": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          },
+          "page_size": {
+            "$ref": "#/components/schemas/PageSize"
+          },
+          "start_date": {
+            "$ref": "#/components/schemas/StartDate"
+          },
+          "end_date": {
+            "$ref": "#/components/schemas/EndDate"
+          }
+        }
+      },
+      "AuditLogRequestParams": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "$ref": "#/components/schemas/AgentId"
+          }
+        }
+      },
+      "Page": {
+        "type": "integer",
+        "default": 1,
+        "minimum": 1,
+        "description": "Page number"
+      },
+      "PageSize": {
+        "type": "integer",
+        "default": 10,
+        "minimum": 1,
+        "maximum": 100,
+        "description": "Number of items per page"
+      },
+      "StartDate": {
+        "type": "string",
+        "description": "Start date"
+      },
+      "EndDate": {
+        "type": "string",
+        "description": "End date"
+      },
+      "AgentId": {
+        "type": "string",
+        "description": "Agent ID"
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Get Action status schema",
+    "version": "2023-10-31"
+  },
+  "paths": {
+    "/api/endpoint/action_status": {
+      "get": {
+        "summary": "Get Actions status schema",
+        "operationId": "EndpointGetActionsStatus",
+        "x-codegen-enabled": false,
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agent_ids": {
+                  "$ref": "#/components/schemas/AgentIds"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgentIds": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          {
+            "type": "string",
+            "minLength": 1
+          }
+        ],
+        "minLength": 1
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

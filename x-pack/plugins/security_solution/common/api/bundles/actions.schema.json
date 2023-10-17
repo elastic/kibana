@@ -1,0 +1,273 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Endpoint Actions Schema",
+    "version": "2023-10-31"
+  },
+  "paths": {
+    "/api/endpoint/action/state": {
+      "get": {
+        "summary": "Get Action State schema",
+        "operationId": "EndpointGetActionsState",
+        "x-codegen-enabled": false,
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/endpoint/action/running_procs": {
+      "post": {
+        "summary": "Get Running Processes Action",
+        "operationId": "EndpointGetRunningProcessesAction",
+        "x-codegen-enabled": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BaseActionSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/endpoint/action/isolate": {
+      "post": {
+        "summary": "Isolate host Action",
+        "operationId": "EndpointIsolateHostAction",
+        "x-codegen-enabled": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BaseActionSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/endpoint/action/unisolate": {
+      "post": {
+        "summary": "Unisolate host Action",
+        "operationId": "EndpointUnisolateHostAction",
+        "x-codegen-enabled": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BaseActionSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/endpoint/action/kill_process": {
+      "post": {
+        "summary": "Kill process Action",
+        "operationId": "EndpointKillProcessAction",
+        "x-codegen-enabled": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessActionSchemas"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/endpoint/action/suspend_process": {
+      "post": {
+        "summary": "Suspend process Action",
+        "operationId": "EndpointSuspendProcessAction",
+        "x-codegen-enabled": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessActionSchemas"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "EndpointIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "description": "List of endpoint IDs (cannot contain empty strings)"
+      },
+      "AlertIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "description": "If defined, any case associated with the given IDs will be updated (cannot contain empty strings)"
+      },
+      "CaseIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "description": "Case IDs to be updated (cannot contain empty strings)"
+      },
+      "Comment": {
+        "type": "string",
+        "description": "Optional comment"
+      },
+      "Parameters": {
+        "type": "object",
+        "description": "Optional parameters object"
+      },
+      "BaseActionSchema": {
+        "type": "object",
+        "properties": {
+          "endpoint_ids": {
+            "$ref": "#/components/schemas/EndpointIds"
+          },
+          "alert_ids": {
+            "$ref": "#/components/schemas/AlertIds"
+          },
+          "case_ids": {
+            "$ref": "#/components/schemas/CaseIds"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/Comment"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/Parameters"
+          }
+        }
+      },
+      "ProcessActionSchemas": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseActionSchema"
+          },
+          {
+            "type": "object",
+            "required": [
+              "parameters"
+            ],
+            "properties": {
+              "parameters": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "pid": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
