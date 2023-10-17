@@ -115,7 +115,7 @@ export function TimesliceMetricIndicatorTypeForm() {
             <h3>
               <FormattedMessage
                 id="xpack.observability.slo.sloEdit.sliType.timesliceMetric.metricTitle"
-                defaultMessage="Metric defintion"
+                defaultMessage="Metric definition"
               />
             </h3>
           </EuiTitle>
