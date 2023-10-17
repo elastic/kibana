@@ -137,7 +137,7 @@ export function HttpRequestsChart({
         id="requests"
         showAnnotations={false}
         fetchStatus={status}
-        timeseries={data}
+        timeseries={timeseries}
         customTheme={comparisonChartTheme}
         yLabelFormat={(y) => `${y}`}
       />

@@ -28,7 +28,7 @@ import {
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { HttpResponseRateChart } from '../charts/mobile_http_rate';
+import { HttpErrorRateChart } from '../charts/mobile_http_error_rate';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { MobileErrorGroupList } from './error_group_list';
 import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
@@ -198,7 +198,7 @@ export function MobileErrorGroupOverview() {
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <HttpResponseRateChart
+                  <HttpErrorRateChart
                     height={150}
                     kuery={kuery}
                     serviceName={serviceName}

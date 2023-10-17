@@ -14,13 +14,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import moment from 'moment';
 import { getComparisonChartTheme } from '../../../../shared/time_comparison/get_comparison_chart_theme';
 import { TimeseriesChartWithContext } from '../../../../shared/charts/timeseries_chart_with_context';
 
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -32,7 +30,8 @@ const INITIAL_STATE = {
   previousPeriod: { timeseries: [] },
 };
 
-export function HttpResponseRateChart({
+export function HttpErrorRateChart({
+  height,
   kuery,
   serviceName,
   start,
@@ -41,6 +40,7 @@ export function HttpResponseRateChart({
   offset,
   comparisonEnabled,
 }: {
+  height: number;
   kuery: string;
   serviceName: string;
   start: string;
@@ -76,10 +76,6 @@ export function HttpResponseRateChart({
     [environment, kuery, serviceName, start, end, offset, comparisonEnabled]
   );
 
-  // const theme = useTheme();
-  const min = moment.utc(start).valueOf();
-  const max = moment.utc(end).valueOf();
-  const { core } = useApmPluginContext();
   const previousPeriodLabel = usePreviousPeriodLabel();
 
   const timeseries = [
@@ -88,7 +84,7 @@ export function HttpResponseRateChart({
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.transactions.httpRequestsTitle', {
-        defaultMessage: 'HTTP Requests',
+        defaultMessage: 'HTTP error rate',
       }),
     },
     ...(comparisonEnabled
@@ -120,7 +116,7 @@ export function HttpResponseRateChart({
             content={i18n.translate(
               'xpack.apm.mobile.errors.httpErrorRateTooltip',
               {
-                defaultMessage: 'Http response status codes by type.',
+                defaultMessage: 'Http error rate consisting of 4xx & 5xx.',
               }
             )}
             position="right"
@@ -130,6 +126,7 @@ export function HttpResponseRateChart({
 
       <TimeseriesChartWithContext
         id="httpErrors"
+        height={height}
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
