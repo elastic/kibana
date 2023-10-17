@@ -67,7 +67,7 @@ export class BulkUploader implements IBulkUploader {
   private kibanaStatusSubscription?: Subscription;
   private readonly opsMetrics$: Observable<OpsMetrics>;
   private kibanaStatus: ServiceStatusLevel | null;
-  private _timer: NodeJS.Timer | null;
+  private _timer: NodeJS.Timeout | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
 
