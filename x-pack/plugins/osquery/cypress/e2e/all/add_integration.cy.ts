@@ -161,7 +161,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
         .parents('tr')
         .within(() => {
           cy.contains('Osquery Manager');
-          cy.getBySel('PackagePoliciesTableUpgradeButton');
+          cy.getBySel('PackagsePoliciesTableUpgradeButton');
           cy.contains(`v${oldVersion}`);
           cy.getBySel('agentActionsBtn').click();
         });
