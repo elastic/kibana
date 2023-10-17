@@ -363,11 +363,6 @@ const fetchReferenceBaselineData = async ({
     }
   }
 
-  console.log(`--@@Baseline request\n`, {
-    ...baselineRequest,
-    body: { ...baselineRequest.body, aggs: randomSamplerWrapper.wrap(baselineRequestAggs) },
-  });
-
   const baselineResponse = await dataSearch(
     {
       ...baselineRequest,
@@ -375,8 +370,6 @@ const fetchReferenceBaselineData = async ({
     },
     signal
   );
-
-  console.log(`--@@Baseline response\n`, baselineResponse);
 
   return baselineResponse;
 };
@@ -456,10 +449,6 @@ const fetchComparisonDriftedData = async ({
     }
   }
 
-  console.log(`--@@Getting ranges\n`, {
-    ...baselineRequest,
-    body: { ...baselineRequest.body, aggs: randomSamplerWrapper.wrap(rangesRequestAggs) },
-  });
   // Compute fractions based on results of ranges
   const rangesResp = await dataSearch(
     {
@@ -468,8 +457,6 @@ const fetchComparisonDriftedData = async ({
     },
     signal
   );
-
-  console.log(`--@@Ranges response\n`, rangesResp.aggregations);
 
   const fieldsWithNoOverlap = new Set<string>();
   for (const { field } of fields) {
@@ -484,13 +471,6 @@ const fetchComparisonDriftedData = async ({
           ...bucket,
           fraction: bucket.doc_count / totalSumOfAllBuckets,
         }));
-
-        console.log(
-          `--@@For field ${field}: fractions`,
-          fractions,
-          'totalSumOfAllBuckets',
-          totalSumOfAllBuckets
-        );
 
         if (totalSumOfAllBuckets > 0) {
           driftedRequestAggs[`${field}_ks_test`] = {
@@ -518,13 +498,6 @@ const fetchComparisonDriftedData = async ({
     },
     signal
   );
-  console.log(
-    `--@@Drifted request (where ks_test agg is omitted if sum of doc_count = 0 from ranges results)\n`,
-    {
-      ...driftedRequest,
-      body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(driftedRequestAggs) },
-    }
-  );
 
   fieldsWithNoOverlap.forEach((field) => {
     if (driftedResp.aggregations) {
@@ -535,11 +508,6 @@ const fetchComparisonDriftedData = async ({
       };
     }
   });
-
-  console.log(
-    `--@@Drifted request (with ks_test) response with -Infinity set if sum of doc_count = 0 from ranges results \n`,
-    driftedResp
-  );
 
   return driftedResp;
 };
