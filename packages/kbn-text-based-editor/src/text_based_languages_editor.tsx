@@ -845,6 +845,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         <ResizableButton
           onMouseDownResizeHandler={onMouseDownResizeHandler}
           onKeyDownResizeHandler={onKeyDownResizeHandler}
+          editorIsInline={editorIsInline}
         />
       )}
     </>
