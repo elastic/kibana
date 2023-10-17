@@ -30,6 +30,7 @@ import { launch } from './puppeteer_launcher';
 interface CreatePageOptions {
   browserTimezone?: string;
   defaultViewport: { width?: number };
+  protocolTimeout: number;
 }
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
@@ -41,6 +42,7 @@ export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
   private getChromiumArgs: () => string[];
   private core: ReportingCore;
+  private protocolTimeout?: number = 0;
 
   constructor(core: ReportingCore, binaryPath: string, logger: LevelLogger) {
     this.core = core;
@@ -48,6 +50,7 @@ export class HeadlessChromiumDriverFactory {
     const config = core.getConfig();
     this.captureConfig = config.get('capture');
     this.browserConfig = this.captureConfig.browser.chromium;
+    this.protocolTimeout = 0;
 
     if (this.browserConfig.disableSandbox) {
       logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
@@ -102,7 +105,8 @@ export class HeadlessChromiumDriverFactory {
           this.binaryPath,
           chromiumArgs,
           viewport,
-          browserTimezone
+          browserTimezone,
+          this.protocolTimeout
         );
 
         page = await browser.newPage();
