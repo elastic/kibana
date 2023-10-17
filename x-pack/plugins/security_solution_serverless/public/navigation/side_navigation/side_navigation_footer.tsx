@@ -29,6 +29,7 @@ const categories: FooterCategory[] = [
     linkIds: [
       ExternalPageName.management,
       ExternalPageName.integrationsSecurity,
+      SecurityPageName.entityAnalyticsManagement,
       ExternalPageName.cloudUsersAndRoles,
       ExternalPageName.cloudBilling,
     ],
@@ -42,7 +43,14 @@ export const SideNavigationFooter: React.FC<{
   return (
     <>
       {categories.map((category, index) => {
-        const categoryItems = items.filter((item) => category.linkIds.includes(item.id));
+        const categoryItems = category.linkIds.reduce<ProjectSideNavItem[]>((acc, linkId) => {
+          const item = items.find(({id}) => id === linkId);
+          if (item) {
+            acc.push(item);
+          }
+          return acc;
+        }, []);
+        
         if (category.type === 'standalone') {
           return (
             <SideNavigationFooterStandalone
