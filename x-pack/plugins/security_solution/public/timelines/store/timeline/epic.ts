@@ -17,7 +17,7 @@ import {
 } from 'lodash/fp';
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
-import { from, empty, merge } from 'rxjs';
+import { from, EMPTY, merge } from 'rxjs';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';
 import {
   isScriptedRangeFilter,
@@ -143,7 +143,7 @@ export const createTimelineEpic =
         debounceTime(500),
         mergeMap(([action]) => {
           dispatcherTimelinePersistQueue.next({ action });
-          return empty();
+          return EMPTY;
         })
       ),
       dispatcherTimelinePersistQueue.pipe(
@@ -274,7 +274,7 @@ export const createTimelineEpic =
               )
             );
           }
-          return empty();
+          return EMPTY;
         })
       )
     );

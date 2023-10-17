@@ -9,7 +9,7 @@ import { get, omit } from 'lodash/fp';
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
 import type { Observable } from 'rxjs';
-import { from, empty } from 'rxjs';
+import { from, EMPTY } from 'rxjs';
 import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/operators';
 
 import { addError } from '../../../common/store/app/actions';
@@ -135,6 +135,6 @@ export const createTimelinePinnedEventEpic =
       filter((action) => timelinePinnedEventActionsType[action.type]),
       mergeMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
-        return empty();
+        return EMPTY;
       })
     );
