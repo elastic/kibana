@@ -5,11 +5,19 @@ env:
   SKIP_KIBANA_BOOTSTRAP: "true"
 
 steps:
-  - label: "Collect Kibana commit data"
+  - label: "List Kibana commits"
     command: ts-node .buildkite/scripts/serverless/generate_commit_selector.ts commits.json 50
     key: collect_data
+    # will save data to the meta: `commit-sha`
 
   - wait: ~
+
+  - label: "Collect commit info"
+    command: ts-node .buildkite/scripts/serverless/collect_commit_info.ts
+    depends_on: collect_data
+
+  - block: "Confirm deployment"
+    depends_on: collect_data
 
   - label: ":ship: Create Deployment Tag"
     command: .buildkite/scripts/serverless/create_deployment_tag.sh
