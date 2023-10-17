@@ -7,6 +7,7 @@
 
 import { TimesliceMetricIndicator, timesliceMetricMetricDef } from '@kbn/slo-schema';
 import * as t from 'io-ts';
+import { assertNever } from '@kbn/std';
 
 import { getElastichsearchQueryOrThrow } from '../transform_generators';
 
@@ -17,7 +18,8 @@ export class GetTimesliceMetricIndicatorAggregation {
   constructor(private indicator: TimesliceMetricIndicator) {}
 
   private buildAggregation(metric: TimesliceMetricMetricDef) {
-    switch (metric.aggregation) {
+    const { aggregation } = metric;
+    switch (aggregation) {
       case 'doc_count':
         return {};
       case 'std_deviation':
@@ -42,18 +44,25 @@ export class GetTimesliceMetricIndicatorAggregation {
             sort: { [this.indicator.params.timestampField]: 'desc' },
           },
         };
-      default:
+      case 'avg':
+      case 'max':
+      case 'min':
+      case 'sum':
+      case 'cardinality':
         if (metric.field == null) {
           throw new Error('You must provide a field for basic metric aggregations.');
         }
         return {
-          [metric.aggregation]: { field: metric.field },
+          [aggregation]: { field: metric.field },
         };
+      default:
+        assertNever(aggregation);
     }
   }
 
   private buildBucketPath(prefix: string, metric: TimesliceMetricMetricDef) {
-    switch (metric.aggregation) {
+    const { aggregation } = metric;
+    switch (aggregation) {
       case 'doc_count':
         return `${prefix}>_count`;
       case 'std_deviation':
@@ -62,8 +71,14 @@ export class GetTimesliceMetricIndicatorAggregation {
         return `${prefix}>metric[${metric.percentile}]`;
       case 'last_value':
         return `${prefix}>metric[${metric.field}]`;
-      default:
+      case 'avg':
+      case 'max':
+      case 'min':
+      case 'sum':
+      case 'cardinality':
         return `${prefix}>metric`;
+      default:
+        assertNever(aggregation);
     }
   }
 
