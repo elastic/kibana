@@ -20,8 +20,9 @@ import type {
 } from '../../../../../common/api/detection_engine/rule_management';
 import type {
   AlertSuppression,
-  RuleResponse,
   AlertSuppressionCamel,
+  InvestigationFields,
+  RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
@@ -380,3 +381,39 @@ export const convertAlertSuppressionToSnake = (
         missing_fields_strategy: input.missingFieldsStrategy,
       }
     : undefined;
+
+export const migrateRuleLegacyInvestigationFields = (
+  rule: RuleAlertType | null | undefined
+): RuleAlertType | null | undefined => {
+  if (!rule) return rule;
+
+  const ruleParams = rule.params;
+
+  if ('investigationFields' in ruleParams) {
+    return {
+      ...rule,
+      params: {
+        ...ruleParams,
+        investigationFields: migrateInvestigationFields(rule.params.investigationFields),
+      },
+    };
+  }
+
+  return rule;
+};
+
+export const migrateInvestigationFields = (
+  investigationFields: InvestigationFields | undefined
+): InvestigationFields | undefined => {
+  if (investigationFields && Array.isArray(investigationFields)) {
+    if (investigationFields.length) {
+      return {
+        field_names: investigationFields,
+      };
+    }
+
+    return undefined;
+  }
+
+  return investigationFields;
+};

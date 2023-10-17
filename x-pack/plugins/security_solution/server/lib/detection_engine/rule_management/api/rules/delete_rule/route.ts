@@ -18,7 +18,7 @@ import { buildRouteValidation } from '../../../../../../utils/build_validation/r
 import { buildSiemResponse } from '../../../../routes/utils';
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { readRules } from '../../../logic/crud/read_rules';
-import { getIdError, transform } from '../../../utils/utils';
+import { getIdError, transform, migrateRuleLegacyInvestigationFields } from '../../../utils/utils';
 
 export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -52,8 +52,9 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
           const rulesClient = ctx.alerting.getRulesClient();
 
           const rule = await readRules({ rulesClient, id, ruleId });
+          const migratedRule = migrateRuleLegacyInvestigationFields(rule);
 
-          if (!rule) {
+          if (!migratedRule) {
             const error = getIdError({ id, ruleId });
             return siemResponse.error({
               body: error.message,
@@ -62,11 +63,11 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
           }
 
           await deleteRules({
-            ruleId: rule.id,
+            ruleId: migratedRule.id,
             rulesClient,
           });
 
-          const transformed = transform(rule);
+          const transformed = transform(migratedRule);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
           } else {

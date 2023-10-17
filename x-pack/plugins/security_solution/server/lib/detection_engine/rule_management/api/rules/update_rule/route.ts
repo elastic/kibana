@@ -23,7 +23,7 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { updateRules } from '../../../logic/crud/update_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { getIdError } from '../../../utils/utils';
+import { getIdError, migrateRuleLegacyInvestigationFields } from '../../../utils/utils';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
@@ -85,9 +85,11 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
             existingRule
           );
 
+          const migratedRule = migrateRuleLegacyInvestigationFields(existingRule);
+
           const rule = await updateRules({
             rulesClient,
-            existingRule,
+            existingRule: migratedRule,
             ruleUpdate: request.body,
           });
 

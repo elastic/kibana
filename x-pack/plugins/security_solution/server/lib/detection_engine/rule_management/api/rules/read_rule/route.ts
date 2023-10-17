@@ -17,7 +17,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
-import { getIdError, transform } from '../../../utils/utils';
+import { getIdError, transform, migrateRuleLegacyInvestigationFields } from '../../../utils/utils';
 
 export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
@@ -55,8 +55,10 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
             rulesClient,
             ruleId,
           });
-          if (rule != null) {
-            const transformed = transform(rule);
+          const migratedRule = migrateRuleLegacyInvestigationFields(rule);
+
+          if (migratedRule != null) {
+            const transformed = transform(migratedRule);
             if (transformed == null) {
               return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
             } else {

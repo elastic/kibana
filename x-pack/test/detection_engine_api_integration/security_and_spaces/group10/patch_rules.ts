@@ -44,6 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('patch_rules', () => {
     describe('patch rules', () => {
@@ -669,6 +670,61 @@ export default ({ getService }: FtrProviderContext) => {
             expect(patchedRule).to.eql(expectedRule);
           });
         });
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      before(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      it('migrates investigation fields when array exists', async () => {
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ rule_id: '2297be91-894c-4831-830f-b424a0ec84f0', name: 'some other name' })
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare.investigation_fields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+      });
+
+      it('removes investigation fields when empty array', async () => {
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ rule_id: '2297be91-894c-4831-830f-b424a0ec5678', name: 'some other name' })
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare.investigation_fields).to.eql(undefined);
+      });
+
+      it('does not migrate investigation fields when intended object type', async () => {
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ rule_id: '2297be91-894c-4831-830f-b424a0ec9102', name: 'some other name' })
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare.investigation_fields).to.eql({ field_names: ['host.name'] });
       });
     });
   });

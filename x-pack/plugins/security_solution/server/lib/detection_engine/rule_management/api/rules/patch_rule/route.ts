@@ -23,7 +23,7 @@ import { patchRules } from '../../../logic/crud/patch_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { getIdError } from '../../../utils/utils';
+import { getIdError, migrateRuleLegacyInvestigationFields } from '../../../utils/utils';
 import { transformValidate } from '../../../utils/validate';
 
 export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
@@ -87,9 +87,11 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             ruleId: params.id,
           });
 
+          const migratedRule = migrateRuleLegacyInvestigationFields(existingRule);
+
           const rule = await patchRules({
             rulesClient,
-            existingRule,
+            existingRule: migratedRule,
             nextParams: params,
           });
           if (rule != null && rule.enabled != null && rule.name != null) {

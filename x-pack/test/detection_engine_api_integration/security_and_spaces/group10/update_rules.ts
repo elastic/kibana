@@ -48,6 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('update_rules', () => {
     describe('update rules', () => {
@@ -907,6 +908,55 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body.investigation_fields).to.eql(undefined);
         });
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      before(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      it('errors if sending legacy investigation fields type', async () => {
+        const updatedRule = {
+          ...getSimpleRuleUpdate('2297be91-894c-4831-830f-b424a0ec84f0'),
+          investigation_fields: ['foo'],
+        };
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(updatedRule)
+          .expect(400);
+
+        expect(body.message).to.eql(
+          '[request body]: Invalid value "["foo"]" supplied to "investigation_fields"'
+        );
+      });
+
+      it('unsets legacy investigation fields when field not specified for update', async () => {
+        const updatedRule = getSimpleRuleUpdate('2297be91-894c-4831-830f-b424a0ec5678');
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(updatedRule)
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare.investigation_fields).to.eql(undefined);
       });
     });
   });

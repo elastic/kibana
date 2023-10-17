@@ -93,8 +93,6 @@ export const exportRulesRoute = (
               : await getExportAll(
                   rulesClient,
                   exceptionsClient,
-                  savedObjectsClient,
-                  logger,
                   actionsExporter,
                   request,
                   actionsClient
