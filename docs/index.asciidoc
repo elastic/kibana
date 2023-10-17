@@ -15,7 +15,5 @@ include::CHANGELOG.asciidoc[]
 
 include::developer/index.asciidoc[]
 
-include::apis.asciidoc[]
-
 include::redirects.asciidoc[]
 
