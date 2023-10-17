@@ -17,7 +17,7 @@ import {
   RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID,
   RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID,
   RULE_PREVIEW_FOOTER_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/preview/components/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/preview/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION =

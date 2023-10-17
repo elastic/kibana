@@ -131,8 +131,8 @@ export const hasFilterKeyError = (
   indexMapping: IndexMapping,
   skipNormalization?: boolean
 ): string | null => {
-  if (key == null) {
-    return `The key is empty and needs to be wrapped by a saved object type like ${types.join()}`;
+  if (!key) {
+    return `Invalid key`;
   }
   if (!key.includes('.')) {
     if (allowedTerms.some((term) => term === key) || fieldDefined(indexMapping, key)) {
@@ -141,12 +141,11 @@ export const hasFilterKeyError = (
     return `This type '${key}' is not allowed`;
   } else if (key.includes('.')) {
     const keySplit = key.split('.');
-    if (
-      keySplit.length <= 1 &&
-      !fieldDefined(indexMapping, keySplit[0]) &&
-      !types.includes(keySplit[0])
-    ) {
-      return `This type '${keySplit[0]}' is not allowed`;
+    const firstField = keySplit[0];
+    const hasIndexWrap = types.includes(firstField);
+
+    if (keySplit.length <= 1 && !fieldDefined(indexMapping, firstField) && !hasIndexWrap) {
+      return `This type '${firstField}' is not allowed`;
     }
     // In some cases we don't want to check about the `attributes` presence
     // In that case pass the `skipNormalization` parameter
@@ -157,34 +156,35 @@ export const hasFilterKeyError = (
       return `This key '${key}' does NOT match the filter proposition SavedObjectType.attributes.key`;
     }
     // Check that the key exists in the mappings
-    const searchKey =
-      skipNormalization || keySplit[1] !== 'attributes'
-        ? `${keySplit[0]}.${keySplit.slice(1, keySplit.length).join('.')}`
-        : `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`;
-    if (
-      (keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
-      (keySplit.length === 2 &&
-        !types.includes(keySplit[0]) &&
-        !fieldDefined(indexMapping, searchKey)) ||
-      (keySplit.length > 2 && !fieldDefined(indexMapping, searchKey))
-    ) {
+    let searchKey = '';
+    if (keySplit.length === 2) {
+      searchKey = hasIndexWrap ? keySplit[1] : key;
+    } else if (keySplit.length > 2) {
+      searchKey =
+        skipNormalization || keySplit[1] !== 'attributes'
+          ? `${firstField}.${keySplit.slice(1, keySplit.length).join('.')}`
+          : `${firstField}.${keySplit.slice(2, keySplit.length).join('.')}`;
+    }
+    if (!fieldDefined(indexMapping, searchKey)) {
       return `This key '${key}' does NOT exist in ${types.join()} saved object index patterns`;
     }
   }
   return null;
 };
 
+const getMappingKey = (key?: string) =>
+  !!key ? 'properties.' + key.split('.').join('.properties.') : '';
+
 export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
   const keySplit = key.split('.');
   const shortenedKey = `${keySplit[1]}.${keySplit.slice(2, keySplit.length).join('.')}`;
-  const mappingKey = 'properties.' + key.split('.').join('.properties.');
-  const shortenedMappingKey = 'properties.' + shortenedKey.split('.').join('.properties.');
+  const mappingKey = getMappingKey(key);
 
-  if (get(indexMappings, mappingKey) != null || get(indexMappings, shortenedMappingKey) != null) {
-    return true;
-  }
-
-  if (mappingKey === 'properties.id') {
+  if (
+    !!get(indexMappings, mappingKey) ||
+    !!get(indexMappings, getMappingKey(shortenedKey)) ||
+    mappingKey === 'properties.id'
+  ) {
     return true;
   }
 
@@ -199,7 +199,7 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
     mappingKey.lastIndexOf(propertiesAttribute) + `${propertiesAttribute}.`.length
   );
   const mapping = `${fieldMapping}fields.${fieldType}`;
-  if (get(indexMappings, mapping) != null) {
+  if (!!get(indexMappings, mapping)) {
     return true;
   }
 
