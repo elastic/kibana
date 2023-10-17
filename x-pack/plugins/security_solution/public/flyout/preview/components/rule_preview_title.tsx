@@ -17,7 +17,7 @@ import {
   RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID,
 } from './test_ids';
 
-interface RulePreviewTitleProps {
+export interface RulePreviewTitleProps {
   /**
    * Rule object that represents relevant information about a rule
    */

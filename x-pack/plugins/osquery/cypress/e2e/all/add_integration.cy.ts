@@ -198,7 +198,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
 
       // test list of prebuilt queries
       navigateTo('/app/osquery/saved_queries');
-      cy.waitForReact();
       cy.react('EuiTableRow').should('have.length.above', 5);
     });
   });

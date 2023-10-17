@@ -10,6 +10,8 @@ import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLeftPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelVisualizeTab } from '..';
 import {
@@ -18,11 +20,6 @@ import {
   VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID,
 } from './test_ids';
 import { ANALYZE_GRAPH_ID, AnalyzeGraph } from '../components/analyze_graph';
-import {
-  ANALYZER_GRAPH_BUTTON,
-  SESSION_VIEW_BUTTON,
-  VISUALIZE_BUTTONGROUP_OPTIONS,
-} from './translations';
 import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { ALERTS_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
@@ -30,12 +27,22 @@ import { useStartTransaction } from '../../../common/lib/apm/use_start_transacti
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
     id: SESSION_VIEW_ID,
-    label: SESSION_VIEW_BUTTON,
+    label: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.visualize.sessionViewButtonLabel"
+        defaultMessage="Session View"
+      />
+    ),
     'data-test-subj': VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID,
   },
   {
     id: ANALYZE_GRAPH_ID,
-    label: ANALYZER_GRAPH_BUTTON,
+    label: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.visualize.analyzerGraphButtonLabel"
+        defaultMessage="Analyzer Graph"
+      />
+    ),
     'data-test-subj': VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
   },
 ];
@@ -83,7 +90,12 @@ export const VisualizeTab: FC = memo(() => {
       <EuiButtonGroup
         color="primary"
         name="coarsness"
-        legend={VISUALIZE_BUTTONGROUP_OPTIONS}
+        legend={i18n.translate(
+          'xpack.securitySolution.flyout.left.visualize.buttonGroupLegendLabel',
+          {
+            defaultMessage: 'Visualize options',
+          }
+        )}
         options={visualizeButtons}
         idSelected={activeVisualizationId}
         onChange={(id) => onChangeCompressed(id)}

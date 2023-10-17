@@ -141,8 +141,9 @@ describe('UpdateSLO', () => {
   });
 
   function expectInstallationOfNewSLOTransform() {
-    expect(mockTransformManager.start).toBeCalled();
     expect(mockTransformManager.install).toBeCalled();
+    expect(mockTransformManager.preview).toBeCalled();
+    expect(mockTransformManager.start).toBeCalled();
   }
 
   function expectDeletionOfObsoleteSLOData(originalSlo: SLO) {

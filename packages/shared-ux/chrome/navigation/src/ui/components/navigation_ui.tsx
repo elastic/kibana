@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import React, { FC } from 'react';
 
 interface Props {
@@ -21,17 +21,14 @@ export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, da
       {unstyled ? (
         <>{children}</>
       ) : (
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          style={{ overflowY: 'auto' }}
-          justifyContent="spaceBetween"
-          data-test-subj={dataTestSubj}
-        >
-          <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-
-          {footerChildren && <EuiFlexItem grow={false}>{footerChildren}</EuiFlexItem>}
-        </EuiFlexGroup>
+        <>
+          <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
+            {children}
+          </EuiCollapsibleNavBeta.Body>
+          {footerChildren && (
+            <EuiCollapsibleNavBeta.Footer>{footerChildren}</EuiCollapsibleNavBeta.Footer>
+          )}
+        </>
       )}
     </>
   );

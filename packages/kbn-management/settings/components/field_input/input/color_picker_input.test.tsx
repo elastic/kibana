@@ -8,42 +8,68 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { ColorPickerInput } from './color_picker_input';
+import { ColorPickerInput, ColorPickerInputProps } from './color_picker_input';
 import { wrap } from '../mocks';
 
 const name = 'Some color field';
 const id = 'some:color:field';
 
 describe('ColorPickerInput', () => {
-  const defaultProps = {
-    id,
-    name,
-    ariaLabel: 'Test',
-    onChange: jest.fn(),
-    value: '#000000',
+  const onInputChange = jest.fn();
+  const defaultProps: ColorPickerInputProps = {
+    onInputChange,
+    field: {
+      name,
+      type: 'color',
+      ariaAttributes: {
+        ariaLabel: name,
+      },
+      id,
+      isOverridden: false,
+      defaultValue: '#000000',
+    },
+    isSavingEnabled: true,
   };
 
-  it('renders without errors', () => {
-    const { container } = render(wrap(<ColorPickerInput {...defaultProps} />));
-    expect(container).toBeInTheDocument();
+  beforeEach(() => {
+    onInputChange.mockClear();
   });
 
-  it('renders the value prop', () => {
-    const { getByRole } = render(wrap(<ColorPickerInput {...defaultProps} />));
+  it('renders without errors', () => {
+    const { container, getByRole } = render(wrap(<ColorPickerInput {...defaultProps} />));
+    expect(container).toBeInTheDocument();
     const input = getByRole('textbox');
     expect(input).toHaveValue('#000000');
   });
 
-  it('calls the onChange prop when the value changes', () => {
+  it('calls the onInputChange prop when the value changes', () => {
     const { getByRole } = render(wrap(<ColorPickerInput {...defaultProps} />));
     const input = getByRole('textbox');
     const newValue = '#ffffff';
     fireEvent.change(input, { target: { value: newValue } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({ value: newValue });
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+      type: 'color',
+      unsavedValue: newValue,
+    });
+  });
+
+  it('calls the onInputChange prop with an error when the value is malformed', () => {
+    const { getByRole } = render(wrap(<ColorPickerInput {...defaultProps} />));
+    const input = getByRole('textbox');
+    const newValue = '#1234';
+    fireEvent.change(input, { target: { value: newValue } });
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+      type: 'color',
+      unsavedValue: newValue,
+      isInvalid: true,
+      error: 'Provide a valid color value',
+    });
   });
 
   it('disables the input when isDisabled prop is true', () => {
-    const { getByRole } = render(wrap(<ColorPickerInput {...defaultProps} isDisabled />));
+    const { getByRole } = render(
+      wrap(<ColorPickerInput {...defaultProps} isSavingEnabled={false} />)
+    );
     const input = getByRole('textbox');
     expect(input).toBeDisabled();
   });

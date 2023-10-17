@@ -8,38 +8,37 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { mockContextValue } from '../mocks/mock_preview_panel_context';
+import { mockContextValue } from '../mocks/mock_context';
 import { PreviewPanelContext } from '../context';
 import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
 import { RulePreviewFooter } from './rule_preview_footer';
 
-const contextValue = {
-  ...mockContextValue,
-  ruleId: 'rule id',
-};
+const renderRulePreviewFooter = (contextValue: PreviewPanelContext) =>
+  render(
+    <TestProviders>
+      <PreviewPanelContext.Provider value={contextValue}>
+        <RulePreviewFooter />
+      </PreviewPanelContext.Provider>
+    </TestProviders>
+  );
 
 describe('<RulePreviewFooter />', () => {
   it('renders rule details link correctly when ruleId is available', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <PreviewPanelContext.Provider value={contextValue}>
-          <RulePreviewFooter />
-        </PreviewPanelContext.Provider>
-      </TestProviders>
-    );
+    const contextValue = {
+      ...mockContextValue,
+      ruleId: 'rule id',
+    };
+    const { getByTestId } = renderRulePreviewFooter(contextValue);
 
     expect(getByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID)).toHaveTextContent(
+      'Show rule details'
+    );
   });
 
   it('should not render rule details link when ruleId is not available', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <PreviewPanelContext.Provider value={mockContextValue}>
-          <RulePreviewFooter />
-        </PreviewPanelContext.Provider>
-      </TestProviders>
-    );
+    const { queryByTestId } = renderRulePreviewFooter(mockContextValue);
 
     expect(queryByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID)).not.toBeInTheDocument();

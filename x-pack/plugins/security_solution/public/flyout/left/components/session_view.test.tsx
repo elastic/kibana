@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
-import { SESSION_VIEW_ERROR_TEST_ID, SESSION_VIEW_TEST_ID } from './test_ids';
+import { SESSION_VIEW_TEST_ID } from './test_ids';
 import { SessionView } from './session_view';
 import {
   ANCESTOR_INDEX,
@@ -46,6 +46,15 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
+const renderSessionView = (contextValue: LeftPanelContext) =>
+  render(
+    <TestProviders>
+      <LeftPanelContext.Provider value={contextValue}>
+        <SessionView />
+      </LeftPanelContext.Provider>
+    </TestProviders>
+  );
+
 describe('<SessionView />', () => {
   it('renders session view correctly', () => {
     const contextValue = {
@@ -53,13 +62,7 @@ describe('<SessionView />', () => {
       indexName: '.ds-logs-endpoint.events.process-default',
     } as unknown as LeftPanelContext;
 
-    const wrapper = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={contextValue}>
-          <SessionView />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const wrapper = renderSessionView(contextValue);
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();
   });
 
@@ -69,30 +72,7 @@ describe('<SessionView />', () => {
       indexName: '.alerts-security', // it should prioritize KIBANA_ANCESTOR_INDEX above indexName
     } as unknown as LeftPanelContext;
 
-    const wrapper = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={contextValue}>
-          <SessionView />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const wrapper = renderSessionView(contextValue);
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render error message on null eventId', () => {
-    const contextValue = {
-      getFieldsData: () => {},
-    } as unknown as LeftPanelContext;
-
-    const wrapper = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={contextValue}>
-          <SessionView />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
-    expect(wrapper.getByTestId(SESSION_VIEW_ERROR_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByText('Unable to display session view')).toBeInTheDocument();
-    expect(wrapper.getByText('There was an error displaying session view')).toBeInTheDocument();
   });
 });

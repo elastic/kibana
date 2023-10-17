@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './helper';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
@@ -18,6 +19,7 @@ import {
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsMonitor,
   ConfigKey,
+  MonitorLocations,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from './monitor_validation';
@@ -39,10 +41,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     }),
     body: schema.any(),
   },
+  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, savedObjectsClient, server } = routeContext;
-    const { encryptedSavedObjects, logger } = server;
-    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+    const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
 
@@ -55,14 +57,11 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       /* Decrypting the previous monitor before editing ensures that all existing fields remain
        * on the object, even in flows where decryption does not take place, such as the enabled tab
        * on the monitor list table. We do not decrypt monitors in bulk for the monitor list table */
-      const decryptedPreviousMonitor =
-        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-          syntheticsMonitorType,
-          monitorId,
-          {
-            namespace: previousMonitor.namespaces?.[0],
-          }
-        );
+      const decryptedPreviousMonitor = await getDecryptedMonitor(
+        server,
+        monitorId,
+        previousMonitor.namespaces?.[0]!
+      );
       const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
 
       const editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitor);
@@ -72,6 +71,15 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;
         return response.badRequest({ body: { message, attributes: { details, ...payload } } });
+      }
+
+      const err = await validatePermissions(routeContext, editedMonitor.locations);
+      if (err) {
+        return response.forbidden({
+          body: {
+            message: err,
+          },
+        });
       }
 
       const monitorWithRevision = {
@@ -228,5 +236,24 @@ export const syncEditedMonitor = async ({
     });
 
     throw e;
+  }
+};
+
+export const validatePermissions = async (
+  { server, response, request }: RouteContext,
+  monitorLocations: MonitorLocations
+) => {
+  const hasPublicLocations = monitorLocations?.some((loc) => loc.isServiceManaged);
+  if (!hasPublicLocations) {
+    return;
+  }
+
+  const elasticManagedLocationsEnabled =
+    Boolean(
+      (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime
+        .elasticManagedLocationsEnabled
+    ) ?? true;
+  if (!elasticManagedLocationsEnabled) {
+    return "You don't have permission to use public locations";
   }
 };

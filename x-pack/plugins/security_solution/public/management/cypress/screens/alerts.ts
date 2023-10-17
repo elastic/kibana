@@ -13,7 +13,8 @@ export const navigateToAlertsList = (urlQueryParams: string = '') => {
 };
 
 export const clickAlertListRefreshButton = (): Cypress.Chainable => {
-  return cy.getByTestSubj('querySubmitButton').click().should('be.enabled');
+  cy.getByTestSubj('querySubmitButton').click();
+  return cy.getByTestSubj('querySubmitButton').should('be.enabled');
 };
 
 /**

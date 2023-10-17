@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Assistant } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
@@ -14,6 +14,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
@@ -44,6 +45,7 @@ import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
 import { initializeTimelineSettings } from '../../../store/timeline/actions';
+import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -86,8 +88,6 @@ const GraphTab = tabWithSuspense(lazy(() => import('../graph_tab_content')));
 const NotesTab = tabWithSuspense(lazy(() => import('../notes_tab_content')));
 const PinnedTab = tabWithSuspense(lazy(() => import('../pinned_tab_content')));
 const SessionTab = tabWithSuspense(lazy(() => import('../session_tab_content')));
-const DiscoverTab = tabWithSuspense(lazy(() => import('../discover_tab_content')));
-
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -100,33 +100,19 @@ interface BasicTimelineTab {
 }
 
 const AssistantTab: React.FC<{
-  isAssistantEnabled: boolean;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  timelineId: TimelineId;
   shouldRefocusPrompt: boolean;
   setConversationId: Dispatch<SetStateAction<string>>;
-}> = memo(
-  ({
-    isAssistantEnabled,
-    renderCellValue,
-    rowRenderers,
-    timelineId,
-    shouldRefocusPrompt,
-    setConversationId,
-  }) => (
-    <Suspense fallback={<EuiSkeletonText lines={10} />}>
-      <AssistantTabContainer>
-        <Assistant
-          isAssistantEnabled={isAssistantEnabled}
-          conversationId={TIMELINE_CONVERSATION_TITLE}
-          setConversationId={setConversationId}
-          shouldRefocusPrompt={shouldRefocusPrompt}
-        />
-      </AssistantTabContainer>
-    </Suspense>
-  )
-);
+}> = memo(({ shouldRefocusPrompt, setConversationId }) => (
+  <Suspense fallback={<EuiSkeletonText lines={10} />}>
+    <AssistantTabContainer>
+      <Assistant
+        conversationId={TIMELINE_CONVERSATION_TITLE}
+        setConversationId={setConversationId}
+        shouldRefocusPrompt={shouldRefocusPrompt}
+      />
+    </AssistantTabContainer>
+  </Suspense>
+));
 
 AssistantTab.displayName = 'AssistantTab';
 
@@ -146,8 +132,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     setConversationId,
     showTimeline,
   }) => {
-    const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
-    const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+    const { hasAssistantPrivilege } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -235,24 +220,12 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             {(activeTimelineTab === TimelineTabs.securityAssistant ||
               hasTimelineConversationStarted) && (
               <AssistantTab
-                isAssistantEnabled={isAssistantEnabled}
-                renderCellValue={renderCellValue}
-                rowRenderers={rowRenderers}
-                timelineId={timelineId}
                 setConversationId={setConversationId}
                 shouldRefocusPrompt={
                   showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
                 }
               />
             )}
-          </HideShowContainer>
-        )}
-        {isDiscoverInTimelineEnabled && (
-          <HideShowContainer
-            $isVisible={TimelineTabs.discover === activeTimelineTab}
-            data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
-          >
-            <DiscoverTab />
           </HideShowContainer>
         )}
       </>
@@ -266,8 +239,18 @@ const CountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
+const StyledEuiBetaBadge = styled(EuiBetaBadge)`
+  vertical-align: middle;
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
 const StyledEuiTab = styled(EuiTab)`
   .euiTab__content {
+    align-items: center;
     display: flex;
     flex-direction: row;
     white-space: pre;
@@ -406,6 +389,28 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
+          {isDiscoverInTimelineEnabled && (
+            <StyledEuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
+              onClick={setDiscoverAsActiveTab}
+              isSelected={activeTab === TimelineTabs.discover}
+              disabled={false}
+              key={TimelineTabs.discover}
+            >
+              <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
+              <StyledEuiBetaBadge
+                label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
+                size="s"
+                iconType="beaker"
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
+                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                  />
+                }
+              />
+            </StyledEuiTab>
+          )}
           {timelineType === TimelineType.default && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
@@ -475,17 +480,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               key={TimelineTabs.securityAssistant}
             >
               <span>{i18n.SECURITY_ASSISTANT}</span>
-            </StyledEuiTab>
-          )}
-          {isDiscoverInTimelineEnabled && (
-            <StyledEuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
-              onClick={setDiscoverAsActiveTab}
-              isSelected={activeTab === TimelineTabs.discover}
-              disabled={false}
-              key={TimelineTabs.discover}
-            >
-              <span>{i18n.DISCOVER_IN_TIMELINE_TAB}</span>
             </StyledEuiTab>
           )}
         </EuiTabs>

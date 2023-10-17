@@ -8,9 +8,10 @@
 import { copyToClipboard, EuiButtonEmpty, EuiCopy } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
-import { FLYOUT_HEADER_SHARE_BUTTON_TEST_ID } from './test_ids';
-import { SHARE } from './translations';
+import { SHARE_BUTTON_TEST_ID } from './test_ids';
 
 interface ShareButtonProps {
   /**
@@ -39,9 +40,18 @@ export const ShareButton: FC<ShareButtonProps> = ({ alertUrl }) => {
             copyToClipboard(alertDetailsLink);
           }}
           iconType="share"
-          data-test-subj={FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
+          data-test-subj={SHARE_BUTTON_TEST_ID}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
+            {
+              defaultMessage: 'Share Alert',
+            }
+          )}
         >
-          {SHARE}
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.header.shareButtonLabel"
+            defaultMessage="Share Alert"
+          />
         </EuiButtonEmpty>
       )}
     </EuiCopy>

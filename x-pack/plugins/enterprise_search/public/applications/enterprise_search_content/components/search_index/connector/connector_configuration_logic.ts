@@ -90,7 +90,10 @@ export interface ConfigView {
  * or that have not had their dependencies met
  *
  */
-function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): ConfigView {
+function sortAndFilterConnectorConfiguration(
+  config: ConnectorConfiguration,
+  isNative: boolean
+): ConfigView {
   // This casting is ugly but makes all of the iteration below work for TypeScript
   // extract_full_html is only defined for crawlers, who don't use this config screen
   // we explicitly filter it out as well
@@ -120,11 +123,12 @@ function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): Co
         entry && !isCategoryEntry(entry) && !entry.category ? { key, ...entry } : null
       )
       .filter(isNotNullish),
-    config
+    config,
+    isNative
   );
   const categories = groupedConfigView
     .map((category) => {
-      const configEntries = filterSortValidateEntries(category.configEntries, config);
+      const configEntries = filterSortValidateEntries(category.configEntries, config, isNative);
 
       return configEntries.length > 0 ? { ...category, configEntries } : null;
     })
@@ -135,12 +139,13 @@ function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): Co
 
 function filterSortValidateEntries(
   configEntries: Array<ConnectorConfigProperties & { key: string }>,
-  config: ConnectorConfiguration
+  config: ConnectorConfiguration,
+  isNative: boolean
 ): ConfigEntryView[] {
   return configEntries
     .filter(
       (configEntry) =>
-        (configEntry.ui_restrictions ?? []).length <= 0 &&
+        ((configEntry.ui_restrictions ?? []).length <= 0 || !isNative) &&
         dependenciesSatisfied(configEntry.depends_on, config)
     )
     .sort((a, b) => {
@@ -373,12 +378,20 @@ export const ConnectorConfigurationLogic = kea<
   }),
   selectors: ({ selectors }) => ({
     configView: [
-      () => [selectors.configState],
-      (configState: ConnectorConfiguration) => sortAndFilterConnectorConfiguration(configState),
+      () => [selectors.configState, selectors.index],
+      (configState: ConnectorConfiguration, index: FetchIndexApiResponse) =>
+        sortAndFilterConnectorConfiguration(
+          configState,
+          isConnectorIndex(index) ? index.connector.is_native : false
+        ),
     ],
     localConfigView: [
-      () => [selectors.localConfigState],
-      (configState) => sortAndFilterConnectorConfiguration(configState),
+      () => [selectors.localConfigState, selectors.index],
+      (configState: ConnectorConfiguration, index: FetchIndexApiResponse) =>
+        sortAndFilterConnectorConfiguration(
+          configState,
+          isConnectorIndex(index) ? index.connector.is_native : false
+        ),
     ],
   }),
 });

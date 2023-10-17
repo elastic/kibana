@@ -7,7 +7,6 @@
 
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import { Filter } from '@kbn/es-query';
-import type { WeekdayStr } from '@kbn/rrule';
 import { IsoWeekday } from '../../../../common';
 import {
   ruleNotifyWhenAttributes,
@@ -16,6 +15,7 @@ import {
   ruleExecutionStatusErrorReasonAttributes,
   ruleExecutionStatusWarningReasonAttributes,
 } from '../constants';
+import { RRuleAttributes } from '../../r_rule/types';
 
 export type RuleNotifyWhenAttributes =
   typeof ruleNotifyWhenAttributes[keyof typeof ruleNotifyWhenAttributes];
@@ -27,27 +27,6 @@ export type RuleExecutionStatusErrorReasonAttributes =
   typeof ruleExecutionStatusErrorReasonAttributes[keyof typeof ruleExecutionStatusErrorReasonAttributes];
 export type RuleExecutionStatusWarningReasonAttributes =
   typeof ruleExecutionStatusWarningReasonAttributes[keyof typeof ruleExecutionStatusWarningReasonAttributes];
-
-type RRuleFreq = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-
-export interface RRuleAttributes {
-  dtstart: string;
-  tzid: string;
-  freq?: RRuleFreq;
-  until?: string;
-  count?: number;
-  interval?: number;
-  wkst?: WeekdayStr;
-  byweekday?: Array<string | number>;
-  bymonth?: number[];
-  bysetpos?: number[];
-  bymonthday: number[];
-  byyearday: number[];
-  byweekno: number[];
-  byhour: number[];
-  byminute: number[];
-  bysecond: number[];
-}
 
 export interface RuleSnoozeScheduleAttributes {
   duration: number;

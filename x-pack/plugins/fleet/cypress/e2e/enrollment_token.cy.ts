@@ -9,10 +9,12 @@ import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { ENROLLMENT_TOKENS } from '../screens/fleet';
 
 import { API_VERSIONS } from '../../common/constants';
+import { request } from '../tasks/common';
+import { login } from '../tasks/login';
 
 describe('Enrollment token page', () => {
   before(() => {
-    cy.request({
+    request({
       method: 'POST',
       url: '/api/fleet/agent_policies',
       body: {
@@ -28,6 +30,10 @@ describe('Enrollment token page', () => {
 
   after(() => {
     cleanupAgentPolicies();
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   it('Create new Token', () => {

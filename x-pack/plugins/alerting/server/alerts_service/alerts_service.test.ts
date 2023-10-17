@@ -53,7 +53,7 @@ interface EsError extends Error {
 }
 
 const GetAliasResponse = {
-  real_index: {
+  '.internal.alerts-test.alerts-default-000001': {
     aliases: {
       alias_1: {
         is_hidden: true,
@@ -196,6 +196,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
@@ -203,6 +204,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validate: {
     params: { validate: (params) => params },
   },
+  validLegacyConsumers: [],
 };
 
 const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {

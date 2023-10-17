@@ -9,7 +9,7 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
-import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
+import { PREVALENCE_TEST_ID } from './test_ids';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
@@ -22,28 +22,31 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { mockContextValue } from '../mocks/mock_right_panel_context';
+import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('../../shared/hooks/use_prevalence');
 
-const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
-const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
-const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
-const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
+const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
+const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(PREVALENCE_TEST_ID);
+const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
+const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(PREVALENCE_TEST_ID);
+
+const NO_DATA_MESSAGE = 'No prevalence data available.';
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutContext;
 
-const renderPrevalenceOverview = (contextValue: RightPanelContext = mockContextValue) => (
-  <TestProviders>
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={contextValue}>
-        <PrevalenceOverview />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
-  </TestProviders>
-);
+const renderPrevalenceOverview = (contextValue: RightPanelContext = mockContextValue) =>
+  render(
+    <TestProviders>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={contextValue}>
+          <PrevalenceOverview />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </TestProviders>
+  );
 
 describe('<PrevalenceOverview />', () => {
   it('should render wrapper component', () => {
@@ -53,7 +56,7 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
 
-    const { getByTestId, queryByTestId } = render(renderPrevalenceOverview());
+    const { getByTestId, queryByTestId } = renderPrevalenceOverview();
     expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
@@ -68,11 +71,10 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
 
-    const { getByTestId } = render(renderPrevalenceOverview());
+    const { getByTestId, queryByText } = renderPrevalenceOverview();
 
-    expect(
-      getByTestId(EXPANDABLE_PANEL_LOADING_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID))
-    ).toBeInTheDocument();
+    expect(getByTestId(EXPANDABLE_PANEL_LOADING_TEST_ID(PREVALENCE_TEST_ID))).toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should render no-data message', () => {
@@ -82,21 +84,21 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
 
-    const { getByTestId } = render(renderPrevalenceOverview());
-
-    expect(getByTestId(`${INSIGHTS_PREVALENCE_TEST_ID}Error`)).toBeInTheDocument();
+    const { getByText } = renderPrevalenceOverview();
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should render only data with prevalence less than 10%', () => {
     const field1 = 'field1';
     const field2 = 'field2';
+    const field3 = 'field3';
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
         {
           field: field1,
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -104,7 +106,15 @@ describe('<PrevalenceOverview />', () => {
         },
         {
           field: field2,
-          value: 'value2',
+          values: ['value2', 'value22'],
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.06,
+          userPrevalence: 0.2,
+        },
+        {
+          field: field3,
+          values: ['value3'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.5,
@@ -113,20 +123,28 @@ describe('<PrevalenceOverview />', () => {
       ],
     });
 
-    const { queryByTestId, getByTestId } = render(renderPrevalenceOverview());
+    const { queryByTestId, getByTestId, queryByText } = renderPrevalenceOverview();
 
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
 
-    const iconDataTestSubj1 = `${INSIGHTS_PREVALENCE_TEST_ID}${field1}Icon`;
-    const valueDataTestSubj1 = `${INSIGHTS_PREVALENCE_TEST_ID}${field1}Value`;
+    const iconDataTestSubj1 = `${PREVALENCE_TEST_ID}${field1}Icon`;
+    const valueDataTestSubj1 = `${PREVALENCE_TEST_ID}${field1}Value`;
     expect(getByTestId(iconDataTestSubj1)).toBeInTheDocument();
     expect(getByTestId(valueDataTestSubj1)).toBeInTheDocument();
     expect(getByTestId(valueDataTestSubj1)).toHaveTextContent('field1, value1 is uncommon');
 
-    const iconDataTestSubj2 = `${INSIGHTS_PREVALENCE_TEST_ID}${field2}Icon`;
-    const valueDataTestSubj2 = `${INSIGHTS_PREVALENCE_TEST_ID}${field2}Value`;
-    expect(queryByTestId(iconDataTestSubj2)).not.toBeInTheDocument();
-    expect(queryByTestId(valueDataTestSubj2)).not.toBeInTheDocument();
+    const iconDataTestSubj2 = `${PREVALENCE_TEST_ID}${field2}Icon`;
+    const valueDataTestSubj2 = `${PREVALENCE_TEST_ID}${field2}Value`;
+    expect(getByTestId(iconDataTestSubj2)).toBeInTheDocument();
+    expect(getByTestId(valueDataTestSubj2)).toBeInTheDocument();
+    expect(getByTestId(valueDataTestSubj2)).toHaveTextContent('field2, value2,value22 is uncommon');
+
+    const iconDataTestSubj3 = `${PREVALENCE_TEST_ID}${field3}Icon`;
+    const valueDataTestSubj3 = `${PREVALENCE_TEST_ID}${field3}Value`;
+    expect(queryByTestId(iconDataTestSubj3)).not.toBeInTheDocument();
+    expect(queryByTestId(valueDataTestSubj3)).not.toBeInTheDocument();
+
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
@@ -136,7 +154,7 @@ describe('<PrevalenceOverview />', () => {
       data: [
         {
           field: 'field1',
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -145,7 +163,7 @@ describe('<PrevalenceOverview />', () => {
       ],
     });
 
-    const { getByTestId } = render(renderPrevalenceOverview());
+    const { getByTestId } = renderPrevalenceOverview();
 
     getByTestId(TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({

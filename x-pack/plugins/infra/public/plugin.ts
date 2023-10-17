@@ -6,10 +6,11 @@
  */
 
 import {
-  AppMountParameters,
+  type AppMountParameters,
+  type AppUpdater,
+  type CoreStart,
+  type AppDeepLink,
   AppNavLinkStatus,
-  AppUpdater,
-  CoreStart,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -18,8 +19,7 @@ import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public'
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DISCOVER_APP_TARGET, LOGS_APP_TARGET } from '../common/constants';
-import { InfraPublicConfig } from '../common/plugin_config_types';
+import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
@@ -29,9 +29,7 @@ import { createLazyPodMetricsTable } from './components/infrastructure_node_metr
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import {
-  DiscoverLogsLocatorDefinition,
-  DiscoverNodeLogsLocatorDefinition,
-  InfraLocators,
+  type InfraLocators,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
 } from '../common/locators';
@@ -40,7 +38,7 @@ import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { TelemetryService } from './services/telemetry';
-import {
+import type {
   InfraClientCoreSetup,
   InfraClientCoreStart,
   InfraClientPluginClass,
@@ -54,10 +52,9 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
-  private metricsExplorerViews: MetricsExplorerViewsService;
+  private metricsExplorerViews?: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
-  private appTarget: string;
   private kibanaVersion: string;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
@@ -65,9 +62,10 @@ export class Plugin implements InfraClientPluginClass {
     this.config = context.config.get();
 
     this.inventoryViews = new InventoryViewsService();
-    this.metricsExplorerViews = new MetricsExplorerViewsService();
+    this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
+      ? new MetricsExplorerViewsService()
+      : undefined;
     this.telemetry = new TelemetryService();
-    this.appTarget = this.config.logs.app_target;
     this.kibanaVersion = context.env.packageInfo.version;
   }
 
@@ -87,18 +85,21 @@ export class Plugin implements InfraClientPluginClass {
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );
-    pluginsSetup.observability.dashboard.register({
-      appName: 'infra_logs',
-      hasData: getLogsHasDataFetcher(core.getStartServices),
-      fetchData: getLogsOverviewDataFetcher(core.getStartServices),
-    });
+
+    if (this.config.featureFlags.logsUIEnabled) {
+      // fetchData `appLink` redirects to logs/stream
+      pluginsSetup.observability.dashboard.register({
+        appName: 'infra_logs',
+        hasData: getLogsHasDataFetcher(core.getStartServices),
+        fetchData: getLogsOverviewDataFetcher(core.getStartServices),
+      });
+    }
 
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_metrics',
       hasData: createMetricsHasData(core.getStartServices),
       fetchData: createMetricsFetchData(core.getStartServices),
     });
-
     pluginsSetup.logsShared.logViews.setLogViewsStaticConfig({
       messageFields: this.config.sources?.default?.fields?.message,
     });
@@ -109,11 +110,6 @@ export class Plugin implements InfraClientPluginClass {
     ]);
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
-    const infraEntries = [
-      { label: 'Inventory', app: 'metrics', path: '/inventory' },
-      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-      { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
-    ];
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
         map(
@@ -136,9 +132,13 @@ export class Plugin implements InfraClientPluginClass {
                         path: '/',
                         isBetaFeature: true,
                       },
-                      { label: 'Stream', app: 'logs', path: '/stream' },
-                      { label: 'Anomalies', app: 'logs', path: '/anomalies' },
-                      { label: 'Categories', app: 'logs', path: '/log-categories' },
+                      ...(this.config.featureFlags.logsUIEnabled
+                        ? [
+                            { label: 'Stream', app: 'logs', path: '/stream' },
+                            { label: 'Anomalies', app: 'logs', path: '/anomalies' },
+                            { label: 'Categories', app: 'logs', path: '/log-categories' },
+                          ]
+                        : []),
                     ],
                   },
                 ]
@@ -148,7 +148,13 @@ export class Plugin implements InfraClientPluginClass {
                   {
                     label: 'Infrastructure',
                     sortKey: 300,
-                    entries: infraEntries,
+                    entries: [
+                      { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                      ...(this.config.featureFlags.metricsExplorerEnabled
+                        ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+                        : []),
+                      { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
+                    ],
                   },
                 ]
               : []),
@@ -163,40 +169,16 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     // Register Locators
-    let logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
-    let nodeLogsLocator = pluginsSetup.share.url.locators.create(
+    const logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
+    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
       new NodeLogsLocatorDefinition({ core })
     );
-
-    if (this.appTarget === DISCOVER_APP_TARGET) {
-      // Register Locators
-      logsLocator = pluginsSetup.share.url.locators.create(
-        new DiscoverLogsLocatorDefinition({ core })
-      );
-      nodeLogsLocator = pluginsSetup.share.url.locators.create(
-        new DiscoverNodeLogsLocatorDefinition({ core })
-      );
-
-      core.application.register({
-        id: 'logs-to-discover',
-        title: '',
-        navLinkStatus: AppNavLinkStatus.hidden,
-        appRoute: '/app/logs',
-        mount: async (params: AppMountParameters) => {
-          // mount callback should not use setup dependencies, get start dependencies instead
-          const [coreStart, , pluginStart] = await core.getStartServices();
-          const { renderApp } = await import('./apps/discover_app');
-
-          return renderApp(coreStart, pluginStart, params);
-        },
-      });
-    }
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, logsLocator)
     );
 
-    if (this.appTarget === LOGS_APP_TARGET) {
+    if (this.config.featureFlags.logsUIEnabled) {
       core.application.register({
         id: 'logs',
         title: i18n.translate('xpack.infra.logs.pluginTitle', {
@@ -248,28 +230,34 @@ export class Plugin implements InfraClientPluginClass {
     }
 
     // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
-    const infraDeepLinks = [
+    const infraDeepLinks: AppDeepLink[] = [
       {
         id: 'inventory',
         title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
           defaultMessage: 'Inventory',
         }),
         path: '/inventory',
+        navLinkStatus: AppNavLinkStatus.visible,
       },
       {
-        id: 'metrics-hosts',
+        id: 'hosts',
         title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
           defaultMessage: 'Hosts',
         }),
         path: '/hosts',
+        navLinkStatus: AppNavLinkStatus.visible,
       },
-      {
-        id: 'metrics-explorer',
-        title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-          defaultMessage: 'Metrics Explorer',
-        }),
-        path: '/explorer',
-      },
+      ...(this.config.featureFlags.metricsExplorerEnabled
+        ? [
+            {
+              id: 'metrics-explorer',
+              title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                defaultMessage: 'Metrics Explorer',
+              }),
+              path: '/explorer',
+            },
+          ]
+        : []),
       {
         id: 'settings',
         title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
@@ -278,6 +266,7 @@ export class Plugin implements InfraClientPluginClass {
         path: '/settings',
       },
     ];
+
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
@@ -298,18 +287,11 @@ export class Plugin implements InfraClientPluginClass {
           coreStart,
           { ...plugins, kibanaVersion: this.kibanaVersion },
           pluginStart,
+          this.config,
           params
         );
       },
     });
-
-    startDep$AndHostViewFlag$.subscribe(
-      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports], boolean]) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: infraDeepLinks,
-        }));
-      }
-    );
 
     /* This exists purely to facilitate URL redirects from the old App ID ("infra"),
     to our new App IDs ("metrics" and "logs"). With version 8.0.0 we can remove this. */
@@ -324,6 +306,14 @@ export class Plugin implements InfraClientPluginClass {
         return renderApp(params);
       },
     });
+
+    startDep$AndHostViewFlag$.subscribe(
+      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports], boolean]) => {
+        this.appUpdater$.next(() => ({
+          deepLinks: infraDeepLinks,
+        }));
+      }
+    );
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
@@ -345,7 +335,7 @@ export class Plugin implements InfraClientPluginClass {
       http: core.http,
     });
 
-    const metricsExplorerViews = this.metricsExplorerViews.start({
+    const metricsExplorerViews = this.metricsExplorerViews?.start({
       http: core.http,
     });
 

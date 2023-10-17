@@ -51,19 +51,19 @@ export interface ChangePointDetectionAppStateProps {
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
   /** Optional flag to indicate whether kibana is running in serverless */
-  isServerless?: boolean;
+  showFrozenDataTierChoice?: boolean;
 }
 
 export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
-  isServerless = false,
+  showFrozenDataTierChoice = true,
 }) => {
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
-    isServerless,
+    showFrozenDataTierChoice,
   };
 
   const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');

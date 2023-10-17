@@ -163,6 +163,7 @@ export const basicCaseFields: CaseAttributes = {
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
   category: null,
+  customFields: [],
 };
 
 export const createCaseSavedObjectResponse = ({

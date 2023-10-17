@@ -64,6 +64,20 @@ export class LogViewsClient implements ILogViewsClient {
       );
   }
 
+  public async getInternalLogView(logViewId: string): Promise<LogView> {
+    this.logger.debug(`Trying to load internal log view "${logViewId}"...`);
+
+    const internalLogView = this.internalLogViews.get(logViewId);
+
+    if (!internalLogView) {
+      throw new NotFoundError(
+        `Failed to load internal log view: no view with id "${logViewId}" found.`
+      );
+    }
+
+    return internalLogView;
+  }
+
   public async getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView> {
     const logView = persistedLogViewReferenceRT.is(logViewReference)
       ? await this.getLogView(logViewReference.logViewId)
@@ -123,20 +137,6 @@ export class LogViewsClient implements ILogViewsClient {
     );
 
     return getLogViewFromSavedObject(savedObject);
-  }
-
-  private async getInternalLogView(logViewId: string): Promise<LogView> {
-    this.logger.debug(`Trying to load internal log view "${logViewId}"...`);
-
-    const internalLogView = this.internalLogViews.get(logViewId);
-
-    if (!internalLogView) {
-      throw new NotFoundError(
-        `Failed to load internal log view: no view with id "${logViewId}" found.`
-      );
-    }
-
-    return internalLogView;
   }
 
   private async getLogViewFromLogsSharedSourceConfiguration(sourceId: string): Promise<LogView> {

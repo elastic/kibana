@@ -40,8 +40,10 @@ export interface DashboardPublicState {
   fullScreenMode?: boolean;
   savedQueryId?: string;
   lastSavedId?: string;
+  managed?: boolean;
   scrollToPanelId?: string;
   highlightPanelId?: string;
+  focusedPanelId?: string;
 }
 
 export interface DashboardRenderPerformanceStats {

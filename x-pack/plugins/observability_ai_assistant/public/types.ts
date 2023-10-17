@@ -39,6 +39,7 @@ import type {
   RegisterFunctionDefinition,
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
+import type { PendingMessage } from '../common/types';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -49,12 +50,6 @@ export type CreateChatCompletionResponseChunk = Omit<CreateChatCompletionRespons
     }
   >;
 };
-
-export interface PendingMessage {
-  message: Message['message'];
-  aborted?: boolean;
-  error?: any;
-}
 
 export interface ObservabilityAIAssistantChatService {
   chat: (options: {
@@ -70,7 +65,8 @@ export interface ObservabilityAIAssistantChatService {
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
-  }) => Promise<{ content?: Serializable; data?: Serializable }>;
+    connectorId: string;
+  }) => Promise<{ content?: Serializable; data?: Serializable } | Observable<PendingMessage>>;
   renderFunction: (
     name: string,
     args: string | undefined,
@@ -118,3 +114,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
 }
 
 export interface ConfigSchema {}
+
+export type { PendingMessage };

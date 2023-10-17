@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appIds } from '@kbn/management-cards-navigation';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -36,8 +42,10 @@ export class ServerlessSearchPlugin
       title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
         defaultMessage: 'Elasticsearch',
       }),
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       appRoute: '/app/elasticsearch',
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
@@ -50,7 +58,7 @@ export class ServerlessSearchPlugin
           user = undefined;
         }
 
-        return await renderApp(element, coreStart, { user, ...services });
+        return await renderApp(element, coreStart, { history, user, ...services });
       },
     });
 
@@ -60,13 +68,15 @@ export class ServerlessSearchPlugin
         defaultMessage: 'Connectors',
       }),
       appRoute: '/app/connectors',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       searchable: false,
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
 
         docLinks.setDocLinks(coreStart.docLinks.links);
-        return await renderApp(element, coreStart, { ...services });
+        return await renderApp(element, coreStart, { history, ...services });
       },
     });
 
@@ -79,6 +89,7 @@ export class ServerlessSearchPlugin
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
+    management.setIsSidebarEnabled(false);
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],

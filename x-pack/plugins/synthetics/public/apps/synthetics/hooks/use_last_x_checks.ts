@@ -14,7 +14,7 @@ import { Ping } from '../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getLocationFilter,
-  SUMMARY_FILTER,
+  FINAL_SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
 import { selectServiceLocationsState } from '../state';
 import { useSyntheticsRefreshContext } from '../contexts/synthetics_refresh_context';
@@ -59,7 +59,7 @@ export function useLastXChecks<Fields>({
       query: {
         bool: {
           filter: [
-            SUMMARY_FILTER,
+            FINAL_SUMMARY_FILTER,
             EXCLUDE_RUN_ONCE_FILTER,
             getTimeRangeFilter(schedule),
             {

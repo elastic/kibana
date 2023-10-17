@@ -62,10 +62,12 @@ import {
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -91,11 +93,12 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and enables a new rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -149,7 +152,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and edits a new rule with a data view', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       cy.get(RULE_NAME_INPUT).clear();
       cy.get(RULE_NAME_INPUT).type(rule.name);
@@ -160,6 +163,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
 
       fillScheduleRuleAndContinue(rule);
       createRuleWithoutEnabling();
+      openRuleManagementPageViaBreadcrumbs();
 
       goToRuleDetailsOf(rule.name);
 

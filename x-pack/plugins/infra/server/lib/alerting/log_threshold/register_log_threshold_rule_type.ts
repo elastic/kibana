@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
@@ -160,6 +161,7 @@ export async function registerLogThresholdRuleType(
         { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'logs',
     useSavedObjectReferences: {
       extractReferences,

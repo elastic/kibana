@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { getExceptionList } from '../../../../objects/exception';
@@ -18,7 +19,8 @@ import {
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539 Do we need to run it in Serverless?
@@ -34,7 +36,7 @@ describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerle
     createExceptionList(getExceptionList(), getExceptionList().list_id);
 
     login(ROLES.reader);
-    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
+    visit(EXCEPTIONS_URL, { role: ROLES.reader });
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown

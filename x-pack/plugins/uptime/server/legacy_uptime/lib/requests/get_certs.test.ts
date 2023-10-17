@@ -186,6 +186,20 @@ describe('getCerts', () => {
                   "filter": Array [
                     Object {
                       "exists": Object {
+                        "field": "summary",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must_not": Object {
+                          "exists": Object {
+                            "field": "run_once",
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "exists": Object {
                         "field": "tls.server.hash.sha256",
                       },
                     },

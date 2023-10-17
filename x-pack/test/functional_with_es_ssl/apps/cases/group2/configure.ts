@@ -13,6 +13,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const header = getPageObject('header');
 
   describe('Configure', function () {
     before(async () => {
@@ -24,6 +25,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
+      this.beforeEach(async () => {
+        await header.waitUntilLoadingHasFinished();
+      });
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
@@ -33,6 +37,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const toast = await toasts.getToastElement(1);
         expect(await toast.getVisibleText()).to.be('Saved external connection settings');
         await toasts.dismissAllToasts();
+        await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
       });
     });
 

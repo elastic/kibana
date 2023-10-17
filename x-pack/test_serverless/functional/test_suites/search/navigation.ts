@@ -16,7 +16,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('navigation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/166597
+  describe.skip('navigation', function () {
     before(async () => {
       await svlCommonPage.login();
       await svlSearchNavigation.navigateToLandingPage();
@@ -48,9 +49,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // navigate to discover
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Explore` });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'discover' });
-      await expect(await browser.getCurrentUrl()).contain('/app/discover');
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
 
       // navigate to a different section
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
@@ -71,6 +71,28 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expectNoPageReload();
     });
 
+    it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:triggersActions' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Index Management', 'Indices']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:ingest_pipelines' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Ingest Pipelines']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:api_keys' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['API keys']);
+    });
+
+    it('navigate management', async () => {
+      await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management']);
+      await testSubjects.click('app-card-dataViews');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
+    });
+
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
       // TODO: test something search project specific instead of generic discover
@@ -78,7 +100,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.search.clickOnOption(0);
       await svlCommonNavigation.search.hideSearch();
 
-      await expect(await browser.getCurrentUrl()).contain('/app/discover');
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
     });
 
     it('does not show cases in sidebar navigation', async () => {

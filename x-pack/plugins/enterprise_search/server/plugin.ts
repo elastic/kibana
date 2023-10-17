@@ -94,7 +94,7 @@ interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
 }
 
-interface PluginsStart {
+export interface PluginsStart {
   data: DataPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
@@ -192,7 +192,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchAISearch: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
           enterpriseSearchElasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
@@ -204,7 +204,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchAISearch: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
           enterpriseSearchElasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,

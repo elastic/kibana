@@ -23,6 +23,7 @@ describe('useSyncToUrl', () => {
     window.location = {
       ...originalLocation,
       search: '',
+      hash: '',
     };
     window.history = {
       ...originalHistory,
@@ -65,8 +66,29 @@ describe('useSyncToUrl', () => {
     );
   });
 
+  it('should should not alter the location hash', () => {
+    const key = 'testKey';
+    const valueToSerialize = { test: 'value' };
+    window.location.hash = '#should_be_there';
+
+    const { result } = renderHook(() => useSyncToUrl(key, jest.fn()));
+
+    act(() => {
+      result.current(valueToSerialize);
+    });
+
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      { path: expect.any(String) },
+      '',
+      '/#should_be_there?testKey=%28test%3Avalue%29'
+    );
+  });
+
   it('should clear the value from the query string on unmount', () => {
     const key = 'testKey';
+
+    // Location should have a key to clear
+    window.location.search = `?${key}=${encode({ test: 'value' })}`;
 
     const { unmount } = renderHook(() => useSyncToUrl(key, jest.fn()));
 
@@ -85,6 +107,9 @@ describe('useSyncToUrl', () => {
     const key = 'testKey';
     const restore = jest.fn();
 
+    // Location should have a key to clear
+    window.location.search = `?${key}=${encode({ test: 'value' })}`;
+
     renderHook(() => useSyncToUrl(key, restore, true));
 
     act(() => {
@@ -92,10 +117,6 @@ describe('useSyncToUrl', () => {
     });
 
     expect(window.history.replaceState).toHaveBeenCalledTimes(1);
-    expect(window.history.replaceState).toHaveBeenCalledWith(
-      { path: expect.any(String) },
-      '',
-      '/?'
-    );
+    expect(window.history.replaceState).toHaveBeenCalledWith({ path: expect.any(String) }, '', '/');
   });
 });

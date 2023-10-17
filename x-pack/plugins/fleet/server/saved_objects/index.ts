@@ -30,6 +30,8 @@ import {
   migratePackagePolicyToV8110,
 } from './migrations/security_solution/to_v8_11_0';
 
+import { migrateCspPackagePolicyToV8110 } from './migrations/cloud_security_posture';
+
 import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
 
 import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/to_v8_10_0';
@@ -73,6 +75,10 @@ import {
 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
+import {
+  migratePackagePolicyToV81102,
+  migratePackagePolicyEvictionsFromV81102,
+} from './migrations/security_solution/to_v8_11_0_2';
 
 /*
  * Saved object types and mappings
@@ -334,6 +340,25 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         schemas: {
           forwardCompatibility: migratePackagePolicyEvictionsFromV8110,
         },
+      },
+      '3': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV81102,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV81102,
+        },
+      },
+      '4': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migrateCspPackagePolicyToV8110,
+          },
+        ],
       },
     },
     migrations: {

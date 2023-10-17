@@ -9,18 +9,12 @@ import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useRightPanelContext } from '../context';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
-import {
-  THREAT_INTELLIGENCE_TITLE,
-  THREAT_MATCH_DETECTED,
-  THREAT_ENRICHMENT,
-  THREAT_MATCHES_DETECTED,
-  THREAT_ENRICHMENTS,
-} from './translations';
 import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 
@@ -55,11 +49,25 @@ export const ThreatIntelligenceOverview: FC = () => {
   return (
     <ExpandablePanel
       header={{
-        title: THREAT_INTELLIGENCE_TITLE,
-        callback: goToThreatIntelligenceTab,
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTitle"
+            defaultMessage="Threat intelligence"
+          />
+        ),
+        link: {
+          callback: goToThreatIntelligenceTab,
+          tooltip: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
+              defaultMessage="Show all threat intelligence"
+            />
+          ),
+        },
         iconType: 'arrowStart',
       }}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
+      content={{ loading }}
     >
       <EuiFlexGroup
         direction="column"
@@ -67,17 +75,27 @@ export const ThreatIntelligenceOverview: FC = () => {
         data-test-subj={`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Container`}
       >
         <InsightsSummaryRow
-          loading={loading}
           icon={'warning'}
           value={threatMatchesCount}
-          text={threatMatchesCount <= 1 ? THREAT_MATCH_DETECTED : THREAT_MATCHES_DETECTED}
+          text={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatMatchDescription"
+              defaultMessage="threat {count, plural, one {match} other {matches}} detected"
+              values={{ count: threatMatchesCount }}
+            />
+          }
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
         />
         <InsightsSummaryRow
-          loading={loading}
           icon={'warning'}
           value={threatEnrichmentsCount}
-          text={threatEnrichmentsCount <= 1 ? THREAT_ENRICHMENT : THREAT_ENRICHMENTS}
+          text={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatEnrichmentDescription"
+              defaultMessage="{count, plural, one {field} other {fields}} enriched with threat intelligence"
+              values={{ count: threatEnrichmentsCount }}
+            />
+          }
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
         />
       </EuiFlexGroup>

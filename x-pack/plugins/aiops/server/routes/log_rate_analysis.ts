@@ -21,10 +21,12 @@ import type {
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
+import { SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { RANDOM_SAMPLER_SEED } from '../../common/constants';
+import { RANDOM_SAMPLER_SEED, AIOPS_TELEMETRY_ID } from '../../common/constants';
 import {
   addSignificantTermsAction,
   addSignificantTermsGroupAction,
@@ -39,6 +41,7 @@ import {
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
 } from '../../common/api/log_rate_analysis';
+import { getCategoryQuery } from '../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../common/api';
 
 import { PLUGIN_ID } from '../../common';
@@ -46,12 +49,15 @@ import { PLUGIN_ID } from '../../common';
 import { isRequestAbortedError } from '../lib/is_request_aborted_error';
 import type { AiopsLicense } from '../types';
 
+import { fetchSignificantCategories } from './queries/fetch_significant_categories';
 import { fetchSignificantTermPValues } from './queries/fetch_significant_term_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
 import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
+import { fetchTerms2CategoriesCounts } from './queries/fetch_terms_2_categories_counts';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
 import { getSignificantTermGroups } from './queries/get_significant_term_groups';
+import { trackAIOpsRouteUsage } from '../lib/track_route_usage';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -67,7 +73,8 @@ export const defineLogRateAnalysisRoute = (
   router: IRouter<DataRequestHandlerContext>,
   license: AiopsLicense,
   logger: Logger,
-  coreStart: CoreStart
+  coreStart: CoreStart,
+  usageCounter?: UsageCounter
 ) => {
   router.versioned
     .post({
@@ -85,6 +92,14 @@ export const defineLogRateAnalysisRoute = (
         },
       },
       async (context, request, response) => {
+        const { headers } = request;
+
+        trackAIOpsRouteUsage(
+          `POST ${AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS}`,
+          headers[AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN],
+          usageCounter
+        );
+
         if (!license.isActivePlatinumLicense) {
           return response.forbidden();
         }
@@ -201,9 +216,10 @@ export const defineLogRateAnalysisRoute = (
 
               // Step 1: Index Info: Field candidates, total doc count, sample probability
 
-              const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] =
-                [];
+              const fieldCandidates: string[] = [];
               let fieldCandidatesCount = fieldCandidates.length;
+
+              const textFieldCandidates: string[] = [];
 
               let totalDocCount = 0;
 
@@ -223,9 +239,16 @@ export const defineLogRateAnalysisRoute = (
                 );
 
                 try {
-                  const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
+                  const indexInfo = await fetchIndexInfo(
+                    client,
+                    request.body,
+                    ['message', 'error.message'],
+                    abortSignal
+                  );
+
                   fieldCandidates.push(...indexInfo.fieldCandidates);
                   fieldCandidatesCount = fieldCandidates.length;
+                  textFieldCandidates.push(...indexInfo.textFieldCandidates);
                   totalDocCount = indexInfo.totalDocCount;
                 } catch (e) {
                   if (!isRequestAbortedError(e)) {
@@ -269,11 +292,43 @@ export const defineLogRateAnalysisRoute = (
                 }
               }
 
-              // Step 2: Significant Terms
+              // Step 2: Significant Categories and Terms
+
+              // This will store the combined count of detected significant log patterns and keywords
+              let fieldValuePairsCount = 0;
+
+              const significantCategories: SignificantTerm[] = request.body.overrides
+                ?.significantTerms
+                ? request.body.overrides?.significantTerms.filter(
+                    (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
+                  )
+                : [];
+
+              // Get significant categories of text fields
+              if (textFieldCandidates.length > 0) {
+                significantCategories.push(
+                  ...(await fetchSignificantCategories(
+                    client,
+                    request.body,
+                    textFieldCandidates,
+                    logger,
+                    sampleProbability,
+                    pushError,
+                    abortSignal
+                  ))
+                );
+
+                if (significantCategories.length > 0) {
+                  push(addSignificantTermsAction(significantCategories));
+                }
+              }
 
               const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
-                ? request.body.overrides?.significantTerms
+                ? request.body.overrides?.significantTerms.filter(
+                    (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
+                  )
                 : [];
+
               const fieldsToSample = new Set<string>();
 
               // Don't use more than 10 here otherwise Kibana will emit an error
@@ -345,7 +400,7 @@ export const defineLogRateAnalysisRoute = (
                         defaultMessage:
                           'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
                         values: {
-                          fieldValuePairsCount: significantTerms.length,
+                          fieldValuePairsCount,
                         },
                       }
                     ),
@@ -368,7 +423,9 @@ export const defineLogRateAnalysisRoute = (
               });
               await pValuesQueue.drain();
 
-              if (significantTerms.length === 0) {
+              fieldValuePairsCount = significantCategories.length + significantTerms.length;
+
+              if (fieldValuePairsCount === 0) {
                 logDebugMessage('Stopping analysis, did not find significant terms.');
                 endWithUpdatedLoadingState();
                 return;
@@ -463,6 +520,25 @@ export const defineLogRateAnalysisRoute = (
                     abortSignal
                   );
 
+                  if (significantCategories.length > 0) {
+                    const { fields: significantCategoriesFields, df: significantCategoriesDf } =
+                      await fetchTerms2CategoriesCounts(
+                        client,
+                        request.body,
+                        JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
+                        significantTerms,
+                        significantCategories,
+                        request.body.deviationMin,
+                        request.body.deviationMax,
+                        logger,
+                        pushError,
+                        abortSignal
+                      );
+
+                    fields.push(...significantCategoriesFields);
+                    df.push(...significantCategoriesDf);
+                  }
+
                   if (shouldStop) {
                     logDebugMessage('shouldStop after fetching frequent_item_sets.');
                     end();
@@ -472,7 +548,7 @@ export const defineLogRateAnalysisRoute = (
                   if (fields.length > 0 && df.length > 0) {
                     const significantTermGroups = getSignificantTermGroups(
                       df,
-                      significantTerms,
+                      [...significantTerms, ...significantCategories],
                       fields
                     );
 
@@ -544,7 +620,7 @@ export const defineLogRateAnalysisRoute = (
                           return;
                         }
                         const histogram =
-                          overallTimeSeries.data.map((o, i) => {
+                          overallTimeSeries.data.map((o) => {
                             const current = cpgTimeSeries.data.find(
                               (d1) => d1.key_as_string === o.key_as_string
                             ) ?? {
@@ -646,7 +722,7 @@ export const defineLogRateAnalysisRoute = (
                     }
 
                     const histogram =
-                      overallTimeSeries.data.map((o, i) => {
+                      overallTimeSeries.data.map((o) => {
                         const current = cpTimeSeries.data.find(
                           (d1) => d1.key_as_string === o.key_as_string
                         ) ?? {
@@ -662,7 +738,7 @@ export const defineLogRateAnalysisRoute = (
 
                     const { fieldName, fieldValue } = cp;
 
-                    loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
+                    loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                     pushHistogramDataLoadingState();
                     push(
                       addSignificantTermsHistogramAction([
@@ -678,6 +754,90 @@ export const defineLogRateAnalysisRoute = (
 
                 fieldValueHistogramQueue.push(significantTerms);
                 await fieldValueHistogramQueue.drain();
+              }
+
+              // histograms for text field patterns
+              if (overallTimeSeries !== undefined && significantCategories.length > 0) {
+                const significantCategoriesHistogramQueries = significantCategories.map((d) => {
+                  const histogramQuery = getHistogramQuery(request.body);
+                  const categoryQuery = getCategoryQuery(d.fieldName, [
+                    { key: `${d.key}`, count: d.doc_count, examples: [] },
+                  ]);
+                  if (Array.isArray(histogramQuery.bool?.filter)) {
+                    histogramQuery.bool?.filter?.push(categoryQuery);
+                  }
+                  return histogramQuery;
+                });
+
+                for (const [i, histogramQuery] of significantCategoriesHistogramQueries.entries()) {
+                  const cp = significantCategories[i];
+                  let catTimeSeries: NumericChartData;
+
+                  try {
+                    catTimeSeries = (
+                      (await fetchHistogramsForFields(
+                        client,
+                        request.body.index,
+                        histogramQuery,
+                        // fields
+                        [
+                          {
+                            fieldName: request.body.timeFieldName,
+                            type: KBN_FIELD_TYPES.DATE,
+                            interval: overallTimeSeries.interval,
+                            min: overallTimeSeries.stats[0],
+                            max: overallTimeSeries.stats[1],
+                          },
+                        ],
+                        // samplerShardSize
+                        -1,
+                        undefined,
+                        abortSignal,
+                        sampleProbability,
+                        RANDOM_SAMPLER_SEED
+                      )) as [NumericChartData]
+                    )[0];
+                  } catch (e) {
+                    logger.error(
+                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
+                        cp.fieldValue
+                      }", got: \n${e.toString()}`
+                    );
+                    pushError(
+                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
+                    );
+                    return;
+                  }
+
+                  const histogram =
+                    overallTimeSeries.data.map((o) => {
+                      const current = catTimeSeries.data.find(
+                        (d1) => d1.key_as_string === o.key_as_string
+                      ) ?? {
+                        doc_count: 0,
+                      };
+                      return {
+                        key: o.key,
+                        key_as_string: o.key_as_string ?? '',
+                        doc_count_significant_term: current.doc_count,
+                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                      };
+                    }) ?? [];
+
+                  const { fieldName, fieldValue } = cp;
+
+                  loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
+                  pushHistogramDataLoadingState();
+                  push(
+                    addSignificantTermsHistogramAction([
+                      {
+                        fieldName,
+                        fieldValue,
+                        histogram,
+                      },
+                    ])
+                  );
+                }
               }
 
               endWithUpdatedLoadingState();

@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
-  SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
-import { CORRELATIONS_SUPPRESSED_ALERTS } from '../../shared/translations';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../common/components/event_details/insights/translations';
-import { TECHNICAL_PREVIEW_MESSAGE } from './translations';
 
 export interface SuppressedAlertsProps {
   /**
@@ -35,8 +34,14 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppre
           error={false}
           icon={'layers'}
           value={alertSuppressionCount}
-          text={CORRELATIONS_SUPPRESSED_ALERTS(alertSuppressionCount)}
-          data-test-subj={INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
+          text={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.correlations.suppressedAlertsLabel"
+              defaultMessage="suppressed {count, plural, =1 {alert} other {alerts}}"
+              values={{ count: alertSuppressionCount }}
+            />
+          }
+          data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
           key={`correlation-row-suppressed-alerts`}
         />
       </EuiFlexItem>
@@ -45,9 +50,14 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppre
           label={SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
           size="s"
           iconType="beaker"
-          tooltipContent={TECHNICAL_PREVIEW_MESSAGE}
+          tooltipContent={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.entities.suppressedAlertTechnicalPreviewTooltip"
+              defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+            />
+          }
           tooltipPosition="bottom"
-          data-test-subj={SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID}
+          data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

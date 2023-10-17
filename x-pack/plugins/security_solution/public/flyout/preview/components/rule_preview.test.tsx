@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { RulePreview } from './rule_preview';
 import { PreviewPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_preview_panel_context';
+import { mockContextValue } from '../mocks/mock_context';
 import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { ThemeProvider } from 'styled-components';
@@ -54,16 +54,27 @@ const contextValue = {
   ruleId: 'rule id',
 };
 
-describe('<RulePreview />', () => {
-  beforeEach(() => {
-    // (useAppToasts as jest.Mock).mockReturnValue(useAppToastsValueMock);
-  });
+const renderRulePreview = () =>
+  render(
+    <TestProviders>
+      <ThemeProvider theme={mockTheme}>
+        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+          <PreviewPanelContext.Provider value={contextValue}>
+            <RulePreview />
+          </PreviewPanelContext.Provider>
+        </ExpandableFlyoutContext.Provider>
+      </ThemeProvider>
+    </TestProviders>
+  );
 
+const NO_DATA_MESSAGE = 'There was an error displaying data.';
+
+describe('<RulePreview />', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should render rule preview and its sub sections', () => {
+  it('should render rule preview and its sub sections', async () => {
     mockUseRuleWithFallback.mockReturnValue({
       rule: { name: 'rule name', description: 'rule description' },
     });
@@ -74,30 +85,27 @@ describe('<RulePreview />', () => {
       ruleActionsData: { actions: ['action'] },
     });
     mockUseGetSavedQuery.mockReturnValue({ isSavedQueryLoading: false, savedQueryBar: null });
-    const { getByTestId } = render(
-      <TestProviders>
-        <ThemeProvider theme={mockTheme}>
-          <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-            <PreviewPanelContext.Provider value={contextValue}>
-              <RulePreview />
-            </PreviewPanelContext.Provider>
-          </ExpandableFlyoutContext.Provider>
-        </ThemeProvider>
-      </TestProviders>
-    );
 
-    expect(getByTestId(RULE_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_ABOUT_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_ABOUT_CONTENT_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_DEFINITION_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID)).toBeInTheDocument();
+    const { getByTestId } = renderRulePreview();
+
+    await act(async () => {
+      expect(getByTestId(RULE_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_PREVIEW_ABOUT_HEADER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_PREVIEW_ABOUT_HEADER_TEST_ID)).toHaveTextContent('About');
+      expect(getByTestId(RULE_PREVIEW_ABOUT_CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_PREVIEW_DEFINITION_HEADER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_PREVIEW_DEFINITION_HEADER_TEST_ID)).toHaveTextContent('Definition');
+      expect(getByTestId(RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID)).toHaveTextContent('Schedule');
+      expect(getByTestId(RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).toHaveTextContent('Actions');
+      expect(getByTestId(RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID)).toBeInTheDocument();
+    });
   });
 
-  it('should not render actions if action is not available', () => {
+  it('should not render actions if action is not available', async () => {
     mockUseRuleWithFallback.mockReturnValue({
       rule: { name: 'rule name', description: 'rule description' },
     });
@@ -106,51 +114,28 @@ describe('<RulePreview />', () => {
       defineRuleData: mockDefineStepRule(),
       scheduleRuleData: mockScheduleStepRule(),
     });
-    const { queryByTestId } = render(
-      <TestProviders>
-        <ThemeProvider theme={mockTheme}>
-          <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-            <PreviewPanelContext.Provider value={contextValue}>
-              <RulePreview />
-            </PreviewPanelContext.Provider>
-          </ExpandableFlyoutContext.Provider>
-        </ThemeProvider>
-      </TestProviders>
-    );
+    const { queryByTestId } = renderRulePreview();
 
-    expect(queryByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID)).not.toBeInTheDocument();
+    await act(async () => {
+      expect(queryByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID)).not.toBeInTheDocument();
+    });
   });
 
-  it('should render loading spinner when rule is loading', () => {
+  it('should render loading spinner when rule is loading', async () => {
     mockUseRuleWithFallback.mockReturnValue({ loading: true, rule: null });
-    const { getByTestId } = render(
-      <TestProviders>
-        <ThemeProvider theme={mockTheme}>
-          <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-            <PreviewPanelContext.Provider value={contextValue}>
-              <RulePreview />
-            </PreviewPanelContext.Provider>
-          </ExpandableFlyoutContext.Provider>
-        </ThemeProvider>
-      </TestProviders>
-    );
-    expect(getByTestId(RULE_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+    const { getByTestId } = renderRulePreview();
+    await act(async () => {
+      expect(getByTestId(RULE_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+    });
   });
 
-  it('should not render rule preview when rule is null', () => {
+  it('should not render rule preview when rule is null', async () => {
     mockUseRuleWithFallback.mockReturnValue({});
-    const { queryByTestId } = render(
-      <TestProviders>
-        <ThemeProvider theme={mockTheme}>
-          <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-            <PreviewPanelContext.Provider value={contextValue}>
-              <RulePreview />
-            </PreviewPanelContext.Provider>
-          </ExpandableFlyoutContext.Provider>
-        </ThemeProvider>
-      </TestProviders>
-    );
-    expect(queryByTestId(RULE_PREVIEW_BODY_TEST_ID)).not.toBeInTheDocument();
+    const { queryByTestId, getByText } = renderRulePreview();
+    await act(async () => {
+      expect(queryByTestId(RULE_PREVIEW_BODY_TEST_ID)).not.toBeInTheDocument();
+      expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    });
   });
 });

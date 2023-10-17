@@ -14,7 +14,7 @@ import {
   isJsonFieldDefinition,
   isMarkdownFieldDefinition,
 } from '@kbn/management-settings-field-definition';
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
 export const DATA_TEST_SUBJ_DEFAULT_DISPLAY_PREFIX = 'default-display-block';
 /**
@@ -22,15 +22,29 @@ export const DATA_TEST_SUBJ_DEFAULT_DISPLAY_PREFIX = 'default-display-block';
  */
 export interface FieldDefaultValueProps<T extends SettingType> {
   /** The {@link FieldDefinition} corresponding the setting. */
-  field: Pick<FieldDefinition<T>, 'id' | 'type' | 'isDefaultValue' | 'defaultValueDisplay'>;
+  field: Pick<
+    FieldDefinition<T>,
+    'id' | 'type' | 'isDefaultValue' | 'defaultValueDisplay' | 'defaultValue'
+  >;
+  unsavedChange?: UnsavedFieldChange<T>;
 }
 
 /**
  * Component for displaying the default value of a {@link FieldDefinition}
  * in the {@link FieldRow}.
  */
-export const FieldDefaultValue = <T extends SettingType>({ field }: FieldDefaultValueProps<T>) => {
+export const FieldDefaultValue = <T extends SettingType>({
+  field,
+  unsavedChange,
+}: FieldDefaultValueProps<T>) => {
   if (field.isDefaultValue) {
+    return null;
+  }
+
+  if (
+    unsavedChange &&
+    (unsavedChange.unsavedValue === field.defaultValue || unsavedChange.unsavedValue === undefined)
+  ) {
     return null;
   }
 

@@ -33,7 +33,7 @@ import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
 import type { AllocatedModel, TrainedModelStat } from '../../../common/types/trained_models';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
-import { useIsServerless } from '../contexts/kibana';
+import { useEnabledFeatures } from '../contexts/ml';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -114,7 +114,7 @@ export function useListItemsFormatter() {
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const formatToListItems = useListItemsFormatter();
-  const isServerless = useIsServerless();
+  const { showLicenseInfo, showNodeInfo } = useEnabledFeatures();
 
   const {
     inference_config: inferenceConfig,
@@ -151,17 +151,17 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       estimated_operations,
       estimated_heap_memory_usage_bytes,
       default_field_map,
-      ...(isServerless ? {} : { license_level }),
+      ...(showLicenseInfo ? { license_level } : {}),
     };
   }, [
-    default_field_map,
     description,
-    estimated_heap_memory_usage_bytes,
-    estimated_operations,
-    license_level,
     tags,
     version,
-    isServerless,
+    estimated_operations,
+    estimated_heap_memory_usage_bytes,
+    default_field_map,
+    showLicenseInfo,
+    license_level,
   ]);
 
   const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
@@ -200,8 +200,8 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   }, [stats]);
 
   const hideColumns = useMemo(() => {
-    return isServerless ? ['model_id', 'node_name'] : ['model_id'];
-  }, [isServerless]);
+    return showNodeInfo ? ['model_id'] : ['model_id', 'node_name'];
+  }, [showNodeInfo]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(() => {
     return [

@@ -32,6 +32,8 @@ describe('getGroupsWithReaddedDuplicates', () => {
         docCount: 792,
         group: [
           {
+            key: 'response_code:500',
+            type: 'keyword',
             fieldName: 'response_code',
             fieldValue: '500',
             duplicate: 1,
@@ -39,6 +41,8 @@ describe('getGroupsWithReaddedDuplicates', () => {
             pValue: 2.9589053032077285e-12,
           },
           {
+            key: 'url:home.php',
+            type: 'keyword',
             fieldName: 'url',
             fieldValue: 'home.php',
             duplicate: 1,

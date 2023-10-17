@@ -15,3 +15,5 @@ export { findRulesSo } from './methods/find_rules_so';
 export type { FindRulesSoParams } from './methods/find_rules_so';
 export { bulkCreateRulesSo } from './methods/bulk_create_rule_so';
 export type { BulkCreateRulesSoParams } from './methods/bulk_create_rule_so';
+export { bulkDeleteRulesSo } from './methods/bulk_delete_rules_so';
+export type { BulkDeleteRulesSoParams } from './methods/bulk_delete_rules_so';

@@ -28,10 +28,7 @@ import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
-import {
-  SLO_BURN_RATE_RULE_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-} from '../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,
@@ -73,7 +70,7 @@ interface PluginStart {
   alerting: PluginStartContract;
 }
 
-const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID];
+const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;

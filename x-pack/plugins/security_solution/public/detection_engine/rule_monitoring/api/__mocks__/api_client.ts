@@ -32,6 +32,7 @@ export const api: jest.Mocked<IRuleMonitoringApiClient> = {
           sequence: 0,
           level: LogLevel.info,
           type: RuleExecutionEventType['status-change'],
+          execution_id: 'execution-id-1',
           message: 'Rule changed status to "succeeded". Rule execution completed without errors',
         },
       ],

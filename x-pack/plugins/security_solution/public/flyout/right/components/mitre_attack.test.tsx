@@ -6,39 +6,42 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { MitreAttack } from './mitre_attack';
 import { RightPanelContext } from '../context';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
-import { mockSearchHit } from '../mocks/mock_context';
+import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
+
+const renderMitreAttack = (contextValue: RightPanelContext) =>
+  render(
+    <RightPanelContext.Provider value={contextValue}>
+      <MitreAttack />
+    </RightPanelContext.Provider>
+  );
 
 describe('<MitreAttack />', () => {
-  it('should render mitre attack information', () => {
+  it('should render mitre attack information', async () => {
     const contextValue = { searchHit: mockSearchHit } as unknown as RightPanelContext;
 
-    const { getByTestId } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <MitreAttack />
-      </RightPanelContext.Provider>
-    );
+    const { getByTestId } = renderMitreAttack(contextValue);
 
-    expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(MITRE_ATTACK_DETAILS_TEST_ID)).toBeInTheDocument();
+    await act(async () => {
+      expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(MITRE_ATTACK_DETAILS_TEST_ID)).toBeInTheDocument();
+    });
   });
 
-  it('should render empty component if missing mitre attack value', () => {
+  it('should render empty component if missing mitre attack value', async () => {
     const contextValue = {
       searchHit: {
         some_field: 'some_value',
       },
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <MitreAttack />
-      </RightPanelContext.Provider>
-    );
+    const { container } = renderMitreAttack(contextValue);
 
-    expect(container).toBeEmptyDOMElement();
+    await act(async () => {
+      expect(container).toBeEmptyDOMElement();
+    });
   });
 });

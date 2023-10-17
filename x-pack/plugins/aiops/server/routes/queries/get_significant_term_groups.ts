@@ -33,7 +33,7 @@ export function getSignificantTermGroups(
   // and then summarize them in larger groups where possible.
 
   // Get a tree structure based on `frequent_item_sets`.
-  const { root } = getSimpleHierarchicalTree(itemsets, false, false, fields);
+  const { root } = getSimpleHierarchicalTree(itemsets, false, false, significantTerms, fields);
 
   // Each leave of the tree will be a summarized group of co-occuring field/value pairs.
   const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);

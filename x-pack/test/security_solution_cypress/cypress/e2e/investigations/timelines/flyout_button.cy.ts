@@ -10,7 +10,8 @@ import { CREATE_NEW_TIMELINE, TIMELINE_FLYOUT_HEADER } from '../../../screens/ti
 import { cleanKibana } from '../../../tasks/common';
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeTimelineUsingCloseButton,
   closeTimelineUsingToggle,
@@ -21,7 +22,7 @@ import {
   openCreateTimelineOptionsPopover,
 } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 describe('timeline flyout button', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
@@ -30,7 +31,7 @@ describe('timeline flyout button', { tags: ['@ess', '@brokenInServerless'] }, ()
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
   });
 

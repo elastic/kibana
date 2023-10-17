@@ -7,8 +7,9 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   createListsIndex,
   waitForValueListsModalToBeLoaded,
@@ -31,10 +32,6 @@ import {
 } from '../../../screens/lists';
 import { refreshIndex } from '../../../tasks/api_calls/elasticsearch';
 
-const TEXT_LIST_FILE_NAME = 'value_list.txt';
-const IPS_LIST_FILE_NAME = 'ip_list.txt';
-const CIDRS_LIST_FILE_NAME = 'cidr_list.txt';
-
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165699
 describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
@@ -48,7 +45,7 @@ describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, 
         KNOWN_VALUE_LIST_FILES.CIDRs,
       ]);
       createListsIndex();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      visit(RULES_MANAGEMENT_URL);
       waitForListsIndex();
       waitForValueListsModalToBeLoaded();
     });
@@ -272,7 +269,7 @@ describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, 
     () => {
       it('Does not allow a t1 analyst user to upload a value list', () => {
         login(ROLES.t1_analyst);
-        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
+        visit(RULES_MANAGEMENT_URL, { role: ROLES.t1_analyst });
         cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
       });
     }

@@ -437,6 +437,7 @@ describe('useTimeline', () => {
           expect(props.chatService.executeFunction).toHaveBeenCalledWith({
             name: 'my_function',
             args: '{}',
+            connectorId: 'foo',
             messages: [
               {
                 '@timestamp': expect.any(String),

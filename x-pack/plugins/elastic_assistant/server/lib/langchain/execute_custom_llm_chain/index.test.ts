@@ -8,11 +8,13 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
-import { ResponseBody } from '../helpers';
+import { ResponseBody } from '../types';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
-import { mockActionResultData } from '../../../__mocks__/action_result_data';
+import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
-import { executeCustomLlmChain } from '.';
+import { callAgentExecutor } from '.';
+import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 jest.mock('../llm/actions_client_llm');
 
@@ -21,7 +23,16 @@ const mockConversationChain = {
 };
 
 jest.mock('langchain/chains', () => ({
-  ConversationChain: jest.fn().mockImplementation(() => mockConversationChain),
+  RetrievalQAChain: {
+    fromLLM: jest.fn().mockImplementation(() => mockConversationChain),
+  },
+}));
+
+const mockCall = jest.fn();
+jest.mock('langchain/agents', () => ({
+  initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
+    call: mockCall,
+  })),
 }));
 
 const mockConnectorId = 'mock-connector-id';
@@ -35,40 +46,47 @@ const mockRequest: KibanaRequest<unknown, unknown, any, any> = {} as KibanaReque
 >;
 
 const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
+const mockLogger = loggerMock.create();
+const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
-describe('executeCustomLlmChain', () => {
+describe('callAgentExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     ActionsClientLlm.prototype.getActionResultData = jest
       .fn()
-      .mockReturnValueOnce(mockActionResultData);
+      .mockReturnValueOnce(mockActionResponse);
   });
 
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
-    await executeCustomLlmChain({
+    await callAgentExecutor({
       actions: mockActions,
       connectorId: mockConnectorId,
+      esClient: esClientMock,
       langChainMessages,
+      logger: mockLogger,
       request: mockRequest,
     });
 
     expect(ActionsClientLlm).toHaveBeenCalledWith({
       actions: mockActions,
       connectorId: mockConnectorId,
+      logger: mockLogger,
       request: mockRequest,
     });
   });
 
   it('kicks off the chain with (only) the last message', async () => {
-    await executeCustomLlmChain({
+    await callAgentExecutor({
       actions: mockActions,
       connectorId: mockConnectorId,
+      esClient: esClientMock,
       langChainMessages,
+      logger: mockLogger,
       request: mockRequest,
     });
 
-    expect(mockConversationChain.call).toHaveBeenCalledWith({
+    expect(mockCall).toHaveBeenCalledWith({
       input: '\n\nDo you know my name?',
     });
   });
@@ -76,29 +94,33 @@ describe('executeCustomLlmChain', () => {
   it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
     const onlyOneMessage = [langChainMessages[0]];
 
-    await executeCustomLlmChain({
+    await callAgentExecutor({
       actions: mockActions,
       connectorId: mockConnectorId,
+      esClient: esClientMock,
       langChainMessages: onlyOneMessage,
+      logger: mockLogger,
       request: mockRequest,
     });
 
-    expect(mockConversationChain.call).toHaveBeenCalledWith({
+    expect(mockCall).toHaveBeenCalledWith({
       input: 'What is my name?',
     });
   });
 
   it('returns the expected response body', async () => {
-    const result: ResponseBody = await executeCustomLlmChain({
+    const result: ResponseBody = await callAgentExecutor({
       actions: mockActions,
       connectorId: mockConnectorId,
+      esClient: esClientMock,
       langChainMessages,
+      logger: mockLogger,
       request: mockRequest,
     });
 
     expect(result).toEqual({
       connector_id: 'mock-connector-id',
-      data: mockActionResultData,
+      data: mockActionResponse,
       status: 'ok',
     });
   });

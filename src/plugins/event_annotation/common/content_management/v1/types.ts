@@ -79,8 +79,6 @@ export type EventAnnotationGroupGetOut = GetResult<
 // ----------- CREATE --------------
 
 export interface CreateOptions {
-  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
-  overwrite?: boolean;
   /** Array of referenced saved objects. */
   references?: Reference[];
 }

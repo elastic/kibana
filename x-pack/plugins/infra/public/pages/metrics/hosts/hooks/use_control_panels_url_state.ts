@@ -11,6 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { useMemo } from 'react';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
@@ -50,7 +51,7 @@ const availableControlPanelFields = Object.values(availableControlsPanels);
 export const useControlPanels = (
   dataView: DataView | undefined
 ): [ControlPanels, (state: ControlPanels) => void] => {
-  const defaultState = getVisibleControlPanelsConfig(dataView);
+  const defaultState = useMemo(() => getVisibleControlPanelsConfig(dataView), [dataView]);
 
   const [controlPanels, setControlPanels] = useUrlState<ControlPanels>({
     defaultState,

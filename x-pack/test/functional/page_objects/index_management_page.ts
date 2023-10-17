@@ -11,7 +11,6 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const log = getService('log');
 
   return {
     async sectionHeadingText() {
@@ -30,28 +29,54 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
     },
 
-    async clickDetailPanelTabAt(indexOfTab: number): Promise<void> {
-      const tabList = await testSubjects.findAll('detailPanelTab');
-      log.debug(tabList.length);
-      await tabList[indexOfTab].click();
+    async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const policyDetailsLinks = await testSubjects.findAll('enrichPolicyDetailsLink');
+      await policyDetailsLinks[indexOfRow].click();
+    },
+
+    async clickDataStreamAt(indexOfRow: number): Promise<void> {
+      const dataStreamLinks = await testSubjects.findAll('nameLink');
+      await dataStreamLinks[indexOfRow].click();
+    },
+
+    async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const deleteButons = await testSubjects.findAll('deletePolicyButton');
+      await deleteButons[indexOfRow].click();
+    },
+
+    async clickExecuteEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const executeButtons = await testSubjects.findAll('executePolicyButton');
+      await executeButtons[indexOfRow].click();
+    },
+
+    async clickConfirmModalButton(): Promise<void> {
+      await testSubjects.click('confirmModalConfirmButton');
+    },
+
+    async clickIndexDetailsTab(tabName: string): Promise<void> {
+      await testSubjects.click(`indexDetailsTab-${tabName}`);
+    },
+
+    async clickIndexDetailsEditSettingsSwitch(): Promise<void> {
+      await testSubjects.click('indexDetailsSettingsEditModeSwitch');
     },
 
     async clickIndexAt(indexOfRow: number): Promise<void> {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
-      await retry.waitFor('detail panel title to show up', async () => {
-        return (await testSubjects.isDisplayed('detailPanelTabSelected')) === true;
+      await retry.waitFor('details page title to show up', async () => {
+        return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
       });
     },
 
-    async performIndexActionInDetailPanel(action: string) {
-      await this.clickContextMenuInDetailPanel();
+    async performIndexAction(action: string) {
+      await this.clickContextMenu();
       if (action === 'flush') {
         await testSubjects.click('flushIndexMenuButton');
       }
     },
 
-    async clickContextMenuInDetailPanel() {
+    async clickContextMenu() {
       await testSubjects.click('indexActionsContextMenuButton');
     },
 
@@ -87,7 +112,12 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     },
 
     async changeTabs(
-      tab: 'indicesTab' | 'data_streamsTab' | 'templatesTab' | 'component_templatesTab'
+      tab:
+        | 'indicesTab'
+        | 'data_streamsTab'
+        | 'templatesTab'
+        | 'component_templatesTab'
+        | 'enrich_policiesTab'
     ) {
       await testSubjects.click(tab);
     },

@@ -25,7 +25,7 @@ import * as utils from '../utils';
 
 import { populateContext } from './engine';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
-import { URL_PATH_END_MARKER } from './components';
+import { URL_PATH_END_MARKER, ConstantComponent } from './components';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -980,10 +980,38 @@ export default function ({
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
-    const components = getTopLevelUrlCompleteComponents(context.method);
-    populateContext(ret.urlTokenPath, context, editor, true, components);
 
-    context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet!, 'endpoint');
+    const components = getTopLevelUrlCompleteComponents(context.method);
+    const { tokenPath, predicate } = (() => {
+      const lastUrlTokenPath =
+        Array.isArray(context.urlTokenPath) && context.urlTokenPath.length !== 0
+          ? context.urlTokenPath[context.urlTokenPath.length - 1]
+          : null;
+      // Checking the last chunk of path like 'c,d,' of 'GET /a/b/c,d,'
+      if (
+        Array.isArray(lastUrlTokenPath) &&
+        // true if neither c nor d equals to every ConstantComponent's name (such as _search)
+        !_.find(
+          components,
+          (c) => c instanceof ConstantComponent && _.find(lastUrlTokenPath, (p) => c.name === p)
+        )
+      ) {
+        // will simulate autocomplete on 'GET /a/b/' with a filter by index
+        return {
+          tokenPath: context.urlTokenPath?.slice(0, -1),
+          predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => term.meta === 'index',
+        };
+      } else {
+        // will do nothing special
+        return { tokenPath: context.urlTokenPath, predicate: () => true };
+      }
+    })();
+
+    populateContext(tokenPath, context, editor, true, components);
+    context.autoCompleteSet = _.filter(
+      addMetaToTermsList(context.autoCompleteSet!, 'endpoint'),
+      predicate
+    );
   }
 
   function addUrlParamsAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
@@ -1112,11 +1140,11 @@ export default function ({
     if (
       lastEvaluatedToken.position.column + 1 === currentToken.position.column &&
       lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      lastEvaluatedToken.type === 'url.slash' &&
+      (lastEvaluatedToken.type === 'url.slash' || lastEvaluatedToken.type === 'url.comma') &&
       currentToken.type === 'url.part' &&
       currentToken.value.length === 1
     ) {
-      // do not suppress autocomplete for a single character immediately following a slash in URL
+      // do not suppress autocomplete for a single character immediately following a slash or comma in URL
     } else if (
       lastEvaluatedToken.position.column < currentToken.position.column &&
       lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&

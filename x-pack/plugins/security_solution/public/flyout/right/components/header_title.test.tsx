@@ -10,17 +10,17 @@ import { render } from '@testing-library/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import {
-  FLYOUT_HEADER_CHAT_BUTTON_TEST_ID,
-  FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID,
-  FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID,
-  FLYOUT_HEADER_SHARE_BUTTON_TEST_ID,
+  CHAT_BUTTON_TEST_ID,
+  RISK_SCORE_VALUE_TEST_ID,
+  SEVERITY_TITLE_TEST_ID,
+  SHARE_BUTTON_TEST_ID,
   FLYOUT_HEADER_TITLE_TEST_ID,
 } from './test_ids';
 import { HeaderTitle } from './header_title';
-import { EVENT_DETAILS } from './translations';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
-import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useAssistant } from '../hooks/use_assistant';
 import { TestProvidersComponent } from '../../../common/mock';
 import { useGetAlertDetailsFlyoutLink } from '../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
@@ -64,8 +64,8 @@ describe('<HeaderTitle />', () => {
     const { getByTestId } = renderHeader(mockContextValue);
 
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RISK_SCORE_VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(SEVERITY_TITLE_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render rule name in the title if document is an alert', () => {
@@ -77,7 +77,7 @@ describe('<HeaderTitle />', () => {
   it('should render share button in the title', () => {
     const { getByTestId } = renderHeader(mockContextValue);
 
-    expect(getByTestId(FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should not render share button in the title if alert is missing url info', () => {
@@ -85,13 +85,13 @@ describe('<HeaderTitle />', () => {
 
     const { queryByTestId } = renderHeader(mockContextValue);
 
-    expect(queryByTestId(FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render chat button in the title', () => {
     const { getByTestId } = renderHeader(mockContextValue);
 
-    expect(getByTestId(FLYOUT_HEADER_CHAT_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CHAT_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should not render chat button in the title if should not be shown', () => {
@@ -99,7 +99,7 @@ describe('<HeaderTitle />', () => {
 
     const { queryByTestId } = renderHeader(mockContextValue);
 
-    expect(queryByTestId(FLYOUT_HEADER_CHAT_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(CHAT_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render default document detail title if document is not an alert', () => {
@@ -118,6 +118,6 @@ describe('<HeaderTitle />', () => {
 
     const { getByTestId } = renderHeader(contextValue);
 
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent(EVENT_DETAILS);
+    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Event details');
   });
 });

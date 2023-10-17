@@ -7,7 +7,9 @@
  */
 
 import React from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+
+import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
@@ -21,23 +23,27 @@ export type TextInputProps = InputProps<'string'>;
  * Component for manipulating a `string` field.
  */
 export const TextInput = ({
-  name,
-  onChange: onChangeProp,
-  ariaLabel,
-  id,
-  isDisabled = false,
-  value: valueProp,
-  ariaDescribedBy,
+  field,
+  unsavedChange,
+  isSavingEnabled,
+  onInputChange,
 }: TextInputProps) => {
-  const value = valueProp || '';
-  const onChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-    onChangeProp({ value: event.target.value });
+  const onChange: EuiFieldTextProps['onChange'] = (event) => {
+    const inputValue = event.target.value;
+    onUpdate({ type: field.type, unsavedValue: inputValue });
+  };
+
+  const onUpdate = useUpdate({ onInputChange, field });
+
+  const { id, name, ariaAttributes } = field;
+  const { ariaLabel, ariaDescribedBy } = ariaAttributes;
+  const [value] = getFieldInputValue(field, unsavedChange);
 
   return (
     <EuiFieldText
       fullWidth
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
-      disabled={isDisabled}
+      disabled={!isSavingEnabled}
       aria-label={ariaLabel}
       aria-describedby={ariaDescribedBy}
       {...{ name, onChange, value }}

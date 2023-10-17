@@ -48,7 +48,7 @@ export const convertHighlightedFieldsToPrevalenceFilters = (
 
     return {
       ...acc,
-      [curr]: { match: { [curr]: Array.isArray(values) ? values[0] : values } },
+      [curr]: { terms: { [curr]: values } },
     };
   }, []) as unknown as Record<string, QueryDslQueryContainer>;
 };

@@ -7,9 +7,10 @@ xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.disableProxies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
+xpack.fleet.internal.retrySetupOnBoot: true
 
 # Cloud links
-xpack.cloud.base_url: "https://cloud.elastic.co"
+xpack.cloud.base_url: 'https://cloud.elastic.co'
 
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
@@ -85,8 +86,11 @@ xpack.spaces.allowFeatureVisibility: false
 # Only display console autocomplete suggestions for ES endpoints that are available in serverless
 console.autocompleteDefinitions.endpointsAvailability: serverless
 
+# Do not check the ES version when running on Serverless
+elasticsearch.ignoreVersionMismatch: true
+
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
-elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
+elasticsearch.requestHeadersWhitelist: ['authorization', 'es-client-authentication']
 
 # Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
 elasticsearch.maxSockets: 800

@@ -6,7 +6,7 @@
  */
 
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
 
@@ -14,6 +14,7 @@ import { ProductLine, ProductTier } from '../../../common/product';
 
 import type { UsageRecord, MeteringCallbackInput } from '../../types';
 import type { ServerlessSecurityConfig } from '../../config';
+
 import { METERING_TASK } from '../constants/metering';
 
 export class EndpointMeteringService {
@@ -27,6 +28,7 @@ export class EndpointMeteringService {
     abortController,
     lastSuccessfulReport,
     config,
+    logger,
   }: MeteringCallbackInput): Promise<UsageRecord[]> => {
     this.setType(config);
     if (!this.type) {
@@ -52,6 +54,7 @@ export class EndpointMeteringService {
 
       const { agent, event } = _source;
       const record = this.buildMeteringRecord({
+        logger,
         agentId: agent.id,
         timestampStr: event.ingested,
         taskId,
@@ -87,11 +90,13 @@ export class EndpointMeteringService {
   }
 
   private buildMeteringRecord({
+    logger,
     agentId,
     timestampStr,
     taskId,
-    projectId = '',
+    projectId,
   }: {
+    logger: Logger;
     agentId: string;
     timestampStr: string;
     taskId: string;
@@ -102,10 +107,10 @@ export class EndpointMeteringService {
     timestamp.setSeconds(0);
     timestamp.setMilliseconds(0);
 
-    return {
+    const usageRecord = {
       // keep endpoint instead of this.type as id prefix so
       // we don't double count in the event of add-on changes
-      id: `endpoint-${agentId}-${timestamp}`,
+      id: `endpoint-${agentId}-${timestamp.toISOString()}`,
       usage_timestamp: timestampStr,
       creation_timestamp: timestampStr,
       usage: {
@@ -116,12 +121,18 @@ export class EndpointMeteringService {
       },
       source: {
         id: taskId,
-        instance_group_id: projectId,
+        instance_group_id: projectId || METERING_TASK.MISSING_PROJECT_ID,
         metadata: {
           tier: this.tier,
         },
       },
     };
+
+    if (!projectId) {
+      logger.error(`project id missing for record: ${JSON.stringify(usageRecord)}`);
+    }
+
+    return usageRecord;
   }
 
   private setType(config: ServerlessSecurityConfig) {

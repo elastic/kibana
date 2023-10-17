@@ -256,11 +256,8 @@
     },
     {
       "groupName": "cypress",
-      "matchPackageNames": [
-        "eslint-plugin-cypress"
-      ],
       "matchPackagePatterns": [
-        "^cypress"
+        "cypress"
       ],
       "reviewers": [
         "Team:apm",
@@ -286,7 +283,8 @@
         "tough-cookie",
         "@types/tough-cookie",
         "xml-crypto",
-        "@types/xml-crypto"
+        "@types/xml-crypto",
+        "@kayahr/text-encoding"
       ],
       "reviewers": [
         "team:kibana-security"

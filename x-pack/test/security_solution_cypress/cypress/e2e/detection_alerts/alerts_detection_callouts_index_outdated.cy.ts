@@ -7,11 +7,15 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
+import { ruleDetailsUrl } from '../../urls/rule_details';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
+
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
   getCallOut,
@@ -21,7 +25,7 @@ import {
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
   login(ROLES.soc_manager);
-  waitForPageWithoutDateRange(url, ROLES.soc_manager);
+  visit(url, { role: ROLES.soc_manager });
   waitForPageTitleToBeShown();
 };
 
@@ -38,7 +42,7 @@ describe(
       // First, we have to open the app on behalf of a privileged user in order to initialize it.
       // Otherwise the app will be disabled and show a "welcome"-like page.
       login();
-      visitWithoutDateRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForPageTitleToBeShown();
     });
 
@@ -70,7 +74,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {
@@ -119,7 +123,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {
@@ -168,7 +172,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {

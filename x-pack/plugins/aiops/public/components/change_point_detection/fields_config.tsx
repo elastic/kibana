@@ -356,6 +356,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
               <EuiSpacer size={'m'} />
 
               <EuiButton
+                data-test-subj="aiopsChangePointDetectionSubmitDashboardAttachButton"
                 fill
                 type={'submit'}
                 fullWidth
@@ -441,6 +442,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
           <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                data-test-subj="aiopsChangePointDetectionExpandConfigButton"
                 iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                 onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
                 aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
@@ -480,6 +482,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 id={`panelContextMenu_${panelIndex}`}
                 button={
                   <EuiButtonIcon
+                    data-test-subj="aiopsChangePointDetectionContextMenuButton"
                     aria-label={i18n.translate(
                       'xpack.aiops.changePointDetection.configActionsLabel',
                       {

@@ -22,7 +22,7 @@ import {
   THRESHOLD_RULE_REGISTRATION_CONTEXT,
 } from '../../common/constants';
 import { sloBurnRateRuleType } from './slo_burn_rate';
-import { thresholdRuleType } from './threshold/register_threshold_rule_type';
+import { thresholdRuleType } from './custom_threshold/register_custom_threshold_rule_type';
 import { sloRuleFieldMap } from './slo_burn_rate/field_map';
 
 export function registerRuleTypes(

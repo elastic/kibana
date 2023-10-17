@@ -17,6 +17,7 @@ export const MitreAttack: FC = () => {
   const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
 
   if (!threatDetails || !threatDetails[0]) {
+    // Do not render empty message on MITRE attack because other frameworks could be used
     return null;
   }
 

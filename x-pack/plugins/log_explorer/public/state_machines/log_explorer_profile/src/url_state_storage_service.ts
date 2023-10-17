@@ -11,15 +11,15 @@ import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/p
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import {
-  DATA_GRID_COLUMNS_PREFERENCES,
-  DATA_GRID_DEFAULT_COLUMNS,
-} from '../../../../common/constants';
-import {
   AllDatasetSelection,
   decodeDatasetSelectionId,
   hydrateDatasetSelection,
   isDatasetSelection,
-} from '../../../utils/dataset_selection';
+} from '../../../../common/dataset_selection';
+import {
+  DATA_GRID_COLUMNS_PREFERENCES,
+  DATA_GRID_DEFAULT_COLUMNS,
+} from '../../../../common/constants';
 import {
   ControlPanelRT,
   ControlPanels,

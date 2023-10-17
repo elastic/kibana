@@ -6,6 +6,7 @@
  */
 
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
+import { intersection as lodashIntersection, isArray } from 'lodash';
 
 import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
@@ -180,6 +181,11 @@ export const buildAlertRoot = (
   };
 };
 
+/**
+ * Merges array of alert sources with the first item in the array
+ * @param objects array of alert _source objects
+ * @returns singular object
+ */
 export const objectArrayIntersection = (objects: object[]) => {
   if (objects.length === 0) {
     return undefined;
@@ -195,6 +201,16 @@ export const objectArrayIntersection = (objects: object[]) => {
   }
 };
 
+/**
+ * Finds the intersection of two objects by recursively
+ * finding the "intersection" of each of of their common keys'
+ * values. If an intersection cannot be found between a key's
+ * values, the value will be undefined in the returned object.
+ *
+ * @param a object
+ * @param b object
+ * @returns intersection of the two objects
+ */
 export const objectPairIntersection = (a: object | undefined, b: object | undefined) => {
   if (a === undefined || b === undefined) {
     return undefined;
@@ -214,6 +230,12 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
         intersection[key] = objectPairIntersection(aVal, bVal);
       } else if (aVal === bVal) {
         intersection[key] = aVal;
+      } else if (isArray(aVal) && isArray(bVal)) {
+        intersection[key] = lodashIntersection(aVal, bVal);
+      } else if (isArray(aVal) && !isArray(bVal)) {
+        intersection[key] = lodashIntersection(aVal, [bVal]);
+      } else if (!isArray(aVal) && isArray(bVal)) {
+        intersection[key] = lodashIntersection([aVal], bVal);
       }
     }
   });

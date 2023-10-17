@@ -20,6 +20,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getSourcererScopeId } from '../../../helpers';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../common/search_strategy/security_solution/related_entities/related_users';
@@ -29,7 +30,7 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../explore/components/risk_score/severity/common';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
@@ -48,9 +49,7 @@ import { useHostRelatedUsers } from '../../../common/containers/related_entities
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HOST_DETAILS_TEST_ID, HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID } from './test_ids';
-import { ENTITY_RISK_CLASSIFICATION } from '../../../explore/components/risk_score/translations';
-import { USER_RISK_TOOLTIP } from '../../../explore/users/components/all_users/translations';
-import * as i18n from './translations';
+import { ENTITY_RISK_LEVEL } from '../../../explore/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
@@ -128,7 +127,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
     () => [
       {
         field: 'user',
-        name: i18n.RELATED_ENTITIES_NAME_COLUMN_TITLE,
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersNameColumnLabel"
+            defaultMessage="Name"
+          />
+        ),
         render: (user: string) => (
           <EuiText grow={false} size="xs">
             <SecurityCellActions
@@ -150,7 +154,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
       },
       {
         field: 'ip',
-        name: i18n.RELATED_ENTITIES_IP_COLUMN_TITLE,
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersIpColumnLabel"
+            defaultMessage="Ip addresses"
+          />
+        ),
         render: (ips: string[]) => {
           return (
             <DefaultFieldRenderer
@@ -167,20 +176,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         ? [
             {
               field: 'risk',
-              name: (
-                <EuiToolTip content={USER_RISK_TOOLTIP}>
-                  <>
-                    {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.user)}{' '}
-                    <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-                  </>
-                </EuiToolTip>
-              ),
+              name: ENTITY_RISK_LEVEL(RiskScoreEntity.user),
               truncateText: false,
               mobileOptions: { show: true },
               sortable: false,
               render: (riskScore: RiskSeverity) => {
                 if (riskScore != null) {
-                  return <RiskScore severity={riskScore} />;
+                  return <RiskScoreLevel severity={riskScore} />;
                 }
                 return getEmptyTagValue();
               },
@@ -199,7 +201,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
-            <EuiText>{`${i18n.RELATED_USERS_TITLE}: ${totalCount}`}</EuiText>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersCountLabel"
+                defaultMessage="Related users: {count}"
+                values={{ count: totalCount }}
+              />
+            </EuiText>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -215,7 +223,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   return (
     <>
       <EuiTitle size="xs">
-        <h4>{i18n.HOST_TITLE}</h4>
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
+            defaultMessage="Host"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <ExpandablePanel
@@ -228,7 +241,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         data-test-subj={HOST_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">
-          <h5>{i18n.HOSTS_INFO_TITLE}</h5>
+          <h4>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsInfoTitle"
+              defaultMessage="Host information"
+            />
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         <AnomalyTableProvider
@@ -263,11 +281,24 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
-                <h5>{i18n.RELATED_USERS_TITLE}</h5>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTitle"
+                    defaultMessage="Related users"
+                  />
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.RELATED_USERS_TOOL_TIP(hostName)}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTooltip"
+                    defaultMessage="After this alert was generated, these users logged into {hostName}. Check if this activity is normal."
+                    values={{ hostName }}
+                  />
+                }
+              >
                 <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
               </EuiToolTip>
             </EuiFlexItem>
@@ -287,11 +318,21 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               loading={isRelatedUsersLoading}
               data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
               pagination={pagination}
-              message={i18n.RELATED_USERS_TABLE_NO_DATA}
+              message={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersNoDataDescription"
+                  defaultMessage="No users identified"
+                />
+              }
             />
             <InspectButton
               queryId={relatedUsersQueryId}
-              title={i18n.RELATED_USERS_TITLE}
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersInspectButtonTitle"
+                  defaultMessage="Related users"
+                />
+              }
               inspectIndex={0}
             />
           </RelatedUsersManage>

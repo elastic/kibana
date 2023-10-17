@@ -8,9 +8,9 @@
 import { EuiSpacer } from '@elastic/eui';
 import type { VFC } from 'react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandableSection } from './expandable_section';
 import { ABOUT_SECTION_TEST_ID } from './test_ids';
-import { ABOUT_TITLE } from './translations';
 import { Description } from './description';
 import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
@@ -29,7 +29,12 @@ export const AboutSection: VFC<AboutSectionProps> = ({ expanded = true }) => {
   return (
     <ExpandableSection
       expanded={expanded}
-      title={ABOUT_TITLE}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.about.sectionTitle"
+          defaultMessage="About"
+        />
+      }
       data-test-subj={ABOUT_SECTION_TEST_ID}
     >
       <Description />

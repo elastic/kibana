@@ -9,6 +9,7 @@ import { recurse } from 'cypress-recurse';
 import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
+import { BASIC_TABLE_LOADING } from '../screens/common';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
@@ -83,6 +84,9 @@ import {
   PROVIDER_BADGE,
   PROVIDER_BADGE_DELETE,
   DISCOVER_TAB,
+  OPEN_TIMELINE_MODAL_TIMELINE_NAMES,
+  OPEN_TIMELINE_MODAL_SEARCH_BAR,
+  OPEN_TIMELINE_MODAL,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -98,7 +102,7 @@ export const addDescriptionToTimeline = (
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled').type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -108,7 +112,7 @@ export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = fals
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -137,8 +141,13 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 };
 
 export const gotToDiscoverTab = () => {
-  cy.get(DISCOVER_TAB).click();
-  cy.get(DISCOVER_TAB).should('have.class', 'euiTab-isSelected');
+  recurse(
+    () => cy.get(DISCOVER_TAB).click(),
+    ($el) => expect($el).to.have.class('euiTab-isSelected'),
+    {
+      delay: 500,
+    }
+  );
 };
 
 export const goToCorrelationTab = () => {
@@ -306,7 +315,7 @@ export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
   // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
@@ -487,3 +496,12 @@ export const setKibanaTimezoneToUTC = () =>
     .then(() => {
       cy.reload();
     });
+
+export const openTimelineFromOpenTimelineModal = (timelineName: string) => {
+  cy.get(OPEN_TIMELINE_MODAL_TIMELINE_NAMES).should('have.lengthOf.gt', 0);
+  cy.get(BASIC_TABLE_LOADING).should('not.exist');
+  cy.get(OPEN_TIMELINE_MODAL_SEARCH_BAR).type(`${timelineName}{enter}`);
+  cy.get(OPEN_TIMELINE_MODAL_TIMELINE_NAMES).should('have.lengthOf', 1);
+  cy.get(OPEN_TIMELINE_MODAL).should('contain.text', timelineName);
+  cy.get(OPEN_TIMELINE_MODAL_TIMELINE_NAMES).first().click();
+};

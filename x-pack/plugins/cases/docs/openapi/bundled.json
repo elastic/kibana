@@ -4579,6 +4579,54 @@
         ],
         "default": "low"
       },
+      "custom_fields_property": {
+        "type": "array",
+        "description": "Values for custom fields of a case",
+        "minItems": 0,
+        "maxItems": 5,
+        "items": {
+          "type": "object",
+          "required": [
+            "key",
+            "type",
+            "field"
+          ],
+          "properties": {
+            "key": {
+              "description": "The key identifying the custom field.",
+              "type": "string"
+            },
+            "type": {
+              "description": "The type of the custom field. Should match the key and how the custom field was configured",
+              "type": "string"
+            },
+            "field": {
+              "description": "An object containing the value of the field.",
+              "type": "object",
+              "required": [
+                "value"
+              ],
+              "properties": {
+                "value": {
+                  "description": "The value of the field.",
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "create_case_request": {
         "title": "Create case request",
         "description": "The create case API request body varies depending on the type of connector.",
@@ -4652,6 +4700,9 @@
             "description": "A title for the case.",
             "type": "string",
             "maxLength": 160
+          },
+          "customFields": {
+            "$ref": "#/components/schemas/custom_fields_property"
           }
         }
       },
@@ -5296,6 +5347,9 @@
                 "version": {
                   "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
                   "type": "string"
+                },
+                "customFields": {
+                  "$ref": "#/components/schemas/custom_fields_property"
                 }
               }
             }

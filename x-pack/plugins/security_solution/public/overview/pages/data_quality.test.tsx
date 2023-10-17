@@ -82,7 +82,7 @@ describe('DataQuality', () => {
   const defaultIlmPhases = `${HOT}${WARM}${UNMANAGED}`;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);

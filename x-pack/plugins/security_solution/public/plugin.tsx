@@ -95,7 +95,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-    this.contract = new PluginContract();
+    this.contract = new PluginContract(this.experimentalFeatures);
     this.telemetry = new TelemetryService();
     this.storage = new Storage(window.localStorage);
   }
@@ -187,6 +187,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...this.contract.getStartServices(),
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+        setHeaderActionMenu: params.setHeaderActionMenu,
         storage: this.storage,
         sessionStorage: this.sessionStorage,
         security: startPluginsDeps.security,
@@ -225,6 +226,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const services = await startServices(params);
         await this.registerActions(store, params.history, services);
 
+        const subscriptionTrackingServices = {
+          analyticsClient: coreStart.analytics,
+          navigateToApp: coreStart.application.navigateToApp,
+        };
+
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
 
@@ -238,6 +244,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             coreStart.application.capabilities,
             services
           ),
+          subscriptionTrackingServices,
         });
       },
     });
@@ -511,9 +518,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
-    const { upsellingService, appLinksSwitcher } = this.contract;
+    const { upsellingService, appLinksSwitcher, deepLinksFormatter } = this.contract;
 
-    registerDeepLinksUpdater(this.appUpdater$);
+    registerDeepLinksUpdater(this.appUpdater$, deepLinksFormatter);
 
     const baseLinksPermissions: LinksPermissions = {
       experimentalFeatures: this.experimentalFeatures,

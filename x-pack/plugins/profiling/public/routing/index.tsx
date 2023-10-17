@@ -9,8 +9,12 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { StackTracesDisplayOption, TopNType } from '@kbn/profiling-utils';
-import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
+import {
+  StackTracesDisplayOption,
+  TopNType,
+  TopNFunctionSortField,
+  topNFunctionSortFieldRt,
+} from '@kbn/profiling-utils';
 import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
@@ -28,8 +32,21 @@ import { StackTracesView } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
 import { DeleteDataView } from '../views/delete_data_view';
+import { Settings } from '../views/settings';
 
 const routes = {
+  '/settings': {
+    element: (
+      <RouteBreadcrumb
+        title={i18n.translate('xpack.profiling.breadcrumb.settings', {
+          defaultMessage: 'Settings',
+        })}
+        href="/settings"
+      >
+        <Settings />
+      </RouteBreadcrumb>
+    ),
+  },
   '/': {
     element: (
       <RouteBreadcrumb

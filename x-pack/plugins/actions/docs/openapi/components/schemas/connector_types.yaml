@@ -20,6 +20,7 @@ enum:
   - .swimlane
   - .teams
   - .tines
+  - .torq
   - .webhook
   - .xmatters
 example: .server-log

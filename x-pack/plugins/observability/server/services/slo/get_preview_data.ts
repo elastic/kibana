@@ -16,12 +16,13 @@ import {
   KQLCustomIndicator,
   MetricCustomIndicator,
 } from '@kbn/slo-schema';
+import { assertNever } from '@kbn/std';
 import { APMTransactionDurationIndicator } from '../../domain/models';
 import { computeSLI } from '../../domain/services';
 import { InvalidQueryError } from '../../errors';
 import {
-  GetHistogramIndicatorAggregation,
   GetCustomMetricIndicatorAggregation,
+  GetHistogramIndicatorAggregation,
 } from './aggregations';
 
 export class GetPreviewData {
@@ -299,19 +300,24 @@ export class GetPreviewData {
   }
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
-    switch (params.indicator.type) {
-      case 'sli.apm.transactionDuration':
-        return this.getAPMTransactionDurationPreviewData(params.indicator);
-      case 'sli.apm.transactionErrorRate':
-        return this.getAPMTransactionErrorPreviewData(params.indicator);
-      case 'sli.kql.custom':
-        return this.getCustomKQLPreviewData(params.indicator);
-      case 'sli.histogram.custom':
-        return this.getHistogramPreviewData(params.indicator);
-      case 'sli.metric.custom':
-        return this.getCustomMetricPreviewData(params.indicator);
-      default:
-        return [];
+    try {
+      const type = params.indicator.type;
+      switch (type) {
+        case 'sli.apm.transactionDuration':
+          return this.getAPMTransactionDurationPreviewData(params.indicator);
+        case 'sli.apm.transactionErrorRate':
+          return this.getAPMTransactionErrorPreviewData(params.indicator);
+        case 'sli.kql.custom':
+          return this.getCustomKQLPreviewData(params.indicator);
+        case 'sli.histogram.custom':
+          return this.getHistogramPreviewData(params.indicator);
+        case 'sli.metric.custom':
+          return this.getCustomMetricPreviewData(params.indicator);
+        default:
+          assertNever(type);
+      }
+    } catch (err) {
+      return [];
     }
   }
 }

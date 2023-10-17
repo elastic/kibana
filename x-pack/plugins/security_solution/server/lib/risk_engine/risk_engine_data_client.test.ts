@@ -562,7 +562,7 @@ describe('RiskEngineDataClient', () => {
               namespace: 'default',
             });
             expect(status).toEqual({
-              isMaxAmountOfRiskEnginesReached: false,
+              isMaxAmountOfRiskEnginesReached: true,
               riskEngineStatus: 'ENABLED',
               legacyRiskEngineStatus: 'NOT_INSTALLED',
             });

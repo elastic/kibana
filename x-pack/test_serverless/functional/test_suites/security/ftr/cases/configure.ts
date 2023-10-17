@@ -15,8 +15,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   describe('Configure Case', function () {
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
 
@@ -33,6 +36,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
+      // Error: Expected the radio group value to equal "close-by-pushing" (got "close-by-user")
+      this.tags(['failsOnMKI']);
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
@@ -47,7 +52,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
+        await retry.waitFor('dropdown-connector-no-connector to exist', async () => {
+          return await testSubjects.exists('dropdown-connector-no-connector');
+        });
       });
 
       it('opens and closes the connectors flyout correctly', async () => {

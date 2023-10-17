@@ -9,6 +9,7 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { DataViewBase } from '@kbn/es-query';
+import type { RunTimeMappings } from '../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getAlertIndexAlias } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
@@ -86,7 +87,7 @@ export const useEventDetails = ({
     useTimelineEventsDetails({
       indexName: eventIndex,
       eventId: eventId ?? '',
-      runtimeMappings: sourcererDataView.runtimeMappings,
+      runtimeMappings: sourcererDataView.runtimeMappings as RunTimeMappings,
       skip: !eventId,
     });
   const getFieldsData = useGetFieldsData(searchHit?.fields);

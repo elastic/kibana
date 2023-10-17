@@ -12,7 +12,7 @@ import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import {
   THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
-  THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID,
+  THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID,
 } from './test_ids';
 import { ThreatIntelligenceDetails } from './threat_intelligence_details';
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
@@ -38,7 +38,7 @@ const defaultContextValue = {
 } as unknown as LeftPanelContext;
 
 // Renders System Under Test
-const renderSUT = (contextValue: LeftPanelContext) =>
+const renderThreatIntelligenceDetails = (contextValue: LeftPanelContext) =>
   render(
     <TestProviders>
       <LeftPanelContext.Provider value={contextValue}>
@@ -59,7 +59,7 @@ describe('<ThreatIntelligenceDetails />', () => {
       eventFields: {},
     });
 
-    const wrapper = renderSUT(defaultContextValue);
+    const wrapper = renderThreatIntelligenceDetails(defaultContextValue);
 
     expect(
       wrapper.getByTestId(THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID)
@@ -79,9 +79,9 @@ describe('<ThreatIntelligenceDetails />', () => {
       eventFields: {},
     });
 
-    const wrapper = renderSUT(defaultContextValue);
+    const wrapper = renderThreatIntelligenceDetails(defaultContextValue);
 
-    expect(wrapper.getByTestId(THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
 
     expect(useThreatIntelligenceDetails).toHaveBeenCalled();
   });

@@ -164,6 +164,13 @@ paths:
   # K8s
   /kubernetes:
     $ref: paths/kubernetes.yaml
+
+  # Uninstall tokens
+  /uninstall_tokens:
+    $ref: paths/uninstall_tokens.yaml
+  /uninstall_tokens/{uninstallTokenId}:
+    $ref: paths/uninstall_tokens@{uninstall_token_id}.yaml
+
 components:
   securitySchemes:
     basicAuth:

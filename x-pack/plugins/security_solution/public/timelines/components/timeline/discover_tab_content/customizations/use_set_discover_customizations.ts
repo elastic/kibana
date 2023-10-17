@@ -11,7 +11,6 @@ import { useSearchBarCustomizations } from './use_search_bar_customizations';
 
 export const useSetDiscoverCustomizationCallbacks = (): CustomizationCallback[] => {
   const searchBarCustomizationCallback = useSearchBarCustomizations();
-
   const histogramCustomizationCallback = useHistogramCustomization();
 
   return [searchBarCustomizationCallback, histogramCustomizationCallback];

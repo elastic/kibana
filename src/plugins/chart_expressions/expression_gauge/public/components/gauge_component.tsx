@@ -246,10 +246,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const onRenderChange = useCallback(
       (isRendered: boolean = true) => {
         if (isRendered) {
-          // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-          window.requestAnimationFrame(() => {
-            renderComplete();
-          });
+          renderComplete();
         }
       },
       [renderComplete]

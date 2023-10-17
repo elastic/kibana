@@ -39,7 +39,7 @@ const renderSessionPreview = () =>
 
 describe('SessionPreview', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders session preview with all data', () => {

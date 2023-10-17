@@ -9,13 +9,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiPageBody } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 import type { ClosureType } from '../../containers/configure/types';
 
@@ -29,7 +30,12 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
+import { CustomFields } from '../custom_fields';
+import { CustomFieldFlyout } from '../custom_fields/flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
+import { addOrReplaceCustomField } from '../custom_fields/utils';
+import { useLicense } from '../../common/use_license';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -53,6 +59,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
+  const license = useLicense();
+  const hasMinimumLicensePermissions = license.isAtLeastGold();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -60,18 +68,29 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
     null
   );
+  const [customFieldFlyoutVisible, setCustomFieldFlyoutVisibility] = useState<boolean>(false);
+  const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
 
   const {
-    connector,
-    closureType,
-    loading: loadingCaseConfigure,
-    mappings,
-    persistLoading,
-    persistCaseConfigure,
-    refetchCaseConfigure,
-    setConnector,
-    setClosureType,
-  } = useCaseConfigure();
+    data: {
+      id: configurationId,
+      version: configurationVersion,
+      closureType,
+      connector,
+      mappings,
+      customFields,
+    },
+    isLoading: loadingCaseConfigure,
+    refetch: refetchCaseConfigure,
+  } = useGetCaseConfiguration();
+
+  const {
+    mutate: persistCaseConfigure,
+    mutateAsync: persistCaseConfigureAsync,
+    isLoading: isPersistingConfiguration,
+  } = usePersistConfiguration();
+
+  const isLoadingCaseConfiguration = loadingCaseConfigure || isPersistingConfiguration;
 
   const {
     isLoading: isLoadingConnectors,
@@ -98,18 +117,31 @@ export const ConfigureCases: React.FC = React.memo(() => {
     async (createdConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 
-      await persistCaseConfigure({
+      await persistCaseConfigureAsync({
         connector: caseConnector,
         closureType,
+        customFields,
+        id: configurationId,
+        version: configurationVersion,
       });
+
       onConnectorUpdated(createdConnector);
-      setConnector(caseConnector);
     },
-    [onConnectorUpdated, closureType, setConnector, persistCaseConfigure]
+    [
+      persistCaseConfigureAsync,
+      closureType,
+      customFields,
+      configurationId,
+      configurationVersion,
+      onConnectorUpdated,
+    ]
   );
 
   const isLoadingAny =
-    isLoadingConnectors || persistLoading || loadingCaseConfigure || isLoadingActionTypes;
+    isLoadingConnectors ||
+    isPersistingConfiguration ||
+    loadingCaseConfigure ||
+    isLoadingActionTypes;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
@@ -133,24 +165,35 @@ export const ConfigureCases: React.FC = React.memo(() => {
       const caseConnector =
         actionConnector != null ? normalizeActionConnector(actionConnector) : getNoneConnector();
 
-      setConnector(caseConnector);
       persistCaseConfigure({
         connector: caseConnector,
         closureType,
+        customFields,
+        id: configurationId,
+        version: configurationVersion,
       });
     },
-    [connectors, closureType, persistCaseConfigure, setConnector]
+    [
+      connectors,
+      persistCaseConfigure,
+      closureType,
+      customFields,
+      configurationId,
+      configurationVersion,
+    ]
   );
 
   const onChangeClosureType = useCallback(
     (type: ClosureType) => {
-      setClosureType(type);
       persistCaseConfigure({
         connector,
+        customFields,
+        id: configurationId,
+        version: configurationVersion,
         closureType: type,
       });
     },
-    [connector, persistCaseConfigure, setClosureType]
+    [configurationId, configurationVersion, connector, customFields, persistCaseConfigure]
   );
 
   useEffect(() => {
@@ -202,6 +245,88 @@ export const ConfigureCases: React.FC = React.memo(() => {
     [connector.id, editedConnectorItem, editFlyoutVisible]
   );
 
+  const onAddCustomFields = useCallback(() => {
+    setCustomFieldFlyoutVisibility(true);
+  }, [setCustomFieldFlyoutVisibility]);
+
+  const onDeleteCustomField = useCallback(
+    (key: string) => {
+      const remainingCustomFields = customFields.filter((field) => field.key !== key);
+
+      persistCaseConfigure({
+        connector,
+        customFields: [...remainingCustomFields],
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+      });
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onEditCustomField = useCallback(
+    (key: string) => {
+      const selectedCustomField = customFields.find((item) => item.key === key);
+
+      if (selectedCustomField) {
+        setCustomFieldToEdit(selectedCustomField);
+      }
+      setCustomFieldFlyoutVisibility(true);
+    },
+    [setCustomFieldFlyoutVisibility, setCustomFieldToEdit, customFields]
+  );
+
+  const onCloseAddFieldFlyout = useCallback(() => {
+    setCustomFieldFlyoutVisibility(false);
+    setCustomFieldToEdit(null);
+  }, [setCustomFieldFlyoutVisibility, setCustomFieldToEdit]);
+
+  const onSaveCustomField = useCallback(
+    (customFieldData: CustomFieldConfiguration) => {
+      const updatedFields = addOrReplaceCustomField(customFields, customFieldData);
+      persistCaseConfigure({
+        connector,
+        customFields: updatedFields,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+      });
+
+      setCustomFieldFlyoutVisibility(false);
+      setCustomFieldToEdit(null);
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      persistCaseConfigure,
+    ]
+  );
+
+  const CustomFieldAddFlyout = customFieldFlyoutVisible ? (
+    <CustomFieldFlyout
+      isLoading={loadingCaseConfigure || isPersistingConfiguration}
+      disabled={
+        !permissions.create ||
+        !permissions.update ||
+        loadingCaseConfigure ||
+        isPersistingConfiguration
+      }
+      customField={customFieldToEdit}
+      onCloseFlyout={onCloseAddFieldFlyout}
+      onSaveField={onSaveCustomField}
+    />
+  ) : null;
+
   return (
     <>
       <HeaderPage
@@ -212,50 +337,67 @@ export const ConfigureCases: React.FC = React.memo(() => {
       />
       <EuiPageBody restrictWidth={true}>
         <FormWrapper>
-          {!connectorIsValid && (
-            <SectionWrapper style={{ marginTop: 0 }}>
-              <EuiCallOut
-                title={i18n.WARNING_NO_CONNECTOR_TITLE}
-                color="warning"
-                iconType="help"
-                data-test-subj="configure-cases-warning-callout"
-              >
-                <FormattedMessage
-                  defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
-                  id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
-                  values={{
-                    appropriateLicense: (
-                      <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
-                        {i18n.LINK_APPROPRIATE_LICENSE}
-                      </EuiLink>
-                    ),
-                  }}
+          {hasMinimumLicensePermissions && (
+            <>
+              {!connectorIsValid && (
+                <SectionWrapper style={{ marginTop: 0 }}>
+                  <EuiCallOut
+                    title={i18n.WARNING_NO_CONNECTOR_TITLE}
+                    color="warning"
+                    iconType="help"
+                    data-test-subj="configure-cases-warning-callout"
+                  >
+                    <FormattedMessage
+                      defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+                      id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+                      values={{
+                        appropriateLicense: (
+                          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                            {i18n.LINK_APPROPRIATE_LICENSE}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiCallOut>
+                </SectionWrapper>
+              )}
+              <SectionWrapper>
+                <ClosureOptions
+                  closureTypeSelected={closureType}
+                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  onChangeClosureType={onChangeClosureType}
                 />
-              </EuiCallOut>
-            </SectionWrapper>
+              </SectionWrapper>
+              <SectionWrapper>
+                <Connectors
+                  actionTypes={actionTypes}
+                  connectors={connectors ?? []}
+                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  handleShowEditFlyout={onClickUpdateConnector}
+                  isLoading={isLoadingAny}
+                  mappings={mappings}
+                  onChangeConnector={onChangeConnector}
+                  selectedConnector={connector}
+                  updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
+                />
+              </SectionWrapper>
+            </>
           )}
           <SectionWrapper>
-            <ClosureOptions
-              closureTypeSelected={closureType}
-              disabled={persistLoading || isLoadingConnectors || !permissions.update}
-              onChangeClosureType={onChangeClosureType}
-            />
-          </SectionWrapper>
-          <SectionWrapper>
-            <Connectors
-              actionTypes={actionTypes}
-              connectors={connectors ?? []}
-              disabled={persistLoading || isLoadingConnectors || !permissions.update}
-              handleShowEditFlyout={onClickUpdateConnector}
-              isLoading={isLoadingAny}
-              mappings={mappings}
-              onChangeConnector={onChangeConnector}
-              selectedConnector={connector}
-              updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
-            />
+            <EuiFlexItem grow={false}>
+              <CustomFields
+                customFields={customFields}
+                isLoading={isLoadingCaseConfiguration}
+                disabled={isLoadingCaseConfiguration}
+                handleAddCustomField={onAddCustomFields}
+                handleDeleteCustomField={onDeleteCustomField}
+                handleEditCustomField={onEditCustomField}
+              />
+            </EuiFlexItem>
           </SectionWrapper>
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}
+          {CustomFieldAddFlyout}
         </FormWrapper>
       </EuiPageBody>
     </>

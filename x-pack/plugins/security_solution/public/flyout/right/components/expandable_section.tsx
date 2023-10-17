@@ -6,6 +6,7 @@
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import type { ReactElement } from 'react';
 import React, { type VFC } from 'react';
 import { useAccordionState } from '../hooks/use_accordion_state';
 
@@ -20,7 +21,7 @@ export interface DescriptionSectionProps {
   /**
    * Title value to render in the header of the accordion
    */
-  title: string;
+  title: ReactElement;
   /**
    * React component to render in the expandable section of the accordion
    */

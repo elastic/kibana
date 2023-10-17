@@ -1,5 +1,11 @@
 title: Connector request properties for a Tines connector
 description: Defines properties for connectors when type is `.tines`.
 type: object
-additionalProperties: true
-# TO-DO: Add the properties for this connector.
+required:
+  - url
+properties:
+  url:
+    description: >
+      The Tines tenant URL.
+      If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
+    type: string

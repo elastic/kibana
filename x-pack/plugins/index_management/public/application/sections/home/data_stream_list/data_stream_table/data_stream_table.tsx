@@ -8,7 +8,14 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiLink,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { DataStream } from '../../../../../../common/types';
@@ -71,7 +78,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (health: DataStream['health']) => {
       return <DataHealth health={health} />;
     },
-    width: '100px',
   });
 
   if (includeStats) {
@@ -80,7 +86,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {
         defaultMessage: 'Last updated',
       }),
-      width: '300px',
       truncateText: true,
       sortable: true,
       render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
@@ -118,6 +123,28 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         {indices.length}
       </EuiLink>
     ),
+  });
+
+  columns.push({
+    field: 'lifecycle',
+    name: (
+      <EuiToolTip
+        content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
+          defaultMessage:
+            '[Technical preview] Data will be kept at least this long before it is automatically deleted. Only applies to data streams managed by a data stream lifecycle. This value might not apply to all data if the data stream also has an index lifecycle policy.',
+        })}
+      >
+        <span>
+          {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
+            defaultMessage: 'Data retention',
+          })}{' '}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" />
+        </span>
+      </EuiToolTip>
+    ),
+    truncateText: true,
+    sortable: true,
+    render: (lifecycle: DataStream['lifecycle']) => lifecycle?.data_retention,
   });
 
   columns.push({

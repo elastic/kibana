@@ -34,11 +34,14 @@ post:
             - $ref: '../components/schemas/create_connector_request_swimlane.yaml'
             - $ref: '../components/schemas/create_connector_request_teams.yaml'
             - $ref: '../components/schemas/create_connector_request_tines.yaml'
+            - $ref: '../components/schemas/create_connector_request_torq.yaml'
             - $ref: '../components/schemas/create_connector_request_webhook.yaml'
             - $ref: '../components/schemas/create_connector_request_xmatters.yaml'
           discriminator:
             propertyName: connector_type_id
         examples:
+          createEmailConnectorRequest:
+            $ref: '../components/examples/create_email_connector_request.yaml'
           createIndexConnectorRequest:
             $ref: '../components/examples/create_index_connector_request.yaml'
           createWebhookConnectorRequest:
@@ -53,6 +56,8 @@ post:
           schema:
             $ref: '../components/schemas/connector_response_properties.yaml'
           examples:
+            createEmailConnectorResponse:
+              $ref: '../components/examples/create_email_connector_response.yaml'
             createIndexConnectorResponse:
               $ref: '../components/examples/create_index_connector_response.yaml'
             createWebhookConnectorResponse:

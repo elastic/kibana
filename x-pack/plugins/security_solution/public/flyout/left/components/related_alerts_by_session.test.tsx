@@ -38,6 +38,13 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID
 );
 
+const renderRelatedAlertsBySession = () =>
+  render(
+    <TestProviders>
+      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
+    </TestProviders>
+  );
+
 describe('<RelatedAlertsBySession />', () => {
   it('should render component correctly', () => {
     (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
@@ -73,11 +80,7 @@ describe('<RelatedAlertsBySession />', () => {
       ],
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
-      </TestProviders>
-    );
+    const { getByTestId } = renderRelatedAlertsBySession();
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
@@ -93,11 +96,24 @@ describe('<RelatedAlertsBySession />', () => {
       error: true,
     });
 
-    const { container } = render(
-      <TestProviders>
-        <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
-      </TestProviders>
-    );
+    const { container } = renderRelatedAlertsBySession();
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render no data message', () => {
+    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByText } = renderRelatedAlertsBySession();
+    expect(getByText('No alerts related by session.')).toBeInTheDocument();
   });
 });

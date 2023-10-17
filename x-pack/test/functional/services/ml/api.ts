@@ -223,7 +223,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createIndex(
       indices: string,
-      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping
+      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping,
+      settings?: Record<string, estypes.IndicesIndexSettings> | estypes.IndicesIndexSettings
     ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
@@ -233,7 +234,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       const body = await es.indices.create({
         index: indices,
-        ...(mappings ? { body: { mappings } } : {}),
+        body: {
+          ...(mappings ? { mappings } : {}),
+          ...(settings ? { settings } : {}),
+        },
       });
       expect(body)
         .to.have.property('acknowledged')
@@ -1494,7 +1498,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         });
       this.assertResponseStatusCode(200, status, ingestPipeline);
 
-      log.debug('> Ingest pipeline crated');
+      log.debug('> Ingest pipeline created');
       return ingestPipeline;
     },
 
@@ -1546,6 +1550,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, module);
 
       log.debug('Module set up');
+      return module;
+    },
+
+    async getModule(moduleId: string) {
+      log.debug(`Get module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .get(`/internal/ml/modules/get_module/${moduleId}`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
       return module;
     },
   };

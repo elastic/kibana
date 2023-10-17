@@ -203,6 +203,15 @@ describe('monitor availability', () => {
                     },
                   },
                   Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-2w",
@@ -382,6 +391,15 @@ describe('monitor availability', () => {
                   Object {
                     "exists": Object {
                       "field": "summary",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
                     },
                   },
                   Object {
@@ -711,6 +729,15 @@ describe('monitor availability', () => {
                     },
                   },
                   Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-3M",
@@ -811,6 +838,15 @@ describe('monitor availability', () => {
                     Object {
                       "exists": Object {
                         "field": "summary",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must_not": Object {
+                          "exists": Object {
+                            "field": "run_once",
+                          },
+                        },
                       },
                     },
                     Object {
@@ -938,6 +974,15 @@ describe('monitor availability', () => {
                   Object {
                     "exists": Object {
                       "field": "summary",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
                     },
                   },
                   Object {

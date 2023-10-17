@@ -27,6 +27,9 @@ export const AnalyzeGraph: FC = () => {
   );
   const filters = useMemo(() => ({ from, to }), [from, to]);
 
+  // TODO as part of https://github.com/elastic/security-team/issues/7032
+  //  bring back no data message if needed
+
   return (
     <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>
       <Resolver

@@ -16,6 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   describe('Configure Case', function () {
     before(async () => {
@@ -24,8 +25,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlObltNavigation.navigateToLandingPage();
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-
-      await common.clickAndValidate('configure-case-button', 'case-configure-title');
     });
 
     after(async () => {
@@ -34,6 +33,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
+      before(async () => {
+        await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      });
+
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
@@ -48,7 +51,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
+        await retry.waitFor('dropdown-connector-no-connector to exist', async () => {
+          return await testSubjects.exists('dropdown-connector-no-connector');
+        });
       });
 
       it('opens and closes the connectors flyout correctly', async () => {

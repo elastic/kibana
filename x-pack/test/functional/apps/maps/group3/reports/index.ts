@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('PNG file matches the baseline image, using sample geo data', async function () {
       await reporting.initEcommerce();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
       await PageObjects.reporting.openPngReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('PNG file matches the baseline image, using embeddable example', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.reporting.openPngReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();

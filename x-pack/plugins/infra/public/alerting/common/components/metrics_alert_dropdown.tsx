@@ -15,15 +15,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
-import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
+import { PrefilledMetricThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
+import { AlertFlyout as CustomThresholdAlertFlyout } from '../../custom_threshold';
 import { InfraClientStartDeps } from '../../../types';
 
-type VisibleFlyoutType = 'inventory' | 'threshold' | null;
+type VisibleFlyoutType = 'inventory' | 'metricThreshold' | 'customThreshold';
 
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType>(null);
+  const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType | null>(null);
   const uiCapabilities = useKibana().services.application?.capabilities;
   const {
     services: { observability },
@@ -32,6 +34,7 @@ export const MetricsAlertDropdown = () => {
     () => Boolean(uiCapabilities?.infrastructure?.save),
     [uiCapabilities]
   );
+  const { featureFlags } = usePluginConfig();
 
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);
 
@@ -78,7 +81,7 @@ export const MetricsAlertDropdown = () => {
           }),
           onClick: () => {
             closePopover();
-            setVisibleFlyoutType('threshold');
+            setVisibleFlyoutType('metricThreshold');
           },
         },
       ],
@@ -117,10 +120,24 @@ export const MetricsAlertDropdown = () => {
               }),
               panel: 2,
             },
+            ...(featureFlags.customThresholdAlertsEnabled
+              ? [
+                  {
+                    'data-test-subj': 'custom-threshold-alerts-menu-option',
+                    name: i18n.translate('xpack.infra.alerting.customThresholdDropdownMenu', {
+                      defaultMessage: 'Create custom threshold rule',
+                    }),
+                    onClick: () => {
+                      closePopover();
+                      setVisibleFlyoutType('customThreshold');
+                    },
+                  },
+                ]
+              : []),
             manageAlertsMenuItem,
           ]
         : [manageAlertsMenuItem],
-    [canCreateAlerts, manageAlertsMenuItem]
+    [canCreateAlerts, closePopover, featureFlags.customThresholdAlertsEnabled, manageAlertsMenuItem]
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
@@ -167,7 +184,7 @@ export const MetricsAlertDropdown = () => {
 };
 
 interface AlertFlyoutProps {
-  visibleFlyoutType: VisibleFlyoutType;
+  visibleFlyoutType: VisibleFlyoutType | null;
   onClose(): void;
 }
 
@@ -175,8 +192,10 @@ const AlertFlyout = ({ visibleFlyoutType, onClose }: AlertFlyoutProps) => {
   switch (visibleFlyoutType) {
     case 'inventory':
       return <PrefilledInventoryAlertFlyout onClose={onClose} />;
-    case 'threshold':
-      return <PrefilledThresholdAlertFlyout onClose={onClose} />;
+    case 'metricThreshold':
+      return <PrefilledMetricThresholdAlertFlyout onClose={onClose} />;
+    case 'customThreshold':
+      return <CustomThresholdAlertFlyout onClose={onClose} />;
     default:
       return null;
   }

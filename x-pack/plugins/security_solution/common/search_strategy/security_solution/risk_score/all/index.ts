@@ -5,27 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { ESQuery } from '../../../../typed_json';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
-import type { RiskScoreEntity } from '../common';
+import type { Inspect, Maybe, SortField } from '../../../common';
 import type { RiskInputs } from '../../../../risk_engine';
-
-export interface RiskScoreRequestOptions extends IEsSearchRequest {
-  defaultIndex: string[];
-  riskScoreEntity: RiskScoreEntity;
-  timerange?: TimerangeInput;
-  alertsTimerange?: TimerangeInput;
-  includeAlertsCount?: boolean;
-  onlyLatest?: boolean;
-  pagination?: {
-    cursorStart: number;
-    querySize: number;
-  };
-  sort?: RiskScoreSortField;
-  filterQuery?: ESQuery | string | undefined;
-}
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;

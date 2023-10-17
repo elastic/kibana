@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -66,6 +67,7 @@ export const registerMetricAnomalyRuleType = (
   },
   defaultActionGroupId: FIRED_ACTIONS_ID,
   actionGroups: [FIRED_ACTIONS],
+  category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'infrastructure',
   minimumLicenseRequired: 'basic',
   isExportable: true,

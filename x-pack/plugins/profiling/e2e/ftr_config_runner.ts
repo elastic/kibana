@@ -22,8 +22,12 @@ async function ftrConfigRun({ readConfigFile }: FtrConfigProviderContext) {
 async function testRunner(ftrProviderContext: FtrProviderContext) {
   const result = await cypressTestRunner({ ftrProviderContext, cypressExecution: cypress.run });
 
-  if (result && (result.status === 'failed' || result.totalFailed > 0)) {
-    process.exit(1);
+  if (
+    result &&
+    ((result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+      (result as CypressCommandLine.CypressRunResult)?.totalFailed)
+  ) {
+    process.exitCode = 1;
   }
 }
 

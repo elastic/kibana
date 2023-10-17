@@ -6,7 +6,6 @@
  */
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { isArray } from 'lodash/fp';
 import { useMemo } from 'react';
 import { useHighlightedFields } from './use_highlighted_fields';
 import { convertHighlightedFieldsToPrevalenceFilters } from '../utils/highlighted_fields_helpers';
@@ -24,7 +23,7 @@ import { EventKind } from '../constants/event_kinds';
 
 export interface PrevalenceData {
   field: string;
-  value: string;
+  values: string[];
   alertCount: number;
   docCount: number;
   hostPrevalence: number;
@@ -91,7 +90,7 @@ export const usePrevalence = ({
     const fieldNames = Object.keys(data.aggregations[FIELD_NAMES_AGG_KEY].buckets);
 
     fieldNames.forEach((fieldName: string) => {
-      const fieldValue = highlightedFields[fieldName].values;
+      const fieldValues = highlightedFields[fieldName].values;
 
       // retrieves the number of signals for the current field/value pair
       const alertCount =
@@ -131,7 +130,7 @@ export const usePrevalence = ({
 
       items.push({
         field: fieldName,
-        value: isArray(fieldValue) ? fieldValue[0] : fieldValue,
+        values: fieldValues,
         alertCount,
         docCount,
         hostPrevalence,

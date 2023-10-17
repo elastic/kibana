@@ -103,13 +103,7 @@ import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import {
-  getEsQueryConfig,
-  IKibanaSearchResponse,
-  isPartialResponse,
-  isCompleteResponse,
-  UI_SETTINGS,
-} from '../..';
+import { getEsQueryConfig, IKibanaSearchResponse, isRunningResponse, UI_SETTINGS } from '../..';
 import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
 import {
@@ -520,7 +514,7 @@ export class SearchSource {
             options.inspector?.adapter,
             options.abortSignal,
             options.sessionId,
-            options.disableShardFailureWarning
+            options.disableWarningToasts
           );
         }
       }
@@ -546,7 +540,7 @@ export class SearchSource {
         // For testing timeout messages in UI, uncomment the next line
         // response.rawResponse.timed_out = true;
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
-          if (isPartialResponse(response)) {
+          if (isRunningResponse(response)) {
             obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
@@ -582,7 +576,7 @@ export class SearchSource {
         });
       }),
       map((response) => {
-        if (!isCompleteResponse(response)) {
+        if (isRunningResponse(response)) {
           return response;
         }
         return onResponse(searchRequest, response, options);

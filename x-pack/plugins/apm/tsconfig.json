@@ -96,12 +96,14 @@
     "@kbn/discover-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/apm-data-access-plugin",
+    "@kbn/metrics-data-access-plugin",
     "@kbn/profiling-data-access-plugin",
     "@kbn/profiling-utils",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/monaco",
-    "@kbn/core-elasticsearch-server-internal"
+    "@kbn/shared-svg",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
 }

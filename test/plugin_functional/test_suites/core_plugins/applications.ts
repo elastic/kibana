@@ -49,7 +49,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const navigateTo = async (path: string) =>
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
-  describe('ui applications', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/166677
+  describe.skip('ui applications', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('foo');

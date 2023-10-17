@@ -13,7 +13,7 @@ import * as userInfo from '../../user_info';
 
 describe('need_admin_for_update_callout', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('hasIndexManage is "null"', () => {

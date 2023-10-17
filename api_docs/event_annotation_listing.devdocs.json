@@ -1,0 +1,349 @@
+{
+  "id": "eventAnnotationListing",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "eventAnnotationListing",
+        "id": "def-public.AnnotationEditorControls",
+        "type": "Function",
+        "tags": [],
+        "label": "AnnotationEditorControls",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotationListing",
+            "id": "def-public.AnnotationEditorControls.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotationListing",
+        "id": "def-public.getAnnotationAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "getAnnotationAccessor",
+        "description": [],
+        "signature": [
+          "(annotation: ",
+          {
+            "pluginId": "@kbn/event-annotation-common",
+            "scope": "common",
+            "docId": "kibKbnEventAnnotationCommonPluginApi",
+            "section": "def-common.EventAnnotationConfig",
+            "text": "EventAnnotationConfig"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.AccessorConfig",
+            "text": "AccessorConfig"
+          }
+        ],
+        "path": "packages/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotationListing",
+            "id": "def-public.getAnnotationAccessor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "annotation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/event-annotation-common",
+                "scope": "common",
+                "docId": "kibKbnEventAnnotationCommonPluginApi",
+                "section": "def-common.EventAnnotationConfig",
+                "text": "EventAnnotationConfig"
+              }
+            ],
+            "path": "packages/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotationListing",
+        "id": "def-public.isManualPointAnnotationConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "isManualPointAnnotationConfig",
+        "description": [],
+        "signature": [
+          "(annotation?: ",
+          {
+            "pluginId": "@kbn/event-annotation-common",
+            "scope": "common",
+            "docId": "kibKbnEventAnnotationCommonPluginApi",
+            "section": "def-common.EventAnnotationConfig",
+            "text": "EventAnnotationConfig"
+          },
+          " | undefined) => annotation is ",
+          {
+            "pluginId": "@kbn/event-annotation-common",
+            "scope": "common",
+            "docId": "kibKbnEventAnnotationCommonPluginApi",
+            "section": "def-common.PointInTimeEventAnnotationConfig",
+            "text": "PointInTimeEventAnnotationConfig"
+          }
+        ],
+        "path": "packages/kbn-event-annotation-common/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotationListing",
+            "id": "def-public.isManualPointAnnotationConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "annotation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/event-annotation-common",
+                "scope": "common",
+                "docId": "kibKbnEventAnnotationCommonPluginApi",
+                "section": "def-common.EventAnnotationConfig",
+                "text": "EventAnnotationConfig"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-event-annotation-common/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotationListing",
+        "id": "def-public.isQueryAnnotationConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "isQueryAnnotationConfig",
+        "description": [],
+        "signature": [
+          "(annotation?: ",
+          {
+            "pluginId": "@kbn/event-annotation-common",
+            "scope": "common",
+            "docId": "kibKbnEventAnnotationCommonPluginApi",
+            "section": "def-common.EventAnnotationConfig",
+            "text": "EventAnnotationConfig"
+          },
+          " | undefined) => annotation is ",
+          {
+            "pluginId": "@kbn/event-annotation-common",
+            "scope": "common",
+            "docId": "kibKbnEventAnnotationCommonPluginApi",
+            "section": "def-common.QueryPointEventAnnotationConfig",
+            "text": "QueryPointEventAnnotationConfig"
+          }
+        ],
+        "path": "packages/kbn-event-annotation-common/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotationListing",
+            "id": "def-public.isQueryAnnotationConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "annotation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/event-annotation-common",
+                "scope": "common",
+                "docId": "kibKbnEventAnnotationCommonPluginApi",
+                "section": "def-common.EventAnnotationConfig",
+                "text": "EventAnnotationConfig"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-event-annotation-common/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotationListing",
+        "id": "def-public.isRangeAnnotationConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "isRangeAnnotationConfig",
+        "description": [],
+        "signature": [
+          "(annotation?: ",
+          {
+            "pluginId": "@kbn/event-annotation-common",
+            "scope": "common",
+            "docId": "kibKbnEventAnnotationCommonPluginApi",
+            "section": "def-common.EventAnnotationConfig",
+            "text": "EventAnnotationConfig"
+          },
+          " | undefined) => annotation is ",
+          {
+            "pluginId": "@kbn/event-annotation-common",
+            "scope": "common",
+            "docId": "kibKbnEventAnnotationCommonPluginApi",
+            "section": "def-common.RangeEventAnnotationConfig",
+            "text": "RangeEventAnnotationConfig"
+          }
+        ],
+        "path": "packages/kbn-event-annotation-common/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotationListing",
+            "id": "def-public.isRangeAnnotationConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "annotation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/event-annotation-common",
+                "scope": "common",
+                "docId": "kibKbnEventAnnotationCommonPluginApi",
+                "section": "def-common.EventAnnotationConfig",
+                "text": "EventAnnotationConfig"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-event-annotation-common/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "eventAnnotationListing",
+        "id": "def-public.annotationsIconSet",
+        "type": "Array",
+        "tags": [],
+        "label": "annotationsIconSet",
+        "description": [],
+        "signature": [
+          "{ value: ",
+          {
+            "pluginId": "@kbn/event-annotation-common",
+            "scope": "common",
+            "docId": "kibKbnEventAnnotationCommonPluginApi",
+            "section": "def-common.AvailableAnnotationIcon",
+            "text": "AvailableAnnotationIcon"
+          },
+          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
+        ],
+        "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/icon_set.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotationListing",
+        "id": "def-public.defaultAnnotationColor",
+        "type": "string",
+        "tags": [],
+        "label": "defaultAnnotationColor",
+        "description": [],
+        "path": "packages/kbn-event-annotation-common/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotationListing",
+        "id": "def-public.defaultAnnotationRangeColor",
+        "type": "string",
+        "tags": [],
+        "label": "defaultAnnotationRangeColor",
+        "description": [],
+        "signature": [
+          "\"#F04E981A\""
+        ],
+        "path": "packages/kbn-event-annotation-common/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "eventAnnotationListing",
+      "id": "def-public.EventAnnotationListingPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "EventAnnotationListingPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/plugins/event_annotation_listing/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('runPipeline', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/60194
+  describe.skip('runPipeline', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {

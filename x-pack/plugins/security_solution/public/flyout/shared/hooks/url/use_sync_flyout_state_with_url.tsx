@@ -22,9 +22,18 @@ type FlyoutState = Parameters<ExpandableFlyoutApi['openFlyout']>[0];
 export const useSyncFlyoutStateWithUrl = () => {
   const flyoutApi = useRef<ExpandableFlyoutApi>(null);
 
-  const syncStateToUrl = useSyncToUrl<FlyoutState>(FLYOUT_URL_PARAM, (data) => {
-    flyoutApi.current?.openFlyout(data);
-  });
+  const handleRestoreFlyout = useCallback(
+    (state?: FlyoutState) => {
+      if (!state) {
+        return;
+      }
+
+      flyoutApi.current?.openFlyout(state);
+    },
+    [flyoutApi]
+  );
+
+  const syncStateToUrl = useSyncToUrl<FlyoutState>(FLYOUT_URL_PARAM, handleRestoreFlyout);
 
   // This should be bound to flyout changed and closed events.
   // When flyout is closed, url state is cleared

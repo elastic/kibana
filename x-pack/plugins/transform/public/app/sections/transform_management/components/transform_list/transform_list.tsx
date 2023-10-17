@@ -70,12 +70,19 @@ type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
   transforms: TransformListRow[],
-  onAlertEdit: (alertRule: TransformHealthAlertRule) => void
+  onAlertEdit: (alertRule: TransformHealthAlertRule) => void,
+  transformsStatsLoading: boolean
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
     const item = transforms.find((transform) => transform.config.id === transformId);
     if (item !== undefined) {
-      m[transformId] = <ExpandedRow item={item} onAlertEdit={onAlertEdit} />;
+      m[transformId] = (
+        <ExpandedRow
+          item={item}
+          onAlertEdit={onAlertEdit}
+          transformsStatsLoading={transformsStatsLoading}
+        />
+      );
     }
     return m;
   }, {} as ItemIdToExpandedRowMap);
@@ -87,6 +94,7 @@ interface TransformListProps {
   transformNodes: number;
   transforms: TransformListRow[];
   transformsLoading: boolean;
+  transformsStatsLoading: boolean;
 }
 
 export const TransformList: FC<TransformListProps> = ({
@@ -95,6 +103,7 @@ export const TransformList: FC<TransformListProps> = ({
   transformNodes,
   transforms,
   transformsLoading,
+  transformsStatsLoading,
 }) => {
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
@@ -126,7 +135,8 @@ export const TransformList: FC<TransformListProps> = ({
     expandedRowItemIds,
     setExpandedRowItemIds,
     transformNodes,
-    transformSelection
+    transformSelection,
+    transformsStatsLoading
   );
 
   const searchError = query?.error ? query?.error.message : undefined;
@@ -166,7 +176,8 @@ export const TransformList: FC<TransformListProps> = ({
   const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(
     expandedRowItemIds,
     transforms,
-    setEditAlertRule
+    setEditAlertRule,
+    transformsStatsLoading
   );
 
   const bulkActionMenuItems = [
@@ -235,6 +246,7 @@ export const TransformList: FC<TransformListProps> = ({
           canResetTransform={capabilities.canResetTransform}
           disabled={isResetActionDisabled(transformSelection, false)}
           isBulkAction={true}
+          items={transformSelection}
         />
       </EuiButtonEmpty>
     </div>,
@@ -247,6 +259,8 @@ export const TransformList: FC<TransformListProps> = ({
           canDeleteTransform={capabilities.canDeleteTransform}
           disabled={isDeleteActionDisabled(transformSelection, false)}
           isBulkAction={true}
+          items={transformSelection}
+          forceDisable={false}
         />
       </EuiButtonEmpty>
     </div>,

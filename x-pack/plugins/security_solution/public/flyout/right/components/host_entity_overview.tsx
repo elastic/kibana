@@ -13,10 +13,11 @@ import {
   EuiIcon,
   useEuiTheme,
   useEuiFontSize,
-  EuiIconTip,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
+import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -29,12 +30,16 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../common/components/page';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../explore/components/risk_score/severity/common';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
-import * as i18n from '../../../overview/components/host_overview/translations';
+import {
+  FAMILY,
+  LAST_SEEN,
+  HOST_RISK_LEVEL,
+} from '../../../overview/components/host_overview/translations';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
@@ -42,23 +47,23 @@ import {
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
-  TECHNICAL_PREVIEW_ICON_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
-import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { RiskScoreDocTooltip } from '../../../overview/components/common';
 
 const HOST_ICON = 'storage';
 const CONTEXT_ID = `flyout-host-entity-overview`;
 
 export interface HostEntityOverviewProps {
   /**
-   * Host name for looking up host related ip addresses and risk classification
+   * Host name for looking up host related ip addresses and risk level
    */
   hostName: string;
 }
 
 /**
- * Host preview content for the entities preview in right flyout. It contains ip addresses and risk classification
+ * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
@@ -91,14 +96,18 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     [hostName]
   );
 
-  const { data: hostRisk, isAuthorized } = useRiskScore({
+  const {
+    data: hostRisk,
+    isAuthorized,
+    loading: isRiskScoreLoading,
+  } = useRiskScore({
     filterQuery,
     riskEntity: RiskScoreEntity.host,
     skip: hostName == null,
     timerange,
   });
 
-  const [_, { hostDetails }] = useHostDetails({
+  const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
     hostName,
     indexNames: selectedPatterns,
     startDate: from,
@@ -108,7 +117,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const hostOSFamily: DescriptionList[] = useMemo(
     () => [
       {
-        title: i18n.FAMILY,
+        title: FAMILY,
         description: (
           <DefaultFieldRenderer
             rowItems={getOr([], 'host.os.family', hostDetails)}
@@ -125,7 +134,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const hostLastSeen: DescriptionList[] = useMemo(
     () => [
       {
-        title: i18n.LAST_SEEN,
+        title: LAST_SEEN,
         description: (
           <FirstLastSeen
             indexPatterns={selectedPatterns}
@@ -147,25 +156,17 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     return [
       {
         title: (
-          <>
-            {i18n.HOST_RISK_CLASSIFICATION}
-            <EuiIconTip
-              title={TECHNICAL_PREVIEW_TITLE}
-              size="m"
-              type="iInCircle"
-              content={TECHNICAL_PREVIEW_MESSAGE}
-              position="bottom"
-              iconProps={{
-                className: 'eui-alignTop',
-              }}
-              data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
-            />
-          </>
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>{HOST_RISK_LEVEL}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
         description: (
           <>
             {hostRiskData ? (
-              <RiskScore severity={hostRiskData.host.risk.calculated_level} />
+              <RiskScoreLevel severity={hostRiskData.host.risk.calculated_level} />
             ) : (
               getEmptyTagValue()
             )}
@@ -196,29 +197,39 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <OverviewDescriptionList
-              dataTestSubj={ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID}
-              descriptionList={hostOSFamily}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {isAuthorized ? (
-              <DescriptionListStyled
-                data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
-                listItems={[hostRiskLevel]}
-              />
-            ) : (
+      {isRiskScoreLoading || isHostDetailsLoading ? (
+        <EuiSkeletonText
+          data-test-subj={ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID}
+          contentAriaLabel={i18n.translate(
+            'xpack.securitySolution.flyout.right.insights.entities.hostLoadingAriaLabel',
+            { defaultMessage: 'host overview' }
+          )}
+        />
+      ) : (
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem>
               <OverviewDescriptionList
-                dataTestSubj={ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID}
-                descriptionList={hostLastSeen}
+                dataTestSubj={ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID}
+                descriptionList={hostOSFamily}
               />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {isAuthorized ? (
+                <DescriptionListStyled
+                  data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
+                  listItems={[hostRiskLevel]}
+                />
+              ) : (
+                <OverviewDescriptionList
+                  dataTestSubj={ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID}
+                  descriptionList={hostLastSeen}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

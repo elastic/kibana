@@ -7,6 +7,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS } from '../../services/get_template_url_from_package_info';
+
+import { SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG } from '../../services/get_template_url_from_agent_policy';
+
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import { sendGetOneAgentPolicy, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
 import {
@@ -14,18 +18,16 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
-import { getCloudShellUrlFromAgentPolicy } from '../../services';
+import { getTemplateUrlFromPackageInfo, getCloudShellUrlFromAgentPolicy } from '../../services';
 
-import {
-  getCloudFormationTemplateUrlFromPackageInfo,
-  getCloudFormationTemplateUrlFromAgentPolicy,
-} from '../../services';
+import { getTemplateUrlFromAgentPolicy } from '../../services';
 
 import type {
   K8sMode,
   CloudSecurityIntegrationType,
   CloudSecurityIntegrationAwsAccountType,
   CloudSecurityIntegration,
+  CloudSecurityIntegrationAzureAccountType,
 } from './types';
 
 // Packages that requires custom elastic-agent manifest
@@ -99,6 +101,9 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     { enabled: Boolean(cloudSecurityPackagePolicy) }
   );
 
+  const AWS_ACCOUNT_TYPE = 'aws.account_type';
+  const AZURE_ACCOUNT_TYPE = 'azure.account_type';
+
   const cloudSecurityIntegration: CloudSecurityIntegration | undefined = useMemo(() => {
     if (!agentPolicy || !cloudSecurityPackagePolicy) {
       return undefined;
@@ -109,8 +114,15 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
 
     if (!integrationType) return undefined;
 
-    const cloudFormationTemplateFromAgentPolicy =
-      getCloudFormationTemplateUrlFromAgentPolicy(agentPolicy);
+    const cloudFormationTemplateFromAgentPolicy = getTemplateUrlFromAgentPolicy(
+      SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG.CLOUD_FORMATION,
+      agentPolicy
+    );
+
+    const azureArmTemplateFromAgentPolicy = getTemplateUrlFromAgentPolicy(
+      SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG.ARM_TEMPLATE,
+      agentPolicy
+    );
 
     // Use the latest CloudFormation template for the current version
     // So it guarantee that the template version matches the integration version
@@ -118,14 +130,29 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     // In case it can't find the template for the current version,
     // it will fallback to the one from the agent policy.
     const cloudFormationTemplateUrl = packageInfoData?.item
-      ? getCloudFormationTemplateUrlFromPackageInfo(packageInfoData.item, integrationType)
+      ? getTemplateUrlFromPackageInfo(
+          packageInfoData.item,
+          integrationType,
+          SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION
+        )
       : cloudFormationTemplateFromAgentPolicy;
-
-    const AWS_ACCOUNT_TYPE = 'aws.account_type';
 
     const cloudFormationAwsAccountType: CloudSecurityIntegrationAwsAccountType | undefined =
       cloudSecurityPackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
         AWS_ACCOUNT_TYPE
+      ]?.value;
+
+    const azureArmTemplateUrl = packageInfoData?.item
+      ? getTemplateUrlFromPackageInfo(
+          packageInfoData.item,
+          integrationType,
+          SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.ARM_TEMPLATE
+        )
+      : azureArmTemplateFromAgentPolicy;
+
+    const azureArmTemplateAccountType: CloudSecurityIntegrationAzureAccountType | undefined =
+      cloudSecurityPackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
+        AZURE_ACCOUNT_TYPE
       ]?.value;
 
     const cloudShellUrl = getCloudShellUrlFromAgentPolicy(agentPolicy);
@@ -136,6 +163,11 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       cloudFormationProps: {
         awsAccountType: cloudFormationAwsAccountType,
         templateUrl: cloudFormationTemplateUrl,
+      },
+      isAzureArmTemplate: Boolean(azureArmTemplateFromAgentPolicy),
+      azureArmTemplateProps: {
+        azureAccountType: azureArmTemplateAccountType,
+        templateUrl: azureArmTemplateUrl,
       },
       cloudShellUrl,
     };

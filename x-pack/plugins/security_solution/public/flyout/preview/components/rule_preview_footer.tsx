@@ -7,9 +7,9 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { usePreviewPanelContext } from '../context';
 import { RenderRuleName } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
-import { SHOW_RULE_DETAILS } from './translations';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { RULE_PREVIEW_FOOTER_TEST_ID } from './test_ids';
 
@@ -31,7 +31,9 @@ export const RulePreviewFooter: React.FC = memo(() => {
             isAggregatable={false}
             isDraggable={false}
             linkValue={ruleId}
-            value={SHOW_RULE_DETAILS}
+            value={i18n.translate('xpack.securitySolution.flyout.preview.rule.viewDetailsLabel', {
+              defaultMessage: 'Show rule details',
+            })}
             openInNewTab
           />
         </EuiFlexItem>

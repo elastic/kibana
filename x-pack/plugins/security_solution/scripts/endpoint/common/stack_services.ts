@@ -11,14 +11,17 @@ import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
 import pRetry from 'p-retry';
-import nodeFetch from 'node-fetch';
 import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
 import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
+import fs from 'fs';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
-import { getLocalhostRealIp } from './localhost_services';
+import { getLocalhostRealIp } from './network_services';
 import { createSecuritySuperuser } from './security_user_services';
+
+const CA_CERTIFICATE: Buffer = fs.readFileSync(CA_CERT_PATH);
 
 export interface RuntimeServices {
   kbnClient: KbnClient;
@@ -64,6 +67,8 @@ interface CreateRuntimeServicesOptions {
   esPassword?: string;
   log?: ToolingLog;
   asSuperuser?: boolean;
+  /** If true, then a certificate will not be used when creating the Kbn/Es clients when url is `https` */
+  noCertForSsl?: boolean;
 }
 
 class KbnClientExtended extends KbnClient {
@@ -105,26 +110,47 @@ export const createRuntimeServices = async ({
   esPassword,
   log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
   asSuperuser = false,
+  noCertForSsl,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
   let username = _username;
   let password = _password;
 
   if (asSuperuser) {
-    await waitForKibana(kibanaUrl);
+    const tmpKbnClient = createKbnClient({
+      url: kibanaUrl,
+      username,
+      password,
+      noCertForSsl,
+      log,
+    });
 
-    const superuserResponse = await createSecuritySuperuser(
-      createEsClient({
-        url: elasticsearchUrl,
-        username,
-        password,
-        log,
-      })
-    );
+    await waitForKibana(tmpKbnClient);
+    const isServerlessEs = await isServerlessKibanaFlavor(tmpKbnClient);
 
-    ({ username, password } = superuserResponse);
+    if (isServerlessEs) {
+      log?.warning(
+        'Creating Security Superuser is not supported in current environment. ES is running in serverless mode. ' +
+          'Will use username [system_indices_superuser] instead.'
+      );
 
-    if (superuserResponse.created) {
-      log.info(`Kibana user [${username}] was crated with password [${password}]`);
+      username = 'system_indices_superuser';
+      password = 'changeme';
+    } else {
+      const superuserResponse = await createSecuritySuperuser(
+        createEsClient({
+          url: elasticsearchUrl,
+          username: esUsername ?? username,
+          password: esPassword ?? password,
+          log,
+          noCertForSsl,
+        })
+      );
+
+      ({ username, password } = superuserResponse);
+
+      if (superuserResponse.created) {
+        log.info(`Kibana user [${username}] was crated with password [${password}]`);
+      }
     }
   }
 
@@ -133,16 +159,17 @@ export const createRuntimeServices = async ({
   const fleetURL = new URL(fleetServerUrl);
 
   return {
-    kbnClient: createKbnClient({ log, url: kibanaUrl, username, password, apiKey }),
+    kbnClient: createKbnClient({ log, url: kibanaUrl, username, password, apiKey, noCertForSsl }),
     esClient: createEsClient({
       log,
       url: elasticsearchUrl,
       username: esUsername ?? username,
       password: esPassword ?? password,
       apiKey,
+      noCertForSsl,
     }),
     log,
-    localhostRealIp: await getLocalhostRealIp(),
+    localhostRealIp: getLocalhostRealIp(),
     apiKey: apiKey ?? '',
     user: {
       username,
@@ -188,6 +215,7 @@ export const createEsClient = ({
   password,
   apiKey,
   log,
+  noCertForSsl,
 }: {
   url: string;
   username: string;
@@ -195,10 +223,18 @@ export const createEsClient = ({
   /** If defined, both `username` and `password` will be ignored */
   apiKey?: string;
   log?: ToolingLog;
+  noCertForSsl?: boolean;
 }): Client => {
+  const isHttps = new URL(url).protocol.startsWith('https');
   const clientOptions: ClientOptions = {
     node: buildUrlWithCredentials(url, apiKey ? '' : username, apiKey ? '' : password),
   };
+
+  if (isHttps && !noCertForSsl) {
+    clientOptions.tls = {
+      ca: [CA_CERTIFICATE],
+    };
+  }
 
   if (apiKey) {
     clientOptions.auth = { apiKey };
@@ -217,6 +253,7 @@ export const createKbnClient = ({
   password,
   apiKey,
   log = new ToolingLog(),
+  noCertForSsl,
 }: {
   url: string;
   username: string;
@@ -224,16 +261,28 @@ export const createKbnClient = ({
   /** If defined, both `username` and `password` will be ignored */
   apiKey?: string;
   log?: ToolingLog;
+  noCertForSsl?: boolean;
 }): KbnClient => {
-  const kbnUrl = buildUrlWithCredentials(url, username, password);
+  const isHttps = new URL(url).protocol.startsWith('https');
+  const clientOptions: ConstructorParameters<typeof KbnClientExtended>[0] = {
+    log,
+    apiKey,
+    url: buildUrlWithCredentials(url, username, password),
+  };
+
+  if (isHttps && !noCertForSsl) {
+    clientOptions.certificateAuthorities = [CA_CERTIFICATE];
+  }
 
   if (log) {
     log.verbose(
-      `Creating Kibana client with URL: ${kbnUrl} ${apiKey ? ` + ApiKey: ${apiKey}` : ''}`
+      `Creating Kibana client with URL: ${clientOptions.url} ${
+        apiKey ? ` + ApiKey: ${apiKey}` : ''
+      }`
     );
   }
 
-  return new KbnClientExtended({ log, url: kbnUrl, apiKey });
+  return new KbnClientExtended(clientOptions);
 };
 
 /**
@@ -253,37 +302,39 @@ export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> =
 };
 
 export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusResponse> => {
-  return kbnClient
-    .request<StatusResponse>({
-      method: 'GET',
-      path: '/api/status',
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .then((response) => response.data);
+  return (await kbnClient.status.get().catch(catchAxiosErrorFormatAndThrow)) as StatusResponse;
 };
 
 /**
  * Checks to ensure Kibana is up and running
- * @param kbnUrl
+ * @param kbnClient
  */
-export const waitForKibana = async (kbnUrl: string): Promise<void> => {
-  const url = (() => {
-    const u = new URL(kbnUrl);
-    // This API seems to be available even if user is not authenticated
-    u.pathname = '/api/status';
-    return u.toString();
-  })();
-
+export const waitForKibana = async (kbnClient: KbnClient): Promise<void> => {
   await pRetry(
     async () => {
-      const response = await nodeFetch(url);
+      const response = await kbnClient.status.get();
 
-      if (response.status !== 200) {
+      if (response.status.overall.level !== 'available') {
         throw new Error(
-          `Kibana not available. Returned: [${response.status}]: ${response.statusText}`
+          `Kibana not available. [status.overall.level: ${response.status.overall.level}]`
         );
       }
     },
     { maxTimeout: 10000 }
   );
+};
+
+export const isServerlessKibanaFlavor = async (kbnClient: KbnClient): Promise<boolean> => {
+  const kbnStatus = await fetchKibanaStatus(kbnClient);
+
+  // If we don't have status for plugins, then error
+  // the Status API will always return something (its an open API), but if auth was successful,
+  // it will also return more data.
+  if (!kbnStatus.status.plugins) {
+    throw new Error(
+      `Unable to retrieve Kibana plugins status (likely an auth issue with the username being used for kibana)`
+    );
+  }
+
+  return kbnStatus.status.plugins?.serverless?.level === 'available';
 };

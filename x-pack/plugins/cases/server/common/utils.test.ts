@@ -38,7 +38,12 @@ import type {
   CaseConnector,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
-import { ConnectorTypes, CaseSeverity, AttachmentType } from '../../common/types/domain';
+import {
+  ConnectorTypes,
+  CaseSeverity,
+  AttachmentType,
+  CustomFieldTypes,
+} from '../../common/types/domain';
 import type { AttachmentRequest } from '../../common/types/api';
 import {
   createAlertRequests,
@@ -83,6 +88,21 @@ function createCommentFindResponse(
 }
 
 describe('common utils', () => {
+  const connector: CaseConnector = {
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: { issueType: 'Task', priority: 'High', parent: null },
+  };
+
+  const customFields = [
+    {
+      key: 'string_custom_field_1',
+      type: CustomFieldTypes.TEXT as const,
+      value: ['this is a text field value', 'this is second'],
+    },
+  ];
+
   describe('transformNewCase', () => {
     beforeAll(() => {
       jest.useFakeTimers();
@@ -92,13 +112,6 @@ describe('common utils', () => {
     afterAll(() => {
       jest.useRealTimers();
     });
-
-    const connector: CaseConnector = {
-      id: '123',
-      name: 'My connector',
-      type: ConnectorTypes.jira,
-      fields: { issueType: 'Task', priority: 'High', parent: null },
-    };
 
     it('transform correctly', () => {
       const myCase = {
@@ -134,6 +147,7 @@ describe('common utils', () => {
             "full_name": "Elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "A description",
           "duration": null,
           "external_service": null,
@@ -188,6 +202,7 @@ describe('common utils', () => {
             "full_name": "Elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "A description",
           "duration": null,
           "external_service": null,
@@ -246,6 +261,75 @@ describe('common utils', () => {
             "full_name": "Elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+
+    it('transform correctly with customFields provided', () => {
+      const myCase = {
+        newCase: {
+          ...newCase,
+          connector,
+          customFields,
+        },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "category": null,
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "customFields": Array [
+            Object {
+              "key": "string_custom_field_1",
+              "type": "text",
+              "value": Array [
+                "this is a text field value",
+                "this is second",
+              ],
+            },
+          ],
           "description": "A description",
           "duration": null,
           "external_service": null,
@@ -304,6 +388,7 @@ describe('common utils', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": null,
@@ -346,6 +431,7 @@ describe('common utils', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "Oh no, a bad meanie destroying data!",
               "duration": null,
               "external_service": null,
@@ -392,6 +478,7 @@ describe('common utils', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
               "duration": null,
               "external_service": null,
@@ -442,6 +529,7 @@ describe('common utils', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
               "duration": null,
               "external_service": null,
@@ -473,6 +561,89 @@ describe('common utils', () => {
           "page": 1,
           "per_page": 10,
           "total": 4,
+        }
+      `);
+    });
+
+    it('transforms correctly case with customFields', () => {
+      const casesMap = new Map<string, Case>();
+      const theCase = { ...mockCases[0] };
+
+      theCase.attributes = { ...theCase.attributes, customFields };
+      casesMap.set(theCase.id, flattenCaseSavedObject({ savedObject: theCase }));
+
+      const res = transformCases({
+        casesMap,
+        countOpenCases: 2,
+        countInProgressCases: 2,
+        countClosedCases: 2,
+        page: 1,
+        perPage: 10,
+        total: casesMap.size,
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "cases": Array [
+            Object {
+              "assignees": Array [],
+              "category": null,
+              "closed_at": null,
+              "closed_by": null,
+              "comments": Array [],
+              "connector": Object {
+                "fields": null,
+                "id": "none",
+                "name": "none",
+                "type": ".none",
+              },
+              "created_at": "2019-11-25T21:54:48.952Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "customFields": Array [
+                Object {
+                  "key": "string_custom_field_1",
+                  "type": "text",
+                  "value": Array [
+                    "this is a text field value",
+                    "this is second",
+                  ],
+                },
+              ],
+              "description": "This is a brand new case of a bad meanie defacing data",
+              "duration": null,
+              "external_service": null,
+              "id": "mock-id-1",
+              "owner": "securitySolution",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "severity": "low",
+              "status": "open",
+              "tags": Array [
+                "defacement",
+              ],
+              "title": "Super Bad Security Issue",
+              "totalAlerts": 0,
+              "totalComment": 0,
+              "updated_at": "2019-11-25T21:54:48.952Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "version": "WzAsMV0=",
+            },
+          ],
+          "count_closed_cases": 2,
+          "count_in_progress_cases": 2,
+          "count_open_cases": 2,
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
         }
       `);
     });
@@ -509,6 +680,7 @@ describe('common utils', () => {
             "full_name": "elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "duration": null,
           "external_service": null,
@@ -567,6 +739,7 @@ describe('common utils', () => {
             "full_name": "elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "duration": null,
           "external_service": null,
@@ -648,6 +821,7 @@ describe('common utils', () => {
             "full_name": "elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "duration": null,
           "external_service": null,
@@ -704,6 +878,72 @@ describe('common utils', () => {
             "full_name": "elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
+          "description": "This is a brand new case of a bad meanie defacing data",
+          "duration": null,
+          "external_service": null,
+          "id": "mock-id-1",
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "defacement",
+          ],
+          "title": "Super Bad Security Issue",
+          "totalAlerts": 0,
+          "totalComment": 2,
+          "updated_at": "2019-11-25T21:54:48.952Z",
+          "updated_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "version": "WzAsMV0=",
+        }
+      `);
+    });
+
+    it('flattens correctly with customFields', () => {
+      const theCase = { ...mockCases[0] };
+      theCase.attributes = { ...theCase.attributes, customFields };
+
+      const res = flattenCaseSavedObject({
+        savedObject: theCase,
+        totalComment: 2,
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "category": null,
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          },
+          "created_at": "2019-11-25T21:54:48.952Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "customFields": Array [
+            Object {
+              "key": "string_custom_field_1",
+              "type": "text",
+              "value": Array [
+                "this is a text field value",
+                "this is second",
+              ],
+            },
+          ],
           "description": "This is a brand new case of a bad meanie defacing data",
           "duration": null,
           "external_service": null,

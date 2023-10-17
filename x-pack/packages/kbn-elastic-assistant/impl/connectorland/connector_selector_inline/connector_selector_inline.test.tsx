@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { noop } from 'lodash/fp';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { ConnectorSelectorInline } from './connector_selector_inline';
 import * as i18n from '../translations';
@@ -64,7 +63,6 @@ describe('ConnectorSelectorInline', () => {
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          onConnectorModalVisibilityChange={noop}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
         />
@@ -83,7 +81,6 @@ describe('ConnectorSelectorInline', () => {
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          onConnectorModalVisibilityChange={noop}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
         />
@@ -102,7 +99,6 @@ describe('ConnectorSelectorInline', () => {
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          onConnectorModalVisibilityChange={noop}
           selectedConnectorId={mockConnectors[0].id}
           selectedConversation={conversation}
         />

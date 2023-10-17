@@ -11,7 +11,7 @@ import type { SignificantTerm, SignificantTermGroupItem } from '@kbn/ml-agg-util
 
 export type GroupTableItemGroup = Pick<
   SignificantTermGroupItem,
-  'fieldName' | 'fieldValue' | 'docCount' | 'pValue' | 'duplicate'
+  'key' | 'type' | 'fieldName' | 'fieldValue' | 'docCount' | 'pValue' | 'duplicate'
 >;
 
 export interface GroupTableItem {

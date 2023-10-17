@@ -14,6 +14,7 @@ import { wrap } from '../mocks';
 describe('FieldDeprecation', () => {
   const defaultProps = {
     field: {
+      id: 'test:field',
       name: 'test',
       type: 'string',
       deprecation: undefined,

@@ -160,7 +160,11 @@ export async function deleteApmRules(supertest: SuperTest<Test>) {
 }
 
 export function deleteApmAlerts(es: Client) {
-  return es.deleteByQuery({ index: APM_ALERTS_INDEX, query: { match_all: {} } });
+  return es.deleteByQuery({
+    index: APM_ALERTS_INDEX,
+    conflicts: 'proceed',
+    query: { match_all: {} },
+  });
 }
 
 export async function clearKibanaApmEventLog(es: Client) {

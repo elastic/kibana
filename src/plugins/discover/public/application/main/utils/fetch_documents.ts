@@ -8,12 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
+import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { SAMPLE_SIZE_SETTING, buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
-import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -60,10 +59,10 @@ export const fetchDocuments = (
         }),
       },
       executionContext,
-      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      disableWarningToasts: true,
     })
     .pipe(
-      filter((res) => isCompleteResponse(res)),
+      filter((res) => !isRunningResponse(res)),
       map((res) => {
         return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView);
       })
@@ -75,9 +74,6 @@ export const fetchDocuments = (
       ? getSearchResponseInterceptedWarnings({
           services,
           adapter,
-          options: {
-            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
-          },
         })
       : [];
 

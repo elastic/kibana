@@ -673,7 +673,7 @@
           },
           " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
-          "> | undefined; zoom?: number | undefined; }; objectType: string; locatorParams: ",
+          "> | undefined; zoom?: number | undefined; }; locatorParams: ",
           {
             "pluginId": "reporting",
             "scope": "common",
@@ -689,7 +689,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          ">[]; }"
+          ">[]; objectType: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",
         "deprecated": false,

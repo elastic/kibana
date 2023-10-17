@@ -17,7 +17,7 @@ export interface CspRadioGroupProps {
   size?: 's' | 'm';
 }
 
-interface CspRadioOption {
+export interface CspRadioOption {
   disabled?: boolean;
   id: string;
   label: string;

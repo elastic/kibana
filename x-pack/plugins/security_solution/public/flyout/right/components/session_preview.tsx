@@ -6,24 +6,21 @@
  */
 
 import { EuiCode, EuiIcon, useEuiTheme } from '@elastic/eui';
+import type { ReactElement } from 'react';
 import React, { useMemo, type FC } from 'react';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { useProcessData } from '../hooks/use_process_data';
-import {
-  SESSION_PREVIEW_COMMAND_TEXT,
-  SESSION_PREVIEW_PROCESS_TEXT,
-  SESSION_PREVIEW_RULE_TEXT,
-  SESSION_PREVIEW_TIME_TEXT,
-} from './translations';
 import { RenderRuleName } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
 
 /**
  * One-off helper to make sure that inline values are rendered consistently
  */
-const ValueContainer: FC<{ text?: string }> = ({ text, children }) => (
+const ValueContainer: FC<{ text?: ReactElement }> = ({ text, children }) => (
   <>
     {text && (
       <>
@@ -53,7 +50,14 @@ export const SessionPreview: FC = () => {
   const processNameFragment = useMemo(() => {
     return (
       processName && (
-        <ValueContainer text={SESSION_PREVIEW_PROCESS_TEXT}>
+        <ValueContainer
+          text={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.processDescription"
+              defaultMessage="started"
+            />
+          }
+        >
           <span style={emphasisStyles}>{processName}</span>
         </ValueContainer>
       )
@@ -63,7 +67,14 @@ export const SessionPreview: FC = () => {
   const timeFragment = useMemo(() => {
     return (
       startAt && (
-        <ValueContainer text={SESSION_PREVIEW_TIME_TEXT}>
+        <ValueContainer
+          text={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.timeDescription"
+              defaultMessage="at"
+            />
+          }
+        >
           <PreferenceFormattedDate value={new Date(startAt)} />
         </ValueContainer>
       )
@@ -74,7 +85,14 @@ export const SessionPreview: FC = () => {
     return (
       ruleName &&
       ruleId && (
-        <ValueContainer text={SESSION_PREVIEW_RULE_TEXT}>
+        <ValueContainer
+          text={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.ruleDescription"
+              defaultMessage="with rule"
+            />
+          }
+        >
           <RenderRuleName
             contextId={scopeId}
             eventId={eventId}
@@ -93,7 +111,14 @@ export const SessionPreview: FC = () => {
   const commandFragment = useMemo(() => {
     return (
       command && (
-        <ValueContainer text={SESSION_PREVIEW_COMMAND_TEXT}>
+        <ValueContainer
+          text={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.commandDescription"
+              defaultMessage="by"
+            />
+          }
+        >
           <EuiCode>
             {workdir} {command}
           </EuiCode>
@@ -103,7 +128,12 @@ export const SessionPreview: FC = () => {
   }, [command, workdir]);
 
   return (
-    <div data-test-subj={SESSION_PREVIEW_TEST_ID}>
+    <div
+      css={css`
+        line-height: 1.5;
+      `}
+      data-test-subj={SESSION_PREVIEW_TEST_ID}
+    >
       <ValueContainer>
         <EuiIcon type="user" />
         &nbsp;

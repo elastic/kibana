@@ -1157,6 +1157,20 @@
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagOptions.examples",
+            "type": "string",
+            "tags": [],
+            "label": "examples",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
             "id": "def-common.FlagOptions.alias",
             "type": "Object",
             "tags": [],

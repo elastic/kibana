@@ -10,4 +10,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-event-annotation-components'],
+  setupFiles: ['jest-canvas-mock'],
 };

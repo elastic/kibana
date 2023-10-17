@@ -8,61 +8,66 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  ActionConnector,
-  ActionTypeRegistryContract,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { HttpSetup } from '@kbn/core-http-browser';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/public/common';
+import { ActionTypeSelectorModal } from '../connector_selector_inline/action_type_selector_modal';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
-import { getGenAiConfig } from '../helpers';
+import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
+
 interface Props {
-  actionTypeRegistry: ActionTypeRegistryContract;
-  http: HttpSetup;
   isDisabled?: boolean;
-  onConnectorSelectionChange: (connector: ActionConnector | undefined) => void;
+  isOpen?: boolean;
+  onConnectorSelectionChange: (connector: AIConnector) => void;
   selectedConnectorId?: string;
-  onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
+  displayFancy?: (displayText: string) => React.ReactNode;
+  setIsOpen?: (isOpen: boolean) => void;
 }
+
+export type AIConnector = ActionConnector & {
+  connectorTypeTitle: string;
+};
 
 export const ConnectorSelector: React.FC<Props> = React.memo(
   ({
-    actionTypeRegistry,
-    http,
     isDisabled = false,
-    onConnectorModalVisibilityChange,
+    isOpen = false,
+    displayFancy,
     selectedConnectorId,
     onConnectorSelectionChange,
+    setIsOpen,
   }) => {
-    const { assistantAvailability } = useAssistantContext();
+    const { actionTypeRegistry, http, assistantAvailability } = useAssistantContext();
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
     const { data: actionTypes } = useLoadActionTypes({ http });
-    const actionType = actionTypes?.find((at) => at.id === GEN_AI_CONNECTOR_ID) ?? {
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['general'],
-      isSystemActionType: false,
-      id: '.gen-ai',
-      name: 'Generative AI',
-      enabled: true,
-    };
+
+    const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
     const {
-      data: connectors,
-      isLoading: isLoadingActionTypes,
-      isFetching: isFetchingActionTypes,
+      data: connectorsWithoutActionContext,
+      isLoading: isLoadingConnectors,
+      isFetching: isFetchingConnectors,
       refetch: refetchConnectors,
     } = useLoadConnectors({ http });
-    const isLoading = isLoadingActionTypes || isFetchingActionTypes;
+
+    const aiConnectors: AIConnector[] = useMemo(
+      () =>
+        connectorsWithoutActionContext
+          ? connectorsWithoutActionContext.map((c) => ({
+              ...c,
+              connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId)),
+            }))
+          : [],
+      [actionTypeRegistry, connectorsWithoutActionContext]
+    );
+
+    const isLoading = isLoadingConnectors || isFetchingConnectors;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     const addNewConnectorOption = useMemo(() => {
@@ -72,7 +77,12 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         dropdownDisplay: (
           <EuiFlexGroup gutterSize="none" key={ADD_NEW_CONNECTOR}>
             <EuiFlexItem grow={true}>
-              <EuiButtonEmpty href="#" iconType="plus" size="xs">
+              <EuiButtonEmpty
+                data-test-subj="addNewConnectorButton"
+                href="#"
+                iconType="plus"
+                size="xs"
+              >
                 {i18n.ADD_NEW_CONNECTOR}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -85,16 +95,17 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       };
     }, []);
 
-    const connectorOptions = useMemo(() => {
-      return (
-        connectors?.map((connector) => {
-          const apiProvider = getGenAiConfig(connector)?.apiProvider;
+    const connectorOptions = useMemo(
+      () =>
+        aiConnectors.map((connector) => {
+          const connectorTypeTitle =
+            getGenAiConfig(connector)?.apiProvider ?? connector.connectorTypeTitle;
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
-            : apiProvider;
+            : connectorTypeTitle;
           return {
             value: connector.id,
-            inputDisplay: connector.name,
+            inputDisplay: displayFancy ? displayFancy(connector.name) : connector.name,
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
                 <strong>{connector.name}</strong>
@@ -106,9 +117,9 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
               </React.Fragment>
             ),
           };
-        }) ?? []
-      );
-    }, [connectors]);
+        }),
+      [aiConnectors, displayFancy]
+    );
 
     // Only include add new connector option if user has privilege
     const allConnectorOptions = useMemo(
@@ -120,22 +131,39 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     );
 
     const cleanupAndCloseModal = useCallback(() => {
-      onConnectorModalVisibilityChange?.(false);
+      setIsOpen?.(false);
       setIsConnectorModalVisible(false);
-    }, [onConnectorModalVisibilityChange]);
+      setSelectedActionType(null);
+    }, [setIsOpen]);
+
+    const [modalForceOpen, setModalForceOpen] = useState(isOpen);
 
     const onChange = useCallback(
       (connectorId: string) => {
         if (connectorId === ADD_NEW_CONNECTOR) {
-          onConnectorModalVisibilityChange?.(true);
+          setModalForceOpen(false);
           setIsConnectorModalVisible(true);
           return;
         }
 
-        const connector = connectors?.find((c) => c.id === connectorId);
-        onConnectorSelectionChange(connector);
+        const connector = aiConnectors.find((c) => c.id === connectorId);
+        if (connector) {
+          onConnectorSelectionChange(connector);
+        }
       },
-      [connectors, onConnectorSelectionChange, onConnectorModalVisibilityChange]
+      [aiConnectors, onConnectorSelectionChange]
+    );
+
+    const onSaveConnector = useCallback(
+      (connector: ActionConnector) => {
+        onConnectorSelectionChange({
+          ...connector,
+          connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId)),
+        });
+        refetchConnectors?.();
+        cleanupAndCloseModal();
+      },
+      [actionTypeRegistry, cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
     );
 
     return (
@@ -146,19 +174,24 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           disabled={localIsDisabled}
           hasDividers={true}
           isLoading={isLoading}
+          isOpen={modalForceOpen}
           onChange={onChange}
           options={allConnectorOptions}
           valueOfSelected={selectedConnectorId ?? ''}
         />
-        {isConnectorModalVisible && (
+        {isConnectorModalVisible && !selectedActionType && (
+          <ActionTypeSelectorModal
+            actionTypes={actionTypes}
+            actionTypeRegistry={actionTypeRegistry}
+            onClose={() => setIsConnectorModalVisible(false)}
+            onSelect={(actionType: ActionType) => setSelectedActionType(actionType)}
+          />
+        )}
+        {isConnectorModalVisible && selectedActionType && (
           <ConnectorAddModal
-            actionType={actionType}
+            actionType={selectedActionType}
             onClose={cleanupAndCloseModal}
-            postSaveEventHandler={(connector: ActionConnector) => {
-              onConnectorSelectionChange(connector);
-              refetchConnectors?.();
-              cleanupAndCloseModal();
-            }}
+            postSaveEventHandler={onSaveConnector}
             actionTypeRegistry={actionTypeRegistry}
           />
         )}

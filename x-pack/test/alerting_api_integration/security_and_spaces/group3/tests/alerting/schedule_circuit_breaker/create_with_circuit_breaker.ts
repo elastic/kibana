@@ -26,7 +26,7 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
         .expect(200);
       objectRemover.add('space1', createdRule.id, 'rule', 'alerting');
 
-      const { body } = await supertest
+      await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ schedule: { interval: '10s' } }))
@@ -41,7 +41,7 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
         .expect(200);
       objectRemover.add('space1', createdRule.id, 'rule', 'alerting');
 
-      const { body } = await supertest
+      await supertest
         .post(`${getUrlPrefix('space2')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ schedule: { interval: '10s' } }))

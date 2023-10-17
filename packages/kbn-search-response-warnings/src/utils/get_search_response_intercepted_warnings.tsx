@@ -7,14 +7,8 @@
  */
 
 import React from 'react';
-import { uniqBy } from 'lodash';
-import {
-  type DataPublicPluginStart,
-  type ShardFailureRequest,
-  ShardFailureOpenModalButton,
-} from '@kbn/data-plugin/public';
+import { type DataPublicPluginStart, ViewWarningButton } from '@kbn/data-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SearchResponseInterceptedWarning } from '../types';
 
 /**
@@ -26,39 +20,23 @@ import type { SearchResponseInterceptedWarning } from '../types';
 export const getSearchResponseInterceptedWarnings = ({
   services,
   adapter,
-  options,
 }: {
   services: {
     data: DataPublicPluginStart;
-    theme: CoreStart['theme'];
   };
   adapter: RequestAdapter;
-  options?: {
-    disableShardFailureWarning?: boolean;
-  };
-}): SearchResponseInterceptedWarning[] | undefined => {
-  if (!options?.disableShardFailureWarning) {
-    return undefined;
-  }
-
+}): SearchResponseInterceptedWarning[] => {
   const interceptedWarnings: SearchResponseInterceptedWarning[] = [];
 
-  services.data.search.showWarnings(adapter, (warning, meta) => {
-    const { request, response } = meta;
-
+  services.data.search.showWarnings(adapter, (warning) => {
     interceptedWarnings.push({
       originalWarning: warning,
       action:
-        warning.type === 'shard_failure' && warning.text && warning.message ? (
-          <ShardFailureOpenModalButton
-            theme={services.theme}
-            title={warning.message}
-            size="s"
-            getRequestMeta={() => ({
-              request: request as ShardFailureRequest,
-              response,
-            })}
+        warning.type === 'incomplete' ? (
+          <ViewWarningButton
             color="primary"
+            size="s"
+            onClick={warning.openInInspector}
             isButtonEmpty={true}
           />
         ) : undefined,
@@ -66,23 +44,5 @@ export const getSearchResponseInterceptedWarnings = ({
     return true; // suppress the default behaviour
   });
 
-  return removeInterceptedWarningDuplicates(interceptedWarnings);
-};
-
-/**
- * Removes duplicated warnings
- * @param interceptedWarnings
- */
-export const removeInterceptedWarningDuplicates = (
-  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined
-): SearchResponseInterceptedWarning[] | undefined => {
-  if (!interceptedWarnings?.length) {
-    return undefined;
-  }
-
-  const uniqInterceptedWarnings = uniqBy(interceptedWarnings, (interceptedWarning) =>
-    JSON.stringify(interceptedWarning.originalWarning)
-  );
-
-  return uniqInterceptedWarnings?.length ? uniqInterceptedWarnings : undefined;
+  return interceptedWarnings;
 };

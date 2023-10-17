@@ -13,6 +13,7 @@ import { UrlDrilldownCollectConfig } from '../url_drilldown_collect_config';
 export const Demo = () => {
   const [config, onConfig] = React.useState<UrlDrilldownConfig>({
     openInNewTab: false,
+    encodeUrl: true,
     url: { template: '' },
   });
 

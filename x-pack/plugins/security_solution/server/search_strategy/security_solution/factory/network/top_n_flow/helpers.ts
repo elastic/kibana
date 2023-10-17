@@ -8,14 +8,12 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { assertUnreachable } from '../../../../../../common/utility_types';
+import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
 import type {
   Direction,
   GeoItem,
-  SortField,
   NetworkTopNFlowBuckets,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowRequestOptions,
   AutonomousSystemItem,
   FlowTargetSourceDest,
 } from '../../../../../../common/search_strategy';
@@ -114,19 +112,19 @@ type QueryOrder =
   | { source_ips: Direction };
 
 export const getQueryOrder = (
-  networkTopNFlowSortField: SortField<NetworkTopTablesFields>
+  networkTopNFlowSortField: NetworkTopNFlowRequestOptions['sort']
 ): QueryOrder => {
-  switch (networkTopNFlowSortField.field) {
-    case NetworkTopTablesFields.bytes_in:
-      return { bytes_in: networkTopNFlowSortField.direction };
-    case NetworkTopTablesFields.bytes_out:
-      return { bytes_out: networkTopNFlowSortField.direction };
-    case NetworkTopTablesFields.flows:
-      return { flows: networkTopNFlowSortField.direction };
-    case NetworkTopTablesFields.destination_ips:
-      return { destination_ips: networkTopNFlowSortField.direction };
-    case NetworkTopTablesFields.source_ips:
-      return { source_ips: networkTopNFlowSortField.direction };
+  if (networkTopNFlowSortField.field === NetworkTopTablesFields.bytes_in) {
+    return { bytes_in: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopTablesFields.bytes_out) {
+    return { bytes_out: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopTablesFields.flows) {
+    return { flows: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopTablesFields.destination_ips) {
+    return { destination_ips: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopTablesFields.source_ips) {
+    return { source_ips: networkTopNFlowSortField.direction };
+  } else {
+    throw new Error(`Ordering on ${networkTopNFlowSortField.field} not currently supported`);
   }
-  assertUnreachable(networkTopNFlowSortField.field);
 };

@@ -30,6 +30,7 @@ import {
 } from '../lib';
 import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
 import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
+import { RuleAttributes } from '../../data/rule/types';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -284,7 +285,12 @@ const bulkEnableRulesWithOCC = async (
       });
     }
   });
-  return { errors, rules, accListSpecificForBulkOperation: [taskIdsToEnable] };
+  return {
+    errors,
+    // TODO: delete the casting when we do versioning of bulk disable api
+    rules: rules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
+    accListSpecificForBulkOperation: [taskIdsToEnable],
+  };
 };
 
 export const tryToEnableTasks = async ({

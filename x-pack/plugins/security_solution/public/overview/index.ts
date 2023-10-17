@@ -8,6 +8,8 @@
 import type { SecuritySubPlugin } from '../app/types';
 import { routes } from './routes';
 
+export * from './types';
+
 export class Overview {
   public setup() {}
 

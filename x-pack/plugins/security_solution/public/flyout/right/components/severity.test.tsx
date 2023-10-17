@@ -8,13 +8,19 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import {
-  FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID,
-  FLYOUT_HEADER_SEVERITY_VALUE_TEST_ID,
-} from './test_ids';
+import { SEVERITY_TITLE_TEST_ID, SEVERITY_VALUE_TEST_ID } from './test_ids';
 import { DocumentSeverity } from './severity';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { TestProviders } from '../../../common/mock';
+
+const renderDocumentSeverity = (contextValue: RightPanelContext) =>
+  render(
+    <TestProviders>
+      <RightPanelContext.Provider value={contextValue}>
+        <DocumentSeverity />
+      </RightPanelContext.Provider>
+    </TestProviders>
+  );
 
 describe('<DocumentSeverity />', () => {
   it('should render severity information', () => {
@@ -23,16 +29,10 @@ describe('<DocumentSeverity />', () => {
       scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <DocumentSeverity />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId } = renderDocumentSeverity(contextValue);
 
-    expect(getByTestId(FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID)).toBeInTheDocument();
-    const severity = getByTestId(FLYOUT_HEADER_SEVERITY_VALUE_TEST_ID);
+    expect(getByTestId(SEVERITY_TITLE_TEST_ID)).toBeInTheDocument();
+    const severity = getByTestId(SEVERITY_VALUE_TEST_ID);
     expect(severity).toBeInTheDocument();
     expect(severity).toHaveTextContent('Low');
   });
@@ -43,11 +43,7 @@ describe('<DocumentSeverity />', () => {
       scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <DocumentSeverity />
-      </RightPanelContext.Provider>
-    );
+    const { container } = renderDocumentSeverity(contextValue);
 
     expect(container).toBeEmptyDOMElement();
   });
@@ -58,11 +54,7 @@ describe('<DocumentSeverity />', () => {
       scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <DocumentSeverity />
-      </RightPanelContext.Provider>
-    );
+    const { container } = renderDocumentSeverity(contextValue);
 
     expect(container).toBeEmptyDOMElement();
   });
@@ -73,11 +65,7 @@ describe('<DocumentSeverity />', () => {
       scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <DocumentSeverity />
-      </RightPanelContext.Provider>
-    );
+    const { container } = renderDocumentSeverity(contextValue);
 
     expect(container).toBeEmptyDOMElement();
   });

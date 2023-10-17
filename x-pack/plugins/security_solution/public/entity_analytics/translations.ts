@@ -170,14 +170,15 @@ export const UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_2 = i18n.translate(
 export const UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_1 = i18n.translate(
   'xpack.securitySolution.riskScore.updateRiskEngineModal.existingData_1',
   {
-    defaultMessage: 'None of your risk score data will be deleted',
+    defaultMessage: 'Legacy risk score data will not be deleted',
   }
 );
 
 export const UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_2 = i18n.translate(
   'xpack.securitySolution.riskScore.updateRiskEngineModal.existingData_2',
   {
-    defaultMessage: ', you will need to remove any old risk score data manually.',
+    defaultMessage:
+      ', it will still exist in the index but will no longer be available in the user interface. You will need to remove legacy risk score data manually.',
   }
 );
 
@@ -248,7 +249,7 @@ export const UPDATE_PANEL_GO_TO_DISMISS = i18n.translate(
 export const getMaxSpaceTitle = (maxSpaces: number) =>
   i18n.translate('xpack.securitySolution.riskScore.maxSpacePanel.title', {
     defaultMessage:
-      'Entity Risk Scoring in the current version can run in {maxSpaces} Kibana spaces.',
+      'Entity Risk Scoring in the current version can run in {maxSpaces, plural, =1 {# Kibana space} other {# Kibana spaces}}',
     values: { maxSpaces },
   });
 

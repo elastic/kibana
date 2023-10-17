@@ -21,6 +21,7 @@ import { AlertFlyout } from '../../../../alerting/inventory/components/alert_fly
 import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 import { AlertsSectionTitle } from '../../components/section_titles';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -32,6 +33,7 @@ export const AlertsSummaryContent = ({
   dateRange: TimeRange;
 }) => {
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
+  const { overrides } = useAssetDetailsRenderPropsContext();
 
   const alertsEsQueryByStatus = useMemo(
     () =>
@@ -67,6 +69,7 @@ export const AlertsSummaryContent = ({
         nodeType={assetType}
         setVisible={toggleAlertFlyout}
         visible={isAlertFlyoutVisible}
+        options={overrides?.alertRule?.options}
       />
     </>
   );

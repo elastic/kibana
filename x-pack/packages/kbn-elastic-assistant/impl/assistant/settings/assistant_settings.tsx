@@ -23,17 +23,18 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { AnonymizationSettings } from '../../data_anonymization/settings/anonymization_settings';
 import { QuickPromptSettings } from '../quick_prompts/quick_prompt_settings/quick_prompt_settings';
 import { SystemPromptSettings } from '../prompt_editor/system_prompt/system_prompt_modal/system_prompt_settings';
-import { AdvancedSettings } from './advanced_settings/advanced_settings';
+import { KnowledgeBaseSettings } from '../../knowledge_base/knowledge_base_settings/knowledge_base_settings';
 import { ConversationSettings } from '../conversations/conversation_settings/conversation_settings';
 import { TEST_IDS } from '../constants';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
+import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -44,16 +45,16 @@ export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
 export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
 export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
-export const FUNCTIONS_TAB = 'FUNCTIONS_TAB' as const;
-export const ADVANCED_TAB = 'ADVANCED_TAB' as const;
+export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
+export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
 
 export type SettingsTabs =
   | typeof CONVERSATIONS_TAB
   | typeof QUICK_PROMPTS_TAB
   | typeof SYSTEM_PROMPTS_TAB
   | typeof ANONYMIZATION_TAB
-  | typeof FUNCTIONS_TAB
-  | typeof ADVANCED_TAB;
+  | typeof KNOWLEDGE_BASE_TAB
+  | typeof EVALUATION_TAB;
 interface Props {
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
@@ -67,7 +68,7 @@ interface Props {
 
 /**
  * Modal for overall Assistant Settings, including conversation settings, quick prompts, system prompts,
- * anonymization, functions (coming soon!), and advanced settings.
+ * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
   ({
@@ -78,17 +79,19 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
   }) => {
-    const { actionTypeRegistry, http, selectedSettingsTab, setSelectedSettingsTab } =
+    const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
       useAssistantContext();
     const {
       conversationSettings,
       defaultAllow,
       defaultAllowReplacement,
+      knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
       setUpdatedConversationSettings,
       setUpdatedDefaultAllow,
       setUpdatedDefaultAllowReplacement,
+      setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
@@ -235,6 +238,24 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 <EuiIcon type="eyeClosed" size="l" />
               </EuiKeyPadMenuItem>
+              <EuiKeyPadMenuItem
+                id={KNOWLEDGE_BASE_TAB}
+                label={i18n.KNOWLEDGE_BASE_MENU_ITEM}
+                isSelected={selectedSettingsTab === KNOWLEDGE_BASE_TAB}
+                onClick={() => setSelectedSettingsTab(KNOWLEDGE_BASE_TAB)}
+              >
+                <EuiIcon type="notebookApp" size="l" />
+              </EuiKeyPadMenuItem>
+              {modelEvaluatorEnabled && (
+                <EuiKeyPadMenuItem
+                  id={EVALUATION_TAB}
+                  label={i18n.EVALUATION_MENU_ITEM}
+                  isSelected={selectedSettingsTab === EVALUATION_TAB}
+                  onClick={() => setSelectedSettingsTab(EVALUATION_TAB)}
+                >
+                  <EuiIcon type="crossClusterReplicationApp" size="l" />
+                </EuiKeyPadMenuItem>
+              )}
             </EuiKeyPadMenu>
           </EuiPageSidebar>
           <EuiPageBody paddingSize="none" panelled={true}>
@@ -254,7 +275,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     conversationSettings={conversationSettings}
                     setUpdatedConversationSettings={setUpdatedConversationSettings}
                     allSystemPrompts={systemPromptSettings}
-                    actionTypeRegistry={actionTypeRegistry}
                     selectedConversation={selectedConversation}
                     onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
@@ -287,8 +307,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
                   />
                 )}
-                {selectedSettingsTab === FUNCTIONS_TAB && <></>}
-                {selectedSettingsTab === ADVANCED_TAB && <AdvancedSettings />}
+                {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
+                  <KnowledgeBaseSettings
+                    knowledgeBase={knowledgeBase}
+                    setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+                  />
+                )}
+                {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner
                 grow={false}
