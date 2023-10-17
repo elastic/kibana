@@ -165,7 +165,7 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: { queue: 'n2-4-spot' },
+        agents: { queue: group.queue },
         depends_on: 'build',
         parallelism: testSuite.count,
         concurrency,
