@@ -102,4 +102,5 @@ export type TestSubjects =
   | 'filter-option-h'
   | 'infiniteRetentionPeriod.input'
   | 'saveButton'
+  | 'dataRetentionDetail'
   | 'createIndexSaveButton';
