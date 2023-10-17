@@ -192,9 +192,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();
-      return result;
+      return { message: result, usage: res.usage };
     }
 
-    return 'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.';
+    return {
+      message:
+        'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.',
+      ...(res.usage ? { usage: res.usage } : { usage: {} }),
+    };
   }
 }
