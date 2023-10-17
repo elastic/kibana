@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { Filter, Query } from '@kbn/es-query';
 import { isNoneGroup, useGrouping, getGroupingQuery } from '@kbn/securitysolution-grouping';
+import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import type { Evaluation } from '../../../../common/types';
@@ -28,7 +29,8 @@ import {
   CloudSecurityDefaultColumn,
 } from '../../../components/cloud_security_data_table';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import { useFindingsByResource } from '../latest_findings_by_resource/use_findings_by_resource';
+// import { useFindingsByResource } from '../latest_findings_by_resource/use_findings_by_resource';
+import { useGroupedFindings } from './use_grouped_findings';
 
 const getDefaultQuery = ({
   query,
@@ -47,7 +49,7 @@ const getDefaultQuery = ({
 const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: 'result.evaluation', width: 80 },
   { id: 'resource.id' },
-  { id: 'resource.name' },
+  { id: 'resource.id' },
   { id: 'resource.sub_type' },
   { id: 'rule.benchmark.rule_number' },
   { id: 'rule.name' },
@@ -116,14 +118,14 @@ export const FINDINGS_UNIT = (totalCount: number) =>
   });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  const cloudPostureTable = useCloudPostureTable({
-    dataView,
-    paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
-    columnsLocalStorageKey,
-    defaultQuery: getDefaultQuery,
-  });
+  // const cloudPostureTable = useCloudPostureTable({
+  //   dataView,
+  //   paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+  //   columnsLocalStorageKey,
+  //   defaultQuery: getDefaultQuery,
+  // });
 
-  const { query, sort } = cloudPostureTable;
+  // const { query, sort } = cloudPostureTable;
 
   const grouping = useGrouping({
     componentProps: {
@@ -134,28 +136,31 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     },
     defaultGroupingOptions: [
       {
-        label: 'Rule Name',
-        key: 'kibana.alert.rule.name',
+        label: 'Resource',
+        key: 'resource.id',
       },
     ],
     fields: dataView.fields,
-    groupingId: 'latestFindings',
-    maxGroupingLevels: 2,
-    onGroupChange: (params) => {
-      console.log('onGroupChange', params);
-    },
-    onOptionsChange: (options) => {
-      console.log('onOptionsChange', options);
-    },
+    groupingId: 'cspLatestFindings',
+    maxGroupingLevels: 1,
+    // onGroupChange: (params) => {
+    //   console.log('onGroupChange', params);
+    // },
+    // onOptionsChange: (options) => {
+    //   console.log('onOptionsChange', options);
+    // },
   });
+
+  const selectedGroup = grouping.selectedGroups[0];
+  const isNoneSelected = isNoneGroup(grouping.selectedGroups);
+  console.log({ selectedGroup });
 
   const groupingQuery = getGroupingQuery({
     additionalFilters: [],
     from: 'now-1y',
-    groupByField: grouping.selectedGroups.join(','),
-    uniqueValue: grouping.selectedGroups.join(','),
+    groupByField: selectedGroup,
+    uniqueValue: selectedGroup,
     to: 'now',
-    // groupByField,
     // pageNumber,
     // rootAggregations,
     // runtimeMappings,
@@ -166,116 +171,38 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     // uniqueValue,
   });
 
-  console.log({ groupingQuery });
-  console.log({ grouping });
-  console.log(grouping.selectedGroups);
-
-  const { data } = useFindingsByResource({
-    sortDirection: cloudPostureTable.urlQuery.sort.direction,
-    query,
-    enabled: true,
+  const { data, isFetching } = useGroupedFindings({
+    // sortDirection: cloudPostureTable.urlQuery.sort.direction,
+    query: groupingQuery,
+    enabled: !isNoneSelected,
   });
 
-  console.log({ data });
+  const aggs = useMemo(
+    // queriedGroup because `selectedGroup` updates before the query response
+    () =>
+      parseGroupingQuery(
+        // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
+        selectedGroup,
+        selectedGroup,
+        data
+      ),
+    [data, selectedGroup]
+  );
 
-  const GroupSelector = () => grouping.groupSelector;
+  if (isNoneSelected) {
+    return (
+      <LatestFindingsContainerOld dataView={dataView} groupSelector={grouping.groupSelector} />
+    );
+  }
 
   return (
     <>
-      {/* <GroupSelector /> */}
       {grouping.getGrouping({
         activePage: 0,
-        data: {
-          groupsCount: {
-            value: 1,
-          },
-          groupByFields: {
-            buckets: [
-              {
-                key: ['Vulnerability: CVE-2022-28734'],
-                doc_count: 41,
-                hostsCountAggregation: {
-                  value: 25,
-                },
-                ruleTags: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [
-                    {
-                      key: 'CNVM',
-                      doc_count: 41,
-                    },
-                    {
-                      key: 'CVE-2022-28734',
-                      doc_count: 41,
-                    },
-                    {
-                      key: 'Cloud Security',
-                      doc_count: 41,
-                    },
-                    {
-                      key: 'Data Source: Cloud Native Vulnerability Management',
-                      doc_count: 41,
-                    },
-                    {
-                      key: 'OS: Linux',
-                      doc_count: 41,
-                    },
-                    {
-                      key: 'Use Case: Vulnerability',
-                      doc_count: 41,
-                    },
-                  ],
-                },
-                unitsCount: {
-                  value: 41,
-                },
-                description: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [
-                    {
-                      key: "Out-of-bounds write when handling split HTTP headers; When handling split HTTP headers, GRUB2 HTTP code accidentally moves its internal data buffer point by one position. This can lead to a out-of-bound write further when parsing the HTTP request, writing a NULL byte past the buffer. It's conceivable that an attacker controlled set of packets can lead to corruption of the GRUB2's internal memory metadata.",
-                      doc_count: 41,
-                    },
-                  ],
-                },
-                severitiesSubAggregation: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [
-                    {
-                      key: 'critical',
-                      doc_count: 18,
-                    },
-                    {
-                      key: 'medium',
-                      doc_count: 13,
-                    },
-                    {
-                      key: 'high',
-                      doc_count: 10,
-                    },
-                  ],
-                },
-                countSeveritySubAggregation: {
-                  value: 3,
-                },
-                usersCountAggregation: {
-                  value: 0,
-                },
-                selectedGroup: 'kibana.alert.rule.name',
-                key_as_string: 'Vulnerability: CVE-2022-28734',
-              },
-            ],
-          },
-          unitsCount: {
-            value: 41,
-          },
-        },
+        data: aggs,
         groupingLevel: 0,
         inspectButton: undefined,
-        isLoading: false,
+        isLoading: isFetching,
         itemsPerPage: 10,
         onChangeGroupsItemsPerPage: () => {
           console.log('onChangeGroupsItemsPerPage');
@@ -284,20 +211,81 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           console.log('onChangeGroupsPage');
         },
         renderChildComponent: (groupFilter) => {
-          return <div>{JSON.stringify(groupFilter)}</div>;
+          console.log({ groupFilter });
+          return <LatestFindingsContainerTable dataView={dataView} filter={groupFilter} />;
         },
         onGroupClose: () => {
           console.log('onGroupClose');
         },
-        selectedGroup: 'kibana.alert.rule.name',
-        // selectedGroup: 'kibana.alert.rule.name',
+        selectedGroup,
+        // selectedGroup: 'resource.id',
         takeActionItems: () => [],
       })}
     </>
   );
 };
 
-export const LatestFindingsContainerOld = ({ dataView }: FindingsBaseProps) => {
+export const LatestFindingsContainerTable = ({ dataView, filter }: FindingsBaseProps) => {
+  const cloudPostureTable = useCloudPostureTable({
+    dataView,
+    paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+    columnsLocalStorageKey,
+    defaultQuery: getDefaultQuery,
+  });
+
+  const { query, sort, queryError, setUrlQuery, getRowsFromPages } = cloudPostureTable;
+
+  useEffect(() => {
+    setUrlQuery({
+      filters: filter,
+    });
+  }, [filter, setUrlQuery]);
+
+  const {
+    data,
+    error: fetchError,
+    isFetching,
+    fetchNextPage,
+  } = useLatestFindings({
+    query,
+    sort,
+    enabled: !queryError,
+  });
+
+  const rows = useMemo(() => getRowsFromPages(data?.pages), [data?.pages, getRowsFromPages]);
+
+  const error = fetchError || queryError;
+  const total = data?.pages[0].total || 0;
+
+  return (
+    <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
+      <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
+      <EuiSpacer size="m" />
+      {error && <ErrorCallout error={error} />}
+      {!error && (
+        <>
+          <EuiSpacer size="xs" />
+          <CloudSecurityDataTable
+            data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
+            dataView={dataView}
+            isLoading={isFetching}
+            defaultColumns={defaultColumns}
+            rows={rows}
+            total={total}
+            flyoutComponent={flyoutComponent}
+            cloudPostureTable={cloudPostureTable}
+            loadMore={fetchNextPage}
+            title={title}
+            customCellRenderer={customCellRenderer}
+            groupSelector={null}
+          />
+        </>
+      )}
+    </EuiFlexItem>
+  );
+};
+
+export const LatestFindingsContainerOld = ({ dataView, groupSelector }: FindingsBaseProps) => {
   const cloudPostureTable = useCloudPostureTable({
     dataView,
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
@@ -365,6 +353,7 @@ export const LatestFindingsContainerOld = ({ dataView }: FindingsBaseProps) => {
             loadMore={fetchNextPage}
             title={title}
             customCellRenderer={customCellRenderer}
+            groupSelector={groupSelector}
           />
         </>
       )}

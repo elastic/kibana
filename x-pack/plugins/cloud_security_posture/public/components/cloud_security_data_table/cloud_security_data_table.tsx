@@ -86,6 +86,7 @@ export const CloudSecurityDataTable = ({
   loadMore,
   title,
   customCellRenderer,
+  groupSelector,
   ...rest
 }: CloudSecurityDataGridProps) => {
   const {
@@ -213,6 +214,7 @@ export const CloudSecurityDataTable = ({
       columns={currentColumns}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
+      groupSelector={groupSelector}
     />
   );
 
