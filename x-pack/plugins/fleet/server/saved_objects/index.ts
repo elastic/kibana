@@ -147,6 +147,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         },
         is_protected: { type: 'boolean' },
         overrides: { type: 'flattened', index: false },
+        keep_monitoring_alive: { type: 'boolean' },
       },
     },
     migrations: {

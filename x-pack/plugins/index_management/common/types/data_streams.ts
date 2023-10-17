@@ -59,7 +59,9 @@ export interface DataStream {
   _meta?: Metadata;
   privileges: Privileges;
   hidden: boolean;
-  lifecycle?: IndicesDataLifecycleWithRollover;
+  lifecycle?: IndicesDataLifecycleWithRollover & {
+    enabled?: boolean;
+  };
 }
 
 export interface DataStreamIndex {
