@@ -52,6 +52,9 @@ export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurity
         const [feature, permission] = value.split('.');
         const featureKey = feature.split('_')[1];
 
+        if (value === 'read' || value === 'all' || value === '*') {
+          features[value] = [value];
+        }
         if (!features[featureKey]) {
           features[featureKey] = [];
         }
@@ -64,10 +67,7 @@ export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurity
       return features;
     };
 
-    const kibanaFeature = find(
-      definition.applications,
-      (application) => application.application === 'kibana-.kibana'
-    );
+    const feature = mapKibanaFeatureToEsPrivileges(definition.applications[0].privileges);
 
     const kibanaRole: Role = {
       name: roleName,
@@ -80,7 +80,7 @@ export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurity
         {
           base: [],
           spaces: ['*'],
-          feature: mapKibanaFeatureToEsPrivileges(kibanaFeature.privileges),
+          feature,
         },
       ],
     };

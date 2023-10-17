@@ -6,6 +6,7 @@
  */
 
 export enum ServerlessRoleName {
+  SYSTEM_INDICES_SUPERUSER = 'system_indices_superuser',
   VIEWER = 'viewer',
   EDITOR = 'editor',
   T1_ANALYST = 't1_analyst',
