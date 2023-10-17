@@ -85,14 +85,28 @@ function createDefaultChangeSpacesHandler(
     spacesToRemove: string[]
   ) => {
     const { title } = object;
-    const objectsToUpdate = objects.map(({ type, id }) => ({ type, id })); // only use 'type' and 'id' fields
+    let objectsToUpdate: Array<{ type: string; id: string }> = objects.map(({ type, id }) => ({ type, id })); // only use 'type' and 'id' fields
     const relativesCount = objects.length - 1;
     const toastTitle = i18n.translate('xpack.spaces.shareToSpace.shareSuccessTitle', {
       values: { objectNoun: object.noun },
       defaultMessage: 'Updated {objectNoun}',
       description: `Object noun can be plural or singular, examples: "Updated objects", "Updated job"`,
     });
-    await spacesManager.updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, spacesToRemove);
+
+    // If removing spaces and there are referenced objects ("related objects" in UI),
+    // only remove spaces from the target object.
+    if (spacesToRemove.length > 0 && objectsToUpdate.length > 1) {
+      const indexOfTarget = objectsToUpdate.findIndex(element => element.id === object.id);
+      if (indexOfTarget >= 0) {
+        objectsToUpdate.splice(indexOfTarget, 1);
+      }
+
+      await spacesManager.updateSavedObjectsSpaces([{ type: object.type, id: object.id }], spacesToAdd, spacesToRemove);
+      if (spacesToAdd.length > 0) {
+        await spacesManager.updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, []);
+      }
+    }
+    else await spacesManager.updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, spacesToRemove);
 
     const isSharedToAllSpaces = spacesToAdd.includes(ALL_SPACES_ID);
     let toastText: string;
