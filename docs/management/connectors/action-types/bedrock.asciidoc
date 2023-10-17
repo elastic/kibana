@@ -1,15 +1,15 @@
 [[bedrock-action-type]]
-== AWS Bedrock connector and action
+== {bedrock} connector and action
 ++++
-<titleabbrev>AWS Bedrock</titleabbrev>
+<titleabbrev>{bedrock}</titleabbrev>
 ++++
-:frontmatter-description: Add a connector that can send requests to AWS Bedrock.
+:frontmatter-description: Add a connector that can send requests to {bedrock}.
 :frontmatter-tags-products: [kibana] 
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [configure]
 
 
-The AWS Bedrock connector uses https://github.com/axios/axios[axios] to send a POST request to AWS Bedrock. The connector uses the <<execute-connector-api,run connector API>> to send the request.
+The {bedrock} connector uses https://github.com/axios/axios[axios] to send a POST request to {bedrock}. The connector uses the <<execute-connector-api,run connector API>> to send the request.
 
 [float]
 [[define-bedrock-ui]]
@@ -19,18 +19,17 @@ You can create connectors in *{stack-manage-app} > {connectors-ui}*.  For exampl
 
 [role="screenshot"]
 // TODO: need logo before screenshot
-image::management/connectors/images/bedrock-connector.png[AWS Bedrock connector]
+image::management/connectors/images/bedrock-connector.png[{bedrock} connector]
 
 [float]
 [[bedrock-connector-configuration]]
 ==== Connector configuration
 
-AWS Bedrock connectors have the following configuration properties:
+{bedrock} connectors have the following configuration properties:
 
 Name::      The name of the connector.
-API URL::   The AWS Bedrock request URL.
-Default model:: The GAI model for AWS Bedrock to use. Current support is for the Anthropic Claude models, defaulting to Claude 2. The model can be set on a per request basis by including a "model" parameter alongside the request body.
-Region::   The AWS Bedrock request URL.
+API URL::   The {bedrock} request URL.
+Default model:: The GAI model for {bedrock} to use. Current support is for the Anthropic Claude models, defaulting to Claude 2. The model can be set on a per request basis by including a "model" parameter alongside the request body.
 Access Key::   The AWS access key for authentication.
 Secret::   The secret for authentication.
 
@@ -43,11 +42,11 @@ as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 // TODO: need logo before screenshot
-image::management/connectors/images/bedrock-params.png[AWS Bedrock params test]
+image::management/connectors/images/bedrock-params.png[{bedrock} params test]
 
-The AWS Bedrock actions have the following configuration properties.
+The {bedrock} actions have the following configuration properties.
 
-Body::      A stringified JSON payload sent to the AWS Bedrock Invoke Model API URL. For example:
+Body::      A stringified JSON payload sent to the {bedrock} Invoke Model API URL. For example:
 +
 [source,text]
 --

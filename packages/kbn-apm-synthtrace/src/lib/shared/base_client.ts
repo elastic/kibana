@@ -13,7 +13,7 @@ import {
   SynthtraceESAction,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { castArray } from 'lodash';
+import { castArray, isFunction } from 'lodash';
 import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { Logger } from '../utils/create_logger';
@@ -69,8 +69,16 @@ export class SynthtraceEsClient<TFields extends Fields> {
     this.pipelineCallback = cb;
   }
 
-  async index(streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<TFields>>) {
+  async index(
+    streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<TFields>>,
+    pipelineCallback?: (base: Readable) => NodeJS.WritableStream
+  ) {
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
+
+    const previousPipelineCallback = this.pipelineCallback;
+    if (isFunction(pipelineCallback)) {
+      this.pipeline(pipelineCallback);
+    }
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {
       const base = isGeneratorObject(obj) ? Readable.from(obj) : obj;
@@ -120,6 +128,11 @@ export class SynthtraceEsClient<TFields extends Fields> {
     });
 
     this.logger.info(`Produced ${count} events`);
+
+    // restore pipeline callback
+    if (pipelineCallback) {
+      this.pipeline(previousPipelineCallback);
+    }
 
     if (this.refreshAfterIndex) {
       await this.refresh();
