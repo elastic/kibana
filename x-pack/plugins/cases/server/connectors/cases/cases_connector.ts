@@ -5,19 +5,37 @@
  * 2.0.
  */
 
+import stringify from 'json-stable-stringify';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { pick } from 'lodash';
 import { CASES_CONNECTOR_SUB_ACTION } from './constants';
-import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
-import { CasesConnectorParamsSchema } from './schema';
+import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
+import { CasesConnectorRunParamsSchema } from './schema';
+import { CasesOracleService } from './cases_oracle_service';
+
+interface GroupingMapValue {
+  alerts: CasesConnectorRunParams['alerts'];
+  grouping: Record<string, unknown>;
+}
 
 export class CasesConnector extends SubActionConnector<
   CasesConnectorConfig,
   CasesConnectorSecrets
 > {
+  private readonly casesOracleService;
+
   constructor(params: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>) {
     super(params);
-
+    this.casesOracleService = new CasesOracleService({
+      log: this.logger,
+      /**
+       * TODO: Think about permissions etc.
+       * Should we use our own savedObjectsClient as we do
+       * in the cases client?
+       */
+      unsecuredSavedObjectsClient: this.savedObjectsClient,
+    });
     this.registerSubActions();
   }
 
@@ -25,7 +43,7 @@ export class CasesConnector extends SubActionConnector<
     this.registerSubAction({
       name: CASES_CONNECTOR_SUB_ACTION.RUN,
       method: 'run',
-      schema: CasesConnectorParamsSchema,
+      schema: CasesConnectorRunParamsSchema,
     });
   }
 
@@ -38,5 +56,66 @@ export class CasesConnector extends SubActionConnector<
     throw new Error('Method not implemented.');
   }
 
-  public async run() {}
+  private groupAlerts({
+    alerts,
+    groupingBy,
+  }: Pick<CasesConnectorRunParams, 'alerts' | 'groupingBy'>): Map<string, GroupingMapValue> {
+    const uniqueGroupingByFields = Array.from(new Set<string>(groupingBy));
+    const groupingMap = new Map<string, GroupingMapValue>();
+
+    const filteredAlerts = alerts.filter((alert) =>
+      uniqueGroupingByFields.every((groupingByField) => Object.hasOwn(alert, groupingByField))
+    );
+
+    for (const alert of filteredAlerts) {
+      const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
+      const groupingKey = stringify(alertWithOnlyTheGroupingFields);
+
+      if (groupingMap.has(groupingKey)) {
+        groupingMap.get(groupingKey)?.alerts.push(alert);
+      } else {
+        groupingMap.set(groupingKey, { alerts: [alert], grouping: alertWithOnlyTheGroupingFields });
+      }
+    }
+
+    return groupingMap;
+  }
+
+  private generateOracleKeys(
+    params: CasesConnectorRunParams,
+    groupingMap: Map<string, GroupingMapValue>
+  ): Map<string, GroupingMapValue> {
+    const { rule, owner } = params;
+    /**
+     * TODO: Take spaceId from the actions framework
+     */
+    const spaceId = 'default';
+
+    const oracleMap = new Map<string, GroupingMapValue>();
+
+    for (const { grouping, alerts } of groupingMap.values()) {
+      const oracleKey = this.casesOracleService.getRecordId({
+        ruleId: rule.id,
+        grouping,
+        owner,
+        spaceId,
+      });
+
+      oracleMap.set(oracleKey, { grouping, alerts });
+    }
+
+    return oracleMap;
+  }
+
+  private getOracleRecord(groupingMap: Map<string, GroupingMapValue>): Promise<OracleRecord> {}
+
+  public async run(params: CasesConnectorRunParams) {
+    const { alerts, groupingBy } = params;
+    const groupingMap = this.groupAlerts({ alerts, groupingBy });
+    const oracleMap = this.generateOracleKeys(params, groupingMap);
+
+    const oracleKeys = oracleMap.keys();
+
+    const oracleBulkGetRes = this.casesOracleService.bulkGetRecord(Array.from(oracleKeys));
+  }
 }

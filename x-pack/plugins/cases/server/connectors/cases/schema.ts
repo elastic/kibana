@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-const AlertSchema = schema.recordOf(schema.string(), schema.string(), {
+const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
   validate: (value) => {
     if (!Object.hasOwn(value, 'id') || !Object.hasOwn(value, 'index')) {
       return 'Alert ID and index must be defined';
@@ -36,7 +36,7 @@ const RuleSchema = schema.object({
 export const CasesConnectorConfigSchema = schema.object({});
 export const CasesConnectorSecretsSchema = schema.object({});
 
-export const CasesConnectorParamsSchema = schema.object({
+export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
   groupingBy: GroupingSchema,
   owner: schema.string(),
