@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -83,7 +84,11 @@ export function FlameGraphTooltip({
     <TooltipContainer>
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>{label}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <EuiText>{label}</EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
           <EuiHorizontalRule margin="none" style={{ background: theme.euiTheme.border.color }} />
           {isRoot === false && (
             <>
