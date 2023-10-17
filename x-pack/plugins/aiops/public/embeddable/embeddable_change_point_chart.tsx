@@ -21,7 +21,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
