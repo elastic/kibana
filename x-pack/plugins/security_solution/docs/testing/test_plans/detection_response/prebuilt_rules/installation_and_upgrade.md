@@ -548,6 +548,22 @@ And all properties of the 2nd rule should be displayed in the correct tab and se
 And user should be able to repeat this for all X rules
 ```
 
+#### **Scenario: Tabs and sections without content should be hidden in preview before installing**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there is at least 1 rule available to install
+And this rule has neither Setup guide nor Investigation guide
+When user opens the Add Rules page
+Then all rules available for installation should be displayed in the table
+When user opens the rule preview for this rule
+Then the preview should open
+And the Setup Guide section should NOT be displayed in the Overview tab
+And the Investigation Guide tab should NOT be displayed
+```
+
 ### Rule installation workflow: filtering, sorting, pagination
 
 TODO: add scenarios
@@ -672,6 +688,23 @@ When user selects the 2nd rule in the table
 Then the preview should be updated
 And all properties of the new version of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 And user should be able to repeat this for all X rules
+```
+
+#### **Scenario: Tabs and sections without content should be hidden in preview before upgrading**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And the updated version of a rule has neither Setup guide nor Investigation guide
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then all rules available for upgrade should be displayed in the table
+When user opens the rule preview for a rule without Setup guide and Investigation guide
+Then the preview should open
+And the Setup Guide section should NOT be displayed in the Overview tab
+And the Investigation Guide tab should NOT be displayed
 ```
 
 ### Rule upgrade workflow: filtering, sorting, pagination
