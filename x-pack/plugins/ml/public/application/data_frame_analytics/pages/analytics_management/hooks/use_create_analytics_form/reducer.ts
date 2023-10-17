@@ -577,7 +577,8 @@ export function reducer(state: State, action: Action): State {
       const { jobConfig: config } = state;
       const { jobId } = state.form;
       // @ts-ignore
-      const formState = getFormStateFromJobConfig(config, false);
+      const formStateFromJobConfig = getFormStateFromJobConfig(config, false);
+      const formState = { ...formStateFromJobConfig, ...state.form };
 
       if (typeof jobId === 'string' && jobId.trim() !== '') {
         formState.jobId = jobId;
@@ -605,7 +606,6 @@ export function reducer(state: State, action: Action): State {
 
       return validateForm({
         ...state,
-        // @ts-ignore
         form: formState,
         isAdvancedEditorEnabled: false,
         advancedEditorRawString: JSON.stringify(config, null, 2),
