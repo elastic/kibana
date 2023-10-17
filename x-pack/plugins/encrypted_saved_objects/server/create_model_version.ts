@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { mergeTransformFunctions } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   SavedObjectModelUnsafeTransformFn,
@@ -14,6 +13,7 @@ import type {
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
 
+import { mapAttributes } from './utilities';
 import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 
@@ -147,10 +147,4 @@ function createMergedUnsafeTransformFn(
     // return encrypted doc
     return { ...result, document: transformedDoc };
   };
-}
-
-function mapAttributes<T>(obj: SavedObjectUnsanitizedDoc<T>, mapper: (attributes: T) => T) {
-  return Object.assign(obj, {
-    attributes: mapper(obj.attributes),
-  });
 }
