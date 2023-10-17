@@ -62,13 +62,14 @@ export const EmptyThumbnail = ({
         background: useEuiBackgroundColor('subdued'),
         border: euiTheme.border.thin,
         ...(borderRadius ? { borderRadius } : {}),
-        // We don't want the placeholder to be clickable
-        pointerEvents: 'none',
       }}
       onClick={(e) => {
+        // We don't want the placeholder to be clickable
         e.stopPropagation();
+        e.preventDefault();
       }}
       onKeyDown={(e) => {
+        // We don't want the placeholder to be clickable
         e.stopPropagation();
       }}
     >
