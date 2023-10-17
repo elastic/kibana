@@ -22,7 +22,7 @@ interface ErrorServiceError {
  * Each Error Boundary tracks an instance of this class
  * @internal
  */
-export class ErrorService {
+export class KibanaErrorService {
   /**
    * Determines if the error fallback UI should appear as an apologetic but promising "Refresh" button,
    * or treated with "danger" coloring and include a detailed error message.

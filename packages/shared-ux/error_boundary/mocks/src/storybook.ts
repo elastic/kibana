@@ -8,20 +8,23 @@
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
-import { ErrorService } from '../../src/services/error_service';
-import { ErrorBoundaryServices } from '../../types';
+import { KibanaErrorService } from '../../src/services/error_service';
+import { KibanaErrorBoundaryServices } from '../../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Params {}
 
-export class ErrorBoundaryStorybookMock extends AbstractStorybookMock<{}, ErrorBoundaryServices> {
+export class KibanaErrorBoundaryStorybookMock extends AbstractStorybookMock<
+  {},
+  KibanaErrorBoundaryServices
+> {
   propArguments = {};
 
   serviceArguments = {};
 
   dependencies = [];
 
-  getServices(params: Params = {}): ErrorBoundaryServices {
+  getServices(params: Params = {}): KibanaErrorBoundaryServices {
     const reloadWindowAction = action('Reload window');
     const reloadWindow = () => {
       reloadWindowAction();
@@ -30,7 +33,7 @@ export class ErrorBoundaryStorybookMock extends AbstractStorybookMock<{}, ErrorB
     return {
       ...params,
       reloadWindow,
-      errorService: new ErrorService(),
+      errorService: new KibanaErrorService(),
     };
   }
 

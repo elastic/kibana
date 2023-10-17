@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { ErrorBoundary, ErrorBoundaryKibanaProvider } from '@kbn/shared-ux-error-boundary';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
@@ -40,8 +40,8 @@ export async function mountManagementSection(
             docLinks: coreStart.docLinks,
           }}
         >
-          <ErrorBoundaryKibanaProvider>
-            <ErrorBoundary>
+          <KibanaErrorBoundaryProvider>
+            <KibanaErrorBoundary>
               <InternalApiClientProvider apiClient={apiClient}>
                 <IlmPolicyStatusContextProvider>
                   <ReportListing
@@ -54,8 +54,8 @@ export async function mountManagementSection(
                   />
                 </IlmPolicyStatusContextProvider>
               </InternalApiClientProvider>
-            </ErrorBoundary>
-          </ErrorBoundaryKibanaProvider>
+            </KibanaErrorBoundary>
+          </KibanaErrorBoundaryProvider>
         </KibanaContextProvider>
       </I18nProvider>
     </KibanaThemeProvider>,

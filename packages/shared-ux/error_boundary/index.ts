@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ErrorBoundary } from './src/ui/error_boundary';
-export {
-  ErrorBoundaryKibanaProvider,
-  ErrorBoundaryProvider,
-} from './src/services/error_boundary_services';
+export { KibanaErrorBoundary } from './src/ui/error_boundary';
+export { KibanaErrorBoundaryProvider } from './src/services/error_boundary_services';

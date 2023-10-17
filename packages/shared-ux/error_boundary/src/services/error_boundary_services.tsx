@@ -8,15 +8,15 @@
 
 import React, { FC, useContext, useMemo } from 'react';
 
-import { ErrorBoundaryServices } from '../../types';
-import { ErrorService } from './error_service';
+import { KibanaErrorBoundaryServices } from '../../types';
+import { KibanaErrorService } from './error_service';
 
-const Context = React.createContext<ErrorBoundaryServices | null>(null);
+const Context = React.createContext<KibanaErrorBoundaryServices | null>(null);
 
 /**
  * A Context Provider for Jest and Storybooks
  */
-export const ErrorBoundaryProvider: FC<ErrorBoundaryServices> = ({
+export const KibanaErrorBoundaryDepsProvider: FC<KibanaErrorBoundaryServices> = ({
   children,
   reloadWindow,
   errorService,
@@ -27,12 +27,12 @@ export const ErrorBoundaryProvider: FC<ErrorBoundaryServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const ErrorBoundaryKibanaProvider: FC = ({ children }) => {
+export const KibanaErrorBoundaryProvider: FC = ({ children }) => {
   // control side-effects of rendering with useMemo
   const reloadWindow = useMemo(() => () => window.location.reload(), []);
-  const errorService = useMemo(() => new ErrorService(), []);
+  const errorService = useMemo(() => new KibanaErrorService(), []);
 
-  const value: ErrorBoundaryServices = {
+  const value: KibanaErrorBoundaryServices = {
     reloadWindow,
     errorService,
   };
@@ -43,7 +43,7 @@ export const ErrorBoundaryKibanaProvider: FC = ({ children }) => {
 /**
  * React hook for accessing pre-wired services.
  */
-export function useErrorBoundary(): ErrorBoundaryServices {
+export function useErrorBoundary(): KibanaErrorBoundaryServices {
   const context = useContext(Context);
   if (!context) {
     throw new Error(

@@ -11,13 +11,13 @@ import React, { FC } from 'react';
 
 import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 
-import { ChunkLoadErrorComponent, ErrorBoundaryStorybookMock } from '../../mocks';
-import { ErrorBoundaryProvider } from '../services/error_boundary_services';
-import { ErrorBoundary } from './error_boundary';
+import { ChunkLoadErrorComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
+import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
+import { KibanaErrorBoundary } from './error_boundary';
 
 import mdx from '../../README.mdx';
 
-const storybookMock = new ErrorBoundaryStorybookMock();
+const storybookMock = new KibanaErrorBoundaryStorybookMock();
 
 export default {
   title: 'Errors/Recoverable Errors',
@@ -49,11 +49,11 @@ export const ErrorInCallout: Story = () => {
 
   return (
     <Template>
-      <ErrorBoundaryProvider {...services}>
-        <ErrorBoundary>
+      <KibanaErrorBoundaryDepsProvider {...services}>
+        <KibanaErrorBoundary>
           <ChunkLoadErrorComponent />
-        </ErrorBoundary>
-      </ErrorBoundaryProvider>
+        </KibanaErrorBoundary>
+      </KibanaErrorBoundaryDepsProvider>
     </Template>
   );
 };

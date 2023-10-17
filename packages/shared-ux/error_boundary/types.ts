@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ErrorService } from './src/services/error_service';
-
-export interface ErrorBoundaryUIServices {
-  reloadWindow: () => void;
-}
+import { KibanaErrorService } from './src/services/error_service';
 
 /**
  * Services that are consumed internally in this component.
  * @internal
  */
-export interface ErrorBoundaryServices extends ErrorBoundaryUIServices {
-  errorService: ErrorService;
+export interface KibanaErrorBoundaryServices {
+  reloadWindow: () => void;
+  errorService: KibanaErrorService;
 }

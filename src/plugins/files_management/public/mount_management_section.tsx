@@ -12,7 +12,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
-import { ErrorBoundary, ErrorBoundaryKibanaProvider } from '@kbn/shared-ux-error-boundary';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
@@ -38,8 +38,8 @@ export const mountManagementSection = (
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-        <ErrorBoundaryKibanaProvider>
-          <ErrorBoundary>
+        <KibanaErrorBoundaryProvider>
+          <KibanaErrorBoundary>
             <QueryClientProvider client={queryClient}>
               <TableListViewKibanaProvider
                 {...{
@@ -59,8 +59,8 @@ export const mountManagementSection = (
                 </FilesManagementAppContextProvider>
               </TableListViewKibanaProvider>
             </QueryClientProvider>
-          </ErrorBoundary>
-        </ErrorBoundaryKibanaProvider>
+          </KibanaErrorBoundary>
+        </KibanaErrorBoundaryProvider>
       </KibanaThemeProvider>
     </I18nProvider>,
     element

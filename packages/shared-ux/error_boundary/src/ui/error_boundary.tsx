@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { ErrorBoundaryServices } from '../../types';
+import { KibanaErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services/error_boundary_services';
 import { FatalPrompt, RecoverablePrompt } from './message_components';
 
@@ -24,10 +24,10 @@ interface ErrorBoundaryProps {
 }
 
 class ErrorBoundaryInternal extends React.Component<
-  ErrorBoundaryProps & ErrorBoundaryServices,
+  ErrorBoundaryProps & KibanaErrorBoundaryServices,
   ErrorBoundaryState
 > {
-  constructor(props: ErrorBoundaryProps & ErrorBoundaryServices) {
+  constructor(props: ErrorBoundaryProps & KibanaErrorBoundaryServices) {
     super(props);
     this.state = {
       error: null,
@@ -74,7 +74,7 @@ class ErrorBoundaryInternal extends React.Component<
   }
 }
 
-export const ErrorBoundary = (props: ErrorBoundaryProps) => {
+export const KibanaErrorBoundary = (props: ErrorBoundaryProps) => {
   const services = useErrorBoundary();
   return <ErrorBoundaryInternal {...props} {...services} />;
 };

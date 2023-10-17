@@ -9,4 +9,4 @@
 export { BadComponent } from './src/bad_component';
 export { ChunkLoadErrorComponent } from './src/chunk_load_error_component';
 export { getServicesMock } from './src/jest';
-export { ErrorBoundaryStorybookMock } from './src/storybook';
+export { KibanaErrorBoundaryStorybookMock } from './src/storybook';

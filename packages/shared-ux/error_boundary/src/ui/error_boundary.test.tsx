@@ -6,24 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import { render } from '@testing-library/react';
+import React, { FC } from 'react';
 
+import { KibanaErrorBoundary } from '../..';
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
-import { ErrorBoundary, ErrorBoundaryProvider } from '../..';
-import { ErrorBoundaryServices } from '../../types';
+import { KibanaErrorBoundaryServices } from '../../types';
+import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 
-describe('<ErrorBoundary>', () => {
-  let services: ErrorBoundaryServices;
+describe('<KibanaErrorBoundary>', () => {
+  let services: KibanaErrorBoundaryServices;
   beforeEach(() => {
     services = getServicesMock();
   });
 
   const Template: FC = ({ children }) => {
     return (
-      <ErrorBoundaryProvider {...services}>
-        <ErrorBoundary>{children}</ErrorBoundary>
-      </ErrorBoundaryProvider>
+      <KibanaErrorBoundaryDepsProvider {...services}>
+        <KibanaErrorBoundary>{children}</KibanaErrorBoundary>
+      </KibanaErrorBoundaryDepsProvider>
     );
   };
 

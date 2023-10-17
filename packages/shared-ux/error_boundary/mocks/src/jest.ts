@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ErrorService } from '../../src/services/error_service';
-import { ErrorBoundaryServices } from '../../types';
+import { KibanaErrorService } from '../../src/services/error_service';
+import { KibanaErrorBoundaryServices } from '../../types';
 
-export const getServicesMock = (): ErrorBoundaryServices => {
+export const getServicesMock = (): KibanaErrorBoundaryServices => {
   const reloadWindow = jest.fn().mockResolvedValue(undefined);
   return {
     reloadWindow,
-    errorService: new ErrorService(),
+    errorService: new KibanaErrorService(),
   };
 };
