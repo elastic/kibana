@@ -61,12 +61,14 @@ export const makeBaseBreadcrumb = (
         defaultMessage: 'Observability',
       }),
       href: observabilityPath,
+      'data-test-subj': 'observabilityPathBreadcrumb',
     },
     {
       text: i18n.translate('xpack.synthetics.breadcrumbs.overviewBreadcrumbText', {
         defaultMessage: 'Synthetics',
       }),
       href: uptimePath,
+      'data-test-subj': 'syntheticsPathBreadcrumb',
     },
   ];
 };
