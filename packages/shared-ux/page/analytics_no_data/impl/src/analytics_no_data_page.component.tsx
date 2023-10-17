@@ -86,6 +86,10 @@ const flavors: {
     pageTitle: i18n.translate('sharedUXPackages.noDataConfig.observabilityPageTitle', {
       defaultMessage: 'Welcome to Elastic Observability!',
     }),
+    pageDescription: i18n.translate('sharedUXPackages.noDataConfig.observabilityPageDescription', {
+      defaultMessage:
+        'Converge metrics, logs, and traces to monitor the health of your applications.',
+    }),
     logo: 'logoObservability',
     action: {
       observability: {
@@ -93,8 +97,7 @@ const flavors: {
           defaultMessage: 'Add data',
         }),
         description: i18n.translate('sharedUXPackages.noDataConfig.observabilityDescription', {
-          defaultMessage:
-            'Start collecting your log data to monitor the health of your applications',
+          defaultMessage: 'Get started by collecting data using one of our many integrations.',
         }),
         'data-test-subj': 'kbnObservabilityNoData',
         href: prependBasePath('/app/observabilityOnboarding/'),
