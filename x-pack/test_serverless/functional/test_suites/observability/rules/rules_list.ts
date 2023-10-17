@@ -600,7 +600,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('ruleTypeFilterButton');
         }
 
-        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Observability');
+        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
+          'Observability'
+        );
       });
 
       await testSubjects.click('ruleTypeapm.anomalyFilterOption');
