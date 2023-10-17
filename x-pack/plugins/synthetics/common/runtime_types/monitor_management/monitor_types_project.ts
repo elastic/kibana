@@ -43,7 +43,7 @@ export const ProjectMonitorCodec = t.intersection([
     alert: AlertConfigsCodec,
     urls: t.union([t.string, t.array(t.string)]),
     hosts: t.union([t.string, t.array(t.string)]),
-    max_redirects: t.string,
+    max_redirects: t.union([t.string, t.number]),
     wait: t.string,
     hash: t.string,
     namespace: t.string,
