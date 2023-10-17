@@ -46,6 +46,7 @@ export interface DocLinks {
     readonly guide: string;
   };
   readonly cloud: {
+    readonly beatsAndLogstashConfiguration: string;
     readonly indexManagement: string;
   };
   readonly console: {
@@ -148,7 +149,6 @@ export interface DocLinks {
     readonly connectorsSharepointOnline: string;
     readonly connectorsTeams: string;
     readonly connectorsSlack: string;
-    readonly connectorsWorkplaceSearch: string;
     readonly connectorsZoom: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
@@ -523,6 +523,7 @@ export interface DocLinks {
     api: string;
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
+    elasticAgentInputConfiguration: string;
   }>;
   readonly ecs: {
     readonly guide: string;
