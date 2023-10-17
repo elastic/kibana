@@ -110,6 +110,7 @@ export const DurationChartComponent = ({
             legendPosition={Position.Right}
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
+            locale={i18n.getLocale()}
             {...chartTheme}
           />
           <Axis
