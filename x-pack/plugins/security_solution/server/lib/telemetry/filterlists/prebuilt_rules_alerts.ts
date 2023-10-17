@@ -99,6 +99,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       relative_file_name_modify_time: true,
     },
     code_signature: {
+      exists: true,
       status: true,
       subject_name: true,
       trusted: true,
@@ -147,6 +148,8 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     args: true,
     args_count: true,
     code_signature: {
+      exists: true,
+      status: true,
       subject_name: true,
       trusted: true,
     },
@@ -159,11 +162,16 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     Ext: {
       api: {
         name: true,
+        parameters: {
+          desired_access: true,
+          desired_access_numeric: true,
+        },
       },
       effective_parent: {
         executable: true,
         name: true,
       },
+      relative_file_creation_time: true,
       token: {
         integrity_level_name: true,
       },
@@ -174,6 +182,12 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     parent: {
       args: true,
       command_line: true,
+      code_signature: {
+        subject_name: true,
+        status: true,
+        exists: true,
+        trusted: true,
+      },
       entity_id: true,
       executable: true,
       Ext: {
