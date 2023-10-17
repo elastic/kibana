@@ -389,7 +389,7 @@ const fetchComparisonDriftedData = async ({
   randomSamplerWrapper: RandomSamplerWrapper;
   signal: AbortSignal;
   baselineResponseAggs: object;
-  baselineRequest: object;
+  baselineRequest: EsRequestParams;
 }) => {
   const driftedRequest = { ...baseRequest };
 
