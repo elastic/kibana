@@ -36,41 +36,60 @@ export const useDebounceWithOptions = (
   );
 };
 
+const quotedWarningMessageRegexp = /"(.*?)"/g;
+
 export const parseWarning = (warning: string): MonacoMessage[] => {
-  if (warning.includes('Line')) {
-    const splitByLine = warning.split('Line');
-    splitByLine.shift();
-    return splitByLine.map((item) => {
-      const [lineNumber, startPosition, warningMessage] = item.split(':');
-      const [trimmedMessage] = warningMessage.split('"');
-      // initialize the length to 10 in case no error word found
-      let errorLength = 10;
-      const [_, wordWithError] = trimmedMessage.split('[');
-      if (wordWithError) {
-        errorLength = wordWithError.length - 1;
-      }
-      return {
-        message: trimmedMessage.trimStart(),
-        startColumn: Number(startPosition),
-        startLineNumber: Number(lineNumber),
-        endColumn: Number(startPosition) + errorLength,
-        endLineNumber: Number(lineNumber),
-        severity: monaco.MarkerSeverity.Warning,
-      };
-    });
-  } else {
-    // unknown warning message
-    return [
-      {
-        message: warning,
-        startColumn: 1,
-        startLineNumber: 1,
-        endColumn: 10,
-        endLineNumber: 1,
-        severity: monaco.MarkerSeverity.Warning,
-      },
-    ];
+  if (quotedWarningMessageRegexp.test(warning)) {
+    const matches = warning.match(quotedWarningMessageRegexp);
+    if (matches) {
+      return matches.map((message) => {
+        // start extracting the quoted message and with few default positioning
+        let warningMessage = message.replace(/"/g, '');
+        let startColumn = 1;
+        let startLineNumber = 1;
+        // initialize the length to 10 in case no error word found
+        let errorLength = 10;
+        // if there's line number encoded in the message use it as new positioning
+        // and replace the actual message without it
+        if (/Line (\d+):(\d+):/.test(warningMessage)) {
+          const [encodedLine, encodedColumn, innerMessage] = warningMessage.split(':');
+          warningMessage = innerMessage;
+          if (!Number.isNaN(Number(encodedColumn))) {
+            startColumn = Number(encodedColumn);
+            startLineNumber = Number(encodedLine.replace('Line ', ''));
+          }
+          // extract the length of the "expression" within the message
+          // and try to guess the correct size for the editor marker to highlight
+          if (/\[.*\]/.test(warningMessage)) {
+            const [_, wordWithError] = warningMessage.split('[');
+            if (wordWithError) {
+              errorLength = wordWithError.length;
+            }
+          }
+        }
+
+        return {
+          message: warningMessage.trimStart(),
+          startColumn,
+          startLineNumber,
+          endColumn: startColumn + errorLength - 1,
+          endLineNumber: startLineNumber,
+          severity: monaco.MarkerSeverity.Warning,
+        };
+      });
+    }
   }
+  // unknown warning message
+  return [
+    {
+      message: warning,
+      startColumn: 1,
+      startLineNumber: 1,
+      endColumn: 10,
+      endLineNumber: 1,
+      severity: monaco.MarkerSeverity.Warning,
+    },
+  ];
 };
 
 export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
