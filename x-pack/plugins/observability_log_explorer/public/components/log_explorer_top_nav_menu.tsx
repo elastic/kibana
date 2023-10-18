@@ -145,6 +145,9 @@ const StatefulTopNav = ({
                 alignment="middle"
               />
             </EuiHeaderSectionItem>
+            <EuiHeaderSectionItem>
+              <FeedbackLink />
+            </EuiHeaderSectionItem>
           </EuiHeaderSection>,
           { theme, i18n }
         ),
@@ -163,8 +166,6 @@ const StatefulTopNav = ({
       <EuiHeaderSection data-test-subj="logExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
-            <FeedbackLink />
-            <VerticalRule />
             <DiscoverLink services={services} state$={state$} />
             <OnboardingLink services={services} />
           </EuiHeaderLinks>
