@@ -8,7 +8,6 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
   SavedObjectsBulkUpdateObject,
@@ -615,15 +614,6 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
         break;
       }
       case 'snoozeSchedule': {
-        // Silently skip adding snooze or snooze schedules on security
-        // rules until we implement snoozing of their rules
-        if (updatedRule.consumer === AlertConsumers.SIEM) {
-          // While the rule is technically not updated, we are still marking
-          // the rule as updated in case of snoozing, until support
-          // for snoozing is added.
-          isAttributesUpdateSkipped = false;
-          break;
-        }
         if (operation.operation === 'set') {
           const snoozeAttributes = getBulkSnooze<Params>(
             updatedRule,
