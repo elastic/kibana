@@ -15,9 +15,14 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiLink,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiCopy,
 } from '@elastic/eui';
 
 import { errorMessageStrings as strings } from './message_strings';
@@ -34,8 +39,14 @@ const CodePanel = (props: ErrorCalloutProps & { onClose: () => void }) => {
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
+
+  const errorMessage = errorComponentName
+    ? strings.fatal.callout.details.componentName(errorComponentName)
+    : error.message;
+  const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
+
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId}>
+    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{strings.fatal.callout.details.title()}</h2>
@@ -43,13 +54,28 @@ const CodePanel = (props: ErrorCalloutProps & { onClose: () => void }) => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiCodeBlock>
-          {errorComponentName && (
-            <p>{strings.fatal.callout.details.componentName(errorComponentName)}</p>
-          )}
-          {error?.message && <p>{error.message}</p>}
-          {errorInfo?.componentStack}
+          <p>{errorMessage}</p>
+          <p>{errorTrace}</p>
         </EuiCodeBlock>
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose} flush="left">
+              {strings.fatal.callout.details.closeButton()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCopy textToCopy={errorMessage + '\n\n' + errorTrace}>
+              {(copy) => (
+                <EuiButton onClick={copy} fill iconType="copyClipboard">
+                  {strings.fatal.callout.details.copyToClipboardButton()}
+                </EuiButton>
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

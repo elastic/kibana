@@ -24,14 +24,22 @@ export const errorMessageStrings = {
           defaultMessage: 'Show details',
         }),
       details: {
+        title: () =>
+          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.title', {
+            defaultMessage: 'Error details',
+          }),
         componentName: (errorComponentName: string) =>
           i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details', {
             defaultMessage: 'An error occurred in {name}:',
             values: { name: errorComponentName },
           }),
-        title: () =>
-          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.title', {
-            defaultMessage: 'Error details',
+        closeButton: () =>
+          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.close', {
+            defaultMessage: 'Close',
+          }),
+        copyToClipboardButton: () =>
+          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.copyToClipboard', {
+            defaultMessage: 'Copy error to clipboard',
           }),
       },
       pageReloadButton: () =>
