@@ -38,7 +38,7 @@ export const ManagementLandingPage = ({
           sections={sections}
           appBasePath={appBasePath}
           hideLinksTo={cardsNavigationConfig?.hideLinksTo}
-          extendCardNavigationDefinitions={cardsNavigationConfig?.extendCardNavDefinitons}
+          cardNavExtensionDefinitions={cardsNavigationConfig?.extendCardNavDefinitons}
         />
       </EuiPageBody>
     );
