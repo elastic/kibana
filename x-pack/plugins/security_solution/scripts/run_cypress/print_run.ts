@@ -356,7 +356,6 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
     });
 
     _.each(runs, (run) => {
-      console.log('Looking at a single runs', run);
       const { spec, stats } = run;
       const ms = durationInMinutes(stats?.duration ?? 0);
       const formattedSpec = formatPath(spec.relative, getWidth(table2, 1));
