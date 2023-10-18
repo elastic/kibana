@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
@@ -27,11 +28,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {
-      const start = Date.now() - 1000 * 60 * 60 * 24 * 2; // day ago
-      const end = Date.now();
+      const start = moment().subtract(1, 'days').toISOString();
+      const end = moment().toISOString();
 
-      const spikeStart = new Date(Date.now() - 1000 * 60 * 15).getTime(); // 15 minutes ago
-      const spikeEnd = new Date(Date.now()).getTime();
+      const spikeStart = moment().subtract(15, 'minutes').valueOf();
+      const spikeEnd = moment().valueOf();
 
       const NORMAL_DURATION = 100;
       const NORMAL_RATE = 1;
