@@ -1,5 +1,6 @@
 type: array
 description: Values for custom fields of a case.
+x-technical-preview: true
 minItems: 0
 maxItems: 5
 items:

@@ -1,0 +1,26 @@
+type: array
+description: Custom fields case configuration.
+x-technical-preview: true
+items:
+  type: object
+  required:
+    - key
+    - label
+    - required
+    - type
+  properties:
+    key:
+      description: A unique key for the custom field.
+      type: string
+    label:
+      description: The custom field label.
+      type: string
+    required:
+      description: Indicates whether the field is required.
+      type: boolean
+    type:
+      description: The type of the custom field.
+      type: string
+      enum:
+        - text
+        - toggle

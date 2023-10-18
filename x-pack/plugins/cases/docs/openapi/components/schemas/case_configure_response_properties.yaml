@@ -2,6 +2,7 @@ closure_type:
   $ref: 'closure_types.yaml'
 customFields:
   type: array
+  x-technical-preview: true
   description: Custom fields configuration details.
   items:
     type: object

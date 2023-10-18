@@ -1,8 +1,9 @@
 summary: This is an example response when the case configuration was updated.
 value: 
   closure_type: close-by-user
+  customFields: []
   owner: cases
-  created_at: 2022-06-01T17:07:17.767Z
+  created_at: 2023-10-01T17:07:17.767Z
   created_by:
     username: elastic
     email: null,

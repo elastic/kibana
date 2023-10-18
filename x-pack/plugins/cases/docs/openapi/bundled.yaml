@@ -230,6 +230,7 @@ paths:
                       $ref: '#/components/schemas/closure_types'
                     customFields:
                       type: array
+                      x-technical-preview: true
                       description: Custom fields configuration details.
                       items:
                         type: object
@@ -376,6 +377,7 @@ paths:
                     $ref: '#/components/schemas/closure_types'
                   customFields:
                     type: array
+                    x-technical-preview: true
                     description: Custom fields configuration details.
                     items:
                       type: object
@@ -523,6 +525,7 @@ paths:
                       $ref: '#/components/schemas/closure_types'
                     customFields:
                       type: array
+                      x-technical-preview: true
                       description: Custom fields configuration details.
                       items:
                         type: object
@@ -1332,6 +1335,7 @@ paths:
                       $ref: '#/components/schemas/closure_types'
                     customFields:
                       type: array
+                      x-technical-preview: true
                       description: Custom fields configuration details.
                       items:
                         type: object
@@ -1479,6 +1483,7 @@ paths:
                     $ref: '#/components/schemas/closure_types'
                   customFields:
                     type: array
+                    x-technical-preview: true
                     description: Custom fields configuration details.
                     items:
                       type: object
@@ -1627,6 +1632,7 @@ paths:
                       $ref: '#/components/schemas/closure_types'
                     customFields:
                       type: array
+                      x-technical-preview: true
                       description: Custom fields configuration details.
                       items:
                         type: object
@@ -2867,6 +2873,7 @@ components:
     custom_fields_property:
       type: array
       description: Values for custom fields of a case.
+      x-technical-preview: true
       minItems: 0
       maxItems: 5
       items:
@@ -3381,6 +3388,8 @@ components:
                   - $ref: '#/components/schemas/connector_properties_servicenow'
                   - $ref: '#/components/schemas/connector_properties_servicenow_sir'
                   - $ref: '#/components/schemas/connector_properties_swimlane'
+              customFields:
+                $ref: '#/components/schemas/custom_fields_property'
               description:
                 description: An updated description for the case.
                 type: string
@@ -3412,8 +3421,6 @@ components:
               version:
                 description: The current version of the case. To determine this value, use the get case or find cases APIs.
                 type: string
-              customFields:
-                $ref: '#/components/schemas/custom_fields_property'
     searchFieldsType:
       type: string
       description: The fields to perform the `simple_query_string` parsed query against.
@@ -3439,6 +3446,33 @@ components:
         - .servicenow-sir
         - .swimlane
       example: .none
+    configure_custom_fields_request:
+      type: array
+      description: Custom fields case configuration.
+      x-technical-preview: true
+      items:
+        type: object
+        required:
+          - key
+          - label
+          - required
+          - type
+        properties:
+          key:
+            description: A unique key for the custom field.
+            type: string
+          label:
+            description: The custom field label.
+            type: string
+          required:
+            description: Indicates whether the field is required.
+            type: boolean
+          type:
+            description: The type of the custom field.
+            type: string
+            enum:
+              - text
+              - toggle
     set_case_configuration_request:
       title: Set case configuration request
       description: External connection details, such as the closure type and default connector for cases.
@@ -3473,18 +3507,10 @@ components:
             - id
             - name
             - type
+        customFields:
+          $ref: '#/components/schemas/configure_custom_fields_request'
         owner:
           $ref: '#/components/schemas/owners'
-        settings:
-          description: An object that contains the case settings.
-          type: object
-          properties:
-            syncAlerts:
-              description: Turns alert syncing on or off.
-              type: boolean
-              example: true
-          required:
-            - syncAlerts
     update_case_configuration_request:
       title: Update case configuration request
       description: External connection details, such as the closure type and default connector for cases.
@@ -3517,6 +3543,8 @@ components:
             - id
             - name
             - type
+        customFields:
+          $ref: '#/components/schemas/configure_custom_fields_request'
         version:
           description: |
             The version of the connector. To retrieve the version value, use the get configuration API.
@@ -4360,8 +4388,9 @@ components:
       summary: This is an example response when the case configuration was updated.
       value:
         closure_type: close-by-user
+        customFields: []
         owner: cases
-        created_at: '2022-06-01T17:07:17.767Z'
+        created_at: '2023-10-01T17:07:17.767Z'
         created_by:
           username: elastic
           email: null,

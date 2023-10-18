@@ -16,6 +16,8 @@ properties:
       - id
       - name
       - type
+  customFields:
+    $ref: 'configure_custom_fields_request.yaml'
   version:
     description: >
       The version of the connector.
