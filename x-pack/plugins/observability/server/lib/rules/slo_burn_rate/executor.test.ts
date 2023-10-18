@@ -97,6 +97,11 @@ function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLO>
   };
 }
 
+function getTimeRange() {
+  const date = new Date(Date.now()).toISOString();
+  return { dateStart: date, dateEnd: date };
+}
+
 describe('BurnRateRuleExecutor', () => {
   let esClientMock: ElasticsearchClientMock;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
@@ -168,6 +173,7 @@ describe('BurnRateRuleExecutor', () => {
           spaceId: 'irrelevant',
           state: {},
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          getTimeRange,
         })
       ).rejects.toThrowError();
     });
@@ -188,6 +194,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(esClientMock.search).not.toHaveBeenCalled();
@@ -236,6 +243,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(alertWithLifecycleMock).not.toBeCalled();
@@ -281,6 +289,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(alertWithLifecycleMock).not.toBeCalled();
@@ -334,6 +343,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(alertWithLifecycleMock).toBeCalledWith({
@@ -436,6 +446,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(alertWithLifecycleMock).toBeCalledWith({

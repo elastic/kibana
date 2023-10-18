@@ -63,6 +63,7 @@ export const getRuleExecutor = ({
     params,
     startedAt,
     spaceId,
+    getTimeRange,
   }): ReturnType<
     ExecutorType<
       BurnRateRuleParams,
@@ -88,7 +89,8 @@ export const getRuleExecutor = ({
       return { state: {} };
     }
 
-    const results = await evaluate(esClient.asCurrentUser, slo, params, startedAt);
+    const { dateEnd } = getTimeRange('1m');
+    const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
     if (results.length > 0) {
       for (const result of results) {
