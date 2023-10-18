@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('overExpressionSelect');
       await testSubjects.setValue('overExpressionSelect', 'top');
       await testSubjects.setValue('fieldsNumberSelect', '4');
-      await testSubjects.setValue('fieldsExpressionSelect', 'host.keyword');
+      await comboBox.set('fieldsExpressionSelect', 'host.keyword');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-grouping',
         screenshotDirectories,
@@ -123,6 +123,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.scrollIntoView('addAlertActionButton');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-action',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+
+      const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
+      await actionFrequency.click();
+      const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
+      await actionSummary.click();
+      const notifyWhen = await testSubjects.find('notifyWhenSelect');
+      await notifyWhen.click();
+      const customInterval = await testSubjects.find('onThrottleInterval');
+      await customInterval.click();
+      await testSubjects.setValue('throttleInput', '24');
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-action-summary',
         screenshotDirectories,
         1400,
         1024

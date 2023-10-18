@@ -68,7 +68,11 @@ export const NetworkTimingsDonut = () => {
 
       <EuiSpacer size="m" />
       <Chart size={{ height: 240 }}>
-        <Settings theme={[themeOverrides, LIGHT_THEME ?? {}]} showLegend={false} />
+        <Settings
+          theme={[themeOverrides, LIGHT_THEME ?? {}]}
+          showLegend={false}
+          locale={i18n.getLocale()}
+        />
         <Partition
           id="spec_1"
           data={networkTimings.timingsWithLabels}
