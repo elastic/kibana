@@ -33,7 +33,7 @@ import { deleteAlertsAndRules } from '../../../tasks/common';
 // FLAKY: https://github.com/elastic/kibana/issues/165652
 describe(
   'Add multiple conditions and validate the generated exceptions',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');

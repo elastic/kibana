@@ -43,7 +43,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Add exception using data views from rule details',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
     const ITEM_NAME = 'Sample Exception List Item';
