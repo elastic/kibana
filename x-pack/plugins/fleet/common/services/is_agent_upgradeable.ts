@@ -35,7 +35,7 @@ export function isAgentUpgradeable(
     return false;
   }
   // check that the agent has not been upgraded more recently than the monitoring period
-  if (hasAgentBeenUpgradedRecently(agent).hasBeenUpgradedRecently) {
+  if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
     return false;
   }
   if (versionToUpgrade !== undefined) {
@@ -63,7 +63,7 @@ const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
   return semverGt(versionToUpgradeNumber, agentVersionNumber);
 };
 
-export function hasAgentBeenUpgradedRecently(agent: Agent): {
+export function getRecentUpgradeInfoForAgent(agent: Agent): {
   hasBeenUpgradedRecently: boolean;
   timeToWaitMs: number;
 } {

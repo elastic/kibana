@@ -387,7 +387,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.header['retry-after']).to.match(/^\d+$/);
       });
 
-      it('should respond 400 if trying to upgrade a recently upgraded agent with force flag', async () => {
+      it('should respond 429 if trying to upgrade a recently upgraded agent with force flag', async () => {
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -413,7 +413,7 @@ export default function (providerContext: FtrProviderContext) {
             version: fleetServerVersion,
             force: true,
           })
-          .expect(400);
+          .expect(429);
       });
 
       it('should respond 200 if trying to upgrade an agent that was upgraded more than 10 minutes ago', async () => {

@@ -19,7 +19,7 @@ import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultFleetErrorHandler } from '../../errors';
 import {
-  hasAgentBeenUpgradedRecently,
+  getRecentUpgradeInfoForAgent,
   isAgentUpgradeable,
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
 } from '../../../common/services';
@@ -72,7 +72,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       }
     }
 
-    const { hasBeenUpgradedRecently, timeToWaitMs } = hasAgentBeenUpgradedRecently(agent);
+    const { hasBeenUpgradedRecently, timeToWaitMs } = getRecentUpgradeInfoForAgent(agent);
     const timeToWaitString = moment
       .utc(moment.duration(timeToWaitMs).asMilliseconds())
       .format('mm[m]ss[s]');
