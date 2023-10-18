@@ -52,6 +52,7 @@ interface Range {
 
 export interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
+  hasRangeChanged: boolean;
   kql?: inputsModel.GlobalKqlQuery | undefined;
   timelineId?: string;
 }
@@ -116,6 +117,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           kql: kqlQuery,
           start: newStart,
           timelineId,
+          hasRangeChanged: false,
         });
         const currentStart = formatDate(newStart);
         const currentEnd = isQuickSelection
@@ -169,6 +171,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
             kql: kqlQuery,
             start: newStart,
             timelineId,
+            hasRangeChanged: true,
           });
           const newRecentlyUsedRanges = [
             { start: newStart, end: newEnd },
@@ -256,6 +259,7 @@ export const dispatchUpdateReduxTime =
     kql,
     start,
     timelineId,
+    hasRangeChanged,
   }: UpdateReduxTime): ReturnUpdateReduxTime => {
     const fromDate = formatDate(start);
     let toDate = formatDate(end, { roundUp: true });
@@ -291,7 +295,7 @@ export const dispatchUpdateReduxTime =
         })
       );
     }
-    if (timelineId != null) {
+    if (timelineId != null && hasRangeChanged) {
       dispatch(
         timelineActions.updateRange({
           id: timelineId,
