@@ -105,7 +105,7 @@ export const Processes = () => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle data-test-subj="infraAssetDetailsAlertsTitle" size="xxs">
+              <EuiTitle data-test-subj="infraAssetDetailsTopProcessesTitle" size="xxs">
                 <span>
                   <FormattedMessage
                     id="xpack.infra.metrics.nodeDetails.processesHeader"
