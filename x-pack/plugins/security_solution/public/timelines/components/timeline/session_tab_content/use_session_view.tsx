@@ -97,8 +97,8 @@ const NavigationComponent: React.FC<NavigationProps> = ({
                   ? EXIT_FULL_SCREEN
                   : FULL_SCREEN
               }
-              className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-              color={fullScreen ? 'ghost' : 'primary'}
+              display={fullScreen ? 'fill' : 'empty'}
+              color="primary"
               data-test-subj="full-screen"
               iconType="fullScreen"
               onClick={toggleFullScreen}

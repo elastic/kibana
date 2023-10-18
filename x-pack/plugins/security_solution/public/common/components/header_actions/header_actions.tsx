@@ -243,8 +243,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
                   ? EXIT_FULL_SCREEN
                   : i18n.FULL_SCREEN
               }
-              className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-              color={fullScreen ? 'ghost' : 'primary'}
+              display={fullScreen ? 'fill' : 'empty'}
+              color="primary"
               data-test-subj={
                 // a full screen button gets created for timeline and for the host page
                 // this sets the data-test-subj for each case so that tests can differentiate between them
