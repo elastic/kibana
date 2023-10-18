@@ -103,98 +103,98 @@ const cspViolation: EventTypeOpts<CSPViolationEvent> = {
     created: {
       type: 'keyword',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: 'Timestamp when the violation was captured by the user agent.',
         optional: false,
       },
     },
     url: {
       type: 'keyword',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"url" field of W3 Reporting API CSP violation report.',
         optional: false,
       },
     },
     user_agent: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"user_agent" field of W3 Reporting API CSP violation report.',
         optional: true,
       },
     },
     documentURL: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"documentURL" field of W3 Reporting API CSP violation report.',
         optional: false,
       },
     },
     referrer: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"referrer" field of W3 Reporting API CSP violation report.',
         optional: true,
       },
     },
     blockedURL: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"blockedURL" field of W3 Reporting API CSP violation report.',
         optional: true,
       },
     },
     effectiveDirective: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"effectiveDirective" field of W3 Reporting API CSP violation report.',
         optional: false,
       },
     },
     originalPolicy: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"originalPolicy" field of W3 Reporting API CSP violation report.',
         optional: false,
       },
     },
     sourceFile: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"sourceFile" field of W3 Reporting API CSP violation report.',
         optional: true,
       },
     },
     sample: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"sample" field of W3 Reporting API CSP violation report.',
         optional: true,
       },
     },
     disposition: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"disposition" field of W3 Reporting API CSP violation report.',
         optional: false,
       },
     },
     statusCode: {
       type: 'integer',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"statusCode" field of W3 Reporting API CSP violation report.',
         optional: false,
       },
     },
     lineNumber: {
       type: 'long',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"lineNumber" field of W3 Reporting API CSP violation report.',
         optional: true,
       },
     },
     columnNumber: {
       type: 'long',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"columnNumber" field of W3 Reporting API CSP violation report.',
         optional: true,
       },
     },
@@ -210,56 +210,56 @@ const permissionsPolicyViolation: EventTypeOpts<PermissionsPolicyViolationEvent>
     created: {
       type: 'keyword',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: 'Timestamp when the violation was captured by the user agent.',
         optional: false,
       },
     },
     url: {
       type: 'keyword',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"url" field of Reporting API permissions policy violation report.',
         optional: false,
       },
     },
     user_agent: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"user_agent" field of Reporting API permissions policy violation report.',
         optional: true,
       },
     },
     featureId: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"featureId" field of Reporting API permissions policy violation report.',
         optional: false,
       },
     },
     sourceFile: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"sourceFile" field of Reporting API permissions policy violation report.',
         optional: true,
       },
     },
     lineNumber: {
       type: 'long',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"lineNumber" field of Reporting API permissions policy violation report.',
         optional: true,
       },
     },
     columnNumber: {
       type: 'long',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"columnNumber" field of Reporting API permissions policy violation report.',
         optional: true,
       },
     },
     disposition: {
       type: 'text',
       _meta: {
-        description: 'Type of the Kibana authentication provider.',
+        description: '"disposition" field of Reporting API permissions policy violation report.',
         optional: false,
       },
     },
