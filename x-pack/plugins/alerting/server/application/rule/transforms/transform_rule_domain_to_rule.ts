@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getRuleSnoozeEndTime, getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
 import { RuleDomain, Rule, RuleParams } from '../types';
 
 interface TransformRuleDomainToRuleOptions {
@@ -17,15 +16,6 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
   options?: TransformRuleDomainToRuleOptions
 ): Rule<Params> => {
   const { isPublic = false } = options || {};
-
-  const snoozeData = {
-    muteAll: ruleDomain.muteAll ?? false,
-    snoozeSchedule: ruleDomain.snoozeSchedule,
-  };
-
-  const isSnoozedUntil = getRuleSnoozeEndTime(snoozeData);
-
-  const activeSnoozes = getActiveScheduledSnoozes(snoozeData)?.map((s) => s.id);
 
   const rule: Rule<Params> = {
     id: ruleDomain.id,
@@ -52,8 +42,8 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     executionStatus: ruleDomain.executionStatus,
     monitoring: ruleDomain.monitoring,
     snoozeSchedule: ruleDomain.snoozeSchedule,
-    activeSnoozes,
-    isSnoozedUntil,
+    activeSnoozes: ruleDomain.activeSnoozes,
+    isSnoozedUntil: ruleDomain.isSnoozedUntil,
     lastRun: ruleDomain.lastRun,
     nextRun: ruleDomain.nextRun,
     revision: ruleDomain.revision,

@@ -41,7 +41,6 @@ const getDefaultRules = (response: any) => ({
   execution_status: response.body.rules[0].execution_status,
   monitoring: response.body.rules[0].monitoring,
   revision: 0,
-  is_snoozed_until: null,
   ...(response.body.rules[0].next_run ? { next_run: response.body.rules[0].next_run } : {}),
   ...(response.body.rules[0].last_run ? { last_run: response.body.rules[0].last_run } : {}),
 });
@@ -75,7 +74,6 @@ const getThreeRules = (response: any) => {
       execution_status: response.body.rules[i].execution_status,
       monitoring: response.body.rules[i].monitoring,
       revision: 0,
-      is_snoozed_until: null,
       ...(response.body.rules[i].next_run ? { next_run: response.body.rules[i].next_run } : {}),
       ...(response.body.rules[i].last_run ? { last_run: response.body.rules[i].last_run } : {}),
     });

@@ -326,7 +326,6 @@ export const returnedRuleForBulkDelete1 = {
   muteAll: false,
   mutedInstanceIds: [],
   revision: 1,
-  isSnoozedUntil: null,
 };
 
 export const returnedRuleForBulkDelete2 = {
@@ -352,7 +351,6 @@ export const returnedRuleForBulkDelete2 = {
   muteAll: false,
   mutedInstanceIds: [],
   revision: 1,
-  isSnoozedUntil: null,
 };
 
 export const returnedRuleForBulkDelete3 = {
@@ -379,7 +377,6 @@ export const returnedRuleForBulkDelete3 = {
   muteAll: false,
   mutedInstanceIds: [],
   revision: 1,
-  isSnoozedUntil: null,
 };
 
 export const returnedRuleForBulkDisable1 = {
