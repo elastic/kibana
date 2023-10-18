@@ -73,8 +73,12 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
   );
 
   const onIconClick = useCallback(() => {
-    openPanel(item);
-  }, [openPanel, item]);
+    if (selectedNode?.id === item.id) {
+      closePanel();
+    } else {
+      openPanel(item);
+    }
+  }, [openPanel, closePanel, item, selectedNode]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -104,7 +108,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle panel navigation',
             })}
-            data-test-subj={`solutionSideNavItemButton-${id}`}
+            data-test-subj={`panelOpener-${id}`}
           />
         </EuiFlexItem>
       )}
