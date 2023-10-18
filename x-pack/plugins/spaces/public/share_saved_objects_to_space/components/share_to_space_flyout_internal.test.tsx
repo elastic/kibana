@@ -390,8 +390,8 @@ describe('ShareToSpaceFlyout', () => {
 
   describe('handles related objects correctly', () => {
     const relatedObject = {
-      type: "index-pattern",
-      id: "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
       spaces: ['my-active-space', 'space-1'],
       inboundReferences: [
         {
@@ -399,7 +399,7 @@ describe('ShareToSpaceFlyout', () => {
           id: 'my-dash',
           name: 'foo',
         },
-      ]
+      ],
     };
 
     it('adds spaces to related objects when only adding spaces', async () => {
@@ -415,11 +415,13 @@ describe('ShareToSpaceFlyout', () => {
       changeSpaceSelection(wrapper, ['space-1', 'space-2']);
       await clickButton(wrapper, 'save');
 
-      const expectedObjects: Array<{ type: string, id: string }> = [savedObjectToShare, relatedObject]
-        .map(({ type, id }) => ({
-          type,
-          id,
-        }));
+      const expectedObjects: Array<{ type: string; id: string }> = [
+        savedObjectToShare,
+        relatedObject,
+      ].map(({ type, id }) => ({
+        type,
+        id,
+      }));
       expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
         expectedObjects,
@@ -447,7 +449,7 @@ describe('ShareToSpaceFlyout', () => {
 
       expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
-        [{type: savedObjectToShare.type, id: savedObjectToShare.id}],
+        [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
         [],
         ['space-1']
       );
@@ -471,13 +473,15 @@ describe('ShareToSpaceFlyout', () => {
       await clickButton(wrapper, 'save');
 
       expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(2);
-      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(1,
-        [{type: savedObjectToShare.type, id: savedObjectToShare.id}],
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(
+        1,
+        [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
         ['space-2', 'space-3'],
         ['space-1']
       );
-      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(2,
-        [{type: relatedObject.type, id: relatedObject.id}],
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(
+        2,
+        [{ type: relatedObject.type, id: relatedObject.id }],
         ['space-2', 'space-3'],
         []
       );
