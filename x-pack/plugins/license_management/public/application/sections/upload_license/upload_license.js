@@ -17,8 +17,8 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
+  EuiPanel,
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
@@ -126,8 +126,8 @@ export class UploadLicense extends React.PureComponent {
     const { currentLicenseType, applying, telemetry, history } = this.props;
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <EuiPageContentBody>
+      <EuiPageSection alignment="center" grow={true}>
+        <EuiPanel color="subdued" paddingSize="l">
           <EuiTitle size="m">
             <h1>
               <FormattedMessage
@@ -215,8 +215,8 @@ export class UploadLicense extends React.PureComponent {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiForm>
-        </EuiPageContentBody>
-      </EuiPageContent>
+        </EuiPanel>
+      </EuiPageSection>
     );
   }
 }
