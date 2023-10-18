@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   ): Promise<void> => {
     let isConfirmCancelModalOpenState = false;
     await retry.tryForTime(defaultTryTimeout * timeMultiplier, async () => {
-      isConfirmCancelModalOpenState = await testSubjects.exists('confirmModalCancelButton');
+      isConfirmCancelModalOpenState = await testSubjects.exists('confirmModalTitleText');
     });
     if (isConfirmCancelModalOpenState) {
       log.debug(`defaultTryTimeout * ${timeMultiplier} is long enough`);
