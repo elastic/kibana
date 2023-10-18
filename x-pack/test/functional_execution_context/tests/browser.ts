@@ -365,7 +365,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // vega viz are flaky for some reason
+      // vega viz are flaky for some reason, skipping them to re-enable coverage on everything else
       describe.skip('propagates context for Vega visualizations', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await assertLogContains({

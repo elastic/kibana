@@ -54,7 +54,9 @@ export function assertLogContains({
 /**
  * Reads the log file and parses the JSON objects that it contains.
  */
-export async function readLogFile(): Promise<Ecs[]> {
+export async function readLogFile(syncDelaySec: number = 5): Promise<Ecs[]> {
+  await forceSyncLogFile();
+  await delay(syncDelaySec * 1000);
   await forceSyncLogFile();
   const logFileContent = await Fs.readFile(logFilePath, 'utf-8');
   return logFileContent
@@ -78,4 +80,8 @@ export async function forceSyncLogFile() {
   const fileDescriptor = await Fs.open(logFilePath);
   await fileDescriptor.datasync();
   await fileDescriptor.close();
+}
+
+async function delay(millis: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, millis));
 }
