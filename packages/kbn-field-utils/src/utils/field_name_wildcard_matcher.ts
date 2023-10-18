@@ -9,7 +9,7 @@
 import { escapeRegExp, memoize } from 'lodash';
 
 const makeRegEx = memoize(function makeRegEx(glob: string) {
-  const trimmedGlob = glob.trim().toLowerCase();
+  const trimmedGlob = glob.trim();
   let globRegex = trimmedGlob
     .split(/[* ]+/) // wildcard or space as a separator
     .map(escapeRegExp)

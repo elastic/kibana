@@ -56,6 +56,15 @@ describe('fieldNameWildcardMatcher', function () {
         true
       );
     });
+
+    it('should be case-insensitive', async () => {
+      expect(fieldNameWildcardMatcher({ name: 'Test' } as DataViewField, 'test')).toBe(true);
+      expect(fieldNameWildcardMatcher({ name: 'test' } as DataViewField, 'Test')).toBe(true);
+      expect(fieldNameWildcardMatcher({ name: 'tesT' } as DataViewField, 'Tes*')).toBe(true);
+      expect(fieldNameWildcardMatcher({ name: 'tesT' } as DataViewField, 'tes*')).toBe(true);
+      expect(fieldNameWildcardMatcher({ name: 'tesT' } as DataViewField, 't T')).toBe(true);
+      expect(fieldNameWildcardMatcher({ name: 'tesT' } as DataViewField, 't t')).toBe(true);
+    });
   });
 
   describe('getFieldSearchMatchingHighlight()', function () {
