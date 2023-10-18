@@ -12,12 +12,14 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiSpacer,
+  EuiSuperDatePicker,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import { Asset, AssetFilters } from '@kbn/assetManager-plugin/common/types_api';
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { SearchBar } from './components/search_bar';
@@ -32,19 +34,30 @@ export function AssetsInventoryPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hosts, setHosts] = useState<Asset[]>([]);
   const [filters, setFilters] = useState<AssetFilters>({});
+  const [start, setStart] = useState<string>('now-1h');
+  const [end, setEnd] = useState<string>('now');
 
   useEffect(() => {
     async function retrieve() {
       setIsLoading(true);
       const { hosts } = await services.assetManager.publicAssetsClient.getHosts({
-        from: 'now-1d',
+        from: start,
+        to: end,
         filters,
       });
       setHosts(hosts);
       setIsLoading(false);
     }
     retrieve();
-  }, [services, filters]);
+  }, [services, filters, start, end]);
+
+  const onTimeChange = useCallback(
+    ({ start, end }: OnTimeChangeProps) => {
+      setStart(start);
+      setEnd(end);
+    },
+    [start, end]
+  );
 
   return (
     <ObservabilityPageTemplate
@@ -68,16 +81,19 @@ export function AssetsInventoryPage() {
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        {/* <EuiFlexItem>
           Show filters:{' '}
           <pre>
             <code>{JSON.stringify(filters, null, 2)}</code>
           </pre>
-        </EuiFlexItem>
+        </EuiFlexItem> */}
         <EuiFlexItem>
-          <TestBox>
-            <div style={{ width: '200px' }}>Date picker xyz</div>
-          </TestBox>
+          <EuiSuperDatePicker
+            isLoading={isLoading}
+            start={start}
+            end={end}
+            onTimeChange={onTimeChange}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -117,12 +133,16 @@ function AssetsTable({ assets }: { assets: Asset[] }) {
       displayAsText: 'Kind',
     },
     {
+      id: 'asset.type',
+      displayAsText: 'Type',
+    },
+    {
       id: 'cloud.provider',
       displayAsText: 'Cloud Provider',
     },
     {
       id: 'cloud.region',
-      displayAsText: 'CSP Region',
+      displayAsText: 'Cloud Region',
     },
   ];
 
@@ -131,7 +151,14 @@ function AssetsTable({ assets }: { assets: Asset[] }) {
       aria-label="Assets table grid"
       columns={columns}
       columnVisibility={{
-        visibleColumns: ['@timestamp', 'asset.ean', 'asset.kind', 'cloud.provider', 'cloud.region'],
+        visibleColumns: [
+          '@timestamp',
+          'asset.ean',
+          'asset.kind',
+          'asset.type',
+          'cloud.provider',
+          'cloud.region',
+        ],
         setVisibleColumns: () => {},
       }}
       rowCount={Math.min(assets.length, 100)}
