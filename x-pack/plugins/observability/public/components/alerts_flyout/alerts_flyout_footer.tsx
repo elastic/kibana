@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import type { TopAlert } from '../../typings/alerts';
 
 interface FlyoutProps {

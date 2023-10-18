@@ -9,6 +9,8 @@ import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
 import type {
   CaseAssignees,
+  CaseCustomField,
+  CaseCustomFields,
   CaseUserProfile,
   UserActionAction,
   UserActionType,
@@ -22,6 +24,7 @@ import { isUserActionType } from '../../../../common/utils/user_actions';
 import { decodeOrThrow } from '../../../../common/api';
 import { BuilderFactory } from '../builder_factory';
 import type {
+  BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
   BulkCreateBulkUpdateCaseUserActions,
@@ -34,8 +37,9 @@ import type {
   ServiceContext,
   TypedUserActionDiffedItems,
   UserActionEvent,
+  UserActionsDict,
 } from '../types';
-import { isAssigneesArray, isStringArray } from '../type_guards';
+import { isAssigneesArray, isCustomFieldsArray, isStringArray } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
 
@@ -55,30 +59,25 @@ export class UserActionPersister {
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
   }
 
-  public async bulkCreateUpdateCase({
-    originalCases,
-    updatedCases,
-    user,
-    refresh,
-  }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
-    const builtUserActions = updatedCases.reduce<UserActionEvent[]>((acc, updatedCase) => {
-      const originalCase = originalCases.find(({ id }) => id === updatedCase.id);
+  public buildUserActions({ updatedCases, user }: BuildUserActionsDictParams): UserActionsDict {
+    return updatedCases.cases.reduce<UserActionsDict>((acc, updatedCase) => {
+      const originalCase = updatedCase.originalCase;
 
       if (originalCase == null) {
         return acc;
       }
 
-      const caseId = updatedCase.id;
+      const caseId = updatedCase.caseId;
       const owner = originalCase.attributes.owner;
 
       const userActions: UserActionEvent[] = [];
-      const updatedFields = Object.keys(updatedCase.attributes);
+      const updatedFields = Object.keys(updatedCase.updatedAttributes);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
         .forEach((field) => {
           const originalValue = get(originalCase, ['attributes', field]);
-          const newValue = get(updatedCase, ['attributes', field]);
+          const newValue = get(updatedCase, ['updatedAttributes', field]);
           userActions.push(
             ...this.getUserActionItemByDifference({
               field,
@@ -91,9 +90,15 @@ export class UserActionPersister {
           );
         });
 
-      return [...acc, ...userActions];
-    }, []);
+      acc[caseId] = userActions;
+      return acc;
+    }, {});
+  }
 
+  public async bulkCreateUpdateCase({
+    builtUserActions,
+    refresh,
+  }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
     await this.bulkCreateAndLog({
       userActions: builtUserActions,
       refresh,
@@ -117,6 +122,12 @@ export class UserActionPersister {
       isStringArray(newValue)
     ) {
       return this.buildTagsUserActions({ ...params, originalValue, newValue });
+    } else if (
+      field === UserActionTypes.customFields &&
+      isCustomFieldsArray(originalValue) &&
+      isCustomFieldsArray(newValue)
+    ) {
+      return this.buildCustomFieldsUserActions({ ...params, originalValue, newValue });
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -149,6 +160,42 @@ export class UserActionPersister {
     });
 
     return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.tags);
+  }
+
+  private buildCustomFieldsUserActions(params: TypedUserActionDiffedItems<CaseCustomField>) {
+    const createPayload: CreatePayloadFunction<
+      CaseCustomField,
+      typeof UserActionTypes.customFields
+    > = (items: CaseCustomFields) => ({ customFields: items });
+
+    const { originalValue: originalCustomFields, newValue: newCustomFields } = params;
+
+    const originalCustomFieldsKeys = new Set(
+      originalCustomFields.map((customField) => customField.key)
+    );
+
+    const compareValues = arraysDifference(originalCustomFields, newCustomFields);
+
+    const updatedCustomFieldsUsersActions = compareValues?.addedItems
+      .filter((customField) => {
+        if (customField.value != null) {
+          return true;
+        }
+
+        return originalCustomFieldsKeys.has(customField.key);
+      })
+      .map((customField) =>
+        this.buildUserAction({
+          commonArgs: params,
+          actionType: UserActionTypes.customFields,
+          action: UserActionActions.update,
+          createPayload,
+          modifiedItems: [customField],
+        })
+      )
+      .filter((userAction): userAction is UserActionEvent => userAction != null);
+
+    return [...(updatedCustomFieldsUsersActions ? updatedCustomFieldsUsersActions : [])];
   }
 
   private buildAddDeleteUserActions<Item, ActionType extends UserActionType>(
@@ -368,6 +415,7 @@ export class UserActionPersister {
     userAction: UserActionEvent;
   } & IndexRefresh): Promise<void> {
     const createdUserAction = await this.create({ ...userAction.parameters, refresh });
+
     this.auditLogger.log(userAction.eventDetails, createdUserAction.id);
   }
 
@@ -381,7 +429,7 @@ export class UserActionPersister {
 
       const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(attributes);
 
-      return await this.context.unsecuredSavedObjectsClient.create<T>(
+      const res = await this.context.unsecuredSavedObjectsClient.create<T>(
         CASE_USER_ACTION_SAVED_OBJECT,
         decodedAttributes as unknown as T,
         {
@@ -389,6 +437,7 @@ export class UserActionPersister {
           refresh,
         }
       );
+      return res;
     } catch (error) {
       this.context.log.error(`Error on POST a new case user action: ${error}`);
       throw error;

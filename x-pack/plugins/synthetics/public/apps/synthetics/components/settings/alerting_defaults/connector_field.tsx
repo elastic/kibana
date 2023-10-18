@@ -6,18 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiIcon } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
 import { useAlertingDefaults } from './hooks/use_alerting_defaults';
 import { alertFormI18n } from './translations';
-import { ClientPluginsStart } from '../../../../../plugin';
 import { AddConnectorFlyout } from './add_connector_flyout';
-
-type ConnectorOption = EuiComboBoxOptionOption<string>;
 
 export function DefaultConnectorField({
   isLoading,
@@ -30,21 +26,7 @@ export function DefaultConnectorField({
   selectedConnectors: string[];
   onChange: (connectors: string[]) => void;
 }) {
-  const { actionTypeRegistry } = useKibana<ClientPluginsStart>().services.triggersActionsUi;
-
-  const { options, connectors } = useAlertingDefaults();
-
-  const renderOption = (option: ConnectorOption) => {
-    const { label, value } = option;
-
-    const { actionTypeId: type } = connectors?.find((dt) => dt.id === value) ?? {};
-    return (
-      <ConnectorSpan>
-        <EuiIcon type={actionTypeRegistry.get(type as string).iconClass} />
-        <span>{label}</span>
-      </ConnectorSpan>
-    );
-  };
+  const { options } = useAlertingDefaults();
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -108,7 +90,6 @@ export function DefaultConnectorField({
         onBlur={onBlur}
         isDisabled={isDisabled}
         data-test-subj={`default-connectors-input-${isLoading ? 'loading' : 'loaded'}`}
-        renderOption={renderOption}
         fullWidth
         aria-label={TAGS_LABEL}
         isLoading={isLoading}
@@ -124,16 +105,6 @@ export function DefaultConnectorField({
 const RowWrapper = styled(EuiFormRow)`
   &&& > .euiFormRow__labelWrapper {
     align-items: baseline;
-  }
-`;
-
-const ConnectorSpan = styled.span`
-  .euiIcon {
-    margin-right: 5px;
-  }
-  > img {
-    width: 16px;
-    height: 20px;
   }
 `;
 

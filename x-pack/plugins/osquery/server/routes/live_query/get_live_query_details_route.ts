@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { every, map, mapKeys, pick, reduce } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type {
+  GetLiveQueryDetailsRequestParamsSchema,
+  GetLiveQueryDetailsRequestQuerySchema,
+} from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { getActionResponses } from './utils';
@@ -20,6 +24,10 @@ import type {
   ActionDetailsStrategyResponse,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
+import {
+  getLiveQueryDetailsRequestParamsSchema,
+  getLiveQueryDetailsRequestQuerySchema,
+} from '../../../common/api';
 
 export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.versioned
@@ -33,13 +41,14 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: schema.object(
-              {
-                id: schema.string(),
-              },
-              { unknowns: 'allow' }
-            ),
-            query: schema.object({}, { unknowns: 'allow' }),
+            params: buildRouteValidation<
+              typeof getLiveQueryDetailsRequestParamsSchema,
+              GetLiveQueryDetailsRequestParamsSchema
+            >(getLiveQueryDetailsRequestParamsSchema),
+            query: buildRouteValidation<
+              typeof getLiveQueryDetailsRequestQuerySchema,
+              GetLiveQueryDetailsRequestQuerySchema
+            >(getLiveQueryDetailsRequestQuerySchema),
           },
         },
       },
@@ -52,7 +61,6 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                filterQuery: request.query,
                 factoryQueryType: OsqueryQueries.actionDetails,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }

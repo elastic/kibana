@@ -13,23 +13,23 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
+import type { UserMenuLink } from './nav_control_component';
+import { SecurityNavControl } from './nav_control_component';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
-import type { UserMenuLink } from './nav_control_component';
-import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
   logoutUrl: string;
   securityApiClients: SecurityApiClients;
-  showNavLinks?: boolean;
 }
 
 interface StartDeps {
@@ -55,18 +55,18 @@ export class SecurityNavControlService {
   private securityApiClients!: SecurityApiClients;
 
   private navControlRegistered!: boolean;
-  private showNavLinks!: boolean;
 
   private securityFeaturesSubscription?: Subscription;
 
   private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
 
-  public setup({ securityLicense, logoutUrl, securityApiClients, showNavLinks = true }: SetupDeps) {
+  constructor(private readonly buildFlavor: BuildFlavor) {}
+
+  public setup({ securityLicense, logoutUrl, securityApiClients }: SetupDeps) {
     this.securityLicense = securityLicense;
     this.logoutUrl = logoutUrl;
     this.securityApiClients = securityApiClients;
-    this.showNavLinks = showNavLinks;
   }
 
   public start({ core, authc }: StartDeps): SecurityNavControlServiceStart {
@@ -75,7 +75,7 @@ export class SecurityNavControlService {
         const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
 
         const shouldRegisterNavControl =
-          this.showNavLinks && !isAnonymousPath && showLinks && !this.navControlRegistered;
+          !isAnonymousPath && showLinks && !this.navControlRegistered;
         if (shouldRegisterNavControl) {
           this.registerSecurityNavControl(core, authc);
         }
@@ -121,8 +121,9 @@ export class SecurityNavControlService {
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
     const { theme$ } = core.theme;
+
     core.chrome.navControls.registerRight({
-      order: 2000,
+      order: 4000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(
           <Providers
@@ -135,6 +136,7 @@ export class SecurityNavControlService {
               editProfileUrl={core.http.basePath.prepend('/security/account')}
               logoutUrl={this.logoutUrl}
               userMenuLinks$={this.userMenuLinks$}
+              buildFlavour={this.buildFlavor}
             />
           </Providers>,
           element

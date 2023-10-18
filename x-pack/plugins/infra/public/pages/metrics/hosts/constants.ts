@@ -7,16 +7,12 @@
 
 import { HostLimitOptions } from './types';
 
-export const TIMESTAMP_FIELD = '@timestamp';
-export const DATA_VIEW_PREFIX = 'infra_metrics';
-
 export const DEFAULT_HOST_LIMIT: HostLimitOptions = 100;
 export const DEFAULT_PAGE_SIZE = 10;
 export const LOCAL_STORAGE_HOST_LIMIT_KEY = 'hostsView:hostLimitSelection';
 export const LOCAL_STORAGE_PAGE_SIZE_KEY = 'hostsView:pageSizeSelection';
 
-export const KPI_CHART_MIN_HEIGHT = 150;
-export const METRIC_CHART_MIN_HEIGHT = 300;
+export const METRIC_CHART_HEIGHT = 300;
 
-export const HOST_LIMIT_OPTIONS = [10, 20, 50, 100, 500] as const;
+export const HOST_LIMIT_OPTIONS = [50, 100, 500] as const;
 export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';

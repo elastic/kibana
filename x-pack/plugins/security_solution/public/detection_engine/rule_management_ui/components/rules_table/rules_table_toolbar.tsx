@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { NewChat } from '@kbn/elastic-assistant';
 import { useUserData } from '../../../../detections/components/user_info';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import * as i18n from './translations';
+import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
+import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
 
 export enum AllRulesTabs {
   management = 'management',
@@ -71,7 +77,39 @@ export const RulesTableToolbar = React.memo(() => {
     [installedTotal, updateTotal, shouldDisplayRuleUpdatesTab]
   );
 
-  return <TabNavigation navTabs={ruleTabs} />;
+  // Assistant integration for using selected rules as prompt context
+  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const {
+    state: { rules, selectedRuleIds },
+  } = useRulesTableContext();
+  const selectedRules = useMemo(
+    () => rules.filter((rule) => selectedRuleIds.includes(rule.id)),
+    [rules, selectedRuleIds]
+  );
+  const getPromptContext = useCallback(
+    async () => getPromptContextFromDetectionRules(selectedRules),
+    [selectedRules]
+  );
+
+  return (
+    <EuiFlexGroup justifyContent={'spaceBetween'}>
+      <EuiFlexItem grow={false}>
+        <TabNavigation navTabs={ruleTabs} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {hasAssistantPrivilege && selectedRules.length > 0 && (
+          <NewChat
+            category="detection-rules"
+            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+            description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
+            getPromptContext={getPromptContext}
+            suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
+            tooltip={i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 });
 
 RulesTableToolbar.displayName = 'RulesTableToolbar';

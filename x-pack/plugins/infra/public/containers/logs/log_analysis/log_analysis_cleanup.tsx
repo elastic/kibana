@@ -46,8 +46,10 @@ const waitUntilJobsAreDeleted = async <JobType extends string>(
 ) => {
   const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, logViewId, jobType));
   while (true) {
-    const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks(fetch);
-    const needToWait = jobIdsBeingDeleted.some((jobId) => moduleJobIds.includes(jobId));
+    const { jobs } = await callGetJobDeletionTasks(fetch);
+    const needToWait = jobs
+      .flatMap((job) => Object.keys(job))
+      .some((jobId) => moduleJobIds.includes(jobId));
 
     if (needToWait) {
       await timeout(1000);

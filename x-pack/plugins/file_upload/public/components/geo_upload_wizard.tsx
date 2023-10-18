@@ -15,7 +15,6 @@ import { ImportCompleteView } from './import_complete_view';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
 import { GeoFileImporter } from '../importer/geo';
-import type { Settings } from '../../common/types';
 import { hasImportPermission } from '../api';
 import { getPartialImportMessage } from './utils';
 
@@ -103,9 +102,6 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     //
     // create index
     //
-    const settings = {
-      number_of_shards: 1,
-    } as unknown as Settings;
     const mappings = {
       properties: {
         geometry: {
@@ -127,7 +123,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     this._geoFileImporter.setGeoFieldType(this.state.geoFieldType);
     const initializeImportResp = await this._geoFileImporter.initializeImport(
       this.state.indexName,
-      settings,
+      {},
       mappings,
       ingestPipeline
     );

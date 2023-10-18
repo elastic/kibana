@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
+import { ServerlessRoleName } from '../support/roles';
+import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -28,6 +30,11 @@ export const clearInputQuery = () =>
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
   cy.get(LIVE_QUERY_EDITOR).type(query, options);
 
+export const inputQueryInFlyout = (
+  query: string,
+  options?: { parseSpecialCharSequences: boolean }
+) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).type(query, options);
+
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
   cy.contains('Submit').click();
@@ -49,7 +56,12 @@ export const checkResults = () => {
 export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
-  cy.react('OsqueryColumnFieldComponent').eq(index).react('ResultComboBox').type(text);
+  cy
+    .react('OsqueryColumnFieldComponent')
+    .eq(index)
+    .within(() => {
+      cy.getBySel('comboBoxInput').type(text);
+    });
 
 export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', index = 0) => {
   cy.getBySel(`osquery-result-type-select-${index}`).click();
@@ -95,20 +107,10 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
+  cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/rules');
-  cy.contains(ruleName).click();
-  cy.getBySel('alertsTable').within(() => {
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('exist');
-      });
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('not.exist');
-      });
-  });
+  clickRuleName(ruleName);
+  waitForAlertsToPopulate();
 };
 
 export const addToCase = (caseId: string) => {
@@ -162,4 +164,8 @@ export const takeOsqueryActionWithParams = () => {
   cy.wait(1000);
   submitQuery();
   cy.getBySel('dataGridHeader').should('contain', 'tags', { timeout: 6000000 });
+};
+
+export const clickRuleName = (ruleName: string) => {
+  cy.contains('a[data-test-subj="ruleName"]', ruleName).click({ force: true });
 };

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Plugin } from './plugin';
+import { Plugin, config } from './plugin';
 
-export function plugin(initializerContext) {
-  return new Plugin(initializerContext);
+export function plugin() {
+  return new Plugin();
 }
+
+export { config };

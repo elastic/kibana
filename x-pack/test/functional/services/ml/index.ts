@@ -57,6 +57,7 @@ import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_j
 import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
 import { TrainedModelsProvider } from './trained_models';
 import { TrainedModelsTableProvider } from './trained_models_table';
+import { DeployDFAModelFlyoutProvider } from './deploy_models_flyout';
 import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 import { MlNodesPanelProvider } from './ml_nodes_list';
 import { MachineLearningCasesProvider } from './cases';
@@ -64,7 +65,7 @@ import { AnomalyChartsProvider } from './anomaly_charts';
 import { NotificationsProvider } from './notifications';
 import { MlTableServiceProvider } from './common_table_service';
 import { MachineLearningFieldStatsFlyoutProvider } from './field_stats_flyout';
-
+import { MachineLearningDataDriftProvider } from './data_drift';
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
@@ -83,6 +84,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     context,
     dashboardJobSelectionTable
   );
+
+  const dataDrift = MachineLearningDataDriftProvider(context);
 
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
@@ -158,6 +161,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, commonUI);
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI, trainedModels);
+  const deployDFAModelFlyout = DeployDFAModelFlyoutProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
   const notifications = NotificationsProvider(context, commonUI, tableService);
 
@@ -178,6 +182,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     customUrls,
     dashboardJobSelectionTable,
     dashboardEmbeddables,
+    dataDrift,
     dataFrameAnalytics,
     dataFrameAnalyticsCreation,
     dataFrameAnalyticsEdit,
@@ -220,6 +225,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     testExecution,
     testResources,
     trainedModels,
+    deployDFAModelFlyout,
     trainedModelsTable,
   };
 }

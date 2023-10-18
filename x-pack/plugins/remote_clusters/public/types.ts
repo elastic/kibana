@@ -11,12 +11,14 @@ import { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { I18nStart } from '@kbn/core/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 export interface Dependencies {
   management: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   cloud: CloudSetup;
   share: SharePluginSetup;
+  licensing: LicensingPluginStart;
 }
 
 export interface ClientConfigType {

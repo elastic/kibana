@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { clearLogFile, closeLogstream } from '../test_utils';
+import { clearLogFile } from '../test_utils';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Execution context', function () {
@@ -14,9 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
       // Cleaning the log file used for the tests to avoid false positives caused by previous runs.
       // If any of the tests rely on logs generating during bootstrap, we might need to change this.
       await clearLogFile();
-    });
-    after(() => {
-      closeLogstream();
     });
 
     loadTestFile(require.resolve('./browser'));

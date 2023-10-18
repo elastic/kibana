@@ -27,8 +27,13 @@
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
-    "@kbn/ml-plugin",
     "@kbn/management-cards-navigation",
     "@kbn/core-elasticsearch-server",
+    "@kbn/search-api-panels",
+    "@kbn/serverless-search-settings",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-connectors",
+    "@kbn/shared-ux-router",
   ]
 }

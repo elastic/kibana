@@ -40,12 +40,12 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
-import { ActionsConfig, getValidatedConfig } from './config';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
+import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
-import { ActionsClient } from './actions_client';
+import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
-  createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
@@ -96,15 +96,13 @@ import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from
 import {
   isConnectorDeprecated,
   ConnectorWithOptionalDeprecation,
-} from './lib/is_connector_deprecated';
+} from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
-import {
-  type IUnsecuredActionsClient,
-  UnsecuredActionsClient,
-} from './unsecured_actions_client/unsecured_actions_client';
+import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
 
@@ -131,6 +129,7 @@ export interface PluginSetupContract {
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
+  setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 }
 
 export interface PluginStartContract {
@@ -170,6 +169,7 @@ export interface ActionsPluginsSetup {
   features: FeaturesPluginSetup;
   spaces?: SpacesPluginSetup;
   monitoringCollection?: MonitoringCollectionSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -179,6 +179,7 @@ export interface ActionsPluginsStart {
   eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 const includedHiddenTypes = [
@@ -256,6 +257,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isPreconfigured: true,
           isSystemAction: false,
         };
+
         this.inMemoryConnectors.push({
           ...rawPreconfiguredConnector,
           isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
@@ -299,7 +301,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(core)
+      this.createRouteHandlerContext(core, actionsConfigUtils)
     );
     if (usageCollection) {
       const eventLogIndex = this.eventLogService.getIndexPattern();
@@ -375,6 +377,20 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         };
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
+      setEnabledConnectorTypes: (connectorTypes) => {
+        if (
+          !!plugins.serverless &&
+          this.actionsConfig.enabledActionTypes.length === 1 &&
+          this.actionsConfig.enabledActionTypes[0] === AllowedHosts.Any
+        ) {
+          this.actionsConfig.enabledActionTypes.pop();
+          this.actionsConfig.enabledActionTypes.push(...connectorTypes);
+        } else {
+          throw new Error(
+            "Enabled connector types can be set only if they haven't already been set in the config"
+          );
+        }
+      },
     };
   }
 
@@ -388,13 +404,18 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       isESOCanEncrypt,
       instantiateAuthorization,
       getUnsecuredSavedObjectsClient,
+      actionsConfig,
     } = this;
+
+    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
+
+    this.throwIfSystemActionsInConfig();
 
     /**
      * Warning: this call mutates the inMemory collection
@@ -439,18 +460,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
-        }),
-        executionEnqueuer: createExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
-          inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
@@ -476,6 +493,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
       });
     };
@@ -545,6 +563,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger: this.logger,
       });
     }
+
+    this.validateEnabledConnectorTypes(plugins);
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
@@ -616,8 +636,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
   };
 
+  private throwIfSystemActionsInConfig = () => {
+    const hasSystemActionAsPreconfiguredInConfig = this.inMemoryConnectors
+      .filter((connector) => connector.isPreconfigured)
+      .some((connector) => this.actionTypeRegistry!.isSystemActionType(connector.actionTypeId));
+
+    if (hasSystemActionAsPreconfiguredInConfig) {
+      throw new Error('Setting system action types in preconfigured connectors are not allowed');
+    }
+  };
+
   private createRouteHandlerContext = (
-    core: CoreSetup<ActionsPluginsStart>
+    core: CoreSetup<ActionsPluginsStart>,
+    actionsConfigUtils: ActionsConfigurationUtilities
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
@@ -663,18 +694,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
-            }),
-            executionEnqueuer: createExecutionEnqueuerFunction({
-              taskManager,
-              actionTypeRegistry: actionTypeRegistry!,
-              isESOCanEncrypt: isESOCanEncrypt!,
-              inMemoryConnectors,
+              configurationUtilities: actionsConfigUtils,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
+              configurationUtilities: actionsConfigUtils,
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,
@@ -693,6 +720,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
       };
     };
+  };
+
+  private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
+    if (
+      !!plugins.serverless &&
+      this.actionsConfig.enabledActionTypes.length > 0 &&
+      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
+    ) {
+      this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
+        // Throws error if action type doesn't exist
+        this.actionTypeRegistry?.get(connectorType);
+      });
+    }
   };
 
   public stop() {

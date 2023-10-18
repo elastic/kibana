@@ -318,5 +318,29 @@ describe('Utils class', () => {
         }
       );
     });
+
+    it('should replace variables in bulk request', () => {
+      testVariables(
+        {
+          url: '${v13}/_bulk',
+          data: [
+            '{"index": {"_id": "0"}}',
+            '{\n  "f": "${v13}"\n}',
+            '{"index": {"_id": "1"}}',
+            '{\n  "f": "${v13}"\n}',
+          ],
+        },
+        { name: 'v13', value: 'test' },
+        {
+          url: 'test/_bulk',
+          data: [
+            '{"index": {"_id": "0"}}',
+            '{\n  "f": "test"\n}',
+            '{"index": {"_id": "1"}}',
+            '{\n  "f": "test"\n}',
+          ],
+        }
+      );
+    });
   });
 });

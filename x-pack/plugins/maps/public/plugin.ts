@@ -45,6 +45,7 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import {
   createRegionMapFn,
@@ -121,6 +122,7 @@ export interface MapsPluginStartDependencies {
   contentManagement: ContentManagementPublicStart;
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
+  serverless?: ServerlessPluginStart;
 }
 
 /**

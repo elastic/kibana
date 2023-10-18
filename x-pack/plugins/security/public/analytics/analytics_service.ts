@@ -15,9 +15,9 @@ import type {
   HttpStart,
 } from '@kbn/core/public';
 
+import { registerUserContext } from './register_user_context';
 import type { AuthenticationServiceSetup } from '..';
 import type { SecurityLicense } from '../../common';
-import { registerUserContext } from './register_user_context';
 
 interface AnalyticsServiceSetupParams {
   securityLicense: SecurityLicense;

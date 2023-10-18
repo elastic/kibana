@@ -25,7 +25,7 @@ import {
   EuiText,
   EuiTitle,
   EuiPageHeader,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -236,7 +236,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   };
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={<span data-test-subj="pageTitle">{pageTitle}</span>}
         description={watch.titleDescription}
@@ -953,6 +953,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
           close={() => setIsRequestVisible(false)}
         />
       ) : null}
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

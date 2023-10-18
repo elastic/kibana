@@ -41,7 +41,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -72,7 +71,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -102,7 +100,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -132,7 +129,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -165,7 +161,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -196,7 +191,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );

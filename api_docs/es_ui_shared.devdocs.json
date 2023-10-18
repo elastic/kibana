@@ -363,7 +363,7 @@
         "label": "JsonEditor",
         "description": [],
         "signature": [
-          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
+          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, ...rest }: Props<T>) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
         "deprecated": false,
@@ -395,7 +395,7 @@
         "label": "NotAuthorizedSection",
         "description": [],
         "signature": [
-          "({ title, message }: Props) => JSX.Element"
+          "({ title, message, dataTestSubj }: Props) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
         "deprecated": false,
@@ -406,7 +406,7 @@
             "id": "def-public.NotAuthorizedSection.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, message }",
+            "label": "{ title, message, dataTestSubj }",
             "description": [],
             "signature": [
               "Props"
@@ -527,7 +527,7 @@
         "label": "SectionLoading",
         "description": [],
         "signature": [
-          "({ inline, children, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ inline, \"data-test-subj\": dataTestSubj, children, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
         "deprecated": false,
@@ -538,7 +538,7 @@
             "id": "def-public.SectionLoading.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ inline, children, ...rest }",
+            "label": "{\n  inline,\n  'data-test-subj': dataTestSubj,\n  children,\n  ...rest\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<Props>"

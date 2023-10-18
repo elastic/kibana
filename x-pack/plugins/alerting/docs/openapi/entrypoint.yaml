@@ -33,6 +33,8 @@ paths:
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_mute_all.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all':
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_unmute_all.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_update_api_key.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute':
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_mute.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute':

@@ -11,7 +11,6 @@ import {
   EntryMatch,
   EntryMatchAny,
   EntryNested,
-  ExceptionListType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -168,24 +167,13 @@ const mockEndpointFields = [
 export const getEndpointField = (name: string): DataViewFieldBase =>
   mockEndpointFields.find((field) => field.name === name) as DataViewFieldBase;
 
-const filterIndexPatterns = (patterns: DataViewBase, type: ExceptionListType): DataViewBase => {
-  return type === 'endpoint'
-    ? {
-        ...patterns,
-        fields: patterns.fields.filter(({ name }) =>
-          ['file.path.caseless', 'file.Ext.code_signature.status'].includes(name)
-        ),
-      }
-    : patterns;
-};
-
 describe('Exception builder helpers', () => {
   describe('#getFilteredIndexPatterns', () => {
     describe('list type detections', () => {
       test('it returns nested fields that match parent value when "item.nested" is "child"', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [{ ...getField('nestedField.child'), name: 'child' }],
           id: '1234',
@@ -197,7 +185,7 @@ describe('Exception builder helpers', () => {
       test('it returns only parent nested field when "item.nested" is "parent" and nested parent field is not undefined', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase & { fields: Array<Partial<FieldSpec>> } = {
           fields: [{ ...getField('nestedField.child'), esTypes: ['nested'], name: 'nestedField' }],
           id: '1234',
@@ -212,7 +200,7 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field: undefined,
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [
             { ...getField('nestedField.child') },
@@ -227,7 +215,7 @@ describe('Exception builder helpers', () => {
       test('it returns all fields unfiletered if "item.nested" is not "child" or "parent"', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [...fields],
           id: '1234',
@@ -265,7 +253,7 @@ describe('Exception builder helpers', () => {
           },
           value: 'some value',
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [{ ...getEndpointField('file.Ext.code_signature.status'), name: 'status' }],
           id: '1234',
@@ -284,7 +272,7 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field,
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const fieldsExpected: FieldSpec[] = [
           {
             aggregatable: false,
@@ -315,53 +303,13 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field: undefined,
         };
-        const output = getFilteredIndexPatterns(
-          payloadIndexPattern,
-          payloadItem,
-          'endpoint',
-          filterIndexPatterns
-        );
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
-          fields: [getEndpointField('file.Ext.code_signature.status')],
-          id: '1234',
-          title: 'logstash-*',
-        };
-        expect(output).toEqual(expected);
-      });
-
-      test('it returns all fields that matched those in "exceptionable_fields.json" with no further filtering if "item.nested" is not "child" or "parent"', () => {
-        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getFilteredIndexPatterns(
-          payloadIndexPattern,
-          payloadItem,
-          'endpoint',
-          filterIndexPatterns
-        );
-        const fieldsExpected: FieldSpec[] = [
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['keyword'],
-            name: 'file.path.caseless',
-            readFromDocValues: false,
-            scripted: false,
-            searchable: true,
-            type: 'string',
-          },
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'file.Ext.code_signature.status',
-            readFromDocValues: false,
-            scripted: false,
-            searchable: true,
-            subType: { nested: { path: 'file.Ext.code_signature' } },
-            type: 'string',
-          },
-        ];
-        const expected: DataViewBase = {
-          fields: fieldsExpected,
+          fields: [
+            { ...getField('nestedField.child') },
+            { ...getField('nestedField.nestedChild.doublyNestedChild') },
+            getEndpointField('file.Ext.code_signature.status'),
+          ],
           id: '1234',
           title: 'logstash-*',
         };

@@ -31,6 +31,7 @@ import { HttpInterceptHaltError } from './http_intercept_halt_error';
 interface Params {
   basePath: IBasePath;
   kibanaVersion: string;
+  buildNumber: number;
   executionContext: ExecutionContextSetup;
 }
 
@@ -135,6 +136,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
+        'kbn-build-number': this.params.buildNumber,
         [ELASTIC_HTTP_VERSION_HEADER]: version,
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
         ...(!isEmpty(context) ? new ExecutionContextContainer(context).toHeader() : {}),

@@ -72,6 +72,13 @@ const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: 
       apps: getAppsForCategory(appCategories.DATA, filteredApps),
     },
     {
+      id: appCategories.ALERTS,
+      title: i18n.translate('management.landing.withCardNavigation.alertsTitle', {
+        defaultMessage: 'Alerts and insights',
+      }),
+      apps: getAppsForCategory(appCategories.ALERTS, filteredApps),
+    },
+    {
       id: appCategories.CONTENT,
       title: i18n.translate('management.landing.withCardNavigation.contentTitle', {
         defaultMessage: 'Content',
@@ -105,7 +112,8 @@ export const CardsNavigation = ({
           defaultMessage: 'Management',
         })}
         description={i18n.translate('management.landing.withCardNavigation.pageDescription', {
-          defaultMessage: 'Manage your indices, data views, saved objects, settings, and more.',
+          defaultMessage:
+            'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.',
         })}
       />
 

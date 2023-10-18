@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import rison from '@kbn/rison';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useMonitorAlertEnable } from '../../../hooks/use_monitor_alert_enable';
 import { ConfigKey } from '../../../../../../common/runtime_types';
@@ -26,21 +27,14 @@ import {
 } from '../../monitors_page/management/monitor_list_table/labels';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
-export const AlertActions = ({
-  from,
-  to,
-  monitorId,
-}: {
-  monitorId: string;
-  from: string;
-  to: string;
-}) => {
+export const AlertActions = ({ from, to }: { from: string; to: string }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const { monitor } = useSelectedMonitor();
+  const monitorQueryId = useMonitorQueryId();
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
-  const alertsUrl = useAlertsUrl({ rangeFrom: from, rangeTo: to, monitorId });
+  const alertsUrl = useAlertsUrl({ rangeFrom: from, rangeTo: to, monitorId: monitorQueryId });
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);

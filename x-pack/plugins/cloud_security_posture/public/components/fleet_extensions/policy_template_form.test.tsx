@@ -10,13 +10,19 @@ import {
   CspPolicyTemplateForm,
   AWS_ORGANIZATION_ACCOUNT,
   AWS_SINGLE_ACCOUNT,
+  GCP_ORGANIZATION_ACCOUNT,
+  GCP_SINGLE_ACCOUNT,
 } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
   getMockPackageInfoCspmAWS,
+  getMockPackageInfoCspmAzure,
+  getMockPackageInfoCspmGCP,
   getMockPackageInfoVulnMgmtAWS,
   getMockPolicyAWS,
+  getMockPolicyAzure,
   getMockPolicyEKS,
+  getMockPolicyGCP,
   getMockPolicyK8s,
   getMockPolicyVulnMgmtAWS,
 } from './mocks';
@@ -28,11 +34,17 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
-import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_GCP,
+} from '../../../common/constants';
 import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
+import { CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS } from './gcp_credential_form';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -193,7 +205,7 @@ describe('<CspPolicyTemplateForm />', () => {
   it('renders CSPM input selector', () => {
     const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} />);
 
-    const option1 = getByLabelText('Amazon Web Services');
+    const option1 = getByLabelText('AWS');
     const option2 = getByLabelText('GCP');
     const option3 = getByLabelText('Azure');
 
@@ -202,7 +214,7 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option3).toBeInTheDocument();
     expect(option1).toBeEnabled();
     expect(option2).toBeEnabled();
-    expect(option3).toBeDisabled();
+    expect(option3).toBeEnabled();
     expect(option1).toBeChecked();
   });
 
@@ -226,7 +238,7 @@ describe('<CspPolicyTemplateForm />', () => {
       <WrappedComponent newPolicy={getMockPolicyAWS()} edit={true} />
     );
 
-    const option1 = getByLabelText('Amazon Web Services');
+    const option1 = getByLabelText('AWS');
     const option2 = getByLabelText('GCP');
     const option3 = getByLabelText('Azure');
 
@@ -971,6 +983,264 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
         updatedPolicy: expectedUpdatedPolicy,
+      });
+    });
+  });
+
+  describe('GCP Credentials input fields', () => {
+    it(`renders ${CLOUDBEAT_GCP} Not supported when version is not at least version 1.5.2`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        credentials_type: { value: 'credentials-file' },
+        setup_access: { value: 'manual' },
+      });
+
+      const { getByText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP('1.3.1')} />
+      );
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: false,
+        updatedPolicy: policy,
+      });
+
+      expect(
+        getByText(
+          'CIS GCP is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS GCP'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it(`renders Google Cloud Shell forms when Setup Access is set to Google Cloud Shell`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        setup_access: { value: 'google_cloud_shell' },
+      });
+
+      const { getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+
+      expect(
+        getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
+      ).toBeInTheDocument();
+    });
+
+    it(`renders ${CLOUDBEAT_GCP} Credentials File fields`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.credentials.type': { value: 'credentials-file' },
+        setup_access: { value: 'manual' },
+      });
+
+      const { getByLabelText, getByRole } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      expect(getByRole('option', { name: 'Credentials File', selected: true })).toBeInTheDocument();
+
+      expect(
+        getByLabelText('Path to JSON file containing the credentials and key used to subscribe')
+      ).toBeInTheDocument();
+    });
+
+    it(`updates ${CLOUDBEAT_GCP} Credentials File fields`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.project_id': { value: 'a' },
+        'gcp.credentials.type': { value: 'credentials-file' },
+        setup_access: { value: 'manual' },
+      });
+
+      const { getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
+
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.credentials.file': { value: 'b' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+    });
+
+    it(`renders ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        setup_access: { value: 'manual' },
+        'gcp.credentials.type': { value: 'credentials-json' },
+      });
+
+      const { getByRole, getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      expect(getByRole('option', { name: 'Credentials JSON', selected: true })).toBeInTheDocument();
+
+      expect(
+        getByLabelText('JSON blob containing the credentials and key used to subscribe')
+      ).toBeInTheDocument();
+    });
+
+    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.project_id': { value: 'a' },
+        'gcp.credentials.type': { value: 'credentials-json' },
+        setup_access: { value: 'manual' },
+      });
+
+      const { getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON), 'b');
+
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.credentials.json': { value: 'b' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+    });
+
+    it(`${CLOUDBEAT_GCP} form do not displays upgrade message for supported versions and gcp organization option is enabled`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.credentials.type': { value: 'manual' },
+        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+      });
+
+      const { queryByText, getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.6.0' } as PackageInfo} />
+      );
+
+      expect(
+        queryByText(
+          'GCP Organization not supported in current integration version. Please upgrade to the latest version to enable GCP Organizations integration.'
+        )
+      ).not.toBeInTheDocument();
+      expect(getByLabelText('GCP Organization')).toBeEnabled();
+    });
+
+    it(`renders ${CLOUDBEAT_GCP} Organization fields when account type is Organization and Setup Access is Google Cloud Shell`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        setup_access: { value: 'google_cloud_shell' },
+      });
+
+      const { getByLabelText, getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      expect(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
+
+      expect(getByLabelText('Organization ID')).toBeInTheDocument();
+    });
+
+    it(`renders ${CLOUDBEAT_GCP} Organization fields when account type is Organization and Setup Access is manual`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        setup_access: { value: 'manual' },
+      });
+
+      const { getByLabelText, getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      expect(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
+
+      expect(getByLabelText('Organization ID')).toBeInTheDocument();
+    });
+
+    it(`Should not render ${CLOUDBEAT_GCP} Organization fields when account type is Single`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.account_type': { value: GCP_SINGLE_ACCOUNT },
+        setup_access: { value: 'google_cloud_shell' },
+      });
+
+      const { queryByLabelText, queryByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      expect(queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeNull();
+
+      expect(queryByLabelText('Organization ID')).toBeNull();
+    });
+
+    it(`updates ${CLOUDBEAT_GCP} organization id`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        setup_access: { value: 'manual' },
+      });
+
+      const { getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
+
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.organization_id': { value: 'c' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+    });
+  });
+
+  describe('Azure Credentials input fields', () => {
+    it(`renders ${CLOUDBEAT_AZURE} Not supported when version is not at least version 1.6.0`, () => {
+      let policy = getMockPolicyAzure();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'arm_template' },
+        'azure.account_type': { value: 'single-account' },
+      });
+
+      const { getByText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.5.0')} />
+      );
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: false,
+        updatedPolicy: policy,
+      });
+
+      expect(
+        getByText(
+          'CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it(`selects default ${CLOUDBEAT_AZURE} fields`, () => {
+      let policy = getMockPolicyAzure();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'arm_template' },
+        'azure.account_type': { value: 'single-account' },
+      });
+
+      render(<WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure()} />);
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
       });
     });
   });

@@ -50,7 +50,7 @@ export function ShowShareModal({
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
-    dashboardSessionStorage,
+    dashboardBackup,
     data: {
       query: {
         timefilter: {
@@ -58,7 +58,6 @@ export function ShowShareModal({
         },
       },
     },
-    initializerContext: { kibanaVersion },
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -122,7 +121,7 @@ export function ShowShareModal({
   };
 
   let unsavedStateForLocator: DashboardAppLocatorParams = {};
-  const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
+  const unsavedDashboardState = dashboardBackup.getState(savedObjectId);
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
@@ -131,8 +130,7 @@ export function ShowShareModal({
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
         ? (convertPanelMapToSavedPanels(
-            unsavedDashboardState.panels,
-            kibanaVersion
+            unsavedDashboardState.panels
           ) as DashboardAppLocatorParams['panels'])
         : undefined,
 

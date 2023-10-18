@@ -7,6 +7,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 
 export interface ContextFetchState {
   /**
@@ -33,6 +34,21 @@ export interface ContextFetchState {
    * Successors fetch status
    */
   successorsStatus: LoadingStatusEntry;
+
+  /**
+   * Intercepted warnings for anchor request
+   */
+  anchorInterceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+
+  /**
+   * Intercepted warnings for predecessors request
+   */
+  predecessorsInterceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+
+  /**
+   * Intercepted warnings for successors request
+   */
+  successorsInterceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
 }
 
 export enum LoadingStatus {
@@ -60,4 +76,7 @@ export const getInitialContextQueryState = (): ContextFetchState => ({
   anchorStatus: { value: LoadingStatus.UNINITIALIZED },
   predecessorsStatus: { value: LoadingStatus.UNINITIALIZED },
   successorsStatus: { value: LoadingStatus.UNINITIALIZED },
+  anchorInterceptedWarnings: undefined,
+  predecessorsInterceptedWarnings: undefined,
+  successorsInterceptedWarnings: undefined,
 });

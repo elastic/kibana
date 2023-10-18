@@ -12,4 +12,5 @@ oneOf:
   - type: array
     items:
       type: string
+    maxItems: 1000
 x-technical-preview: true

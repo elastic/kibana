@@ -50,6 +50,7 @@ export const StepDetailsLinkIcon = ({
 
   return (
     <EuiButtonIcon
+      data-test-subj="syntheticsStepDetailsLinkIconButton"
       {...commonProps}
       aria-label={VIEW_DETAILS}
       title={VIEW_DETAILS}

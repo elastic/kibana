@@ -142,6 +142,7 @@ export function SpanLinksTable({ items }: Props) {
           <EuiPopover
             button={
               <EuiButtonIcon
+                data-test-subj="apmColumnsButton"
                 aria-label="Edit"
                 iconType="boxesHorizontal"
                 onClick={() => {

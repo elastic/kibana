@@ -1,0 +1,2 @@
+type: string
+description: Comma-separated list of data streams, indices, and aliases that you want to search. Supports wildcards (`*`).

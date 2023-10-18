@@ -18,7 +18,6 @@ export enum appIds {
   INDEX_MANAGEMENT = 'index_management',
   TRANSFORM = 'transform',
   ML = 'jobsListLink',
-  DATA_VIEW = 'data_view',
   SAVED_OBJECTS = 'objects',
   TAGS = 'tags',
   FILES_MANAGEMENT = 'filesManagement',
@@ -28,6 +27,7 @@ export enum appIds {
   CONNECTORS = 'triggersActionsConnectors',
   RULES = 'triggersActions',
   MAINTENANCE_WINDOWS = 'maintenanceWindows',
+  SERVERLESS_SETTINGS = 'settings',
 }
 
 // Create new type that is a union of all the appId values
@@ -35,35 +35,19 @@ export type AppId = `${appIds}`;
 
 export const appCategories = {
   DATA: 'data',
+  ALERTS: 'alerts',
   CONTENT: 'content',
   OTHER: 'other',
 };
 
 export const appDefinitions: Record<AppId, AppDefinition> = {
-  [appIds.INGEST_PIPELINES]: {
-    category: appCategories.DATA,
-    description: i18n.translate(
-      'management.landing.withCardNavigation.ingestPipelinesDescription',
-      {
-        defaultMessage:
-          'Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing.',
-      }
-    ),
-    icon: <EuiIcon size="l" type="logstashInput" />,
-  },
-  [appIds.PIPELINES]: {
-    category: appCategories.DATA,
-    description: i18n.translate('management.landing.withCardNavigation.ingestDescription', {
-      defaultMessage: 'Manage Logstash event processing and see the result visually.',
-    }),
-    icon: <EuiIcon size="l" type="logstashQueue" />,
-  },
   [appIds.INDEX_MANAGEMENT]: {
     category: appCategories.DATA,
     description: i18n.translate(
       'management.landing.withCardNavigation.indexmanagementDescription',
       {
-        defaultMessage: 'Update your Elasticsearch indices individually or in bulk.',
+        defaultMessage:
+          'Configure and maintain your Elasticsearch indices for data storage and retrieval.',
       }
     ),
     icon: <EuiIcon size="l" type="indexSettings" />,
@@ -71,94 +55,113 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.TRANSFORM]: {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.transformDescription', {
-      defaultMessage:
-        'Transforms pivot indices into summarized, entity-centric indices, or create an indexed view of the latest documents.',
+      defaultMessage: 'Pivot your data or copy the latest documents into an entity-centric index.',
     }),
     icon: <EuiIcon size="l" type="indexFlush" />,
+  },
+  [appIds.INGEST_PIPELINES]: {
+    category: appCategories.DATA,
+    description: i18n.translate(
+      'management.landing.withCardNavigation.ingestPipelinesDescription',
+      {
+        defaultMessage: 'Remove fields, extract values, and perform transformations on your data.',
+      }
+    ),
+    icon: <EuiIcon size="l" type="logstashInput" />,
+  },
+  [appIds.DATA_VIEWS]: {
+    category: appCategories.DATA,
+    description: i18n.translate('management.landing.withCardNavigation.dataViewsDescription', {
+      defaultMessage: 'Create and manage the Elasticsearch data you selected for exploration.',
+    }),
+    icon: <EuiIcon size="l" type="indexEdit" />,
   },
   [appIds.ML]: {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.mlDescription', {
       defaultMessage:
-        'View, export, and import machine learning analytics and anomaly detection items.',
+        'Identify, analyze, and process your data using advanced analysis techniques.',
     }),
     icon: <EuiIcon size="l" type="indexMapping" />,
   },
-  [appIds.DATA_VIEW]: {
+  [appIds.PIPELINES]: {
     category: appCategories.DATA,
-    description: i18n.translate('management.landing.withCardNavigation.dataViewsDescription', {
+    description: i18n.translate('management.landing.withCardNavigation.ingestDescription', {
       defaultMessage:
-        'Create and manage the data views that help you retrieve your data from Elasticsearch.',
+        'Manage and view the Logstash event processing pipeline from inputs to outputs.',
     }),
-    icon: <EuiIcon size="l" type="indexEdit" />,
+    icon: <EuiIcon size="l" type="logstashQueue" />,
   },
-  [appIds.SAVED_OBJECTS]: {
-    category: appCategories.CONTENT,
-    description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {
-      defaultMessage:
-        'Manage and share your saved objects. To edit the underlying data of an object, go to its associated application.',
-    }),
-    icon: <EuiIcon size="l" type="save" />,
-  },
-  [appIds.TAGS]: {
-    category: appCategories.CONTENT,
-    description: i18n.translate('management.landing.withCardNavigation.tagsDescription', {
-      defaultMessage: 'Use tags to categorize and easily find your objects.',
-    }),
-    icon: <EuiIcon size="l" type="tag" />,
-  },
-  [appIds.FILES_MANAGEMENT]: {
-    category: appCategories.CONTENT,
-    description: i18n.translate('management.landing.withCardNavigation.fileManagementDescription', {
-      defaultMessage: 'Any files created will be listed here.',
-    }),
-    icon: <EuiIcon size="l" type="documents" />,
-  },
-  [appIds.API_KEYS]: {
-    category: appCategories.OTHER,
-    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
-      defaultMessage: 'Allow applications to access Elastic on your behalf.',
-    }),
-    icon: <EuiIcon size="l" type="lockOpen" />,
-  },
-  [appIds.DATA_VIEWS]: {
-    category: appCategories.DATA,
-    description: i18n.translate('management.landing.withCardNavigation.dataViewsDescription', {
-      defaultMessage:
-        'Create and manage the data views that help you retrieve your data from Elasticsearch.',
-    }),
-    icon: <EuiIcon size="l" type="indexEdit" />,
-  },
-  [appIds.CONNECTORS]: {
-    category: appCategories.OTHER,
-    description: i18n.translate('management.landing.withCardNavigation.connectorsDescription', {
-      defaultMessage: 'Connect third-party software with your alerting data.',
-    }),
-    icon: <EuiIcon size="l" type="desktop" />,
-  },
+
   [appIds.RULES]: {
-    category: appCategories.OTHER,
+    category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {
-      defaultMessage: 'Detect conditions using rules.',
+      defaultMessage: 'Define when to generate alerts and notifications.',
     }),
     icon: <EuiIcon size="l" type="editorChecklist" />,
   },
+  [appIds.CONNECTORS]: {
+    category: appCategories.ALERTS,
+    description: i18n.translate('management.landing.withCardNavigation.connectorsDescription', {
+      defaultMessage: 'Configure connections to third party systems for use in cases and rules.',
+    }),
+    icon: <EuiIcon size="l" type="desktop" />,
+  },
   [appIds.MAINTENANCE_WINDOWS]: {
-    category: appCategories.OTHER,
+    category: appCategories.ALERTS,
     description: i18n.translate(
       'management.landing.withCardNavigation.maintenanceWindowsDescription',
       {
-        defaultMessage: 'Suppress rule notifications for scheduled periods of time.',
+        defaultMessage:
+          'Suppress rule notifications during scheduled times for maintenance, updates, and other system tasks.',
       }
     ),
     icon: <EuiIcon size="l" type="wrench" />,
   },
+
+  [appIds.SAVED_OBJECTS]: {
+    category: appCategories.CONTENT,
+    description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {
+      defaultMessage: 'Manage your saved dashboards, maps, data views, and Canvas workpads.',
+    }),
+    icon: <EuiIcon size="l" type="save" />,
+  },
+  [appIds.FILES_MANAGEMENT]: {
+    category: appCategories.CONTENT,
+    description: i18n.translate('management.landing.withCardNavigation.fileManagementDescription', {
+      defaultMessage: 'Access all files that you uploaded.',
+    }),
+    icon: <EuiIcon size="l" type="documents" />,
+  },
   [appIds.REPORTING]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
-      defaultMessage: 'Get reports generated in applications.',
+      defaultMessage: 'Manage generated PDF, PNG and CSV reports.',
     }),
     icon: <EuiIcon size="l" type="visPie" />,
+  },
+  [appIds.TAGS]: {
+    category: appCategories.CONTENT,
+    description: i18n.translate('management.landing.withCardNavigation.tagsDescription', {
+      defaultMessage: 'Organize, search, and filter your saved objects by specific criteria.',
+    }),
+    icon: <EuiIcon size="l" type="tag" />,
+  },
+
+  [appIds.API_KEYS]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
+      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
+    }),
+    icon: <EuiIcon size="l" type="lockOpen" />,
+  },
+
+  [appIds.SERVERLESS_SETTINGS]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.settingsDescription', {
+      defaultMessage: 'Control project behavior, such as date display and default sorting.',
+    }),
+    icon: <EuiIcon size="l" type="gear" />,
   },
 };
 

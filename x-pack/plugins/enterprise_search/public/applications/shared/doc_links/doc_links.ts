@@ -8,6 +8,8 @@
 import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
+  public aiSearchDoc: string;
+  public aiSearchHelp: string;
   public apiKeys: string;
   public appSearchAdaptiveRelevance: string;
   public appSearchApiClients: string;
@@ -63,10 +65,13 @@ class DocLinks {
   public cloudIndexManagement: string;
   public connectors: string;
   public connectorsAzureBlobStorage: string;
+  public connectorsBox: string;
   public connectorsClients: string;
   public connectorsConfluence: string;
   public connectorsContentExtraction: string;
   public connectorsDropbox: string;
+  public connectorsGithub: string;
+  public connectorsGmail: string;
   public connectorsGoogleCloudStorage: string;
   public connectorsGoogleDrive: string;
   public connectorsJira: string;
@@ -75,13 +80,19 @@ class DocLinks {
   public connectorsMySQL: string;
   public connectorsNative: string;
   public connectorsNetworkDrive: string;
+  public connectorsOneDrive: string;
   public connectorsOracle: string;
+  public connectorsOutlook: string;
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
+  public connectorsSalesforce: string;
   public connectorsServiceNow: string;
   public connectorsSharepoint: string;
   public connectorsSharepointOnline: string;
-  public connectorsWorkplaceSearch: string;
+  public connectorsSlack: string;
+  public connectorsTeams: string;
+  public connectorsZoom: string;
+  public consoleGuide: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
@@ -97,10 +108,6 @@ class DocLinks {
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
-  public esre: string;
-  public esreFaq: string;
-  public esreHelp: string;
-  public esreLearn: string;
   public indexApi: string;
   public ingestionApis: string;
   public ingestPipelines: string;
@@ -112,13 +119,17 @@ class DocLinks {
   public licenseManagement: string;
   public machineLearningStart: string;
   public mlDocumentEnrichment: string;
+  public mlDocumentEnrichmentUpdateMappings: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
+  public restApis: string;
   public rrf: string;
   public searchApplications: string;
   public searchApplicationsSearch: string;
   public searchApplicationsTemplates: string;
   public searchApplicationsSearchApi: string;
+  public searchLabs: string;
+  public searchLabsRepo: string;
   public searchTemplates: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
@@ -164,6 +175,8 @@ class DocLinks {
   public workplaceSearchZoom: string;
 
   constructor() {
+    this.aiSearchDoc = '';
+    this.aiSearchHelp = '';
     this.apiKeys = '';
     this.appSearchAdaptiveRelevance = '';
     this.appSearchApis = '';
@@ -219,10 +232,13 @@ class DocLinks {
     this.cloudIndexManagement = '';
     this.connectors = '';
     this.connectorsAzureBlobStorage = '';
+    this.connectorsBox = '';
     this.connectorsConfluence = '';
     this.connectorsContentExtraction = '';
     this.connectorsClients = '';
     this.connectorsDropbox = '';
+    this.connectorsGithub = '';
+    this.connectorsGmail = '';
     this.connectorsGoogleCloudStorage = '';
     this.connectorsGoogleDrive = '';
     this.connectorsJira = '';
@@ -231,13 +247,19 @@ class DocLinks {
     this.connectorsMySQL = '';
     this.connectorsNative = '';
     this.connectorsNetworkDrive = '';
+    this.connectorsOneDrive = '';
     this.connectorsOracle = '';
+    this.connectorsOutlook = '';
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
+    this.connectorsSalesforce = '';
     this.connectorsServiceNow = '';
     this.connectorsSharepoint = '';
     this.connectorsSharepointOnline = '';
-    this.connectorsWorkplaceSearch = '';
+    this.connectorsSlack = '';
+    this.connectorsTeams = '';
+    this.connectorsZoom = '';
+    this.consoleGuide = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
@@ -253,10 +275,6 @@ class DocLinks {
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
-    this.esre = '';
-    this.esreFaq = '';
-    this.esreHelp = '';
-    this.esreLearn = '';
     this.indexApi = '';
     this.ingestionApis = '';
     this.ingestPipelines = '';
@@ -268,8 +286,10 @@ class DocLinks {
     this.licenseManagement = '';
     this.machineLearningStart = '';
     this.mlDocumentEnrichment = '';
+    this.mlDocumentEnrichmentUpdateMappings = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
+    this.restApis = '';
     this.rrf = '';
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
@@ -277,6 +297,8 @@ class DocLinks {
     this.searchApplications = '';
     this.searchApplicationsSearch = '';
     this.searchApplicationsSearchApi = '';
+    this.searchLabs = '';
+    this.searchLabsRepo = '';
     this.searchTemplates = '';
     this.start = '';
     this.supportedNlpModels = '';
@@ -321,6 +343,8 @@ class DocLinks {
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
+    this.aiSearchDoc = docLinks.links.enterpriseSearch.aiSearchDoc;
+    this.aiSearchHelp = docLinks.links.enterpriseSearch.aiSearchHelp;
     this.apiKeys = docLinks.links.enterpriseSearch.apiKeys;
     this.appSearchAdaptiveRelevance = docLinks.links.appSearch.adaptiveRelevance;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
@@ -376,26 +400,35 @@ class DocLinks {
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
+    this.connectorsBox = docLinks.links.enterpriseSearch.connectorsBox;
     this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
     this.connectorsContentExtraction = docLinks.links.enterpriseSearch.connectorsContentExtraction;
     this.connectorsClients = docLinks.links.enterpriseSearch.connectorsClients;
     this.connectorsDropbox = docLinks.links.enterpriseSearch.connectorsDropbox;
+    this.connectorsGithub = docLinks.links.enterpriseSearch.connectorsGithub;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
     this.connectorsGoogleDrive = docLinks.links.enterpriseSearch.connectorsGoogleDrive;
+    this.connectorsGmail = docLinks.links.enterpriseSearch.connectorsGmail;
     this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsNative = docLinks.links.enterpriseSearch.connectorsNative;
     this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
+    this.connectorsOneDrive = docLinks.links.enterpriseSearch.connectorsOneDrive;
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
+    this.connectorsOutlook = docLinks.links.enterpriseSearch.connectorsOutlook;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
+    this.connectorsSalesforce = docLinks.links.enterpriseSearch.connectorsSalesforce;
     this.connectorsServiceNow = docLinks.links.enterpriseSearch.connectorsServiceNow;
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
-    this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
+    this.connectorsSlack = docLinks.links.enterpriseSearch.connectorsSlack;
+    this.connectorsTeams = docLinks.links.enterpriseSearch.connectorsTeams;
+    this.connectorsZoom = docLinks.links.enterpriseSearch.connectorsZoom;
+    this.consoleGuide = docLinks.links.console.guide;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
@@ -411,10 +444,6 @@ class DocLinks {
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
-    this.esre = docLinks.links.enterpriseSearch.esre;
-    this.esreFaq = docLinks.links.enterpriseSearch.esreFaq;
-    this.esreHelp = docLinks.links.enterpriseSearch.esreHelp;
-    this.esreLearn = docLinks.links.enterpriseSearch.esreLearn;
     this.indexApi = docLinks.links.enterpriseSearch.indexApi;
     this.ingestionApis = docLinks.links.enterpriseSearch.ingestionApis;
     this.ingestPipelines = docLinks.links.enterpriseSearch.ingestPipelines;
@@ -426,8 +455,11 @@ class DocLinks {
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.mlDocumentEnrichment = docLinks.links.enterpriseSearch.mlDocumentEnrichment;
+    this.mlDocumentEnrichmentUpdateMappings =
+      docLinks.links.enterpriseSearch.mlDocumentEnrichmentUpdateMappings;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
+    this.restApis = docLinks.links.apis.restApis;
     this.rrf = docLinks.links.elasticsearch.rrf;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
@@ -435,6 +467,8 @@ class DocLinks {
     this.searchApplicationsSearchApi = docLinks.links.enterpriseSearch.searchApplicationsSearchApi;
     this.searchApplications = docLinks.links.enterpriseSearch.searchApplications;
     this.searchApplicationsSearch = docLinks.links.enterpriseSearch.searchApplicationsSearch;
+    this.searchLabs = docLinks.links.enterpriseSearch.searchLabs;
+    this.searchLabsRepo = docLinks.links.enterpriseSearch.searchLabsRepo;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;

@@ -170,6 +170,7 @@ export type {
   Reason,
   WaitUntilNextSessionCompletesOptions,
   SearchResponseWarning,
+  SearchResponseIncompleteWarning,
 } from './search';
 
 export {
@@ -196,7 +197,7 @@ export type {
 } from './search';
 
 export type { ISearchOptions } from '../common';
-export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export { isRunningResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -272,8 +273,8 @@ export type {
   GlobalQueryStateFromUrl,
 } from './query';
 
-export type { ShardFailureRequest } from './shard_failure_modal';
-export { ShardFailureOpenModalButton } from './shard_failure_modal';
+// TODO: move to @kbn/search-response-warnings
+export { ViewWarningButton } from './search/warnings';
 
 export type { AggsStart } from './search/aggs';
 

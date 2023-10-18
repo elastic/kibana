@@ -12,12 +12,17 @@ export {
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
   monitoringSchema,
-  rRuleSchema,
   ruleResponseSchema,
   ruleSnoozeScheduleSchema,
 } from './schemas/latest';
 
-export type { RuleParams, RuleResponse, RuleSnoozeSchedule } from './types/latest';
+export type {
+  RuleParams,
+  RuleResponse,
+  RuleSnoozeSchedule,
+  RuleLastRun,
+  Monitoring,
+} from './types/latest';
 
 export {
   ruleNotifyWhen,
@@ -42,7 +47,6 @@ export {
   ruleExecutionStatusSchema as ruleExecutionStatusSchemaV1,
   ruleLastRunSchema as ruleLastRunSchemaV1,
   monitoringSchema as monitoringSchemaV1,
-  rRuleSchema as rRuleSchemaV1,
   ruleResponseSchema as ruleResponseSchemaV1,
   ruleSnoozeScheduleSchema as ruleSnoozeScheduleSchemaV1,
 } from './schemas/v1';
@@ -67,4 +71,6 @@ export type {
   RuleParams as RuleParamsV1,
   RuleResponse as RuleResponseV1,
   RuleSnoozeSchedule as RuleSnoozeScheduleV1,
+  RuleLastRun as RuleLastRunV1,
+  Monitoring as MonitoringV1,
 } from './types/v1';

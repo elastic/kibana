@@ -7,7 +7,7 @@
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DraggableId } from 'react-beautiful-dnd';
+import type { DraggableId } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
@@ -272,6 +272,7 @@ export const HoverActions: React.FC<Props> = React.memo(
         })}
       >
         <Container
+          data-test-subj="hover-actions-container"
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}

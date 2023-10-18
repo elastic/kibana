@@ -93,7 +93,7 @@ type CustomTableViewProps = Pick<
   | 'editItem'
   | 'contentEditor'
   | 'emptyPrompt'
-  | 'showEditActionForItem'
+  | 'itemIsEditable'
 >;
 
 const useTableListViewProps = (
@@ -109,6 +109,7 @@ const useTableListViewProps = (
       overlays,
       toastNotifications,
       visualizeCapabilities,
+      contentManagement,
     },
   } = useKibana<VisualizeServices>();
 
@@ -176,11 +177,16 @@ const useTableListViewProps = (
             description: args.description ?? '',
             tags: args.tags,
           },
-          { overlays, savedObjectsTagging }
+          {
+            overlays,
+            savedObjectsTagging,
+            typesService: getTypes(),
+            contentManagement,
+          }
         );
       }
     },
-    [overlays, savedObjectsTagging]
+    [overlays, savedObjectsTagging, contentManagement]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -251,8 +257,7 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    showEditActionForItem: ({ attributes: { readOnly } }) =>
-      visualizeCapabilities.save && !readOnly,
+    itemIsEditable: ({ attributes: { readOnly } }) => visualizeCapabilities.save && !readOnly,
   };
 
   return props;
@@ -270,6 +275,7 @@ export const VisualizeListing = () => {
       uiSettings,
       kbnUrlStateStorage,
       listingViewRegistry,
+      serverless,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -298,13 +304,20 @@ export const VisualizeListing = () => {
   useMount(() => {
     // Reset editor state for all apps if the visualize listing page is loaded.
     stateTransferService.clearEditorState();
-    chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-          defaultMessage: 'Visualize Library',
-        }),
-      },
-    ]);
+    if (serverless?.setBreadcrumbs) {
+      // reset any deeper context breadcrumbs
+      // "Visualization" breadcrumb is set automatically by the serverless navigation
+      serverless.setBreadcrumbs([]);
+    } else {
+      chrome.setBreadcrumbs([
+        {
+          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
+            defaultMessage: 'Visualize Library',
+          }),
+        },
+      ]);
+    }
+
     chrome.docTitle.change(
       i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
     );
@@ -370,8 +383,10 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-              getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
+            getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) =>
+              readOnly
+                ? undefined
+                : getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
             }
             tableCaption={visualizeLibraryTitle}
             {...tableViewProps}

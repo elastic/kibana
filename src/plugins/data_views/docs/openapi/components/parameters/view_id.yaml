@@ -1,0 +1,7 @@
+in: path
+name: viewId
+description: An identifier for the data view.
+required: true
+schema:
+  type: string
+  example: ff959d40-b880-11e8-a6d9-e546fe2bba5f

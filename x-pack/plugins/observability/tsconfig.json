@@ -76,12 +76,24 @@
     "@kbn/field-types",
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server",
-    "@kbn/cloud-chat-plugin",
     "@kbn/cloud-plugin",
     "@kbn/stack-alerts-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/actions-plugin",
-    "@kbn/core-capabilities-common"
+    "@kbn/core-capabilities-common",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/osquery-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/aiops-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/deeplinks-observability",
+    "@kbn/core-application-common",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-link-redirect-app"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

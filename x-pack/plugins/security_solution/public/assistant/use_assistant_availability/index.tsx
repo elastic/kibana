@@ -6,21 +6,39 @@
  */
 
 import { useLicense } from '../../common/hooks/use_license';
+import { useKibana } from '../../common/lib/kibana';
+import { ASSISTANT_FEATURE_ID } from '../../../common/constants';
 
 export interface UseAssistantAvailability {
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
+  // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
+  hasConnectorsAllPrivilege: boolean;
+  // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
+  hasConnectorsReadPrivilege: boolean;
 }
 
 export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
+  const capabilities = useKibana().services.application.capabilities;
+  const hasAssistantPrivilege = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
+
+  // Connectors & Actions capabilities as defined in x-pack/plugins/actions/server/feature.ts
+  // `READ` ui capabilities defined as: { ui: ['show', 'execute'] }
+  const hasConnectorsReadPrivilege =
+    capabilities.actions?.show === true && capabilities.actions?.execute === true;
+  // `ALL` ui capabilities defined as: { ui: ['show', 'execute', 'save', 'delete'] }
+  const hasConnectorsAllPrivilege =
+    hasConnectorsReadPrivilege &&
+    capabilities.actions?.delete === true &&
+    capabilities.actions?.save === true;
+
   return {
+    hasAssistantPrivilege,
+    hasConnectorsAllPrivilege,
+    hasConnectorsReadPrivilege,
     isAssistantEnabled: isEnterprise,
-    // TODO: RBAC check (https://github.com/elastic/security-team/issues/6932)
-    // Leaving as a placeholder for RBAC as the same behavior will be required
-    // When false, the Assistant is hidden and unavailable
-    hasAssistantPrivilege: true,
   };
 };

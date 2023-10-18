@@ -11,7 +11,7 @@ import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
 type InsertFields = 'comment' | 'description';
 
-export const InsertTimeline = ({ fieldName }: { fieldName: InsertFields }) => {
+export const InsertTimeline: React.FC<{ fieldName: InsertFields }> = ({ fieldName }) => {
   const { setFieldValue, getFormData } = useFormContext();
   const timelineHooks = useTimelineContext()?.hooks;
   const formData = getFormData();
@@ -22,3 +22,5 @@ export const InsertTimeline = ({ fieldName }: { fieldName: InsertFields }) => {
   timelineHooks?.useInsertTimeline(formData[fieldName] ?? '', onTimelineAttached);
   return null;
 };
+
+InsertTimeline.displayName = 'InsertTimeline';

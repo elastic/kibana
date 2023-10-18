@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
+import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const ES_TEST_INDEX_NAME = '.kibana-alerting-test-data';
 
@@ -68,6 +69,17 @@ export class ESTestIndexTool {
     );
   }
 
+  async indexDoc(source: string, reference?: string) {
+    return await this.es.index({
+      index: this.index,
+      document: {
+        source,
+        reference,
+      },
+      refresh: true,
+    });
+  }
+
   async destroy() {
     const indexExists = await this.es.indices.exists({ index: this.index });
     if (indexExists) {
@@ -108,6 +120,30 @@ export class ESTestIndexTool {
       body,
     };
     return await this.es.search(params, { meta: true });
+  }
+
+  async getAll(size: number = 10) {
+    const params = {
+      index: this.index,
+      size,
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    };
+    return await this.es.search(params, { meta: true });
+  }
+
+  async removeAll() {
+    const params: DeleteByQueryRequest = {
+      index: this.index,
+      query: {
+        match_all: {},
+      },
+      conflicts: 'proceed',
+    };
+    return await this.es.deleteByQuery(params);
   }
 
   async waitForDocs(source: string, reference: string, numDocs: number = 1) {

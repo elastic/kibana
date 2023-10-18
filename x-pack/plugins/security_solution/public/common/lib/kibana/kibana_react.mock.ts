@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -49,10 +47,12 @@ import { mockApm } from '../apm/service.mock';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { of } from 'rxjs';
-import { UpsellingService } from '../upsellings';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { contractStartServicesMock } from '../../../mocks';
+import { getDefaultConfigSettings } from '../../../../common/config_settings';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -122,9 +122,12 @@ export const createStartServicesMock = (
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
+  const mockSetHeaderActionMenu = jest.fn();
 
   return {
     ...core,
+    ...contractStartServicesMock,
+    configSettings: getDefaultConfigSettings(),
     apm,
     cases,
     unifiedSearch,
@@ -195,6 +198,7 @@ export const createStartServicesMock = (
     ml: {
       locator,
     },
+    telemetry: {},
     theme: {
       theme$: themeServiceMock.createTheme$(),
     },
@@ -216,15 +220,17 @@ export const createStartServicesMock = (
       ...cloud,
       isCloudEnabled: false,
     },
-    isSidebarEnabled$: of(true),
-    upselling: new UpsellingService(),
     customDataService,
+    uiActions: uiActionsPluginMock.createStartContract(),
+    savedSearch: savedSearchPluginMock.createStartContract(),
+    setHeaderActionMenu: mockSetHeaderActionMenu,
   } as unknown as StartServices;
 };
 
 export const createWithKibanaMock = () => {
   const services = createStartServicesMock();
 
+  // eslint-disable-next-line react/display-name
   return (Component: unknown) => (props: unknown) => {
     return React.createElement(Component as string, { ...(props as object), kibana: { services } });
   };
@@ -233,6 +239,7 @@ export const createWithKibanaMock = () => {
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
+  // eslint-disable-next-line react/display-name
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(
       KibanaContextProvider,

@@ -97,7 +97,7 @@ describe('StatusRuleExecutor', () => {
 
     const staleDownConfigs = await statusRule.markDeletedConfigs({
       id1: {
-        location: 'us-east-1',
+        locationId: 'us-east-1',
         configId: 'id1',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -105,7 +105,7 @@ describe('StatusRuleExecutor', () => {
         ping: {} as any,
       },
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
-        location: 'US Central DEV',
+        locationId: 'us_central_dev',
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -113,7 +113,7 @@ describe('StatusRuleExecutor', () => {
         ping: {} as any,
       },
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_qa': {
-        location: 'US Central QA',
+        locationId: 'us_central_qa',
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -126,7 +126,7 @@ describe('StatusRuleExecutor', () => {
       id1: {
         configId: 'id1',
         isDeleted: true,
-        location: 'us-east-1',
+        locationId: 'us-east-1',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
@@ -135,7 +135,7 @@ describe('StatusRuleExecutor', () => {
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         isLocationRemoved: true,
-        location: 'US Central DEV',
+        locationId: 'us_central_dev',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
@@ -175,7 +175,7 @@ describe('StatusRuleExecutor', () => {
 
     const staleDownConfigs = await statusRule.markDeletedConfigs({
       id1: {
-        location: 'us-east-1',
+        locationId: 'us-east-1',
         configId: 'id1',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -183,7 +183,7 @@ describe('StatusRuleExecutor', () => {
         ping: {} as any,
       },
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
-        location: 'US Central DEV',
+        locationId: 'us_central_dev',
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -191,7 +191,7 @@ describe('StatusRuleExecutor', () => {
         ping: {} as any,
       },
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_qa': {
-        location: 'US Central QA',
+        locationId: 'us_central_qa',
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -204,7 +204,7 @@ describe('StatusRuleExecutor', () => {
       id1: {
         configId: 'id1',
         isDeleted: true,
-        location: 'us-east-1',
+        locationId: 'us-east-1',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
@@ -213,7 +213,7 @@ describe('StatusRuleExecutor', () => {
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         isLocationRemoved: true,
-        location: 'US Central DEV',
+        locationId: 'us_central_dev',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',

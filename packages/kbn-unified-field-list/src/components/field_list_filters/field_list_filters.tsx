@@ -23,6 +23,7 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
   getCustomFieldType?: FieldTypeFilterProps<T>['getCustomFieldType'];
   onSupportedFieldFilter?: FieldTypeFilterProps<T>['onSupportedFieldFilter'];
   onChangeFieldTypes: FieldTypeFilterProps<T>['onChange'];
+  compressed?: FieldNameSearchProps['compressed'];
   nameFilter: FieldNameSearchProps['nameFilter'];
   screenReaderDescriptionId?: FieldNameSearchProps['screenReaderDescriptionId'];
   onChangeNameFilter: FieldNameSearchProps['onChange'];
@@ -38,6 +39,7 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
  * @param getCustomFieldType
  * @param onSupportedFieldFilter
  * @param onChangeFieldTypes
+ * @param compressed
  * @param nameFilter
  * @param screenReaderDescriptionId
  * @param onChangeNameFilter
@@ -52,6 +54,7 @@ function InnerFieldListFilters<T extends FieldListItem = DataViewField>({
   getCustomFieldType,
   onSupportedFieldFilter,
   onChangeFieldTypes,
+  compressed,
   nameFilter,
   screenReaderDescriptionId,
   onChangeNameFilter,
@@ -72,6 +75,7 @@ function InnerFieldListFilters<T extends FieldListItem = DataViewField>({
           />
         ) : undefined
       }
+      compressed={compressed}
       nameFilter={nameFilter}
       screenReaderDescriptionId={screenReaderDescriptionId}
       onChange={onChangeNameFilter}

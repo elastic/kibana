@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
+import {
+  AnnotationDomainType,
+  AreaSeries,
+  Axis,
+  Chart,
+  LineAnnotation,
+  Position,
+  RectAnnotation,
+  ScaleType,
+  Settings,
+  Tooltip,
+} from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,18 +24,36 @@ import {
   EuiIcon,
   EuiLoadingChart,
   EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { min, max } from 'lodash';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';
 
-export function DataPreviewChart() {
+interface DataPreviewChartProps {
+  formatPattern?: string;
+  threshold?: number;
+  thresholdDirection?: 'above' | 'below';
+  thresholdColor?: string;
+  thresholdMessage?: string;
+}
+
+export function DataPreviewChart({
+  formatPattern,
+  threshold,
+  thresholdDirection,
+  thresholdColor,
+  thresholdMessage,
+}: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
   const { isIndicatorSectionValid } = useSectionFormValidation({
@@ -44,15 +73,41 @@ export function DataPreviewChart() {
   const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
-  const percentFormat = uiSettings.get('format:percent:defaultPattern');
-  const panelLabel = i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.panelLabel', {
-    defaultMessage: 'SLI preview',
-  });
+  const numberFormat =
+    formatPattern != null
+      ? formatPattern
+      : (uiSettings.get('format:percent:defaultPattern') as string);
+
+  const values = (previewData || []).map((row) => row.sliValue);
+  const maxValue = max(values);
+  const minValue = min(values);
+  const domain = {
+    fit: true,
+    min:
+      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
+    max:
+      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
+  };
+
+  const title = (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.observability.slo.sloEdit.dataPreviewChart.panelLabel"
+            defaultMessage="SLI preview"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+    </>
+  );
 
   if (!isIndicatorSectionValid) {
     return (
       <EuiFlexItem>
-        <EuiFormRow label={panelLabel} fullWidth>
+        {title}
+        <EuiFormRow fullWidth>
           <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 160 }}>
               <EuiFlexItem grow={false}>
@@ -71,9 +126,43 @@ export function DataPreviewChart() {
     );
   }
 
+  const annotation = threshold != null && (
+    <>
+      <LineAnnotation
+        id="thresholdAnnotation"
+        domainType={AnnotationDomainType.YDomain}
+        dataValues={[{ dataValue: threshold }]}
+        style={{
+          line: {
+            strokeWidth: 2,
+            stroke: thresholdColor || '#000',
+            opacity: 1,
+          },
+        }}
+      />
+      <RectAnnotation
+        dataValues={[
+          {
+            coordinates:
+              thresholdDirection === 'above'
+                ? {
+                    y0: threshold,
+                    y1: maxValue,
+                  }
+                : { y0: minValue, y1: threshold },
+            details: thresholdMessage,
+          },
+        ]}
+        id="thresholdShade"
+        style={{ fill: thresholdColor || '#000', opacity: 0.1 }}
+      />
+    </>
+  );
+
   return (
     <EuiFlexItem>
-      <EuiFormRow label={panelLabel} fullWidth>
+      {title}
+      <EuiFormRow fullWidth>
         <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
           {(isPreviewLoading || isError) && (
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 160 }}>
@@ -109,7 +198,10 @@ export function DataPreviewChart() {
                 noResults={
                   <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
                 }
+                locale={i18n.getLocale()}
               />
+
+              {annotation}
 
               <Axis
                 id="y-axis"
@@ -118,7 +210,8 @@ export function DataPreviewChart() {
                 })}
                 ticks={5}
                 position={Position.Left}
-                tickFormat={(d) => numeral(d).format(percentFormat)}
+                tickFormat={(d) => numeral(d).format(numberFormat)}
+                domain={domain}
               />
 
               <Axis

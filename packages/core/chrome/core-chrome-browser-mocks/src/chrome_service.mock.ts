@@ -50,6 +50,7 @@ const createStartContractMock = () => {
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
     setBreadcrumbs: jest.fn(),
+    getIsSideNavCollapsed$: jest.fn(),
     getBreadcrumbsAppendExtension$: jest.fn(),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn(),
@@ -69,6 +70,8 @@ const createStartContractMock = () => {
     setChromeStyle: jest.fn(),
     project: {
       setHome: jest.fn(),
+      setProjectsUrl: jest.fn(),
+      setProjectName: jest.fn(),
       setNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
       setBreadcrumbs: jest.fn(),

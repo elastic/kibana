@@ -23,3 +23,15 @@ export const isValidRange = (from: string, to: string): boolean => {
   }
   return true;
 };
+
+export function isStringOrNonEmptyArray(
+  value: string | string[] | undefined
+): value is string | string[] {
+  if (typeof value === 'undefined') {
+    return false;
+  }
+  if (Array.isArray(value) && value.length === 0) {
+    return false;
+  }
+  return true;
+}

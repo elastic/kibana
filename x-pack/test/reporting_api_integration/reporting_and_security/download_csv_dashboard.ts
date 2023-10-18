@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   const generateAPI = {
     getCSVFromSearchSource: async (job: JobParamsDownloadCSV) => {
       return await supertestSvc
-        .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
+        .post(`/internal/reporting/generate/immediate/csv_searchsource`)
         .set('kbn-xsrf', 'xxx')
         .send(job);
     },

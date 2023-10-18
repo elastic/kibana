@@ -13,8 +13,8 @@ import type {
   DraggableStateSnapshot,
   DraggingStyle,
   NotDraggingStyle,
-} from 'react-beautiful-dnd';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+} from '@hello-pangea/dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -39,7 +39,7 @@ export const DragEffects = styled.div``;
 DragEffects.displayName = 'DragEffects';
 
 /**
- * Wraps the `react-beautiful-dnd` error boundary. See also:
+ * Wraps the `@hello-pangea/dnd` error boundary. See also:
  * https://github.com/atlassian/react-beautiful-dnd/blob/v12.0.0/docs/guides/setup-problem-detection-and-error-recovery.md
  *
  * NOTE: This extends from `PureComponent` because, at the time of this
@@ -355,13 +355,31 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       >
         {truncate ? (
           <TruncatableText data-test-subj="render-truncatable-content">
-            {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+            {render(dataProvider, null, {
+              isDragging: false,
+              isDropAnimating: false,
+              isClone: false,
+              dropAnimation: null,
+              draggingOver: null,
+              combineWith: null,
+              combineTargetFor: null,
+              mode: null,
+            })}
           </TruncatableText>
         ) : (
           <ProviderContentWrapper
             data-test-subj={`render-content-${dataProvider.queryMatch.field}`}
           >
-            {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+            {render(dataProvider, null, {
+              isDragging: false,
+              isDropAnimating: false,
+              isClone: false,
+              dropAnimation: null,
+              draggingOver: null,
+              combineWith: null,
+              combineTargetFor: null,
+              mode: null,
+            })}
           </ProviderContentWrapper>
         )}
       </div>

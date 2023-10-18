@@ -23,7 +23,7 @@ import { DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardScreenshotModeService } from '../screenshot_mode/types';
 import { DashboardInitializerContextService } from '../initializer_context/types';
 import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
-import { DashboardSessionStorageServiceType } from '../dashboard_session_storage/types';
+import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 
 export interface DashboardContentManagementRequiredServices {
@@ -31,10 +31,10 @@ export interface DashboardContentManagementRequiredServices {
   spaces: DashboardSpacesService;
   embeddable: DashboardEmbeddableService;
   notifications: DashboardNotificationsService;
+  dashboardBackup: DashboardBackupServiceType;
   screenshotMode: DashboardScreenshotModeService;
   initializerContext: DashboardInitializerContextService;
   savedObjectsTagging: DashboardSavedObjectsTaggingService;
-  dashboardSessionStorage: DashboardSessionStorageServiceType;
 }
 
 export interface DashboardContentManagementService {
@@ -43,6 +43,9 @@ export interface DashboardContentManagementService {
   loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
+  updateDashboardMeta: (
+    props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>
+  ) => Promise<void>;
 }
 
 /**
@@ -60,9 +63,12 @@ type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
 
 export interface LoadDashboardReturn {
   dashboardFound: boolean;
+  newDashboardCreated?: boolean;
   dashboardId?: string;
+  managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: DashboardContainerInput;
+  anyMigrationRun?: boolean;
 }
 
 /**
@@ -87,8 +93,12 @@ export interface SaveDashboardReturn {
  */
 export interface FindDashboardsService {
   search: (
-    props: Pick<SearchDashboardsArgs, 'hasReference' | 'hasNoReference' | 'search' | 'size'>
+    props: Pick<
+      SearchDashboardsArgs,
+      'hasReference' | 'hasNoReference' | 'search' | 'size' | 'options'
+    >
   ) => Promise<SearchDashboardsResponse>;
+  findById: (id: string) => Promise<FindDashboardsByIdResponse>;
   findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
   findByTitle: (title: string) => Promise<{ id: string } | undefined>;
 }

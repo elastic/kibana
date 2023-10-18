@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CasesMetricsResponse } from '../../../common/api';
+import type { CaseMetricsFeature, CasesMetricsResponse } from '../../../common/types/api';
 import { BaseHandler } from './base_handler';
 import type { AllCasesBaseHandlerCommonOptions } from './types';
 
 export abstract class AllCasesBaseHandler extends BaseHandler<CasesMetricsResponse> {
   protected readonly owner?: string | string[];
 
-  constructor(options: AllCasesBaseHandlerCommonOptions, features?: string[]) {
+  constructor(options: AllCasesBaseHandlerCommonOptions, features?: CaseMetricsFeature[]) {
     const { owner, ...restOptions } = options;
     super(restOptions, features);
 

@@ -8,19 +8,39 @@
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import {
+  getSearchResponseInterceptedWarnings,
+  type SearchResponseInterceptedWarning,
+} from '@kbn/search-response-warnings';
+import type { DiscoverServices } from '../../../build_services';
 
 export async function fetchAnchor(
   anchorId: string,
   dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
-  useNewFieldsApi: boolean = false
-): Promise<DataTableRecord> {
+  useNewFieldsApi: boolean = false,
+  services: DiscoverServices
+): Promise<{
+  anchorRow: DataTableRecord;
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+}> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
-  const { rawResponse } = await lastValueFrom(searchSource.fetch$());
+
+  const adapter = new RequestAdapter();
+  const { rawResponse } = await lastValueFrom(
+    searchSource.fetch$({
+      disableWarningToasts: true,
+      inspector: {
+        adapter,
+        title: 'anchor',
+      },
+    })
+  );
   const doc = rawResponse.hits?.hits?.[0] as EsHitRecord;
 
   if (!doc) {
@@ -30,7 +50,13 @@ export async function fetchAnchor(
       })
     );
   }
-  return buildDataTableRecord(doc, dataView, true);
+  return {
+    anchorRow: buildDataTableRecord(doc, dataView, true),
+    interceptedWarnings: getSearchResponseInterceptedWarnings({
+      services,
+      adapter,
+    }),
+  };
 }
 
 export function updateSearchSource(

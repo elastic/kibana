@@ -333,6 +333,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Lens visualization as persistable attachment', () => {
       const myDashboardName = `My-dashboard-${uuidv4()}`;
+
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
@@ -362,6 +363,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
+
+        await cases.api.deleteAllCases();
       });
 
       it('adds lens visualization to a new case from dashboard', async () => {
@@ -385,7 +388,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
 
-        const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
         await testSubjects.existOrFail('comment-persistableState-.lens');
@@ -412,7 +415,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
 
-        const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);
 
         await testSubjects.existOrFail('comment-persistableState-.lens');

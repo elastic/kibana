@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { EuiDragDropContext, EuiDraggable, EuiDroppable, euiDragDropReorder } from '@elastic/eui';
 
 import { ComponentTemplateListItem } from '../../../../../common';
@@ -14,11 +14,6 @@ import {
   Props as ComponentTemplatesListItemProps,
 } from './component_templates_list_item';
 
-interface DraggableLocation {
-  droppableId: string;
-  index: number;
-}
-
 interface Props {
   components: ComponentTemplateListItem[];
   onReorder: (components: ComponentTemplateListItem[]) => void;
@@ -26,12 +21,9 @@ interface Props {
 }
 
 export const ComponentTemplatesSelection = ({ components, onReorder, listItemProps }: Props) => {
-  const onDragEnd = ({
+  const onDragEnd: ComponentProps<typeof EuiDragDropContext>['onDragEnd'] = ({
     source,
     destination,
-  }: {
-    source?: DraggableLocation;
-    destination?: DraggableLocation;
   }) => {
     if (source && destination) {
       const items = euiDragDropReorder(components, source.index, destination.index);

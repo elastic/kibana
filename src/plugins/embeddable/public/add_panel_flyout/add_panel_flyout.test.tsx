@@ -34,7 +34,7 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
                 'testId',
                 'CONTACT_CARD_EMBEDDABLE',
                 'test name',
-                {} as unknown as SavedObjectCommon<unknown>
+                {} as unknown as SavedObjectCommon
               )
             }
           >

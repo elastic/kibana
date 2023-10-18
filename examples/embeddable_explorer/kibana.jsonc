@@ -14,8 +14,7 @@
       "embeddableExamples",
       "developerExamples",
       "dashboard",
-      "kibanaReact",
-      "savedObjects"
+      "kibanaReact"
     ]
   }
 }

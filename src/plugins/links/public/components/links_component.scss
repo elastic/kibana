@@ -1,0 +1,58 @@
+.linksComponent {
+
+  .linksPanelLink {
+    max-width: fit-content; // added this so that the error tooltip shows up **right beside** the link label
+
+    &.dashboardLinkError {
+      &.dashboardLinkError--noLabel .euiListGroupItem__button {
+        font-style: italic;
+      }
+
+      .dashboardLinkIcon {
+        margin-right: $euiSizeS;
+      }
+    }
+
+    &.linkCurrent {
+      border-radius: 0;
+      .euiListGroupItem__text {
+        cursor: default;
+        color: $euiColorPrimary;
+      }
+    }
+  }
+
+  .verticalLayoutWrapper {
+    gap: $euiSizeXS;
+    .linksPanelLink {
+      &.linkCurrent {
+        &::before {
+          content: '';
+          position: absolute;
+          width: .5 * $euiSizeXS;
+          height: 75%;
+          background-color: $euiColorPrimary;
+        }
+      }
+    }
+  }
+
+  .horizontalLayoutWrapper {
+    height: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    flex-direction: row;
+
+    .linksPanelLink {
+      &.linkCurrent {
+        padding: 0 $euiSizeS;
+
+        .euiListGroupItem__text {
+          box-shadow: $euiColorPrimary 0 (-.5 * $euiSizeXS) inset;
+          padding-inline: 0;
+        }
+      }
+    }
+  }
+}

@@ -6,7 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { getDataStreams } from './bundle/get_data_streams';
 import { getNonDataStreamIndices } from './bundle/get_non_data_stream_indices';
 import { getElasticsearchVersion } from './get_elasticsearch_version';
@@ -15,7 +16,7 @@ import { getExistingApmIndexTemplates } from './bundle/get_existing_index_templa
 import { getIndicesStates } from './bundle/get_indices_states';
 import { getApmEvents } from './bundle/get_apm_events';
 import { getApmIndexTemplates } from './helpers/get_apm_index_template_names';
-import { handle403Exception } from './helpers/handle_403_exception';
+import { handleExceptions } from './helpers/handle_exceptions';
 import { getDiagnosticsPrivileges } from './helpers/get_diagnostic_privileges';
 
 const DEFEAULT_START = Date.now() - 60 * 5 * 1000; // 5 minutes
@@ -29,7 +30,7 @@ export async function getDiagnosticsBundle({
   kuery,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
   start: number | undefined;
   end: number | undefined;
   kuery: string | undefined;
@@ -39,62 +40,54 @@ export async function getDiagnosticsBundle({
     apmIndices,
   });
 
-  const indexTemplatesByIndexPattern = await handle403Exception(
-    getIndexTemplatesByIndexPattern({
-      esClient,
-      apmIndices,
-    }),
-    []
-  );
+  const indexTemplatesByIndexPattern =
+    (await handleExceptions(
+      getIndexTemplatesByIndexPattern({
+        esClient,
+        apmIndices,
+      })
+    )) ?? [];
 
-  const existingIndexTemplates = await handle403Exception(
-    getExistingApmIndexTemplates({
-      esClient,
-    }),
-    []
-  );
+  const existingIndexTemplates =
+    (await handleExceptions(
+      getExistingApmIndexTemplates({
+        esClient,
+      })
+    )) ?? [];
 
-  const dataStreams = await handle403Exception(
-    getDataStreams({ esClient, apmIndices }),
-    []
-  );
-  const nonDataStreamIndices = await handle403Exception(
-    getNonDataStreamIndices({
-      esClient,
-      apmIndices,
-    }),
-    []
-  );
+  const dataStreams =
+    (await handleExceptions(getDataStreams({ esClient, apmIndices }))) ?? [];
+
+  const nonDataStreamIndices =
+    (await handleExceptions(
+      getNonDataStreamIndices({
+        esClient,
+        apmIndices,
+      })
+    )) ?? [];
 
   const { invalidIndices, validIndices, indices, ingestPipelines, fieldCaps } =
-    await handle403Exception(
+    (await handleExceptions(
       getIndicesStates({
         esClient,
         apmIndices,
-      }),
-      {
-        invalidIndices: [],
-        validIndices: [],
-        indices: [],
-        ingestPipelines: [],
-        fieldCaps: {},
-      }
-    );
+      })
+    )) ?? {};
 
-  const apmEvents = await handle403Exception(
-    getApmEvents({
-      esClient,
-      apmIndices,
-      start,
-      end,
-      kuery,
-    }),
-    []
-  );
-  const elasticsearchVersion = await handle403Exception(
-    getElasticsearchVersion(esClient),
-    'N/A'
-  );
+  const apmEvents =
+    (await handleExceptions(
+      getApmEvents({
+        esClient,
+        apmIndices,
+        start,
+        end,
+        kuery,
+      })
+    )) ?? [];
+
+  const elasticsearchVersion =
+    (await handleExceptions(getElasticsearchVersion(esClient))) ??
+    NOT_AVAILABLE_LABEL;
 
   return {
     created_at: new Date().toISOString(),

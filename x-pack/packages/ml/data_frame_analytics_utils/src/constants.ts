@@ -39,6 +39,7 @@ export const JOB_MAP_NODE_TYPES = {
   TRANSFORM: 'transform',
   INDEX: 'index',
   TRAINED_MODEL: 'trainedModel',
+  INGEST_PIPELINE: 'ingestPipeline',
 } as const;
 
 /**

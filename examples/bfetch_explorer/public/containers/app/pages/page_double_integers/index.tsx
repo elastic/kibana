@@ -11,6 +11,7 @@ import { EuiPanel, EuiText } from '@elastic/eui';
 import { DoubleIntegers } from '../../../../components/double_integers';
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
+import { Sidebar } from '../../sidebar';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
@@ -19,7 +20,7 @@ export const PageDoubleIntegers: React.FC<Props> = () => {
   const { explorer } = useDeps();
 
   return (
-    <Page title={'Double Integers'}>
+    <Page title={'Double Integers'} sidebar={<Sidebar />}>
       <EuiText>
         Below is a list of numbers in milliseconds. They are sent as a batch to the server. For each
         number server waits given number of milliseconds then doubles the number and streams it

@@ -12,9 +12,9 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ShareModeControl } from './share_mode_control';
 import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
-import { ShareModeControl } from './share_mode_control';
 
 interface Props {
   spaces: SpacesDataEntry[];

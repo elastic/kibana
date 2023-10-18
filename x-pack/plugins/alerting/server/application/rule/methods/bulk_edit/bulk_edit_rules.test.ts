@@ -10,7 +10,11 @@ import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
@@ -56,7 +60,12 @@ jest.mock('uuid', () => {
   return { v4: () => `${uuid++}` };
 });
 
+jest.mock('../get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
+
 const { isSnoozeActive } = jest.requireMock('../../../../lib/snooze/is_snooze_active');
+const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -65,6 +74,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -82,14 +92,18 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 const paramsModifier = jest.fn();
 
@@ -227,10 +241,12 @@ describe('bulkEdit()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     });
 
     (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
@@ -724,11 +740,17 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
-        getSummarizedAlerts: jest.fn().mockResolvedValue({}),
         validate: {
           params: { validate: (params) => params },
         },
+        alerts: {
+          context: 'test',
+          mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+          shouldWrite: true,
+        },
+        validLegacyConsumers: [],
       });
       const existingAction = {
         frequency: {
@@ -1435,40 +1457,6 @@ describe('bulkEdit()', () => {
       expect(response.errors[0].message).toEqual(
         'Error updating rule: could not add snooze - Rule cannot have more than 5 snooze schedules'
       );
-    });
-
-    test('should ignore siem rules when bulk editing snooze', async () => {
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            attributes: { ...existingDecryptedRule.attributes, consumer: 'siem' } as any,
-          },
-        ],
-      });
-
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
-
-      const snoozePayload = getSnoozeSchedule();
-
-      await rulesClient.bulkEdit({
-        filter: '',
-        operations: [
-          {
-            operation: 'set',
-            field: 'snoozeSchedule',
-            value: snoozePayload,
-          },
-        ],
-      });
-
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes as any)
-          .snoozeSchedule
-      ).toEqual([]);
     });
   });
 
@@ -2334,7 +2322,9 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
+        validLegacyConsumers: [],
       });
 
       const result = await rulesClient.bulkEdit({
@@ -2378,7 +2368,9 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
+        validLegacyConsumers: [],
       });
 
       const result = await rulesClient.bulkEdit({
@@ -2490,6 +2482,66 @@ describe('bulkEdit()', () => {
       expect(result.errors[0].message).toBe(
         `Error updating rule with ID "${existingDecryptedRule.id}": the interval 10m is longer than the action frequencies`
       );
+    });
+
+    test('should only validate schedule limit if schedule is being modified', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              revision: 0,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledTimes(0);
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '2m' },
+          },
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
     });
   });
 

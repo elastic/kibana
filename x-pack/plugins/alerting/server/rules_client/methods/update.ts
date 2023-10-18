@@ -17,7 +17,7 @@ import {
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { parseDuration } from '../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -33,6 +33,10 @@ import {
   createNewAPIKeySet,
   migrateLegacyActions,
 } from '../lib';
+import {
+  validateScheduleLimit,
+  ValidateScheduleLimitResult,
+} from '../../application/rule/methods/get_schedule_frequency';
 
 type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
@@ -86,6 +90,30 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     );
     // Still attempt to load the object using SOC
     alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+  }
+
+  const {
+    attributes: { enabled, schedule, name },
+  } = alertSavedObject;
+
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (enabled && schedule.interval !== data.schedule.interval) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      prevInterval: alertSavedObject.attributes.schedule?.interval,
+      updatedInterval: data.schedule.interval,
+    });
+  }
+
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'update',
+      })
+    );
   }
 
   try {

@@ -3,8 +3,11 @@
 ## Disable plugins
 enterpriseSearch.enabled: false
 xpack.apm.enabled: false
+xpack.infra.enabled: false
+xpack.observabilityLogExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.uptime.enabled: false
+xpack.legacy_uptime.enabled: false
 
 ## Enable the Security Solution Serverless plugin
 xpack.securitySolutionServerless.enabled: true
@@ -13,6 +16,14 @@ xpack.securitySolutionServerless.productTypes:
     { product_line: 'security', product_tier: 'complete' },
     { product_line: 'endpoint', product_tier: 'complete' },
   ]
+
+xpack.securitySolution.offeringSettings: {
+    sideNavEnabled: false, # Internal security side navigation disabled, the serverless global chrome navigation is used instead
+    ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+    ESQLEnabled: false, # ES|QL disabled, not supported by serverless Elasticsearch
+  }
+
+newsfeed.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
@@ -23,7 +34,27 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
 
-# Serverless security specific options
-xpack.securitySolution.enableExperimental:
-   - discoverInTimeline
+# Fleet specific configuration
+xpack.fleet.internal.registry.capabilities: ['security']
+xpack.fleet.internal.registry.spec.max: '3.0'
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
+xpack.fleet.internal.registry.spec.min: '1.0'
+xpack.fleet.internal.registry.excludePackages: [
+    # Oblt integrations
+    'apm',
+    'synthetics',
+    # Removed in 8.11 integrations
+    'cisco',
+    'microsoft',
+    'symantec',
+    'cyberark',
+  ]
+# fleet_server package installed to publish agent metrics
+xpack.fleet.packages:
+  - name: fleet_server
+    version: latest  
 
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: true
+xpack.ml.nlp.enabled: false

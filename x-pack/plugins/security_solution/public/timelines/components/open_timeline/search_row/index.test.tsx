@@ -77,7 +77,7 @@ describe('SearchRow', () => {
         </ThemeProvider>
       );
 
-      wrapper.find('[data-test-subj="only-favorites-toggle"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="only-favorites-toggle"]').first().simulate('click');
 
       expect(onToggleOnlyFavorites).toHaveBeenCalled();
     });

@@ -17,29 +17,33 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { AlertService, CasesService, CaseUserActionService } from '../../services';
+import type { UpdateAlertStatusRequest } from '../alerts/types';
+import type { CasesClient, CasesClientArgs } from '..';
+import type { OwnerEntity } from '../../authorization';
+import type { PatchCasesArgs } from '../../services/cases/types';
+import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
+
 import type { CasePatchRequest, CasesPatchRequest } from '../../../common/types/api';
-import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
-import { decodeWithExcessOrThrow } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  MAX_ASSIGNEES_PER_CASE,
+  MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
-
-import { arraysDifference, getCaseToUpdate } from '../utils';
-
-import type { AlertService, CasesService } from '../../services';
+import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   isCommentRequestTypeAlert,
 } from '../../common/utils';
-import type { UpdateAlertStatusRequest } from '../alerts/types';
-import type { CasesClientArgs } from '..';
-import type { OwnerEntity } from '../../authorization';
-import { Operations } from '../../authorization';
-import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
+import { arraysDifference, getCaseToUpdate } from '../utils';
+import {
+  dedupAssignees,
+  fillMissingCustomFields,
+  getClosedInfoForUpdate,
+  getDurationForUpdate,
+} from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -51,9 +55,12 @@ import type {
   User,
   CaseAssignees,
   AttachmentAttributes,
+  CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CasesPatchRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { validateCustomFields } from './validators';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -63,8 +70,58 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
 
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
+    throw Boom.badRequest(`Updating the owner of a case is not allowed ids: [${ids.join(', ')}]`);
   }
+}
+
+/**
+ * Throws an error if any of the requests attempt to create a number of user actions that would put
+ * it's case over the limit.
+ */
+async function throwIfMaxUserActionsReached({
+  userActionsDict,
+  userActionService,
+}: {
+  userActionsDict: UserActionsDict;
+  userActionService: CaseUserActionService;
+}) {
+  if (userActionsDict == null) {
+    return;
+  }
+
+  const currentTotals = await userActionService.getMultipleCasesUserActionsTotal({
+    caseIds: Object.keys(userActionsDict),
+  });
+
+  Object.keys(currentTotals).forEach((caseId) => {
+    const totalToAdd = userActionsDict?.[caseId]?.length ?? 0;
+
+    if (currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
+      throw Boom.badRequest(
+        `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+      );
+    }
+  });
+}
+
+async function validateCustomFieldsInRequest({
+  casesToUpdate,
+  customFieldsConfigurationMap,
+}: {
+  casesToUpdate: UpdateRequestWithOriginalCase[];
+  customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+}) {
+  casesToUpdate.forEach(({ updateReq, originalCase }) => {
+    if (updateReq.customFields) {
+      const owner = originalCase.attributes.owner;
+      const customFieldsConfiguration = customFieldsConfigurationMap.get(owner);
+
+      validateCustomFields({
+        requestCustomFields: updateReq.customFields,
+        customFieldsConfiguration,
+      });
+    }
+  });
 }
 
 /**
@@ -103,27 +160,6 @@ function notifyPlatinumUsage(
 
   if (requestsUpdatingAssignees.length > 0) {
     licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
-  }
-}
-
-/**
- * Throws an error if any of the requests attempt to add more than
- * MAX_ASSIGNEES_PER_CASE to a case
- */
-function throwIfTotalAssigneesAreInvalid(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsUpdatingAssignees = requests.filter(
-    ({ updateReq }) => updateReq.assignees !== undefined
-  );
-
-  if (
-    requestsUpdatingAssignees.some(({ updateReq }) => areTotalAssigneesInvalid(updateReq.assignees))
-  ) {
-    const ids = requestsUpdatingAssignees.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case, ids: [${ids.join(
-        ', '
-      )}]`
-    );
   }
 }
 
@@ -263,7 +299,7 @@ function partitionPatchRequest(
   };
 }
 
-interface UpdateRequestWithOriginalCase {
+export interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
 }
@@ -275,7 +311,8 @@ interface UpdateRequestWithOriginalCase {
  */
 export const update = async (
   cases: CasesPatchRequest,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
 ): Promise<Cases> => {
   const {
     services: {
@@ -292,7 +329,6 @@ export const update = async (
 
   try {
     const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
-
     const myCases = await caseService.getCases({
       caseIds: query.cases.map((q) => q.id),
     });
@@ -333,6 +369,11 @@ export const update = async (
       );
     }
 
+    const configurations = await casesClient.configure.get({});
+    const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
+      configurations.map((conf) => [conf.owner, conf.customFields])
+    );
+
     const casesToUpdate: UpdateRequestWithOriginalCase[] = query.cases.reduce(
       (acc: UpdateRequestWithOriginalCase[], updateCase) => {
         const originalCase = casesMap.get(updateCase.id);
@@ -362,11 +403,23 @@ export const update = async (
 
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
-    throwIfTotalAssigneesAreInvalid(casesToUpdate);
 
+    await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
+
+    const patchCasesPayload = createPatchCasesPayload({
+      user,
+      casesToUpdate,
+      customFieldsConfigurationMap,
+    });
+    const userActionsDict = userActionService.creator.buildUserActions({
+      updatedCases: patchCasesPayload,
+      user,
+    });
+
+    await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
     notifyPlatinumUsage(licensingService, casesToUpdate);
 
-    const updatedCases = await patchCases({ caseService, user, casesToUpdate });
+    const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status
     // attached to the case to the new status.
@@ -413,10 +466,15 @@ export const update = async (
       return flattenCases;
     }, [] as Case[]);
 
+    const builtUserActions =
+      userActionsDict != null
+        ? Object.keys(userActionsDict).reduce<UserActionEvent[]>((acc, key) => {
+            return [...acc, ...userActionsDict[key]];
+          }, [])
+        : [];
+
     await userActionService.creator.bulkCreateUpdateCase({
-      originalCases: myCases.saved_objects,
-      updatedCases: updatedCases.saved_objects,
-      user,
+      builtUserActions,
     });
 
     const casesAndAssigneesToNotifyForAssignment = getCasesAndAssigneesToNotifyForAssignment(
@@ -442,37 +500,83 @@ export const update = async (
   }
 };
 
-const patchCases = async ({
-  caseService,
+const normalizeCaseAttributes = (
+  updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>,
+  customFieldsConfiguration?: CustomFieldsConfiguration
+) => {
+  let trimmedAttributes = { ...updateCaseAttributes };
+
+  if (updateCaseAttributes.title) {
+    trimmedAttributes = { ...trimmedAttributes, title: updateCaseAttributes.title.trim() };
+  }
+
+  if (updateCaseAttributes.description) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      description: updateCaseAttributes.description.trim(),
+    };
+  }
+
+  if (updateCaseAttributes.category) {
+    trimmedAttributes = { ...trimmedAttributes, category: updateCaseAttributes.category.trim() };
+  }
+
+  if (updateCaseAttributes.tags) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      tags: updateCaseAttributes.tags.map((tag: string) => tag.trim()),
+    };
+  }
+
+  if (updateCaseAttributes.customFields) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      customFields: fillMissingCustomFields({
+        customFields: updateCaseAttributes.customFields,
+        customFieldsConfiguration,
+      }),
+    };
+  }
+
+  return trimmedAttributes;
+};
+
+const createPatchCasesPayload = ({
   casesToUpdate,
   user,
+  customFieldsConfigurationMap,
 }: {
-  caseService: CasesService;
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
-}) => {
+  customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+}): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
-  const updatedCases = await caseService.patchCases({
+  return {
     cases: casesToUpdate.map(({ updateReq, originalCase }) => {
       // intentionally removing owner from the case so that we don't accidentally allow it to be updated
       const { id: caseId, version, owner, assignees, ...updateCaseAttributes } = updateReq;
 
       const dedupedAssignees = dedupAssignees(assignees);
 
+      const trimmedCaseAttributes = normalizeCaseAttributes(
+        updateCaseAttributes,
+        customFieldsConfigurationMap.get(originalCase.attributes.owner)
+      );
+
       return {
         caseId,
         originalCase,
         updatedAttributes: {
-          ...updateCaseAttributes,
+          ...trimmedCaseAttributes,
           ...(dedupedAssignees && { assignees: dedupedAssignees }),
           ...getClosedInfoForUpdate({
             user,
             closedDate: updatedDt,
-            status: updateCaseAttributes.status,
+            status: trimmedCaseAttributes.status,
           }),
           ...getDurationForUpdate({
-            status: updateCaseAttributes.status,
+            status: trimmedCaseAttributes.status,
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
           }),
@@ -483,9 +587,17 @@ const patchCases = async ({
       };
     }),
     refresh: false,
-  });
+  };
+};
 
-  return updatedCases;
+const patchCases = async ({
+  caseService,
+  patchCasesPayload,
+}: {
+  caseService: CasesService;
+  patchCasesPayload: PatchCasesArgs;
+}) => {
+  return caseService.patchCases(patchCasesPayload);
 };
 
 const getCasesAndAssigneesToNotifyForAssignment = (

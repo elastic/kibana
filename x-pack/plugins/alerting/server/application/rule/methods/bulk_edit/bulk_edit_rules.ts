@@ -8,7 +8,6 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
   SavedObjectsBulkUpdateObject,
@@ -25,7 +24,7 @@ import {
   convertRuleIdsToKueryNode,
 } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { parseDuration } from '../../../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
@@ -77,6 +76,11 @@ import {
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
+import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
+
+const isValidInterval = (interval: string | undefined): interval is string => {
+  return interval !== undefined;
+};
 
 export const bulkEditFieldsToExcludeFromRevisionUpdates = new Set(['snoozeSchedule', 'apiKey']);
 
@@ -286,8 +290,16 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
+  const prevInterval: string[] = [];
 
   for await (const response of rulesFinder.find()) {
+    const intervals = response.saved_objects
+      .filter((rule) => rule.attributes.enabled)
+      .map((rule) => rule.attributes.schedule?.interval)
+      .filter(isValidInterval);
+
+    prevInterval.concat(intervals);
+
     await pMap(
       response.saved_objects,
       async (rule: SavedObjectsFindResult<RuleAttributes>) =>
@@ -308,9 +320,51 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   }
   await rulesFinder.close();
 
+  const updatedInterval = rules
+    .filter((rule) => rule.attributes.enabled)
+    .map((rule) => rule.attributes.schedule?.interval)
+    .filter(isValidInterval);
+
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (operations.some((operation) => operation.field === 'schedule')) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      prevInterval,
+      updatedInterval,
+    });
+  }
+
+  if (validationPayload) {
+    return {
+      apiKeysToInvalidate: Array.from(apiKeysMap.values())
+        .filter((value) => value.newApiKey)
+        .map((value) => value.newApiKey as string),
+      resultSavedObjects: [],
+      rules: [],
+      errors: rules.map((rule) => ({
+        message: getRuleCircuitBreakerErrorMessage({
+          name: rule.attributes.name || 'n/a',
+          interval: validationPayload!.interval,
+          intervalAvailable: validationPayload!.intervalAvailable,
+          action: 'bulkEdit',
+          rules: updatedInterval.length,
+        }),
+        rule: {
+          id: rule.id,
+          name: rule.attributes.name || 'n/a',
+        },
+      })),
+      skipped: [],
+    };
+  }
+
   const { result, apiKeysToInvalidate } =
     rules.length > 0
-      ? await saveBulkUpdatedRules(context, rules, apiKeysMap)
+      ? await saveBulkUpdatedRules({
+          context,
+          rules,
+          apiKeysMap,
+        })
       : {
           result: { saved_objects: [] },
           apiKeysToInvalidate: [],
@@ -615,15 +669,6 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
         break;
       }
       case 'snoozeSchedule': {
-        // Silently skip adding snooze or snooze schedules on security
-        // rules until we implement snoozing of their rules
-        if (updatedRule.consumer === AlertConsumers.SIEM) {
-          // While the rule is technically not updated, we are still marking
-          // the rule as updated in case of snoozing, until support
-          // for snoozing is added.
-          isAttributesUpdateSkipped = false;
-          break;
-        }
         if (operation.operation === 'set') {
           const snoozeAttributes = getBulkSnooze<Params>(
             updatedRule,
@@ -821,11 +866,15 @@ function updateAttributes(
   };
 }
 
-async function saveBulkUpdatedRules(
-  context: RulesClientContext,
-  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
-  apiKeysMap: ApiKeysMap
-) {
+async function saveBulkUpdatedRules({
+  context,
+  rules,
+  apiKeysMap,
+}: {
+  context: RulesClientContext;
+  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
+  apiKeysMap: ApiKeysMap;
+}) {
   const apiKeysToInvalidate: string[] = [];
   let result;
   try {

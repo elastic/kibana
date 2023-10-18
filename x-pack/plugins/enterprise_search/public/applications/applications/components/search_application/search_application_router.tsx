@@ -46,7 +46,7 @@ export const SearchApplicationRouter: React.FC = () => {
         from={SEARCH_APPLICATION_PATH}
         to={generateEncodedPath(SEARCH_APPLICATION_TAB_PATH, {
           searchApplicationName,
-          tabId: SearchApplicationViewTabs.PREVIEW,
+          tabId: SearchApplicationViewTabs.DOCS_EXPLORER,
         })}
         exact
       />

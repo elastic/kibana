@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-
-import { GetPrebuiltRulesAndTimelinesStatusResponse } from './get_prebuilt_rules_and_timelines_status_route';
+import { stringifyZodError } from '@kbn/securitysolution-es-utils';
+import { expectParseError, expectParseSuccess } from '../../../../test/zod_helpers';
+import { GetPrebuiltRulesAndTimelinesStatusResponse } from './get_prebuilt_rules_and_timelines_status_route.gen';
 
 describe('Get prebuilt rules and timelines status response schema', () => {
   test('it should validate an empty prepackaged response with defaults', () => {
@@ -22,12 +20,10 @@ describe('Get prebuilt rules and timelines status response schema', () => {
       timelines_not_installed: 0,
       timelines_not_updated: 0,
     };
-    const decoded = GetPrebuiltRulesAndTimelinesStatusResponse.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const result = GetPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('it should not validate an extra invalid field added', () => {
@@ -41,12 +37,12 @@ describe('Get prebuilt rules and timelines status response schema', () => {
       timelines_not_installed: 0,
       timelines_not_updated: 0,
     };
-    const decoded = GetPrebuiltRulesAndTimelinesStatusResponse.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const result = GetPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_field"']);
-    expect(message.schema).toEqual({});
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "Unrecognized key(s) in object: 'invalid_field'"
+    );
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_installed" number', () => {
@@ -59,14 +55,12 @@ describe('Get prebuilt rules and timelines status response schema', () => {
       timelines_not_installed: 0,
       timelines_not_updated: 0,
     };
-    const decoded = GetPrebuiltRulesAndTimelinesStatusResponse.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const result = GetPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "rules_installed"',
-    ]);
-    expect(message.schema).toEqual({});
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'rules_installed: Number must be greater than or equal to 0'
+    );
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_not_installed"', () => {
@@ -79,14 +73,12 @@ describe('Get prebuilt rules and timelines status response schema', () => {
       timelines_not_installed: 0,
       timelines_not_updated: 0,
     };
-    const decoded = GetPrebuiltRulesAndTimelinesStatusResponse.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const result = GetPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "rules_not_installed"',
-    ]);
-    expect(message.schema).toEqual({});
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'rules_not_installed: Number must be greater than or equal to 0'
+    );
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_not_updated"', () => {
@@ -99,14 +91,12 @@ describe('Get prebuilt rules and timelines status response schema', () => {
       timelines_not_installed: 0,
       timelines_not_updated: 0,
     };
-    const decoded = GetPrebuiltRulesAndTimelinesStatusResponse.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const result = GetPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "rules_not_updated"',
-    ]);
-    expect(message.schema).toEqual({});
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'rules_not_updated: Number must be greater than or equal to 0'
+    );
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_custom_installed"', () => {
@@ -119,14 +109,12 @@ describe('Get prebuilt rules and timelines status response schema', () => {
       timelines_not_installed: 0,
       timelines_not_updated: 0,
     };
-    const decoded = GetPrebuiltRulesAndTimelinesStatusResponse.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const result = GetPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "rules_custom_installed"',
-    ]);
-    expect(message.schema).toEqual({});
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'rules_custom_installed: Number must be greater than or equal to 0'
+    );
   });
 
   test('it should NOT validate an empty prepackaged response if "rules_installed" is not there', () => {
@@ -141,13 +129,9 @@ describe('Get prebuilt rules and timelines status response schema', () => {
     };
     // @ts-expect-error
     delete payload.rules_installed;
-    const decoded = GetPrebuiltRulesAndTimelinesStatusResponse.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const result = GetPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "rules_installed"',
-    ]);
-    expect(message.schema).toEqual({});
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('rules_installed: Required');
   });
 });

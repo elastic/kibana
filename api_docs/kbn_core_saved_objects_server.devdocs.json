@@ -5788,44 +5788,8 @@
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "fleet",
@@ -5978,6 +5942,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
               }
             ]
           },
@@ -6101,31 +6069,31 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
@@ -6727,202 +6695,6 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
-        "id": "def-common.SavedObjectModelBidirectionalTransformation",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectModelBidirectionalTransformation",
-        "description": [
-          "\nA bidirectional transformation.\n\nBidirectional transformations define migration functions that can be used to\ntransform a document from the lower version to the higher one (`up`), and\nthe other way around, from the higher version to the lower one (`down`)\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectModelBidirectionalTransformation",
-            "text": "SavedObjectModelBidirectionalTransformation"
-          },
-          "<PreviousAttributes, NewAttributes>"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectModelBidirectionalTransformation.up",
-            "type": "Function",
-            "tags": [],
-            "label": "up",
-            "description": [
-              "\nThe upward (previous=>next) transformation."
-            ],
-            "signature": [
-              "(document: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationDoc",
-                "text": "SavedObjectModelTransformationDoc"
-              },
-              "<PreviousAttributes>, context: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationContext",
-                "text": "SavedObjectModelTransformationContext"
-              },
-              ") => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationResult",
-                "text": "SavedObjectModelTransformationResult"
-              },
-              "<NewAttributes>"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectModelBidirectionalTransformation.up.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "document",
-                "description": [],
-                "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
-                  "[] | undefined; }"
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectModelBidirectionalTransformation.up.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectModelTransformationContext",
-                    "text": "SavedObjectModelTransformationContext"
-                  }
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectModelBidirectionalTransformation.down",
-            "type": "Function",
-            "tags": [],
-            "label": "down",
-            "description": [
-              "\nThe downward (next=>previous) transformation."
-            ],
-            "signature": [
-              "(document: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationDoc",
-                "text": "SavedObjectModelTransformationDoc"
-              },
-              "<NewAttributes>, context: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationContext",
-                "text": "SavedObjectModelTransformationContext"
-              },
-              ") => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationResult",
-                "text": "SavedObjectModelTransformationResult"
-              },
-              "<PreviousAttributes>"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectModelBidirectionalTransformation.down.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "document",
-                "description": [],
-                "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
-                  "[] | undefined; }"
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectModelBidirectionalTransformation.down.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectModelTransformationContext",
-                    "text": "SavedObjectModelTransformationContext"
-                  }
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-common.SavedObjectModelDataBackfillResult",
         "type": "Interface",
         "tags": [],
@@ -7004,6 +6776,22 @@
             "label": "modelVersion",
             "description": [
               "\nThe model version this migration is registered for"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectModelTransformationContext.namespaceType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [
+              "\nThe namespace type of the savedObject type this migration is registered for"
+            ],
+            "signature": [
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
             "deprecated": false,
@@ -8639,7 +8427,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsRawDocSource",
-        "description": [],
+        "description": [
+          "\nSaved object document as stored in `_source` of doc in ES index\nSimilar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9611,52 +9401,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsServiceSetup.getAllIndices",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "getAllIndices",
-            "description": [
-              "\nReturns all (aliases to) kibana system indices used for saved object storage.\n"
-            ],
-            "signature": [
-              "() => string[]"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core-saved-objects-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-plugins-server-internal",
-                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core-plugins-server-internal",
-                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/plugins/saved_objects_tagging/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts"
-              }
-            ],
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10217,7 +9961,7 @@
             "tags": [],
             "label": "getAllIndices",
             "description": [
-              "\nReturns all (aliases to) kibana system indices used for saved object storage."
+              "\nReturns all (aliases to) kibana system indices used for saved object storage.\n"
             ],
             "signature": [
               "() => string[]"
@@ -10549,7 +10293,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/cases.ts"
+                "path": "x-pack/plugins/cases/server/saved_object_types/cases/cases.ts"
               },
               {
                 "plugin": "cases",
@@ -10572,10 +10316,6 @@
                 "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/server/saved_objects/search.ts"
               },
@@ -10590,6 +10330,10 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "lists",
@@ -10634,6 +10378,10 @@
               {
                 "plugin": "@kbn/core-test-helpers-so-type-serializer",
                 "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",

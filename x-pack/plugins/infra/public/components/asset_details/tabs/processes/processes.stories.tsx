@@ -7,23 +7,25 @@
 
 import React from 'react';
 import type { Meta, Story } from '@storybook/react/types-6-0';
-import { DecorateWithKibanaContext } from '../../__stories__/decorator';
-import { Processes, type ProcessesProps } from './processes';
+import {
+  DecorateWithKibanaContext,
+  DecorateWithAssetDetailsStateContext,
+} from '../../__stories__/decorator';
+import { Processes } from './processes';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 
-const stories: Meta<ProcessesProps> = {
+const stories: Meta = {
   title: 'infra/Asset Details View/Components/Processes',
-  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
+  decorators: [
+    decorateWithGlobalStorybookThemeProviders,
+    DecorateWithKibanaContext,
+    DecorateWithAssetDetailsStateContext,
+  ],
   component: Processes,
-  args: {
-    nodeName: 'host1',
-    nodeType: 'host',
-    currentTimestamp: 1683630468,
-  },
 };
 
-const Template: Story<ProcessesProps> = (args) => {
-  return <Processes {...args} />;
+const Template: Story = () => {
+  return <Processes />;
 };
 
 export const Default = Template.bind({});

@@ -6,5 +6,6 @@
  */
 
 export async function getLatestVersion(): Promise<string> {
-  return '8.9.0-SNAPSHOT';
+  // temporary solution until newer agents work fine with Docker
+  return '8.10.4';
 }

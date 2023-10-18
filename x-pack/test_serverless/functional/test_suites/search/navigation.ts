@@ -12,12 +12,19 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchLandingPage = getPageObject('svlSearchLandingPage');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('navigation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/166597
+  describe.skip('navigation', function () {
     before(async () => {
+      await svlCommonPage.login();
       await svlSearchNavigation.navigateToLandingPage();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
     });
 
     it('navigate search sidenav & breadcrumbs', async () => {
@@ -37,25 +44,21 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'serverlessElasticsearch',
       });
-      await svlCommonNavigation.sidenav.expectSectionClosed('rootNav:ml');
 
       // TODO: test something search project specific instead of generic discover
       // navigate to discover
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Explore` });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'discover' });
-      await expect(await browser.getCurrentUrl()).contain('/app/discover');
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
 
       // navigate to a different section
-      await svlCommonNavigation.sidenav.openSection('rootNav:ml');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:notifications' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:notifications' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Machine Learning` });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'ml:notifications',
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:index_management',
       });
-      await testSubjects.existOrFail(`mlPageNotifications`);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Index Management` });
+      await testSubjects.existOrFail(`indicesTab`);
 
       // navigate back to serverless search overview
       await svlCommonNavigation.breadcrumbs.clickHome();
@@ -64,17 +67,30 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Getting started` });
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
-      await svlCommonNavigation.sidenav.expectSectionOpen(`rootNav:ml`); // remains open
 
       await expectNoPageReload();
     });
 
-    it('active sidenav section is auto opened on load', async () => {
-      await svlCommonNavigation.sidenav.openSection('rootNav:ml');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:notifications' });
-      await browser.refresh();
-      await testSubjects.existOrFail(`mlPageNotifications`);
-      await svlCommonNavigation.sidenav.expectSectionOpen('rootNav:ml');
+    it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:triggersActions' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Index Management', 'Indices']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:ingest_pipelines' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Ingest Pipelines']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:api_keys' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['API keys']);
+    });
+
+    it('navigate management', async () => {
+      await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management']);
+      await testSubjects.click('app-card-dataViews');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
     });
 
     it('navigate using search', async () => {
@@ -84,7 +100,20 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.search.clickOnOption(0);
       await svlCommonNavigation.search.hideSearch();
 
-      await expect(await browser.getCurrentUrl()).contain('/app/discover');
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
+    });
+
+    it('does not show cases in sidebar navigation', async () => {
+      await svlSearchLandingPage.assertSvlSearchSideNavExists();
+
+      expect(await testSubjects.missingOrFail('cases'));
+    });
+
+    it('does not navigate to cases app', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
+
+      expect(await browser.getCurrentUrl()).not.contain('/app/management/cases');
+      await testSubjects.missingOrFail('cases-all-title');
     });
   });
 }

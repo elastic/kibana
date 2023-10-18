@@ -22,25 +22,10 @@ import numeral from '@elastic/numeral';
 import { ReactNode } from 'react';
 import React from 'react';
 
-import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { isEmpty } from 'lodash';
 import { GetInspectQuery } from '../../../../../../types';
 import * as i18n from './translations';
-
-const DescriptionListStyled = euiStyled(EuiDescriptionList)`
-  @media only screen and (min-width: ${({ theme }: { theme: EuiTheme }) =>
-    theme.eui.euiBreakpoints.s}) {
-    .euiDescriptionList__title {
-      width: 30% !important;
-    }
-
-    .euiDescriptionList__description {
-      width: 70% !important;
-    }
-  }
-`;
-
-DescriptionListStyled.displayName = 'DescriptionListStyled';
 
 export interface ModalInspectProps {
   closeModal: () => void;
@@ -154,7 +139,11 @@ const ModalInspectQueryComponent = ({ closeModal, getInspectQuery, title }: Moda
       content: (
         <>
           <EuiSpacer />
-          <DescriptionListStyled listItems={statistics} type="column" />
+          <EuiDescriptionList
+            listItems={statistics}
+            type="responsiveColumn"
+            columnWidths={[3, 7]}
+          />
         </>
       ),
     },

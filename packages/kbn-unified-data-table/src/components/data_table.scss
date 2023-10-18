@@ -1,0 +1,163 @@
+.unifiedDataTable {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.unifiedDataTable__cellValue {
+  font-family: $euiCodeFontFamily;
+}
+
+.unifiedDataTable__cellPopover {
+  // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
+  .lines-content.monaco-editor-background {
+    overflow: unset !important;
+    contain: unset !important;
+  }
+}
+
+.unifiedDataTable__cellPopoverValue {
+  font-family: $euiCodeFontFamily;
+  font-size: $euiFontSizeS;
+}
+
+.euiDataGridRowCell__definedHeight {
+  white-space: pre-wrap;
+}
+
+.unifiedDataTable__inner {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  height: 100%;
+
+  .euiDataGrid__content {
+    background: transparent;
+  }
+
+  .euiDataGrid__controls {
+    border-top: $euiBorderThin;
+  }
+
+  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+    border-bottom: $euiBorderThin;
+  }
+
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
+    background-color: tintOrShade($euiColorLightShade, 50%, 0);
+  }
+}
+
+.unifiedDataTable__table {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+.unifiedDataTable__flyoutHeader {
+  white-space: nowrap;
+}
+
+.unifiedDataTable__flyoutDocumentNavigation {
+  justify-content: flex-end;
+}
+
+// We only truncate if the cell is not a control column.
+.euiDataGridHeader {
+
+  .euiDataGridHeaderCell__content {
+    @include euiTextTruncate;
+    overflow: hidden;
+    white-space: pre-wrap;
+    flex-grow: 1;
+  }
+
+  .euiDataGridHeaderCell__popover {
+    flex-grow: 0;
+    flex-basis: auto;
+    width: auto;
+    padding-left: $euiSizeXS;
+  }
+}
+
+.euiDataGridRowCell--numeric {
+  text-align: right;
+}
+
+.euiDataGrid__loading,
+.euiDataGrid__noResults {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 0 100%;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+}
+
+.unifiedDataTableFormatSource {
+  @include euiTextTruncate;
+}
+
+.unifiedDataTable__rowControl {
+  // fine-tuning the vertical alignment with the text for any row height setting
+  margin-top: -3px;
+  .euiDataGridRowCell__truncate & { // "Single line" row height setting
+    margin-top: 0;
+  }
+}
+
+.unifiedDataTable__descriptionList {
+  // force the content truncation when "Single line" row height setting is active
+  .euiDataGridRowCell__truncate & {
+    -webkit-line-clamp: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+.unifiedDataTable__descriptionListTitle {
+  margin-inline: 0 0;
+  padding-inline: 0;
+  background: transparent;
+  font-weight: $euiFontWeightBold;
+}
+
+.unifiedDataTable__descriptionListDescription {
+  margin-inline: $euiSizeS $euiSizeS;
+  padding-inline: 0;
+  word-break: break-all;
+  white-space: normal;
+
+  // Special handling for images coming from the image field formatter
+  img {
+    // Align the images vertically centered with the text
+    vertical-align: middle;
+    // Set the maximum height to the line-height. The used function is the same
+    // function used to calculate the line-height for the EuiDescriptionList Description.
+    // !important is required to overwrite the max-height on the element from the field formatter
+    max-height: lineHeightFromBaseline(2) !important;
+    // An arbitrary amount of width we don't want to go over, to not have very wide images.
+    // For most width-height-ratios that will never be hit, because we'd usually limit
+    // it by the way smaller height. But images with very large width and very small height
+    // might be limited by that.
+    max-width: ($euiSizeXXL * 12.5) !important;
+  }
+}
+
+@include euiBreakpoint('xs', 's', 'm') {
+  // EUI issue to hide 'of' text https://github.com/elastic/eui/issues/4654
+  .unifiedDataTable__flyoutDocumentNavigation .euiPagination__compressedText {
+    display: none;
+  }
+}

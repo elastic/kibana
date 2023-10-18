@@ -99,6 +99,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       relative_file_name_modify_time: true,
     },
     code_signature: {
+      exists: true,
       status: true,
       subject_name: true,
       trusted: true,
@@ -147,6 +148,8 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     args: true,
     args_count: true,
     code_signature: {
+      exists: true,
+      status: true,
       subject_name: true,
       trusted: true,
     },
@@ -159,11 +162,16 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     Ext: {
       api: {
         name: true,
+        parameters: {
+          desired_access: true,
+          desired_access_numeric: true,
+        },
       },
       effective_parent: {
         executable: true,
         name: true,
       },
+      relative_file_creation_time: true,
       token: {
         integrity_level_name: true,
       },
@@ -174,6 +182,12 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     parent: {
       args: true,
       command_line: true,
+      code_signature: {
+        subject_name: true,
+        status: true,
+        exists: true,
+        trusted: true,
+      },
       entity_id: true,
       executable: true,
       Ext: {
@@ -205,6 +219,52 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     name: true,
   },
   source: true,
+  threat: {
+    enrichments: {
+      indicator: {
+        confidence: true,
+        description: true,
+        email: {
+          address: true,
+        },
+        first_seen: true,
+        ip: true,
+        last_seen: true,
+        marking: {
+          tlp: true,
+          tlp_version: true,
+        },
+        modified_at: true,
+        name: true,
+        port: true,
+        provider: true,
+        reference: true,
+        scanner_stats: true,
+        sightings: true,
+        type: true,
+        matched: {
+          atomic: true,
+          field: true,
+          id: true,
+          index: true,
+          occurred: true,
+          type: true,
+        },
+      },
+    },
+    feed: {
+      description: true,
+      name: true,
+      reference: true,
+    },
+    framework: true,
+    group: {
+      alias: true,
+      id: true,
+      name: true,
+      reference: true,
+    },
+  },
   tls: {
     server: {
       hash: true,

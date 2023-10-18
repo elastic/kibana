@@ -22,6 +22,7 @@ import type {
 } from '../../../common/search_strategy';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
+import { parseRequest } from './parse_request';
 
 /**
  * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts
@@ -51,9 +52,12 @@ export const requestEndpointFieldsSearch = async (
   beatFields: BeatFields,
   indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
+  const parsedRequest = parseRequest(request);
+
   if (
-    request.indices.length > 1 ||
-    (request.indices[0] !== eventsIndexPattern && request.indices[0] !== METADATA_UNITED_INDEX)
+    parsedRequest.indices.length > 1 ||
+    (parsedRequest.indices[0] !== eventsIndexPattern &&
+      parsedRequest.indices[0] !== METADATA_UNITED_INDEX)
   ) {
     throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
   }
@@ -63,11 +67,11 @@ export const requestEndpointFieldsSearch = async (
   );
 
   if (
-    (!canWriteEventFilters && request.indices[0] === eventsIndexPattern) ||
-    (!canReadEndpointList && request.indices[0] === METADATA_UNITED_INDEX)
+    (!canWriteEventFilters && parsedRequest.indices[0] === eventsIndexPattern) ||
+    (!canReadEndpointList && parsedRequest.indices[0] === METADATA_UNITED_INDEX)
   ) {
     throw new EndpointAuthorizationError();
   }
 
-  return requestIndexFieldSearch(request, deps, beatFields, indexPatterns, true);
+  return requestIndexFieldSearch(parsedRequest, deps, beatFields, indexPatterns, true);
 };

@@ -46,7 +46,12 @@ export const ElasticEuiLibServices = require('@elastic/eui/optimize/es/services'
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/optimize/es/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
 export const KbnDatemath = require('@kbn/datemath');
-export const ReactBeautifulDnD = require('react-beautiful-dnd');
+export const HelloPangeaDnd = require('@hello-pangea/dnd/dist/dnd');
+export const ReduxjsToolkit = require('@reduxjs/toolkit');
+export const ReactRedux = require('react-redux');
+export const Redux = require('redux');
+export const Immer = require('immer');
+export const Reselect = require('reselect');
 
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');

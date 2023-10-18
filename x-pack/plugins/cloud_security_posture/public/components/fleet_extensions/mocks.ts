@@ -18,6 +18,8 @@ import {
 import type { PostureInput } from '../../../common/types';
 
 export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
+export const getMockPolicyGCP = () => getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp');
+export const getMockPolicyAzure = () => getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure');
 export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
 export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
 export const getMockPolicyVulnMgmtAWS = () =>
@@ -79,6 +81,50 @@ export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   } as PackageInfo;
 };
 
+export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
+  return {
+    version: packageVersion,
+    name: 'cspm',
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: 'cspm',
+        inputs: [
+          {
+            type: CLOUDBEAT_GCP,
+            title: 'GCP',
+            description: '',
+            vars: [{}],
+          },
+        ],
+      },
+    ],
+  } as PackageInfo;
+};
+
+export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
+  return {
+    version: packageVersion,
+    name: 'cspm',
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: 'cspm',
+        inputs: [
+          {
+            type: CLOUDBEAT_AZURE,
+            title: 'Azure',
+            description: '',
+            vars: [{}],
+          },
+        ],
+      },
+    ],
+  } as PackageInfo;
+};
+
 const getPolicyMock = (
   type: PostureInput,
   posture: string,
@@ -104,6 +150,20 @@ const getPolicyMock = (
     credential_profile_name: { type: 'text' },
     role_arn: { type: 'text' },
     'aws.credentials.type': { value: 'assume_role', type: 'text' },
+  };
+
+  const gcpVarsMock = {
+    'gcp.project_id': { type: 'text' },
+    'gcp.organization_id': { type: 'text' },
+    'gcp.credentials.file': { type: 'text' },
+    'gcp.credentials.json': { type: 'text' },
+    'gcp.credentials.type': { type: 'text' },
+    'gcp.account_type': { value: 'organization-account', type: 'text' },
+  };
+
+  const azureVarsMock = {
+    'azure.account_type': { type: 'text' },
+    'azure.credentials.type': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
@@ -145,14 +205,16 @@ const getPolicyMock = (
       {
         type: CLOUDBEAT_GCP,
         policy_template: 'cspm',
-        enabled: false,
-        streams: [{ enabled: false, data_stream: dataStream }],
+        enabled: type === CLOUDBEAT_GCP,
+        streams: [{ enabled: type === CLOUDBEAT_GCP, data_stream: dataStream, vars: gcpVarsMock }],
       },
       {
         type: CLOUDBEAT_AZURE,
         policy_template: 'cspm',
         enabled: false,
-        streams: [{ enabled: false, data_stream: dataStream }],
+        streams: [
+          { enabled: type === CLOUDBEAT_AZURE, data_stream: dataStream, vars: azureVarsMock },
+        ],
       },
       {
         type: CLOUDBEAT_VULN_MGMT_AWS,

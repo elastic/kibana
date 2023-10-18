@@ -31,7 +31,8 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('Security lists task telemetry', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/164334
+  describe.skip('Security lists task telemetry', async () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });

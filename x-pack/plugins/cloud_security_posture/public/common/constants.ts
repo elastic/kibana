@@ -27,6 +27,7 @@ import {
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
 import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import gkeLogo from '../assets/icons/cis_gke_logo.svg';
+import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
 export const statusColors = {
   passed: euiThemeVars.euiColorSuccess,
@@ -37,6 +38,8 @@ export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
 export const MAX_FINDINGS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
+export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';
+export const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = 'cloudPosture:dataTable:columns';
 export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
@@ -59,6 +62,8 @@ export interface CloudPostureIntegrationProps {
     disabled?: boolean;
     icon?: string;
     tooltip?: string;
+    isBeta?: boolean;
+    testId?: string;
   }>;
 }
 
@@ -75,12 +80,13 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       {
         type: CLOUDBEAT_AWS,
         name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'Amazon Web Services',
+          defaultMessage: 'AWS',
         }),
         benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
           defaultMessage: 'CIS AWS',
         }),
         icon: 'logoAWS',
+        testId: 'cisAwsTestId',
       },
       {
         type: CLOUDBEAT_GCP,
@@ -90,8 +96,10 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
           defaultMessage: 'CIS GCP',
         }),
-        icon: 'logoGCP',
+        icon: googleCloudLogo,
+        testId: 'cisGcpTestId',
       },
+      // needs to be a function that disables/enabled based on integration version
       {
         type: CLOUDBEAT_AZURE,
         name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
@@ -100,11 +108,10 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
         }),
-        disabled: true,
+        disabled: false,
+        isBeta: true,
         icon: 'logoAzure',
-        tooltip: i18n.translate('xpack.csp.cspmIntegration.azureOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
+        testId: 'cisAzureTestId',
       },
     ],
   },
@@ -189,7 +196,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'GCP',
         }),
         disabled: true,
-        icon: 'logoGCP',
+        icon: googleCloudLogo,
         tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.tooltipContent', {
           defaultMessage: 'Coming soon',
         }),
@@ -211,4 +218,9 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
   },
 };
 export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
-export const MIN_VERSION_GCP_CIS = '1.5.0';
+export const MIN_VERSION_GCP_CIS = '1.5.2';
+
+export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
+
+export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
+export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';

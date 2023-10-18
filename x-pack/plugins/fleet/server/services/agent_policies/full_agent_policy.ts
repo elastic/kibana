@@ -18,9 +18,13 @@ import type {
   FleetProxy,
   FleetServerHost,
 } from '../../types';
-import type { FullAgentPolicyOutputPermissions, PackageInfo } from '../../../common/types';
+import type {
+  FullAgentPolicyMonitoring,
+  FullAgentPolicyOutputPermissions,
+  PackageInfo,
+} from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
-import { dataTypes, outputType } from '../../../common/constants';
+import { dataTypes, kafkaCompressionType, outputType } from '../../../common/constants';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getPackageInfo } from '../epm/packages';
@@ -58,8 +62,15 @@ export async function getFullAgentPolicy(
     return null;
   }
 
-  const { outputs, proxies, dataOutput, fleetServerHosts, monitoringOutput, sourceUri } =
-    await fetchRelatedSavedObjects(soClient, agentPolicy);
+  const {
+    outputs,
+    proxies,
+    dataOutput,
+    fleetServerHosts,
+    monitoringOutput,
+    downloadSourceUri,
+    downloadSourceProxyUri,
+  } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
@@ -98,6 +109,35 @@ export async function getFullAgentPolicy(
     acc[name] = featureConfig;
     return acc;
   }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
+
+  const defaultMonitoringConfig: FullAgentPolicyMonitoring = {
+    enabled: false,
+    logs: false,
+    metrics: false,
+  };
+
+  let monitoring: FullAgentPolicyMonitoring = { ...defaultMonitoringConfig };
+
+  // If the agent policy has monitoring enabled for at least one of "logs" or "metrics", generate
+  // a monitoring config for the resulting compiled agent policy
+  if (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) {
+    monitoring = {
+      namespace: agentPolicy.namespace,
+      use_output: getOutputIdForAgentPolicy(monitoringOutput),
+      enabled: true,
+      logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
+      metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
+    };
+    // If the `keep_monitoring_alive` flag is set, enable monitoring but don't enable logs or metrics.
+    // This allows cloud or other environments to keep the monitoring server alive without tearing it down.
+  } else if (agentPolicy.keep_monitoring_alive) {
+    monitoring = {
+      enabled: true,
+      logs: false,
+      metrics: false,
+    };
+  }
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -118,18 +158,10 @@ export async function getFullAgentPolicy(
     revision: agentPolicy.revision,
     agent: {
       download: {
-        sourceURI: sourceUri,
+        sourceURI: downloadSourceUri,
+        ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
       },
-      monitoring:
-        agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
-          ? {
-              namespace: agentPolicy.namespace,
-              use_output: getOutputIdForAgentPolicy(monitoringOutput),
-              enabled: true,
-              logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
-              metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-            }
-          : { enabled: false, logs: false, metrics: false },
+      monitoring,
       features,
       protection: {
         enabled: agentPolicy.is_protected,
@@ -291,7 +323,6 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
-      auth_type,
       username,
       password,
       sasl,
@@ -303,31 +334,69 @@ export function transformOutputToFullPolicyOutput(
       headers,
       timeout,
       broker_timeout,
-      broker_buffer_size,
-      broker_ack_reliability,
+      required_acks,
     } = output;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
+    const transformPartition = () => {
+      if (!partition) return {};
+      switch (partition) {
+        case 'random':
+          return {
+            random: {
+              ...(random?.group_events
+                ? { group_events: random.group_events }
+                : { group_events: 1 }),
+            },
+          };
+        case 'round_robin':
+          return {
+            round_robin: {
+              ...(round_robin?.group_events
+                ? { group_events: round_robin.group_events }
+                : { group_events: 1 }),
+            },
+          };
+        case 'hash':
+        default:
+          return { hash: { ...(hash?.hash ? { hash: hash.hash } : { hash: '' }) } };
+      }
+    };
+
+    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
       key,
       compression,
-      compression_level,
-      auth_type,
-      username,
-      password,
-      sasl,
-      partition,
-      random,
-      round_robin,
-      hash,
-      topics,
-      headers,
+      ...(compression === kafkaCompressionType.Gzip ? { compression_level } : {}),
+      ...(username ? { username } : {}),
+      ...(password ? { password } : {}),
+      ...(sasl ? { sasl } : {}),
+      partition: transformPartition(),
+      topics: (topics ?? []).map((topic) => {
+        const { topic: topicName, ...rest } = topic;
+        const whenKeys = Object.keys(rest);
+
+        if (whenKeys.length === 0) {
+          return { topic: topicName };
+        }
+        if (rest.when && rest.when.condition) {
+          const [keyName, value] = rest.when.condition.split(':');
+
+          return {
+            topic: topicName,
+            when: {
+              [rest.when.type as string]: {
+                [keyName.replace(/\s/g, '')]: value,
+              },
+            },
+          };
+        }
+      }),
+      headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,
-      broker_buffer_size,
-      broker_ack_reliability,
+      required_acks,
     };
   }
 

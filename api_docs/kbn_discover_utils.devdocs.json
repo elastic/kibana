@@ -446,7 +446,8 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          ") => FormattedHit"
+          ") => ",
+          "FormattedHit"
         ],
         "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
         "deprecated": false,
@@ -458,9 +459,7 @@
             "type": "Object",
             "tags": [],
             "label": "hit",
-            "description": [
-              "The hit to format"
-            ],
+            "description": [],
             "signature": [
               "DataTableRecord"
             ],
@@ -475,9 +474,7 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": [
-              "The corresponding data view"
-            ],
+            "description": [],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -498,9 +495,7 @@
             "type": "Function",
             "tags": [],
             "label": "shouldShowFieldHandler",
-            "description": [
-              "A function to check a field."
-            ],
+            "description": [],
             "signature": [
               "ShouldShowFieldInTableHandler"
             ],
@@ -970,13 +965,13 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.ENABLE_SQL",
+        "id": "def-common.ENABLE_ESQL",
         "type": "string",
         "tags": [],
-        "label": "ENABLE_SQL",
+        "label": "ENABLE_ESQL",
         "description": [],
         "signature": [
-          "\"discover:enableSql\""
+          "\"discover:enableESQL\""
         ],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,

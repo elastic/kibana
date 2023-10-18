@@ -3,6 +3,10 @@
 ++++
 <titleabbrev>Slack</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can send Slack messages.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 The Slack connector uses incoming webhooks or an API method to send Slack messages.
 
@@ -27,37 +31,6 @@ If you use the latter method, you choose your channel when you create a rule act
 Thus a connector can be used in multiple rules and actions to communicate with different channels.
 
 For Slack setup details, go to <<configuring-slack>>.
-
-[float]
-[[preconfigured-slack-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-
-.Example Slack connector with webhook
-[source,text]
---
-xpack.actions.preconfigured:
-  my-slack:
-    name: preconfigured-slack-webhook-connector-type
-    actionTypeId: .slack
-    secrets:
-      webhookUrl: 'https://hooks.slack.com/services/xxxx/xxxx/xxxx' <1>
---
-<1> To obtain this value, go to <<configuring-slack-webhook>>.
-
-.Example Slack connector with web API
-[source,text]
---
-xpack.actions.preconfigured:
-  my-slack:
-    name: preconfigured-slack-api-connector-type
-    actionTypeId: .slack_api
-    secrets:
-      token: 'xoxb-xxxx-xxxx-xxxx' <1>
---
-<1> To obtain this value, go to <<configuring-slack-web-api>>.
 
 [float]
 [[slack-action-configuration]]

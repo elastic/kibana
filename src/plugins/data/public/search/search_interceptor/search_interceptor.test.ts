@@ -249,29 +249,6 @@ describe('SearchInterceptor', () => {
       expect(error).not.toHaveBeenCalled();
     });
 
-    test('should abort if request is partial and not running (ES graceful error)', async () => {
-      const responses = [
-        {
-          time: 10,
-          value: {
-            isPartial: true,
-            isRunning: false,
-            rawResponse: {},
-            id: 1,
-          },
-        },
-      ];
-      mockFetchImplementation(responses);
-
-      const response = searchInterceptor.search({});
-      response.subscribe({ next, error });
-
-      await timeTravel(10);
-
-      expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
-    });
-
     test('should abort on user abort', async () => {
       const responses = [
         {
@@ -1005,30 +982,6 @@ describe('SearchInterceptor', () => {
         expect(fetchMock).toBeCalledTimes(2);
       });
 
-      test('should deliver error to all replays', async () => {
-        const responses = [
-          {
-            time: 10,
-            value: {
-              isPartial: true,
-              isRunning: false,
-              rawResponse: {},
-              id: 1,
-            },
-          },
-        ];
-
-        mockFetchImplementation(responses);
-
-        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-        await timeTravel(10);
-        expect(fetchMock).toBeCalledTimes(1);
-        expect(error).toBeCalledTimes(2);
-        expect(error.mock.calls[0][0].message).toEqual('Received partial response');
-        expect(error.mock.calls[1][0].message).toEqual('Received partial response');
-      });
-
       test('should ignore anything outside params when hashing', async () => {
         mockFetchImplementation(basicCompleteResponse);
 
@@ -1053,6 +1006,25 @@ describe('SearchInterceptor', () => {
         searchInterceptor.search(req2, { sessionId }).subscribe({ next, error, complete });
         await timeTravel(10);
         expect(fetchMock).toBeCalledTimes(1);
+      });
+
+      test('should deliver error to all replays', async () => {
+        const responses = [
+          {
+            time: 10,
+            value: {},
+          },
+        ];
+
+        mockFetchImplementation(responses);
+
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(fetchMock).toBeCalledTimes(1);
+        expect(error).toBeCalledTimes(2);
+        expect(error.mock.calls[0][0].message).toEqual('Aborted');
+        expect(error.mock.calls[1][0].message).toEqual('Aborted');
       });
 
       test('should ignore preference when hashing', async () => {

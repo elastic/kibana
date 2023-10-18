@@ -132,8 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/162586
-      describe.skip('post-authentication stage', () => {
+      describe('post-authentication stage', () => {
         for (const client of ['start-contract', 'request-context', 'custom']) {
           it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
             this.timeout(60000);
@@ -190,6 +189,9 @@ export default function ({ getService }: FtrProviderContext) {
       beforeEach(async () => (sessionCookie = await createSessionCookie()));
 
       it('should clear cookie and redirect to login', async function () {
+        // Let's make sure that created tokens are available for search.
+        await getService('es').indices.refresh({ index: '.security-tokens' });
+
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.

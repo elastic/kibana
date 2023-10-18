@@ -17,7 +17,13 @@ import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
 import { EditControlGroupButton } from './edit_control_group_button';
 
-export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlGroupContainer }) {
+export function ControlsToolbarButton({
+  controlGroup,
+  isDisabled,
+}: {
+  controlGroup: ControlGroupContainer;
+  isDisabled?: boolean;
+}) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -30,6 +36,7 @@ export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlG
       size="s"
       iconType="controlsHorizontal"
       data-test-subj="dashboard-controls-menu-button"
+      isDisabled={isDisabled}
     >
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenuPanel

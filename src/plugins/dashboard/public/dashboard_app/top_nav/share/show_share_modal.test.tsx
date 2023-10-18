@@ -70,9 +70,7 @@ describe('ShowShareModal', () => {
   const getPropsAndShare = (
     unsavedState?: Partial<DashboardContainerInput>
   ): ShowShareModalProps => {
-    pluginServices.getServices().dashboardSessionStorage.getState = jest
-      .fn()
-      .mockReturnValue(unsavedState);
+    pluginServices.getServices().dashboardBackup.getState = jest.fn().mockReturnValue(unsavedState);
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
@@ -130,12 +128,9 @@ describe('ShowShareModal', () => {
         locatorParams: { params: DashboardAppLocatorParams };
       }
     ).locatorParams.params;
-    const {
-      initializerContext: { kibanaVersion },
-    } = pluginServices.getServices();
     const rawDashboardState = {
       ...unsavedDashboardState,
-      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels, kibanaVersion),
+      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels),
     };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(

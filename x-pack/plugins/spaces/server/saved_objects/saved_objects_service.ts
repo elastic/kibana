@@ -7,12 +7,12 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 
-import type { SpacesServiceStart } from '../spaces_service';
-import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
 import { spaceMigrations, usageStatsMigrations } from './migrations';
 import { SavedObjectsSpacesExtension } from './saved_objects_spaces_extension';
 import { SpacesSavedObjectSchemas } from './schemas';
+import type { SpacesServiceStart } from '../spaces_service';
+import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;

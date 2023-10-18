@@ -50,35 +50,33 @@ import {
   IsRuleEnabled,
   IsRuleImmutable,
   MaxSignals,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
   RuleAuthorArray,
+  InvestigationFields,
   RuleDescription,
   RuleFalsePositiveArray,
   RuleFilterArray,
   RuleLicense,
   RuleMetadata,
   RuleName,
+  RuleNameOverride,
   RuleObjectId,
   RuleQuery,
   RuleReferenceArray,
   RuleSignatureId,
   RuleTagArray,
   RuleVersion,
-  SetupGuide,
-  ThreatArray,
-} from './common_attributes/misc_attributes';
-import {
-  RuleNameOverride,
-  TimestampOverride,
-  TimestampOverrideFallbackDisabled,
-} from './common_attributes/field_overrides';
-import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from './common_attributes/saved_objects';
-import { RelatedIntegrationArray } from './common_attributes/related_integrations';
-import { RequiredFieldArray } from './common_attributes/required_fields';
-import { TimelineTemplateId, TimelineTemplateTitle } from './common_attributes/timeline_template';
+  SetupGuide,
+  ThreatArray,
+  TimelineTemplateId,
+  TimelineTemplateTitle,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
+} from './common_attributes';
 import {
   EventCategoryOverride,
   TiebreakerField,
@@ -119,6 +117,7 @@ export const baseSchema = buildRuleSchemas({
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
     meta: RuleMetadata,
+    investigation_fields: InvestigationFields,
     // Throttle
     throttle: RuleActionThrottle,
   },
@@ -181,8 +180,8 @@ export const BaseCreateProps = baseSchema.create;
 // with some variations for each route. These intersect with type specific schemas below
 // to create the full schema for each route.
 
-type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
-const SharedCreateProps = t.intersection([
+export type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
+export const SharedCreateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
 ]);
@@ -214,6 +213,7 @@ export enum QueryLanguage {
   'kuery' = 'kuery',
   'lucene' = 'lucene',
   'eql' = 'eql',
+  'esql' = 'esql',
 }
 
 export type KqlQueryLanguage = t.TypeOf<typeof KqlQueryLanguage>;
@@ -253,6 +253,37 @@ export const EqlRulePatchProps = t.intersection([SharedPatchProps, eqlSchema.pat
 
 export type EqlPatchParams = t.TypeOf<typeof EqlPatchParams>;
 export const EqlPatchParams = eqlSchema.patch;
+
+// -------------------------------------------------------------------------------------------------
+// ES|QL rule schema
+
+export type EsqlQueryLanguage = t.TypeOf<typeof EsqlQueryLanguage>;
+export const EsqlQueryLanguage = t.literal('esql');
+
+const esqlSchema = buildRuleSchemas({
+  required: {
+    type: t.literal('esql'),
+    language: EsqlQueryLanguage,
+    query: RuleQuery,
+  },
+  optional: {},
+  defaultable: {},
+});
+
+export type EsqlRule = t.TypeOf<typeof EsqlRule>;
+export const EsqlRule = t.intersection([SharedResponseProps, esqlSchema.response]);
+
+export type EsqlRuleCreateProps = t.TypeOf<typeof EsqlRuleCreateProps>;
+export const EsqlRuleCreateProps = t.intersection([SharedCreateProps, esqlSchema.create]);
+
+export type EsqlRuleUpdateProps = t.TypeOf<typeof EsqlRuleUpdateProps>;
+export const EsqlRuleUpdateProps = t.intersection([SharedUpdateProps, esqlSchema.create]);
+
+export type EsqlRulePatchProps = t.TypeOf<typeof EsqlRulePatchProps>;
+export const EsqlRulePatchProps = t.intersection([SharedPatchProps, esqlSchema.patch]);
+
+export type EsqlPatchParams = t.TypeOf<typeof EsqlPatchParams>;
+export const EsqlPatchParams = esqlSchema.patch;
 
 // -------------------------------------------------------------------------------------------------
 // Indicator Match rule schema
@@ -501,6 +532,7 @@ export const NewTermsPatchParams = newTermsSchema.patch;
 export type TypeSpecificCreateProps = t.TypeOf<typeof TypeSpecificCreateProps>;
 export const TypeSpecificCreateProps = t.union([
   eqlSchema.create,
+  esqlSchema.create,
   threatMatchSchema.create,
   querySchema.create,
   savedQuerySchema.create,
@@ -512,6 +544,7 @@ export const TypeSpecificCreateProps = t.union([
 export type TypeSpecificPatchProps = t.TypeOf<typeof TypeSpecificPatchProps>;
 export const TypeSpecificPatchProps = t.union([
   eqlSchema.patch,
+  esqlSchema.patch,
   threatMatchSchema.patch,
   querySchema.patch,
   savedQuerySchema.patch,
@@ -523,6 +556,7 @@ export const TypeSpecificPatchProps = t.union([
 export type TypeSpecificResponse = t.TypeOf<typeof TypeSpecificResponse>;
 export const TypeSpecificResponse = t.union([
   eqlSchema.response,
+  esqlSchema.response,
   threatMatchSchema.response,
   querySchema.response,
   savedQuerySchema.response,
@@ -535,7 +569,7 @@ export const TypeSpecificResponse = t.union([
 // Final combined schemas
 
 export type RuleCreateProps = t.TypeOf<typeof RuleCreateProps>;
-export const RuleCreateProps = t.intersection([SharedCreateProps, TypeSpecificCreateProps]);
+export const RuleCreateProps = t.intersection([TypeSpecificCreateProps, SharedCreateProps]);
 
 export type RuleUpdateProps = t.TypeOf<typeof RuleUpdateProps>;
 export const RuleUpdateProps = t.intersection([TypeSpecificCreateProps, SharedUpdateProps]);
@@ -545,28 +579,3 @@ export const RulePatchProps = t.intersection([TypeSpecificPatchProps, SharedPatc
 
 export type RuleResponse = t.TypeOf<typeof RuleResponse>;
 export const RuleResponse = t.intersection([SharedResponseProps, TypeSpecificResponse]);
-
-// -------------------------------------------------------------------------------------------------
-// Rule preview schemas
-
-// TODO: Move to the rule_preview subdomain
-
-export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
-export const previewRulesSchema = t.intersection([
-  SharedCreateProps,
-  TypeSpecificCreateProps,
-  t.type({ invocationCount: t.number, timeframeEnd: t.string }),
-]);
-
-export interface RulePreviewLogs {
-  errors: string[];
-  warnings: string[];
-  startedAt?: string;
-  duration: number;
-}
-
-export interface PreviewResponse {
-  previewId: string | undefined;
-  logs: RulePreviewLogs[] | undefined;
-  isAborted: boolean | undefined;
-}

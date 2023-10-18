@@ -10,6 +10,7 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { PLUGIN_NAME } from '../common/constants';
 import { ResponseStreamStartPlugins } from './plugin';
 import { App } from './containers/app';
 
@@ -24,6 +25,21 @@ export const mount =
   async ({ appBasePath, element }: AppMountParameters) => {
     const [core, plugins] = await coreSetup.getStartServices();
     const deps: ResponseStreamDeps = { appBasePath, core, plugins };
+
+    core.chrome.setBreadcrumbs([
+      {
+        text: 'Developer examples',
+        href: `/app/developerExamples`,
+        onClick: (e) => {
+          e.preventDefault();
+          core.application.navigateToApp('developerExamples');
+        },
+      },
+      {
+        text: PLUGIN_NAME,
+      },
+    ]);
+
     const reactElement = (
       <KibanaContextProvider services={deps}>
         <App />

@@ -7,30 +7,14 @@
 
 import { EuiSkeletonText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { TimeRange } from '@kbn/es-query';
+import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { useMetadata } from '../../hooks/use_metadata';
-import { toTimestampRange } from '../../utils';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 
-export interface OsqueryProps {
-  nodeName: string;
-  nodeType: InventoryItemType;
-  dateRange: TimeRange;
-}
+export const Osquery = () => {
+  const { featureFlags } = usePluginConfig();
+  const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
 
-export const Osquery = ({ nodeName, nodeType, dateRange }: OsqueryProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
-  const { loading, metadata } = useMetadata(
-    nodeName,
-    nodeType,
-    inventoryModel.requiredMetrics,
-    sourceId,
-    toTimestampRange(dateRange)
-  );
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
@@ -40,13 +24,16 @@ export const Osquery = ({ nodeName, nodeType, dateRange }: OsqueryProps) => {
 
   // avoids component rerender when resizing the popover
   const content = useMemo(() => {
+    if (!featureFlags.osqueryEnabled) {
+      return null;
+    }
     // TODO: Add info when Osquery plugin is not available
-    if (loading || !OsqueryAction) {
+    if (metadataLoading || !OsqueryAction) {
       return <EuiSkeletonText lines={10} />;
     }
 
     return <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField formType="simple" />;
-  }, [OsqueryAction, loading, metadata]);
+  }, [featureFlags.osqueryEnabled, metadataLoading, OsqueryAction, metadata?.info?.agent?.id]);
 
   return content;
 };

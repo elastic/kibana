@@ -7,7 +7,7 @@
 
 import { compact, uniq } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 
 export function getApmIndexPatterns(indices: string[]) {
   return uniq(indices.flatMap((index): string[] => index.split(',')));
@@ -18,7 +18,7 @@ export async function getIndicesAndIngestPipelines({
   apmIndices,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
 }) {
   const indices = await esClient.indices.get({
     index: getApmIndexPatterns([

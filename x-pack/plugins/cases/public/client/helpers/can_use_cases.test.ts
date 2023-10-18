@@ -11,8 +11,8 @@ import {
   allCasesPermissions,
   noCasesCapabilities,
   noCasesPermissions,
-  readCasesCapabilities,
   readCasesPermissions,
+  readCasesCapabilities,
   writeCasesCapabilities,
   writeCasesPermissions,
 } from '../../common/mock';
@@ -77,6 +77,12 @@ const hasSecurityWriteAndObservabilityRead: CasesCapabilities = {
   generalCases: noCasesCapabilities(),
 };
 
+const hasSecurityConnectors: CasesCapabilities = {
+  securitySolutionCases: readCasesCapabilities(),
+  observabilityCases: noCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
+};
+
 describe('canUseCases', () => {
   it.each([hasAll, hasSecurity, hasObservability, hasSecurityWriteAndObservabilityRead])(
     'returns true for all permissions, if a user has access to both on any solution',
@@ -107,6 +113,14 @@ describe('canUseCases', () => {
     (capability) => {
       const permissions = canUseCases(capability)();
       expect(permissions).toStrictEqual(noCasesPermissions());
+    }
+  );
+
+  it.each([hasSecurityConnectors])(
+    'returns true for only connectors, if a user has access to only connectors on any solution',
+    (capability) => {
+      const permissions = canUseCases(capability)();
+      expect(permissions).toStrictEqual(readCasesPermissions());
     }
   );
 });

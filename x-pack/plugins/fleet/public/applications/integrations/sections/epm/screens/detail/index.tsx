@@ -83,6 +83,7 @@ import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
 import { DocumentationPage } from './documentation';
+import { Configs } from './configs';
 
 import './index.scss';
 
@@ -92,7 +93,8 @@ export type DetailViewPanelName =
   | 'assets'
   | 'settings'
   | 'custom'
-  | 'api-reference';
+  | 'api-reference'
+  | 'configs';
 
 export interface DetailParams {
   pkgkey: string;
@@ -293,7 +295,7 @@ export function Detail() {
 
   const headerLeftContent = useMemo(
     () => (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="headerLeft">
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
@@ -625,6 +627,24 @@ export function Detail() {
       });
     }
 
+    if (canReadPackageSettings) {
+      tabs.push({
+        id: 'configs',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.configsText"
+            defaultMessage="Configs"
+          />
+        ),
+        isSelected: panel === 'configs',
+        'data-test-subj': `tab-configs`,
+        href: getHref('integration_details_configs', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
+
     if (canReadPackageSettings && showCustomTab) {
       tabs.push({
         id: 'custom',
@@ -745,6 +765,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
+            <Configs packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
             <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />

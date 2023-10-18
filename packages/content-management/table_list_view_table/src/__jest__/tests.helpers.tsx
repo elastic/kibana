@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import type { ComponentType } from 'react';
-import { from, of } from 'rxjs';
+import { from } from 'rxjs';
 import { ContentEditorProvider } from '@kbn/content-management-content-editor';
 
 import { TagList } from '../mocks';
@@ -31,13 +31,11 @@ export const getMockServices = (overrides?: Partial<Services>) => {
   return services;
 };
 
-const theme$ = of({ darkMode: false });
-
 export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Services> = {}) {
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
-      <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined} theme$={theme$}>
+      <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
         <TableListViewProvider {...services}>
           <Comp {...(props as any)} />
         </TableListViewProvider>

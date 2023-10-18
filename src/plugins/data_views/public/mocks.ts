@@ -11,7 +11,9 @@ import { DataViewsPlugin, DataViewsContract } from '.';
 export type Setup = jest.Mocked<ReturnType<DataViewsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataViewsPlugin['start']>>;
 
-const createSetupContract = (): Setup => ({});
+const createSetupContract = (): Setup => ({
+  enableRollups: jest.fn(),
+});
 
 const createStartContract = (): Start => {
   return {

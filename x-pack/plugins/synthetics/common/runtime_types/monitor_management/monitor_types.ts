@@ -46,6 +46,10 @@ export const TLSSensitiveFieldsCodec = t.partial({
 
 export const TLSCodec = t.intersection([TLSFieldsCodec, TLSSensitiveFieldsCodec]);
 
+const MonitorLocationsCodec = t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec]));
+
+export type MonitorLocations = t.TypeOf<typeof MonitorLocationsCodec>;
+
 // CommonFields
 export const CommonFieldsCodec = t.intersection([
   t.interface({
@@ -56,9 +60,10 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
-    [ConfigKey.LOCATIONS]: t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec])),
+    [ConfigKey.LOCATIONS]: MonitorLocationsCodec,
     [ConfigKey.MONITOR_QUERY_ID]: t.string,
     [ConfigKey.CONFIG_ID]: t.string,
+    [ConfigKey.MAX_ATTEMPTS]: t.number,
   }),
   t.partial({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,

@@ -19,7 +19,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
-    await this.testSubjects.click('dashboardAddPanelButton');
+    await this.testSubjects.click('dashboardAddFromLibraryButton');
     // Give some time for the animation to complete
     await this.common.sleep(500);
   }
@@ -145,6 +145,20 @@ export class DashboardAddPanelService extends FtrService {
     }
   }
 
+  async ensureAddPanelIsClosed() {
+    this.log.debug('DashboardAddPanel.ensureAddPanelIsClosed');
+    const isOpen = await this.isAddPanelOpen();
+    if (isOpen) {
+      await this.retry.try(async () => {
+        await this.closeAddPanel();
+        const isNowOpen = await this.isAddPanelOpen();
+        if (isNowOpen) {
+          throw new Error('Add panel still open, trying again.');
+        }
+      });
+    }
+  }
+
   async closeAddPanel() {
     await this.flyout.ensureAllClosed();
   }
@@ -222,6 +236,9 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeAddPanel();
+
+    // close "Added successfully" toast
+    await this.common.clearAllToasts();
     return embeddableName;
   }
 

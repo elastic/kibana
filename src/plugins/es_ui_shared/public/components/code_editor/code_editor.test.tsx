@@ -9,8 +9,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import EuiCodeEditor from './code_editor';
-// @ts-ignore
-import { keys } from '@elastic/eui/lib/services';
+import { keys } from '@elastic/eui';
 import { findTestSubject, requiredProps, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
 describe('EuiCodeEditor', () => {

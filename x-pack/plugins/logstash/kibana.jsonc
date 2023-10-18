@@ -21,7 +21,6 @@
       "security"
     ],
     "requiredBundles": [
-      "esUiShared",
       "kibanaReact"
     ]
   }

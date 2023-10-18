@@ -18,7 +18,7 @@ import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -360,7 +360,7 @@ class TutorialUi extends React.Component {
   render() {
     let content;
     if (this.state.notFound) {
-      content = (
+      return (
         <KibanaPageTemplate
           isEmptyState={true}
           pageHeader={{
@@ -435,7 +435,11 @@ class TutorialUi extends React.Component {
       );
     }
 
-    return <KibanaPageTemplate template="empty">{content}</KibanaPageTemplate>;
+    return (
+      <KibanaPageTemplate template="empty">
+        <KibanaPageTemplate.Section>{content}</KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    );
   }
 }
 

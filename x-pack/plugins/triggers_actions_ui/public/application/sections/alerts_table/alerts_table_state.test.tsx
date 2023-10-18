@@ -20,7 +20,6 @@ import {
   FetchAlertData,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
-import { TypeRegistry } from '../../type_registry';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
@@ -32,6 +31,7 @@ import { getCasesMockMap } from './cases/index.mock';
 import { createCasesServiceMock } from './index.mock';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
@@ -68,6 +68,43 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     },
   }),
 }));
+
+const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+beforeAll(() => {
+  // The JSDOM implementation is too slow
+  // Especially for dropdowns that try to position themselves
+  // perf issue - https://github.com/jsdom/jsdom/issues/3234
+  Object.defineProperty(window, 'getComputedStyle', {
+    value: (el: HTMLElement) => {
+      /**
+       * This is based on the jsdom implementation of getComputedStyle
+       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+       *
+       * It is missing global style parsing and will only return styles applied directly to an element.
+       * Will not return styles that are global or from emotion
+       */
+      const declaration = new CSSStyleDeclaration();
+      const { style } = el;
+
+      Array.prototype.forEach.call(style, (property: string) => {
+        declaration.setProperty(
+          property,
+          style.getPropertyValue(property),
+          style.getPropertyPriority(property)
+        );
+      });
+
+      return declaration;
+    },
+    configurable: true,
+    writable: true,
+  });
+});
+
+afterAll(() => {
+  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+});
 
 const columns = [
   {
@@ -224,10 +261,15 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
   }
   return {};
 });
+
+const updateMock = jest.fn();
+const getActionsMock = jest.fn();
 const alertsTableConfigurationRegistryMock = {
   has: hasMock,
   get: getMock,
-} as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+  getActions: getActionsMock,
+  update: updateMock,
+} as unknown as AlertTableConfigRegistry;
 
 const storageMock = Storage as jest.Mock;
 
@@ -288,7 +330,8 @@ describe('AlertsTableState', () => {
     const alertsTableConfigurationRegistryWithPersistentControlsMock = {
       has: hasMock,
       get: getMockWithUsePersistentControls,
-    } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+      update: updateMock,
+    } as unknown as AlertTableConfigRegistry;
 
     return {
       ...tableProps,
@@ -600,6 +643,7 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       expect(hasMock).toHaveBeenCalledWith(PLUGIN_ID);
       expect(getMock).toHaveBeenCalledWith(PLUGIN_ID);
+      expect(updateMock).toBeCalledTimes(2);
     });
 
     it('should render an empty error state when the plugin id owner is not registered', async () => {
@@ -707,8 +751,7 @@ describe('AlertsTableState', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/150790
-  describe.skip('field browser', () => {
+  describe('field browser', () => {
     const browserFields: BrowserFields = {
       kibana: {
         fields: {

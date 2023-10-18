@@ -13,15 +13,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } fro
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
 import {
   getDefaultAiOpsListState,
   type AiOpsPageUrlState,
 } from '../../application/utils/url_state';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import { SearchPanel } from '../search_panel';
 import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
@@ -84,7 +85,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
 
   const { timefilter } = useData(
     dataView,
-    'explain_log_rage_spikes',
+    'log_rate_analysis',
     searchQuery,
     setGlobalState,
     currentSelectedSignificantTerm,
@@ -151,6 +152,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             setGlobalState={setGlobalState}
             esSearchQuery={searchQuery}
             stickyHistogram={stickyHistogram}
+            embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
           />
         </EuiFlexGroup>
       </EuiPageSection>

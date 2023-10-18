@@ -13,7 +13,7 @@ import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
@@ -68,7 +68,9 @@ describe('Search service', () => {
       data = searchService.start(mockCoreStart, {
         fieldFormats: {} as FieldFormatsStart,
         indexPatterns: {} as DataViewsContract,
+        inspector: {} as InspectorStartContract,
         screenshotMode: screenshotModePluginMock.createStartContract(),
+        scriptedFieldsEnabled: true,
       });
     });
 
@@ -141,7 +143,7 @@ describe('Search service', () => {
 
         expect(notifications.toasts.addWarning).toBeCalledTimes(1);
         expect(notifications.toasts.addWarning).toBeCalledWith({
-          title: '2 of 4 shards failed',
+          title: 'Results are partial and may be incomplete.',
           text: expect.any(Function),
         });
       });
@@ -153,90 +155,6 @@ describe('Search service', () => {
         data.showWarnings(inspector.adapter, callback);
 
         expect(notifications.toasts.addWarning).toBeCalledTimes(0);
-      });
-
-      it('will show single notification when some warnings are filtered', () => {
-        callback = (warning) => warning.reason?.type === 'illegal_argument_exception';
-        shards.failures = [
-          {
-            reason: {
-              type: 'illegal_argument_exception',
-              reason: 'reason of "illegal_argument_exception"',
-            },
-          },
-          {
-            reason: {
-              type: 'other_kind_of_exception',
-              reason: 'reason of other_kind_of_exception',
-            },
-          },
-          { reason: { type: 'fatal_warning', reason: 'this is a fatal warning message' } },
-        ] as unknown as estypes.ShardFailure[];
-
-        const responder = inspector.adapter.start('request1');
-        responder.ok(getMockResponseWithShards(shards));
-        data.showWarnings(inspector.adapter, callback);
-
-        expect(notifications.toasts.addWarning).toBeCalledTimes(1);
-        expect(notifications.toasts.addWarning).toBeCalledWith({
-          title: '2 of 4 shards failed',
-          text: expect.any(Function),
-        });
-      });
-
-      it('can show a timed_out warning', () => {
-        const responder = inspector.adapter.start('request1');
-        shards = { total: 4, successful: 4, skipped: 0, failed: 0 };
-        const response1 = getMockResponseWithShards(shards);
-        response1.json.rawResponse.timed_out = true;
-        responder.ok(response1);
-        data.showWarnings(inspector.adapter, callback);
-
-        expect(notifications.toasts.addWarning).toBeCalledTimes(1);
-        expect(notifications.toasts.addWarning).toBeCalledWith({
-          title: 'Data might be incomplete because your request timed out',
-        });
-      });
-
-      it('can show two warnings if response has shard failures and also timed_out', () => {
-        const responder = inspector.adapter.start('request1');
-        const response1 = getMockResponseWithShards(shards);
-        response1.json.rawResponse.timed_out = true;
-        responder.ok(response1);
-        data.showWarnings(inspector.adapter, callback);
-
-        expect(notifications.toasts.addWarning).toBeCalledTimes(2);
-        expect(notifications.toasts.addWarning).nthCalledWith(1, {
-          title: 'Data might be incomplete because your request timed out',
-        });
-        expect(notifications.toasts.addWarning).nthCalledWith(2, {
-          title: '2 of 4 shards failed',
-          text: expect.any(Function),
-        });
-      });
-
-      it('will show multiple warnings when multiple responses have shard failures', () => {
-        const responder1 = inspector.adapter.start('request1');
-        const responder2 = inspector.adapter.start('request2');
-        responder1.ok(getMockResponseWithShards(shards));
-        responder2.ok({
-          json: {
-            rawResponse: {
-              timed_out: true,
-            },
-          },
-        });
-
-        data.showWarnings(inspector.adapter, callback);
-
-        expect(notifications.toasts.addWarning).toBeCalledTimes(2);
-        expect(notifications.toasts.addWarning).nthCalledWith(1, {
-          title: '2 of 4 shards failed',
-          text: expect.any(Function),
-        });
-        expect(notifications.toasts.addWarning).nthCalledWith(2, {
-          title: 'Data might be incomplete because your request timed out',
-        });
       });
     });
   });

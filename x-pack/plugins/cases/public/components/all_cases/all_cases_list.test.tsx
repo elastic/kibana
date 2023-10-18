@@ -191,7 +191,10 @@ describe('AllCasesListGeneric', () => {
       expect(
         screen.getAllByTestId('case-table-column-createdAt')[0].querySelector('.euiToolTipAnchor')
       ).toHaveTextContent(removeMsFromDate(useGetCasesMockState.data.cases[0].createdAt));
-      expect(screen.getByTestId('case-table-case-count')).toHaveTextContent('Showing 10 cases');
+      expect(screen.getByTestId('case-table-case-count')).toHaveTextContent(
+        `Showing 10 of ${useGetCasesMockState.data.total} cases`
+      );
+      expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     });
   });
 

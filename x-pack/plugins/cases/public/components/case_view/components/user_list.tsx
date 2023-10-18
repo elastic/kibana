@@ -106,7 +106,7 @@ export const UserList: React.FC<UserListProps> = React.memo(
           {loading && (
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiLoadingSpinner />
+                <EuiLoadingSpinner data-test-subj="users-list-loading-spinner" />
               </EuiFlexItem>
             </EuiFlexGroup>
           )}

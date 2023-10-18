@@ -319,6 +319,11 @@ export interface FieldsForWildcardResponse {
   indices: string[];
 }
 
+/**
+ * Existing Indices response
+ */
+export type ExistingIndicesResponse = string[];
+
 export interface IDataViewsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
   hasUserDataView: () => Promise<boolean>;
@@ -517,10 +522,15 @@ export type DataViewSpec = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
+  clientId?: string | number;
 };
 
 export interface HasDataService {
   hasESData: () => Promise<boolean>;
   hasUserDataView: () => Promise<boolean>;
   hasDataView: () => Promise<boolean>;
+}
+
+export interface ClientConfigType {
+  scriptedFieldsEnabled?: boolean;
 }

@@ -28,7 +28,7 @@ const DEFAULT_CATEGORY_WEIGHTS: RiskWeights = RISK_CATEGORIES.map((category) => 
  * This function and its use can be deleted once we've replaced our use of event.kind with a proper risk category field.
  */
 const convertCategoryToEventKindValue = (category?: string): string | undefined =>
-  category === 'alerts' ? 'signal' : category;
+  category === 'category_1' ? 'signal' : category;
 
 const isGlobalIdentifierTypeWeight = (weight: RiskWeight): weight is GlobalRiskWeight =>
   weight.type === RiskWeightTypes.global;
@@ -54,11 +54,11 @@ const getWeightForIdentifierType = (weight: RiskWeight, identifierType: Identifi
 };
 
 export const buildCategoryScoreDeclarations = (): string => {
-  const otherScoreDeclaration = `results['other_score'] = 0;`;
+  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_score'] = 0;`).join('');
+};
 
-  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_score'] = 0;`)
-    .join('')
-    .concat(otherScoreDeclaration);
+export const buildCategoryCountDeclarations = (): string => {
+  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_count'] = 0;`).join('');
 };
 
 export const buildCategoryWeights = (userWeights?: RiskWeights): RiskCategoryRiskWeight[] => {
@@ -69,17 +69,13 @@ export const buildCategoryWeights = (userWeights?: RiskWeights): RiskCategoryRis
   );
 };
 
-export const buildCategoryScoreAssignment = (): string => {
-  const otherClause = `results['other_score'] += current_score;`;
-
+export const buildCategoryAssignment = (): string => {
   return RISK_CATEGORIES.map(
     (category) =>
       `if (inputs[i].category == '${convertCategoryToEventKindValue(
         category
-      )}') { results['${category}_score'] += current_score; }`
-  )
-    .join(' else ')
-    .concat(` else { ${otherClause} }`);
+      )}') { results['${category}_score'] += current_score; results['${category}_count'] += 1; }`
+  ).join(' else ');
 };
 
 export const buildWeightingOfScoreByCategory = ({

@@ -79,6 +79,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   ) : (
     <>
       <CasesTableUtilityBar
+        pagination={pagination}
         isSelectorView={isSelectorView}
         totalCases={data.total ?? 0}
         selectedCases={selectedCases}

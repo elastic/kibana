@@ -105,8 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/155451
-    describe.skip('from the Endpoint list and details', () => {
+    describe('from the Endpoint list and details', () => {
       before(async () => {
         await pageObjects.endpoint.navigateToEndpointList();
       });
@@ -143,6 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 serializedQuery: getEndpointAlertsQueryForAgentId(endpointAgentId).$stringify(),
               },
             },
+            savedSearchId: null,
           },
           timeline.data.persistTimeline.timeline.version
         );
@@ -183,6 +183,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Show event/alert details for the first one in the list
         await pageObjects.timeline.showEventDetails();
 
+        // TODO: The index already exists error toast should not show up
+        // close and dismiss it if it does
+        if (await testSubjects.exists('globalToastList')) {
+          await testSubjects.click('toastCloseButton');
+        }
         // Click responder from the take action button
         await testSubjects.click('take-action-dropdown-btn');
         await testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
@@ -198,6 +203,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let indexedAlerts: IndexedEndpointRuleAlerts;
 
       before(async () => {
+        await getService('kibanaServer').request({
+          path: `internal/kibana/settings`,
+          method: 'POST',
+          body: { changes: { 'securitySolution:enableExpandableFlyout': false } },
+        });
+
         indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
 
         await detectionsTestService.waitForAlerts(

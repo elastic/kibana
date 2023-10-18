@@ -6,7 +6,7 @@
  */
 
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import axios from 'axios';
+import axios, { AxiosHeaders } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -71,7 +71,9 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
           status: 200,
           statusText: 'ok',
           headers: {},
-          config: {},
+          config: {
+            headers: new AxiosHeaders(),
+          },
         };
         return Promise.resolve(okResponse);
       }

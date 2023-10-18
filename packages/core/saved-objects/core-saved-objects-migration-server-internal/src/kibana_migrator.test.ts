@@ -9,6 +9,7 @@
 import { take } from 'rxjs/operators';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   type MigrationResult,
@@ -322,5 +323,6 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
     nodeRoles: { backgroundTasks: true, ui: true, migrator: true },
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
 };

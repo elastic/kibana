@@ -6,10 +6,21 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { AssetManagerServerPlugin, config, AssetManagerConfig } from './plugin';
+import { AssetManagerConfig } from '../common/config';
+import {
+  AssetManagerServerPlugin,
+  AssetManagerServerPluginSetup,
+  AssetManagerServerPluginStart,
+  config,
+} from './plugin';
 import type { WriteSamplesPostBody } from './routes/sample_assets';
 
-export type { AssetManagerConfig, WriteSamplesPostBody };
+export type {
+  AssetManagerConfig,
+  WriteSamplesPostBody,
+  AssetManagerServerPluginSetup,
+  AssetManagerServerPluginStart,
+};
 export { config };
 
 export const plugin = (context: PluginInitializerContext<AssetManagerConfig>) =>

@@ -128,7 +128,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ category });
 
       await expect(find(findRequest, clientArgs)).rejects.toThrow(
-        `Error: Too many categories provided. The maximum allowed is ${MAX_CATEGORY_FILTER_LENGTH}`
+        `Error: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
       );
     });
 

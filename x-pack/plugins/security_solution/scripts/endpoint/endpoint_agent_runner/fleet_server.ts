@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  CA_TRUSTED_FINGERPRINT,
+  FLEET_SERVER_CERT_PATH,
+  FLEET_SERVER_KEY_PATH,
+  fleetServerDevServiceAccount,
+} from '@kbn/dev-utils';
 import type {
   AgentPolicy,
   CreateAgentPolicyResponse,
@@ -14,11 +20,12 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
+  API_VERSIONS,
+  APP_API_ROUTES,
   FLEET_SERVER_PACKAGE,
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import { APP_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import type {
   FleetServerHost,
   GenerateServiceTokenResponse,
@@ -36,37 +43,50 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
+import { FLEET_SERVER_CUSTOM_CONFIG } from '../common/fleet_server/fleet_server_services';
+import { isServerlessKibanaFlavor } from '../common/stack_services';
+import type { FormattedAxiosError } from '../common/format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
+import { isLocalhost } from '../common/is_localhost';
 import { dump } from './utils';
-import { isLocalhost } from '../common/localhost_services';
 import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
 export const runFleetServerIfNeeded = async (): Promise<
-  { fleetServerContainerId: string; fleetServerAgentPolicyId: string } | undefined
+  { fleetServerContainerId: string; fleetServerAgentPolicyId: string | undefined } | undefined
 > => {
   let fleetServerContainerId;
   let fleetServerAgentPolicyId;
+  let serviceToken;
 
   const {
     log,
     kibana: { isLocalhost: isKibanaOnLocalhost },
+    kbnClient,
   } = getRuntimeServices();
 
   log.info(`Setting up fleet server (if necessary)`);
   log.indent(4);
+  const isServerless = await isServerlessKibanaFlavor(kbnClient);
+
+  await verifyDockerInstalled(log);
+  await maybeCreateDockerNetwork(log);
 
   try {
-    fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
-    const serviceToken = await generateFleetServiceToken();
-
-    if (isKibanaOnLocalhost) {
-      await configureFleetIfNeeded();
+    if (isServerless) {
+      fleetServerContainerId = await startFleetServerStandAloneWithDocker();
+    } else {
+      fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
+      serviceToken = await generateFleetServiceToken();
+      if (isKibanaOnLocalhost) {
+        await configureFleetIfNeeded();
+      }
+      fleetServerContainerId = await startFleetServerWithDocker({
+        policyId: fleetServerAgentPolicyId,
+        serviceToken,
+      });
     }
-
-    fleetServerContainerId = await startFleetServerWithDocker({
-      policyId: fleetServerAgentPolicyId,
-      serviceToken,
-    });
   } catch (error) {
     log.error(dump(error));
     log.indent(-4);
@@ -85,6 +105,9 @@ const getFleetServerPackagePolicy = async (): Promise<PackagePolicy | undefined>
     .request<GetPackagePoliciesResponse>({
       method: 'GET',
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: {
         perPage: 1,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
@@ -119,6 +142,9 @@ const getOrCreateFleetServerAgentPolicyId = async (): Promise<string> => {
     .request<CreateAgentPolicyResponse>({
       method: 'POST',
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       body: {
         name: `Fleet Server policy (${Math.random().toString(32).substring(2)})`,
         description: `Created by CLI Tool via: ${__filename}`,
@@ -148,6 +174,9 @@ const generateFleetServiceToken = async (): Promise<string> => {
     .request<GenerateServiceTokenResponse>({
       method: 'POST',
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       body: {},
     })
     .then((response) => response.data.value);
@@ -189,39 +218,29 @@ export const startFleetServerWithDocker = async ({
   try {
     const dockerArgs = [
       'run',
-
       '--restart',
       'no',
-
+      '--net',
+      'elastic',
       '--add-host',
       'host.docker.internal:host-gateway',
-
       '--rm',
-
       '--detach',
-
       '--name',
       containerName,
-
       // The container's hostname will appear in Fleet when the agent enrolls
       '--hostname',
       containerName,
-
       '--env',
       'FLEET_SERVER_ENABLE=1',
-
       '--env',
       `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
-
       '--env',
       `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
-
       '--env',
       `FLEET_SERVER_POLICY=${policyId}`,
-
       '--publish',
       `${fleetServerPort}:8220`,
-
       `docker.elastic.co/beats/elastic-agent:${version}`,
     ];
 
@@ -243,11 +262,100 @@ export const startFleetServerWithDocker = async ({
 
     containerId = (await execa('docker', dockerArgs)).stdout;
 
-    const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName);
+    const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName, 120000);
 
     log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
 
     log.info(`Done. Fleet Server is running and connected to Fleet.
+  Container Name: ${containerName}
+  Container Id:   ${containerId}
+
+  View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${containerName}`)}
+  Shell access:         ${chalk.bold(`docker exec -it ${containerName} /bin/bash`)}
+  Kill container:       ${chalk.bold(`docker kill ${containerId}`)}
+`);
+  } catch (error) {
+    log.error(dump(error));
+    log.indent(-4);
+    throw error;
+  }
+
+  log.indent(-4);
+
+  return containerId;
+};
+
+export const startFleetServerStandAloneWithDocker = async () => {
+  let containerId;
+  const {
+    log,
+    elastic: { url: elasticUrl },
+    fleetServer: { port: fleetServerPort },
+  } = getRuntimeServices();
+
+  log.info(`Starting a new fleet server using Docker`);
+  log.indent(4);
+  const esURL = new URL(elasticUrl);
+
+  esURL.hostname = SERVERLESS_NODES[0].name;
+
+  const esUrlWithRealIp = esURL.toString();
+
+  const containerName = `dev-fleet-server.${fleetServerPort}`;
+  try {
+    const dockerArgs = [
+      'run',
+      '--restart',
+      'no',
+      '--net',
+      'elastic',
+      '--add-host',
+      'host.docker.internal:host-gateway',
+      '--rm',
+      '--detach',
+      '--name',
+      containerName,
+      // The container's hostname will appear in Fleet when the agent enrolls
+      '--hostname',
+      containerName,
+      '--volume',
+      `${FLEET_SERVER_CERT_PATH}:/fleet-server.crt`,
+      '--volume',
+      `${FLEET_SERVER_KEY_PATH}:/fleet-server.key`,
+      '--env',
+      'FLEET_SERVER_CERT=/fleet-server.crt',
+      '--env',
+      'FLEET_SERVER_CERT_KEY=/fleet-server.key',
+      '--env',
+      `ELASTICSEARCH_HOSTS=${esUrlWithRealIp}`,
+      '--env',
+      `ELASTICSEARCH_SERVICE_TOKEN=${fleetServerDevServiceAccount.token}`,
+      '--env',
+      `ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=${CA_TRUSTED_FINGERPRINT}`,
+      '--volume',
+      `${FLEET_SERVER_CUSTOM_CONFIG}:/etc/fleet-server.yml:ro`,
+      '--publish',
+      `${fleetServerPort}:8220`,
+      `docker.elastic.co/observability-ci/fleet-server:latest`,
+    ];
+
+    await execa('docker', ['kill', containerName])
+      .then(() => {
+        log.verbose(
+          `Killed an existing container with name [${containerName}]. New one will be started.`
+        );
+      })
+      .catch((error) => {
+        log.verbose(`Attempt to kill currently running fleet-server container (if any) with name [${containerName}] was unsuccessful:
+  ${error}
+(This is ok if one was not running already)`);
+      });
+
+    log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
+
+    containerId = (await execa('docker', dockerArgs)).stdout;
+
+    log.info(`Done. Fleet Server Stand Alone is running and connected to Fleet.
   Container Name: ${containerName}
   Container Id:   ${containerId}
 
@@ -277,6 +385,9 @@ const configureFleetIfNeeded = async () => {
     const fleetOutputs = await kbnClient
       .request<GetOutputsResponse>({
         method: 'GET',
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
         path: outputRoutesService.getListPath(),
       })
       .then((response) => response.data);
@@ -313,11 +424,16 @@ const configureFleetIfNeeded = async () => {
 
             log.info(`Updating Fleet Settings for Output [${output.name} (${id})]`);
 
-            await kbnClient.request<GetOneOutputResponse>({
-              method: 'PUT',
-              path: outputRoutesService.getUpdatePath(id),
-              body: update,
-            });
+            await kbnClient
+              .request<GetOneOutputResponse>({
+                method: 'PUT',
+                headers: {
+                  'elastic-api-version': API_VERSIONS.public.v1,
+                },
+                path: outputRoutesService.getUpdatePath(id),
+                body: update,
+              })
+              .catch(catchAxiosErrorFormatAndThrow);
           }
         }
       }
@@ -352,7 +468,29 @@ const addFleetServerHostToFleetSettings = async (
       .request<PostFleetServerHostsResponse>({
         method: 'POST',
         path: fleetServerHostsRoutesService.getCreatePath(),
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
         body: newFleetHostEntry,
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
+      .catch((error: FormattedAxiosError) => {
+        if (
+          error.response.status === 403 &&
+          ((error.response?.data?.message as string) ?? '').includes('disabled')
+        ) {
+          log.error(`Update failed with [403: ${error.response.data.message}].
+
+${chalk.red('Are you running this utility against a Serverless project?')}
+If so, the following entry should be added to your local
+'config/serverless.[project_type].dev.yml' (ex. 'serverless.security.dev.yml'):
+
+${chalk.bold(chalk.cyan('xpack.fleet.internal.fleetServerStandalone: false'))}
+
+`);
+        }
+
+        throw error;
       })
       .then((response) => response.data);
 

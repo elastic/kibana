@@ -1,8 +1,15 @@
 {
   "snapshot.get_repository": {
     "url_params": {
-      "master_timeout": "",
-      "local": "__flag__"
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -11,6 +18,10 @@
       "_snapshot",
       "_snapshot/{repository}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

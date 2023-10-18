@@ -28,7 +28,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IngestPipelineParams } from '../../../../../../../common/types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { CurlRequest } from '../../components/curl_request/curl_request';

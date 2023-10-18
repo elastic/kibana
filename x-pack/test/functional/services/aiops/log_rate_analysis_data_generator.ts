@@ -7,7 +7,20 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
+  KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
+  FAREQUOTE_WITH_SPIKE: 'farequote_with_spike',
+  ARTIFICIAL_LOGS_WITH_SPIKE_NOTEXTFIELD: 'artificial_logs_with_spike_notextfield',
+  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD: 'artificial_logs_with_spike_textfield',
+  ARTIFICIAL_LOGS_WITH_DIP_NOTEXTFIELD: 'artificial_logs_with_dip_notextfield',
+  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
+} as const;
+export type LogRateAnalysisDataGenerator =
+  typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
 
 export interface GeneratedDoc {
   user: string;
@@ -16,6 +29,7 @@ export interface GeneratedDoc {
   version: string;
   '@timestamp': number;
   should_ignore_this_field: string;
+  message?: string;
 }
 
 const REFERENCE_TS = 1669018354793;
@@ -24,7 +38,16 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-function getArtificialLogsWithSpike(index: string) {
+function getMessage(timestamp: number, user: string, url: string, responseCode: string) {
+  const date = new Date(timestamp);
+  return `${user} [${date.toLocaleString('en-US')}] "GET /${url} HTTP/1.1" ${responseCode}`;
+}
+
+function getArtificialLogsWithDeviation(
+  index: string,
+  deviationType: string,
+  includeTextField = false
+) {
   const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
@@ -44,15 +67,20 @@ function getArtificialLogsWithSpike(index: string) {
           ) {
             tsOffset = 0;
             [...Array(100)].forEach(() => {
-              tsOffset += DAY_MS / 100;
+              tsOffset += Math.round(DAY_MS / 100);
+              const timestamp = ts + tsOffset;
               const doc: GeneratedDoc = {
                 user,
                 response_code: responseCode,
                 url,
                 version: 'v1.0.0',
-                '@timestamp': ts + tsOffset,
+                '@timestamp': timestamp,
                 should_ignore_this_field: 'should_ignore_this_field',
               };
+
+              if (includeTextField) {
+                doc.message = getMessage(timestamp, user, url, responseCode);
+              }
 
               bulkBody.push(action);
               bulkBody.push(doc);
@@ -74,16 +102,25 @@ function getArtificialLogsWithSpike(index: string) {
     ['login.php', 'user.php', 'home.php'].forEach((url) => {
       tsOffset = 0;
       [...Array(docsPerUrl1[url])].forEach(() => {
-        tsOffset += DAY_MS / docsPerUrl1[url];
-        bulkBody.push(action);
-        bulkBody.push({
+        tsOffset += Math.round(DAY_MS / docsPerUrl1[url]);
+        const timestamp =
+          (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) + tsOffset;
+
+        const doc: GeneratedDoc = {
           user: 'Peter',
           response_code: responseCode,
           url,
           version: 'v1.0.0',
-          '@timestamp': DEVIATION_TS + tsOffset,
+          '@timestamp': timestamp,
           should_ignore_this_field: 'should_ignore_this_field',
-        });
+        };
+
+        if (includeTextField) {
+          doc.message = getMessage(timestamp, 'Peter', url, responseCode);
+        }
+
+        bulkBody.push(action);
+        bulkBody.push(doc);
       });
     });
   });
@@ -97,16 +134,25 @@ function getArtificialLogsWithSpike(index: string) {
     ['login.php', 'home.php'].forEach((url) => {
       tsOffset = 0;
       [...Array(docsPerUrl2[url] + userIndex)].forEach(() => {
-        tsOffset += DAY_MS / docsPerUrl2[url];
-        bulkBody.push(action);
-        bulkBody.push({
+        tsOffset += Math.round(DAY_MS / docsPerUrl2[url]);
+        const timestamp =
+          (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) + tsOffset;
+
+        const doc: GeneratedDoc = {
           user,
           response_code: '500',
           url,
           version: 'v1.0.0',
-          '@timestamp': DEVIATION_TS + tsOffset,
+          '@timestamp': timestamp,
           should_ignore_this_field: 'should_ignore_this_field',
-        });
+        };
+
+        if (includeTextField) {
+          doc.message = 'an unexpected error occured';
+        }
+
+        bulkBody.push(action);
+        bulkBody.push(doc);
       });
     });
   });
@@ -120,7 +166,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
   const log = getService('log');
 
   return new (class DataGenerator {
-    public async generateData(dataGenerator: string) {
+    public async generateData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
           // will be added via UI
@@ -158,18 +204,26 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
           break;
 
-        case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_spike_notextfield':
+        case 'artificial_logs_with_spike_textfield':
+        case 'artificial_logs_with_dip_notextfield':
+        case 'artificial_logs_with_dip_textfield':
           try {
-            await es.indices.delete({
-              index: 'artificial_logs_with_spike',
+            const indexExists = await es.indices.exists({
+              index: dataGenerator,
             });
+            if (indexExists) {
+              await es.indices.delete({
+                index: dataGenerator,
+              });
+            }
           } catch (e) {
-            log.info(`Could not delete index 'artificial_logs_with_spike' in before() callback`);
+            log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
 
           // Create index with mapping
           await es.indices.create({
-            index: 'artificial_logs_with_spike',
+            index: dataGenerator,
             mappings: {
               properties: {
                 user: { type: 'keyword' },
@@ -178,13 +232,18 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
                 version: { type: 'keyword' },
                 '@timestamp': { type: 'date' },
                 should_ignore_this_field: { type: 'keyword', doc_values: false, index: false },
+                message: { type: 'text' },
               },
             },
           });
 
+          const dataGeneratorOptions = dataGenerator.split('_');
+          const deviationType = dataGeneratorOptions[3] ?? LOG_RATE_ANALYSIS_TYPE.SPIKE;
+          const textField = dataGeneratorOptions[4] === 'textfield' ?? false;
+
           await es.bulk({
             refresh: 'wait_for',
-            body: getArtificialLogsWithSpike('artificial_logs_with_spike'),
+            body: getArtificialLogsWithDeviation(dataGenerator, deviationType, textField),
           });
           break;
 
@@ -193,7 +252,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
       }
     }
 
-    public async removeGeneratedData(dataGenerator: string) {
+    public async removeGeneratedData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
           // do not remove
@@ -203,13 +262,16 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
           break;
 
-        case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_spike_notextfield':
+        case 'artificial_logs_with_spike_textfield':
+        case 'artificial_logs_with_dip_notextfield':
+        case 'artificial_logs_with_dip_textfield':
           try {
             await es.indices.delete({
-              index: 'artificial_logs_with_spike',
+              index: dataGenerator,
             });
           } catch (e) {
-            log.error(`Error deleting index 'artificial_logs_with_spike' in after() callback`);
+            log.error(`Error deleting index '${dataGenerator}' in after() callback`);
           }
           break;
 

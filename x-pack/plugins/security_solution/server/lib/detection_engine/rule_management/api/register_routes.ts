@@ -62,8 +62,6 @@ export const registerRuleManagementRoutes = (
   // Rules filters
   getRuleManagementFilters(router);
 
-  // Rules dashboard
-  if (config.experimentalFeatures.detectionsCoverageOverview) {
-    getCoverageOverviewRoute(router);
-  }
+  // Rules coverage overview
+  getCoverageOverviewRoute(router);
 };

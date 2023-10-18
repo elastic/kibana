@@ -37,3 +37,12 @@ export const generateEmptyVariableField = (): DevToolsVariable => ({
   name: '',
   value: '',
 });
+
+export const isValidVariableName = (name: string) => {
+  /*
+   * MUST avoid characters that get URL-encoded, because they'll result in unusable variable names.
+   * Common variable names consist of letters, digits, and underscores and do not begin with a digit.
+   * However, the ones beginning with a digit are still allowed here for backward compatibility.
+   */
+  return typeof name === 'string' && name.match(/^[a-zA-Z0-9_]+$/g) !== null;
+};

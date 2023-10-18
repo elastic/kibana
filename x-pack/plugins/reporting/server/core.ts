@@ -46,7 +46,6 @@ import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
 import { CsvV2ExportType } from './export_types/csv_v2';
 import { PdfV1ExportType } from './export_types/printable_pdf';
 import { PdfExportType } from './export_types/printable_pdf_v2';
-import { PngV1ExportType } from './export_types/png';
 import { PngExportType } from './export_types/png_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -79,7 +78,7 @@ export interface ReportingInternalStart {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
-  screenshotting: ScreenshottingStart;
+  screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
@@ -110,7 +109,6 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private exportTypes: ExportType[] = [];
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -126,21 +124,9 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    // Export Type declarations
-    this.exportTypes.push(
-      new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
-    );
-    this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
-    // deprecated export types for tests
-    this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
-
-    this.exportTypes.forEach((et) => {
+    this.getExportTypes().forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
-
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
@@ -148,7 +134,7 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
-      getScreenshots: this.getScreenshots.bind(this),
+      getScreenshots: config.statefulSettings.enabled ? this.getScreenshots.bind(this) : undefined,
       getSpaceId: this.getSpaceId.bind(this),
     });
 
@@ -166,7 +152,7 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.exportTypes.forEach((et) => {
+    this.exportTypesRegistry.getAll().forEach((et) => {
       et.setup(setupDeps);
     });
 
@@ -184,7 +170,7 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    this.exportTypes.forEach((et) => {
+    this.exportTypesRegistry.getAll().forEach((et) => {
       et.start({ ...startDeps, reporting: this.getContract() });
     });
 
@@ -233,6 +219,35 @@ export class ReportingCore {
   public setConfig(config: ReportingConfigType) {
     this.config = config;
     this.pluginSetup$.next(true);
+  }
+
+  /**
+   * Validate export types with config settings
+   * only CSV export types should be registered in the export types registry for serverless
+   */
+  private getExportTypes(): ExportType[] {
+    const { csv, pdf, png } = this.config.export_types;
+    const exportTypes = [];
+
+    if (csv.enabled) {
+      // NOTE: CsvSearchSourceExportType should be deprecated and replaced with V2 in the UI: https://github.com/elastic/kibana/issues/151190
+      exportTypes.push(
+        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
+      );
+      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+    }
+
+    if (pdf.enabled) {
+      // NOTE: PdfV1ExportType is deprecated and tagged for removal: https://github.com/elastic/kibana/issues/154601
+      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
+    }
+
+    if (png.enabled) {
+      exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+    }
+
+    return exportTypes;
   }
 
   /**
@@ -393,7 +408,7 @@ export class ReportingCore {
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshots({
+        return screenshotting!.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>
             typeof url === 'string'

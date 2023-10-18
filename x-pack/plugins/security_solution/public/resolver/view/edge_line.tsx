@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -57,6 +55,7 @@ const StyledElapsedTime = styled.div<StyledElapsedTime>`
 /**
  * A placeholder line segment view that connects process nodes.
  */
+// eslint-disable-next-line react/display-name
 export const EdgeLine = React.memo(
   ({
     className,

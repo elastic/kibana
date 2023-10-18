@@ -1,11 +1,5 @@
 @import 'src/core/public/mixins';
 
-.dshAppWrapper {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-}
-
 .dshUnsavedListingItem {
   margin-top: $euiSizeM;
 }

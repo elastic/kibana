@@ -7,7 +7,7 @@
 
 import { chunk, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IKibanaResponse } from '@kbn/core/server';
 import {
   transformError,
   getBootstrapIndexExists,
@@ -20,6 +20,7 @@ import type {
   SecuritySolutionPluginRouter,
 } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
+import type { CreateIndexResponse } from '../../../../../common/api/detection_engine';
 import { buildSiemResponse } from '../utils';
 import {
   getSignalsTemplate,
@@ -35,34 +36,39 @@ import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 
 export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: DETECTION_ENGINE_INDEX_URL,
-      validate: false,
+      access: 'public',
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, _, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      async (context, _, response): Promise<IKibanaResponse<CreateIndexResponse>> => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const securitySolution = await context.securitySolution;
-        const siemClient = securitySolution?.getAppClient();
-        if (!siemClient) {
-          return siemResponse.error({ statusCode: 404 });
+        try {
+          const securitySolution = await context.securitySolution;
+          const siemClient = securitySolution?.getAppClient();
+          if (!siemClient) {
+            return siemResponse.error({ statusCode: 404 });
+          }
+          await createDetectionIndex(securitySolution);
+          return response.ok({ body: { acknowledged: true } });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-        await createDetectionIndex(securitySolution);
-        return response.ok({ body: { acknowledged: true } });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };
 
 export const createDetectionIndex = async (

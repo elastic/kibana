@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiSpacer } from '@elastic/eui';
+import { useGetProtectionsUnavailableComponent } from '../../../hooks/use_get_protections_unavailable_component';
 import { RelatedDetectionRulesCallout } from '../../related_detection_rules_callout';
 import { ReputationService } from './components/reputation_service';
 import { useTestIdGenerator } from '../../../../../../../hooks/use_test_id_generator';
@@ -42,6 +43,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const protection = 'behavior_protection';
     const protectionLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.protections.behavior',
@@ -49,6 +51,10 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
         defaultMessage: 'Malicious behavior protections',
       }
     );
+
+    if (!isProtectionsAllowed) {
+      return null;
+    }
 
     if (!isPlatinumPlus) {
       return (

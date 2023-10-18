@@ -39,7 +39,8 @@
     "@kbn/shared-ux-router",
     "@kbn/core-application-browser",
     "@kbn/observability-shared-plugin",
-    "@kbn/core-ui-settings-browser-mocks"
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/observability-ai-assistant-plugin"
   ],
   "exclude": ["target/**/*"]
 }

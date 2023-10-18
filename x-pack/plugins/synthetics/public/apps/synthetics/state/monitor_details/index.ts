@@ -19,6 +19,8 @@ import {
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
   getMonitorAction,
+  showOnlyFinalAttemptsAction,
+  setStatusFilter,
 } from './actions';
 
 export interface MonitorDetailsState {
@@ -37,6 +39,8 @@ export interface MonitorDetailsState {
   syntheticsMonitorDispatchedAt: number;
   error: IHttpSerializedFetchError | null;
   selectedLocationId: string | null;
+  showOnlyFinalAttempts?: boolean;
+  statusFilter?: 'up' | 'down' | undefined;
 }
 
 const initialState: MonitorDetailsState = {
@@ -47,6 +51,7 @@ const initialState: MonitorDetailsState = {
   syntheticsMonitorDispatchedAt: 0,
   error: null,
   selectedLocationId: null,
+  showOnlyFinalAttempts: false,
 };
 
 export const monitorDetailsReducer = createReducer(initialState, (builder) => {
@@ -108,8 +113,14 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     })
     .addCase(enableMonitorAlertAction.success, (state, action) => {
       if ('updated_at' in action.payload && state.syntheticsMonitor) {
-        state.syntheticsMonitor = action.payload.attributes as EncryptedSyntheticsSavedMonitor;
+        state.syntheticsMonitor = action.payload;
       }
+    })
+    .addCase(showOnlyFinalAttemptsAction, (state, action) => {
+      state.showOnlyFinalAttempts = action.payload;
+    })
+    .addCase(setStatusFilter, (state, action) => {
+      state.statusFilter = action.payload;
     });
 });
 

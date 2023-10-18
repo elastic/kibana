@@ -4,29 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { stringify } from 'query-string';
-import rison from '@kbn/rison';
+import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import rison from '@kbn/rison';
+import moment from 'moment';
+import { stringify } from 'query-string';
 import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
-  API_BASE_GENERATE,
-  API_BASE_URL,
-  API_GENERATE_IMMEDIATE,
-  API_LIST_URL,
-  API_MIGRATE_ILM_POLICY_URL,
   getRedirectAppPath,
+  INTERNAL_ROUTES,
+  PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import {
-  BaseParams,
-  DownloadReportFn,
-  JobId,
-  ManagementLinkFn,
-  ReportApiJSON,
-} from '../../../common/types';
+import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
@@ -46,7 +38,7 @@ export interface DiagnoseResponse {
 interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
-  getReportingJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+  getReportingPublicJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
   createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
@@ -61,7 +53,6 @@ interface IReportingAPI {
 
   // Function props
   getManagementLink: ManagementLinkFn;
-  getDownloadLink: DownloadReportFn;
 
   // Diagnostic-related API calls
   verifyBrowser(): Promise<DiagnoseResponse>;
@@ -96,9 +87,13 @@ export class ReportingAPIClient implements IReportingAPI {
     return href;
   }
 
+  /**
+   * Get the internal URL
+   */
   public getReportURL(jobId: string) {
-    const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
-    const downloadLink = `${apiBaseUrl}/download/${jobId}`;
+    const downloadLink = this.http.basePath.prepend(
+      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}?${ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM}=true`
+    );
 
     return downloadLink;
   }
@@ -110,9 +105,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async deleteReport(jobId: string) {
-    return await this.http.delete<void>(`${API_LIST_URL}/delete/${jobId}`, {
-      asSystemRequest: true,
-    });
+    return await this.http.delete<void>(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${jobId}`);
   }
 
   public async list(page = 0, jobIds: string[] = []) {
@@ -122,7 +115,7 @@ export class ReportingAPIClient implements IReportingAPI {
       query.ids = jobIds.slice(0, 10).join(',');
     }
 
-    const jobQueueEntries: ReportApiJSON[] = await this.http.get(`${API_LIST_URL}/list`, {
+    const jobQueueEntries: ReportApiJSON[] = await this.http.get(INTERNAL_ROUTES.JOBS.LIST, {
       query,
       asSystemRequest: true,
     });
@@ -131,7 +124,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async total() {
-    return await this.http.get<number>(`${API_LIST_URL}/count`, {
+    return await this.http.get<number>(INTERNAL_ROUTES.JOBS.COUNT, {
       asSystemRequest: true,
     });
   }
@@ -151,47 +144,50 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async getInfo(jobId: string) {
-    const report: ReportApiJSON = await this.http.get(`${API_LIST_URL}/info/${jobId}`, {
-      asSystemRequest: true,
-    });
+    const report: ReportApiJSON = await this.http.get(
+      `${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/${jobId}`
+    );
     return new Job(report);
   }
 
   public async findForJobIds(jobIds: JobId[]) {
-    const reports: ReportApiJSON[] = await this.http.fetch(`${API_LIST_URL}/list`, {
+    const reports: ReportApiJSON[] = await this.http.fetch(INTERNAL_ROUTES.JOBS.LIST, {
       query: { page: 0, ids: jobIds.join(',') },
       method: 'GET',
     });
     return reports.map((report) => new Job(report));
   }
 
-  public getReportingJobPath(exportType: string, jobParams: BaseParams) {
+  /**
+   * Returns a string for the public API endpoint used to automate the generation of reports
+   * This string must be shown when the user selects the option to view/copy the POST URL
+   */
+  public getReportingPublicJobPath(exportType: string, jobParams: BaseParams) {
     const params = stringify({
       jobParams: rison.encode(jobParams),
     });
-    return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
+    return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;
   }
 
+  /**
+   * Calls the internal API to generate a report job on-demand
+   */
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
     const resp: { job: ReportApiJSON } = await this.http.post(
-      `${API_BASE_GENERATE}/${exportType}`,
+      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
       {
         method: 'POST',
-        body: JSON.stringify({
-          jobParams: jobParamsRison,
-        }),
+        body: JSON.stringify({ jobParams: jobParamsRison }),
       }
     );
-
     add(resp.job.id);
-
     return new Job(resp.job);
   }
 
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
-    return this.http.post(`${API_GENERATE_IMMEDIATE}`, {
+    return this.http.post(INTERNAL_ROUTES.DOWNLOAD_CSV, {
       asResponse: true,
       body: JSON.stringify(params),
     });
@@ -216,24 +212,19 @@ export class ReportingAPIClient implements IReportingAPI {
   public getManagementLink: ManagementLinkFn = () =>
     this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
 
-  public getDownloadLink: DownloadReportFn = (jobId: JobId) =>
-    this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
+  public getDownloadLink = (jobId: JobId) => this.getReportURL(jobId);
 
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/browser`, {
-      asSystemRequest: true,
-    });
+    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER);
   }
 
   public verifyScreenCapture() {
-    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/screenshot`, {
-      asSystemRequest: true,
-    });
+    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT);
   }
 
   public migrateReportingIndicesIlmPolicy() {
-    return this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
+    return this.http.put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY);
   }
 }

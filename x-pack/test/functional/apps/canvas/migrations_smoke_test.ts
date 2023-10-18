@@ -9,7 +9,7 @@ import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
+  const PageObjects = getPageObjects(['settings', 'savedObjects']);
 
   describe('migration smoke test', function () {
     it('imports an 8.2 workpad', async function () {

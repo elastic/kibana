@@ -8,12 +8,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -234,21 +229,15 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
   }
 
   if (isLoading) {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
-      </EuiPageContent>
-    );
+    return <SectionLoading>{i18nTexts.isLoading}</SectionLoading>;
   }
 
   if (kibanaDeprecations?.length === 0) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <NoDeprecationsPrompt
-          deprecationType={i18nTexts.deprecationLabel}
-          navigateToOverviewPage={() => history.push('/overview')}
-        />
-      </EuiPageContent>
+      <NoDeprecationsPrompt
+        deprecationType={i18nTexts.deprecationLabel}
+        navigateToOverviewPage={() => history.push('/overview')}
+      />
     );
   }
 

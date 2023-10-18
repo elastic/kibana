@@ -6,6 +6,7 @@
  */
 
 export enum ErrorCode {
+  ACCESS_CONTROL_DISABLED = 'access_control_disabled',
   ANALYTICS_COLLECTION_ALREADY_EXISTS = 'analytics_collection_already_exists',
   ANALYTICS_COLLECTION_NOT_FOUND = 'analytics_collection_not_found',
   CONNECTOR_DOCUMENT_ALREADY_EXISTS = 'connector_document_already_exists',
@@ -22,6 +23,7 @@ export enum ErrorCode {
   SEARCH_APPLICATION_ALREADY_EXISTS = 'search_application_already_exists',
   SEARCH_APPLICATION_NAME_INVALID = 'search_application_name_invalid',
   SEARCH_APPLICATION_NOT_FOUND = 'search_application_not_found',
+  SEARCH_APPLICATION_ALIAS_NOT_FOUND = 'search_application_alias_not_found',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
 }

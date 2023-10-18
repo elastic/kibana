@@ -116,6 +116,7 @@ export const AnnotationDescriptionList = ({ annotation, detectorDescription }: P
       data-test-subj={'mlAnnotationDescriptionList'}
       className="ml-annotation-description-list"
       type="column"
+      columnWidths={[3, 7]}
       listItems={listItems}
     />
   );

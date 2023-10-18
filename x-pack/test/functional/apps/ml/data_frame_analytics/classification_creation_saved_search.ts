@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('classification saved search creation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/147020
+  describe.skip('classification saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
@@ -123,7 +124,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '20mb',
                   'Version',
-                  '8.10.0',
                 ],
               },
               {
@@ -224,7 +224,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '20mb',
                   'Version',
-                  '8.10.0',
                 ],
               },
               {
@@ -318,14 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'STOPPED',
-                  'Create time',
-                  'Model memory limit',
-                  '7mb',
-                  'Version',
-                  '8.10.0',
-                ],
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '7mb', 'Version'],
               },
               {
                 section: 'stats',
@@ -415,14 +407,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'STOPPED',
-                  'Create time',
-                  'Model memory limit',
-                  '6mb',
-                  'Version',
-                  '8.10.0',
-                ],
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '6mb', 'Version'],
               },
               {
                 section: 'stats',

@@ -26,7 +26,7 @@
         "tags": [],
         "label": "buildSamplerAggregation",
         "description": [
-          "\nWraps the supplied aggregations in a sampler aggregation.\nA supplied samplerShardSize (the shard_size parameter of the sampler aggregation)\nof less than 1 indicates no sampling, and the aggs are returned as-is."
+          "\nWraps the supplied aggregations in a sampler aggregation.\nA supplied samplerShardSize (the shard_size parameter of the sampler aggregation)\nof less than 1 indicates no sampling, and the aggs are returned as-is.\n"
         ],
         "signature": [
           "(aggs: any, shardSize: number) => Record<string, ",
@@ -43,7 +43,9 @@
             "type": "Any",
             "tags": [],
             "label": "aggs",
-            "description": [],
+            "description": [
+              "- The aggregations to be wrapped in the sampler aggregation."
+            ],
             "signature": [
               "any"
             ],
@@ -58,7 +60,9 @@
             "type": "number",
             "tags": [],
             "label": "shardSize",
-            "description": [],
+            "description": [
+              "- The shard size parameter for the sampler aggregation.\n  A value less than 1 indicates no sampling."
+            ],
             "signature": [
               "number"
             ],
@@ -68,7 +72,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The wrapped aggregations."
+        ],
         "initialIsOpen": false
       },
       {
@@ -78,7 +84,7 @@
         "tags": [],
         "label": "fetchAggIntervals",
         "description": [
-          "\nReturns aggregation intervals for the supplied document fields."
+          "\nReturns aggregation intervals for the supplied document fields.\n"
         ],
         "signature": [
           "(client: ",
@@ -121,7 +127,9 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": [],
+            "description": [
+              "- The Elasticsearch client."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
@@ -142,7 +150,9 @@
             "type": "string",
             "tags": [],
             "label": "indexPattern",
-            "description": [],
+            "description": [
+              "- The index pattern to search."
+            ],
             "signature": [
               "string"
             ],
@@ -157,7 +167,9 @@
             "type": "Object",
             "tags": [],
             "label": "query",
-            "description": [],
+            "description": [
+              "- The query to filter documents."
+            ],
             "signature": [
               "QueryDslQueryContainer"
             ],
@@ -172,7 +184,9 @@
             "type": "Array",
             "tags": [],
             "label": "fields",
-            "description": [],
+            "description": [
+              "- An array of field definitions for which aggregation intervals are requested."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
@@ -194,7 +208,9 @@
             "type": "number",
             "tags": [],
             "label": "samplerShardSize",
-            "description": [],
+            "description": [
+              "- The shard size parameter for sampling aggregations. A value less than 1 indicates no sampling."
+            ],
             "signature": [
               "number"
             ],
@@ -209,7 +225,9 @@
             "type": "Object",
             "tags": [],
             "label": "runtimeMappings",
-            "description": [],
+            "description": [
+              "- Optional runtime mappings to apply."
+            ],
             "signature": [
               "MappingRuntimeFields",
               " | undefined"
@@ -225,7 +243,9 @@
             "type": "Object",
             "tags": [],
             "label": "abortSignal",
-            "description": [],
+            "description": [
+              "- Optional AbortSignal for canceling the request."
+            ],
             "signature": [
               "AbortSignal | undefined"
             ],
@@ -240,7 +260,9 @@
             "type": "number",
             "tags": [],
             "label": "randomSamplerProbability",
-            "description": [],
+            "description": [
+              "- Optional probability value for random sampling."
+            ],
             "signature": [
               "number | undefined"
             ],
@@ -255,7 +277,9 @@
             "type": "number",
             "tags": [],
             "label": "randomSamplerSeed",
-            "description": [],
+            "description": [
+              "- Optional seed value for random sampling."
+            ],
             "signature": [
               "number | undefined"
             ],
@@ -265,7 +289,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A promise that resolves to a map of aggregation intervals for the specified fields."
+        ],
         "initialIsOpen": false
       },
       {
@@ -431,7 +457,9 @@
             "type": "Object",
             "tags": [],
             "label": "abortSignal",
-            "description": [],
+            "description": [
+              "optional abort signal"
+            ],
             "signature": [
               "AbortSignal | undefined"
             ],
@@ -486,7 +514,9 @@
         "type": "Function",
         "tags": [],
         "label": "getSamplerAggregationsResponsePath",
-        "description": [],
+        "description": [
+          "\nReturns the path of aggregations in the Elasticsearch response as an array,\ndepending on whether sampling is being used.\n"
+        ],
         "signature": [
           "(samplerShardSize: number) => string[]"
         ],
@@ -500,7 +530,9 @@
             "type": "number",
             "tags": [],
             "label": "samplerShardSize",
-            "description": [],
+            "description": [
+              "- The shard size parameter of the sampler aggregation.\n  A value less than 1 indicates no sampling."
+            ],
             "signature": [
               "number"
             ],
@@ -510,7 +542,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "An array representing the path of aggregations in the response."
+        ],
         "initialIsOpen": false
       },
       {
@@ -705,13 +739,15 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.numberValidator",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "throws"
+        ],
         "label": "numberValidator",
         "description": [
-          "\nValidate if a number is greater than a specified minimum & lesser than specified maximum"
+          "\nValidate if a number is within specified minimum and maximum bounds.\n"
         ],
         "signature": [
-          "(conditions: { min?: number | undefined; max?: number | undefined; integerOnly?: boolean | undefined; } | undefined) => (value: number) => ",
+          "(conditions: NumberValidatorConditions | undefined) => ((value: number) => ",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -719,7 +755,8 @@
             "section": "def-common.NumberValidationResult",
             "text": "NumberValidationResult"
           },
-          " | null"
+          " | null) & ",
+          "MemoizedFunction"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
@@ -731,57 +768,21 @@
             "type": "Object",
             "tags": [],
             "label": "conditions",
-            "description": [],
+            "description": [
+              "- An optional object containing validation conditions."
+            ],
+            "signature": [
+              "NumberValidatorConditions | undefined"
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-common.numberValidator.$1.min",
-                "type": "number",
-                "tags": [],
-                "label": "min",
-                "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
-                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-common.numberValidator.$1.max",
-                "type": "number",
-                "tags": [],
-                "label": "max",
-                "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
-                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-common.numberValidator.$1.integerOnly",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "integerOnly",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "validation results."
+        ],
         "initialIsOpen": false
       }
     ],
@@ -790,7 +791,9 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.AggCardinality",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "AggCardinality",
         "description": [
           "\nInterface for cardinality aggregation."
@@ -805,7 +808,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "cardinality",
-            "description": [],
+            "description": [
+              "The cardinality aggregation configuration"
+            ],
             "signature": [
               "FieldAggCardinality | ScriptAggCardinality"
             ],
@@ -835,7 +840,9 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": [],
+            "description": [
+              "The field name."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -846,7 +853,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldValue",
-            "description": [],
+            "description": [
+              "\nFor dynamic fieldValues we only identify fields as `string`,\nbut for example `http.response.status_code` which is part of\nof the list of predefined field candidates is of type long/number"
+            ],
             "signature": [
               "string | number"
             ],
@@ -861,10 +870,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.HistogramField",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "HistogramField",
         "description": [
-          "\nParameters to identify which histogram data needs to be generated for a field."
+          "\nRepresents parameters used to identify which histogram data needs to be generated for a field."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -876,7 +887,9 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": [],
+            "description": [
+              "\nThe name of the field for which histogram data is generated."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -887,7 +900,9 @@
             "type": "Enum",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe type of the field, using Kibana field types."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/field-types",
@@ -908,9 +923,13 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.NumberValidationResult",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "NumberValidationResult",
-        "description": [],
+        "description": [
+          "\nRepresents the result of number validation."
+        ],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -921,7 +940,9 @@
             "type": "boolean",
             "tags": [],
             "label": "min",
-            "description": [],
+            "description": [
+              "The minimum allowed value."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -932,7 +953,9 @@
             "type": "boolean",
             "tags": [],
             "label": "max",
-            "description": [],
+            "description": [
+              "The maximum allowed value."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -943,7 +966,9 @@
             "type": "boolean",
             "tags": [],
             "label": "integerOnly",
-            "description": [],
+            "description": [
+              "Boolean flag to allow integer values only."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -955,10 +980,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.NumericChartData",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "NumericChartData",
         "description": [
-          "\nInterface to describe the data structure returned for numeric based charts."
+          "\nInterface describing the data structure returned for numeric-based charts."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
@@ -970,7 +997,9 @@
             "type": "Array",
             "tags": [],
             "label": "data",
-            "description": [],
+            "description": [
+              "\nAn array of data points, each represented by a NumericDataItem."
+            ],
             "signature": [
               "NumericDataItem[]"
             ],
@@ -984,7 +1013,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "\nThe identifier for the data set."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -995,7 +1026,9 @@
             "type": "number",
             "tags": [],
             "label": "interval",
-            "description": [],
+            "description": [
+              "\nThe interval value for the data."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1006,7 +1039,9 @@
             "type": "Object",
             "tags": [],
             "label": "stats",
-            "description": [],
+            "description": [
+              "\nAn array of statistics values, typically [min, max]."
+            ],
             "signature": [
               "[number, number]"
             ],
@@ -1020,7 +1055,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe type of chart, which is 'numeric'."
+            ],
             "signature": [
               "\"numeric\""
             ],
@@ -1035,10 +1072,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.NumericColumnStats",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "NumericColumnStats",
         "description": [
-          "\nInterface to describe attributes used for histograms."
+          "\nInterface describing attributes used for numeric histograms."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1050,7 +1089,9 @@
             "type": "number",
             "tags": [],
             "label": "interval",
-            "description": [],
+            "description": [
+              "The interval value for the histogram."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1061,7 +1102,9 @@
             "type": "number",
             "tags": [],
             "label": "min",
-            "description": [],
+            "description": [
+              "The minimum value in the histogram."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1072,7 +1115,9 @@
             "type": "number",
             "tags": [],
             "label": "max",
-            "description": [],
+            "description": [
+              "The maximum value in the histogram."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1116,7 +1161,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe type of the numeric histogram field."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/field-types",
@@ -1146,10 +1193,13 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.SignificantTerm",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface",
+          "extends"
+        ],
         "label": "SignificantTerm",
         "description": [
-          "\nSignificant term meta data for a field/value pair.\nNote this is used as a custom type within Log Rate Analysis\nfor a p-value based variant, not a generic significant terms\naggregation type."
+          "\nRepresents significant term metadata for a field/value pair.\nThis interface is used as a custom type within Log Rate Analysis\nfor a p-value based variant, not related to the generic\nsignificant terms aggregation type.\n"
         ],
         "signature": [
           {
@@ -1174,11 +1224,42 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The key associated with the significant term."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the significant term."
+            ],
+            "signature": [
+              "\"keyword\" | \"log_pattern\""
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
             "id": "def-common.SignificantTerm.doc_count",
             "type": "number",
             "tags": [],
             "label": "doc_count",
-            "description": [],
+            "description": [
+              "The document count for the significant term."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1189,7 +1270,9 @@
             "type": "number",
             "tags": [],
             "label": "bg_count",
-            "description": [],
+            "description": [
+              "The background count for the significant term."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1200,7 +1283,9 @@
             "type": "number",
             "tags": [],
             "label": "total_doc_count",
-            "description": [],
+            "description": [
+              "The total document count for all terms."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1211,7 +1296,9 @@
             "type": "number",
             "tags": [],
             "label": "total_bg_count",
-            "description": [],
+            "description": [
+              "The total background count for all terms."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1222,7 +1309,9 @@
             "type": "number",
             "tags": [],
             "label": "score",
-            "description": [],
+            "description": [
+              "The score associated with the significant term."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1233,7 +1322,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
-            "description": [],
+            "description": [
+              "The p-value for the significant term, or null if not available."
+            ],
             "signature": [
               "number | null"
             ],
@@ -1247,7 +1338,9 @@
             "type": "number",
             "tags": [],
             "label": "normalizedScore",
-            "description": [],
+            "description": [
+              "The normalized score for the significant term."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1258,7 +1351,9 @@
             "type": "Array",
             "tags": [],
             "label": "histogram",
-            "description": [],
+            "description": [
+              "An optional histogram of significant term items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
@@ -1279,7 +1374,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "unique",
-            "description": [],
+            "description": [
+              "Indicates if the significant term is unique within a group."
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -1294,10 +1391,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.SignificantTermGroup",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "SignificantTermGroup",
         "description": [
-          "\nTree leaves"
+          "\nRepresents a significant term group."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1309,7 +1408,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "The identifier for the item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1320,7 +1421,9 @@
             "type": "Array",
             "tags": [],
             "label": "group",
-            "description": [],
+            "description": [
+              "An array of significant term group items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
@@ -1341,7 +1444,9 @@
             "type": "number",
             "tags": [],
             "label": "docCount",
-            "description": [],
+            "description": [
+              "The document count associated with this item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1352,7 +1457,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
-            "description": [],
+            "description": [
+              "The p-value for this item, or null if not available."
+            ],
             "signature": [
               "number | null"
             ],
@@ -1366,7 +1473,9 @@
             "type": "Array",
             "tags": [],
             "label": "histogram",
-            "description": [],
+            "description": [
+              "An optional array of significant term histogram items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
@@ -1388,10 +1497,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.SignificantTermGroupHistogram",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "SignificantTermGroupHistogram",
         "description": [
-          "\nHistogram data for a group of field/value pairs."
+          "\nRepresents histogram data for a group of field/value pairs."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1403,7 +1514,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "The identifier for the group."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1414,7 +1527,9 @@
             "type": "Array",
             "tags": [],
             "label": "histogram",
-            "description": [],
+            "description": [
+              "An array of significant term histogram items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
@@ -1436,9 +1551,13 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.SignificantTermGroupItem",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "SignificantTermGroupItem",
-        "description": [],
+        "description": [
+          "\nRepresents an item in a significant term group."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
@@ -1462,11 +1581,42 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupItem.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The key associated with the significant term."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupItem.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the significant term."
+            ],
+            "signature": [
+              "\"keyword\" | \"log_pattern\""
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
             "id": "def-common.SignificantTermGroupItem.docCount",
             "type": "number",
             "tags": [],
             "label": "docCount",
-            "description": [],
+            "description": [
+              "The document count associated with this item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1477,7 +1627,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
-            "description": [],
+            "description": [
+              "The p-value for this item, or null if not available."
+            ],
             "signature": [
               "number | null"
             ],
@@ -1491,7 +1643,9 @@
             "type": "number",
             "tags": [],
             "label": "duplicate",
-            "description": [],
+            "description": [
+              "An optional number of duplicates."
+            ],
             "signature": [
               "number | undefined"
             ],
@@ -1506,10 +1660,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.SignificantTermHistogram",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "SignificantTermHistogram",
         "description": [
-          "\nHistogram data for a field/value pair."
+          "\nRepresents histogram data for a field/value pair."
         ],
         "signature": [
           {
@@ -1538,7 +1694,9 @@
             "type": "Array",
             "tags": [],
             "label": "histogram",
-            "description": [],
+            "description": [
+              "An array of significant term histogram items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
@@ -1560,10 +1718,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.SignificantTermHistogramItem",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "SignificantTermHistogramItem",
         "description": [
-          "\nSignificant term histogram data item."
+          "\nRepresents a data item in a significant term histogram."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1575,7 +1735,9 @@
             "type": "number",
             "tags": [],
             "label": "doc_count_overall",
-            "description": [],
+            "description": [
+              "The document count for this item in the overall context."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1586,7 +1748,9 @@
             "type": "number",
             "tags": [],
             "label": "doc_count_significant_term",
-            "description": [],
+            "description": [
+              "The document count for this item in the significant term context."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1597,7 +1761,9 @@
             "type": "number",
             "tags": [],
             "label": "key",
-            "description": [],
+            "description": [
+              "The numeric key associated with this item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1608,7 +1774,9 @@
             "type": "string",
             "tags": [],
             "label": "key_as_string",
-            "description": [],
+            "description": [
+              "The string representation of the key."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1700,8 +1868,43 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantTermType",
+        "type": "Type",
+        "tags": [],
+        "label": "SignificantTermType",
+        "description": [
+          "\nRepresents the type of significant term as determined by the SIGNIFICANT_TERM_TYPE enumeration."
+        ],
+        "signature": [
+          "\"keyword\" | \"log_pattern\""
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SIGNIFICANT_TERM_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "SIGNIFICANT_TERM_TYPE",
+        "description": [
+          "\nEnumeration of significant term types."
+        ],
+        "signature": [
+          "{ readonly KEYWORD: \"keyword\"; readonly LOG_PATTERN: \"log_pattern\"; }"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

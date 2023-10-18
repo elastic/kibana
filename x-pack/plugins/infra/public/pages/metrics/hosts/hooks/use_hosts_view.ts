@@ -43,18 +43,18 @@ export const useHostsView = () => {
   const {
     services: { http },
   } = useKibanaContextForPlugin();
-  const { buildQuery, getParsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const abortCtrlRef = useRef(new AbortController());
 
   const baseRequest = useMemo(
     () =>
       createInfraMetricsRequest({
-        dateRange: getParsedDateRange(),
+        dateRange: parsedDateRange,
         esQuery: buildQuery(),
         sourceId,
         limit: searchCriteria.limit,
       }),
-    [buildQuery, getParsedDateRange, sourceId, searchCriteria.limit]
+    [buildQuery, parsedDateRange, sourceId, searchCriteria.limit]
   );
 
   const [state, refetch] = useAsyncFn(

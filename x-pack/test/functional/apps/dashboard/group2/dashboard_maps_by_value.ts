@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
-  const appsMenu = getService('appsMenu');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
 
@@ -60,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       if (!saveToDashboard) {
-        await appsMenu.clickLink('Dashboard');
+        await PageObjects.dashboard.navigateToAppFromAppsMenu();
       }
     } else {
       await PageObjects.maps.clickSaveAndReturnButton();
@@ -70,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   async function createNewDashboard() {
-    await PageObjects.common.navigateToApp('dashboard');
+    await PageObjects.dashboard.navigateToApp();
     await PageObjects.dashboard.preserveCrossAppState();
     await PageObjects.dashboard.clickNewDashboard();
   }

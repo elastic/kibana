@@ -11,12 +11,12 @@ import { useRouteMatch } from 'react-router-dom';
 import { useValues } from 'kea';
 
 import {
-  EuiPage,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
+  EuiPageSidebar,
   EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiCallOut,
   EuiSpacer,
+  EuiPageTemplate,
 } from '@elastic/eui';
 
 import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '..';
@@ -47,13 +47,22 @@ export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
     <>
       {pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
       <AccountHeader />
-      <EuiPage className="personalDashboardLayout" paddingSize="none">
-        <EuiPageSideBar role="navigation" className="personalDashboardLayout__sideBar" sticky>
+      <EuiPageTemplate className="personalDashboardLayout" paddingSize="none">
+        <EuiPageSidebar
+          role="navigation"
+          className="personalDashboardLayout__sideBar"
+          sticky
+          minWidth="480px"
+        >
           {useRouteMatch(PRIVATE_SOURCES_PATH) && <PrivateSourcesSidebar />}
           {useRouteMatch(PERSONAL_SETTINGS_PATH) && <AccountSettingsSidebar />}
-        </EuiPageSideBar>
+        </EuiPageSidebar>
         <EuiPageBody component="main" panelled role="main">
-          <EuiPageContentBody className="personalDashboardLayout__body" restrictWidth>
+          <EuiPageSection
+            className="personalDashboardLayout__body"
+            paddingSize="none"
+            restrictWidth
+          >
             {readOnlyMode && (
               <>
                 <EuiCallOut
@@ -65,10 +74,11 @@ export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
               </>
             )}
             <FlashMessages />
+
             {isLoading ? <Loading /> : children}
-          </EuiPageContentBody>
+          </EuiPageSection>
         </EuiPageBody>
-      </EuiPage>
+      </EuiPageTemplate>
     </>
   );
 };

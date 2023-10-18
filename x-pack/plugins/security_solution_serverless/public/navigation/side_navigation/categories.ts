@@ -15,11 +15,12 @@ import { ExternalPageName } from '../links/constants';
 export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.dashboards],
+    linkIds: [ExternalPageName.discover, SecurityPageName.dashboards],
   },
   {
     type: LinkCategoryType.separator,
     linkIds: [
+      SecurityPageName.rulesLanding,
       SecurityPageName.alerts,
       SecurityPageName.cloudSecurityPostureFindings,
       SecurityPageName.case,
@@ -28,17 +29,17 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
     linkIds: [
-      SecurityPageName.timelines,
-      SecurityPageName.threatIntelligenceIndicators,
+      SecurityPageName.investigations,
+      SecurityPageName.threatIntelligence,
       SecurityPageName.exploreLanding,
     ],
   },
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.rulesLanding],
+    linkIds: [ExternalPageName.fleet, SecurityPageName.assets],
   },
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.mlLanding, ExternalPageName.devToolsRoot],
+    linkIds: [SecurityPageName.mlLanding],
   },
 ];

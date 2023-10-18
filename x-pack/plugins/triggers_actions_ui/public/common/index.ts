@@ -24,7 +24,7 @@ export {
 export { connectorDeprecatedMessage, deprecatedMessage } from './connectors_selection';
 export type { IOption } from './index_controls';
 export { getFields, getIndexOptions, firstFieldOption } from './index_controls';
-export { getTimeFieldOptions, useKibana } from './lib';
+export { getTimeFieldOptions, getTimeOptions, useKibana } from './lib';
 export type {
   Comparator,
   AggregationType,

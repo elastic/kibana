@@ -27,8 +27,6 @@ describe('Duration', () => {
       expect(new Duration(1, DurationUnit.Day).format()).toBe('1d');
       expect(new Duration(1, DurationUnit.Week).format()).toBe('1w');
       expect(new Duration(1, DurationUnit.Month).format()).toBe('1M');
-      expect(new Duration(1, DurationUnit.Quarter).format()).toBe('1Q');
-      expect(new Duration(1, DurationUnit.Year).format()).toBe('1Y');
     });
   });
 
@@ -39,31 +37,25 @@ describe('Duration', () => {
       expect(short.isShorterThan(new Duration(1, DurationUnit.Day))).toBe(true);
       expect(short.isShorterThan(new Duration(1, DurationUnit.Week))).toBe(true);
       expect(short.isShorterThan(new Duration(1, DurationUnit.Month))).toBe(true);
-      expect(short.isShorterThan(new Duration(1, DurationUnit.Quarter))).toBe(true);
-      expect(short.isShorterThan(new Duration(1, DurationUnit.Year))).toBe(true);
     });
 
     it('returns false when the current duration is longer (or equal) than the other duration', () => {
-      const long = new Duration(1, DurationUnit.Year);
+      const long = new Duration(1, DurationUnit.Month);
       expect(long.isShorterThan(new Duration(1, DurationUnit.Minute))).toBe(false);
       expect(long.isShorterThan(new Duration(1, DurationUnit.Hour))).toBe(false);
       expect(long.isShorterThan(new Duration(1, DurationUnit.Day))).toBe(false);
       expect(long.isShorterThan(new Duration(1, DurationUnit.Week))).toBe(false);
       expect(long.isShorterThan(new Duration(1, DurationUnit.Month))).toBe(false);
-      expect(long.isShorterThan(new Duration(1, DurationUnit.Quarter))).toBe(false);
-      expect(long.isShorterThan(new Duration(1, DurationUnit.Year))).toBe(false);
     });
   });
 
   describe('isLongerOrEqualThan', () => {
     it('returns true when the current duration is longer or equal than the other duration', () => {
-      const long = new Duration(2, DurationUnit.Year);
+      const long = new Duration(2, DurationUnit.Month);
       expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Hour))).toBe(true);
       expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Day))).toBe(true);
       expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Week))).toBe(true);
       expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Month))).toBe(true);
-      expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Quarter))).toBe(true);
-      expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Year))).toBe(true);
     });
 
     it('returns false when the current duration is shorter than the other duration', () => {
@@ -73,8 +65,6 @@ describe('Duration', () => {
       expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Day))).toBe(false);
       expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Week))).toBe(false);
       expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Month))).toBe(false);
-      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Quarter))).toBe(false);
-      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Year))).toBe(false);
     });
   });
 

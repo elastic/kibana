@@ -33,12 +33,7 @@ const COMBOBOX_PADDINGS = 20;
 const DEFAULT_FONT = '14px Inter';
 
 class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
-  comboBoxRef: React.RefObject<HTMLInputElement>;
-
-  constructor(props: PhrasesValuesInputProps) {
-    super(props);
-    this.comboBoxRef = React.createRef();
-  }
+  comboBoxWrapperRef = React.createRef<HTMLDivElement>();
 
   public render() {
     const { suggestions } = this.state;
@@ -46,7 +41,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
 
     return (
-      <div ref={this.comboBoxRef}>
+      <div ref={this.comboBoxWrapperRef}>
         <StringComboBox
           fullWidth={fullWidth}
           compressed={compressed}
@@ -79,7 +74,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
                   defaultComboboxWidth={DEFAULT_COMBOBOX_WIDTH}
                   defaultFont={DEFAULT_FONT}
                   comboboxPaddings={COMBOBOX_PADDINGS}
-                  comboBoxRef={this.comboBoxRef}
+                  comboBoxWrapperRef={this.comboBoxWrapperRef}
                   label={option.label}
                   search={searchValue}
                 />

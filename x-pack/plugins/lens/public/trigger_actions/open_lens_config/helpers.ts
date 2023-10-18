@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import './helpers.scss';
+import { IEmbeddable, tracksOverlays } from '@kbn/embeddable-plugin/public';
+import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isLensEmbeddable } from '../utils';
@@ -19,17 +20,10 @@ interface Context {
   theme: ThemeServiceStart;
 }
 
-interface TracksOverlays {
-  openOverlay: (ref: OverlayRef) => void;
-  clearOverlays: () => void;
-}
-
-function tracksOverlays(root: unknown): root is TracksOverlays {
-  return Boolean((root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays);
-}
-
 export async function isActionCompatible(embeddable: IEmbeddable) {
-  return Boolean(isLensEmbeddable(embeddable) && embeddable.isTextBasedLanguage());
+  // display the action only if dashboard is on editable mode
+  const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
+  return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
 }
 
 export async function executeAction({ embeddable, startDependencies, overlays, theme }: Context) {
@@ -54,6 +48,7 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
         }
       ),
       {
+        className: 'lnsConfigPanel__overlay',
         size: 's',
         'data-test-subj': 'customizeLens',
         type: 'push',
@@ -65,6 +60,6 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
         outsideClickCloses: true,
       }
     );
-    overlayTracker?.openOverlay(handle);
+    overlayTracker?.openOverlay(handle, { focusedPanelId: embeddable.id });
   }
 }

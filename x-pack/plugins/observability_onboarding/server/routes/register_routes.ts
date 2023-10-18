@@ -25,6 +25,7 @@ interface RegisterRoutes {
   logger: Logger;
   plugins: ObservabilityOnboardingRouteHandlerResources['plugins'];
   config: ObservabilityOnboardingConfig;
+  kibanaVersion: string;
   services: {
     esLegacyConfigService: EsLegacyConfigService;
   };
@@ -36,6 +37,7 @@ export function registerRoutes({
   logger,
   plugins,
   config,
+  kibanaVersion,
   services,
 }: RegisterRoutes) {
   const routes = Object.values(repository);
@@ -82,6 +84,7 @@ export function registerRoutes({
               },
             },
             config,
+            kibanaVersion,
             services,
           })) as any;
 

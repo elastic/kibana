@@ -9,6 +9,7 @@ import type { CoverageOverviewRule } from './rule';
 import type { CoverageOverviewMitreTechnique } from './mitre_technique';
 
 export interface CoverageOverviewMitreTactic {
+  id: string;
   name: string;
   /**
    * An url leading to the tactic's page

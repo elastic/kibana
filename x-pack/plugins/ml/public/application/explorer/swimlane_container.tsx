@@ -244,6 +244,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const isPaginationVisible =
     (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
+    swimlaneLimit > (perPage ?? 5) &&
     onPaginationChange &&
     fromPage &&
     perPage;
@@ -451,6 +452,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         xDomain={xDomain}
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
+                        locale={i18n.getLocale()}
                       />
 
                       <Heatmap

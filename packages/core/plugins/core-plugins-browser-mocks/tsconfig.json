@@ -16,6 +16,7 @@
     "@kbn/logging-mocks",
     "@kbn/core-plugins-browser-internal",
     "@kbn/core-plugins-browser",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",

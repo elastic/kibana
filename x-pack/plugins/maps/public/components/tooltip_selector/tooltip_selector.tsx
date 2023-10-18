@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, ComponentProps, Fragment } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonIcon,
@@ -144,12 +144,9 @@ export class TooltipSelector extends Component<Props, State> {
     }
   };
 
-  _onDragEnd = ({
+  _onDragEnd: ComponentProps<typeof EuiDragDropContext>['onDragEnd'] = ({
     source,
     destination,
-  }: {
-    source: { index: number };
-    destination?: { index: number };
   }) => {
     // Dragging item out of EuiDroppable results in destination of null
     if (!destination) {

@@ -39,6 +39,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
@@ -51,6 +52,12 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
@@ -70,9 +77,7 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   SLOS_PATH,
-} from './routes/paths';
-import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
-import { type CoPilotService } from './typings/co_pilot';
+} from '../common/locators/paths';
 
 export interface ConfigSchema {
   unsafe: {
@@ -94,29 +99,26 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
-  compositeSlo: { enabled: boolean };
-  aiAssistant?: {
-    enabled: boolean;
-    feedback: {
-      enabled: boolean;
-    };
-  };
 }
+
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
   charts: ChartsPluginStart;
+  contentManagement: ContentManagementPublicStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
@@ -127,6 +129,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -136,6 +139,7 @@ export interface ObservabilityPublicPluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
+  aiops: AiopsPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -152,8 +156,6 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
-
-  private coPilotService: CoPilotService | undefined;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -285,6 +287,14 @@ export class Plugin
     coreSetup.application.register(app);
 
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
+    const registerSloEmbeddableFactory = async () => {
+      const { SloOverviewEmbeddableFactoryDefinition } = await import(
+        './embeddable/slo/overview/slo_embeddable_factory'
+      );
+      const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
+      pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+    };
+    registerSloEmbeddableFactory();
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
@@ -299,6 +309,14 @@ export class Plugin
         icon: 'logoObservability',
         path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
+        isVisible: (capabilities) => {
+          const obs = capabilities.catalogue[observabilityFeatureId];
+          const uptime = capabilities.catalogue.uptime;
+          const infra = capabilities.catalogue.infra;
+          const apm = capabilities.catalogue.apm;
+
+          return obs || uptime || infra || apm;
+        },
       });
     }
 
@@ -346,12 +364,6 @@ export class Plugin
       )
     );
 
-    this.coPilotService = createCoPilotService({
-      enabled: !!config.aiAssistant?.enabled,
-      http: coreSetup.http,
-      trackingEnabled: !!config.aiAssistant?.feedback.enabled,
-    });
-
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -360,7 +372,6 @@ export class Plugin
       ruleDetailsLocator,
       sloDetailsLocator,
       sloEditLocator,
-      getCoPilotService: () => this.coPilotService!,
     };
   }
 
@@ -390,7 +401,6 @@ export class Plugin
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      getCoPilotService: () => this.coPilotService!,
     };
   }
 }

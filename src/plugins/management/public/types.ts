@@ -31,7 +31,6 @@ export interface DefinedSections {
 
 export interface ManagementStart {
   setIsSidebarEnabled: (enabled: boolean) => void;
-  setLandingPageRedirect: (landingPageRedirect: string) => void;
   setupCardsNavigation: ({ enabled, hideLinksTo }: NavigationCardsSubject) => void;
 }
 

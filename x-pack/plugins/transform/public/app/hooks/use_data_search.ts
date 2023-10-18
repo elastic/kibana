@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 
+import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
+
 import { useAppDependencies } from '../app_dependencies';
 
-export const useDataSearch = () => {
+export const useDataSearch = (
+  esSearchRequestParams: IKibanaSearchRequest['params'],
+  enabled?: boolean
+) => {
   const { data } = useAppDependencies();
 
-  return useCallback(
-    async (esSearchRequestParams: IKibanaSearchRequest['params'], abortSignal?: AbortSignal) => {
-      try {
-        const { rawResponse: resp } = await lastValueFrom(
-          data.search.search(
-            {
-              params: esSearchRequestParams,
-            },
-            { abortSignal }
-          )
-        );
+  return useQuery<estypes.SearchResponse>(
+    [TRANSFORM_REACT_QUERY_KEYS.DATA_SEARCH, esSearchRequestParams],
+    async ({ signal }) => {
+      const { rawResponse: resp } = await lastValueFrom(
+        data.search.search(
+          {
+            params: esSearchRequestParams,
+          },
+          { abortSignal: signal }
+        )
+      );
 
-        return resp;
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          // ignore abort errors
-        } else {
-          return error;
-        }
-      }
+      return resp;
     },
-    [data]
+    { enabled }
   );
 };

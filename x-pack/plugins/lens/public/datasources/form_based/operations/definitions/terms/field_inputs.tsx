@@ -30,6 +30,7 @@ export interface FieldInputsProps {
   invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
+  showTimeSeriesDimensions: boolean;
 }
 
 interface WrappedValue {
@@ -50,6 +51,7 @@ export function FieldInputs({
   indexPattern,
   operationSupportMatrix,
   invalidFields,
+  showTimeSeriesDimensions,
 }: FieldInputsProps) {
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) =>
@@ -165,6 +167,7 @@ export function FieldInputs({
                 data-test-subj={
                   localValues.length !== 1 ? `indexPattern-dimension-field-${index}` : undefined
                 }
+                showTimeSeriesDimensions={localValues.length < 2 && showTimeSeriesDimensions}
               />
             </DraggableBucketContainer>
           );

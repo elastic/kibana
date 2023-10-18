@@ -111,6 +111,13 @@ export const createMockConfigSchema = (
       ...overrides.roles,
     },
     capture: { maxAttempts: 1 },
+    export_types: {
+      pdf: { enabled: true },
+      png: { enabled: true },
+      csv: { enabled: true },
+      ...overrides.export_types,
+    },
+    statefulSettings: { enabled: true },
   } as ReportingConfigType;
 };
 

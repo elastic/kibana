@@ -17,6 +17,7 @@ import { getFunctionName } from '../helpers/get_function_name';
 export const EVENT_GENERATING_ELEMENTS = [
   'EuiButton',
   'EuiButtonEmpty',
+  'EuiButtonIcon',
   'EuiLink',
   'EuiFieldText',
   'EuiFieldSearch',
@@ -74,7 +75,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const intent = getIntentFromNode(parent);
 
         // 4. The element name that generates the events
-        const element = name.replace('Eui', '').replace('Empty', '');
+        const element = name.replace('Eui', '').replace('Empty', '').replace('Icon', '');
 
         const suggestion = `${appName}${componentName}${intent}${element}`; // 'o11yHeaderActionsSubmitButton'
 

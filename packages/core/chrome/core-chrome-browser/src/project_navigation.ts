@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
+import { EuiAccordionProps, IconType } from '@elastic/eui';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -45,7 +47,11 @@ export type AppDeepLinkId =
   | ObservabilityLink;
 
 /** @public */
-export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub';
+export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
+
+export type SideNavNodeStatus = 'hidden' | 'visible';
+
+export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -56,8 +62,99 @@ export type GetIsActiveFn = (params: {
   prepend: (path: string) => string;
 }) => boolean;
 
+/**
+ * Base definition of navigation nodes. A node can either be a "group" or an "item".
+ * Each have commmon properties and specific properties.
+ */
+interface NodeDefinitionBase {
+  /**
+   * Optional icon for the navigation node. Note: not all navigation depth will render the icon
+   */
+  icon?: IconType;
+  /**
+   * href for absolute links only. Internal links should use "link".
+   */
+  href?: string;
+  /**
+   * Optional status to indicate if the breadcrumb should be hidden when this node is active.
+   * @default 'visible'
+   */
+  breadcrumbStatus?: 'hidden' | 'visible';
+  /**
+   * Optional status to for the side navigation. "hidden" and "visible" are self explanatory.
+   * The `renderAsItem` status is _only_ for group nodes (nodes with children declared or with
+   * the "nodeType" set to `group`) and allow to render the node as an "item" instead of the head of
+   * a group. This is usefull to have sub-pages declared in the tree that will correctly be mapped
+   * in the Breadcrumbs, but are not rendered in the side navigation.
+   * @default 'visible'
+   */
+  sideNavStatus?: SideNavNodeStatus;
+  /**
+   * Optional function to get the active state. This function is called whenever the location changes.
+   */
+  getIsActive?: GetIsActiveFn;
+  /**
+   * ----------------------------------------------------------------------------------------------
+   * ------------------------------- GROUP NODES ONLY PROPS ---------------------------------------
+   * ----------------------------------------------------------------------------------------------
+   */
+  /**
+   * ["group" nodes only] Optional flag to indicate if the node must be treated as a group title.
+   * Can not be used with `children`
+   */
+  isGroupTitle?: boolean;
+  /**
+   * ["group" nodes only] Property to indicate how the group should be rendered.
+   * - Accordion: wraps the items in an EuiAccordion
+   * - PanelOpener: renders a button to open a panel on the right of the side nav
+   * - item: renders the group as an item in the side nav
+   * @default 'block'
+   */
+  renderAs?: RenderAs;
+  /**
+   * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
+   * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation
+   * panel opening on the right of the side nav.
+   */
+  appendHorizontalRule?: boolean;
+  /**
+   * ["group" nodes only] Temp prop. Will be removed once the new navigation is fully implemented.
+   */
+  accordionProps?: Partial<EuiAccordionProps>;
+  /**
+   * ----------------------------------------------------------------------------------------------
+   * -------------------------------- ITEM NODES ONLY PROPS ---------------------------------------
+   * ----------------------------------------------------------------------------------------------
+   */
+  /**
+   * ["item" nodes only] Optional flag to indicate if the target page should be opened in a new Browser tab.
+   * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
+   */
+  openInNewTab?: boolean;
+  /**
+   * ["item" nodes only] Optional flag to indicate if a badge should be rendered next to the text.
+   * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
+   */
+  withBadge?: boolean;
+  /**
+   * ["item" nodes only] If `withBadge` is true, this object can be used to customize the badge.
+   */
+  badgeOptions?: {
+    /** The text of the badge. Default: "Beta" */
+    text?: string;
+  };
+}
+
 /** @public */
-export interface ChromeProjectNavigationNode {
+/**
+ * Chrome project navigation node. This is the tree definition stored in the Chrome service
+ * that is generated based on the NodeDefinition below.
+ * Some of the process that occurs between the 2 are:
+ * - "link" prop get converted to existing ChromNavLink
+ * - "path" is added to each node based on where it is located in the tree
+ * - "isActive" state is set for each node if its URL matches the current location
+ */
+export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */
   id: string;
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
@@ -66,28 +163,15 @@ export interface ChromeProjectNavigationNode {
   path: string[];
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
-  /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
-  icon?: string;
-  /** Optional children of the navigation node */
-  children?: ChromeProjectNavigationNode[];
   /**
-   * href for absolute links only. Internal links should use "link".
+   * Optional children of the navigation node. Once a node has "children" defined it is
+   * considered a "group" node.
    */
-  href?: string;
+  children?: ChromeProjectNavigationNode[];
   /**
    * Flag to indicate if the node is currently active.
    */
   isActive?: boolean;
-  /**
-   * Optional function to get the active state. This function is called whenever the location changes.
-   */
-  getIsActive?: GetIsActiveFn;
-
-  /**
-   * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
-   * @default 'visible'
-   */
-  breadcrumbStatus?: 'hidden' | 'visible';
 }
 
 /** @public */
@@ -114,7 +198,8 @@ export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
 
-type NonEmptyArray<T> = [T, ...T[]];
+// --- NOTE: The following types are the ones that the consumer uses to configure their navigation.
+// ---       They are converted to the ChromeProjectNavigationNode type above.
 
 /**
  * @public
@@ -128,7 +213,7 @@ export interface NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> {
+> extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */
   id?: Id;
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
@@ -137,24 +222,8 @@ export interface NodeDefinition<
   link?: LinkId;
   /** Cloud link id */
   cloudLink?: CloudLinkId;
-  /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
-  icon?: string;
-  /** Optional children of the navigation node */
-  children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
-  /**
-   * Use href for absolute links only. Internal links should use "link".
-   */
-  href?: string;
-  /**
-   * Optional function to get the active state. This function is called whenever the location changes.
-   */
-  getIsActive?: GetIsActiveFn;
-
-  /**
-   * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
-   * @default 'visible'
-   */
-  breadcrumbStatus?: 'hidden' | 'visible';
+  /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
+  children?: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
 }
 
 /**

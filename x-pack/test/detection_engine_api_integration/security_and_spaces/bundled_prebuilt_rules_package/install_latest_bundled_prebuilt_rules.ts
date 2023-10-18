@@ -15,6 +15,7 @@ import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets, deleteAllRules } from '../../utils';
 import { getPrebuiltRulesStatus } from '../../utils/prebuilt_rules/get_prebuilt_rules_status';
+import { installPrebuiltRulesPackageByVersion } from '../../utils/prebuilt_rules/install_fleet_package_by_url';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -55,18 +56,17 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
-      const EPM_URL = `/api/fleet/epm/packages/security_detection_engine/99.0.0`;
-
-      const bundledInstallResponse = await supertest
-        .post(EPM_URL)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/json')
-        .send({ force: true })
-        .expect(200);
+      const bundledInstallResponse = await installPrebuiltRulesPackageByVersion(
+        es,
+        supertest,
+        '99.0.0'
+      );
 
       // As opposed to "registry"
-      expect(bundledInstallResponse.body._meta.install_source).toBe('bundled');
+      expect(bundledInstallResponse._meta.install_source).toBe('bundled');
 
+      // Refresh ES indices to avoid race conditions between write and reading of indeces
+      // See implementation utility function at x-pack/test/detection_engine_api_integration/utils/prebuilt_rules/install_prebuilt_rules_fleet_package.ts
       await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify that status is updated after package installation

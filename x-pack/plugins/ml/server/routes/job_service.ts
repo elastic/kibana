@@ -12,7 +12,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
-  categorizationFieldExamplesSchema,
+  categorizationFieldValidationSchema,
   basicChartSchema,
   populationChartSchema,
   datafeedIdsSchema,
@@ -30,7 +30,7 @@ import {
   deleteJobsSchema,
 } from './schemas/job_service_schema';
 
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
+import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
@@ -428,16 +428,16 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: jobIdSchema,
+            body: jobForCloningSchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { getJobForCloning } = jobServiceProvider(client, mlClient);
-          const { jobId } = request.body;
+          const { jobId, retainCreatedBy } = request.body;
 
-          const resp = await getJobForCloning(jobId);
+          const resp = await getJobForCloning(jobId, retainCreatedBy);
           return response.ok({
             body: resp,
           });
@@ -897,15 +897,15 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /internal/ml/jobs/categorization_field_examples Get categorization field examples
-   * @apiName ValidateCategoryExamples
-   * @apiDescription Validates category examples
+   * @api {post} /internal/ml/jobs/categorization_field_validation Get categorization field examples
+   * @apiName ValidateCategoryValidation
+   * @apiDescription Validates a field for categorization
    *
-   * @apiSchema (body) categorizationFieldExamplesSchema
+   * @apiSchema (body) categorizationFieldValidationSchema
    */
   router.versioned
     .post({
-      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_examples`,
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,
       access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
@@ -916,7 +916,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: schema.object(categorizationFieldExamplesSchema),
+            body: schema.object(categorizationFieldValidationSchema),
           },
         },
       },

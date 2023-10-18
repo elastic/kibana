@@ -131,7 +131,7 @@ describe('esaggs expression function - server', () => {
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
-      disableShardWarnings: false,
+      disableWarningToasts: false,
       timeFields: args.timeFields,
       timeRange: undefined,
     });

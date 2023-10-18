@@ -7,23 +7,18 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import pRetry from 'p-retry';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { merge } from 'lodash';
 
 export type Mappings = Required<estypes.IndicesCreateRequest>['body']['mappings'] &
   Required<estypes.IndicesPutMappingRequest>['body'];
 
-type IndexSettings = Required<estypes.IndicesPutSettingsRequest>['body']['settings'];
-
 export async function createOrUpdateIndex({
   index,
   mappings,
-  settings,
   client,
   logger,
 }: {
   index: string;
   mappings: Mappings;
-  settings?: IndexSettings;
   client: ElasticsearchClient;
   logger: Logger;
 }) {
@@ -49,7 +44,6 @@ export async function createOrUpdateIndex({
               index,
               client,
               mappings,
-              settings,
             });
 
         if (!result.acknowledged) {
@@ -70,28 +64,26 @@ export async function createOrUpdateIndex({
   }
 }
 
-async function createNewIndex({
+function createNewIndex({
   index,
   client,
   mappings,
-  settings,
 }: {
   index: string;
   client: ElasticsearchClient;
   mappings: Required<estypes.IndicesCreateRequest>['body']['mappings'];
-  settings: Required<estypes.IndicesPutSettingsRequest>['body']['settings'];
 }) {
-  return await client.indices.create({
+  return client.indices.create({
     index,
     body: {
       // auto_expand_replicas: Allows cluster to not have replicas for this index
-      settings: merge({ index: { auto_expand_replicas: '0-1' } }, settings),
+      settings: { index: { auto_expand_replicas: '0-1' } },
       mappings,
     },
   });
 }
 
-async function updateExistingIndex({
+function updateExistingIndex({
   index,
   client,
   mappings,
@@ -100,7 +92,7 @@ async function updateExistingIndex({
   client: ElasticsearchClient;
   mappings: estypes.IndicesPutMappingRequest['body'];
 }) {
-  return await client.indices.putMapping({
+  return client.indices.putMapping({
     index,
     body: mappings,
   });

@@ -11,10 +11,11 @@ import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/ap
 import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
-import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/common/api_schemas/update_transforms';
-import { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/common/api_schemas/update_transforms';
+import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
@@ -39,14 +40,17 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async createIndices(indices: string) {
+    async createIndices(
+      indices: string,
+      params: IndicesCreateRequest['body'] = {} as NonNullable<IndicesCreateRequest['body']>
+    ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
         log.debug(`Indices '${indices}' already exist. Nothing to create.`);
         return;
       }
 
-      const createResponse = await es.indices.create({ index: indices });
+      const createResponse = await es.indices.create({ index: indices, ...params });
       expect(createResponse)
         .to.have.property('acknowledged')
         .eql(true, 'Response for create request indices should be acknowledged.');

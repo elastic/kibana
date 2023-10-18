@@ -7,10 +7,6 @@
 
 import { CoreStart } from '@kbn/core/server';
 
-export type InternalSavedObjectsClient = Awaited<
-  ReturnType<typeof getInternalSavedObjectsClient>
->;
-
 export async function getInternalSavedObjectsClient(coreStart: CoreStart) {
   return coreStart.savedObjects.createInternalRepository();
 }

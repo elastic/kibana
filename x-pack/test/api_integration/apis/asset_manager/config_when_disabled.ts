@@ -12,6 +12,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseIntegrationTestsConfig.getAll(),
-    testFiles: [require.resolve('./when_disabled.ts')],
+    testFiles: [require.resolve('./tests/when_disabled.ts')],
   };
 }

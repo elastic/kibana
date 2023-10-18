@@ -13,12 +13,15 @@ import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createApmRule } from '../alerts/alerting_api_helper';
 import {
-  waitForRuleStatus,
+  createApmRule,
   runRuleSoon,
-  waitForAlertInIndex,
-} from '../alerts/wait_for_rule_status';
+  deleteApmAlerts,
+  deleteRuleById,
+  ApmAlertFields,
+} from '../alerts/helpers/alerting_api_helper';
+import { waitForRuleStatus } from '../alerts/helpers/wait_for_rule_status';
+import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -28,12 +31,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
   const supertest = getService('supertest');
-  const esClient = getService('es');
+  const es = getService('es');
   const serviceName = 'synth-go';
   const dayInMs = 24 * 60 * 60 * 1000;
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
-  const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 
   async function getTransactionGroups(overrides?: {
     path?: {
@@ -139,6 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;
+        let alerts: ApmAlertFields[];
 
         before(async () => {
           const createdRule = await createApmRule({
@@ -162,22 +165,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
           });
-          expect(createdRule.id).to.not.eql(undefined);
           ruleId = createdRule.id;
+          alerts = await waitForAlertsForRule({ es, ruleId });
         });
 
         after(async () => {
-          await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-          await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+          await deleteRuleById({ supertest, ruleId });
+          await deleteApmAlerts(es);
         });
 
         it('checks if rule is active', async () => {
-          const executionStatus = await waitForRuleStatus({
-            id: ruleId,
+          const ruleStatus = await waitForRuleStatus({
+            ruleId,
             expectedStatus: 'active',
             supertest,
           });
-          expect(executionStatus.status).to.be('active');
+          expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
@@ -189,13 +192,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('indexes alert document', async () => {
-          const resp = await waitForAlertInIndex({
-            es: esClient,
-            indexName: APM_ALERTS_INDEX,
-            ruleId,
-          });
-
-          expect(resp.hits.hits.length).to.be(1);
+          expect(alerts.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -221,6 +218,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Transaction groups with p99 transaction duration alerts', () => {
         let ruleId: string;
+        let alerts: ApmAlertFields[];
 
         before(async () => {
           const createdRule = await createApmRule({
@@ -244,22 +242,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
           });
-          expect(createdRule.id).to.not.eql(undefined);
+
           ruleId = createdRule.id;
+          alerts = await waitForAlertsForRule({ es, ruleId });
         });
 
         after(async () => {
-          await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-          await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+          await deleteRuleById({ supertest, ruleId });
+          await deleteApmAlerts(es);
         });
 
         it('checks if rule is active', async () => {
-          const executionStatus = await waitForRuleStatus({
-            id: ruleId,
+          const ruleStatus = await waitForRuleStatus({
+            ruleId,
             expectedStatus: 'active',
             supertest,
           });
-          expect(executionStatus.status).to.be('active');
+          expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
@@ -271,13 +270,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('indexes alert document', async () => {
-          const resp = await waitForAlertInIndex({
-            es: esClient,
-            indexName: APM_ALERTS_INDEX,
-            ruleId,
-          });
-
-          expect(resp.hits.hits.length).to.be(1);
+          expect(alerts.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -306,6 +299,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Transaction groups with error rate alerts', () => {
         let ruleId: string;
+        let alerts: ApmAlertFields[];
 
         before(async () => {
           const createdRule = await createApmRule({
@@ -328,22 +322,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionErrorRate,
           });
-          expect(createdRule.id).to.not.eql(undefined);
           ruleId = createdRule.id;
+          alerts = await waitForAlertsForRule({ es, ruleId });
         });
 
         after(async () => {
-          await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-          await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+          await deleteRuleById({ supertest, ruleId });
+          await deleteApmAlerts(es);
         });
 
         it('checks if rule is active', async () => {
-          const executionStatus = await waitForRuleStatus({
-            id: ruleId,
+          const ruleStatus = await waitForRuleStatus({
+            ruleId,
             expectedStatus: 'active',
             supertest,
           });
-          expect(executionStatus.status).to.be('active');
+          expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
@@ -355,13 +349,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('indexes alert document', async () => {
-          const resp = await waitForAlertInIndex({
-            es: esClient,
-            indexName: APM_ALERTS_INDEX,
-            ruleId,
-          });
-
-          expect(resp.hits.hits.length).to.be(1);
+          expect(alerts.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {

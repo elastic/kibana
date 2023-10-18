@@ -179,6 +179,7 @@ export const ScheduleItem = ({
             options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
             onChange={onChangeTimeType}
             value={timeType}
+            aria-label={field.label}
             data-test-subj="timeType"
             {...rest}
           />

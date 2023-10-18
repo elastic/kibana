@@ -30,6 +30,8 @@ export { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './a
 export { UPDATE_FILTER_REFERENCES_TRIGGER } from './triggers';
 export { createSearchBar } from './search_bar/create_search_bar';
 
+export { createFilterAction } from './actions/apply_filter_action';
+
 /*
  * Autocomplete query suggestions:
  */

@@ -31,6 +31,19 @@ export const ESQLLang: CustomLangModuleType = {
 
     new DiagnosticsAdapter(ESQL_LANG_ID, (...uris) => workerProxyService.getWorker(uris));
   },
+  languageConfiguration: {
+    brackets: [['(', ')']],
+    autoClosingPairs: [
+      { open: '(', close: ')' },
+      { open: `'`, close: `'` },
+      { open: '"', close: '"' },
+    ],
+    surroundingPairs: [
+      { open: '(', close: ')' },
+      { open: `'`, close: `'` },
+      { open: '"', close: '"' },
+    ],
+  },
 
   getSuggestionProvider(callbacks?: ESQLCustomAutocompleteCallbacks) {
     return new ESQLCompletionAdapter((...uris) => workerProxyService.getWorker(uris), callbacks);

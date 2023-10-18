@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiTitle, useEuiTheme, useEuiShadow } from '@elastic/eui';
+import { EuiTitle, useEuiTheme, useEuiShadow, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-
 import { WelcomePanel } from './welcome_panel';
 import { TogglePanel } from './toggle_panel';
 import {
@@ -20,6 +19,7 @@ import {
 import type { SecurityProductTypes } from '../../common/config';
 import { ProductSwitch } from './product_switch';
 import { useTogglePanel } from './use_toggle_panel';
+import { ProductLine } from '../../common/product';
 
 const CONTENT_WIDTH = 1150;
 
@@ -30,11 +30,25 @@ export interface GetStartedProps {
 export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes }) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('s');
+
   const {
     onProductSwitchChanged,
+    onCardClicked,
     onStepClicked,
-    state: { activeProducts, activeCards, finishedSteps },
+    onStepButtonClicked,
+    state: {
+      activeProducts,
+      activeSections,
+      finishedSteps,
+      totalActiveSteps,
+      totalStepsLeft,
+      expandedCardSteps,
+    },
   } = useTogglePanel({ productTypes });
+  const productTier = productTypes.find(
+    (product) => product.product_line === ProductLine.security
+  )?.product_tier;
+
   return (
     <KibanaPageTemplate
       restrictWidth={false}
@@ -61,6 +75,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
             size="l"
             css={css`
               padding-left: ${euiTheme.size.xs};
+              padding-bottom: ${euiTheme.size.l};
             `}
           >
             <span>{GET_STARTED_PAGE_TITLE}</span>
@@ -68,12 +83,24 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         }
         description={
           <>
-            <strong className="eui-displayBlock">{GET_STARTED_PAGE_SUBTITLE}</strong>
+            <strong
+              css={css`
+                font-size: ${euiTheme.base * 1.37}px;
+              `}
+              className="eui-displayBlock"
+            >
+              {GET_STARTED_PAGE_SUBTITLE}
+            </strong>
+            <EuiSpacer size="m" />
             <span className="eui-displayBlock">{GET_STARTED_PAGE_DESCRIPTION}</span>
           </>
         }
       >
-        <WelcomePanel />
+        <WelcomePanel
+          totalActiveSteps={totalActiveSteps}
+          totalStepsLeft={totalStepsLeft}
+          productTier={productTier}
+        />
       </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section
         bottomBorder={false}
@@ -104,9 +131,12 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
       >
         <TogglePanel
           finishedSteps={finishedSteps}
-          activeCards={activeCards}
+          activeSections={activeSections}
           activeProducts={activeProducts}
+          expandedCardSteps={expandedCardSteps}
           onStepClicked={onStepClicked}
+          onCardClicked={onCardClicked}
+          onStepButtonClicked={onStepButtonClicked}
         />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

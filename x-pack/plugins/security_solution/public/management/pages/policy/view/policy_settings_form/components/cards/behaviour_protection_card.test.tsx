@@ -122,9 +122,7 @@ describe('Policy Behaviour Protection Card', () => {
           : []),
         'User notification',
         'Agent version 7.15+',
-        ...(config.notifyUser
-          ? ['Notify user', 'Notification message', '—']
-          : ["Don't notify user"]),
+        ...(config.notifyUser ? ['Notify user', 'Notification message', '—'] : ['Notify user']),
         ...(config.prebuiltRules
           ? [
               'View related detection rules. ',

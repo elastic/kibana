@@ -22,7 +22,7 @@ import partition from 'lodash/fp/partition';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { LinkCategories, SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
 import { SolutionSideNavItemPosition } from './types';
 import type { SolutionSideNavItem, Tracker } from './types';
@@ -106,28 +106,25 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
       <EuiFlexGroup gutterSize="none" direction="column">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" direction="column">
-            <EuiFlexItem>
-              <EuiListGroup gutterSize="none">
-                <SolutionSideNavItems
-                  items={topItems}
-                  categories={categories}
-                  selectedId={selectedId}
-                  activePanelNavId={activePanelNavId}
-                  isMobileSize={isMobileSize}
-                  onOpenPanelNav={openPanelNav}
-                />
-              </EuiListGroup>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiListGroup gutterSize="none">
-                <SolutionSideNavItems
-                  items={bottomItems}
-                  selectedId={selectedId}
-                  activePanelNavId={activePanelNavId}
-                  isMobileSize={isMobileSize}
-                  onOpenPanelNav={openPanelNav}
-                />
-              </EuiListGroup>
+              <SolutionSideNavItems
+                items={topItems}
+                categories={categories}
+                selectedId={selectedId}
+                activePanelNavId={activePanelNavId}
+                isMobileSize={isMobileSize}
+                onOpenPanelNav={openPanelNav}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <SolutionSideNavItems
+                items={bottomItems}
+                selectedId={selectedId}
+                activePanelNavId={activePanelNavId}
+                isMobileSize={isMobileSize}
+                onOpenPanelNav={openPanelNav}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -151,7 +148,7 @@ interface SolutionSideNavItemsProps {
   activePanelNavId: ActivePanelNav;
   isMobileSize: boolean;
   onOpenPanelNav: (id: string) => void;
-  categories?: LinkCategories;
+  categories?: SeparatorLinkCategory[];
 }
 /**
  * The Solution side navigation items component.
@@ -284,16 +281,18 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
       <>
         <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem>
-            <EuiListGroupItem
-              label={itemLabel}
-              href={href}
-              wrapText
-              onClick={onLinkClicked}
-              className={itemClassNames}
-              color="text"
-              size="s"
-              data-test-subj={`solutionSideNavItemLink-${id}`}
-            />
+            <EuiListGroup gutterSize="none">
+              <EuiListGroupItem
+                label={itemLabel}
+                href={href}
+                wrapText
+                onClick={onLinkClicked}
+                className={itemClassNames}
+                color="text"
+                size="s"
+                data-test-subj={`solutionSideNavItemLink-${id}`}
+              />
+            </EuiListGroup>
           </EuiFlexItem>
           {hasPanelNav && (
             <EuiFlexItem grow={0}>

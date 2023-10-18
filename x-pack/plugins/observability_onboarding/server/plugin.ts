@@ -23,7 +23,7 @@ import {
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
 import { ObservabilityOnboardingConfig } from '.';
-import { observabilityOnboardingState } from './saved_objects/observability_onboarding_status';
+import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
 import { EsLegacyConfigService } from './services/es_legacy_config_service';
 
 export class ObservabilityOnboardingPlugin
@@ -46,13 +46,16 @@ export class ObservabilityOnboardingPlugin
   }
 
   public setup(
-    core: CoreSetup<ObservabilityOnboardingPluginStartDependencies>,
+    core: CoreSetup<
+      ObservabilityOnboardingPluginStartDependencies,
+      ObservabilityOnboardingPluginStart
+    >,
     plugins: ObservabilityOnboardingPluginSetupDependencies
   ) {
     this.logger.debug('observability_onboarding: Setup');
     this.esLegacyConfigService.setup(core.elasticsearch.legacy.config$);
 
-    core.savedObjects.registerType(observabilityOnboardingState);
+    core.savedObjects.registerType(observabilityOnboardingFlow);
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
@@ -74,6 +77,7 @@ export class ObservabilityOnboardingPlugin
       repository: getObservabilityOnboardingServerRouteRepository(),
       plugins: resourcePlugins,
       config,
+      kibanaVersion: this.initContext.env.packageInfo.version,
       services: {
         esLegacyConfigService: this.esLegacyConfigService,
       },

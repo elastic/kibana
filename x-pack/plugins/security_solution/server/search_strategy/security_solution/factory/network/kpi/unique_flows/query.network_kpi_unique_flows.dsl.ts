@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { NetworkKpiUniqueFlowsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkKpiUniqueFlowsRequestOptions } from '../../../../../../../common/api/search_strategy';
+
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { getIpFilter } from '../common';
 

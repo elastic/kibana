@@ -47,12 +47,23 @@ export const useUrlState = <State>({
   }, [defaultState, decodedState]);
 
   const setState = useCallback(
-    (newState: State | undefined) => {
+    (patch: State | undefined | ((prevState: State) => State)) => {
       if (!history || !history.location) {
         return;
       }
 
       const currentLocation = history.location;
+
+      const newState =
+        patch instanceof Function
+          ? patch(
+              decodeUrlState(
+                decodeRisonUrlState(
+                  getParamFromQueryString(getQueryStringFromLocation(currentLocation), urlStateKey)
+                )
+              ) ?? defaultState
+            )
+          : patch;
 
       const newLocation = replaceQueryStringInLocation(
         currentLocation,
@@ -66,7 +77,7 @@ export const useUrlState = <State>({
         history.replace(newLocation);
       }
     },
-    [encodeUrlState, history, urlStateKey]
+    [decodeUrlState, defaultState, encodeUrlState, history, urlStateKey]
   );
 
   const [shouldInitialize, setShouldInitialize] = useState(

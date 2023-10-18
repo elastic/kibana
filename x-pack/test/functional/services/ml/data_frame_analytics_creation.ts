@@ -716,7 +716,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async assertInitialCloneJobDetailsStep(job: DataFrameAnalyticsConfig) {
       await this.assertJobIdValue(''); // id should be empty
       await this.assertJobDescriptionValue(String(job.description));
-      await this.assertDestIndexValue(''); // destination index should be empty
+      // destination index same as id should be checked since dest index is reset to '' on clone
+      await this.assertDestIndexSameAsIdCheckState(true);
     },
 
     async assertCreationCalloutMessagesExist() {

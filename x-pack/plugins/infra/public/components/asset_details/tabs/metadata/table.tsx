@@ -141,7 +141,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
   const searchBar: EuiSearchBarProps = {
     onChange: searchBarOnChange,
     box: {
-      'data-test-subj': 'infraHostMetadataSearchBarInput',
+      'data-test-subj': 'infraAssetDetailsMetadataSearchBarInput',
       incremental: true,
       schema: true,
       placeholder: SEARCH_PLACEHOLDER,
@@ -171,7 +171,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
 
   return (
     <EuiInMemoryTable
-      data-test-subj="infraMetadataTable"
+      data-test-subj="infraAssetDetailsMetadataTable"
       tableLayout={'fixed'}
       responsive={false}
       columns={columns}
@@ -182,9 +182,9 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
       error={searchError ? `${searchError.message}` : ''}
       message={
         loading ? (
-          <div data-test-subj="infraHostMetadataLoading">{LOADING}</div>
+          <div data-test-subj="infraAssetDetailsMetadataLoading">{LOADING}</div>
         ) : (
-          <div data-test-subj="infraHostMetadataNoData">{NO_METADATA_FOUND}</div>
+          <div data-test-subj="infraAssetDetailsMetadataNoData">{NO_METADATA_FOUND}</div>
         )
       }
     />

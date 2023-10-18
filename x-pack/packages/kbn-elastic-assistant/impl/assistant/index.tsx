@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +29,7 @@ import {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -42,10 +51,10 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 
 export interface Props {
   conversationId?: string;
-  isAssistantEnabled: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
+  setConversationId?: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -54,14 +63,15 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   conversationId,
-  isAssistantEnabled,
   promptContextId = '',
   shouldRefocusPrompt = false,
   showTitle = true,
+  setConversationId,
 }) => {
   const {
-    actionTypeRegistry,
+    assistantTelemetry,
     augmentMessageCodeBlocks,
+    assistantAvailability: { isAssistantEnabled },
     conversations,
     defaultAllow,
     defaultAllowReplacement,
@@ -86,11 +96,7 @@ const AssistantComponent: React.FC<Props> = ({
   const { createConversation } = useConversation();
 
   // Connector details
-  const {
-    data: connectors,
-    isSuccess: areConnectorsFetched,
-    refetch: refetchConnectors,
-  } = useLoadConnectors({ http });
+  const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => getDefaultConnector(connectors)?.id, [connectors]);
   const defaultProvider = useMemo(
     () =>
@@ -111,6 +117,12 @@ const AssistantComponent: React.FC<Props> = ({
         conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
       : WELCOME_CONVERSATION_TITLE
   );
+
+  useEffect(() => {
+    if (setConversationId) {
+      setConversationId(selectedConversationId);
+    }
+  }, [selectedConversationId, setConversationId]);
 
   const currentConversation = useMemo(
     () =>
@@ -153,23 +165,14 @@ const AssistantComponent: React.FC<Props> = ({
   }, [areConnectorsFetched, connectors?.length, currentConversation, setLastConversationId]);
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
-    actionTypeRegistry,
-    http,
-    refetchConnectors,
+    conversation: blockBotConversation,
     onSetupComplete: () => {
       bottomRef.current?.scrollIntoView({ behavior: 'auto' });
     },
-    conversation: blockBotConversation,
-    isConnectorConfigured: !!connectors?.length,
   });
 
-  const currentTitle: { title: string | JSX.Element; titleIcon: string } =
-    isWelcomeSetup && blockBotConversation.theme?.title && blockBotConversation.theme?.titleIcon
-      ? {
-          title: blockBotConversation.theme?.title,
-          titleIcon: blockBotConversation.theme?.titleIcon,
-        }
-      : { title, titleIcon: 'logoSecurity' };
+  const currentTitle: string | JSX.Element =
+    isWelcomeSetup && blockBotConversation.theme?.title ? blockBotConversation.theme?.title : title;
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
@@ -396,6 +399,16 @@ const AssistantComponent: React.FC<Props> = ({
     return chatbotComments;
   }, [connectorComments, isDisabled, chatbotComments]);
 
+  const trackPrompt = useCallback(
+    (promptTitle: string) => {
+      assistantTelemetry?.reportAssistantQuickPrompt({
+        conversationId: selectedConversationId,
+        promptTitle,
+      });
+    },
+    [assistantTelemetry, selectedConversationId]
+  );
+
   return (
     <>
       <EuiModalHeader
@@ -407,7 +420,6 @@ const AssistantComponent: React.FC<Props> = ({
         {showTitle && (
           <AssistantHeader
             currentConversation={currentConversation}
-            currentTitle={currentTitle}
             defaultConnectorId={defaultConnectorId}
             defaultProvider={defaultProvider}
             docLinks={docLinks}
@@ -419,6 +431,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             setSelectedConversationId={setSelectedConversationId}
             showAnonymizedValues={showAnonymizedValues}
+            title={currentTitle}
           />
         )}
 
@@ -447,6 +460,7 @@ const AssistantComponent: React.FC<Props> = ({
             <EuiFlexGroup justifyContent="spaceAround">
               <EuiFlexItem grow={false}>
                 <ConnectorMissingCallout
+                  isConnectorConfigured={connectors?.length > 0}
                   isSettingsModalVisible={isSettingsModalVisible}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                 />
@@ -485,6 +499,7 @@ const AssistantComponent: React.FC<Props> = ({
           <QuickPrompts
             setInput={setUserPrompt}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            trackPrompt={trackPrompt}
           />
         )}
       </EuiModalFooter>

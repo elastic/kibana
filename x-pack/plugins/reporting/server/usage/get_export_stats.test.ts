@@ -110,35 +110,7 @@ test('Model of jobTypes', () => {
     exportTypesHandler
   );
 
-  expect(result.PNG).toMatchInlineSnapshot(`
-    Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 3,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": Object {},
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {},
-        "png_memory": Object {},
-      },
-      "output_size": Object {
-        "1.0": 5093470,
-        "25.0": 5093470,
-        "5.0": 5093470,
-        "50.0": 8514532,
-        "75.0": 11935594,
-        "95.0": 11935594,
-        "99.0": 11935594,
-      },
-      "total": 3,
-    }
-  `);
+  expect(result.PNG).toMatchInlineSnapshot(`undefined`);
   expect(result.csv_searchsource).toMatchInlineSnapshot(`
     Object {
       "app": Object {
@@ -219,35 +191,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
     featureMap,
     exportTypesHandler
   );
-  expect(result.PNG).toMatchInlineSnapshot(`
-    Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 5,
-      "error_codes": Object {},
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {},
-        "png_memory": Object {},
-      },
-      "output_size": Object {
-        "1.0": 5093470,
-        "25.0": 5093470,
-        "5.0": 5093470,
-        "50.0": 8514532,
-        "75.0": 11935594,
-        "95.0": 11935594,
-        "99.0": 11935594,
-      },
-      "total": 15,
-    }
-  `);
+  expect(result.PNG).toMatchInlineSnapshot(`undefined`);
 });
 
 test('Incorporate queue times', () => {

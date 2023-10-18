@@ -16,6 +16,7 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
     linkIds: [
+      SecurityPageName.rulesLanding,
       SecurityPageName.alerts,
       SecurityPageName.cloudSecurityPostureFindings,
       SecurityPageName.case,
@@ -25,12 +26,8 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
     type: LinkCategoryType.separator,
     linkIds: [
       SecurityPageName.timelines,
-      SecurityPageName.threatIntelligenceIndicators,
+      SecurityPageName.threatIntelligence,
       SecurityPageName.exploreLanding,
     ],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.rulesLanding],
   },
 ];

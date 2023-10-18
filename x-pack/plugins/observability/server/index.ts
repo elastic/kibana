@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
@@ -18,9 +18,9 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
-import { observabilityCoPilotConfig } from './services/openai/config';
 
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
+export { getParsedFilterQuery } from './utils/get_parsed_filtered_query';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
@@ -47,17 +47,16 @@ const configSchema = schema.object({
       }),
     }),
     thresholdRule: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: offeringBasedSchema({
+        serverless: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: true }),
+      }),
     }),
   }),
-  thresholdRule: schema.object({
+  customThresholdRule: schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  aiAssistant: schema.maybe(observabilityCoPilotConfig),
-  compositeSlo: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
 });
 
 export const config: PluginConfigDescriptor = {

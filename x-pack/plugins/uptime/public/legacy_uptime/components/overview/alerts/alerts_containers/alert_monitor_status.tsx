@@ -22,6 +22,8 @@ import { FILTER_FIELDS } from '../../../../../../common/constants';
 const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
 
 interface Props {
+  id?: string;
+  stackVersion?: string;
   ruleParams: { [key: string]: any };
   enabled: boolean;
   numTimes: number;
@@ -33,11 +35,13 @@ interface Props {
 }
 
 export const AlertMonitorStatus: React.FC<Props> = ({
+  id,
   enabled,
   numTimes,
   setRuleParams,
   timerange,
   ruleParams,
+  stackVersion,
 }) => {
   const dispatch = useDispatch();
 
@@ -46,6 +50,12 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       dispatch(setSearchTextAction(ruleParams.search));
     }
   }, [ruleParams, dispatch]);
+
+  useEffect(() => {
+    if (!id && stackVersion && !ruleParams.stackVersion) {
+      setRuleParams('stackVersion', stackVersion);
+    }
+  }, [ruleParams, id, stackVersion, setRuleParams]);
 
   const { count, loading } = useSnapShotCount({
     query: ruleParams.search,

@@ -31,8 +31,8 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
     }),
   ];
 
-  public labelsText$ = new BehaviorSubject<string>('');
-  public multiLabel$ = new BehaviorSubject<boolean>(false);
+  private labelsText$ = new BehaviorSubject<string>('');
+  private multiLabel$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,

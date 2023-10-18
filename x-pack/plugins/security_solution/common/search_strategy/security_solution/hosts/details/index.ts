@@ -8,21 +8,15 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { Inspect, Maybe, TimerangeInput } from '../../../common';
-import type { HostItem, HostsFields } from '../common';
-import type { RequestOptionsPaginated } from '../..';
+import type { Inspect, Maybe } from '../../../common';
+import type { HostItem } from '../common';
 
 export interface HostDetailsStrategyResponse extends IEsSearchResponse {
   hostDetails: HostItem;
   inspect?: Maybe<Inspect>;
 }
 
-export interface HostDetailsRequestOptions extends Partial<RequestOptionsPaginated<HostsFields>> {
-  hostName: string;
-  skip?: boolean;
-  timerange: TimerangeInput;
-  inspect?: Maybe<Inspect>;
-}
+export type { HostDetailsRequestOptions } from '../../../../api/search_strategy';
 
 export interface AggregationRequest {
   [aggField: string]: estypes.AggregationsAggregationContainer;

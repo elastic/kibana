@@ -16,8 +16,8 @@ import { useRootNavLink } from '../../common/links/nav_links';
 import { useGlobalQueryString } from '../../common/utils/global_query_string';
 import { trackLandingLinkClick } from '../../common/lib/telemetry/trackers';
 
-const PAGE_TITLE = i18n.translate('xpack.securitySolution.management.landing.settingsTitle', {
-  defaultMessage: 'Settings',
+const PAGE_TITLE = i18n.translate('xpack.securitySolution.management.landing.title', {
+  defaultMessage: 'Manage',
 });
 
 export const ManageLandingPage = () => {

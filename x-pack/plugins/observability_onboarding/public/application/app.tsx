@@ -24,9 +24,9 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { ConfigSchema } from '..';
-import { customLogsRoutes } from '../components/app/custom_logs/wizard';
+import { customLogsRoutes } from '../components/app/custom_logs';
+import { systemLogsRoutes } from '../components/app/system_logs';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -34,16 +34,7 @@ import {
 } from '../plugin';
 import { baseRoutes, routes } from '../routes';
 import { CustomLogs } from '../routes/templates/custom_logs';
-
-export type BreadcrumbTitle<
-  T extends { [K in keyof T]?: string | undefined } = {}
-> = string | ((props: RouteComponentProps<T>) => string) | null;
-
-export interface RouteDefinition<
-  T extends { [K in keyof T]?: string | undefined } = any
-> extends RouteProps {
-  breadcrumb: BreadcrumbTitle<T>;
-}
+import { SystemLogs } from '../routes/templates/system_logs';
 
 export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
@@ -59,6 +50,7 @@ export const breadcrumbsApp = {
 
 function App() {
   const customLogRoutesPaths = Object.keys(customLogsRoutes);
+  const systemLogRoutesPaths = Object.keys(systemLogsRoutes);
 
   return (
     <>
@@ -93,6 +85,26 @@ function App() {
               );
             })}
           </CustomLogs>
+        </Route>
+        <Route exact path={systemLogRoutesPaths}>
+          <SystemLogs>
+            {systemLogRoutesPaths.map((key) => {
+              const path = key as keyof typeof routes;
+              const { handler, exact } = routes[path];
+              const Wrapper = () => {
+                return handler();
+              };
+
+              return (
+                <Route
+                  key={path}
+                  path={path}
+                  exact={exact}
+                  component={Wrapper}
+                />
+              );
+            })}
+          </SystemLogs>
         </Route>
       </Routes>
     </>
@@ -134,6 +146,8 @@ export function ObservabilityOnboardingAppRoot({
   const i18nCore = core.i18n;
   const plugins = { ...deps };
 
+  const renderFeedbackLinkAsPortal = !config.serverless.enabled;
+
   return (
     <RedirectAppLinks
       className={APP_WRAPPER_CLASS}
@@ -160,12 +174,14 @@ export function ObservabilityOnboardingAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <EuiErrorBoundary>
-                <HeaderMenuPortal
-                  setHeaderActionMenu={setHeaderActionMenu}
-                  theme$={theme$}
-                >
-                  <ObservabilityOnboardingHeaderActionMenu />
-                </HeaderMenuPortal>
+                {renderFeedbackLinkAsPortal && (
+                  <HeaderMenuPortal
+                    setHeaderActionMenu={setHeaderActionMenu}
+                    theme$={theme$}
+                  >
+                    <ObservabilityOnboardingHeaderActionMenu />
+                  </HeaderMenuPortal>
+                )}
                 <ObservabilityOnboardingApp />
               </EuiErrorBoundary>
             </Router>

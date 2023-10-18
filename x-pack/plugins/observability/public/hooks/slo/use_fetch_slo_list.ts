@@ -20,10 +20,10 @@ import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 interface SLOListParams {
-  name?: string;
+  kqlQuery?: string;
   page?: number;
   sortBy?: string;
-  indicatorTypes?: string[];
+  sortDirection?: 'asc' | 'desc';
   shouldRefetch?: boolean;
 }
 
@@ -33,7 +33,7 @@ export interface UseFetchSloListResponse {
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  sloList: FindSLOResponse | undefined;
+  data: FindSLOResponse | undefined;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
   ) => Promise<QueryObserverResult<FindSLOResponse | undefined, unknown>>;
@@ -43,44 +43,34 @@ const SHORT_REFETCH_INTERVAL = 1000 * 5; // 5 seconds
 const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchSloList({
-  name = '',
+  kqlQuery = '',
   page = 1,
-  sortBy = 'creationTime',
-  indicatorTypes = [],
+  sortBy = 'status',
+  sortDirection = 'desc',
   shouldRefetch,
-}: SLOListParams | undefined = {}): UseFetchSloListResponse {
+}: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
-
-  const [stateRefetchInterval, setStateRefetchInterval] = useState<number | undefined>(
-    SHORT_REFETCH_INTERVAL
-  );
+  const [stateRefetchInterval, setStateRefetchInterval] = useState<number>(SHORT_REFETCH_INTERVAL);
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: sloKeys.list({ name, page, sortBy, indicatorTypes }),
+      queryKey: sloKeys.list({ kqlQuery, page, sortBy, sortDirection }),
       queryFn: async ({ signal }) => {
-        try {
-          const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
-            query: {
-              ...(page && { page }),
-              ...(name && { name }),
-              ...(sortBy && { sortBy }),
-              ...(indicatorTypes &&
-                indicatorTypes.length > 0 && {
-                  indicatorTypes: indicatorTypes.join(','),
-                }),
-            },
-            signal,
-          });
+        const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
+          query: {
+            ...(kqlQuery && { kqlQuery }),
+            ...(sortBy && { sortBy }),
+            ...(sortDirection && { sortDirection }),
+            ...(page && { page }),
+          },
+          signal,
+        });
 
-          return response;
-        } catch (error) {
-          throw error;
-        }
+        return response;
       },
       keepPreviousData: true,
       refetchOnWindowFocus: false,
@@ -118,7 +108,7 @@ export function useFetchSloList({
   );
 
   return {
-    sloList: data,
+    data,
     isInitialLoading,
     isLoading,
     isRefetching,

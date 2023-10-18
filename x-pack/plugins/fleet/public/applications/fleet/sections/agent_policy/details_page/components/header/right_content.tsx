@@ -69,7 +69,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   }
 
   const addAgentLink = (
-    <EuiLink onClick={addAgent}>
+    <EuiLink onClick={addAgent} data-test-subj="addAgentLink">
       {isFleetServerPolicy ? (
         <FormattedMessage
           id="xpack.fleet.policyDetails.addFleetServerButton"

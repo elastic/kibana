@@ -112,6 +112,7 @@ export const MonitorType = t.intersection([
       id: t.string,
       name: t.string,
     }),
+    origin: t.union([t.literal('ui'), t.literal('project')]),
   }),
 ]);
 
@@ -143,11 +144,24 @@ export const UrlType = t.partial({
   path: t.string,
 });
 
+const SummaryCodec = t.type({
+  down: t.number,
+  up: t.number,
+  status: t.union([t.literal('up'), t.literal('down')]),
+  attempt: t.number,
+  max_attempts: t.number,
+  final_attempt: t.boolean,
+  retry_group: t.string,
+});
+
+export type TestSummary = t.TypeOf<typeof SummaryCodec>;
+
 export const PingType = t.intersection([
   t.type({
     timestamp: t.string,
     monitor: MonitorType,
     docId: t.string,
+    observer: ObserverCodec,
   }),
   t.partial({
     '@timestamp': t.string,
@@ -198,17 +212,13 @@ export const PingType = t.intersection([
         uid: t.string,
       }),
     }),
-    observer: ObserverCodec,
     resolve: t.partial({
       ip: t.string,
       rtt: t.partial({
         us: t.number,
       }),
     }),
-    summary: t.partial({
-      down: t.number,
-      up: t.number,
-    }),
+    summary: SummaryCodec,
     synthetics: SyntheticsDataType,
     tags: t.array(t.string),
     tcp: t.partial({
@@ -263,37 +273,6 @@ export const PingStatusType = t.intersection([
 
 export type PingStatus = t.TypeOf<typeof PingStatusType>;
 
-// Convenience function for tests etc that makes an empty ping
-// object with the minimum of fields.
-export const makePing = (f: {
-  docId?: string;
-  type?: string;
-  id?: string;
-  timestamp?: string;
-  ip?: string;
-  status?: string;
-  duration?: number;
-  location?: string;
-  name?: string;
-  url?: string;
-}): Ping => {
-  return {
-    docId: f.docId || 'myDocId',
-    timestamp: f.timestamp || '2020-07-07T01:14:08Z',
-    monitor: {
-      id: f.id || 'myId',
-      type: f.type || 'myType',
-      ip: f.ip || '127.0.0.1',
-      status: f.status || 'up',
-      duration: { us: f.duration || 100000 },
-      name: f.name,
-      check_group: 'myCheckGroup',
-    },
-    ...(f.location ? { observer: { geo: { name: f.location } } } : {}),
-    ...(f.url ? { url: { full: f.url } } : {}),
-  };
-};
-
 export const PingsResponseType = t.type({
   total: t.number,
   pings: t.array(PingType),
@@ -323,6 +302,7 @@ export const GetPingsParamsType = t.intersection([
     monitorId: t.string,
     sort: t.string,
     status: t.string,
+    finalAttempt: t.boolean,
   }),
 ]);
 

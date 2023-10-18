@@ -11,16 +11,22 @@ import {
   type ExpandableFlyoutProps,
   ExpandableFlyoutProvider,
 } from '@kbn/expandable-flyout';
-import type { RightPanelProps } from './right';
-import { RightPanel, RightPanelKey } from './right';
-import { RightPanelProvider } from './right/context';
-import type { LeftPanelProps } from './left';
-import { LeftPanel, LeftPanelKey } from './left';
-import { LeftPanelProvider } from './left/context';
+import type { IsolateHostPanelProps } from './document_details/isolate_host';
+import { IsolateHostPanel, IsolateHostPanelKey } from './document_details/isolate_host';
+import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
+import type { RightPanelProps } from './document_details/right';
+import { RightPanel, RightPanelKey } from './document_details/right';
+import { RightPanelProvider } from './document_details/right/context';
+import type { LeftPanelProps } from './document_details/left';
+import { LeftPanel, LeftPanelKey } from './document_details/left';
+import { LeftPanelProvider } from './document_details/left/context';
 import {
   SecuritySolutionFlyoutUrlSyncProvider,
   useSecurityFlyoutUrlSync,
-} from './shared/context/url_sync';
+} from './document_details/shared/context/url_sync';
+import type { PreviewPanelProps } from './document_details/preview';
+import { PreviewPanel, PreviewPanelKey } from './document_details/preview';
+import { PreviewPanelProvider } from './document_details/preview/context';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -41,6 +47,22 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <LeftPanelProvider {...(props as LeftPanelProps).params}>
         <LeftPanel path={props.path as LeftPanelProps['path']} />
       </LeftPanelProvider>
+    ),
+  },
+  {
+    key: PreviewPanelKey,
+    component: (props) => (
+      <PreviewPanelProvider {...(props as PreviewPanelProps).params}>
+        <PreviewPanel path={props.path as PreviewPanelProps['path']} />
+      </PreviewPanelProvider>
+    ),
+  },
+  {
+    key: IsolateHostPanelKey,
+    component: (props) => (
+      <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
+        <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
+      </IsolateHostPanelProvider>
     ),
   },
 ];

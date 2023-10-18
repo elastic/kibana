@@ -12,8 +12,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { getActionList, getActionListByStatus } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';

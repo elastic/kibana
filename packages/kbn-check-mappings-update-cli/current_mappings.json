@@ -42,6 +42,29 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "url": {
+    "dynamic": false,
+    "properties": {
+      "slug": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "accessDate": {
+        "type": "date"
+      },
+      "createDate": {
+        "type": "date"
+      }
+    }
+  },
   "usage-counters": {
     "dynamic": false,
     "properties": {
@@ -127,25 +150,6 @@
     "dynamic": false,
     "properties": {
       "lastUpdatedAt": {
-        "type": "date"
-      }
-    }
-  },
-  "url": {
-    "dynamic": false,
-    "properties": {
-      "slug": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "accessDate": {
-        "type": "date"
-      },
-      "createDate": {
         "type": "date"
       }
     }
@@ -616,6 +620,10 @@
       }
     }
   },
+  "apm-indices": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "name": {
@@ -625,17 +633,6 @@
         "type": "text"
       },
       "color": {
-        "type": "text"
-      }
-    }
-  },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
         "type": "text"
       }
     }
@@ -931,6 +928,17 @@
       }
     }
   },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
   "visualization": {
     "dynamic": false,
     "properties": {
@@ -1051,6 +1059,21 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "links": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "links": {
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -1344,6 +1367,41 @@
       },
       "category": {
         "type": "keyword"
+      },
+      "customFields": {
+        "type": "nested",
+        "properties": {
+          "key": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword",
+            "fields": {
+              "number": {
+                "type": "long",
+                "ignore_malformed": true
+              },
+              "boolean": {
+                "type": "boolean",
+                "ignore_malformed": true
+              },
+              "string": {
+                "type": "text"
+              },
+              "date": {
+                "type": "date",
+                "ignore_malformed": true
+              },
+              "ip": {
+                "type": "ip",
+                "ignore_malformed": true
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -1406,6 +1464,14 @@
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
+      }
+    }
   },
   "canvas-element": {
     "dynamic": false,
@@ -1497,6 +1563,9 @@
       },
       "prerelease_integrations_enabled": {
         "type": "boolean"
+      },
+      "secret_storage_requirements_met": {
+        "type": "boolean"
       }
     }
   },
@@ -1576,6 +1645,9 @@
       "overrides": {
         "type": "flattened",
         "index": false
+      },
+      "keep_monitoring_alive": {
+        "type": "boolean"
       }
     }
   },
@@ -1647,6 +1719,9 @@
         "type": "keyword"
       },
       "auth_type": {
+        "type": "keyword"
+      },
+      "connection_type": {
         "type": "keyword"
       },
       "username": {
@@ -1734,6 +1809,12 @@
         "type": "text"
       },
       "broker_buffer_size": {
+        "type": "integer"
+      },
+      "required_acks": {
+        "type": "integer"
+      },
+      "channel_buffer_size": {
         "type": "integer"
       }
     }
@@ -1942,6 +2023,9 @@
         "type": "boolean"
       },
       "host": {
+        "type": "keyword"
+      },
+      "proxy_id": {
         "type": "keyword"
       }
     }
@@ -2249,6 +2333,9 @@
   },
   "observability-onboarding-state": {
     "properties": {
+      "type": {
+        "type": "keyword"
+      },
       "state": {
         "type": "object",
         "dynamic": false
@@ -2256,14 +2343,6 @@
       "progress": {
         "type": "object",
         "dynamic": false
-      }
-    }
-  },
-  "infrastructure-monitoring-log-view": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
       }
     }
   },
@@ -2515,6 +2594,106 @@
     }
   },
   "synthetics-param": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "infrastructure-ui-source": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "inventory-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "metrics-explorer-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "upgrade-assistant-reindex-operation": {
+    "dynamic": false,
+    "properties": {
+      "indexName": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "integer"
+      }
+    }
+  },
+  "upgrade-assistant-ml-upgrade-operation": {
+    "dynamic": false,
+    "properties": {
+      "snapshotId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  },
+  "monitoring-telemetry": {
+    "properties": {
+      "reportedClusterUuids": {
+        "type": "keyword"
+      }
+    }
+  },
+  "apm-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "apm-server-schema": {
+    "properties": {
+      "schemaJson": {
+        "type": "text",
+        "index": false
+      }
+    }
+  },
+  "apm-service-group": {
+    "properties": {
+      "groupName": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
+      }
+    }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
   },
@@ -2907,6 +3086,9 @@
       },
       "updatedBy": {
         "type": "text"
+      },
+      "savedSearchId": {
+        "type": "text"
       }
     }
   },
@@ -2935,92 +3117,46 @@
       }
     }
   },
-  "infrastructure-ui-source": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "inventory-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "metrics-explorer-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "upgrade-assistant-reindex-operation": {
+  "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
-      "indexName": {
+      "dataViewId": {
         "type": "keyword"
       },
-      "status": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "filter": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "identifierType": {
+        "type": "keyword"
+      },
+      "interval": {
+        "type": "keyword"
+      },
+      "pageSize": {
         "type": "integer"
-      }
-    }
-  },
-  "upgrade-assistant-ml-upgrade-operation": {
-    "dynamic": false,
-    "properties": {
-      "snapshotId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
+      },
+      "range": {
+        "properties": {
+          "start": {
+            "type": "keyword"
+          },
+          "end": {
+            "type": "keyword"
           }
         }
       }
     }
   },
-  "monitoring-telemetry": {
+  "policy-settings-protection-updates-note": {
     "properties": {
-      "reportedClusterUuids": {
-        "type": "keyword"
-      }
-    }
-  },
-  "apm-indices": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-server-schema": {
-    "properties": {
-      "schemaJson": {
+      "note": {
         "type": "text",
         "index": false
       }
     }
-  },
-  "apm-service-group": {
-    "properties": {
-      "groupName": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
   }
 }

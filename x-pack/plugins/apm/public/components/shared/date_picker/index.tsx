@@ -105,6 +105,7 @@ export function DatePicker({
       }}
       showUpdateButton={true}
       commonlyUsedRanges={commonlyUsedRanges}
+      width={'auto'}
     />
   );
 }

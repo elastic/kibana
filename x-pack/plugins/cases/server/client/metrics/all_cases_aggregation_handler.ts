@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CasesMetricsResponse } from '../../../common/api';
+import type { CasesMetricsResponse } from '../../../common/types/api';
 import { AggregationHandler } from './aggregation_handler';
 import type { AggregationBuilder, AllCasesBaseHandlerCommonOptions } from './types';
 

@@ -8,13 +8,13 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 
-import { setup } from '@kbn/core-test-helpers-http-setup-browser';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { setup } from '@kbn/core-test-helpers-http-setup-browser';
 
-import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
-import { LogoutReason } from '../../common/types';
 import { SessionExpired } from './session_expired';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
+import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
+import { LogoutReason } from '../../common/types';
 
 jest.mock('./session_expired');
 

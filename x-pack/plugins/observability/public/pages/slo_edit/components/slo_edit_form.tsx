@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
@@ -62,7 +62,7 @@ export function SloEditForm({ slo }: Props) {
     sloIds: slo?.id ? [slo.id] : undefined,
   });
 
-  const sloFormValuesUrlState = useParseUrlState();
+  const sloFormValuesFromUrlState = useParseUrlState();
   const isAddRuleFlyoutOpen = useAddRuleFlyoutState(isEditMode);
   const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
 
@@ -73,7 +73,7 @@ export function SloEditForm({ slo }: Props) {
   }, [isEditMode, rules, slo]);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesUrlState),
+    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesFromUrlState),
     values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
   });
@@ -258,7 +258,7 @@ export function SloEditForm({ slo }: Props) {
         <AddRuleFlyout
           canChangeTrigger={false}
           consumer={sloFeatureId}
-          initialValues={{ name: `${slo.name} burn rate rule`, params: { sloId: slo.id } }}
+          initialValues={{ name: `${watch('name')} burn rate rule`, params: { sloId: slo.id } }}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}

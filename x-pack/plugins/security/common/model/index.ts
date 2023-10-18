@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
+export type {
+  ApiKey,
+  RestApiKey,
+  CrossClusterApiKey,
+  ApiKeyToInvalidate,
+  ApiKeyRoleDescriptors,
+  CrossClusterApiKeyAccess,
+} from './api_key';
 export type { User, EditUser, GetUserDisplayNameParams } from './user';
 export type {
   GetUserProfileResponse,
@@ -15,7 +22,6 @@ export type {
   UserProfileData,
   UserProfileLabels,
   UserProfileUserInfoWithSecurity,
-  UserProfileAvatarData,
 } from './user_profile';
 export {
   getUserAvatarColor,

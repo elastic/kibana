@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import { validateMaxUserActions } from '../../../common/utils/validators';
 import { AttachmentPatchRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -29,7 +30,7 @@ export async function update(
   clientArgs: CasesClientArgs
 ): Promise<Case> {
   const {
-    services: { attachmentService },
+    services: { attachmentService, userActionService },
     logger,
     authorization,
     externalReferenceAttachmentTypeRegistry,
@@ -41,6 +42,11 @@ export async function update(
       version: queryCommentVersion,
       ...queryRestAttributes
     } = decodeWithExcessOrThrow(AttachmentPatchRequestRt)(queryParams);
+    await validateMaxUserActions({
+      caseId: caseID,
+      userActionService,
+      userActionsToAdd: 1,
+    });
 
     decodeCommentRequest(queryRestAttributes, externalReferenceAttachmentTypeRegistry);
 

@@ -20,19 +20,24 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-
+import {
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
+import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { parseAlert } from '../helpers/parse_alert';
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import type { TopAlert } from '../../../typings/alerts';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 
 const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
 
@@ -65,6 +70,7 @@ export function AlertActions({
     },
   } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -76,13 +82,13 @@ export function AlertActions({
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
+  const ruleId = alert.fields[ALERT_RULE_UUID] ?? null;
   const linkToRule =
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? prepend(paths.observability.ruleDetails(ruleId))
       : null;
 
-  const alertId = alert.fields['kibana.alert.uuid'] ?? null;
+  const alertId = alert.fields[ALERT_UUID] ?? null;
   const linkToAlert =
     pageId !== ALERT_DETAILS_PAGE_ID && alertId
       ? prepend(paths.observability.alertDetails(alertId))
@@ -100,6 +106,11 @@ export function AlertActions({
         ]
       : [];
   }, [ecsData, getRuleIdFromEvent, data]);
+
+  const isActiveAlert = useMemo(
+    () => alert.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
+    [alert.fields]
+  );
 
   const onSuccess = useCallback(() => {
     refresh();
@@ -125,6 +136,14 @@ export function AlertActions({
     selectCaseModal.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
+
+  const handleUntrackAlert = useCallback(async () => {
+    await untrackAlerts({
+      indices: [ecsData?._index ?? ''],
+      alertUuids: [alertId],
+    });
+    onSuccess();
+  }, [untrackAlerts, alertId, ecsData, onSuccess]);
 
   const actionsMenuItems = [
     ...(userCasesPermissions.create && userCasesPermissions.read
@@ -192,6 +211,19 @@ export function AlertActions({
         </EuiContextMenuItem>
       ),
     ],
+    ...(isActiveAlert
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="untrackAlert"
+            key="untrackAlert"
+            onClick={handleUntrackAlert}
+          >
+            {i18n.translate('xpack.observability.alerts.actions.untrack', {
+              defaultMessage: 'Mark as untracked',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
 
   const actionsToolTip =
@@ -216,6 +248,7 @@ export function AlertActions({
             })}
           >
             <EuiButtonIcon
+              data-test-subj="o11yAlertActionsButton"
               aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
                 defaultMessage: 'View in app',
               })}
@@ -248,7 +281,11 @@ export function AlertActions({
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+          <EuiContextMenuPanel
+            size="s"
+            items={actionsMenuItems}
+            data-test-subj="alertsTableActionsMenu"
+          />
         </EuiPopover>
       </EuiFlexItem>
     </>

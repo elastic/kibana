@@ -1014,7 +1014,22 @@
         "label": "DEFAULT_EMS_LANDING_PAGE_URL",
         "description": [],
         "signature": [
-          "\"https://maps.elastic.co/v8.7\""
+          "\"https://maps.elastic.co\""
+        ],
+        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsEms",
+        "id": "def-common.DEFAULT_EMS_REST_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_EMS_REST_VERSION",
+        "description": [],
+        "signature": [
+          "\"2023-10-31\""
         ],
         "path": "src/plugins/maps_ems/common/ems_defaults.ts",
         "deprecated": false,

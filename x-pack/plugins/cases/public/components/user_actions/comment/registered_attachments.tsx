@@ -90,8 +90,6 @@ export const createRegisteredAttachmentUserActionBuilder = <
   getAttachmentViewProps,
   handleDeleteComment,
 }: BuilderArgs<C, R>): ReturnType<UserActionBuilder> => ({
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
   build: () => {
     const attachmentTypeId: string = getId();
     const isTypeRegistered = registry.has(attachmentTypeId);

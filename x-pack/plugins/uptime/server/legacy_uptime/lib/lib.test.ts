@@ -44,7 +44,7 @@ describe('UptimeEsClient', () => {
 
       expect(esClient.search).toHaveBeenCalledWith(
         {
-          index: 'heartbeat-8*,heartbeat-7*',
+          index: 'heartbeat-*',
           ...mockSearchParams,
         },
         { meta: true }
@@ -74,7 +74,7 @@ describe('UptimeEsClient', () => {
       await expect(uptimeEsClient.search(mockSearchParams)).rejects.toThrow(mockError);
       expect(esClient.search).toHaveBeenCalledWith(
         {
-          index: 'heartbeat-8*,heartbeat-7*',
+          index: 'heartbeat-*',
           ...mockSearchParams,
         },
         { meta: true }
@@ -92,7 +92,7 @@ describe('UptimeEsClient', () => {
 
       expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
       expect(result).toEqual({
-        indices: 'heartbeat-8*,heartbeat-7*',
+        indices: 'heartbeat-*',
         result: {
           body: {},
           headers: {
@@ -143,11 +143,11 @@ describe('UptimeEsClient', () => {
     it('appends synthetics-* in index for legacy alerts', async () => {
       savedObjectsClient.get = jest.fn().mockResolvedValue({
         attributes: {
-          heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
+          heartbeatIndices: 'heartbeat-*',
           syntheticsIndexRemoved: true,
         },
       });
-      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { stackVersion: '8.9.0' });
 
       const mockSearchParams = {
         body: {
@@ -167,7 +167,7 @@ describe('UptimeEsClient', () => {
 
       expect(esClient.search).toHaveBeenCalledWith(
         {
-          index: 'heartbeat-8*,heartbeat-7*,synthetics-*',
+          index: 'heartbeat-*,synthetics-*',
           ...mockSearchParams,
         },
         { meta: true }
@@ -180,7 +180,7 @@ describe('UptimeEsClient', () => {
           settingsObjectId
         );
       });
-      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { stackVersion: '8.9.0' });
 
       const mockSearchParams = {
         body: {
@@ -200,13 +200,66 @@ describe('UptimeEsClient', () => {
 
       expect(esClient.search).toHaveBeenCalledWith(
         {
-          index: 'heartbeat-8*,heartbeat-7*,synthetics-*',
+          index: 'heartbeat-*,synthetics-*',
           ...mockSearchParams,
         },
         { meta: true }
       );
     });
-  });
+    it('does not append synthetics-* to index for stack version 8.10.0 or later', async () => {
+      savedObjectsClient.get = jest.fn().mockImplementation(() => {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          umDynamicSettings.name,
+          settingsObjectId
+        );
+      });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, {
+        stackVersion: '8.11.0',
+      });
 
-  // Add more tests for other methods and edge cases
+      await uptimeEsClient.search({
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        {
+          index: 'heartbeat-*',
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+        { meta: true }
+      );
+
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, {
+        stackVersion: '8.10.0',
+      });
+
+      await uptimeEsClient.search({
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(esClient.search).toHaveBeenLastCalledWith(
+        {
+          index: 'heartbeat-*',
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+        { meta: true }
+      );
+    });
+  });
 });

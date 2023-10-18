@@ -66,6 +66,8 @@ import {
   DimensionEditorButtonGroups,
   CalloutWarning,
   DimensionEditorGroupsOptions,
+  isLayerChangingDueToDecimalsPercentile,
+  isLayerChangingDueToOtherBucketChange,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
@@ -124,10 +126,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+
   // If a layer has sampling disabled, assume the toast has already fired in the past
   const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
     !isSamplingValueEnabled(state.layers[layerId])
   );
+
+  const [hasRankingToastFired, setRankingToastAsFired] = useState(false);
+
+  const [hasOtherBucketToastFired, setHasOtherBucketToastFired] = useState(false);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
@@ -139,6 +146,25 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const updateLayer = useCallback(
     (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
+  );
+
+  const fireOrResetOtherBucketToast = useCallback(
+    (newLayer: FormBasedLayer) => {
+      if (isLayerChangingDueToOtherBucketChange(state.layers[layerId], newLayer)) {
+        props.notifications.toasts.add({
+          title: i18n.translate('xpack.lens.uiInfo.otherBucketChangeTitle', {
+            defaultMessage: '“Group remaining values as Other” disabled',
+          }),
+          text: i18n.translate('xpack.lens.uiInfo.otherBucketDisabled', {
+            defaultMessage:
+              'Values >= 1000 may slow performance. Re-enable the setting in “Advanced” options.',
+          }),
+        });
+      }
+      // resets the flag
+      setHasOtherBucketToastFired(!hasOtherBucketToastFired);
+    },
+    [layerId, props.notifications.toasts, state.layers, hasOtherBucketToastFired]
   );
 
   const fireOrResetRandomSamplingToast = useCallback(
@@ -161,6 +187,33 @@ export function DimensionEditor(props: DimensionEditorProps) {
       setSamplingToastAsFired(!hasRandomSamplingToastFired);
     },
     [hasRandomSamplingToastFired, layerId, props.notifications.toasts, state.layers]
+  );
+
+  const fireOrResetRankingToast = useCallback(
+    (newLayer: FormBasedLayer) => {
+      if (isLayerChangingDueToDecimalsPercentile(state.layers[layerId], newLayer)) {
+        props.notifications.toasts.add({
+          title: i18n.translate('xpack.lens.uiInfo.rankingResetTitle', {
+            defaultMessage: 'Ranking changed to alphabetical',
+          }),
+          text: i18n.translate('xpack.lens.uiInfo.rankingResetToAlphabetical', {
+            defaultMessage: 'To rank by percentile, use whole numbers only.',
+          }),
+        });
+      }
+      // reset the flag if the user switches to another supported operation
+      setRankingToastAsFired(!hasRankingToastFired);
+    },
+    [hasRankingToastFired, layerId, props.notifications.toasts, state.layers]
+  );
+
+  const fireOrResetToastChecks = useCallback(
+    (newLayer: FormBasedLayer) => {
+      fireOrResetRandomSamplingToast(newLayer);
+      fireOrResetRankingToast(newLayer);
+      fireOrResetOtherBucketToast(newLayer);
+    },
+    [fireOrResetRandomSamplingToast, fireOrResetRankingToast, fireOrResetOtherBucketToast]
   );
 
   const setStateWrapper = useCallback(
@@ -203,7 +256,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           }
           const newLayer = adjustColumnReferencesForChangedColumn(outputLayer, columnId);
           // Fire an info toast (eventually) on layer update
-          fireOrResetRandomSamplingToast(newLayer);
+          fireOrResetToastChecks(newLayer);
 
           return mergeLayer({
             state: prevState,
@@ -217,7 +270,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }
       );
     },
-    [columnId, fireOrResetRandomSamplingToast, layerId, setState, state.layers]
+    [columnId, fireOrResetToastChecks, layerId, setState, state.layers]
   );
 
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
@@ -811,7 +864,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     field,
                     visualizationGroups: dimensionGroups,
                   });
-                  fireOrResetRandomSamplingToast(newLayer);
+                  fireOrResetToastChecks(newLayer);
                   updateLayer(newLayer);
                 }}
                 onChooseField={(choice: FieldChoiceWithOperationType) => {
@@ -846,7 +899,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else {
                     newLayer = setter;
                   }
-                  fireOrResetRandomSamplingToast(newLayer);
+                  fireOrResetToastChecks(newLayer);
                   return updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId));
                 }}
                 validation={validation}
@@ -1224,7 +1277,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
             !isFullscreen &&
             selectedColumn &&
             (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-              <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
+              <FormatSelector
+                selectedColumn={selectedColumn}
+                onChange={onFormatChange}
+                docLinks={props.core.docLinks}
+              />
             ) : null}
           </>
         </div>

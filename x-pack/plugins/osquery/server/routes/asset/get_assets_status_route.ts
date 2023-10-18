@@ -6,15 +6,17 @@
  */
 
 import { filter } from 'lodash/fp';
-import { schema } from '@kbn/config-schema';
 import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
 
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
+import type { GetAssetsStatusRequestParamsSchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getAssetsStatusRequestParamsSchema } from '../../../common/api';
 
 export const getAssetsStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -28,7 +30,10 @@ export const getAssetsStatusRoute = (router: IRouter, osqueryContext: OsqueryApp
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: schema.object({}, { unknowns: 'allow' }),
+            params: buildRouteValidation<
+              typeof getAssetsStatusRequestParamsSchema,
+              GetAssetsStatusRequestParamsSchema
+            >(getAssetsStatusRequestParamsSchema),
           },
         },
       },

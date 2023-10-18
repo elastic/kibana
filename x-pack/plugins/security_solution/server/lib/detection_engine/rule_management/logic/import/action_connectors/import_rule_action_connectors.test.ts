@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import {
   getImportRulesSchemaMock,
   webHookConnector,

@@ -18,7 +18,7 @@ interface Props {
   side?: 'left' | 'right';
 }
 
-export function HeaderNavControls({ navControls$, side }: Props) {
+export function HeaderNavControls({ navControls$ }: Props) {
   const navControls = useObservable(navControls$, []);
 
   if (!navControls) {
@@ -30,10 +30,7 @@ export function HeaderNavControls({ navControls$, side }: Props) {
   return (
     <>
       {navControls.map((navControl: ChromeNavControl, index: number) => (
-        <EuiHeaderSectionItem
-          key={index}
-          border={side ? (side === 'left' ? 'right' : 'left') : 'none'}
-        >
+        <EuiHeaderSectionItem key={index}>
           <HeaderExtension extension={navControl.mount} />
         </EuiHeaderSectionItem>
       ))}

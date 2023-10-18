@@ -13,16 +13,16 @@ import type {
   CasesFindResponse,
   CasesStatusResponse,
   CasesBulkGetResponse,
+  CasesMetricsResponse,
 } from '../../common/types/api';
 import {
   CasesFindResponseRt,
   CasesStatusResponseRt,
   CasesBulkGetResponseRt,
+  CasesMetricsResponseRt,
 } from '../../common/types/api';
 import { createToasterPlainError } from '../containers/utils';
 import { throwErrors } from '../../common';
-import type { CasesMetricsResponse } from '../../common/api';
-import { CasesMetricsResponseRt } from '../../common/api';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));

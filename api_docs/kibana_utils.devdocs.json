@@ -9243,7 +9243,7 @@
             "section": "def-common.Serializable",
             "text": "Serializable"
           },
-          ">) => S"
+          ">, loose: boolean | undefined) => S"
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
         "deprecated": false,
@@ -9299,6 +9299,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.migrateToLatest.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "loose",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -10079,7 +10094,7 @@
             "tags": [],
             "label": "migrations",
             "description": [
-              "\nA list of migration functions, which migrate the persistable state\nserializable object to the next version. Migration functions should are\nkeyed by the Kibana version using semver, where the version indicates to\nwhich version the state will be migrated to."
+              "\nA list of migration functions, which migrate the persistable state\nserializable object to the next version. Migration functions should be\nkeyed using semver, where the version indicates which version the state\nwill be migrated to."
             ],
             "signature": [
               {

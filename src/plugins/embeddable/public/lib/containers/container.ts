@@ -37,8 +37,8 @@ import {
   PanelState,
   EmbeddableContainerSettings,
 } from './i_container';
-import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
+import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -160,23 +160,32 @@ export abstract class Container<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
-  >(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable> {
+  >(type: string, explicitInput: Partial<EEI>, attributes?: unknown): Promise<E | ErrorEmbeddable> {
     const factory = this.getFactory(type) as EmbeddableFactory<EEI, EEO, E> | undefined;
 
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
 
-    const panelState = this.createNewPanelState<EEI, E>(factory, explicitInput);
+    const { newPanel, otherPanels } = this.createNewPanelState<EEI, E>(
+      factory,
+      explicitInput,
+      attributes
+    );
 
-    return this.createAndSaveEmbeddable(type, panelState);
+    return this.createAndSaveEmbeddable(type, newPanel, otherPanels);
   }
 
   public async replaceEmbeddable<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
-  >(id: string, newExplicitInput: Partial<EEI>, newType?: string) {
+  >(
+    id: string,
+    newExplicitInput: Partial<EEI>,
+    newType?: string,
+    generateNewId?: boolean
+  ): Promise<string> {
     if (!this.input.panels[id]) {
       throw new PanelNotFoundError();
     }
@@ -186,21 +195,28 @@ export abstract class Container<
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(newType);
       }
-      this.updateInput({
-        panels: {
-          ...this.input.panels,
-          [id]: {
-            ...this.input.panels[id],
-            explicitInput: { ...newExplicitInput, id },
-            type: newType,
-          },
-        },
-      } as Partial<TContainerInput>);
-    } else {
-      this.updateInputForChild(id, newExplicitInput);
     }
 
+    const panels = { ...this.input.panels };
+    const oldPanel = panels[id];
+
+    if (generateNewId) {
+      delete panels[id];
+      id = uuidv4();
+    }
+    this.updateInput({
+      panels: {
+        ...panels,
+        [id]: {
+          ...oldPanel,
+          explicitInput: { ...newExplicitInput, id },
+          type: newType ?? oldPanel.type,
+        },
+      },
+    } as Partial<TContainerInput>);
+
     await this.untilEmbeddableLoaded<E>(id);
+    return id;
   }
 
   public removeEmbeddable(embeddableId: string) {
@@ -301,7 +317,7 @@ export abstract class Container<
 
   public async getExplicitInputIsEqual(lastInput: TContainerInput) {
     const { panels: lastPanels, ...restOfLastInput } = lastInput;
-    const { panels: currentPanels, ...restOfCurrentInput } = this.getInput();
+    const { panels: currentPanels, ...restOfCurrentInput } = this.getExplicitInput();
     const otherInputIsEqual = isEqual(restOfLastInput, restOfCurrentInput);
     if (!otherInputIsEqual) return false;
 
@@ -330,8 +346,9 @@ export abstract class Container<
     TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
-    partial: Partial<TEmbeddableInput> = {}
-  ): PanelState<TEmbeddableInput> {
+    partial: Partial<TEmbeddableInput> = {},
+    attributes?: unknown
+  ): { newPanel: PanelState<TEmbeddableInput>; otherPanels: TContainerInput['panels'] } {
     const embeddableId = partial.id || uuidv4();
 
     const explicitInput = this.createNewExplicitEmbeddableInput<TEmbeddableInput>(
@@ -341,11 +358,15 @@ export abstract class Container<
     );
 
     return {
-      type: factory.type,
-      explicitInput: {
-        ...explicitInput,
-        id: embeddableId,
-      } as TEmbeddableInput,
+      newPanel: {
+        type: factory.type,
+        explicitInput: {
+          ...explicitInput,
+          id: embeddableId,
+          version: factory.latestVersion,
+        } as TEmbeddableInput,
+      },
+      otherPanels: this.getInput().panels,
     };
   }
 
@@ -371,7 +392,6 @@ export abstract class Container<
     initializeSettings?: EmbeddableContainerSettings
   ) {
     let initializeOrder = Object.keys(initialInput.panels);
-
     if (initializeSettings?.childIdInitializeOrder) {
       const initializeOrderSet = new Set<string>();
 
@@ -400,10 +420,10 @@ export abstract class Container<
   protected async createAndSaveEmbeddable<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
-  >(type: string, panelState: PanelState) {
+  >(type: string, panelState: PanelState, otherPanels: TContainerInput['panels']) {
     this.updateInput({
       panels: {
-        ...this.input.panels,
+        ...otherPanels,
         [panelState.explicitInput.id]: panelState,
       },
     } as Partial<TContainerInput>);
@@ -491,6 +511,7 @@ export abstract class Container<
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
     }
+
     return embeddable;
   }
 

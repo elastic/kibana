@@ -28,14 +28,14 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteListsIndex(supertest, log);
     });
 
-    it('should create lists indices', async () => {
+    it('should create lists data streams', async () => {
       const { body: fetchedIndices } = await supertest
         .get(LIST_INDEX)
         .set('kbn-xsrf', 'true')
         .expect(404);
 
       expect(fetchedIndices).to.eql({
-        message: 'index .lists-default and index .items-default does not exist',
+        message: 'data stream .lists-default and data stream .items-default does not exist',
         status_code: 404,
       });
 
@@ -46,14 +46,15 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql({ list_index: true, list_item_index: true });
     });
 
-    it('should update lists indices if old legacy templates exists', async () => {
+    it('should migrate lists indices to data streams and remove old legacy templates', async () => {
       // create legacy indices
       await createLegacyListsIndices(es);
 
-      const { body: listsIndex } = await supertest
+      await supertest
         .get(LIST_INDEX)
         .set('kbn-xsrf', 'true')
-        .expect(200);
+        // data stream does not exist
+        .expect(404);
 
       // confirm that legacy templates are in use
       const legacyListsTemplateExists = await getTemplateExists(es, '.lists-default');
@@ -65,10 +66,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(legacyItemsTemplateExists).to.equal(true);
       expect(nonLegacyListsTemplateExists).to.equal(false);
       expect(nonLegacyItemsTemplateExists).to.equal(false);
-      expect(listsIndex).to.eql({ list_index: true, list_item_index: true });
 
-      // Expected 409 as index exists already, but now the templates should have been updated
-      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').expect(409);
+      // migrates old indices to data streams
+      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').expect(200);
 
       const { body } = await supertest.get(LIST_INDEX).set('kbn-xsrf', 'true').expect(200);
 

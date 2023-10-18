@@ -17,12 +17,12 @@ import type {
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
 
+import { defineLoginRoutes } from './login';
 import type { SecurityLicense } from '../../../common/licensing';
 import type { LoginSelectorProvider } from '../../../common/login_state';
 import type { ConfigType } from '../../config';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineLoginRoutes } from './login';
 
 describe('Login view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;

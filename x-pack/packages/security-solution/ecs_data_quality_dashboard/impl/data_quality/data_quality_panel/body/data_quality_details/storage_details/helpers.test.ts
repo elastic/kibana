@@ -102,6 +102,7 @@ describe('helpers', () => {
       const pattern = 'auditbeat-*';
       const flattenedBuckets = getFlattenedBuckets({
         ilmPhases,
+        isILMAvailable: true,
         patternRollups,
       });
 
@@ -129,12 +130,45 @@ describe('helpers', () => {
         },
       ]);
     });
+
+    test('it returns the expected legend items when isILMAvailable is false', () => {
+      const pattern = 'auditbeat-*';
+      const flattenedBuckets = getFlattenedBuckets({
+        ilmPhases,
+        isILMAvailable: false,
+        patternRollups,
+      });
+      expect(getLegendItemsForPattern({ pattern, flattenedBuckets })).toEqual([
+        {
+          color: euiThemeVars.euiColorSuccess,
+          ilmPhase: null,
+          index: '.ds-auditbeat-8.6.1-2023.02.07-000001',
+          pattern: 'auditbeat-*',
+          sizeInBytes: 18791790,
+        },
+        {
+          color: euiThemeVars.euiColorDanger,
+          ilmPhase: null,
+          index: 'auditbeat-custom-index-1',
+          pattern: 'auditbeat-*',
+          sizeInBytes: 28409,
+        },
+        {
+          color: euiThemeVars.euiColorDanger,
+          ilmPhase: null,
+          index: 'auditbeat-custom-empty-index-1',
+          pattern: 'auditbeat-*',
+          sizeInBytes: 247,
+        },
+      ]);
+    });
   });
 
   describe('getLegendItems', () => {
     test('it returns the expected legend items', () => {
       const flattenedBuckets = getFlattenedBuckets({
         ilmPhases,
+        isILMAvailable: true,
         patternRollups,
       });
 
@@ -205,6 +239,7 @@ describe('helpers', () => {
       expect(
         getFlattenedBuckets({
           ilmPhases,
+          isILMAvailable: true,
           patternRollups,
         })
       ).toEqual([
@@ -250,6 +285,57 @@ describe('helpers', () => {
         },
       ]);
     });
+
+    test('it returns the expected flattened buckets when isILMAvailable is false', () => {
+      expect(
+        getFlattenedBuckets({
+          ilmPhases,
+          isILMAvailable: false,
+          patternRollups,
+        })
+      ).toEqual([
+        {
+          ilmPhase: undefined,
+          incompatible: 0,
+          indexName: '.internal.alerts-security.alerts-default-000001',
+          pattern: '.alerts-security.alerts-default',
+          sizeInBytes: 0,
+        },
+        {
+          ilmPhase: undefined,
+          incompatible: 0,
+          indexName: '.ds-auditbeat-8.6.1-2023.02.07-000001',
+          pattern: 'auditbeat-*',
+          sizeInBytes: 18791790,
+        },
+        {
+          ilmPhase: undefined,
+          incompatible: 1,
+          indexName: 'auditbeat-custom-empty-index-1',
+          pattern: 'auditbeat-*',
+          sizeInBytes: 247,
+        },
+        {
+          ilmPhase: undefined,
+          incompatible: 3,
+          indexName: 'auditbeat-custom-index-1',
+          pattern: 'auditbeat-*',
+          sizeInBytes: 28409,
+        },
+        {
+          ilmPhase: undefined,
+          indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          pattern: 'packetbeat-*',
+          sizeInBytes: 512194751,
+        },
+        {
+          ilmPhase: undefined,
+          indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
+          pattern: 'packetbeat-*',
+          sizeInBytes: 584326147,
+        },
+      ]);
+    });
   });
 
   describe('getFillColor', () => {
@@ -276,6 +362,7 @@ describe('helpers', () => {
     test('it returns the expected map', () => {
       const flattenedBuckets = getFlattenedBuckets({
         ilmPhases,
+        isILMAvailable: true,
         patternRollups,
       });
 
@@ -363,6 +450,7 @@ describe('helpers', () => {
     const layer0FillColor = 'transparent';
     const flattenedBuckets = getFlattenedBuckets({
       ilmPhases,
+      isILMAvailable: true,
       patternRollups,
     });
     const pathToFlattenedBucketMap = getPathToFlattenedBucketMap(flattenedBuckets);

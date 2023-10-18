@@ -18,10 +18,12 @@ import {
   DocLinksStart,
   IUiSettingsClient,
   ExecutionContextStart,
+  HttpSetup,
 } from '@kbn/core/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
 
@@ -33,16 +35,25 @@ export interface AppDependencies {
     getUrlForApp: ApplicationStart['getUrlForApp'];
     executionContext: ExecutionContextStart;
     application: ApplicationStart;
+    http: HttpSetup;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
     isFleetEnabled: boolean;
+    share: SharePluginStart;
+    cloud?: CloudSetup;
   };
   services: {
     uiMetricService: UiMetricService;
     extensionsService: ExtensionsService;
     httpService: HttpService;
     notificationService: NotificationService;
+  };
+  config: {
+    enableIndexActions: boolean;
+    enableLegacyTemplates: boolean;
+    enableIndexStats: boolean;
+    editableIndexSettings: 'all' | 'limited';
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -52,7 +63,6 @@ export interface AppDependencies {
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   theme$: Observable<CoreTheme>;
-  enableIndexActions: boolean;
 }
 
 export const AppContextProvider = ({

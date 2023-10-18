@@ -60,6 +60,8 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
+import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
+import { PostInstallAzureArmTemplateModal } from './components/post_install_azure_arm_template_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -414,8 +416,24 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
             />
           )}
+        {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' && agentPolicy && savedPackagePolicy && (
+          <PostInstallAzureArmTemplateModal
+            agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+          />
+        )}
         {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
           <PostInstallCloudFormationModal
+            agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+          />
+        )}
+        {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' && agentPolicy && savedPackagePolicy && (
+          <PostInstallGoogleCloudShellModal
             agentPolicy={agentPolicy}
             packagePolicy={savedPackagePolicy}
             onConfirm={() => navigateAddAgent(savedPackagePolicy)}

@@ -11,6 +11,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
+import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
+
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
@@ -87,33 +89,47 @@ export const generateServiceTokenHandler: RequestHandler = async (context, reque
 };
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
-      validate: CheckPermissionsRequestSchema,
-    },
-    getCheckPermissionsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: CheckPermissionsRequestSchema },
+      },
+      getCheckPermissionsHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
-      validate: {},
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    generateServiceTokenHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {},
+      },
 
-  router.post(
-    {
+      generateServiceTokenHandler
+    );
+
+  router.versioned
+    .post({
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
-      validate: {},
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    generateServiceTokenHandler
-  );
+      access: INTERNAL_API_ACCESS,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {},
+      },
+      generateServiceTokenHandler
+    );
 };

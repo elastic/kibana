@@ -288,8 +288,8 @@ in the current data view is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover:enableSql]]`discover:enableSql`::
-experimental[] Allows SQL queries for search.
+[[discover:enableESQL]]`discover:enableESQL`::
+experimental[] Allows ES|QL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
@@ -429,6 +429,9 @@ preview:[] Sorts services without anomaly detection rules on the APM Service inv
 
 [[observability-default-service-env]]`observability:apmDefaultServiceEnvironment`::
 Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
+
+[[observability-apm-enable-profiling]]`observability:apmEnableProfilingIntegration`::
+Enable the Universal Profiling integration in APM.
 
 [[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
 preview:[] Display Amazon Lambda metrics in the service metrics tab.

@@ -6,8 +6,6 @@
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [analyze]
 
-preview::[]
-
 [[open-case]]
 === Open a new case
 
@@ -90,8 +88,7 @@ cases.
 
 For hosted {kib} on {ess}:
 
-. Add the email addresses to the monitoring email allowlist. Follow the steps in
-{cloud}/ec-watcher.html#ec-watcher-allowlist[Send alerts by email].
+. Add the email domains to the {cloud}/ec-organizations-notifications-domain-allowlist.html[notifications domain allowlist].
 +
 --
 You do not need to take any more steps to configure an email connector or update
@@ -105,14 +102,13 @@ For self-managed {kib}:
 +
 --
 NOTE: At this time, email notifications support only preconfigured connectors,
-which are defined in the `kibana.yml` file. For examples, refer to
-{kibana-ref}/email-action-type.html#preconfigured-email-configuration[Preconfigured email connector]
-and {kibana-ref}/email-action-type.html#configuring-email[Configuring email connectors for well-known services].
+which are defined in the `kibana.yml` file.
+For examples, refer to <<preconfigured-email-configuration>> and <<configuring-email>>.
 --
 . Set the `notifications.connectors.default.email` {kib} setting to the name of
 your email connector.
 . If you want the email notifications to contain links back to the case, you
-must configure the {kibana-ref}/settings.html#server-publicBaseUrl[server.publicBaseUrl] setting.
+must configure the <<server-publicBaseUrl,server.publicBaseUrl>> setting.
 
 When you subsequently add assignees to cases, they receive an email.
 // end::case-notifications[]

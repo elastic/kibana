@@ -19,11 +19,13 @@ export function LoadAnnotationLibraryFlyout({
   isLoadLibraryVisible,
   setLoadLibraryFlyoutVisible,
   addLayer,
+  isInlineEditing,
 }: {
   isLoadLibraryVisible: boolean;
   setLoadLibraryFlyoutVisible: (visible: boolean) => void;
   eventAnnotationService: EventAnnotationServiceType;
   addLayer: (argument?: ExtraAppendLayerArg) => void;
+  isInlineEditing?: boolean;
 }) {
   const {
     renderEventAnnotationGroupSavedObjectFinder: EventAnnotationGroupSavedObjectFinder,
@@ -66,6 +68,7 @@ export function LoadAnnotationLibraryFlyout({
         setLoadLibraryFlyoutVisible(false);
         return true;
       }}
+      isInlineEditing={isInlineEditing}
     >
       <div
         css={css`

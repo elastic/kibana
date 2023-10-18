@@ -6,7 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { APMRouteHandlerResources } from '../../routes/typings';
+import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;
 
@@ -26,17 +28,19 @@ export async function getApmAlertsClient({
     throw Error('No alert indices exist for "apm"');
   }
 
-  type ApmAlertsClientSearchParams = Omit<
-    Parameters<typeof alertsClient.find>[0],
-    'index'
-  >;
+  type RequiredParams = ESSearchRequest & {
+    size: number;
+    track_total_hits: boolean | number;
+  };
 
   return {
-    search(searchParams: ApmAlertsClientSearchParams) {
+    search<TParams extends RequiredParams>(
+      searchParams: TParams
+    ): Promise<InferSearchResponseOf<ParsedTechnicalFields, TParams>> {
       return alertsClient.find({
         ...searchParams,
         index: apmAlertsIndices.join(','),
-      });
+      }) as Promise<any>;
     },
   };
 }

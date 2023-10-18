@@ -1,10 +1,22 @@
 {
   "cluster.get_settings": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "flat_settings": "__flag__",
-      "master_timeout": "",
-      "timeout": "",
-      "include_defaults": "__flag__"
+      "include_defaults": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -12,6 +24,10 @@
     "patterns": [
       "_cluster/settings"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-get-settings.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-get-settings.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

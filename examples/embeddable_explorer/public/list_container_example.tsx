@@ -11,10 +11,8 @@ import { EuiPanel, EuiSpacer, EuiText, EuiPageTemplate, EuiCodeBlock } from '@el
 import { EmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
-  TODO_EMBEDDABLE,
   ListContainerFactory,
 } from '@kbn/embeddable-examples-plugin/public';
-import { TodoInput } from '@kbn/embeddable-examples-plugin/public/todo';
 
 interface Props {
   listContainerEmbeddableFactory: ListContainerFactory;
@@ -33,7 +31,7 @@ export function ListContainerExample({ listContainerEmbeddableFactory }: Props) 
               factory={listContainerEmbeddableFactory}
               input={{
                 id: 'hello',
-                title: 'Todo list',
+                title: 'Hello world list',
                 viewMode: ViewMode.VIEW,
                 panels: {
                   '1': {
@@ -43,21 +41,10 @@ export function ListContainerExample({ listContainerEmbeddableFactory }: Props) 
                     },
                   },
                   '2': {
-                    type: TODO_EMBEDDABLE,
+                    type: HELLO_WORLD_EMBEDDABLE,
                     explicitInput: {
                       id: '2',
-                      task: 'Goes out on Wednesdays!',
-                      icon: 'broom',
-                      title: 'Take out the trash',
-                    } as TodoInput,
-                  },
-                  '3': {
-                    type: TODO_EMBEDDABLE,
-                    explicitInput: {
-                      id: '3',
-                      icon: 'broom',
-                      title: 'Vaccum the floor',
-                    } as TodoInput,
+                    },
                   },
                 },
               }}
@@ -77,24 +64,13 @@ export function ListContainerExample({ listContainerEmbeddableFactory }: Props) 
         explicitInput: {
           id: '1',
         },
-      },
       '2': {
-        type: TODO_EMBEDDABLE,
-        explicitInput: {
-          id: '2',
-          task: 'Goes out on Wednesdays!',
-          icon: 'broom',
-          title: 'Take out the trash',
-        } as TodoInput,
-      },
-      '3': {
-        type: TODO_EMBEDDABLE,
-        explicitInput: {
-          id: '3',
-          icon: 'broom',
-          title: 'Vaccum the floor',
-        } as TodoInput,
-      },
+          type: HELLO_WORLD_EMBEDDABLE,
+          explicitInput: {
+            id: '2',
+          },
+        },
+       }
     },
   }}
 />`}

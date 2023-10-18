@@ -11,6 +11,7 @@ import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWi
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { UserProfileGrant } from './user_profile_grant';
 import type {
   SecurityLicense,
   UserProfile,
@@ -22,7 +23,6 @@ import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { CheckUserProfilesPrivilegesResponse } from '../authorization/types';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import { getPrintableSessionId, type Session } from '../session_management';
-import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
 const ACTIVATION_MAX_RETRIES = 10;

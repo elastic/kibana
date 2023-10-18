@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
-
-import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import {
+  getSLOTransformId,
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_TEMP_INDEX_NAME,
+} from '../../assets/constants';
 import { SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
+import { SLORepository } from './slo_repository';
+import { createTempSummaryDocument } from './summary_transform/helpers/create_temp_summary';
+import { TransformManager } from './transform_manager';
 
 export class UpdateSLO {
   constructor(
@@ -24,65 +28,78 @@ export class UpdateSLO {
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
-    const { hasBreakingChange, updatedSlo } = this.updateSLO(originalSlo, params);
+    const updatedSlo: SLO = Object.assign({}, originalSlo, params, {
+      updatedAt: new Date(),
+      revision: originalSlo.revision + 1,
+      groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
+    });
 
-    if (hasBreakingChange) {
-      await this.deleteObsoleteSLORevisionData(originalSlo);
+    validateSLO(updatedSlo);
 
-      await this.repository.save(updatedSlo);
+    const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
+    await this.repository.save(updatedSlo);
+
+    try {
       await this.transformManager.install(updatedSlo);
-      await this.transformManager.start(getSLOTransformId(updatedSlo.id, updatedSlo.revision));
-    } else {
-      await this.repository.save(updatedSlo);
+    } catch (err) {
+      await this.repository.save(originalSlo);
+      throw err;
     }
+
+    try {
+      await this.transformManager.preview(updatedSloTransformId);
+      await this.transformManager.start(updatedSloTransformId);
+    } catch (err) {
+      await Promise.all([
+        this.transformManager.uninstall(updatedSloTransformId),
+        this.repository.save(originalSlo),
+      ]);
+
+      throw err;
+    }
+
+    await this.esClient.index({
+      index: SLO_SUMMARY_TEMP_INDEX_NAME,
+      id: `slo-${updatedSlo.id}`,
+      document: createTempSummaryDocument(updatedSlo),
+      refresh: true,
+    });
+
+    await this.deleteOriginalSLO(originalSlo);
 
     return this.toResponse(updatedSlo);
   }
 
-  private updateSLO(originalSlo: SLO, params: UpdateSLOParams) {
-    let hasBreakingChange = false;
-    const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updatedAt: new Date() });
-    validateSLO(updatedSlo);
-
-    if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {
-      hasBreakingChange = true;
+  private async deleteOriginalSLO(originalSlo: SLO) {
+    try {
+      const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
+      await this.transformManager.stop(originalSloTransformId);
+      await this.transformManager.uninstall(originalSloTransformId);
+    } catch (err) {
+      // Any errors here should not prevent moving forward.
+      // Worst case we keep rolling up data for the previous revision number.
     }
 
-    if (originalSlo.budgetingMethod !== updatedSlo.budgetingMethod) {
-      hasBreakingChange = true;
-    }
-
-    if (
-      originalSlo.budgetingMethod === 'timeslices' &&
-      updatedSlo.budgetingMethod === 'timeslices' &&
-      (originalSlo.objective.timesliceTarget !== updatedSlo.objective.timesliceTarget ||
-        !deepEqual(originalSlo.objective.timesliceWindow, updatedSlo.objective.timesliceWindow))
-    ) {
-      hasBreakingChange = true;
-    }
-
-    if (!deepEqual(originalSlo.settings, updatedSlo.settings)) {
-      hasBreakingChange = true;
-    }
-
-    if (hasBreakingChange) {
-      updatedSlo.revision++;
-    }
-
-    return { hasBreakingChange, updatedSlo };
-  }
-
-  private async deleteObsoleteSLORevisionData(originalSlo: SLO) {
-    const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    await this.transformManager.stop(originalSloTransformId);
-    await this.transformManager.uninstall(originalSloTransformId);
     await this.deleteRollupData(originalSlo.id, originalSlo.revision);
+    await this.deleteSummaryData(originalSlo.id, originalSlo.revision);
   }
 
   private async deleteRollupData(sloId: string, sloRevision: number): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: `${SLO_INDEX_TEMPLATE_NAME}*`,
+      index: SLO_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      query: {
+        bool: {
+          filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],
+        },
+      },
+    });
+  }
+
+  private async deleteSummaryData(sloId: string, sloRevision: number): Promise<void> {
+    await this.esClient.deleteByQuery({
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      refresh: true,
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],

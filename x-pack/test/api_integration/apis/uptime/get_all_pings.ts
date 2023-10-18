@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { PINGS_DATE_RANGE_START, PINGS_DATE_RANGE_END } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('get_all_pings', () => {
-    const archive = 'x-pack/test/functional/es_archives/uptime/pings';
+    const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
     before('load heartbeat data', async () => await esArchiver.load(archive));
     after('unload heartbeat data', async () => await esArchiver.unload(archive));
@@ -31,9 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(apiResponse.total).to.be(2);
-      expect(apiResponse.pings.length).to.be(2);
-      expect(apiResponse.pings[0].monitor.id).to.be('http@https://www.github.com/');
+      expect(apiResponse.total).to.be(1931);
+      expect(apiResponse.pings.length).to.be(25);
+      expect(apiResponse.pings[0].monitor.id).to.be('0074-up');
+      expect(apiResponse.pings[0].url.full).to.be('http://localhost:5678/pattern?r=200x1');
     });
 
     it('should sort pings according to timestamp', async () => {
@@ -46,10 +47,10 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(apiResponse.total).to.be(2);
-      expect(apiResponse.pings.length).to.be(2);
-      expect(apiResponse.pings[0]['@timestamp']).to.be('2018-10-30T14:49:23.889Z');
-      expect(apiResponse.pings[1]['@timestamp']).to.be('2018-10-30T18:51:56.792Z');
+      expect(apiResponse.total).to.be(1931);
+      expect(apiResponse.pings.length).to.be(25);
+      expect(apiResponse.pings[0]['@timestamp']).to.be('2019-09-11T03:31:04.396Z');
+      expect(apiResponse.pings[1]['@timestamp']).to.be('2019-09-11T03:31:04.396Z');
     });
 
     it('should return results of n length', async () => {
@@ -63,9 +64,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(apiResponse.total).to.be(2);
+      expect(apiResponse.total).to.be(1931);
       expect(apiResponse.pings.length).to.be(1);
-      expect(apiResponse.pings[0].monitor.id).to.be('http@https://www.github.com/');
+      expect(apiResponse.pings[0].monitor.id).to.be('0074-up');
     });
 
     it('should miss pings outside of date range', async () => {

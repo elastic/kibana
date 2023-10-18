@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import type { GetAgentsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent } from '../helpers';
 import { setupFleetAndAgents } from './agents/services';
+
+const AGENT_COUNT_WAIT_ATTEMPTS = 3;
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -120,12 +127,46 @@ export default function (providerContext: FtrProviderContext) {
       );
     });
 
+    async function waitForAgents(
+      expectedAgentCount: number,
+      attempts: number,
+      _attemptsMade = 0
+    ): Promise<GetAgentsResponse> {
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?showInactive=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      if (apiResponse.list.length === expectedAgentCount) {
+        return apiResponse;
+      }
+
+      if (_attemptsMade >= attempts) {
+        throw new Error(
+          `Agents not loaded correctly, failing test. All agents: \n: ${JSON.stringify(
+            apiResponse.list,
+            null,
+            2
+          )}`
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return waitForAgents(expectedAgentCount, attempts, _attemptsMade + 1);
+    }
+
     it('should return the correct telemetry values for fleet', async () => {
+      // it appears agent 9 is not being loaded sometimes
+      // first check if all the agents have been correctly loaded
+      await waitForAgents(agentCount, AGENT_COUNT_WAIT_ATTEMPTS);
+
       const {
         body: [{ stats: apiResponse }],
       } = await supertest
-        .post(`/api/telemetry/v2/clusters/_stats`)
+        .post(`/internal/telemetry/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -133,13 +174,13 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse.stack_stats.kibana.plugins.fleet.agents).eql({
-        total_enrolled: 8,
+        total_enrolled: 8, // does not include inactive
         healthy: 3,
         unhealthy: 3,
         offline: 1,
         unenrolled: 0,
         inactive: 1,
-        updating: 1,
+        updating: 1, // includes enrolling + unenrolling + updating
         total_all_statuses: 8,
       });
 

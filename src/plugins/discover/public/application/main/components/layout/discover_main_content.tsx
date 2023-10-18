@@ -6,22 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
+import useObservable from 'react-use/lib/useObservable';
 import React, { useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { useDataState } from '../../hooks/use_data_state';
+import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 
 const DROP_PROPS = {
   value: {
@@ -75,6 +77,7 @@ export const DiscoverMainContent = ({
   );
 
   const dataState = useDataState(stateContainer.dataState.data$.main$);
+  const documents = useObservable(stateContainer.dataState.data$.documents$);
   const isDropAllowed = Boolean(onDropFieldToTable);
 
   return (
@@ -94,7 +97,6 @@ export const DiscoverMainContent = ({
           data-test-subj="dscMainContent"
         >
           <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="none" />
             {!isPlainRecord && (
               <DocumentViewModeToggle
                 viewMode={viewMode}
@@ -112,6 +114,11 @@ export const DiscoverMainContent = ({
               data-test-subj="discoverMainError"
             />
           )}
+          <SelectedVSAvailableCallout
+            isPlainRecord={isPlainRecord}
+            textBasedQueryColumns={documents?.textBasedQueryColumns}
+            selectedColumns={columns}
+          />
 
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments

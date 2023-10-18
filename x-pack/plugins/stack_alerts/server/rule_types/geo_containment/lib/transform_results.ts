@@ -6,64 +6,55 @@
  */
 
 import _ from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { GeoContainmentAlertInstanceState } from '../types';
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
-  results: estypes.SearchResponse<unknown>,
+  results: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   dateField: string,
   geoField: string
 ): Map<string, GeoContainmentAlertInstanceState[]> {
-  const buckets = _.get(results, 'aggregations.shapes.buckets', {});
-  const arrResults = _.flatMap(buckets, (bucket: unknown, bucketKey: string) => {
-    const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
-    return _.map(subBuckets, (subBucket) => {
-      const locationFieldResult = _.get(
-        subBucket,
-        `entityHits.hits.hits[0].fields["${geoField}"][0]`,
-        ''
-      );
-      const location = locationFieldResult
-        ? _.chain(locationFieldResult)
-            .split(', ')
-            .map((coordString) => +coordString)
-            .reverse()
-            .value()
-        : [];
-      const dateInShape = _.get(
-        subBucket,
-        `entityHits.hits.hits[0].fields["${dateField}"][0]`,
-        null
-      );
-      const docId = _.get(subBucket, `entityHits.hits.hits[0]._id`);
+  const resultsMap = new Map<string, GeoContainmentAlertInstanceState[]>();
+  const boundarySplitBuckets = results?.aggregations?.shapes?.buckets ?? {};
+  for (const boundaryId in boundarySplitBuckets) {
+    if (!boundarySplitBuckets.hasOwnProperty(boundaryId)) {
+      continue;
+    }
 
-      return {
-        location,
-        shapeLocationId: bucketKey,
-        entityName: subBucket.key,
-        dateInShape,
-        docId,
-      };
-    });
+    const entitySplitBuckets = boundarySplitBuckets[boundaryId]?.entitySplit?.buckets ?? [];
+    for (let i = 0; i < entitySplitBuckets.length; i++) {
+      const entityName = entitySplitBuckets[i].key;
+      const entityResults = resultsMap.get(entityName) ?? [];
+      entityResults.push({
+        // Required for zero down time (ZDT)
+        // populate legacy location so non-updated-kibana nodes can handle new alert state
+        //
+        // Why 0,0 vs parsing WKT and populating actual location?
+        // This loop gets processed for each entity location in each containing boundary, ie: its a hot loop
+        // There is a mimial amount of time between one kibana node updating and all Kibana nodes being updated
+        // vs a huge CPU penetatily for all kibana nodes for the rest of the time
+        // Algorithm optimized for the more common use case where all Kibana nodes are running updated version
+        location: [0, 0],
+        locationWkt:
+          entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[geoField]?.[0] ?? '',
+        shapeLocationId: boundaryId,
+        dateInShape:
+          entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[dateField]?.[0] ?? null,
+        docId: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?._id,
+      });
+      resultsMap.set(entityName, entityResults);
+    }
+  }
+
+  // TODO remove sort
+  // legacy algorithm sorted entity hits oldest to newest for an undocumented reason
+  // preserving sort to avoid unknown breaking changes
+  resultsMap.forEach((value, key) => {
+    if (value.length > 1) {
+      // sort oldest to newest
+      resultsMap.set(key, _.orderBy(value, ['dateInShape'], ['desc', 'asc']));
+    }
   });
-  const orderedResults = _.orderBy(arrResults, ['entityName', 'dateInShape'], ['asc', 'desc'])
-    // Get unique
-    .reduce(
-      (
-        accu: Map<string, GeoContainmentAlertInstanceState[]>,
-        el: GeoContainmentAlertInstanceState & { entityName: string }
-      ) => {
-        const { entityName, ...locationData } = el;
-        if (entityName) {
-          if (!accu.has(entityName)) {
-            accu.set(entityName, []);
-          }
-          accu.get(entityName)!.push(locationData);
-        }
-        return accu;
-      },
-      new Map()
-    );
-  return orderedResults;
+
+  return resultsMap;
 }

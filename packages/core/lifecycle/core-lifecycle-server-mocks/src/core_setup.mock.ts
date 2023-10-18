@@ -48,6 +48,7 @@ export function createCoreSetupMock({
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
     registerGlobal: uiSettingsServiceMock.createSetupContract().registerGlobal,
+    setAllowlist: uiSettingsServiceMock.createSetupContract().setAllowlist,
   };
 
   const mock: CoreSetupMockType = {

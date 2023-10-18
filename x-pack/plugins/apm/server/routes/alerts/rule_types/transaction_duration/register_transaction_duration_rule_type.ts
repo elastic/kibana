@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   asDuration,
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -21,7 +27,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { firstValueFrom } from 'rxjs';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -45,10 +50,9 @@ import {
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
 } from '../../../../lib/helpers/transactions';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -68,10 +72,24 @@ import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
+export const transactionDurationActionVariables = [
+  apmActionVariables.alertDetailsUrl,
+  apmActionVariables.environment,
+  apmActionVariables.interval,
+  apmActionVariables.reason,
+  apmActionVariables.serviceName,
+  apmActionVariables.threshold,
+  apmActionVariables.transactionName,
+  apmActionVariables.transactionType,
+  apmActionVariables.triggerValue,
+  apmActionVariables.viewInAppUrl,
+];
+
 export function registerTransactionDurationRuleType({
   alerting,
   ruleDataClient,
-  config$,
+  getApmIndices,
+  apmConfig,
   logger,
   basePath,
 }: RegisterRuleDependencies) {
@@ -87,19 +105,9 @@ export function registerTransactionDurationRuleType({
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: transactionDurationParamsSchema },
     actionVariables: {
-      context: [
-        apmActionVariables.alertDetailsUrl,
-        apmActionVariables.environment,
-        apmActionVariables.interval,
-        apmActionVariables.reason,
-        apmActionVariables.serviceName,
-        apmActionVariables.transactionType,
-        apmActionVariables.transactionName,
-        apmActionVariables.threshold,
-        apmActionVariables.triggerValue,
-        apmActionVariables.viewInAppUrl,
-      ],
+      context: transactionDurationActionVariables,
     },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -109,21 +117,16 @@ export function registerTransactionDurationRuleType({
         ruleParams.groupBy
       );
 
-      const config = await firstValueFrom(config$);
-
       const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
         services;
 
-      const indices = await getApmIndices({
-        config,
-        savedObjectsClient,
-      });
+      const indices = await getApmIndices(savedObjectsClient);
 
       // only query transaction events when set to 'never',
       // to prevent (likely) unnecessary blocking request
       // in rule execution
       const searchAggregatedTransactions =
-        config.searchAggregatedTransactions !==
+        apmConfig.searchAggregatedTransactions !==
         SearchAggregatedTransactionSetting.never;
 
       const index = searchAggregatedTransactions
@@ -133,6 +136,21 @@ export function registerTransactionDurationRuleType({
       const field = getDurationFieldForTransactions(
         searchAggregatedTransactions
       );
+
+      const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
+        ? [
+            ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+              queryEmptyString: false,
+            }),
+            ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+              queryEmptyString: false,
+            }),
+            ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+              queryEmptyString: false,
+            }),
+            ...environmentQuery(ruleParams.environment),
+          ]
+        : [];
 
       const searchParams = {
         index,
@@ -149,19 +167,13 @@ export function registerTransactionDurationRuleType({
                     },
                   },
                 },
-                ...getDocumentTypeFilterForTransactions(
+                ...getBackwardCompatibleDocumentTypeFilter(
                   searchAggregatedTransactions
                 ),
-                ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
-                  queryEmptyString: false,
-                }),
-                ...environmentQuery(ruleParams.environment),
+                ...termFilterQuery,
+                ...getParsedFilterQuery(
+                  ruleParams.searchConfiguration?.query?.query as string
+                ),
               ] as QueryDslQueryContainer[],
             },
           },
@@ -298,6 +310,8 @@ export function registerTransactionDurationRuleType({
       return { state: {} };
     },
     alerts: ApmRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 
   alerting.registerType(ruleType);

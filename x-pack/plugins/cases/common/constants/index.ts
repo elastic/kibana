@@ -61,9 +61,6 @@ export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as co
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
 
-export const CASE_METRICS_URL = `${CASES_URL}/metrics` as const;
-export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as const;
-
 /**
  * Internal routes
  */
@@ -83,6 +80,8 @@ export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` 
 export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
+export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
+export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
 
 /**
  * Action routes
@@ -127,7 +126,12 @@ export const MAX_DELETE_IDS_LENGTH = 100 as const;
 export const MAX_SUGGESTED_PROFILES = 10 as const;
 export const MAX_CASES_TO_UPDATE = 100 as const;
 export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
+export const MAX_USER_ACTIONS_PER_CASE = 10000 as const;
 export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
+export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
+export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
+export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
 
 /**
  * Cases features
@@ -158,6 +162,7 @@ export const READ_CASES_CAPABILITY = 'read_cases' as const;
 export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
 export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
+export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 
 /**
  * Cases API Tags
@@ -172,6 +177,11 @@ export const SUGGEST_USER_PROFILES_API_TAG = 'casesSuggestUserProfiles';
  * This tag is registered for the security bulk get API
  */
 export const BULK_GET_USER_PROFILES_API_TAG = 'bulkGetUserProfiles';
+
+/**
+ * This tag is registered for the connectors (configure) get API
+ */
+export const GET_CONNECTORS_CONFIGURE_API_TAG = 'casesGetConnectorsConfigure';
 
 /**
  * User profiles

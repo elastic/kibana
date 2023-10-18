@@ -5,24 +5,44 @@
  * 2.0.
  */
 
-import { APP_PATH, MANAGE_PATH } from '@kbn/security-solution-plugin/common';
+import { APP_PATH } from '@kbn/security-solution-plugin/common';
+import type { CoreSetup } from '@kbn/core/public';
+import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { setAppLinks } from './links/app_links';
-import { subscribeNavigationTree } from './navigation_tree';
+import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
+import { getDefaultNavigationComponent } from './default_navigation';
+import { projectAppLinksSwitcher } from './links/app_links';
+import { formatProjectDeepLinks } from './links/deep_links';
 
-const SECURITY_MANAGE_PATH = `${APP_PATH}${MANAGE_PATH}`;
+export const setupNavigation = (
+  _core: CoreSetup,
+  { securitySolution }: SecuritySolutionServerlessPluginSetupDeps
+) => {
+  securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
+  securitySolution.setDeepLinksFormatter(formatProjectDeepLinks);
+};
 
-export const configureNavigation = (services: Services) => {
-  const { serverless, securitySolution, management } = services;
-  securitySolution.setIsSidebarEnabled(false);
-  management.setLandingPageRedirect(SECURITY_MANAGE_PATH);
-
+export const startNavigation = (services: Services) => {
+  const { serverless, management } = services;
   serverless.setProjectHome(APP_PATH);
-  serverless.setSideNavComponent(getSecuritySideNavComponent(services));
 
-  setAppLinks(services);
-  subscribeNavigationTree(services);
+  const projectNavigationTree = new ProjectNavigationTree(services);
+
+  if (services.experimentalFeatures.platformNavEnabled) {
+    projectNavigationTree.getNavigationTree$().subscribe((navigationTree) => {
+      serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
+    });
+  } else {
+    management.setupCardsNavigation({ enabled: true });
+
+    projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
+      serverless.setNavigation({ navigationTree: chromeNavigationTree });
+    });
+    serverless.setSideNavComponent(getSecuritySideNavComponent(services));
+  }
+  management.setIsSidebarEnabled(false);
+
   subscribeBreadcrumbs(services);
 };

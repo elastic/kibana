@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 import { _versionOrUndefined } from '../../common/underscore_version';
 import { deserializerOrUndefined } from '../../common/deserializer';
 import { metaOrUndefined } from '../../common/meta';
+import { timestampOrUndefined } from '../../common/timestamp';
 import { serializerOrUndefined } from '../../common/serializer';
 import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';
@@ -25,6 +26,7 @@ import { value } from '../../common/value';
 export const listItemSchema = t.exact(
   t.type({
     _version: _versionOrUndefined,
+    '@timestamp': timestampOrUndefined,
     created_at,
     created_by,
     deserializer: deserializerOrUndefined,

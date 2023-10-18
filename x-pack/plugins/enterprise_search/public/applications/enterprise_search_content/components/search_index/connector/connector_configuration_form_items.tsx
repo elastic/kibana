@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiPanel, EuiToolTip } 
 
 import { i18n } from '@kbn/i18n';
 
-import { DisplayType } from '../../../../../../common/types/connectors';
+import { DisplayType } from '@kbn/search-connectors';
 
 import { ConnectorConfigurationField } from './connector_configuration_field';
 import { ConfigEntryView } from './connector_configuration_logic';

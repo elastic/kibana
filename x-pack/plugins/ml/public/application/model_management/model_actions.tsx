@@ -29,20 +29,24 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { isTestable } from './test_models';
+import { isTestable, isDfaTrainedModel } from './test_models';
 import { ModelItem } from './models_list';
 
 export function useModelActions({
+  onDfaTestAction,
   onTestAction,
   onModelsDeleteRequest,
+  onModelDeployRequest,
   onLoading,
   isLoading,
   fetchModels,
   modelAndDeploymentIds,
 }: {
   isLoading: boolean;
+  onDfaTestAction: (model: ModelItem) => void;
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (models: ModelItem[]) => void;
+  onModelDeployRequest: (model: ModelItem) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
@@ -52,12 +56,13 @@ export function useModelActions({
       application: { navigateToUrl, capabilities },
       overlays,
       theme,
+      i18n: i18nStart,
       docLinks,
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
 
-  const [canManageIngestPipelines, setCanManageIngestPipelines] = useState(false);
+  const [canManageIngestPipelines, setCanManageIngestPipelines] = useState<boolean>(false);
 
   const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeployment;
 
@@ -80,9 +85,11 @@ export function useModelActions({
         cluster: ['manage_ingest_pipelines'],
       })
       .then((result) => {
-        const canManagePipelines = result.cluster?.manage_ingest_pipelines;
         if (isMounted) {
-          setCanManageIngestPipelines(canManagePipelines);
+          setCanManageIngestPipelines(
+            result.hasPrivileges === undefined ||
+              result.hasPrivileges.cluster?.manage_ingest_pipelines === true
+          );
         }
       });
     return () => {
@@ -91,14 +98,19 @@ export function useModelActions({
   }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme),
-    [overlays, theme]
+    () => getUserConfirmationProvider(overlays, theme, i18nStart),
+    [i18nStart, overlays, theme]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
-      getUserInputModelDeploymentParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
-    [overlays, theme.theme$, startModelDeploymentDocUrl]
+      getUserInputModelDeploymentParamsProvider(
+        overlays,
+        theme,
+        i18nStart,
+        startModelDeploymentDocUrl
+      ),
+    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -167,17 +179,18 @@ export function useModelActions({
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
-          defaultMessage: 'Start deployment',
+          defaultMessage: 'Deploy',
         }),
         description: i18n.translate(
-          'xpack.ml.inference.modelsList.startModelDeploymentActionLabel',
+          'xpack.ml.inference.modelsList.startModelDeploymentActionDescription',
           {
             defaultMessage: 'Start deployment',
           }
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
+        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'play',
-        type: 'icon',
+        type: 'button',
         isPrimary: true,
         enabled: (item) => {
           return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
@@ -301,10 +314,12 @@ export function useModelActions({
         'data-test-subj': 'mlModelsTableRowStopDeploymentAction',
         icon: 'stop',
         type: 'icon',
-        isPrimary: true,
-        available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
-        enabled: (item) =>
-          canStartStopTrainedModels && !isLoading && item.deployment_ids.length > 0,
+        isPrimary: false,
+        available: (item) =>
+          item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+          canStartStopTrainedModels &&
+          (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING),
+        enabled: (item) => !isLoading,
         onClick: async (item) => {
           const requireForceStop = isPopulatedObject(item.pipelines);
           const hasMultipleDeployments = item.deployment_ids.length > 1;
@@ -370,17 +385,19 @@ export function useModelActions({
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
-          defaultMessage: 'Download model',
+          defaultMessage: 'Download',
         }),
         description: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
-          defaultMessage: 'Download model',
+          defaultMessage: 'Download',
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
+        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'download',
-        type: 'icon',
+        type: 'button',
         isPrimary: true,
-        available: (item) => item.tags.includes(ELASTIC_MODEL_TAG),
-        enabled: (item) => !item.state && !isLoading,
+        available: (item) =>
+          item.tags.includes(ELASTIC_MODEL_TAG) && item.state === MODEL_STATE.NOT_DOWNLOADED,
+        enabled: (item) => !isLoading,
         onClick: async (item) => {
           try {
             onLoading(true);
@@ -410,6 +427,53 @@ export function useModelActions({
             );
             onLoading(false);
           }
+        },
+      },
+      {
+        name: (model) => {
+          const hasDeployments = model.state === MODEL_STATE.STARTED;
+          return (
+            <EuiToolTip
+              position="left"
+              content={
+                hasDeployments
+                  ? i18n.translate(
+                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                      {
+                        defaultMessage: 'Model has started deployments',
+                      }
+                    )
+                  : null
+              }
+            >
+              <>
+                {i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
+                  defaultMessage: 'Deploy model',
+                })}
+              </>
+            </EuiToolTip>
+          );
+        },
+        description: i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
+          defaultMessage: 'Deploy model',
+        }),
+        'data-test-subj': 'mlModelsTableRowDeployAction',
+        icon: 'continuityAbove',
+        type: 'icon',
+        isPrimary: false,
+        onClick: (model) => {
+          onModelDeployRequest(model);
+        },
+        available: (item) => {
+          return (
+            isDfaTrainedModel(item) &&
+            !isBuiltInModel(item) &&
+            !item.putModelConfig &&
+            canManageIngestPipelines
+          );
+        },
+        enabled: (item) => {
+          return item.state !== MODEL_STATE.STARTED;
         },
       },
       {
@@ -473,8 +537,50 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: isTestable,
-        onClick: (item) => onTestAction(item),
-        enabled: (item) => canTestTrainedModels && isTestable(item, true) && !isLoading,
+        onClick: (item) => {
+          if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
+            onDfaTestAction(item);
+          } else {
+            onTestAction(item);
+          }
+        },
+        enabled: (item) => {
+          return canTestTrainedModels && isTestable(item, true) && !isLoading;
+        },
+      },
+      {
+        name: i18n.translate('xpack.ml.inference.modelsList.analyzeDataDriftLabel', {
+          defaultMessage: 'Analyze data drift',
+        }),
+        description: i18n.translate('xpack.ml.inference.modelsList.analyzeDataDriftLabel', {
+          defaultMessage: 'Analyze data drift',
+        }),
+        'data-test-subj': 'mlModelsAnalyzeDataDriftAction',
+        icon: 'visTagCloud',
+        type: 'icon',
+        isPrimary: true,
+        available: (item) => {
+          return (
+            item?.metadata?.analytics_config !== undefined ||
+            (Array.isArray(item.indices) && item.indices.length > 0)
+          );
+        },
+        onClick: async (item) => {
+          let indexPatterns: string[] | undefined = item?.indices
+            ?.map((o) => Object.keys(o))
+            .flat();
+
+          if (item?.metadata?.analytics_config?.dest?.index !== undefined) {
+            const destIndex = item.metadata.analytics_config.dest?.index;
+            indexPatterns = [destIndex];
+          }
+          const path = await urlLocator.getUrl({
+            page: ML_PAGES.DATA_DRIFT_CUSTOM,
+            pageState: indexPatterns ? { comparison: indexPatterns.join(',') } : {},
+          });
+
+          await navigateToPath(path, false);
+        },
       },
     ],
     [
@@ -492,9 +598,11 @@ export function useModelActions({
       displayErrorToast,
       getUserConfirmation,
       onModelsDeleteRequest,
+      onModelDeployRequest,
       canDeleteTrainedModels,
       isBuiltInModel,
       onTestAction,
+      onDfaTestAction,
       canTestTrainedModels,
       canManageIngestPipelines,
     ]

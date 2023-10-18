@@ -62,6 +62,7 @@ export const createTransformIfNotExists = async (
     return {
       [transform.transform_id]: {
         success: false,
+        isExist: true,
         error: transformError(
           new Error(
             i18n.translate('xpack.securitySolution.riskScore.transform.transformExistsTitle', {
@@ -78,19 +79,19 @@ export const createTransformIfNotExists = async (
       try {
         await esClient.transform.putTransform(transform);
 
-        return { [transform.transform_id]: { success: true, error: null } };
+        return { [transform.transform_id]: { success: true, isExist: true, error: null } };
       } catch (createErr) {
         const createError = transformError(createErr);
         logger.error(
           `Failed to create transform ${transform.transform_id}: ${createError.message}`
         );
-        return { [transform.transform_id]: { success: false, error: createError } };
+        return { [transform.transform_id]: { success: false, isExist: false, error: createError } };
       }
     } else {
       logger.error(
         `Failed to check if transform ${transform.transform_id} exists before creation: ${existError.message}`
       );
-      return { [transform.transform_id]: { success: false, error: existError } };
+      return { [transform.transform_id]: { success: false, isExist: false, error: existError } };
     }
   }
 };
@@ -179,4 +180,5 @@ export const startTransformIfNotStarted = async (
       },
     };
   }
+  return { [transformId]: { success: true, error: null } };
 };

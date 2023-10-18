@@ -10,12 +10,12 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { defineSessionInfoRoutes } from './info';
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineSessionInfoRoutes } from './info';
 
 describe('Info session routes', () => {
   let router: jest.Mocked<SecurityRouter>;

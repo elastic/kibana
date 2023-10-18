@@ -1,6 +1,10 @@
 {
   "searchable_snapshots.stats": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "level": [
         "cluster",
         "indices",
@@ -12,8 +16,12 @@
     ],
     "patterns": [
       "_searchable_snapshots/stats",
-      "{indices}/_searchable_snapshots/stats"
+      "{index}/_searchable_snapshots/stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

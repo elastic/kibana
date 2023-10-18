@@ -109,7 +109,7 @@ async function getCreationOptions(
   }
 }
 
-function getFilters(
+export function getFilters(
   serviceName: string,
   environment: string,
   dataView: DataView
@@ -139,7 +139,7 @@ function getFilters(
     } else {
       const environmentFilter = buildPhraseFilter(
         environmentField,
-        serviceName,
+        environment,
         dataView
       );
       filters.push(environmentFilter);

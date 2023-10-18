@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
@@ -128,6 +129,9 @@ import {
 import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 import type { FilesClientFactory } from './services/files/types';
 import { PolicyWatcher } from './services/agent_policy_watch';
+import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
+import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
+import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -165,6 +169,7 @@ export interface FleetAppContext {
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
+  kibanaInstanceId: PluginInitializerContext['env']['instanceUuid'];
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -232,6 +237,10 @@ export interface FleetStartContract {
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
   createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
+  /*
+  Function exported to allow creating unique ids for saved object tags
+   */
+  getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
 }
 
 export class FleetPlugin
@@ -245,6 +254,7 @@ export class FleetPlugin
   private isProductionMode: FleetAppContext['isProductionMode'];
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'];
   private httpSetup?: HttpServiceSetup;
   private securitySetup!: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
@@ -253,6 +263,7 @@ export class FleetPlugin
   private bulkActionsResolver?: BulkActionsResolver;
   private fleetUsageSender?: FleetUsageSender;
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
+  private fleetMetricsTask?: FleetMetricsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -264,6 +275,7 @@ export class FleetPlugin
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
+    this.kibanaInstanceId = this.initializerContext.env.instanceUuid;
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
@@ -434,6 +446,10 @@ export class FleetPlugin
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
+    const fetchAgents = async (abortController: AbortController) =>
+      await fetchAgentMetrics(core, abortController);
+    this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);
+
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
     // Only some endpoints require superuser so we pass a raw IRouter here
@@ -484,6 +500,7 @@ export class FleetPlugin
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
+      kibanaInstanceId: this.kibanaInstanceId,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
@@ -498,6 +515,7 @@ export class FleetPlugin
     this.fleetUsageSender?.start(plugins.taskManager);
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
     startFleetUsageLogger(plugins.taskManager);
+    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
 
     const logger = appContextService.getLogger();
 
@@ -527,9 +545,39 @@ export class FleetPlugin
           )
           .toPromise();
 
-        await setupFleet(
-          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-          core.elasticsearch.client.asInternalUser
+        // Retry Fleet setup w/ backoff
+        await backOff(
+          async () => {
+            await setupFleet(
+              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.elasticsearch.client.asInternalUser
+            );
+          },
+          {
+            // We only retry when this feature flag is enabled
+            numOfAttempts: this.configInitialValue.internal?.retrySetupOnBoot ? Infinity : 1,
+            // 250ms initial backoff
+            startingDelay: 250,
+            // 5m max backoff
+            maxDelay: 60000 * 5,
+            timeMultiple: 2,
+            // avoid HA contention with other Kibana instances
+            jitter: 'full',
+            retry: (error: any, attemptCount: number) => {
+              const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
+              logger.debug(summary, { error: { message: error } });
+
+              this.fleetStatus$.next({
+                level: ServiceStatusLevels.available,
+                summary,
+                meta: {
+                  attemptCount,
+                  error,
+                },
+              });
+              return true;
+            },
+          }
         );
 
         this.fleetStatus$.next({
@@ -537,8 +585,7 @@ export class FleetPlugin
           summary: 'Fleet is available',
         });
       } catch (error) {
-        logger.warn('Fleet setup failed');
-        logger.warn(error);
+        logger.warn('Fleet setup failed', { error: { message: error } });
 
         this.fleetStatus$.next({
           // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
@@ -591,10 +638,11 @@ export class FleetPlugin
       createFleetActionsClient(packageName: string) {
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      getPackageSpecTagId,
     };
   }
 
-  public async stop() {
+  public stop() {
     appContextService.stop();
     this.policyWatcher?.stop();
     licenseService.stop();

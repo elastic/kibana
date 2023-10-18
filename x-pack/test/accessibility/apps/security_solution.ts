@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/95707
+  // Failing: See https://github.com/elastic/kibana/issues/166102
+  // Failing: See https://github.com/elastic/kibana/issues/166105
   describe.skip('Security Solution Accessibility', () => {
     before(async () => {
       await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });

@@ -6,40 +6,21 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
-import React, { useMemo } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ThemeProvider } from 'styled-components';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { useUiSetting$, KibanaThemeProvider } from './shared_imports';
 import type { AppPluginStartDependencies } from './types';
 import { OsqueryApp } from './components/app';
-import { DEFAULT_DARK_MODE, PLUGIN_NAME } from '../common';
+import { PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
 import { queryClient } from './query_client';
-
-const OsqueryAppContext = () => {
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-  const theme = useMemo(
-    () => ({
-      eui: darkMode ? euiDarkVars : euiLightVars,
-      darkMode,
-    }),
-    [darkMode]
-  );
-
-  return (
-    <ThemeProvider theme={theme}>
-      <OsqueryApp />
-    </ThemeProvider>
-  );
-};
+import { KibanaThemeProvider } from './shared_imports';
 
 export const renderApp = (
   core: CoreStart,
@@ -64,7 +45,7 @@ export const renderApp = (
           <Router history={history}>
             <I18nProvider>
               <QueryClientProvider client={queryClient}>
-                <OsqueryAppContext />
+                <OsqueryApp />
                 <ReactQueryDevtools initialIsOpen={false} />
               </QueryClientProvider>
             </I18nProvider>

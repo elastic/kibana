@@ -64,11 +64,12 @@ import {
 
 import {
   getFiltersInLayer,
-  getShardFailuresWarningMessages,
+  getSearchWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
   getNotifiableFeatures,
+  getUnsupportedOperationsWarningMessage,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -141,7 +142,10 @@ export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = (
   columnId,
   indexPatterns,
 }) => {
-  const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
+  const indexPattern = indexPatterns?.[prevState.layers[layerId]?.indexPatternId];
+  if (!indexPattern) {
+    throw new Error('indexPatterns is not passed to the function');
+  }
   return mergeLayer({
     state: prevState,
     layerId,
@@ -798,6 +802,7 @@ export function getFormBasedDatasource({
           core.docLinks,
           setState
         ),
+        ...getUnsupportedOperationsWarningMessage(state, frameDatasourceAPI, core.docLinks),
       ];
 
       const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
@@ -806,7 +811,7 @@ export function getFormBasedDatasource({
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
-      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
+      return [...getSearchWarningMessages(state, warning, request, response, core.theme)];
     },
 
     checkIntegrity: (state, indexPatterns) => {
@@ -852,6 +857,14 @@ export function getFormBasedDatasource({
     },
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+    },
+    injectReferencesToLayers: (state, references) => {
+      const layers =
+        references && state ? injectReferences(state, references).layers : state?.layers;
+      return {
+        ...state,
+        layers,
+      };
     },
 
     getDatasourceInfo: async (state, references, dataViewsService) => {

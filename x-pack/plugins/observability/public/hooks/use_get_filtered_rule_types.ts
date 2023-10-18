@@ -6,10 +6,13 @@
  */
 
 import { useMemo } from 'react';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { usePluginContext } from './use_plugin_context';
 
 export function useGetFilteredRuleTypes() {
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
-  return useMemo(() => observabilityRuleTypeRegistry.list(), [observabilityRuleTypeRegistry]);
+  return useMemo(() => {
+    return [ES_QUERY_ID, ...observabilityRuleTypeRegistry.list()];
+  }, [observabilityRuleTypeRegistry]);
 }

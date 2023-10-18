@@ -27,6 +27,7 @@ export const createCase = async (
 
   const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
     .set(headers)
     .send(params)
     .expect(expectedHttpCode);

@@ -12,10 +12,6 @@ See also <<whats-new>> and <<release-notes>>.
 * <<breaking_80_index_pattern_changes>>
 * <<breaking_80_setting_changes>>
 
-//NOTE: The notable-breaking-changes tagged regions are re-used in the
-//Installation and Upgrade Guide
-
-// tag::notable-breaking-changes[]
 [float]
 [[breaking_80_index_pattern_changes]]
 === Index pattern changes
@@ -404,5 +400,3 @@ Configuration management tools and automation will need to be updated to use the
 *Details:* The deprecated `server.xsrf.whitelist` setting is no longer supported.
 
 *Impact:* Use {kibana-ref}/settings.html#settings-xsrf-allowlist[`server.xsrf.allowlist`] instead.
-
-// end::notable-breaking-changes[]

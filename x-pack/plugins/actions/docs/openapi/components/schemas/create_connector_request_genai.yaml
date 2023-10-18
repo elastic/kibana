@@ -1,6 +1,6 @@
-title: Create generative AI connector request
+title: Create OpenAI connector request
 description: >
-  The generative AI connector uses axios to send a POST request to either
+  The OpenAI connector uses axios to send a POST request to either
   OpenAI or Azure OpenAPI.
 type: object
 required:
@@ -22,4 +22,4 @@ properties:
     description: The display name for the connector.
     example: my-connector
   secrets:
-    $ref: 'secrets_properties_genai.yaml' 
+    $ref: 'secrets_properties_genai.yaml'

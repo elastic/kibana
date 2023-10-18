@@ -5,79 +5,87 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-navigation';
-import { useGetLinkProps, type GetLinkProps } from '@kbn/security-solution-navigation/links';
-import {
-  SolutionSideNavItemPosition,
-  type SolutionSideNavItem,
-} from '@kbn/security-solution-side-nav';
+import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import { SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
 import { useNavLinks } from '../../common/hooks/use_nav_links';
+import { ExternalPageName } from '../links/constants';
+import type { ProjectSideNavItem } from './types';
+import type { ProjectPageName } from '../links/types';
+
+type GetLinkProps = (link: NavigationLink) => {
+  href: string & Partial<ProjectSideNavItem>;
+};
 
 const isBottomNavItem = (id: string) =>
-  id === SecurityPageName.landing || id === SecurityPageName.administration;
-const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
+  id === SecurityPageName.landing ||
+  id === ExternalPageName.devTools ||
+  id === ExternalPageName.management ||
+  id === ExternalPageName.integrationsSecurity ||
+  id === ExternalPageName.cloudUsersAndRoles ||
+  id === ExternalPageName.cloudPerformance ||
+  id === ExternalPageName.cloudBilling;
 
 /**
  * Formats generic navigation links into the shape expected by the `SolutionSideNav`
  */
-const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  iconType: navLink.sideNavIcon,
-  position: isBottomNavItem(navLink.id)
-    ? SolutionSideNavItemPosition.bottom
-    : SolutionSideNavItemPosition.top,
-  ...getLinkProps({ id: navLink.id }),
-  ...(navLink.categories?.length && { categories: navLink.categories }),
-  ...(navLink.links?.length && {
-    items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
-      if (!current.disabled) {
-        acc.push({
-          id: current.id,
-          label: current.title,
-          iconType: current.sideNavIcon,
-          isBeta: current.isBeta,
-          betaOptions: current.betaOptions,
-          ...getLinkProps({ id: current.id }),
-        });
-      }
-      return acc;
-    }, []),
-  }),
-});
-
-/**
- * Formats the get started navigation links into the shape expected by the `SolutionSideNav`
- */
-const formatGetStartedLink = (
-  navLink: NavigationLink,
+const formatLink = (
+  navLink: NavigationLink<ProjectPageName>,
   getLinkProps: GetLinkProps
-): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  iconType: navLink.sideNavIcon,
-  position: SolutionSideNavItemPosition.bottom,
-  ...getLinkProps({ id: navLink.id }),
-  appendSeparator: true,
-});
+): ProjectSideNavItem => {
+  const items = navLink.links?.reduce<ProjectSideNavItem[]>((acc, current) => {
+    if (!current.disabled) {
+      acc.push({
+        id: current.id,
+        label: current.title,
+        iconType: current.sideNavIcon,
+        isBeta: current.isBeta,
+        betaOptions: current.betaOptions,
+        ...getLinkProps(current),
+      });
+    }
+    return acc;
+  }, []);
+
+  return {
+    id: navLink.id,
+    label: navLink.title,
+    iconType: navLink.sideNavIcon,
+    position: isBottomNavItem(navLink.id)
+      ? SolutionSideNavItemPosition.bottom
+      : SolutionSideNavItemPosition.top,
+    ...getLinkProps(navLink),
+    ...(navLink.categories?.length && { categories: navLink.categories }),
+    ...(items && { items }),
+  };
+};
 
 /**
  * Returns all the formatted SideNavItems, including external links
  */
-export const useSideNavItems = (): SolutionSideNavItem[] => {
+export const useSideNavItems = (): ProjectSideNavItem[] => {
   const navLinks = useNavLinks();
-  const getLinkProps = useGetLinkProps();
+  const getKibanaLinkProps = useGetLinkProps();
+
+  const getLinkProps = useCallback<GetLinkProps>(
+    (link) => {
+      if (link.externalUrl) {
+        return {
+          href: link.externalUrl,
+          openInNewTab: true,
+        };
+      } else {
+        return getKibanaLinkProps({ id: link.id });
+      }
+    },
+    [getKibanaLinkProps]
+  );
 
   return useMemo(
     () =>
-      navLinks.reduce<SolutionSideNavItem[]>((items, navLink) => {
-        if (navLink.disabled) {
-          return items;
-        }
-        if (isGetStartedNavItem(navLink.id)) {
-          items.push(formatGetStartedLink(navLink, getLinkProps));
-        } else {
+      navLinks.reduce<ProjectSideNavItem[]>((items, navLink) => {
+        if (!navLink.disabled) {
           items.push(formatLink(navLink, getLinkProps));
         }
         return items;

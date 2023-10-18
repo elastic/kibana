@@ -114,6 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await testSubjects.click('unifiedHistogramQueryHits'); // to cancel out tooltips
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';
@@ -126,6 +127,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should reload the saved search with persisted query to show the initial hit count', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         // apply query some changes
         await queryBar.setQuery('test');
         await queryBar.submitQuery();
@@ -297,10 +300,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('resizable layout panels', () => {
-      it('should allow resizing the layout panels', async () => {
+      it('should allow resizing the histogram layout panels', async () => {
         const resizeDistance = 100;
-        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelTop');
-        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelMain');
+        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelFixed');
+        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelFlex');
         const resizeButton = await testSubjects.find('unifiedHistogramResizableButton');
         const topPanelSize = (await topPanel.getPosition()).height;
         const mainPanelSize = (await mainPanel.getPosition()).height;
@@ -311,6 +314,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const newTopPanelSize = (await topPanel.getPosition()).height;
         const newMainPanelSize = (await mainPanel.getPosition()).height;
         expect(newTopPanelSize).to.be(topPanelSize + resizeDistance);
+        expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
+      });
+
+      it('should allow resizing the sidebar layout panels', async () => {
+        const resizeDistance = 100;
+        const leftPanel = await testSubjects.find('discoverLayoutResizablePanelFixed');
+        const mainPanel = await testSubjects.find('discoverLayoutResizablePanelFlex');
+        const resizeButton = await testSubjects.find('discoverLayoutResizableButton');
+        const leftPanelSize = (await leftPanel.getPosition()).width;
+        const mainPanelSize = (await mainPanel.getPosition()).width;
+        await browser.dragAndDrop(
+          { location: resizeButton },
+          { location: { x: resizeDistance, y: 0 } }
+        );
+        const newLeftPanelSize = (await leftPanel.getPosition()).width;
+        const newMainPanelSize = (await mainPanel.getPosition()).width;
+        expect(newLeftPanelSize).to.be(leftPanelSize + resizeDistance);
         expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
       });
     });

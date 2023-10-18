@@ -15,7 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
+import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -295,6 +295,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       pagination,
     },
     {
+      // We don't need refreshes on windows focus and reconnects if auto-refresh if off
+      refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
+      refetchOnReconnect: isRefreshOn && !isActionInProgress,
       refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     }
@@ -307,7 +310,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching: isSnoozeSettingsFetching,
     isError: isSnoozeSettingsFetchError,
     refetch: refetchSnoozeSettings,
-  } = useFetchRulesSnoozeSettings(
+  } = useFetchRulesSnoozeSettingsQuery(
     rules.map((x) => x.id),
     { enabled: rules.length > 0 }
   );

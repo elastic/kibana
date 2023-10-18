@@ -18,13 +18,12 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   getAwsCredentialsFormManualOptions,
-  AwsCredentialsType,
   AwsOptions,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './get_aws_credentials_form_options';
@@ -35,6 +34,8 @@ import {
   NewPackagePolicyPostureInput,
 } from '../utils';
 import { SetupFormat, useAwsCredentialsForm } from './hooks';
+import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
+import { AwsCredentialsType } from '../../../../common/types';
 
 interface AWSSetupInfoContentProps {
   integrationLink: string;
@@ -43,8 +44,8 @@ interface AWSSetupInfoContentProps {
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
-      <EuiHorizontalRule margin="xxl" />
-      <EuiTitle size="s">
+      <EuiHorizontalRule margin="xl" />
+      <EuiTitle size="xs">
         <h2>
           <FormattedMessage
             id="xpack.csp.awsIntegration.setupInfoContentTitle"
@@ -102,12 +103,15 @@ interface Props {
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
 }
 
 const CloudFormationSetup = ({
   hasCloudFormationTemplate,
+  input,
 }: {
   hasCloudFormationTemplate: boolean;
+  input: NewPackagePolicyInput;
 }) => {
   if (!hasCloudFormationTemplate) {
     return (
@@ -119,6 +123,9 @@ const CloudFormationSetup = ({
       </EuiCallOut>
     );
   }
+
+  const accountType = input.streams?.[0]?.vars?.['aws.account_type']?.value;
+
   return (
     <>
       <EuiText color="subdued" size="s">
@@ -129,10 +136,25 @@ const CloudFormationSetup = ({
         >
           <li>
             <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.login"
-              defaultMessage="Log in as an admin to the AWS Account you want to onboard"
+              id="xpack.csp.awsIntegration.cloudFormationSetupStep.hostRequirement"
+              defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
+          {accountType === AWS_ORGANIZATION_ACCOUNT ? (
+            <li>
+              <FormattedMessage
+                id="xpack.csp.awsIntegration.cloudFormationSetupStep.organizationLogin"
+                defaultMessage="Log in as an admin in your organization's AWS management account"
+              />
+            </li>
+          ) : (
+            <li>
+              <FormattedMessage
+                id="xpack.csp.awsIntegration.cloudFormationSetupStep.login"
+                defaultMessage="Log in as an admin to the AWS Account you want to onboard"
+              />
+            </li>
+          )}
           <li>
             <FormattedMessage
               id="xpack.csp.awsIntegration.cloudFormationSetupStep.save"
@@ -167,7 +189,7 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
   </EuiLink>
 );
 
-const ReadDocumentation = ({ url }: { url: string }) => {
+export const ReadDocumentation = ({ url }: { url: string }) => {
   return (
     <EuiText color="subdued" size="s">
       <FormattedMessage
@@ -194,6 +216,7 @@ export const AwsCredentialsForm = ({
   packageInfo,
   onChange,
   setIsValid,
+  disabled,
 }: Props) => {
   const {
     awsCredentialsType,
@@ -217,18 +240,22 @@ export const AwsCredentialsForm = ({
       <AWSSetupInfoContent integrationLink={integrationLink} />
       <EuiSpacer size="l" />
       <RadioGroup
+        disabled={disabled}
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
-        onChange={onSetupFormatChange}
+        onChange={(idSelected: SetupFormat) =>
+          idSelected !== setupFormat && onSetupFormatChange(idSelected)
+        }
       />
       <EuiSpacer size="l" />
       {setupFormat === 'cloud_formation' && (
-        <CloudFormationSetup hasCloudFormationTemplate={hasCloudFormationTemplate} />
+        <CloudFormationSetup hasCloudFormationTemplate={hasCloudFormationTemplate} input={input} />
       )}
       {setupFormat === 'manual' && (
         <>
           <AwsCredentialTypeSelector
+            disabled={disabled}
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy(
@@ -244,6 +271,7 @@ export const AwsCredentialsForm = ({
           <ReadDocumentation url={integrationLink} />
           <EuiSpacer size="l" />
           <AwsInputVarFields
+            disabled={disabled}
             fields={fields}
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
@@ -258,9 +286,11 @@ export const AwsCredentialsForm = ({
 const AwsCredentialTypeSelector = ({
   type,
   onChange,
+  disabled,
 }: {
   onChange(type: AwsCredentialsType): void;
   type: AwsCredentialsType;
+  disabled: boolean;
 }) => (
   <EuiFormRow
     fullWidth
@@ -269,6 +299,7 @@ const AwsCredentialTypeSelector = ({
     })}
   >
     <EuiSelect
+      disabled={disabled}
       fullWidth
       options={getAwsCredentialsFormManualOptions()}
       value={type}
@@ -282,9 +313,11 @@ const AwsCredentialTypeSelector = ({
 const AwsInputVarFields = ({
   fields,
   onChange,
+  disabled,
 }: {
   fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
+  disabled: boolean;
 }) => (
   <div>
     {fields.map((field) => (
@@ -292,6 +325,7 @@ const AwsInputVarFields = ({
         <>
           {field.type === 'password' && (
             <EuiFieldPassword
+              disabled={disabled}
               id={field.id}
               type="dual"
               fullWidth
@@ -301,6 +335,7 @@ const AwsInputVarFields = ({
           )}
           {field.type === 'text' && (
             <EuiFieldText
+              disabled={disabled}
               id={field.id}
               fullWidth
               value={field.value || ''}

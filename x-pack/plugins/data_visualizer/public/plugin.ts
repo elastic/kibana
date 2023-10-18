@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart, CoreSetup, CoreStart } from '@kbn/core/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -24,7 +24,11 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
+import {
+  getDataDriftComponent,
+  getFileDataVisualizerComponent,
+  getIndexDataVisualizerComponent,
+} from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
@@ -38,6 +42,7 @@ export interface DataVisualizerSetupDependencies {
   discover: DiscoverSetup;
 }
 export interface DataVisualizerStartDependencies {
+  analytics: AnalyticsServiceStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   fileUpload: FileUploadPluginStart;
@@ -85,6 +90,7 @@ export class DataVisualizerPlugin
     return {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
+      getDataDriftComponent,
       getMaxBytesFormatted,
     };
   }

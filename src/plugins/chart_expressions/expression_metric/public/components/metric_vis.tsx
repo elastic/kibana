@@ -181,7 +181,7 @@ export const MetricVis = ({
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
-      title,
+      title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
       extra: (
@@ -303,6 +303,7 @@ export const MetricVis = ({
       >
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
+            locale={i18n.getLocale()}
             theme={[
               {
                 background: { color: 'transparent' },

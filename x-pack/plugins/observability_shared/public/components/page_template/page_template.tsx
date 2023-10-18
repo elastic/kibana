@@ -29,13 +29,7 @@ import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
-  | 'children'
-  | 'data-test-subj'
-  | 'paddingSize'
-  | 'pageHeader'
-  | 'restrictWidth'
-  | 'isEmptyState'
-  | 'noDataConfig'
+  'children' | 'data-test-subj' | 'pageHeader' | 'restrictWidth' | 'isEmptyState' | 'noDataConfig'
 > & {
   showSolutionNav?: boolean;
   isPageDataLoaded?: boolean;

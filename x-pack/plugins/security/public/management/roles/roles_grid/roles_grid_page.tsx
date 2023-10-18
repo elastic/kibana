@@ -28,6 +28,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { ConfirmDelete } from './confirm_delete';
+import { PermissionDenied } from './permission_denied';
 import type { Role } from '../../../../common/model';
 import {
   getExtendedRoleDeprecationNotice,
@@ -39,8 +41,6 @@ import {
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { ActionsEuiTableFormatting } from '../../table_utils';
 import type { RolesAPIClient } from '../roles_api_client';
-import { ConfirmDelete } from './confirm_delete';
-import { PermissionDenied } from './permission_denied';
 
 interface Props {
   notifications: NotificationsStart;

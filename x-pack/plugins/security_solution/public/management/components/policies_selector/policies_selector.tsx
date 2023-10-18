@@ -20,6 +20,7 @@ import {
   EuiFilterButton,
   EuiFilterSelectItem,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
@@ -57,6 +58,7 @@ const UNASSIGNED_ENTRIES = i18n.translate(
 
 export const PoliciesSelector = memo<PoliciesSelectorProps>(
   ({ policies, onChangeSelection, defaultExcludedPolicies, defaultIncludedPolicies }) => {
+    const { euiTheme } = useEuiTheme();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [query, setQuery] = useState<string>('');
     const [itemsList, setItemsList] = useState<PolicySelectionItem[]>([]);
@@ -195,7 +197,14 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
                   value={query}
                 />
               </EuiPopoverTitle>
-              <div data-test-subj="policiesSelector-popover" className="euiFilterSelect__items">
+              {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+                  instead of EuiFilterSelectItem (which is pending deprecation).
+                  @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+              <div
+                data-test-subj="policiesSelector-popover"
+                className="eui-yScroll"
+                css={{ maxHeight: euiTheme.base * 30 }}
+              >
                 {dropdownItems}
               </div>
             </EuiPopover>

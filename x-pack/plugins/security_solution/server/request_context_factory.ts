@@ -25,7 +25,7 @@ import type {
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
-import type { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
+import { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -43,7 +43,6 @@ interface ConstructorOptions {
   ruleMonitoringService: IRuleMonitoringService;
   kibanaVersion: string;
   kibanaBranch: string;
-  riskEngineDataClient: RiskEngineDataClient;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -58,14 +57,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const {
-      config,
-      core,
-      plugins,
-      endpointAppContextService,
-      ruleMonitoringService,
-      riskEngineDataClient,
-    } = options;
+    const { config, core, plugins, endpointAppContextService, ruleMonitoringService } = options;
 
     const { lists, ruleRegistry, security } = plugins;
 
@@ -139,7 +131,16 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getInternalFleetServices: memoize(() => endpointAppContextService.getInternalFleetServices()),
 
-      getRiskEngineDataClient: () => riskEngineDataClient,
+      getRiskEngineDataClient: memoize(
+        () =>
+          new RiskEngineDataClient({
+            logger: options.logger,
+            kibanaVersion: options.kibanaVersion,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            soClient: coreContext.savedObjects.client,
+            namespace: getSpaceId(),
+          })
+      ),
     };
   }
 }

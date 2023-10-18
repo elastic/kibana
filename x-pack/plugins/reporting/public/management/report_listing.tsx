@@ -81,7 +81,15 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { ilmPolicyContextValue, urlService, navigateToUrl, capabilities } = this.props;
+    const {
+      apiClient,
+      toasts,
+      ilmPolicyContextValue,
+      urlService,
+      navigateToUrl,
+      capabilities,
+      config,
+    } = this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
     const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
@@ -101,7 +109,7 @@ class ReportListingUi extends Component<Props, State> {
           }
         />
 
-        <MigrateIlmPolicyCallOut toasts={this.props.toasts} />
+        {config.statefulSettings.enabled ? <MigrateIlmPolicyCallOut toasts={toasts} /> : null}
 
         <EuiSpacer size={'l'} />
         <div>{this.renderTable()}</div>
@@ -120,7 +128,7 @@ class ReportListingUi extends Component<Props, State> {
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <ReportDiagnostic apiClient={this.props.apiClient} />
+            <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
@@ -138,8 +146,8 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
-    const { pollConfig, license$ } = this.props;
-    const pollFrequencyInMillis = durationToNumber(pollConfig.jobsRefresh.interval);
+    const { config, license$ } = this.props;
+    const pollFrequencyInMillis = durationToNumber(config.poll.jobsRefresh.interval);
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
@@ -147,7 +155,7 @@ class ReportListingUi extends Component<Props, State> {
       pollFrequencyInMillis,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier: pollConfig.jobsRefresh.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier: config.poll.jobsRefresh.intervalErrorMultiplier,
     });
     this.poller.start();
     this.licenseSubscription = license$.subscribe(this.licenseHandler);
@@ -318,7 +326,7 @@ class ReportListingUi extends Component<Props, State> {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
               <EuiLink
-                data-test-subj={`viewReportingLink${job.id}`}
+                data-test-subj={`viewReportingLink-${job.id}`}
                 onClick={() => this.setState({ selectedJob: job })}
               >
                 {objectTitle ||
@@ -499,7 +507,10 @@ class ReportListingUi extends Component<Props, State> {
 }
 
 export const ReportListing = (
-  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities'>
+  props: Omit<
+    Props,
+    'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities' | 'configAllowsImages'
+  >
 ) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
   const { apiClient } = useInternalApiClient();

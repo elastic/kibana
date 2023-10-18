@@ -14,7 +14,9 @@ const envGrepFiles = process.env.APM_TEST_GREP_FILES as string;
 function getGlobPattern() {
   try {
     const envGrepFilesParsed = JSON.parse(envGrepFiles as string) as string[];
-    return envGrepFilesParsed.map((pattern) => `**/${pattern}**`);
+    return envGrepFilesParsed.map((pattern) => {
+      return pattern.includes('spec') ? `**/${pattern}**` : `**/${pattern}**.spec.ts`;
+    });
   } catch (e) {
     // ignore
   }
