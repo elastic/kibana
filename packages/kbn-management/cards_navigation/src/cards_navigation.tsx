@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { flatMap } from 'lodash';
 import {
@@ -26,7 +26,7 @@ import {
   AppProps,
   AppId,
 } from './types';
-import { appCategories, appDefinitions, getAppIdsByCategory } from './consts';
+import { appCategories, appDefinitions as defaultCardNavigationDefinitions } from './consts';
 
 // Retrieve the data we need from a given app from the management app registry
 const getDataFromManagementApp = (app: Application) => {
@@ -37,23 +37,37 @@ const getDataFromManagementApp = (app: Application) => {
   };
 };
 
-// Given a category and a list of apps, build an array of apps that belong to that category
-const getAppsForCategory = (category: string, filteredApps: { [key: string]: Application }) => {
-  return getAppIdsByCategory(category)
-    .map((appId: AppId) => {
-      if (!filteredApps[appId]) {
-        return null;
-      }
-
-      return {
-        ...getDataFromManagementApp(filteredApps[appId]),
-        ...appDefinitions[appId],
-      };
-    })
-    .filter(Boolean) as AppProps[];
+// Compose a list of app ids that belong to a given category
+export const getAppIdsByCategory = (category: string, appDefinitions) => {
+  const appKeys = Object.keys(appDefinitions) as AppId[];
+  return appKeys.filter((appId: AppId) => {
+    return appDefinitions[appId].category === category;
+  });
 };
 
-const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: string[]) => {
+// Given a category and a list of apps, build an array of apps that belong to that category
+const getAppsForCategoryFactory =
+  (appDefinitions: CardsNavigationComponentProps['extendCardNavigationDefinitions']) =>
+  (category: string, filteredApps: { [key: string]: Application }) => {
+    return getAppIdsByCategory(category, appDefinitions)
+      .map((appId: AppId) => {
+        if (!filteredApps[appId]) {
+          return null;
+        }
+
+        return {
+          ...getDataFromManagementApp(filteredApps[appId]),
+          ...appDefinitions![appId],
+        };
+      })
+      .filter(Boolean) as AppProps[];
+  };
+
+const getEnabledAppsByCategory = (
+  sections: AppRegistrySections[],
+  cardNavigationDefintions: CardsNavigationComponentProps['extendCardNavigationDefinitions'],
+  hideLinksTo: string[]
+) => {
   // Flatten all apps into a single array
   const flattenApps = flatMap(sections, (section) => section.apps)
     // Remove all apps that the consumer wants to disable.
@@ -66,6 +80,8 @@ const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: 
     },
     {}
   );
+
+  const getAppsForCategory = getAppsForCategoryFactory(cardNavigationDefintions);
 
   // Build list of categories with apps that are enabled
   return [
@@ -106,8 +122,17 @@ export const CardsNavigation = ({
   appBasePath,
   onCardClick,
   hideLinksTo = [],
+  extendCardNavigationDefinitions = {},
 }: CardsNavigationComponentProps) => {
-  const appsByCategory = getEnabledAppsByCategory(sections, hideLinksTo);
+  const cardNavigationDefintions = useMemo(
+    () => ({
+      ...defaultCardNavigationDefinitions,
+      ...extendCardNavigationDefinitions,
+    }),
+    [extendCardNavigationDefinitions]
+  );
+
+  const appsByCategory = getEnabledAppsByCategory(sections, cardNavigationDefintions, hideLinksTo);
 
   return (
     <EuiPageSection color="transparent" paddingSize="none">

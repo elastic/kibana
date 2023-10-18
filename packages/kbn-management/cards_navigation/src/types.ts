@@ -55,6 +55,7 @@ export interface CardsNavigationComponentProps {
   appBasePath: string;
   onCardClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   hideLinksTo?: AppId[];
+  extendCardNavigationDefinitions?: Record<string, AppDefinition>;
 }
 
 export interface ManagementAppProps {
