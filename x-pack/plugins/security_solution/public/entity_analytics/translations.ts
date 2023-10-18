@@ -260,7 +260,6 @@ export const MAX_SPACE_PANEL_MESSAGE = i18n.translate(
   }
 );
 
-
 export const CHECK_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.riskScore.errors.privileges.check',
   {
