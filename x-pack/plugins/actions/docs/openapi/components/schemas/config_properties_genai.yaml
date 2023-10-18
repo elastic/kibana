@@ -1,4 +1,4 @@
-title: Connector request properties for a generative AI connector
+title: Connector request properties for an OpenAI connector
 description: Defines properties for connectors when type is `.gen-ai`.
 oneOf:
   - type: object

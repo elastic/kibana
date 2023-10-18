@@ -7,7 +7,6 @@
 
 import { useEffect, useCallback } from 'react';
 import createContainer from 'constate';
-import { findInventoryModel } from '../../../../common/inventory_models';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
@@ -19,16 +18,14 @@ export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'asset' | 'assetT
 export function useMetadataProvider({ asset, assetType }: UseMetadataProviderProps) {
   const [, setUrlState] = useAssetDetailsUrlState();
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
-  const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
 
-  const { loading, error, metadata, reload } = useMetadata(
-    asset.id,
+  const { loading, error, metadata, reload } = useMetadata({
+    assetId: asset.id,
     assetType,
-    inventoryModel.requiredMetrics,
     sourceId,
-    getDateRangeInTimestamp()
-  );
+    timeRange: getDateRangeInTimestamp(),
+  });
 
   const refresh = useCallback(() => {
     reload();

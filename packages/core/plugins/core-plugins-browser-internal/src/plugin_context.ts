@@ -128,6 +128,7 @@ export function createPluginStartContext<
       navigateToApp: deps.application.navigateToApp,
       navigateToUrl: deps.application.navigateToUrl,
       getUrlForApp: deps.application.getUrlForApp,
+      currentLocation$: deps.application.currentLocation$,
     },
     customBranding: deps.customBranding,
     docLinks: deps.docLinks,

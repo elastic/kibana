@@ -468,7 +468,7 @@
           },
           " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\"> & React.RefAttributes<",
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\"> & React.RefAttributes<",
           {
             "pluginId": "unifiedHistogram",
             "scope": "public",
@@ -550,6 +550,31 @@
                 "text": "ExpressionsInspectorAdapter"
               },
               " | undefined; }"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramChartLoadEvent.embeddableOutput$",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableOutput$",
+            "description": [
+              "\nObservable of the lens embeddable output"
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensEmbeddableOutput",
+                "text": "LensEmbeddableOutput"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
@@ -894,21 +919,46 @@
           },
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramState.lensTablesAdapter",
+            "id": "def-public.UnifiedHistogramState.lensAdapters",
             "type": "Object",
             "tags": [],
-            "label": "lensTablesAdapter",
+            "label": "lensAdapters",
             "description": [
-              "\nThe current Lens request table"
+              "\nThe current Lens adapters"
             ],
             "signature": [
-              "Record<string, ",
+              "Partial<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
+                "section": "def-common.DefaultInspectorAdapters",
+                "text": "DefaultInspectorAdapters"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramState.lensEmbeddableOutput$",
+            "type": "Object",
+            "tags": [],
+            "label": "lensEmbeddableOutput$",
+            "description": [
+              "\nLens embeddable output observable"
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensEmbeddableOutput",
+                "text": "LensEmbeddableOutput"
               },
               "> | undefined"
             ],
@@ -1178,7 +1228,7 @@
           },
           " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\">"
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,

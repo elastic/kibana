@@ -30,6 +30,7 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
+import { BehaviorSubject, Observable } from 'rxjs';
 import {
   useExistingFieldsFetcher,
   type ExistingFieldsFetcher,
@@ -49,6 +50,7 @@ import type {
 } from '../../types';
 
 export interface UnifiedFieldListSidebarContainerApi {
+  isSidebarCollapsed$: Observable<boolean>;
   refetchFieldsExistenceInfo: ExistingFieldsFetcher['refetchFieldsExistenceInfo'];
   closeFieldListFlyout: () => void;
   // no user permission or missing dataViewFieldEditor service will result in `undefined` API methods
@@ -121,6 +123,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const { isSidebarCollapsed, onToggleSidebar } = useSidebarToggle({ stateService });
+  const [isSidebarCollapsed$] = useState(() => new BehaviorSubject(isSidebarCollapsed));
 
   const canEditDataView =
     Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
@@ -222,16 +225,21 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     };
   }, []);
 
+  useEffect(() => {
+    isSidebarCollapsed$.next(isSidebarCollapsed);
+  }, [isSidebarCollapsed, isSidebarCollapsed$]);
+
   useImperativeHandle(
     componentRef,
     () => ({
+      isSidebarCollapsed$,
       refetchFieldsExistenceInfo,
       closeFieldListFlyout,
       createField: editField,
       editField,
       deleteField,
     }),
-    [refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
+    [isSidebarCollapsed$, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
   );
 
   if (!dataView) {

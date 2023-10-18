@@ -11,11 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import {
-  getExperimentalAllowedValues,
-  isValidExperimentalValue,
-} from '../common/experimental_features';
-const allowedExperimentalValues = getExperimentalAllowedValues();
+import { isValidExperimentalValue } from '../common/experimental_features';
 
 import {
   PreconfiguredPackagesSchema,
@@ -25,6 +21,7 @@ import {
   PreconfiguredFleetProxiesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
+import { appContextService } from './services';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
@@ -120,6 +117,7 @@ export const config: PluginConfigDescriptor = {
         elasticsearch: schema.object({
           hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
           ca_sha256: schema.maybe(schema.string()),
+          ca_trusted_fingerprint: schema.maybe(schema.string()),
         }),
         fleet_server: schema.maybe(
           schema.object({
@@ -161,9 +159,9 @@ export const config: PluginConfigDescriptor = {
         validate(list) {
           for (const key of list) {
             if (!isValidExperimentalValue(key)) {
-              return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
-                ', '
-              )}`;
+              appContextService
+                .getLogger()
+                .warn(`[${key}] is not a valid fleet experimental feature.`);
             }
           }
         },
@@ -188,9 +186,11 @@ export const config: PluginConfigDescriptor = {
               min: 0,
             })
           ),
+          retrySetupOnBoot: schema.boolean({ defaultValue: false }),
           registry: schema.object(
             {
               kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
+              excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
               spec: schema.object(
                 {
                   min: schema.maybe(schema.string()),
@@ -219,6 +219,7 @@ export const config: PluginConfigDescriptor = {
               defaultValue: {
                 kibanaVersionCheckEnabled: true,
                 capabilities: [],
+                excludePackages: [],
                 spec: {
                   max: REGISTRY_SPEC_MAX_VERSION,
                 },

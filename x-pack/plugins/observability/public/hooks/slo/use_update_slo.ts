@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useUpdateSlo() {
   const {
@@ -20,7 +23,7 @@ export function useUpdateSlo() {
 
   return useMutation<
     UpdateSLOResponse,
-    string,
+    ServerError,
     { sloId: string; slo: UpdateSLOInput },
     { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
@@ -69,7 +72,7 @@ export function useUpdateSlo() {
           queryClient.setQueryData(context.queryKey, context.previousData);
         }
 
-        toasts.addError(new Error(String(error)), {
+        toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.update.errorNotification', {
             defaultMessage: 'Something went wrong when updating {name}',
             values: { name },

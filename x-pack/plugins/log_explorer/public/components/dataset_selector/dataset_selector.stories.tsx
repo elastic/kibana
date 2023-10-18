@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import {
   AllDatasetSelection,
   DatasetSelection,
@@ -27,6 +28,10 @@ const meta: Meta<typeof DatasetSelector> = {
   argTypes: {
     datasetsError: {
       options: [null, { message: 'Failed to fetch data streams' }],
+      control: { type: 'radio' },
+    },
+    dataViewsError: {
+      options: [null, { message: 'Failed to fetch data data views' }],
       control: { type: 'radio' },
     },
     integrationsError: {
@@ -71,20 +76,39 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
 
   const sortedDatasets = search.sortOrder === 'asc' ? filteredDatasets : filteredDatasets.reverse();
 
+  const filteredDataViews = mockDataViews.filter((dataView) =>
+    dataView.name?.includes(search.name as string)
+  );
+
+  const sortedDataViews =
+    search.sortOrder === 'asc' ? filteredDataViews : filteredDataViews.reverse();
+
+  const {
+    datasetsError,
+    dataViewsError,
+    integrationsError,
+    isLoadingDataViews,
+    isLoadingIntegrations,
+    isLoadingUncategorized,
+  } = args;
+
   return (
     <DatasetSelector
       {...args}
-      datasets={sortedDatasets}
+      datasets={Boolean(datasetsError || isLoadingUncategorized) ? [] : sortedDatasets}
+      dataViews={Boolean(dataViewsError || isLoadingDataViews) ? [] : sortedDataViews}
       datasetSelection={datasetSelection}
-      integrations={sortedIntegrations}
+      integrations={Boolean(integrationsError || isLoadingIntegrations) ? [] : sortedIntegrations}
+      onDataViewsSearch={setSearch}
+      onDataViewsSort={setSearch}
       onIntegrationsLoadMore={onIntegrationsLoadMore}
       onIntegrationsSearch={setSearch}
       onIntegrationsSort={setSearch}
       onIntegrationsStreamsSearch={setSearch}
       onIntegrationsStreamsSort={setSearch}
       onSelectionChange={onSelectionChange}
-      onUnmanagedStreamsSearch={setSearch}
-      onUnmanagedStreamsSort={setSearch}
+      onUncategorizedSearch={setSearch}
+      onUncategorizedSort={setSearch}
     />
   );
 };
@@ -92,12 +116,18 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
 export const Basic = DatasetSelectorTemplate.bind({});
 Basic.args = {
   datasetsError: null,
+  dataViewsError: null,
   integrationsError: null,
+  isLoadingDataViews: false,
   isLoadingIntegrations: false,
-  isLoadingStreams: false,
+  isLoadingUncategorized: false,
+  isSearchingIntegrations: false,
+  onDataViewsReload: () => alert('Reload data views...'),
+  onDataViewSelection: (dataView) => alert(`Navigate to data view "${dataView.name}"`),
+  onDataViewsTabClick: () => console.log('Load data views...'),
   onIntegrationsReload: () => alert('Reload integrations...'),
-  onStreamsEntryClick: () => console.log('Load uncategorized streams...'),
-  onUnmanagedStreamsReload: () => alert('Reloading streams...'),
+  onUncategorizedTabClick: () => console.log('Load uncategorized streams...'),
+  onUncategorizedReload: () => alert('Reloading streams...'),
 };
 
 const mockIntegrations: Integration[] = [
@@ -477,3 +507,25 @@ const mockDatasets: Dataset[] = [
   { name: 'data-load-balancing-logs-*' as IndexPattern },
   { name: 'data-scaling-logs-*' as IndexPattern },
 ].map((dataset) => Dataset.create(dataset));
+
+const mockDataViews: DataViewListItem[] = [
+  {
+    id: 'logs-*',
+    namespaces: ['default'],
+    title: 'logs-*',
+    name: 'logs-*',
+  },
+  {
+    id: 'metrics-*',
+    namespaces: ['default'],
+    title: 'metrics-*',
+    name: 'metrics-*',
+  },
+  {
+    id: '7258d186-6430-4b51-bb67-2603cdfb4652',
+    namespaces: ['default'],
+    title: 'synthetics-*',
+    typeMeta: {},
+    name: 'synthetics-dashboard',
+  },
+];

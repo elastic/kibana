@@ -12,10 +12,12 @@ xpack.legacy_uptime.enabled: false
 xpack.serverless.observability.enabled: true
 
 ## Configure plugins
-xpack.infra.logs.app_target: discover
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/observability/landing
+
+# Customize empty page state for analytics apps
+no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
 
 ## Set the dev project switch current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
@@ -28,10 +30,21 @@ xpack.apm.serverlessOnboarding: true
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability']
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.max: '3.0'
-# Disabled until packages implement the new spec https://github.com/elastic/kibana/issues/166742
-# xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-# xpack.fleet.internal.registry.spec.min: '3.0'
+# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
+xpack.fleet.internal.registry.spec.min: '1.0'
+xpack.fleet.internal.registry.excludePackages: [
+    # Security integrations
+    'endpoint',
+    'beaconing',
+    'osquery_manager',
+    # Removed in 8.11 integrations
+    'cisco',
+    'microsoft',
+    'symantec',
+    'cyberark',
+  ]
 
 ## Required for force installation of APM Package
 xpack.fleet.packages:

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
@@ -49,7 +50,7 @@ import {
   asDecimalOrInteger,
   getAlertUrlTransaction,
 } from '../../../../../common/utils/formatters';
-import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
+import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -103,6 +104,7 @@ export function registerTransactionErrorRateRuleType({
       actionVariables: {
         context: transactionErrorRateActionVariables,
       },
+      category: DEFAULT_APP_CATEGORIES.observability.id,
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -167,7 +169,7 @@ export function registerTransactionErrorRateRuleType({
                       },
                     },
                   },
-                  ...getDocumentTypeFilterForTransactions(
+                  ...getBackwardCompatibleDocumentTypeFilter(
                     searchAggregatedTransactions
                   ),
                   {

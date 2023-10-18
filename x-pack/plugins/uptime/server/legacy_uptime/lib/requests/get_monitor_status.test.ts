@@ -151,6 +151,15 @@ describe('getMonitorStatus', () => {
                   },
                 },
                 Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
                   "range": Object {
                     "summary.down": Object {
                       "gt": "0",
@@ -209,7 +218,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,heartbeat-7*",
+        "index": "heartbeat-*",
       }
     `);
   });
@@ -292,6 +301,15 @@ describe('getMonitorStatus', () => {
                   },
                 },
                 Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
                   "range": Object {
                     "summary.down": Object {
                       "gt": "0",
@@ -335,7 +353,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,heartbeat-7*",
+        "index": "heartbeat-*",
       }
     `);
   });
@@ -470,6 +488,15 @@ describe('getMonitorStatus', () => {
                   },
                 },
                 Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
                   "range": Object {
                     "summary.down": Object {
                       "gt": "0",
@@ -546,7 +573,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,heartbeat-7*",
+        "index": "heartbeat-*",
       }
     `);
   });
@@ -641,6 +668,15 @@ describe('getMonitorStatus', () => {
                   },
                 },
                 Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
                   "range": Object {
                     "summary.down": Object {
                       "gt": "0",
@@ -677,7 +713,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,heartbeat-7*",
+        "index": "heartbeat-*",
       }
     `);
   });
@@ -787,6 +823,15 @@ describe('getMonitorStatus', () => {
                   },
                 },
                 Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
                   "range": Object {
                     "summary.down": Object {
                       "gt": "0",
@@ -814,7 +859,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,heartbeat-7*",
+        "index": "heartbeat-*",
       }
     `);
     expect(result.length).toBe(3);

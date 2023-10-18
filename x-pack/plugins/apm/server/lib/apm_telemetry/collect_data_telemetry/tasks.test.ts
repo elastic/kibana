@@ -164,6 +164,66 @@ describe('data telemetry collection tasks', () => {
     });
   });
 
+  describe('global_labels', () => {
+    const task = tasks.find((t) => t.name === 'global_labels');
+
+    it('returns count of global labels when present', async () => {
+      const fieldCaps = jest.fn().mockResolvedValue({
+        indices: [
+          '.ds-metrics-apm.service_destination.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.service_summary.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.service_transaction.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.transaction.1m-default-2023.09.26-000005',
+        ],
+        fields: {
+          'labels.telemetry_auto_version': {
+            keyword: {
+              type: 'keyword',
+              metadata_field: false,
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+          labels: {
+            object: {
+              type: 'object',
+              metadata_field: false,
+              searchable: false,
+              aggregatable: false,
+            },
+          },
+        },
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
+      ).toEqual({
+        counts: {
+          global_labels: {
+            '1d': 1,
+          },
+        },
+      });
+    });
+
+    it('returns 0 count of global labels when not present', async () => {
+      const fieldCaps = jest.fn().mockResolvedValue({
+        indices: [],
+        fields: {},
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
+      ).toEqual({
+        counts: {
+          global_labels: {
+            '1d': 0,
+          },
+        },
+      });
+    });
+  });
+
   describe('cloud', () => {
     const task = tasks.find((t) => t.name === 'cloud');
 
@@ -735,6 +795,58 @@ describe('data telemetry collection tasks', () => {
       ).toEqual({
         service_groups: {
           kuery_fields: ['service.environment', 'agent.name'],
+          total: 2,
+        },
+      });
+    });
+  });
+
+  describe('custom dashboards', () => {
+    const task = tasks.find((t) => t.name === 'custom_dashboards');
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    it('returns custom dashboards stats from all spaces', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 500,
+        total: 2,
+        saved_objects: [
+          {
+            type: 'apm-custom-dashboards',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              dashboardSavedObjectId: 'foo-id',
+              serviceEnvironmentFilterEnabled: true,
+              serviceNameFilterEnabled: true,
+              kuery: 'service.name: frontend and service.environment: prod',
+            },
+            references: [],
+            score: 1,
+          },
+          {
+            type: 'apm-custom-dashboards',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['space-1'],
+            attributes: {
+              dashboardSavedObjectId: 'bar-id',
+              serviceEnvironmentFilterEnabled: true,
+              serviceNameFilterEnabled: true,
+              kuery: 'service.name: frontend',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      });
+
+      expect(
+        await task?.executor({
+          savedObjectsClient,
+        } as any)
+      ).toEqual({
+        custom_dashboards: {
+          kuery_fields: ['service.name', 'service.environment'],
           total: 2,
         },
       });

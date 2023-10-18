@@ -11,7 +11,11 @@ import semverGt from 'semver/functions/gt';
 
 import type { Agent } from '../types';
 
-export function isAgentUpgradeable(agent: Agent, kibanaVersion: string, versionToUpgrade?: string) {
+export function isAgentUpgradeable(
+  agent: Agent,
+  latestAgentVersion: string,
+  versionToUpgrade?: string
+) {
   let agentVersion: string;
   if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
     agentVersion = agent.local_metadata.elastic.agent.version;
@@ -29,25 +33,22 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string, versionT
     return false;
   }
   if (versionToUpgrade !== undefined) {
-    return (
-      isNotDowngrade(agentVersion, versionToUpgrade) &&
-      isAgentVersionLessThanKibana(agentVersion, kibanaVersion)
-    );
+    return isNotDowngrade(agentVersion, versionToUpgrade);
   }
-  return isAgentVersionLessThanKibana(agentVersion, kibanaVersion);
+  return isAgentVersionLessThanLatest(agentVersion, latestAgentVersion);
 }
 
-export const isAgentVersionLessThanKibana = (agentVersion: string, kibanaVersion: string) => {
+const isAgentVersionLessThanLatest = (agentVersion: string, latestAgentVersion: string) => {
   // make sure versions are only the number before comparison
   const agentVersionNumber = semverCoerce(agentVersion);
   if (!agentVersionNumber) throw new Error('agent version is not valid');
-  const kibanaVersionNumber = semverCoerce(kibanaVersion);
-  if (!kibanaVersionNumber) throw new Error('kibana version is not valid');
+  const latestAgentVersionNumber = semverCoerce(latestAgentVersion);
+  if (!latestAgentVersionNumber) throw new Error('latest version is not valid');
 
-  return semverLt(agentVersionNumber, kibanaVersionNumber);
+  return semverLt(agentVersionNumber, latestAgentVersionNumber);
 };
 
-export const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
+const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
   const agentVersionNumber = semverCoerce(agentVersion);
   if (!agentVersionNumber) throw new Error('agent version is not valid');
   const versionToUpgradeNumber = semverCoerce(versionToUpgrade);

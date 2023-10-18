@@ -698,17 +698,12 @@ describe('ruleType', () => {
           actionGroup: 'query matched',
           id: 'query matched',
           payload: expect.objectContaining({
-            kibana: {
-              alert: {
-                url: expect.any(String),
-                reason: expect.any(String),
-                title: "rule 'rule-name' matched query",
-                evaluation: {
-                  conditions: 'Number of matching documents is greater than or equal to 3',
-                  value: 3,
-                },
-              },
-            },
+            'kibana.alert.evaluation.conditions':
+              'Number of matching documents is greater than or equal to 3',
+            'kibana.alert.evaluation.value': '3',
+            'kibana.alert.reason': expect.any(String),
+            'kibana.alert.title': "rule 'rule-name' matched query",
+            'kibana.alert.url': expect.any(String),
           }),
         })
       );
@@ -836,17 +831,11 @@ describe('ruleType', () => {
           actionGroup: 'query matched',
           id: 'query matched',
           payload: expect.objectContaining({
-            kibana: {
-              alert: {
-                url: expect.any(String),
-                reason: expect.any(String),
-                title: "rule 'rule-name' matched query",
-                evaluation: {
-                  conditions: 'Query matched documents',
-                  value: 3,
-                },
-              },
-            },
+            'kibana.alert.evaluation.conditions': 'Query matched documents',
+            'kibana.alert.evaluation.value': '3',
+            'kibana.alert.reason': expect.any(String),
+            'kibana.alert.title': "rule 'rule-name' matched query",
+            'kibana.alert.url': expect.any(String),
           }),
         })
       );

@@ -22,7 +22,7 @@ export const ROWS_HEIGHT_OPTIONS = {
   single: 0,
   default: -1,
 };
-
+export const defaultRowLineHeight = '1.6em';
 export const defaultMonacoEditorWidth = 370;
 export const defaultTimeColumnWidth = 212;
 export const kibanaJSON = 'kibana-json';

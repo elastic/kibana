@@ -60,7 +60,8 @@ const visitArtifactTab = (tabId: string) => {
 
 describe(
   'Artifact tabs in Policy Details page',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] }, // broken due to disabled Native Role Management
+  // FIXME: Test needs to be refactored for serverless so that it uses a standard set of users that are also available in serverless
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     before(() => {
       login();

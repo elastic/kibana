@@ -356,7 +356,7 @@ export class SyntheticsPrivateLocation {
 
   async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.uptimeEsClient.baseESClient;
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     if (esClient && newPolicies.length > 0) {
       return await this.server.fleet.packagePolicyService.bulkCreate(
         soClient,
@@ -368,8 +368,8 @@ export class SyntheticsPrivateLocation {
 
   async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.uptimeEsClient.baseESClient;
-    if (soClient && esClient && policiesToUpdate.length > 0) {
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    if (policiesToUpdate.length > 0) {
       const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
         soClient,
         esClient,
@@ -384,8 +384,8 @@ export class SyntheticsPrivateLocation {
 
   async deletePolicyBulk(policyIdsToDelete: string[]) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.uptimeEsClient.baseESClient;
-    if (soClient && esClient && policyIdsToDelete.length > 0) {
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    if (policyIdsToDelete.length > 0) {
       try {
         return await this.server.fleet.packagePolicyService.delete(
           soClient,
@@ -403,7 +403,7 @@ export class SyntheticsPrivateLocation {
 
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.uptimeEsClient.baseESClient;
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
 
     const policyIdsToDelete = [];
     for (const config of configs) {

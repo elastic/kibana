@@ -132,6 +132,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
           title: 'test-maintenance-window-new',
           duration: 60 * 1000,
           r_rule: newRRule,
+          category_ids: ['management'],
           enabled: false,
         })
         .expect(200);
@@ -140,6 +141,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
       expect(updatedMW.duration).eql(60 * 1000);
       expect(updatedMW.r_rule).eql(newRRule);
       expect(updatedMW.title).eql('test-maintenance-window-new');
+      expect(updatedMW.category_ids).eql(['management']);
     });
 
     it('should update RRule correctly when removing fields', async () => {
@@ -153,6 +155,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
             count: 1,
             until: moment.utc().add(1, 'week').toISOString(),
           },
+          category_ids: ['management'],
         })
         .expect(200);
 
@@ -179,6 +182,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         .send({
           ...createParams,
           r_rule: updatedRRule,
+          category_ids: null,
         })
         .expect(200);
 
@@ -189,6 +193,42 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
 
       expect(response.body.data[0].id).to.eql(createdMaintenanceWindow.id);
       expect(response.body.data[0].r_rule).to.eql(updatedRRule);
+      expect(response.body.data[0].category_ids).to.eql(null);
+    });
+
+    it('should throw if updating maintenance window with invalid category ids', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          title: 'test-maintenance-window',
+          duration: 60 * 60 * 1000, // 1 hr
+          r_rule: {
+            dtstart: new Date().toISOString(),
+            tzid: 'UTC',
+            freq: 2, // weekly
+            count: 1,
+          },
+        })
+        .expect(200);
+
+      objectRemover.add(
+        'space1',
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
+      await supertest
+        .post(
+          `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ category_ids: ['something-else'] })
+        .expect(400);
     });
   });
 }

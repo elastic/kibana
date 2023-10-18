@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-
-import { ResponseBody } from '../helpers';
-import { ActionsClientLlm } from '../llm/actions_client_llm';
-import { mockActionResultData } from '../../../__mocks__/action_result_data';
-import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
-import { callAgentExecutor } from '.';
-import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { KibanaRequest } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import { ActionsClientLlm } from '../llm/actions_client_llm';
+import { mockActionResponse } from '../../../__mocks__/action_result_data';
+import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
+import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
+import { ResponseBody } from '../types';
+import { callAgentExecutor } from '.';
 
 jest.mock('../llm/actions_client_llm');
 
@@ -55,7 +56,7 @@ describe('callAgentExecutor', () => {
 
     ActionsClientLlm.prototype.getActionResultData = jest
       .fn()
-      .mockReturnValueOnce(mockActionResultData);
+      .mockReturnValueOnce(mockActionResponse);
   });
 
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
@@ -66,6 +67,7 @@ describe('callAgentExecutor', () => {
       langChainMessages,
       logger: mockLogger,
       request: mockRequest,
+      kbResource: ESQL_RESOURCE,
     });
 
     expect(ActionsClientLlm).toHaveBeenCalledWith({
@@ -84,6 +86,7 @@ describe('callAgentExecutor', () => {
       langChainMessages,
       logger: mockLogger,
       request: mockRequest,
+      kbResource: ESQL_RESOURCE,
     });
 
     expect(mockCall).toHaveBeenCalledWith({
@@ -101,6 +104,7 @@ describe('callAgentExecutor', () => {
       langChainMessages: onlyOneMessage,
       logger: mockLogger,
       request: mockRequest,
+      kbResource: ESQL_RESOURCE,
     });
 
     expect(mockCall).toHaveBeenCalledWith({
@@ -116,11 +120,12 @@ describe('callAgentExecutor', () => {
       langChainMessages,
       logger: mockLogger,
       request: mockRequest,
+      kbResource: ESQL_RESOURCE,
     });
 
     expect(result).toEqual({
       connector_id: 'mock-connector-id',
-      data: mockActionResultData,
+      data: mockActionResponse,
       status: 'ok',
     });
   });

@@ -41,6 +41,8 @@ import { BackButton } from './back_button';
 import { WindowsInstallStep } from '../../shared/windows_install_step';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
+const defaultDatasetName = '';
+
 export function InstallElasticAgent() {
   const {
     services: { share },
@@ -63,12 +65,14 @@ export function InstallElasticAgent() {
     useState<ElasticAgentPlatform>('linux-tar');
 
   const enforcedDatasetName =
-    integration === dataset ? dataset : `${integration}.${dataset}`;
+    (integration === dataset ? dataset : `${integration}.${dataset}`) ??
+    defaultDatasetName;
 
   async function onContinue() {
     await singleDatasetLocator!.navigate({
       integration,
       dataset: enforcedDatasetName,
+      origin: { id: 'application-log-onboarding' },
     });
   }
 
@@ -109,7 +113,11 @@ export function InstallElasticAgent() {
         customConfigurations,
         logFilePaths,
       } = getState();
-      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
+      if (
+        !hasAlreadySavedFlow(getState()) &&
+        monitoringRole?.hasPrivileges &&
+        datasetName
+      ) {
         return callApi('POST /internal/observability_onboarding/logs/flow', {
           params: {
             body: {
@@ -269,7 +277,7 @@ export function InstallElasticAgent() {
               'xpack.observability_onboarding.installElasticAgent.description',
               {
                 defaultMessage:
-                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipper is an Agent developed by Elastic.',
+                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipping tool is an agent developed by Elastic.',
               }
             )}
           </p>

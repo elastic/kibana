@@ -25,19 +25,19 @@ export const IsoDateString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 export type IsoDateStringC = typeof IsoDateString;
-export const schemaDate = IsoDateString;
-export const schemaDateArray = rt.array(IsoDateString);
-export const schemaDateRange = rt.partial({
-  gte: schemaDate,
-  lte: schemaDate,
-});
-export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaUnknown = rt.unknown;
 export const schemaUnknownArray = rt.array(rt.unknown);
 export const schemaString = rt.string;
 export const schemaStringArray = rt.array(schemaString);
 export const schemaNumber = rt.number;
 export const schemaNumberArray = rt.array(schemaNumber);
+export const schemaDate = rt.union([IsoDateString, schemaNumber]);
+export const schemaDateArray = rt.array(schemaDate);
+export const schemaDateRange = rt.partial({
+  gte: schemaDate,
+  lte: schemaDate,
+});
+export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaStringOrNumber = rt.union([schemaString, schemaNumber]);
 export const schemaStringOrNumberArray = rt.array(schemaStringOrNumber);
 export const schemaBoolean = rt.boolean;
@@ -69,15 +69,9 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const StackAlertRequired = rt.type({
 });
 const StackAlertOptional = rt.partial({
-  kibana: rt.partial({
-    alert: rt.partial({
-      evaluation: rt.partial({
-        conditions: schemaString,
-        value: schemaString,
-      }),
-      title: schemaString,
-    }),
-  }),
+  'kibana.alert.evaluation.conditions': schemaString,
+  'kibana.alert.evaluation.value': schemaString,
+  'kibana.alert.title': schemaString,
 });
 
 // prettier-ignore

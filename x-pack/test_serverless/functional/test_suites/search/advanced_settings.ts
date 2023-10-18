@@ -8,17 +8,22 @@
 import expect from '@kbn/expect';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { isEditorFieldSetting } from '../common/management/advanced_settings';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const browser = getService('browser');
   const retry = getService('retry');
 
-  // Skip until we enable the Advanced settings app in serverless
-  describe.skip('Search advanced settings', function () {
+  describe('Search advanced settings', function () {
     before(async () => {
-      await pageObjects.common.navigateToApp('advancedSettings');
+      await pageObjects.svlCommonPage.login();
+      await pageObjects.common.navigateToApp('settings');
+    });
+
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the page', async () => {
@@ -32,8 +37,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('renders search settings', () => {
       for (const settingId of SEARCH_PROJECT_SETTINGS) {
+        // Code editors don't have their test subjects rendered
+        if (isEditorFieldSetting(settingId)) {
+          continue;
+        }
         it('renders ' + settingId + ' edit field', async () => {
-          const fieldTestSubj = 'advancedSetting-editField-' + settingId;
+          const fieldTestSubj = 'management-settings-editField-' + settingId;
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
         });
       }

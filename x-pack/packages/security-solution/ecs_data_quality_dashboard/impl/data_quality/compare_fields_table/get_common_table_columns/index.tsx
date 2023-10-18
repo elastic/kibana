@@ -11,8 +11,9 @@ import React from 'react';
 
 import { SameFamily } from '../../data_quality_panel/same_family';
 import { EcsAllowedValues } from '../ecs_allowed_values';
+import { getIsInSameFamily } from '../../helpers';
 import { IndexInvalidValues } from '../index_invalid_values';
-import { CodeDanger, CodeSuccess, CodeWarning } from '../../styles';
+import { CodeDanger, CodeSuccess } from '../../styles';
 import * as i18n from '../translations';
 import type { AllowedValue, EnrichedFieldMetadata, UnallowedValueCount } from '../../types';
 
@@ -45,9 +46,9 @@ export const getCommonTableColumns = (): Array<
     name: i18n.INDEX_MAPPING_TYPE_ACTUAL,
     render: (_, x) =>
       x.type != null && x.indexFieldType !== x.type ? (
-        x.isInSameFamily ? (
+        getIsInSameFamily({ ecsExpectedType: x.type, type: x.indexFieldType }) ? (
           <div>
-            <CodeWarning data-test-subj="codeWarning">{x.indexFieldType}</CodeWarning>
+            <CodeSuccess data-test-subj="codeSuccess">{x.indexFieldType}</CodeSuccess>
             <SameFamily />
           </div>
         ) : (

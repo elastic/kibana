@@ -26,7 +26,10 @@
     "@kbn/config-schema",
     "@kbn/core-application-browser",
     "@kbn/core-http-browser",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/management-settings-application",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*"

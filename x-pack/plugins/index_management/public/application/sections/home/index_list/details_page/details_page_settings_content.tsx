@@ -153,7 +153,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                 <b>
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.settings.docsCardTitle"
-                    defaultMessage="Index settings"
+                    defaultMessage="Edit index settings"
                   />
                 </b>
               </EuiText>
@@ -183,7 +183,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
               >
                 <FormattedMessage
                   id="xpack.idxMgmt.indexDetails.settings.saveButtonLabel"
-                  defaultMessage="Save"
+                  defaultMessage="Save changes"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -208,16 +208,13 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                 title={i18n.translate(
                   'xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage',
                   {
-                    defaultMessage: 'Unable to save the settings',
+                    defaultMessage: 'Unable to save settings',
                   }
                 )}
                 color="danger"
                 iconType="error"
               >
-                <p>
-                  {updateError.error}
-                  {updateError.message && <span>: {updateError.message}</span>}
-                </p>
+                {updateError.message && <p>{updateError.message}</p>}
               </EuiCallOut>
             </>
           )}
@@ -230,7 +227,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           >
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.settings.docsCardLink"
-              defaultMessage="Settings reference"
+              defaultMessage="Learn more about settings"
             />
           </EuiLink>
         </EuiPanel>

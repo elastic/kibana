@@ -2295,18 +2295,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-browser",
                 "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
               },
@@ -2319,44 +2307,20 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
                 "plugin": "fleet",
@@ -2369,6 +2333,22 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "osquery",
@@ -2457,26 +2437,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "alerting",
@@ -2795,22 +2755,6 @@
             "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
-          },
-          {
             "plugin": "savedSearch",
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
           },
@@ -2845,6 +2789,22 @@
           {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
@@ -5897,7 +5857,8 @@
               "Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences'"
             ],
             "signature": [
-              "\"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | undefined"
+              "SavedObjectsCollectMultiNamespaceReferencesPurpose",
+              " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,

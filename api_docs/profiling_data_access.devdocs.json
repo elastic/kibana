@@ -37,7 +37,7 @@
         "label": "ProfilingDataAccessPluginStart",
         "description": [],
         "signature": [
-          "{ services: { fetchFlamechartData: ({ esClient, rangeFromMs, rangeToMs, kuery }: ",
+          "{ services: { fetchFlamechartData: ({ esClient, rangeFromMs, rangeToMs, kuery, useLegacyFlamegraphAPI, }: ",
           "FetchFlamechartParams",
           ") => Promise<",
           {

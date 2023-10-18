@@ -16,6 +16,7 @@ import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   isSortableByColumn,
+  getOtherBucketSwitchDefault,
 } from './helpers';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
@@ -599,6 +600,91 @@ describe('isSortableByColumn()', () => {
           'col2'
         )
       ).toBeTruthy();
+    });
+  });
+
+  describe('other bucket defaults', () => {
+    it('should default to true if size < 1000 and previous otherBucket is not set', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 10)).toBeTruthy();
+    });
+
+    it('should default to false if size > 1000 and previous otherBucket is not set', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 1000)).toBeFalsy();
+    });
+
+    it('should default to true if size < 1000 and previous otherBucket is set to true', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          otherBucket: true,
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 10)).toBeTruthy();
+    });
+
+    it('should default to false if size > 1000 and previous otherBucket is set to true', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          otherBucket: true,
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 1001)).toBeFalsy();
+    });
+
+    it('should default to false if size < 1000 and previous otherBucket is set to false', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 1005,
+          orderDirection: 'asc',
+          otherBucket: false,
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 6)).toBeFalsy();
     });
   });
 });

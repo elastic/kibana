@@ -604,7 +604,12 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
-    isEqual: () => true,
+    isEqual: (
+      persistableState1: TextBasedPersistedState,
+      references1: SavedObjectReference[],
+      persistableState2: TextBasedPersistedState,
+      references2: SavedObjectReference[]
+    ) => isEqual(persistableState1, persistableState2),
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const indexPatterns: DataView[] = [];
       for (const { index } of Object.values(state.layers)) {

@@ -5,36 +5,28 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { BaseMessage } from 'langchain/schema';
 import { ChainTool, Tool } from 'langchain/tools';
 
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { ResponseBody } from '../helpers';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
+import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 
 export const callAgentExecutor = async ({
   actions,
   connectorId,
   esClient,
   langChainMessages,
+  llmType,
   logger,
   request,
-}: {
-  actions: ActionsPluginStart;
-  connectorId: string;
-  esClient: ElasticsearchClient;
-  langChainMessages: BaseMessage[];
-  logger: Logger;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<unknown, unknown, any, any>;
-}): Promise<ResponseBody> => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request, logger });
+  elserId,
+  kbResource,
+}: AgentExecutorParams): AgentExecutorResponse => {
+  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
@@ -48,7 +40,13 @@ export const callAgentExecutor = async ({
   });
 
   // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger);
+  const esStore = new ElasticsearchStore(
+    esClient,
+    KNOWLEDGE_BASE_INDEX_PATTERN,
+    logger,
+    elserId,
+    kbResource
+  );
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
 
   const tools: Tool[] = [

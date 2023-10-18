@@ -7097,21 +7097,6 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-server.KbnServerError.requestParams",
-            "type": "Object",
-            "tags": [],
-            "label": "requestParams",
-            "description": [],
-            "signature": [
-              "ConnectionRequestParams",
-              " | undefined"
-            ],
-            "path": "src/plugins/kibana_utils/server/report_server_error.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaUtils",
             "id": "def-server.KbnServerError.Unnamed",
             "type": "Function",
             "tags": [],
@@ -7163,22 +7148,6 @@
                 "description": [],
                 "signature": [
                   "Record<string, any> | undefined"
-                ],
-                "path": "src/plugins/kibana_utils/server/report_server_error.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-server.KbnServerError.Unnamed.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "requestParams",
-                "description": [],
-                "signature": [
-                  "ConnectionRequestParams",
-                  " | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/server/report_server_error.ts",
                 "deprecated": false,

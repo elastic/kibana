@@ -32,7 +32,7 @@ export const esqlSearchStrategyProvider = (
     const search = async () => {
       try {
         const { terminateAfter, ...requestParams } = request.params ?? {};
-        const { headers, body, meta } = await esClient.asCurrentUser.transport.request(
+        const { headers, body } = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
             path: '/_query',
@@ -45,12 +45,10 @@ export const esqlSearchStrategyProvider = (
             meta: true,
           }
         );
-        const transportRequestParams = meta?.request?.params;
         return {
           rawResponse: body,
           isPartial: false,
           isRunning: false,
-          ...(transportRequestParams ? { requestParams: transportRequestParams } : {}),
           warning: headers?.warning,
         };
       } catch (e) {

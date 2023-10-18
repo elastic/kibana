@@ -84,7 +84,7 @@ export interface OptionsListRequestBody {
   allowExpensiveQueries: boolean;
   sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
-  selectedOptions?: string[];
+  selectedOptions?: Array<string | number>;
   runPastTimeout?: boolean;
   searchString?: string;
   fieldSpec?: FieldSpec;

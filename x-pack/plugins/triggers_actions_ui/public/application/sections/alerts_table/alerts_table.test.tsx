@@ -53,6 +53,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     useKibana: () => ({
       services: {
         cases: mockCaseService,
+        notifications: {
+          toasts: {
+            addDanger: jest.fn(),
+            addSuccess: jest.fn(),
+          },
+        },
       },
     }),
   };

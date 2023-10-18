@@ -171,6 +171,8 @@ describe('useTimeline', () => {
             return subject;
           }),
           executeFunction: jest.fn(),
+          hasFunction: jest.fn(),
+          hasRenderFunction: jest.fn(),
         },
         onChatUpdate: jest.fn().mockImplementation((messages) => {
           props = { ...props, messages };

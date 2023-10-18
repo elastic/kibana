@@ -73,8 +73,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage', {
-          defaultMessage: 'Successfully closed: [{indexNames}]',
+        i18n.translate('xpack.idxMgmt.closeIndicesAction.indexClosedMessage', {
+          defaultMessage: 'The index {indexNames} was closed.',
           values: { indexNames: indexNames.join(', ') },
         })
       );
@@ -91,8 +91,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
-          defaultMessage: 'Successfully opened: [{indexNames}]',
+        i18n.translate('xpack.idxMgmt.openIndicesAction.indexOpenedMessage', {
+          defaultMessage: 'The index {indexNames} was opened.',
           values: { indexNames: indexNames.join(', ') },
         })
       );
@@ -109,8 +109,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.flushIndicesAction.successfullyFlushedIndicesMessage', {
-          defaultMessage: 'Successfully flushed: [{indexNames}]',
+        i18n.translate('xpack.idxMgmt.flushIndicesAction.indexFlushedMessage', {
+          defaultMessage: 'The index {indexNames} was flushed.',
           values: { indexNames: indexNames.join(', ') },
         })
       );
@@ -127,8 +127,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
-          defaultMessage: 'Successfully refreshed: [{indexNames}]',
+        i18n.translate('xpack.idxMgmt.refreshIndicesAction.indexRefreshedMessage', {
+          defaultMessage: 'The index {indexNames} was refreshed.',
           values: { indexNames: indexNames.join(', ') },
         })
       );
@@ -145,8 +145,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
-          defaultMessage: 'Successfully cleared cache: [{indexNames}]',
+        i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.indexCacheClearedMessage', {
+          defaultMessage: 'The cache of the index {indexNames} was cleared.',
           values: { indexNames: indexNames.join(', ') },
         })
       );
@@ -163,8 +163,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.unfreezeIndicesAction.successfullyUnfrozeIndicesMessage', {
-          defaultMessage: 'Successfully unfroze: [{indexNames}]',
+        i18n.translate('xpack.idxMgmt.unfreezeIndicesAction.indexUnfrozenMessage', {
+          defaultMessage: 'The index {indexNames} was unfrozen.',
           values: { indexNames: indexNames.join(', ') },
         })
       );
@@ -182,13 +182,10 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
         await reloadIndices();
         setIsLoading(false);
         notificationService.showSuccessToast(
-          i18n.translate(
-            'xpack.idxMgmt.forceMergeIndicesAction.successfullyForceMergedIndicesMessage',
-            {
-              defaultMessage: 'Successfully force merged: [{indexNames}]',
-              values: { indexNames: indexNames.join(', ') },
-            }
-          )
+          i18n.translate('xpack.idxMgmt.forceMergeIndicesAction.indexForcemergedMessage', {
+            defaultMessage: 'The index {indexNames} was force merged.',
+            values: { indexNames: indexNames.join(', ') },
+          })
         );
       } catch (error) {
         setIsLoading(false);
@@ -204,8 +201,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await deleteIndicesRequest(indexNames);
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
-          defaultMessage: 'Successfully deleted: [{indexNames}]',
+        i18n.translate('xpack.idxMgmt.deleteIndicesAction.indexDeletedMessage', {
+          defaultMessage: 'The index {indexNames} was deleted.',
           values: { indexNames: indexNames.join(', ') },
         })
       );

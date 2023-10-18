@@ -66,10 +66,3 @@ export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
     defaultMessage: 'Failed to query events data',
   }
 );
-
-export const VIEW_DASHBOARD_BUTTON = i18n.translate(
-  'xpack.securitySolution.hosts.navigaton.hostRisk.viewDashboardButtonLabel',
-  {
-    defaultMessage: 'View source dashboard',
-  }
-);

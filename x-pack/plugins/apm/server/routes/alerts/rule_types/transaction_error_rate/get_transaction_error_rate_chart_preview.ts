@@ -21,7 +21,7 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
 import { APMConfig } from '../../../..';
@@ -96,7 +96,7 @@ export async function getTransactionErrorRateChartPreview({
               searchConfiguration?.query?.query as string
             ),
             ...rangeQuery(start, end),
-            ...getDocumentTypeFilterForTransactions(
+            ...getBackwardCompatibleDocumentTypeFilter(
               searchAggregatedTransactions
             ),
             {

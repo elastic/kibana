@@ -16,10 +16,10 @@ jest.mock('../../lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('react-use/lib/useObservable', () => jest.fn((fn) => fn()));
+jest.mock('react-use/lib/useObservable', () => jest.fn((component) => component));
 
 describe('LandingPageComponent', () => {
-  const mockGetStartedComponent = jest.fn();
+  const mockGetComponent = jest.fn();
   const history = createBrowserHistory();
   const mockSecuritySolutionTemplateWrapper = jest
     .fn()
@@ -39,7 +39,7 @@ describe('LandingPageComponent', () => {
         securityLayout: {
           getPluginWrapper: jest.fn().mockReturnValue(mockSecuritySolutionTemplateWrapper),
         },
-        getStartedComponent$: mockGetStartedComponent,
+        getComponent$: mockGetComponent,
       },
     });
   });
@@ -49,7 +49,7 @@ describe('LandingPageComponent', () => {
   });
 
   it('renders the get started component', () => {
-    mockGetStartedComponent.mockReturnValue(<div data-test-subj="get-started" />);
+    mockGetComponent.mockReturnValue(<div data-test-subj="get-started" />);
     const { queryByTestId } = renderPage();
 
     expect(queryByTestId('get-started')).toBeInTheDocument();

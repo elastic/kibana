@@ -13,10 +13,6 @@ import type { RenderResult } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { TestRenderer } from '../../../../../../mock';
 
-import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
-
-import { ExperimentalFeaturesService } from '../../../../../../services/experimental_features';
-
 import { createAgentPolicyMock, createPackagePolicyMock } from '../../../../../../../common/mocks';
 import type { AgentPolicy, NewAgentPolicy } from '../../../../../../../common/types';
 
@@ -51,13 +47,6 @@ describe('Agent policy advanced options content', () => {
     newAgentPolicy = false,
     packagePolicy = [createPackagePolicyMock()],
   } = {}) => {
-    // remove when feature flag is removed
-    ExperimentalFeaturesService.init({
-      ...allowedExperimentalValues,
-      // @ts-expect-error ts upgrade v4.7.4
-      agentTamperProtectionEnabled: true,
-    });
-
     if (newAgentPolicy) {
       mockAgentPolicy = generateNewAgentPolicyWithDefaults();
     } else {

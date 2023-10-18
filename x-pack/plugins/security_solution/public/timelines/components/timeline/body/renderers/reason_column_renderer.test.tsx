@@ -58,7 +58,7 @@ const defaultProps = {
 
 describe('reasonColumnRenderer', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('isIntance', () => {

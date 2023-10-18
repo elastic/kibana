@@ -92,10 +92,8 @@ const deriveValue = (type: SettingType, value: unknown): Value => {
  * may be missing the `type` or `value` properties.
  * @returns A mapped collection of normalized {@link UiSetting} objects.
  */
-export const normalizeSettings = (
-  rawSettings: RawSettings
-): Record<string, UiSettingMetadata<SettingType>> => {
-  const normalizedSettings: Record<string, UiSettingMetadata<SettingType>> = {};
+export const normalizeSettings = (rawSettings: RawSettings): Record<string, UiSettingMetadata> => {
+  const normalizedSettings: Record<string, UiSettingMetadata> = {};
 
   const entries = Object.entries(rawSettings);
 

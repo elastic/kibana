@@ -11,6 +11,8 @@ import {
   RuleExecutorServicesMock,
   alertsMock,
 } from '@kbn/alerting-plugin/server/mocks';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import {
@@ -69,6 +71,14 @@ const mockOptions = {
   executionId: '',
   startedAt: STARTED_AT_MOCK_DATE,
   previousStartedAt: null,
+  params: {
+    searchConfiguration: {
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    },
+  },
   state: {
     wrapped: initialRuleState,
     trackedAlerts: {
@@ -123,8 +133,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/155534
-describe.skip('The metric threshold alert type', () => {
+describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -133,6 +142,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           sourceId,
           criteria: [
             {
@@ -147,7 +157,6 @@ describe.skip('The metric threshold alert type', () => {
       comparator: Comparator,
       threshold: number[],
       shouldFire: boolean = false,
-      shouldWarn: boolean = false,
       isNoData: boolean = false
     ) =>
       setEvaluationResults([
@@ -160,7 +169,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire,
-            shouldWarn,
             isNoData,
             bucketKey: { groupBy0: '*' },
           },
@@ -224,7 +232,7 @@ describe.skip('The metric threshold alert type', () => {
       setResults(Comparator.GT, [0.75], true);
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
-      expect(action.group).toBe('*');
+      expect(action.group).toBeUndefined();
       expect(action.reason).toContain('is 1');
       expect(action.reason).toContain('Alert when > 0.75');
       expect(action.reason).toContain('test.metric.1');
@@ -237,7 +245,7 @@ describe.skip('The metric threshold alert type', () => {
     const execute = (
       comparator: Comparator,
       threshold: number[],
-      groupBy: string[] = ['something'],
+      groupBy: string[] = ['groupByField'],
       metric?: string,
       state?: any
     ) =>
@@ -245,6 +253,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           groupBy,
           criteria: [
             {
@@ -270,7 +279,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -282,7 +290,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -303,7 +310,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -315,7 +321,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -336,7 +341,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -348,7 +352,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -369,7 +372,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -381,15 +383,18 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA).action.group).toBe('a');
-      expect(mostRecentAction(instanceIdB).action.group).toBe('b');
+      expect(mostRecentAction(instanceIdA).action.group).toEqual([
+        { field: 'groupByField', value: 'a' },
+      ]);
+      expect(mostRecentAction(instanceIdB).action.group).toEqual([
+        { field: 'groupByField', value: 'b' },
+      ]);
     });
     test('persists previous groups that go missing, until the groupBy param changes', async () => {
       setEvaluationResults([
@@ -402,7 +407,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -414,7 +418,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -426,7 +429,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'c' },
           },
@@ -435,7 +437,7 @@ describe.skip('The metric threshold alert type', () => {
       const { state: stateResult1 } = await execute(
         Comparator.GT,
         [0.75],
-        ['something'],
+        ['groupByField'],
         'test.metric.2'
       );
       expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
@@ -449,7 +451,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -461,7 +462,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -473,7 +473,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: 'c' },
           },
@@ -482,7 +481,7 @@ describe.skip('The metric threshold alert type', () => {
       const { state: stateResult2 } = await execute(
         Comparator.GT,
         [0.75],
-        ['something'],
+        ['groupByField'],
         'test.metric.1',
         stateResult1
       );
@@ -499,7 +498,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -511,7 +509,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -520,7 +517,7 @@ describe.skip('The metric threshold alert type', () => {
       const { state: stateResult3 } = await execute(
         Comparator.GT,
         [0.75],
-        ['something', 'something-else'],
+        ['groupByField', 'groupByField-else'],
         'test.metric.1',
         stateResult2
       );
@@ -538,7 +535,8 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
-          groupBy: ['something'],
+          ...mockOptions.params,
+          groupBy: ['groupByField'],
           criteria: [
             {
               ...baseNonCountCriterion,
@@ -547,7 +545,12 @@ describe.skip('The metric threshold alert type', () => {
               metric: metric ?? baseNonCountCriterion.metric,
             },
           ],
-          filterQuery,
+          searchConfiguration: {
+            query: {
+              query: filterQuery,
+              language: 'kuery',
+            },
+          },
         },
         state: state ?? mockOptions.state.wrapped,
       });
@@ -562,7 +565,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -574,7 +576,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -586,7 +587,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'c' },
           },
@@ -609,7 +609,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -621,7 +620,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -633,7 +631,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: 'c' },
           },
@@ -659,7 +656,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -671,7 +667,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -701,6 +696,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           groupBy,
           criteria: [
             {
@@ -731,7 +727,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'host-01' },
             context: {
@@ -746,7 +741,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'host-02' },
             context: {
@@ -784,6 +778,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           groupBy,
           criteria: [
             {
@@ -812,7 +807,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -838,6 +832,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           sourceId,
           groupBy,
           criteria: [
@@ -866,7 +861,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -880,7 +874,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -901,7 +894,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -923,7 +915,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -935,7 +926,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -949,7 +939,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -961,7 +950,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -969,7 +957,7 @@ describe.skip('The metric threshold alert type', () => {
       ]);
       const instanceIdA = 'a';
       const instanceIdB = 'b';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'something');
+      await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'groupByField');
       expect(mostRecentAction(instanceIdA)).toBeAlertAction();
       expect(mostRecentAction(instanceIdB)).toBe(undefined);
     });
@@ -984,7 +972,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -998,7 +985,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -1027,6 +1013,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           sourceId,
           criteria: [
             {
@@ -1048,7 +1035,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -1066,7 +1052,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -1086,8 +1071,9 @@ describe.skip('The metric threshold alert type', () => {
           ...mockOptions,
           services,
           params: {
+            ...mockOptions.params,
             sourceId,
-            groupBy: 'something',
+            groupBy: 'groupByField',
             criteria: [
               {
                 ...baseCountCriterion,
@@ -1112,7 +1098,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: false,
-              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -1124,7 +1109,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: false,
-              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -1143,7 +1127,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: 0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
-              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -1155,7 +1138,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: 0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
-              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -1175,6 +1157,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           criteria: [
             {
               ...baseNonCountCriterion,
@@ -1197,7 +1180,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -1215,7 +1197,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -1233,6 +1214,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           sourceId,
           criteria: [
             {
@@ -1256,7 +1238,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -1274,7 +1255,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: '*' },
           },
@@ -1292,6 +1272,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           sourceId,
           criteria: [
             {
@@ -1315,7 +1296,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: '*' },
           },
@@ -1337,7 +1317,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: '*' },
           },
@@ -1356,6 +1335,7 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
+          ...mockOptions.params,
           sourceId,
           criteria: [
             {
@@ -1384,7 +1364,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: STARTED_AT_MOCK_DATE.toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: '*' },
           },
@@ -1395,15 +1374,9 @@ describe.skip('The metric threshold alert type', () => {
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
         alertDetailsUrl: '',
-        alertState: 'NO DATA',
-        group: '*',
-        groupByKeys: undefined,
-        metric: { condition0: 'test.metric.3', condition1: 'count' },
         reason: 'test.metric.3 reported no data in the last 1m',
-        threshold: { condition0: ['1'], condition1: [30] },
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
-        value: { condition0: '[NO DATA]', condition1: 0 },
-        viewInAppUrl: 'http://localhost:5601/app/metrics/explorer',
+        value: ['[NO DATA]', 0],
         tags: [],
       });
       expect(recentAction).toBeNoDataAction();
@@ -1421,7 +1394,8 @@ describe.skip('The metric threshold alert type', () => {
         ...mockOptions,
         services,
         params: {
-          groupBy: 'something',
+          ...mockOptions.params,
+          groupBy: 'groupByField',
           sourceId: 'default',
           criteria: [
             {
@@ -1457,7 +1431,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: '*' },
           },
@@ -1475,7 +1448,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: '*' },
           },
@@ -1493,7 +1465,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -1505,7 +1476,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -1531,7 +1501,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: 'a' },
           },
@@ -1543,7 +1512,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: false,
             isNoData: true,
             bucketKey: { groupBy0: 'b' },
           },
@@ -1565,7 +1533,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -1577,7 +1544,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -1589,7 +1555,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'c' },
           },
@@ -1610,7 +1575,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 1,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'a' },
           },
@@ -1622,7 +1586,6 @@ describe.skip('The metric threshold alert type', () => {
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
-            shouldWarn: false,
             isNoData: false,
             bucketKey: { groupBy0: 'b' },
           },
@@ -1641,7 +1604,8 @@ describe.skip('The metric threshold alert type', () => {
           ...mockOptions,
           services,
           params: {
-            groupBy: 'something',
+            ...mockOptions.params,
+            groupBy: 'groupByField',
             sourceId: 'default',
             criteria: [
               {
@@ -1673,7 +1637,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
-              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -1691,7 +1654,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
-              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -1709,7 +1671,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: true,
-              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -1721,7 +1682,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
-              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -1745,7 +1705,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
-              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'a' },
             },
@@ -1757,7 +1716,6 @@ describe.skip('The metric threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
-              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
             },
@@ -1768,112 +1726,6 @@ describe.skip('The metric threshold alert type', () => {
         expect(mostRecentAction(instanceIdA)).toBeNoDataAction();
         expect(mostRecentAction(instanceIdB)).toBeNoDataAction();
       });
-    });
-  });
-
-  describe('attempting to use a malformed filterQuery', () => {
-    afterAll(() => clearInstances());
-    const instanceID = '*';
-    const execute = () =>
-      executor({
-        ...mockOptions,
-        services,
-        params: {
-          criteria: [
-            {
-              ...baseNonCountCriterion,
-            },
-          ],
-          sourceId: 'default',
-          filterQuery:
-            'host.name:(look.there.is.no.space.after.these.parentheses)and uh.oh: "wow that is bad"',
-        },
-      });
-    test('reports an error', async () => {
-      await execute();
-      expect(mostRecentAction(instanceID)).toBeErrorAction();
-    });
-  });
-
-  describe('querying the entire infrastructure with warning threshold', () => {
-    afterAll(() => clearInstances());
-    const instanceID = '*';
-
-    const execute = () =>
-      executor({
-        ...mockOptions,
-        services,
-        params: {
-          sourceId: 'default',
-          criteria: [
-            {
-              ...baseNonCountCriterion,
-              comparator: Comparator.GT,
-              threshold: [9999],
-            },
-          ],
-        },
-      });
-
-    const setResults = ({
-      comparator = Comparator.GT,
-      threshold = [9999],
-      warningComparator = Comparator.GT,
-      warningThreshold = [2.49],
-      metric = 'test.metric.1',
-      currentValue = 7.59,
-      shouldWarn = false,
-    }) =>
-      setEvaluationResults([
-        {
-          '*': {
-            ...baseNonCountCriterion,
-            comparator,
-            threshold,
-            warningComparator,
-            warningThreshold,
-            metric,
-            currentValue,
-            timestamp: new Date().toISOString(),
-            shouldFire: false,
-            shouldWarn,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-
-    test('warns as expected with the > comparator', async () => {
-      setResults({ warningThreshold: [2.49], currentValue: 2.5, shouldWarn: true });
-      await execute();
-      expect(mostRecentAction(instanceID)).toBeWarnAction();
-
-      setResults({ warningThreshold: [2.49], currentValue: 1.23, shouldWarn: false });
-      await execute();
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-    });
-
-    test('reports expected warning values to the action context', async () => {
-      setResults({ warningThreshold: [2.49], currentValue: 2.5, shouldWarn: true });
-      await execute();
-
-      const { action } = mostRecentAction(instanceID);
-      expect(action.group).toBe('*');
-      expect(action.reason).toBe('test.metric.1 is 2.5 in the last 1 min. Alert when > 2.49.');
-    });
-
-    test('reports expected warning values to the action context for percentage metric', async () => {
-      setResults({
-        warningThreshold: [0.81],
-        currentValue: 0.82,
-        shouldWarn: true,
-        metric: 'system.cpu.user.pct',
-      });
-      await execute();
-
-      const { action } = mostRecentAction(instanceID);
-      expect(action.group).toBe('*');
-      expect(action.reason).toBe('system.cpu.user.pct is 82% in the last 1 min. Alert when > 81%.');
     });
   });
 });
@@ -1897,10 +1749,28 @@ const mockLibs: any = {
 const executor = createMetricThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createRuleExecutorServices();
+const mockedIndex = {
+  id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+  title: 'metrics-fake_hosts',
+  fieldFormatMap: {},
+  typeMeta: {},
+  timeFieldName: '@timestamp',
+};
+const mockedDataView = {
+  getIndexPattern: () => 'mockedIndexPattern',
+  ...mockedIndex,
+};
+const mockedSearchSource = {
+  getField: jest.fn(() => mockedDataView),
+} as any as ISearchSource;
 const services: RuleExecutorServicesMock &
   LifecycleAlertServices<AlertState, MetricThresholdAlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
+  searchSourceClient: {
+    ...searchSourceCommonMock,
+    create: jest.fn(() => Promise.resolve(mockedSearchSource)),
+  },
 };
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')
@@ -1957,12 +1827,12 @@ function clearInstances() {
 
 interface Action {
   id: string;
-  action: { alertState: string };
+  action: { reason: string };
 }
 
 expect.extend({
   toBeAlertAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTIONS.id && action?.action.alertState === 'ALERT';
+    const pass = action?.id === FIRED_ACTIONS.id && !action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be an ALERT action`;
     return {
       message,
@@ -1970,16 +1840,8 @@ expect.extend({
     };
   },
   toBeNoDataAction(action?: Action) {
-    const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.alertState === 'NO DATA';
+    const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be a NO DATA action`;
-    return {
-      message,
-      pass,
-    };
-  },
-  toBeErrorAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTIONS.id && action?.action.alertState === 'ERROR';
-    const message = () => `expected ${action} to be an ERROR action`;
     return {
       message,
       pass,
@@ -1992,9 +1854,7 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
-      toBeWarnAction(action?: Action): R;
       toBeNoDataAction(action?: Action): R;
-      toBeErrorAction(action?: Action): R;
     }
   }
 }

@@ -25,6 +25,7 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InventoryItemType;
   currentTime: number;
+  detailsItemId: string | null;
 }
 
 export const GroupOfGroups: React.FC<Props> = (props) => {
@@ -43,6 +44,7 @@ export const GroupOfGroups: React.FC<Props> = (props) => {
             bounds={props.bounds}
             nodeType={props.nodeType}
             currentTime={props.currentTime}
+            detailsItemId={props.detailsItemId}
           />
         ))}
       </Groups>

@@ -12,7 +12,6 @@ import {
   EuiButtonGroupOptionProps,
   EuiSelectableOption,
   EuiPopoverTitle,
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiSelectable,
   EuiFlexGroup,
@@ -20,6 +19,7 @@ import {
   EuiPopover,
   Direction,
   EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import {
@@ -70,7 +70,7 @@ export const OptionsListPopoverSortingButton = ({
         data: { sortBy: key },
         checked: key === sort.by ? 'on' : undefined,
         'data-test-subj': `optionsList__sortBy_${key}`,
-        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
+        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(field?.type),
       } as SortByItem;
     });
   });
@@ -85,32 +85,34 @@ export const OptionsListPopoverSortingButton = ({
     },
     [optionsList.dispatch]
   );
+
   const SortButton = () => (
-    <EuiButtonEmpty
-      size="s"
+    <EuiButtonIcon
+      size="xs"
+      display="empty"
       color="text"
-      iconSide="right"
-      iconType="arrowDown"
-      disabled={showOnlySelected}
+      iconType={sort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
+      isDisabled={showOnlySelected}
       className="optionsList__sortButton"
       data-test-subj="optionsListControl__sortingOptionsButton"
       onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
       aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-    >
-      {OptionsListStrings.popover.getSortPopoverTitle()}
-    </EuiButtonEmpty>
+    />
   );
 
   return (
     <EuiPopover
       button={
-        showOnlySelected ? (
-          <EuiToolTip position="top" content={OptionsListStrings.popover.getSortDisabledTooltip()}>
-            <SortButton />
-          </EuiToolTip>
-        ) : (
+        <EuiToolTip
+          position="top"
+          content={
+            showOnlySelected
+              ? OptionsListStrings.popover.getSortDisabledTooltip()
+              : OptionsListStrings.popover.getSortPopoverTitle()
+          }
+        >
           <SortButton />
-        )
+        </EuiToolTip>
       }
       panelPaddingSize="none"
       isOpen={isSortingPopoverOpen}

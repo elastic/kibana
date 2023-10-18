@@ -125,7 +125,7 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
     cy.get(CONFIRM_BTN).should('be.disabled');
 
     // add value again and button should be enabled again
-    addExceptionEntryFieldMatchAnyValue('test', 0);
+    addExceptionEntryFieldMatchAnyValue(['test'], 0);
     cy.get(CONFIRM_BTN).should('be.enabled');
   });
 

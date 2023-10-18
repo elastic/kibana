@@ -197,6 +197,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
             compressed
             disabled={selectedQuickPrompt == null}
             fullWidth
+            data-test-subj="quick-prompt-prompt"
             onChange={handlePromptChange}
             placeholder={i18n.QUICK_PROMPT_PROMPT_PLACEHOLDER}
             value={prompt}

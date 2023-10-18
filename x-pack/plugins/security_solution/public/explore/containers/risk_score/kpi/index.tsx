@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import {
   getHostRiskIndex,
@@ -20,12 +20,12 @@ import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import type { ESQuery } from '../../../../../common/typed_json';
 import type { SeverityCount } from '../../../components/risk_score/severity/types';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import type { InspectResponse } from '../../../../types';
 import type { inputsModel } from '../../../../common/store';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { useRiskScoreFeatureStatus } from '../feature_status';
 
 interface RiskScoreKpi {
   error: unknown;
@@ -52,13 +52,20 @@ export const useRiskScoreKpi = ({
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
   const spaceId = useSpaceId();
-  const featureEnabled = useMlCapabilities().isPlatinumOrTrialLicense;
-  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
-      ? getHostRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)
-      : getUserRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)
+      ? getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
+      : getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
     : undefined;
+
+  const {
+    isDeprecated,
+    isEnabled,
+    isAuthorized,
+    isLoading: isDeprecatedLoading,
+    refetch: refetchDeprecated,
+  } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
 
   const { loading, result, search, refetch, inspect, error } =
     useSearchStrategy<RiskQueries.kpiRiskScore>({
@@ -73,18 +80,42 @@ export const useRiskScoreKpi = ({
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
 
   useEffect(() => {
-    if (!skip && defaultIndex && featureEnabled) {
+    if (
+      !skip &&
+      defaultIndex &&
+      !isDeprecatedLoading &&
+      isAuthorized &&
+      isEnabled &&
+      !isDeprecated
+    ) {
       search({
         filterQuery,
         defaultIndex: [defaultIndex],
         entity: riskEntity,
       });
     }
-  }, [defaultIndex, search, filterQuery, skip, riskEntity, featureEnabled]);
+  }, [
+    isEnabled,
+    isDeprecated,
+    isAuthorized,
+    isDeprecatedLoading,
+    skip,
+    defaultIndex,
+    search,
+    filterQuery,
+    riskEntity,
+  ]);
+
+  const refetchAll = useCallback(() => {
+    if (defaultIndex) {
+      refetchDeprecated(defaultIndex);
+      refetch();
+    }
+  }, [defaultIndex, refetch, refetchDeprecated]);
 
   // since query does not take timerange arg, we need to manually refetch when time range updates
   useEffect(() => {
-    refetch();
+    refetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timerange?.to, timerange?.from]);
 

@@ -24,7 +24,7 @@ import {
 } from './_dashboard_listing_strings';
 import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_session_storage/dashboard_session_storage_service';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 import { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {
@@ -46,7 +46,7 @@ export const DashboardListingEmptyPrompt = ({
 }: DashboardListingEmptyPromptProps) => {
   const {
     application,
-    dashboardSessionStorage,
+    dashboardBackup,
     dashboardCapabilities: { showWriteControls },
   } = pluginServices.getServices();
 
@@ -77,8 +77,8 @@ export const DashboardListingEmptyPrompt = ({
             color="danger"
             onClick={() =>
               confirmDiscardUnsavedChanges(() => {
-                dashboardSessionStorage.clearState(DASHBOARD_PANELS_UNSAVED_ID);
-                setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+                dashboardBackup.clearState(DASHBOARD_PANELS_UNSAVED_ID);
+                setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
               })
             }
             data-test-subj="discardDashboardPromptButton"
@@ -105,7 +105,7 @@ export const DashboardListingEmptyPrompt = ({
     isEditingFirstDashboard,
     createItem,
     disableCreateDashboardButton,
-    dashboardSessionStorage,
+    dashboardBackup,
     setUnsavedDashboardIds,
     goToDashboard,
   ]);

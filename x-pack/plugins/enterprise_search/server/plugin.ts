@@ -94,7 +94,7 @@ interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
 }
 
-interface PluginsStart {
+export interface PluginsStart {
   data: DataPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;

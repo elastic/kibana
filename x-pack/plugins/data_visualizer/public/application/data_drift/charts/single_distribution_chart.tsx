@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
-import React from 'react';
+
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
+import type { Histogram } from '@kbn/ml-chi2test';
+
+import { i18n } from '@kbn/i18n';
 import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
-import { NoChartsData } from './no_charts_data';
 import { DATA_COMPARISON_TYPE } from '../constants';
-import { DataDriftField, Feature, Histogram } from '../types';
+import type { DataDriftField, Feature } from '../types';
+
+import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
+import { NoChartsData } from './no_charts_data';
 
 export const SingleDistributionChart = ({
   data,
@@ -38,7 +44,7 @@ export const SingleDistributionChart = ({
     <Chart>
       <Tooltip body={DataComparisonChartTooltipBody} />
 
-      <Settings />
+      <Settings locale={i18n.getLocale()} />
       <Axis
         id="vertical"
         position={Position.Left}

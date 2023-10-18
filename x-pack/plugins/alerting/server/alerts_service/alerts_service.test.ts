@@ -196,6 +196,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',

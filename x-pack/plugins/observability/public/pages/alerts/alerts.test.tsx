@@ -60,9 +60,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       },
       thresholdRule: { enabled: false },
     },
-    compositeSlo: {
-      enabled: false,
-    },
     aiAssistant: {
       enabled: false,
       feedback: {
@@ -173,7 +170,12 @@ describe('AlertsPage with all capabilities', () => {
   });
 
   it('renders MaintenanceWindowCallout if one exists', async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
     const wrapper = await setup();
 
     await waitFor(() => {

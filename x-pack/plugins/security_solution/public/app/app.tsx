@@ -31,13 +31,13 @@ import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
+import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../assistant/provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -45,7 +45,6 @@ interface StartAppComponent {
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
   history,
-  setHeaderActionMenu,
   onAppLeave,
   store,
   theme$,
@@ -77,13 +76,11 @@ const StartAppComponent: FC<StartAppComponent> = ({
                               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                             >
                               <UpsellingProvider upsellingService={upselling}>
-                                <PageRouter
-                                  history={history}
-                                  onAppLeave={onAppLeave}
-                                  setHeaderActionMenu={setHeaderActionMenu}
-                                >
-                                  {children}
-                                </PageRouter>
+                                <DiscoverInTimelineContextProvider>
+                                  <PageRouter history={history} onAppLeave={onAppLeave}>
+                                    {children}
+                                  </PageRouter>
+                                </DiscoverInTimelineContextProvider>
                               </UpsellingProvider>
                             </CellActionsProvider>
                           </ReactQueryClientProvider>
@@ -110,7 +107,6 @@ interface SecurityAppComponentProps {
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -120,7 +116,6 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   history,
   onAppLeave,
   services,
-  setHeaderActionMenu,
   store,
   theme$,
 }) => {
@@ -134,13 +129,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       }}
     >
       <CloudProvider>
-        <StartApp
-          history={history}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          store={store}
-          theme$={theme$}
-        >
+        <StartApp history={history} onAppLeave={onAppLeave} store={store} theme$={theme$}>
           {children}
         </StartApp>
       </CloudProvider>

@@ -16,13 +16,13 @@ import {
   EuiLink,
   EuiTitle,
   EuiText,
-  EuiLoadingSpinner,
   useEuiTheme,
   EuiToolTip,
+  EuiSkeletonText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 
 export interface ExpandablePanelPanelProps {
   header: {
@@ -197,11 +197,13 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
   }, [children, expandable, toggleStatus]);
 
   const content = loading ? (
-    <EuiFlexGroup justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner data-test-subj={`${dataTestSubj}Loading`} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiSkeletonText
+      data-test-subj={`${dataTestSubj}Loading`}
+      contentAriaLabel={i18n.translate(
+        'xpack.securitySolution.flyout.shared.expandablePanelLoadingAriaLabel',
+        { defaultMessage: 'expandable panel' }
+      )}
+    />
   ) : error ? null : (
     children
   );

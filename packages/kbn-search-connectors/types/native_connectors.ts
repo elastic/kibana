@@ -50,6 +50,37 @@ const MAX_CONCURRENT_DOWNLOADS_LABEL = i18n.translate(
   }
 );
 
+const USE_TEXT_EXTRACTION_SERVICE_LABEL = i18n.translate(
+  'searchConnectors.nativeConnectors.textExtractionService.label',
+  {
+    defaultMessage: 'Use text extraction service',
+  }
+);
+
+const USE_TEXT_EXTRACTION_SERVICE_TOOLTIP = i18n.translate(
+  'searchConnectors.nativeConnectors.textExtractionService.tooltip',
+  {
+    defaultMessage:
+      'Requires a separate deployment of the Elastic Data Extraction Service. ' +
+      'Also requires that pipeline settings disable text extraction.',
+  }
+);
+
+const ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL = i18n.translate(
+  'searchConnectors.nativeConnectors.enableDLS.label',
+  {
+    defaultMessage: 'Enable document level security',
+  }
+);
+
+const ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP = i18n.translate(
+  'searchConnectors.nativeConnectors.enableDLS.tooltip',
+  {
+    defaultMessage:
+      'Document level security ensures identities and permissions set in Google Drive are maintained in Elasticsearch. This enables you to restrict and personalize read-access users and groups have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
+  }
+);
+
 const DATABASE_LABEL = i18n.translate('searchConnectors.nativeConnectors.databaseLabel', {
   defaultMessage: 'Database',
 });
@@ -156,6 +187,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         value: 100,
+      },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
       },
     },
     features: {
@@ -398,6 +444,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         value: 50,
       },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -503,6 +564,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: 100,
       },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -514,6 +590,393 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'Dropbox',
     }),
     serviceType: 'dropbox',
+  },
+  github: {
+    configuration: {
+      data_source: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate('searchConnectors.nativeConnectors.github.label', {
+          defaultMessage: 'GitHub data source',
+        }),
+        options: [
+          {
+            label: i18n.translate('searchConnectors.nativeConnectors.github.options.cloudLabel', {
+              defaultMessage: 'GitHub Cloud',
+            }),
+            value: 'github_cloud',
+          },
+          {
+            label: i18n.translate('searchConnectors.nativeConnectors.github.options.cloudServer', {
+              defaultMessage: 'GitHub Server',
+            }),
+            value: 'github_server',
+          },
+        ],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'github_server',
+      },
+      host: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'github_server',
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.github.url.label', {
+          defaultMessage: 'GitHub URL',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      token: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.github.token.label', {
+          defaultMessage: 'GitHub Token',
+        }),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      repositories: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate('searchConnectors.nativeConnectors.github.listOfRepos.label', {
+          defaultMessage: 'List of repositories',
+        }),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.github.listOfRepos.tooltip', {
+          defaultMessage: 'This configurable field is ignored when Advanced Sync Rules are used.',
+        }),
+        type: FieldType.LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      ssl_enabled: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_SSL_LABEL,
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      ssl_ca: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'ssl_enabled',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: SSL_CERTIFICATE_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      retry_count: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: RETRIES_PER_REQUEST_LABEL,
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 3,
+        display_value: 3,
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.github.name', {
+      defaultMessage: 'Github',
+    }),
+    features: {},
+    serviceType: 'github',
+  },
+  google_drive: {
+    configuration: {
+      service_account_credentials: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate('searchConnectors.nativeConnectors.gdrive.label', {
+          defaultMessage: 'Google Drive service account JSON',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: true,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.gdrive.tooltip', {
+          defaultMessage:
+            'This connectors authenticates as a service account to synchronize content from Google Drive.',
+        }),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      use_domain_wide_delegation_for_sync: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.useDomainWideDelegation.label',
+          {
+            defaultMessage: 'Use domain-wide delegation for data sync',
+          }
+        ),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.useDomainWideDelegation.tooltip',
+          {
+            defaultMessage:
+              'Enable domain-wide delegation to automatically sync content from all shared and personal drives in the Google workspace. This eliminates the need to manually share Google Drive data with your service account, though it may increase sync time. If disabled, only items and folders manually shared with the service account will be synced. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      google_workspace_admin_email_for_data_sync: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmailDataSync.label',
+          {
+            defaultMessage: 'Google Workspace admin email',
+          }
+        ),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmailDataSync.tooltip',
+          {
+            defaultMessage:
+              'Provide the admin email to be used with domain-wide delegation for data sync. This email enables the connector to utilize the Admin Directory API for listing organization users. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [
+          {
+            type: 'regex',
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
+        ],
+        value: '',
+      },
+      google_workspace_email_for_shared_drives_sync: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceEmailSharedDrivesSync.label',
+          {
+            defaultMessage: 'Google Workspace email for syncing shared drives',
+          }
+        ),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceEmailSharedDrivesSync.tooltip',
+          {
+            defaultMessage:
+              'Provide the Google Workspace user email for discovery and syncing of shared drives. Only the shared drives this user has access to will be synced.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [
+          {
+            type: 'regex',
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
+        ],
+        value: '',
+      },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      google_workspace_admin_email: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: false,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmail.label',
+          { defaultMessage: 'Google Workspace admin email' }
+        ),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmail.tooltip',
+          {
+            defaultMessage:
+              'In order to use Document Level Security you need to enable Google Workspace domain-wide delegation of authority for your service account. A service account with delegated authority can impersonate admin user with sufficient permissions to fetch all users and their corresponding permissions.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [
+          {
+            type: 'regex',
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
+        ],
+        value: '',
+      },
+      max_concurrency: {
+        default_value: 25,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.label', {
+          defaultMessage: 'Maximum concurrent HTTP requests',
+        }),
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.tooltip', {
+          defaultMessage:
+            'This setting determines the maximum number of concurrent HTTP requests sent to the Google API to fetch data. Increasing this value can improve data retrieval speed, but it may also place higher demands on system resources and network bandwidth.',
+        }),
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [
+          {
+            type: 'greater_than',
+            constraint: 0,
+          },
+        ],
+        value: '',
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+    },
+    features: {
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.google_drive.name', {
+      defaultMessage: 'Google Drive',
+    }),
+    serviceType: 'google_drive',
   },
   jira: {
     configuration: {
@@ -740,6 +1203,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         value: 100,
+      },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
       },
     },
     features: {
@@ -1379,6 +1857,131 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     serviceType: 'network_drive',
   },
+  onedrive: {
+    configuration: {
+      client_id: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.oneDrive.azureClientId.label', {
+          defaultMessage: 'Azure application Client ID',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      client_secret: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oneDrive.azureClientSecret.label',
+          { defaultMessage: 'Azure application Client Secret' }
+        ),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      tenant_id: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.oneDrive.tenantId.label', {
+          defaultMessage: 'Azure application Tenant ID',
+        }),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: RETRIES_PER_REQUEST_LABEL,
+        options: [],
+        order: 4,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      concurrent_downloads: {
+        default_value: 15,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: MAX_CONCURRENT_DOWNLOADS_LABEL,
+        options: [],
+        order: 5,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.onedrive.name', {
+      defaultMessage: 'OneDrive',
+    }),
+    features: {
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+    },
+    serviceType: 'onedrive',
+  },
   postgresql: {
     configuration: {
       host: {
@@ -1655,6 +2258,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: 10,
       },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -1780,24 +2398,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: false,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: i18n.translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.textExtractionServiceLabel',
-          {
-            defaultMessage: 'Use text extraction service',
-          }
-        ),
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
         order: 6,
         required: true,
         sensitive: false,
-        tooltip: i18n.translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.textExtractionServiceTooltip',
-          {
-            defaultMessage:
-              'Requires a separate deployment of the Elastic Data Extraction Service. ' +
-              'Also requires that pipeline settings disable text extraction.',
-          }
-        ),
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: ['advanced'],
         validations: [],

@@ -44,8 +44,7 @@ interface CyLoginTask {
  * @param user
  */
 export const login: CyLoginTask = (
-  // FIXME:PT default user to `soc_manager`
-  user?: SecurityTestUser
+  user: SecurityTestUser = ROLE.endpoint_operations_analyst
 ): ReturnType<typeof sendApiLoginRequest> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
@@ -94,7 +93,6 @@ const sendApiLoginRequest = (
       const basicProvider = loginState.body.selector.providers.find(
         (provider) => provider.type === 'basic'
       );
-
       return request({
         url: loginUrl,
         method: 'POST',

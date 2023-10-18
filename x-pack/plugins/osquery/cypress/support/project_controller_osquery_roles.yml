@@ -1,26 +1,7 @@
+# add more functionalities just for ESS environment
 soc_manager:
   applications:
-    - application: discover
-      privileges:
-        - all
-      resources: "*"
-    - application: visualize
-      privileges:
-        - read
-      resources: "*"
     - application: observabilityCases
-      privileges:
-        - all
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: infrastructure
-      privileges:
-        - read
-      resources: "*"
-    - application: indexPatterns
       privileges:
         - all
       resources: "*"
