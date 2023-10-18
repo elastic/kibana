@@ -360,10 +360,10 @@ export class ElasticsearchStore extends VectorStore {
    * @param modelId ID of the model to check
    * @returns Promise<boolean> indicating whether the model is installed
    */
-  async isModelInstalled(modelId: string): Promise<boolean> {
+  async isModelInstalled(modelId?: string): Promise<boolean> {
     try {
       const getResponse = await this.esClient.ml.getTrainedModels({
-        model_id: modelId,
+        model_id: modelId ?? this.model,
         include: 'definition_status',
       });
 
