@@ -348,6 +348,7 @@ export interface DocLinks {
     };
     readonly privileges: string;
     readonly manageDetectionRules: string;
+    readonly createEsqlRuleType: string;
   };
   readonly query: {
     readonly eql: string;
@@ -612,9 +613,6 @@ export interface DocLinks {
   };
   readonly synthetics: {
     readonly featureRoles: string;
-  };
-  readonly esql: {
-    readonly statsBy: string;
   };
   readonly telemetry: {
     readonly settings: string;

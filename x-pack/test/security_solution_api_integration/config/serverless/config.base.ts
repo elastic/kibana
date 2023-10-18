@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
+// import { ES_RESOURCES } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/serverless';
 
 export interface CreateTestConfigOptions {
   testFiles: string[];
@@ -23,6 +24,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [...svlSharedConfig.get('kbnTestServer.serverArgs'), '--serverless=security'],
       },
+      // esServerlessOptions: {
+      //   resources: Object.values(ES_RESOURCES),
+      // },
       testFiles: options.testFiles,
       junit: options.junit,
 
