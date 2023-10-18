@@ -74,6 +74,11 @@ class ErrorBoundaryInternal extends React.Component<
   }
 }
 
+/**
+ * Implementation of Kibana Error Boundary
+ * @param {ErrorBoundaryProps} props - ErrorBoundaryProps
+ * @public
+ */
 export const KibanaErrorBoundary = (props: ErrorBoundaryProps) => {
   const services = useErrorBoundary();
   return <ErrorBoundaryInternal {...props} {...services} />;
