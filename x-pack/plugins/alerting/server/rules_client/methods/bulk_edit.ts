@@ -642,15 +642,6 @@ async function getUpdatedAttributesFromOperations(
         break;
       }
       case 'snoozeSchedule': {
-        // Silently skip adding snooze or snooze schedules on security
-        // rules until we implement snoozing of their rules
-        if (rule.attributes.consumer === AlertConsumers.SIEM) {
-          // While the rule is technically not updated, we are still marking
-          // the rule as updated in case of snoozing, until support
-          // for snoozing is added.
-          isAttributesUpdateSkipped = false;
-          break;
-        }
         if (operation.operation === 'set') {
           const snoozeAttributes = getBulkSnoozeAttributes(rule.attributes, operation.value);
           try {
