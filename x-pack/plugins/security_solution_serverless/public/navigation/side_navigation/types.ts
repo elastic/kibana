@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
+import type { ProjectPageName } from '../links/types';
 
-export const DEV_TOOLS_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.devTools.title',
-  {
-    defaultMessage: 'Developer tools',
-  }
-);
+export type ProjectSideNavItem = SolutionSideNavItem<ProjectPageName>;
