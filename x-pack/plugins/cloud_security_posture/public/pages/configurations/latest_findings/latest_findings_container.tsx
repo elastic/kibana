@@ -139,6 +139,18 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         label: 'Resource',
         key: 'resource.id',
       },
+      {
+        label: 'Rule name',
+        key: 'rule.name',
+      },
+      {
+        label: 'Cloud account',
+        key: 'cloud.account.name',
+      },
+      {
+        label: 'Kubernetes cluster',
+        key: 'orchestrator.cluster.name',
+      },
     ],
     fields: dataView.fields,
     groupingId: 'cspLatestFindings',
