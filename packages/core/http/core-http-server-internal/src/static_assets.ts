@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server/src/router';
 import type { BasePath } from './base_path_service';
 import { CdnConfig } from './cdn';
 
@@ -15,7 +16,14 @@ export class StaticAssets {
    * Returns a href (hypertext reference) intended to be used as the base for constructing
    * other hrefs to static assets.
    */
-  getHrefBase(): string {
-    return this.cdnConfig.url ?? this.basePath.serverBasePath;
+  getHrefBase(request?: KibanaRequest): string {
+    if (this.cdnConfig.url) {
+      return this.cdnConfig.url;
+    }
+    // TODO: not sure if this is necessary for static asset HREFs.
+    if (request) {
+      return this.basePath.get(request);
+    }
+    return this.basePath.serverBasePath;
   }
 }

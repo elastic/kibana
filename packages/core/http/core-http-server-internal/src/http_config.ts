@@ -24,7 +24,7 @@ import {
   securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
-import type { CdnConfig } from './cdn';
+import { CdnConfig } from './cdn';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 
@@ -319,7 +319,8 @@ export class HttpConfig implements IHttpConfig {
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding });
+    this.cdn = new CdnConfig(rawHttpConfig.cdn);
+    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding }, this.cdn.getCspConfig());
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
@@ -329,7 +330,6 @@ export class HttpConfig implements IHttpConfig {
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
-    this.cdn = rawHttpConfig.cdn;
   }
 }
 

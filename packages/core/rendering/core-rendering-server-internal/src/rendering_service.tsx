@@ -114,6 +114,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
     };
     const buildNum = env.packageInfo.buildNum;
+    const staticAssetsHrefBase = http.staticAssets.getHrefBase(request);
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
@@ -180,7 +181,7 @@ export class RenderingService {
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
       themeVersion,
-      basePath: serverBasePath,
+      baseHref: staticAssetsHrefBase,
       buildNum,
     });
 
@@ -188,8 +189,8 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
-      uiPublicUrl: `${basePath}/ui`,
-      bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
+      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
+      bootstrapScriptUrl: `${staticAssetsHrefBase}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       darkMode,
@@ -212,7 +213,7 @@ export class RenderingService {
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+          translationsUrl: `${staticAssetsHrefBase}/translations/${i18n.getLocale()}.json`,
         },
         theme: {
           darkMode,

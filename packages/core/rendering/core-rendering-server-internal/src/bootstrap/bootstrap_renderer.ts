@@ -17,6 +17,7 @@ import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
+import { getBundlesHref } from '../render_utils';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
@@ -79,7 +80,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       darkMode,
     });
     const buildHash = packageInfo.buildNum;
-    const bundlesHref = `${baseHref}/${buildHash}/bundles`;
+    const bundlesHref = getBundlesHref(baseHref, String(buildHash));
 
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,

@@ -178,4 +178,13 @@ describe('CspConfig', () => {
       });
     });
   });
+
+  describe('with additional config', () => {
+    test(`adds, for example, CDN host name to directives along with 'self'`, () => {
+      const config = new CspConfig(defaultConfig, { default_src: ['foo.bar'] });
+      expect(config.header).toEqual(
+        "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; default-src 'self' foo.bar"
+      );
+    });
+  });
 });
