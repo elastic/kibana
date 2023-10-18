@@ -71,6 +71,7 @@ export async function fetchServiceInventoryAlertCounts(apmApiClient: ApmApiClien
         probability: 1,
         documentType: ApmDocumentType.ServiceTransactionMetric,
         rollupInterval: RollupInterval.SixtyMinutes,
+        useDurationSummary: true,
       },
     },
   });

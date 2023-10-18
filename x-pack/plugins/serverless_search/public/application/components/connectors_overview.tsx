@@ -20,16 +20,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 
+import { generatePath } from 'react-router-dom';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { PLUGIN_ID } from '../../../common';
 import { useConnectors } from '../hooks/api/use_connectors';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
-import { CREATE_CONNECTOR_PATH } from './connectors_router';
+import { EDIT_CONNECTOR_PATH } from './connectors_router';
 
 export const ConnectorsOverview = () => {
-  const { data } = useConnectors();
+  const { data, isLoading: connectorsLoading } = useConnectors();
   const {
     application: { navigateToUrl },
     http,
@@ -51,7 +52,7 @@ export const ConnectorsOverview = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      navigateToUrl(`${CREATE_CONNECTOR_PATH}/${connector?.id}`);
+      navigateToUrl(generatePath(EDIT_CONNECTOR_PATH, { id: connector?.id || '' }));
     }
   }, [connector, isSuccess, navigateToUrl]);
 
@@ -121,7 +122,7 @@ export const ConnectorsOverview = () => {
           </p>
         </EuiText>
       </EuiPageTemplate.Header>
-      {(data?.connectors || []).length > 0 ? (
+      {connectorsLoading || (data?.connectors || []).length > 0 ? (
         <EuiPageTemplate.Section restrictWidth color="subdued">
           <ConnectorsTable />
         </EuiPageTemplate.Section>

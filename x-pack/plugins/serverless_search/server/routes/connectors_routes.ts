@@ -9,8 +9,10 @@ import { schema } from '@kbn/config-schema';
 import {
   CONNECTOR_DEFINITIONS,
   createConnector,
+  deleteConnectorById,
   fetchConnectorById,
   fetchConnectors,
+  updateConnectorConfiguration,
   updateConnectorNameAndDescription,
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
@@ -186,6 +188,59 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         client.asCurrentUser,
         request.params.connectorId,
         request.body.service_type
+      );
+
+      return response.ok({
+        body: {
+          result,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
+
+  router.delete(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await deleteConnectorById(client.asCurrentUser, request.params.connectorId);
+      return response.ok({
+        body: {
+          result,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}/configuration',
+      validate: {
+        body: schema.object({
+          configuration: schema.recordOf(
+            schema.string(),
+            schema.oneOf([schema.string(), schema.number(), schema.boolean()])
+          ),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await updateConnectorConfiguration(
+        client.asCurrentUser,
+        request.params.connectorId,
+        request.body.configuration
       );
 
       return response.ok({

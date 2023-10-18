@@ -346,50 +346,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
-        describe('#With Nginx section', () => {
-          before(async () => {
-            await navigateToNodeDetails('demo-stack-nginx-01', 'demo-stack-nginx-01');
-            await pageObjects.header.waitUntilLoadingHasFinished();
-          });
-
-          describe('Overview Tab', () => {
-            before(async () => {
-              await pageObjects.assetDetails.clickOverviewTab();
-
-              await pageObjects.timePicker.setAbsoluteRange(
-                START_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT),
-                END_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT)
-              );
-            });
-
-            [
-              { metric: 'cpuUsage', value: '0.8%' },
-              { metric: 'normalizedLoad1m', value: '1.4%' },
-              { metric: 'memoryUsage', value: '18.0%' },
-              { metric: 'diskSpaceUsage', value: '17.5%' },
-            ].forEach(({ metric, value }) => {
-              it(`${metric} tile should show ${value}`, async () => {
-                await retry.tryForTime(3 * 1000, async () => {
-                  const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                    metric
-                  );
-                  expect(tileValue).to.eql(value);
-                });
-              });
-            });
-
-            it('should render 12 charts in the Metrics section', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-              expect(hosts.length).to.equal(12);
-            });
-
-            it('should render 3 charts in the Nginx Metrics section', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsNginxMetricsCharts();
-              expect(hosts.length).to.equal(3);
-            });
-          });
-        });
-
         describe('#With Kubernetes section', () => {
           before(async () => {
             await navigateToNodeDetails('demo-stack-kubernetes-01', 'demo-stack-kubernetes-01');

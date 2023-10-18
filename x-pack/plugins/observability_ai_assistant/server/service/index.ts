@@ -60,9 +60,6 @@ export class ObservabilityAIAssistantService {
       conversations: getResourceName('index-template-conversations'),
       kb: getResourceName('index-template-kb'),
     },
-    ilmPolicy: {
-      conversations: getResourceName('ilm-policy-conversations'),
-    },
     pipelines: {
       kb: getResourceName('kb-ingest-pipeline'),
     },
@@ -112,23 +109,6 @@ export class ObservabilityAIAssistantService {
         template: conversationComponentTemplate,
       });
 
-      await esClient.ilm.putLifecycle({
-        name: this.resourceNames.ilmPolicy.conversations,
-        policy: {
-          phases: {
-            hot: {
-              min_age: '0s',
-              actions: {
-                rollover: {
-                  max_age: '90d',
-                  max_primary_shard_size: '50gb',
-                },
-              },
-            },
-          },
-        },
-      });
-
       await esClient.indices.putIndexTemplate({
         name: this.resourceNames.indexTemplate.conversations,
         composed_of: [this.resourceNames.componentTemplate.conversations],
@@ -139,6 +119,7 @@ export class ObservabilityAIAssistantService {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
             refresh_interval: '1s',
+            hidden: true,
           },
         },
       });
@@ -196,6 +177,7 @@ export class ObservabilityAIAssistantService {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
             refresh_interval: '1s',
+            hidden: true,
           },
         },
       });

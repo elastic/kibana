@@ -5,38 +5,27 @@
  * 2.0.
  */
 
-import { APP_PATH, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
-import type {
-  SecuritySolutionServerlessPluginSetupDeps,
-  ServerlessSecurityPublicConfig,
-} from '../types';
+import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { SecurityPagePath } from './links/constants';
 import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
 import { getDefaultNavigationComponent } from './default_navigation';
-import { getProjectAppLinksSwitcher } from './links/app_links';
+import { projectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
-
-const SECURITY_PROJECT_SETTINGS_PATH = `${APP_PATH}${
-  SecurityPagePath[SecurityPageName.projectSettings]
-}`;
 
 export const setupNavigation = (
   _core: CoreSetup,
-  { securitySolution }: SecuritySolutionServerlessPluginSetupDeps,
-  experimentalFeatures: ExperimentalFeatures
+  { securitySolution }: SecuritySolutionServerlessPluginSetupDeps
 ) => {
-  securitySolution.setAppLinksSwitcher(getProjectAppLinksSwitcher(experimentalFeatures));
+  securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
   securitySolution.setDeepLinksFormatter(formatProjectDeepLinks);
 };
 
-export const startNavigation = (services: Services, config: ServerlessSecurityPublicConfig) => {
-  const { serverless, securitySolution, management } = services;
-  securitySolution.setIsSidebarEnabled(false);
+export const startNavigation = (services: Services) => {
+  const { serverless, management } = services;
   serverless.setProjectHome(APP_PATH);
 
   const projectNavigationTree = new ProjectNavigationTree(services);
@@ -46,9 +35,8 @@ export const startNavigation = (services: Services, config: ServerlessSecurityPu
       serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
     });
   } else {
-    if (!config.developer.disableManagementUrlRedirect) {
-      management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
-    }
+    management.setupCardsNavigation({ enabled: true });
+
     projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
       serverless.setNavigation({ navigationTree: chromeNavigationTree });
     });

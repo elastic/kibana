@@ -10,7 +10,7 @@ import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/sav
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
-export const INSTALLED_VERSION = '1.0.7';
+export const INSTALLED_VERSION = '1.1.0';
 
 export class PrivateLocationTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
