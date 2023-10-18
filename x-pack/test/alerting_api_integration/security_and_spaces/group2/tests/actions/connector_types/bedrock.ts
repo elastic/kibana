@@ -404,7 +404,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: bedrockSuccessResponse.completion,
+              data: { message: bedrockSuccessResponse.completion },
             });
           });
         });
