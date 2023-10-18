@@ -57,7 +57,7 @@ export interface CardsNavigationComponentProps {
   appBasePath: string;
   onCardClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   hideLinksTo?: AppId[];
-  extendCardNavigationDefinitions?: Record<string, AppDefinition>;
+  extendCardNavigationDefinitions?: Record<string, AppDefinitionExtention<boolean>>;
 }
 
 export interface ManagementAppProps {
@@ -70,6 +70,12 @@ export interface AppDefinition {
   category: typeof appCategories[keyof typeof appCategories];
   description: string;
   icon: EuiIconProps['type'];
+}
+
+export interface AppDefinitionExtention<N extends boolean> extends AppDefinition {
+  noVerify: N;
+  href: [N] extends [true] ? string : never;
+  title: [N] extends [true] ? string : never;
 }
 
 export type AppProps = ManagementAppProps & AppDefinition;
