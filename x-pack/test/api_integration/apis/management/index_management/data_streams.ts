@@ -128,8 +128,11 @@ export default function ({ getService }: FtrProviderContext) {
             {
               name: indexName,
               uuid,
+              preferILM: true,
+              managedBy: 'Data stream lifecycle',
             },
           ],
+          nextGenerationManagedBy: 'Data stream lifecycle',
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,

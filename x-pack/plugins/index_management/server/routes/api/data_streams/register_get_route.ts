@@ -31,6 +31,7 @@ const enhanceDataStreams = ({
   hasIlmPolicyWithDeletePhase?: boolean;
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
+    // @ts-expect-error @elastic/elasticsearch next_generation_managed_by prop is still not in the ES types
     const enhancedDataStream: EnhancedDataStreamFromEs = {
       ...dataStream,
       hasIlmPolicyWithDeletePhase,
@@ -166,9 +167,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           }
 
           if (dataStreams[0].ilm_policy) {
-            // if (true) {
             const ilmPolicy = await getILMPolicy(client, dataStreams[0].ilm_policy);
-            // const ilmPolicy = await getILMPolicy(client, 'asd');
 
             hasIlmPolicyWithDeletePhase = !isEmpty(ilmPolicy?.policy?.phases?.delete);
           }

@@ -24,7 +24,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     hidden,
     lifecycle,
     hasIlmPolicyWithDeletePhase,
-    next_generation_managed_by,
+    next_generation_managed_by: nextGenerationManagedBy,
   } = dataStreamFromEs;
 
   return {
@@ -32,20 +32,20 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     timeStampField,
     indices: indices.map(
       ({
-        index_name,
-        index_uuid,
-        prefer_ilm,
-        managed_by,
+        index_name: indexName,
+        index_uuid: indexUuid,
+        prefer_ilm: preferILM,
+        managed_by: managedBy,
       }: {
         index_name: string;
         index_uuid: string;
         prefer_ilm: boolean;
         managed_by: string;
       }) => ({
-        name: index_name,
-        uuid: index_uuid,
-        preferILM: prefer_ilm,
-        managedBy: managed_by,
+        name: indexName,
+        uuid: indexUuid,
+        preferILM,
+        managedBy,
       })
     ),
     generation,
@@ -60,7 +60,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     hidden,
     lifecycle,
     hasIlmPolicyWithDeletePhase,
-    nextGenerationManagedBy: next_generation_managed_by,
+    nextGenerationManagedBy,
   };
 }
 
