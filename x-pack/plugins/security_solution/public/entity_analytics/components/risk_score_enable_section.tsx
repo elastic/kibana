@@ -69,7 +69,7 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
     >
       <p>{i18n.ERROR_PANEL_MESSAGE}</p>
 
-      <EuiAccordion id={'risk-engine-erros'} buttonContent={i18n.ERROR_PANEL_ERRORS}>
+      <EuiAccordion id="risk-engine-erros" buttonContent={i18n.ERROR_PANEL_ERRORS}>
         <>
           {errors.map((error) => (
             <div key={error}>
@@ -80,7 +80,7 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
         </>
       </EuiAccordion>
 
-      <EuiAccordion id={'risk-engine-erros'} buttonContent={i18n.CHECK_PRIVILEGES}>
+      <EuiAccordion id="risk-engine-privileges" buttonContent={i18n.CHECK_PRIVILEGES}>
         <p>
           {i18n.NEED_TO_HAVE}
           <ul>
