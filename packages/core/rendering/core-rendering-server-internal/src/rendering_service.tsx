@@ -190,7 +190,7 @@ export class RenderingService {
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
-      bootstrapScriptUrl: `${staticAssetsHrefBase}/${bootstrapScript}`,
+      bootstrapScriptUrl: `${serverBasePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       darkMode,
