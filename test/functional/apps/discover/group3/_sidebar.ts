@@ -635,7 +635,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('test/functional/fixtures/es_archiver/many_fields');
       });
 
-      it.only('should work with ad-hoc data views and runtime fields', async () => {
+      it('should work with ad-hoc data views and runtime fields', async () => {
         await PageObjects.discover.createAdHocDataView('logstash', true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -681,9 +681,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_bytes-runtimefield2')).to.be(true);
         expect(allFields.includes('_bytes-runtimefield')).to.be(false);
-        await (() => new Promise((resolve) => setTimeout(resolve, 5000)));
         await PageObjects.discover.removeField('_bytes-runtimefield');
-        await (() => new Promise((resolve) => setTimeout(resolve, 5000)));
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
