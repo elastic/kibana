@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates rule when settings are configured', async () => {
       await supertest
-        .post(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
           heartbeatIndices: 'heartbeat-*',
@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('updates rules when settings are updated', async () => {
       await supertest
-        .post(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
           heartbeatIndices: 'heartbeat-*',

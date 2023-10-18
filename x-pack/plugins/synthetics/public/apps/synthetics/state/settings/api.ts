@@ -21,20 +21,22 @@ import {
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { LocationMonitor } from '.';
 
-const apiPath = SYNTHETICS_API_URLS.DYNAMIC_SETTINGS;
-
 interface SaveApiRequest {
   settings: DynamicSettings;
 }
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
-  return await apiService.get(apiPath, undefined, DynamicSettingsCodec);
+  return await apiService.get(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, {}, DynamicSettingsCodec);
 };
 
 export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
-  return await apiService.post(apiPath, settings, DynamicSettingsSaveCodec);
+  return await apiService.put(
+    SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
+    settings,
+    DynamicSettingsSaveCodec
+  );
 };
 
 export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {
