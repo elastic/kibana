@@ -23,16 +23,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const logger = getService('log');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
-  // FLAKY https://github.com/elastic/kibana/issues/160298
-  registry.when.skip(
+  registry.when(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {
-      const start = '2021-01-01T00:00:00.000Z';
-      const end = '2021-01-08T00:15:00.000Z';
+      const start = Date.now() - 1000 * 60 * 60 * 24 * 2; // day ago
+      const end = Date.now();
 
-      const spikeStart = new Date('2021-01-07T23:15:00.000Z').getTime();
-      const spikeEnd = new Date('2021-01-08T00:15:00.000Z').getTime();
+      const spikeStart = new Date(Date.now() - 1000 * 60 * 15).getTime(); // 15 minutes ago
+      const spikeEnd = new Date(Date.now()).getTime();
 
       const NORMAL_DURATION = 100;
       const NORMAL_RATE = 1;
@@ -40,6 +39,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string;
 
       before(async () => {
+        await cleanup();
+
         const serviceA = apm
           .service({ name: 'a', environment: 'production', agentName: 'java' })
           .instance('a');
@@ -65,26 +66,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
         await synthtraceEsClient.index(events);
+
+        await createAndRunApmMlJobs({ es, ml, environments: ['production'] });
       });
 
       after(async () => {
+        await cleanup();
+      });
+
+      async function cleanup() {
         try {
           await synthtraceEsClient.clean();
           await deleteRuleById({ supertest, ruleId });
+          await ml.cleanMlIndices();
         } catch (e) {
           logger.info('Could not delete rule by id', e);
         }
-      });
+      }
 
       describe('with ml jobs', () => {
-        before(async () => {
-          await createAndRunApmMlJobs({ es, ml, environments: ['production'] });
-        });
-
-        after(async () => {
-          await ml.cleanMlIndices();
-        });
-
         it('checks if alert is active', async () => {
           const createdRule = await createApmRule({
             supertest,
@@ -97,7 +97,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.Anomaly,
           });
-
           ruleId = createdRule.id;
           if (!ruleId) {
             expect(ruleId).to.not.eql(undefined);
