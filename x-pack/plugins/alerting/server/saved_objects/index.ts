@@ -141,6 +141,40 @@ export function setupSavedObjects(
     mappings: maintenanceWindowMappings,
   });
 
+  savedObjects.registerType({
+    name: 'ad_hoc_rule_run_params',
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: {
+      dynamic: false,
+      properties: {
+        // Don't need to index
+        // ruleId: {
+        //   type: 'keyword',
+        // },
+        // spaceId: {
+        //   type: 'keyword',
+        // },
+        createdAt: {
+          type: 'date',
+        },
+        // intervalStart: {
+        //   type: 'date',
+        // },
+        // intervalEnd: {
+        //   type: 'date',
+        // },
+        // intervalDuration: {
+        //   type: 'keyword',
+        // },
+      },
+    },
+    management: {
+      importableAndExportable: false,
+    },
+  });
+
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: 'alert',

@@ -101,6 +101,7 @@ import { rulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
+import { AdHocRuleRunClient } from './ad_hoc_runs/ad_hoc_rule_run_client';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -214,6 +215,7 @@ export class AlertingPlugin {
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
+  private adHocRuleRunClient?: AdHocRuleRunClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -268,6 +270,12 @@ export class AlertingPlugin {
         'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
+
+    this.adHocRuleRunClient = new AdHocRuleRunClient({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      coreStartServices: core.getStartServices(),
+    });
 
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
@@ -449,6 +457,7 @@ export class AlertingPlugin {
       maintenanceWindowClientFactory,
       security,
       licenseState,
+      adHocRuleRunClient,
     } = this;
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
@@ -462,6 +471,8 @@ export class AlertingPlugin {
         ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
         : undefined;
     };
+
+    adHocRuleRunClient?.startCheck(plugins.taskManager);
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
