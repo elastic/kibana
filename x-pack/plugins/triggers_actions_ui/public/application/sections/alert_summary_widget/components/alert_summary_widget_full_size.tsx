@@ -18,6 +18,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
 import { Alert, ChartProps } from '../types';
@@ -75,6 +76,7 @@ export const AlertSummaryWidgetFullSize = ({
               theme={chartTheme}
               baseTheme={baseTheme}
               onBrushEnd={onBrushEnd}
+              locale={i18n.getLocale()}
             />
             <Axis
               id="bottom"
