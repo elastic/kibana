@@ -43,7 +43,7 @@ interface Props {
   comparisonTotalSeconds?: number;
   onShowMoreClick?: () => void;
   inline: boolean;
-  parentLabel: string;
+  parentLabel?: string;
 }
 
 export function FlameGraphTooltip({
