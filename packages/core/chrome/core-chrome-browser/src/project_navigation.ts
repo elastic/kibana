@@ -105,13 +105,6 @@ interface NodeDefinitionBase {
    * ----------------------------------------------------------------------------------------------
    */
   /**
-   * ["group" nodes only] Optional flag to indicate if the node must be treated as a group title.
-   * Can not be used with `children`
-   */
-  isGroupTitle?: boolean;
-  /** Add vertical space before this group */
-  spaceBefore?: EuiThemeSize | null;
-  /**
    * ["group" nodes only] Property to indicate how the group should be rendered.
    * - Accordion: wraps the items in an EuiAccordion
    * - PanelOpener: renders a button to open a panel on the right of the side nav

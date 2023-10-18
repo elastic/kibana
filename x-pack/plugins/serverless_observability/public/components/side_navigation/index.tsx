@@ -31,90 +31,94 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          title: i18n.translate('xpack.serverlessObservability.nav.logExplorer', {
-            defaultMessage: 'Log Explorer',
-          }),
-          link: 'observability-log-explorer',
-        },
-        {
-          title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
-            defaultMessage: 'Dashboards',
-          }),
-          link: 'dashboards',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-          },
-        },
-        {
-          title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
-            defaultMessage: 'Visualizations',
-          }),
-          link: 'visualize',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
-          },
-        },
-        {
-          link: 'observability-overview:alerts',
-        },
-        {
-          link: 'observability-overview:cases',
-        },
-        {
-          link: 'observability-overview:slos',
-        },
-        {
-          id: 'aiops',
-          title: 'AIOps',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
           children: [
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
-                defaultMessage: 'Anomaly detection',
+              title: i18n.translate('xpack.serverlessObservability.nav.logExplorer', {
+                defaultMessage: 'Log Explorer',
               }),
-              link: 'ml:anomalyDetection',
+              link: 'observability-log-explorer',
             },
             {
-              title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
-                defaultMessage: 'Log rate analysis',
+              title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
+                defaultMessage: 'Dashboards',
               }),
-              link: 'ml:logRateAnalysis',
+              link: 'dashboards',
               getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
               },
             },
             {
-              title: i18n.translate('xpack.serverlessObservability.ml.changePointDetection', {
-                defaultMessage: 'Change point detection',
+              title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
+                defaultMessage: 'Visualizations',
               }),
-              link: 'ml:changePointDetections',
+              link: 'visualize',
               getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.includes(prepend('/app/ml/aiops/change_point_detection'));
+                return (
+                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
+                  pathNameSerialized.startsWith(prepend('/app/maps'))
+                );
               },
             },
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
-                defaultMessage: 'Job notifications',
-              }),
-              link: 'ml:notifications',
+              link: 'observability-overview:alerts',
+            },
+            {
+              link: 'observability-overview:cases',
+            },
+            {
+              link: 'observability-overview:slos',
+            },
+            {
+              id: 'aiops',
+              title: 'AIOps',
+              renderAs: 'accordion',
+              accordionProps: {
+                arrowProps: { css: { display: 'none' } },
+              },
+              children: [
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
+                    defaultMessage: 'Anomaly detection',
+                  }),
+                  link: 'ml:anomalyDetection',
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
+                    defaultMessage: 'Log rate analysis',
+                  }),
+                  link: 'ml:logRateAnalysis',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
+                  },
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.ml.changePointDetection', {
+                    defaultMessage: 'Change point detection',
+                  }),
+                  link: 'ml:changePointDetections',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.includes(
+                      prepend('/app/ml/aiops/change_point_detection')
+                    );
+                  },
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
+                    defaultMessage: 'Job notifications',
+                  }),
+                  link: 'ml:notifications',
+                },
+              ],
             },
           ],
-        },
-        {
-          id: 'groups-spacer-1',
-          isGroupTitle: true,
         },
         {
           id: 'apm',
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
@@ -145,6 +149,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
@@ -163,10 +168,6 @@ const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
-        {
-          id: 'groups-spacer-2',
-          isGroupTitle: true,
-        },
       ],
     },
   ],
@@ -177,7 +178,6 @@ const navigationTree: NavigationTreeDefinition = {
         defaultMessage: 'Get Started',
       }),
       link: 'observabilityOnboarding',
-      isGroupTitle: true,
       icon: 'launch',
     },
     {
