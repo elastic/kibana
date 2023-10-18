@@ -290,7 +290,7 @@ const startFleetServerWithDocker = async ({
       if (!isServerless) {
         await addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrl);
       }
-      
+
       await updateFleetElasticsearchOutputHostNames(kbnClient, log);
 
       if (isServerless) {
