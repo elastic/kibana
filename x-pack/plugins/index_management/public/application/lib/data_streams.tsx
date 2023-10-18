@@ -80,24 +80,31 @@ export const getLifecycleValue = (
 export const isDataStreamUnmanaged = (
   nextGenerationManagedBy?: DataStream['nextGenerationManagedBy']
 ) => {
-  return nextGenerationManagedBy === 'Unmanaged';
+  return nextGenerationManagedBy?.toLowerCase() === 'unmanaged';
 };
 
 export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
   return (
-    dataStream?.nextGenerationManagedBy === 'Index Lifecycle Management' &&
-    dataStream?.indices?.every((index) => index.managedBy === 'Index Lifecycle Management')
+    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&
+    dataStream?.indices?.every(
+      (index) => index.managedBy.toLowerCase() === 'index lifecycle management'
+    )
   );
 };
 
 export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {
-  if (dataStream?.nextGenerationManagedBy === 'Data Stream Lifecycle') {
+  if (dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle') {
     const ilmIndices = dataStream?.indices?.filter(
-      (index) => index.managedBy === 'Index Lifecycle Management'
+      (index) => index.managedBy.toLowerCase() === 'index lifecycle management'
     );
     const dslIndices = dataStream?.indices?.filter(
-      (index) => index.managedBy === 'Data Stream Lifecycle'
+      (index) => index.managedBy.toLowerCase() === 'data stream lifecycle'
     );
+
+    // When there arent any ILM indices, there's no need to show anything.
+    if (!ilmIndices?.length) {
+      return;
+    }
 
     return {
       ilmIndices,

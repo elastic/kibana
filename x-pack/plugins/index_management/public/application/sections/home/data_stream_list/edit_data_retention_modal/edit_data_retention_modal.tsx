@@ -150,7 +150,11 @@ const configurationFormSchema: FormSchema = {
   },
 };
 
-export const EditDataRetentionModal: React.FunctionComponent<Props> = ({ dataStream, onClose }) => {
+export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
+  dataStream,
+  ilmPolicyLink,
+  onClose,
+}) => {
   const lifecycle = dataStream?.lifecycle;
   const dataStreamName = dataStream?.name as string;
   const dataStreamManagedBy = dataStream?.nextGenerationManagedBy;
@@ -247,9 +251,21 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({ dataStr
                 <p>
                   <FormattedMessage
                     id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
-                    defaultMessage="The following indices are managed by ILM: {managedByILM}. Updating data retention will not affect these indices, instead you will have to update the ILM policy."
+                    defaultMessage="The following indices are managed by ILM: {managedByILM}. Updating data retention will not affect these indices, instead you will have to update the {ilmPolicyLink}."
                     values={{
-                      managedByIlm: <strong>{dslWithIlmIndices.ilmIndices.join(', ')}</strong>,
+                      managedByILM: (
+                        <strong>
+                          {dslWithIlmIndices.ilmIndices.map((index) => index.name).join(', ')}
+                        </strong>
+                      ),
+                      ilmPolicyLink: (
+                        <EuiLink href={ilmPolicyLink}>
+                          <FormattedMessage
+                            id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMLink"
+                            defaultMessage="ILM policy"
+                          />
+                        </EuiLink>
+                      ),
                     }}
                   />
                 </p>

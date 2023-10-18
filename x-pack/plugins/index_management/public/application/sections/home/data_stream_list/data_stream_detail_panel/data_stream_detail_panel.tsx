@@ -27,6 +27,8 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { DiscoverLink } from '../../../../lib/discover_link';
@@ -282,7 +284,44 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     const managementDetails = getManagementDetails();
     const details = [...defaultDetails, ...managementDetails];
 
-    content = <DetailsList details={details} />;
+    content = (
+      <>
+        {isDataStreamFullyManagedByILM(dataStream) && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMTitle',
+                { defaultMessage: 'This data stream is fully managed by ILM' }
+              )}
+              color="warning"
+              iconType="warning"
+              data-test-subj="dsIsFullyManagedByILM"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMDescription"
+                  defaultMessage="Editing the data retention for this data stream is only possible through its {link}."
+                  values={{
+                    link: (
+                      <EuiLink href={ilmPolicyLink}>
+                        <FormattedMessage
+                          id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMButtonLabel"
+                          defaultMessage="ILM policy"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiCallOut>
+
+            <EuiSpacer />
+          </>
+        )}
+
+        <DetailsList details={details} />
+      </>
+    );
   }
 
   const closePopover = () => {
