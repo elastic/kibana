@@ -312,12 +312,23 @@ export async function installKibanaSavedObjects({
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
-  // Index patterns will be installed with `overwrite: false` to prevent
-  // blowing away users' scripted/runtime fields they may have added
-  const [indexPatternSavedObjects, nonIndexPatternSavedObjects] = partition(
+  // Index patterns (now called "data views") have their own import logic
+  const [_indexPatternSavedObjects, nonIndexPatternSavedObjects] = partition(
     toBeSavedObjects,
     ({ type }) => type === KibanaSavedObjectType.indexPattern
   );
+
+  // We have to use a type assertion here because `partition` doesn't support multi-typed arrays via multiple generics
+  const indexPatternSavedObjects = _indexPatternSavedObjects as Array<
+    SavedObject<DataViewSavedObjectAttrs>
+  >;
+
+  await handleIndexPatternImport({
+    indexPatternSavedObjects,
+    savedObjectsClient,
+    savedObjectsImporter,
+    logger,
+  });
 
   let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
@@ -329,51 +340,9 @@ export async function installKibanaSavedObjects({
       errors: importErrors = [],
       success,
     } = await retryImportOnConflictError(async () => {
-      // Don't use the SO importer for data views, as we want some more granular control over how they're created and updated
-      for (const dataView of indexPatternSavedObjects as Array<
-        SavedObject<DataViewSavedObjectAttrs>
-      >) {
-        try {
-          // If a data view with the given ID already exists, we need to make sure it has the right `title` and `name`.
-          // This is essentially a "lazy migration" as a result of https://github.com/elastic/kibana/issues/120340
-          const existingDataView = await savedObjectsClient.get<DataViewSavedObjectAttrs>(
-            KibanaSavedObjectType.indexPattern,
-            dataView.id,
-            {}
-          );
-
-          const shouldUpdateTitle = existingDataView.attributes.title !== dataView.attributes.title;
-          const shouldUpdateName = existingDataView.attributes.name !== dataView.attributes.name;
-
-          let updateAttributes: Partial<DataViewSavedObjectAttrs> = {};
-
-          if (shouldUpdateTitle) {
-            updateAttributes = { ...updateAttributes, title: dataView.attributes.title };
-          }
-          if (shouldUpdateName) {
-            updateAttributes = { ...updateAttributes, name: dataView.attributes.name };
-          }
-
-          if (!isEmpty(updateAttributes)) {
-            logger.info(
-              `Found outdated data view with id: ${dataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
-            );
-
-            await savedObjectsClient.update(
-              KibanaSavedObjectType.indexPattern,
-              dataView.id,
-              updateAttributes
-            );
-          }
-        } catch (error) {
-          // If existing data view is not found, just ignore the error, otherwise re-throw
-          if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            throw error;
-          }
-        }
-      }
-
-      // Create non-index-pattern saved objects with overwrite: true
+      // Create non-index-pattern saved objects with `overwrite: true`.
+      // These imports can also be retried by the wrapping `retryImportOnConflictError` helper, while
+      // index pattern creation/update won't be retried on a conflict error.
       return savedObjectsImporter.import({
         overwrite: true,
         readStream: createListStream(nonIndexPatternSavedObjects),
@@ -461,4 +430,80 @@ export function toAssetReference({ id, type }: SavedObject) {
   const reference: AssetReference = { id, type: type as KibanaSavedObjectType };
 
   return reference;
+}
+
+// Exported for testing
+export async function handleIndexPatternImport({
+  indexPatternSavedObjects,
+  savedObjectsClient,
+  savedObjectsImporter,
+  logger,
+}: {
+  indexPatternSavedObjects: Array<SavedObject<DataViewSavedObjectAttrs>>;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: SavedObjectsImporterContract;
+  logger: Logger;
+}) {
+  // We want to figure out which data views being created already exist and which ones are brand new
+  const newDataViews: Array<SavedObject<DataViewSavedObjectAttrs>> = [];
+  const existingDataViews: Array<SavedObject<DataViewSavedObjectAttrs>> = [];
+
+  for (const dataView of indexPatternSavedObjects as Array<SavedObject<DataViewSavedObjectAttrs>>) {
+    try {
+      const existingDataView = await savedObjectsClient.get<DataViewSavedObjectAttrs>(
+        KibanaSavedObjectType.indexPattern,
+        dataView.id,
+        {}
+      );
+
+      existingDataViews.push(existingDataView);
+    } catch (error) {
+      // If an existing data view is not found, ignore the error and create a new data view
+      // Otherwise, re-throw the error
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        throw error;
+      }
+
+      newDataViews.push(dataView);
+    }
+
+    for (const existingDataView of existingDataViews) {
+      // If a data view with the given ID already exists, we need to make sure it has the right `title` and `name`.
+      // This is essentially a "lazy migration" as a result of https://github.com/elastic/kibana/issues/120340.
+      const shouldUpdateTitle = existingDataView.attributes.title !== dataView.attributes.title;
+      const shouldUpdateName = existingDataView.attributes.name !== dataView.attributes.name;
+
+      let updateAttributes: Partial<DataViewSavedObjectAttrs> = {};
+
+      if (shouldUpdateTitle) {
+        updateAttributes = { ...updateAttributes, title: dataView.attributes.title };
+      }
+      if (shouldUpdateName) {
+        updateAttributes = { ...updateAttributes, name: dataView.attributes.name };
+      }
+
+      if (!isEmpty(updateAttributes)) {
+        logger.info(
+          `Found outdated data view with id: ${dataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
+        );
+
+        await savedObjectsClient.update(
+          KibanaSavedObjectType.indexPattern,
+          dataView.id,
+          updateAttributes
+        );
+      }
+    }
+  }
+
+  // New data views can just be imported via the saved object importer.
+  // However, we need to make sure we pass `overwrite: false` to ensure we don't overwrite
+  // users' runtime fields or scripted fields.
+  await savedObjectsImporter.import({
+    overwrite: false,
+    readStream: createListStream(newDataViews),
+    createNewCopies: false,
+    refresh: false,
+    managed: true,
+  });
 }
