@@ -33,10 +33,6 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
-  beforeEach(() => {
-    login();
-  });
-
   before(() => {
     getEndpointIntegrationVersion().then((version) =>
       createAgentPolicyTask(version).then((data) => {
@@ -51,6 +47,10 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         });
       })
     );
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   after(() => {
@@ -73,7 +73,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     let caseId: string;
     const caseOwner = 'securitySolution';
 
-    before(() => {
+    beforeEach(() => {
       loadRule(
         { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
         false
@@ -86,7 +86,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       });
     });
 
-    after(() => {
+    afterEach(() => {
       if (ruleId) {
         cleanupRule(ruleId);
       }
@@ -108,7 +108,6 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       // visit case details page
       cy.intercept('GET', `/api/cases/${caseId}/user_actions/_find*`).as('case');
       loadPage(`${APP_CASES_PATH}/${caseId}`);
-      openCaseAlertDetails(caseId);
 
       cy.wait('@case', { timeout: 30000 }).then(({ response: res }) => {
         const caseAlertId = res?.body.userActions[1].id;

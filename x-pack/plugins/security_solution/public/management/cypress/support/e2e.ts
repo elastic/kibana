@@ -104,7 +104,7 @@ Cypress.on('uncaught:exception', () => false);
 
 // Login as a Platform Engineer to properly initialize Security Solution App
 before(() => {
-  login(ROLE.platform_engineer);
+  login(ROLE.soc_manager);
   loadPage('/app/security/alerts');
   cy.getByTestSubj('manage-alert-detection-rules').should('exist');
 });
