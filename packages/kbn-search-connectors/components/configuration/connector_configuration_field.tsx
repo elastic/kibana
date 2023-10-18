@@ -155,7 +155,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                       button={
                         <EuiButtonIcon
                           aria-label={i18n.translate(
-                            'xpack.serverlessSearch.connectors.openPopoverLabel',
+                            'searchConnectors.configuration.openPopoverLabel',
                             {
                               defaultMessage: 'Open licensing popover',
                             }

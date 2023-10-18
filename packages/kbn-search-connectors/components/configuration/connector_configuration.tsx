@@ -171,7 +171,7 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
                         onClick={() => setIsEditing(!isEditing)}
                       >
                         {i18n.translate(
-                          'xpack.serverlessSearch.configurationConnector.config.editButton.title',
+                          'searchConnectors.configurationConnector.config.editButton.title',
                           {
                             defaultMessage: 'Edit configuration',
                           }
@@ -188,12 +188,9 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
           <EuiFlexItem>
             <EuiCallOut
               color="danger"
-              title={i18n.translate(
-                'xpack.serverlessSearch.configurationConnector.config.error.title',
-                {
-                  defaultMessage: 'Connector error',
-                }
-              )}
+              title={i18n.translate('searchConnectors.configurationConnector.config.error.title', {
+                defaultMessage: 'Connector error',
+              })}
             >
               <EuiText size="s">{error}</EuiText>
             </EuiCallOut>

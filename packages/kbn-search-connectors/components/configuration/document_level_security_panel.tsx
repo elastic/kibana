@@ -25,7 +25,7 @@ export const DocumentLevelSecurityPanel: React.FC<DocumentLevelSecurityPanelProp
         <EuiTitle>
           <h4>
             {i18n.translate(
-              'xpack.serverlessSearch.connector.documentLevelSecurity.enablePanel.heading',
+              'searchConnectors.connector.documentLevelSecurity.enablePanel.heading',
               { defaultMessage: 'Document Level Security' }
             )}
           </h4>
@@ -34,7 +34,7 @@ export const DocumentLevelSecurityPanel: React.FC<DocumentLevelSecurityPanelProp
         <EuiText size="s">
           <p>
             {i18n.translate(
-              'xpack.serverlessSearch.connector.documentLevelSecurity.enablePanel.description',
+              'searchConnectors.connector.documentLevelSecurity.enablePanel.description',
               {
                 defaultMessage:
                   'Enables you to control which documents users can access, based on their permissions. This ensures search results only return relevant, authorized information for users, based on their roles.',

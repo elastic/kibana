@@ -44,4 +44,29 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
       });
     }
   );
+
+  router.get(
+    {
+      path: '/internal/serverless_search/index_names',
+      validate: {
+        query: schema.object({
+          query: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
+
+      const result = await client.indices.get({
+        expand_wildcards: 'open',
+        index: request.query.query ? `*${request.query.query}*` : '*',
+      });
+      return response.ok({
+        body: {
+          index_names: Object.keys(result || {}),
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
 };

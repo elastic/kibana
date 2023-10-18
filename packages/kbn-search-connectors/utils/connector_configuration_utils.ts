@@ -121,13 +121,10 @@ export const filterSortValidateEntries = (
 
       if (configEntry.type === FieldType.INTEGER && !validIntInput(configEntry.value)) {
         validationErrors.push(
-          i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.config.invalidInteger',
-            {
-              defaultMessage: '{label} must be an integer.',
-              values: { label },
-            }
-          )
+          i18n.translate('searchConnectors.config.invalidInteger', {
+            defaultMessage: '{label} must be an integer.',
+            values: { label },
+          })
         );
       }
 

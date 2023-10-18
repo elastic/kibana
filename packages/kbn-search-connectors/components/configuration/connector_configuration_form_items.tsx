@@ -52,7 +52,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
         }
 
         const helpText = defaultValue
-          ? i18n.translate('xpack.serverlessSearch.configurationConnector.config.defaultValue', {
+          ? i18n.translate('searchConnectors.configurationConnector.config.defaultValue', {
               defaultMessage: 'If left empty, the default value {defaultValue} will be used.',
               values: { defaultValue },
             })

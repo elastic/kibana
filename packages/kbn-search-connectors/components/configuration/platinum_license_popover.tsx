@@ -43,7 +43,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
-        {i18n.translate('xpack.serverlessSearch.connectors.upgradeTitle', {
+        {i18n.translate('searchConnectors.connectors.upgradeTitle', {
           defaultMessage: 'Upgrade to Elastic Platinum',
         })}
       </EuiPopoverTitle>
@@ -55,7 +55,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
         `}
       >
         <p>
-          {i18n.translate('xpack.serverlessSearch.connectors.upgradeTitle', {
+          {i18n.translate('searchConnectors.connectors.upgradeDescription', {
             defaultMessage:
               'To use this connector, you must update your license to Platinum or start a 30-day free trial.',
           })}
@@ -66,7 +66,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
           {subscriptionLink && (
             <EuiFlexItem grow={false}>
               <EuiButton iconType="popout" target="_blank" href={subscriptionLink}>
-                {i18n.translate('xpack.serverlessSearch.connectors.upgradeTitle', {
+                {i18n.translate('searchConnectors.connectors.subscriptionLabel', {
                   defaultMessage: 'Subscription plans',
                 })}
               </EuiButton>
@@ -75,12 +75,9 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
           {stackManagementHref && (
             <EuiFlexItem grow={false}>
               <EuiButton iconType="wrench" iconSide="right" href={stackManagementHref}>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.selectConnector.manageLicenseButtonLabel',
-                  {
-                    defaultMessage: 'Manage license',
-                  }
-                )}
+                {i18n.translate('searchConnectors.manageLicenseButtonLabel', {
+                  defaultMessage: 'Manage license',
+                })}
               </EuiButton>
             </EuiFlexItem>
           )}

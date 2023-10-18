@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ConnectorLinkElasticsearch } from './connector_link';
 import { ConnectorConfigFields } from './connector_config_fields';
+import { ConnectorIndexName } from './connector_index_name';
 
 interface ConnectorConfigurationProps {
   connector: Connector;
@@ -90,6 +91,7 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
           />
         )}
         {currentStep === 'configure' && <ConnectorConfigFields connector={connector} />}
+        {currentStep === 'connect' && <ConnectorIndexName connector={connector} />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

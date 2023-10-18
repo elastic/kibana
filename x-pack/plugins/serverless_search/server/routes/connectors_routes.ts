@@ -13,6 +13,7 @@ import {
   fetchConnectorById,
   fetchConnectors,
   updateConnectorConfiguration,
+  updateConnectorIndexName,
   updateConnectorNameAndDescription,
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
@@ -167,6 +168,38 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         },
         headers: { 'content-type': 'application/json' },
       });
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}/index_name',
+      validate: {
+        body: schema.object({
+          index_name: schema.string(),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const result = await updateConnectorIndexName(
+          client.asCurrentUser,
+          request.params.connectorId,
+          request.body.index_name
+        );
+        return response.ok({
+          body: {
+            result,
+          },
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        return response.conflict({ body: e });
+      }
     }
   );
 

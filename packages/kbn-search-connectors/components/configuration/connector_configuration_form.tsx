@@ -103,7 +103,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
           <EuiTitle size="xs">
             <h4>
               {i18n.translate(
-                'xpack.serverlessSearch.configurationConnector.config.advancedConfigurations.title',
+                'searchConnectors.configurationConnector.config.advancedConfigurations.title',
                 { defaultMessage: 'Advanced Configurations' }
               )}
             </h4>
@@ -131,12 +131,9 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               type="submit"
               isLoading={isLoading}
             >
-              {i18n.translate(
-                'xpack.serverlessSearch.configurationConnector.config.submitButton.title',
-                {
-                  defaultMessage: 'Save configuration',
-                }
-              )}
+              {i18n.translate('searchConnectors.configurationConnector.config.submitButton.title', {
+                defaultMessage: 'Save configuration',
+              })}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -148,7 +145,7 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               }}
             >
               {i18n.translate(
-                'xpack.serverlessSearch.configurationConnector.config.cancelEditingButton.title',
+                'searchConnectors.configurationConnector.config.cancelEditingButton.title',
                 {
                   defaultMessage: 'Cancel',
                 }

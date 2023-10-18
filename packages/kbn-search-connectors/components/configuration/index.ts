@@ -7,6 +7,3 @@
  */
 
 export * from './connector_configuration';
-export * from './connector_configuration_field';
-export * from './connector_configuration_form';
-export * from './connector_configuration_form_items';
