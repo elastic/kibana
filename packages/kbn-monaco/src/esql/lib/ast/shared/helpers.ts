@@ -68,22 +68,6 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
 
-// from linear offset to Monaco position
-export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
-  const lines = expression.split(/\n/);
-  let remainingChars = offset;
-  let lineNumber = 1;
-  for (const line of lines) {
-    if (line.length >= remainingChars) {
-      return new monaco.Position(lineNumber, remainingChars + 1);
-    }
-    remainingChars -= line.length + 1;
-    lineNumber++;
-  }
-
-  throw new Error('Algorithm failure');
-}
-
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
   const lines = expression.split(/\n/);

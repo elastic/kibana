@@ -9,15 +9,28 @@
 import { CharStreams } from 'antlr4ts';
 import { monaco } from '../../../monaco_imports';
 import { getParser } from '../antlr_facade';
-import { AstListener } from '../ast/ast_factory';
-import { getHoverItem, getSignatureHelp, suggest } from '../ast/autocomplete/autocomplete';
-import { offsetToRowColumn } from '../ast/shared/helpers';
-import { ESQLMessage } from '../ast/types';
-import { validateAst } from '../ast/validation/validation';
+import type { ESQLMessage } from '../ast/types';
 import type { ESQLCallbacks } from '../ast/autocomplete/types';
 import { ESQLErrorListener } from './esql_error_listener';
+import type { AstListener } from '../ast/ast_factory';
 
 const ROOT_STATEMENT = 'singleStatement';
+
+// from linear offset to Monaco position
+export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
+  const lines = expression.split(/\n/);
+  let remainingChars = offset;
+  let lineNumber = 1;
+  for (const line of lines) {
+    if (line.length >= remainingChars) {
+      return new monaco.Position(lineNumber, remainingChars + 1);
+    }
+    remainingChars -= line.length + 1;
+    lineNumber++;
+  }
+
+  throw new Error('Algorithm failure');
+}
 
 function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: ESQLMessage[]) {
   return messages.map((e) => {
@@ -40,13 +53,12 @@ function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: 
 }
 
 export function getLanguageProviders() {
-  const getAst = (text: string | undefined) => {
+  const getAst = (text: string | undefined, parseListener: AstListener) => {
     if (!text) {
       return { ast: [], errors: [] };
     }
     const inputStream = CharStreams.fromString(text);
     const errorListener = new ESQLErrorListener();
-    const parseListener = new AstListener();
     const parser = getParser(inputStream, errorListener, parseListener);
 
     parser[ROOT_STATEMENT]();
@@ -57,11 +69,15 @@ export function getLanguageProviders() {
       errors: [],
     };
   };
+
+  const getWrappedAstFn = (parseListener: AstListener) => (text: string | undefined) =>
+    getAst(text, parseListener);
   return {
     // used for debugging purposes only
     getAst,
     validate: async (code: string, callbacks?: ESQLCallbacks) => {
-      const { ast } = getAst(code);
+      const { validateAst, AstListener } = await import('../ast');
+      const { ast } = await getAst(code, new AstListener());
       const { errors, warnings } = await validateAst(ast, callbacks);
       const monacoErrors = wrapAsMonacoMessage('error', code, errors);
       const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
@@ -70,23 +86,27 @@ export function getLanguageProviders() {
     getSignatureHelp: (callbacks?: ESQLCallbacks): monaco.languages.SignatureHelpProvider => {
       return {
         signatureHelpTriggerCharacters: [' ', '('],
-        provideSignatureHelp(
+        async provideSignatureHelp(
           model: monaco.editor.ITextModel,
           position: monaco.Position,
           _token: monaco.CancellationToken,
           context: monaco.languages.SignatureHelpContext
         ) {
-          return getSignatureHelp(model, position, context, getAst);
+          const { getSignatureHelp, AstListener } = await import('../ast');
+          return getSignatureHelp(model, position, context, getWrappedAstFn(new AstListener()));
         },
       };
     },
     getHoverProvider: (): monaco.languages.HoverProvider => {
       return {
-        provideHover: (
+        async provideHover(
           model: monaco.editor.ITextModel,
           position: monaco.Position,
           token: monaco.CancellationToken
-        ) => getHoverItem(model, position, token, getAst),
+        ) {
+          const { getHoverItem, AstListener } = await import('../ast');
+          return getHoverItem(model, position, token, getWrappedAstFn(new AstListener()));
+        },
       };
     },
     getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
@@ -97,7 +117,14 @@ export function getLanguageProviders() {
           position: monaco.Position,
           context: monaco.languages.CompletionContext
         ): Promise<monaco.languages.CompletionList> {
-          const suggestionEntries = await suggest(model, position, context, getAst, callbacks);
+          const { suggest, AstListener } = await import('../ast');
+          const suggestionEntries = await suggest(
+            model,
+            position,
+            context,
+            getWrappedAstFn(new AstListener()),
+            callbacks
+          );
           return {
             suggestions: suggestionEntries.map((suggestion) => ({
               ...suggestion,

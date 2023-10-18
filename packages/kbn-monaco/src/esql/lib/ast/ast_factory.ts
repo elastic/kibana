@@ -28,13 +28,8 @@ import {
   WhereCommandContext,
 } from '../../antlr/esql_parser';
 import { esql_parserListener as ESQLParserListener } from '../../antlr/esql_parser_listener';
-import {
-  createCommand,
-  createFunction,
-  createOption,
-  createLiteral,
-  getPosition,
-} from './ast_helpers';
+import { createCommand, createFunction, createOption, createLiteral } from './ast_helpers';
+import { getPosition } from './ast_position_utils';
 import {
   collectAllSourceIdentifiers,
   collectAllFieldsStatements,
