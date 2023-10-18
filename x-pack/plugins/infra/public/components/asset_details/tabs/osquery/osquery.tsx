@@ -31,7 +31,9 @@ export const Osquery = () => {
   return isLoading ? (
     <EuiSkeletonText lines={10} />
   ) : (
-    <MemoOsQueryAction agentId={agentId.current} />
+    // Osquery must receive an agent id for it to function in infra. There may be incomplete metric documents without this information, causing the metadata endpoint to return incomplete data.
+    // To prevent incorrect Osquery form rendering, we're passing an invalid agent id. This ensures the user sees the 'not available' message instead of the form.
+    <MemoOsQueryAction agentId={agentId.current ?? '_na'} />
   );
 };
 
