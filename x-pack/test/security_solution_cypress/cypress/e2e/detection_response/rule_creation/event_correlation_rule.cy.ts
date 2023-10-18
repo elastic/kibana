@@ -58,7 +58,7 @@ import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_manag
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

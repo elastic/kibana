@@ -55,7 +55,7 @@ import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_manag
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe('Machine Learning rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');
