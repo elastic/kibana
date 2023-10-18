@@ -60,7 +60,6 @@ export function ErrorsWarningsPopover({
   isPopoverOpen,
   items,
   type,
-  refreshErrors,
   setIsPopoverOpen,
   onErrorClick,
   hasSmallerSpace,
@@ -68,7 +67,6 @@ export function ErrorsWarningsPopover({
   isPopoverOpen: boolean;
   items: MonacoError[];
   type: 'error' | 'warning';
-  refreshErrors: () => void;
   setIsPopoverOpen: (flag: boolean) => void;
   onErrorClick: (error: MonacoError) => void;
   hasSmallerSpace?: boolean;
@@ -93,7 +91,6 @@ export function ErrorsWarningsPopover({
                   }
                 `}
                 onClick={() => {
-                  refreshErrors();
                   setIsPopoverOpen(!isPopoverOpen);
                 }}
               >
@@ -234,7 +231,6 @@ export const EditorFooter = memo(function EditorFooter({
               isPopoverOpen={isPopoverOpen}
               items={errors}
               type="error"
-              refreshErrors={refreshErrors}
               setIsPopoverOpen={setIsPopoverOpen}
               onErrorClick={onErrorClick}
               hasSmallerSpace={hasSmallerSpace}
@@ -245,7 +241,6 @@ export const EditorFooter = memo(function EditorFooter({
               isPopoverOpen={isPopoverOpen}
               items={warning}
               type="warning"
-              refreshErrors={refreshErrors}
               setIsPopoverOpen={setIsPopoverOpen}
               onErrorClick={onErrorClick}
               hasSmallerSpace={hasSmallerSpace}
