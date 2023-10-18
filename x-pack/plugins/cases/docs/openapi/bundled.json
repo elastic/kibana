@@ -5444,7 +5444,7 @@
           },
           "required": {
             "type": "boolean",
-            "description": "Defines if the custom field is required on case creation."
+            "description": "Defines if the custom field can be set to null on create/update cases."
           },
           "type": {
             "type": "string",
