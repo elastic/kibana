@@ -19,7 +19,7 @@ import {
   type Message,
 } from '../../common/types';
 import type { ChatPromptEditorProps } from '../components/chat/chat_prompt_editor';
-import type { ChatTimelineProps } from '../components/chat/chat_timeline';
+import type { ChatTimelineItem, ChatTimelineProps } from '../components/chat/chat_timeline';
 import { ChatActionClickType } from '../components/chat/types';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import type { ObservabilityAIAssistantChatService, PendingMessage } from '../types';
@@ -101,6 +101,7 @@ export function useTimeline({
   const [isFunctionLoading, setIsFunctionLoading] = useState(false);
 
   const prevConversationId = usePrevious(conversationId);
+
   useEffect(() => {
     if (prevConversationId !== conversationId && pendingMessage?.error) {
       setPendingMessage(undefined);
@@ -257,26 +258,27 @@ export function useTimeline({
     });
   }
 
-  const items = useMemo(() => {
-    if (pendingMessage) {
+  const itemsWithAddedLoadingStates = useMemo(() => {
+    // While we're loading we add an empty loading chat item:
+    if (pendingMessage || isFunctionLoading) {
       const nextItems = conversationItems.concat({
         id: '',
         actions: {
           canCopy: true,
           canEdit: false,
           canGiveFeedback: false,
-          canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
+          canRegenerate: pendingMessage?.aborted || !!pendingMessage?.error,
         },
         display: {
           collapsed: false,
-          hide: pendingMessage.message.role === MessageRole.System,
+          hide: pendingMessage?.message.role === MessageRole.System,
         },
-        content: pendingMessage.message.content,
+        content: pendingMessage?.message.content,
         currentUser,
-        error: pendingMessage.error,
-        function_call: pendingMessage.message.function_call,
-        loading: !pendingMessage.aborted && !pendingMessage.error,
-        role: pendingMessage.message.role,
+        error: pendingMessage?.error,
+        function_call: pendingMessage?.message.function_call,
+        loading: !pendingMessage?.aborted && !pendingMessage?.error,
+        role: pendingMessage?.message.role || MessageRole.Assistant,
         title: '',
       });
 
@@ -288,6 +290,7 @@ export function useTimeline({
     }
 
     return conversationItems.map((item, index) => {
+      // When we're done loading we remove the placeholder item again
       if (index < conversationItems.length - 1) {
         return item;
       }
@@ -297,6 +300,29 @@ export function useTimeline({
       };
     });
   }, [conversationItems, pendingMessage, currentUser, isFunctionLoading]);
+
+  const items = useMemo(() => {
+    const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
+    let currentGroup: ChatTimelineItem[] | null = null;
+
+    for (const item of itemsWithAddedLoadingStates) {
+      if (item.display.hide || !item) continue;
+
+      if (item.display.collapsed) {
+        if (currentGroup) {
+          currentGroup.push(item);
+        } else {
+          currentGroup = [item];
+          consolidatedChatItems.push(currentGroup);
+        }
+      } else {
+        consolidatedChatItems.push(item);
+        currentGroup = null;
+      }
+    }
+
+    return consolidatedChatItems;
+  }, [itemsWithAddedLoadingStates]);
 
   useEffect(() => {
     return () => {
