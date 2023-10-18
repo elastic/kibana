@@ -36,8 +36,10 @@ export type {
   CloudLinkId,
   SideNavCompProps,
   SideNavComponent,
+  SideNavNodeStatus,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectBreadcrumb,
   NodeDefinition,
   NodeDefinitionWithChildren,
+  RenderAs as NodeRenderAs,
 } from './project_navigation';
