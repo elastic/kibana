@@ -23,8 +23,8 @@ type FilterItemSetProps = Omit<
   ComponentProps<typeof FilterGroup>,
   'initialControls' | 'dataViewId'
 > & {
-  assignees: string[];
-  onAssigneesChange: (users: string[]) => void;
+  assignees?: string[];
+  onAssigneesChange?: (users: string[]) => void;
 };
 
 const SECURITY_ALERT_DATA_VIEW = {

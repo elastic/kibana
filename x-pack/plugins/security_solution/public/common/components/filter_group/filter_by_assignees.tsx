@@ -20,12 +20,12 @@ export interface FilterByAssigneesPopoverProps {
   /**
    * Ids of the users assigned to the alert
    */
-  existingAssigneesIds: string[];
+  existingAssigneesIds?: string[];
 
   /**
    * Callback to handle changing of the assignees selection
    */
-  onUsersChange: (users: string[]) => void;
+  onUsersChange?: (users: string[]) => void;
 }
 
 /**
@@ -44,7 +44,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
       if (isLoadingUsers) {
         return;
       }
-      const assignees = userProfiles.filter((user) => existingAssigneesIds.includes(user.uid));
+      const assignees = userProfiles.filter((user) => existingAssigneesIds?.includes(user.uid));
       setSelectedAssignees(assignees);
     }, [existingAssigneesIds, isLoadingUsers, userProfiles]);
 
@@ -52,7 +52,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
       (newAssignees: UserProfileWithAvatar[]) => {
         if (!isEqual(newAssignees, selectedAssignees)) {
           setSelectedAssignees(newAssignees);
-          onUsersChange(newAssignees.map((user) => user.uid));
+          onUsersChange?.(newAssignees.map((user) => user.uid));
         }
       },
       [onUsersChange, selectedAssignees]

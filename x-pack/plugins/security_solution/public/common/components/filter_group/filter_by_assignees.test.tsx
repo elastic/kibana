@@ -42,7 +42,7 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_suggest_us
   };
 });
 
-const renderFilterByAssigneesPopover = (alertAssignees: string[], onUsersChange = jest.fn()) =>
+const renderFilterByAssigneesPopover = (alertAssignees?: string[], onUsersChange = jest.fn()) =>
   render(
     <TestProviders>
       <FilterByAssigneesPopover
@@ -58,21 +58,21 @@ describe('<FilterByAssigneesPopover />', () => {
   });
 
   it('should render closed popover component', () => {
-    const { getByTestId, queryByTestId } = renderFilterByAssigneesPopover([]);
+    const { getByTestId, queryByTestId } = renderFilterByAssigneesPopover();
 
     expect(getByTestId(TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
     expect(queryByTestId('euiSelectableList')).not.toBeInTheDocument();
   });
 
   it('should render opened popover component', () => {
-    const { getByTestId } = renderFilterByAssigneesPopover([]);
+    const { getByTestId } = renderFilterByAssigneesPopover();
 
     getByTestId(TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON).click();
     expect(getByTestId('euiSelectableList')).toBeInTheDocument();
   });
 
   it('should render assignees', () => {
-    const { getByTestId } = renderFilterByAssigneesPopover([]);
+    const { getByTestId } = renderFilterByAssigneesPopover();
 
     getByTestId(TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON).click();
 
