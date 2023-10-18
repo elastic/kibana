@@ -263,13 +263,15 @@ export class IndexTable extends Component {
     const headers = getHeaders({ showIndexStats: config.enableIndexStats });
     return Object.entries(headers).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
+      // we only want to make index name column 25% width when there are more columns displayed
+      const widthClassName = fieldName === 'name' && config.enableIndexStats ? 'indTable__header__width' : '';
       return (
         <EuiTableHeaderCell
           key={fieldName}
           onSort={() => this.onSort(fieldName)}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
-          className={'indTable__header--' + fieldName}
+          className={`indTable__header--${fieldName} ${widthClassName}`}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
         >
           {label}
