@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export const TAB_SUMMARY = 'TAB_SUMMARY';
-export const TAB_SETTINGS = 'TAB_SETTINGS';
-export const TAB_MAPPING = 'TAB_MAPPING';
-export const TAB_STATS = 'TAB_STATS';
-export const TAB_EDIT_SETTINGS = 'TAB_EDIT_SETTINGS';
+export { flappingSchema } from './flapping_schema';
+export { queryDelaySchema } from './query_delay_schema';
