@@ -81,7 +81,7 @@ export interface DiscoveredPlugin {
    * An optional list of plugin dependencies that can be resolved dynamically at runtime
    * using the dynamic contract resolving capabilities from the plugin service.
    */
-  readonly runtimePluginDependencies: readonly string[];
+  readonly runtimePluginDependencies: readonly PluginName[];
 
   /**
    * Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when
