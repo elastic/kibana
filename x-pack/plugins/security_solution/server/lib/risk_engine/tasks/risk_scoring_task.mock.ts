@@ -7,7 +7,7 @@
 
 import { type ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { TYPE, VERSION } from './constants';
+import { INTERVAL, TYPE, VERSION } from './constants';
 import { defaultState } from './state';
 
 const createRiskScoringTaskInstanceMock = (
@@ -21,6 +21,7 @@ const createRiskScoringTaskInstanceMock = (
     status: TaskStatus.Running,
     startedAt: new Date(),
     scheduledAt: new Date(),
+    schedule: { interval: INTERVAL },
     retryAt: new Date(),
     params: {},
     state: defaultState,

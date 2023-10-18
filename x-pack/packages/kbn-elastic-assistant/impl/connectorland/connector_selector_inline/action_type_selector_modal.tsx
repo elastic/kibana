@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { ActionType } from '@kbn/actions-plugin/common';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { css } from '@emotion/css/dist/emotion-css.cjs';
 import * as i18n from '../translations';
 
 interface Props {
@@ -26,6 +27,12 @@ interface Props {
   onClose: () => void;
   onSelect: (actionType: ActionType) => void;
 }
+const itemClassName = css`
+  .euiKeyPadMenuItem__label {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+`;
 
 export const ActionTypeSelectorModal = ({
   actionTypes,
@@ -34,7 +41,7 @@ export const ActionTypeSelectorModal = ({
   onSelect,
 }: Props) =>
   actionTypes && actionTypes.length > 0 ? (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} data-test-subj="action-type-selector-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -44,11 +51,13 @@ export const ActionTypeSelectorModal = ({
           {actionTypes.map((actionType: ActionType) => {
             const fullAction = actionTypeRegistry.get(actionType.id);
             return (
-              <EuiFlexItem key={actionType.id} grow={false}>
+              <EuiFlexItem data-test-subj="action-option" key={actionType.id} grow={false}>
                 <EuiKeyPadMenuItem
+                  className={itemClassName}
                   key={actionType.id}
                   isDisabled={!actionType.enabled}
                   label={actionType.name}
+                  data-test-subj={`action-option-${actionType.name}`}
                   onClick={() => onSelect(actionType)}
                 >
                   <EuiIcon size="xl" type={fullAction.iconClass} />

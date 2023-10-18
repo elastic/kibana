@@ -46,6 +46,7 @@ export interface DocLinks {
     readonly guide: string;
   };
   readonly cloud: {
+    readonly beatsAndLogstashConfiguration: string;
     readonly indexManagement: string;
   };
   readonly console: {
@@ -148,7 +149,6 @@ export interface DocLinks {
     readonly connectorsSharepointOnline: string;
     readonly connectorsTeams: string;
     readonly connectorsSlack: string;
-    readonly connectorsWorkplaceSearch: string;
     readonly connectorsZoom: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
@@ -415,6 +415,7 @@ export interface DocLinks {
     monitorUptimeSynthetics: string;
     userExperience: string;
     createAlerts: string;
+    syntheticsAlerting: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
@@ -521,6 +522,8 @@ export interface DocLinks {
     agentPolicy: string;
     api: string;
     uninstallAgent: string;
+    installAndUninstallIntegrationAssets: string;
+    elasticAgentInputConfiguration: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -580,6 +583,7 @@ export interface DocLinks {
     readonly elasticsearch: string;
   };
   readonly serverlessClients: {
+    readonly clientLib: string;
     readonly goApiReference: string;
     readonly goGettingStarted: string;
     readonly httpApis: string;
@@ -602,6 +606,9 @@ export interface DocLinks {
     readonly integrationsBeats: string;
     readonly integrationsConnectorClient: string;
     readonly integrationsLogstash: string;
+  };
+  readonly serverlessSecurity: {
+    readonly apiKeyPrivileges: string;
   };
   readonly synthetics: {
     readonly featureRoles: string;

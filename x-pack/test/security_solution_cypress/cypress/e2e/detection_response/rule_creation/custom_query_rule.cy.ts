@@ -10,10 +10,10 @@ import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createAndEnableRuleOnly,
   fillScheduleRuleAndContinue,
   fillAboutRuleMinimumAndContinue,
   fillDefineCustomRuleAndContinue,
+  createRuleWithoutEnabling,
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -37,7 +37,7 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleMinimumAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
-      createAndEnableRuleOnly();
+      createRuleWithoutEnabling();
 
       cy.log('Asserting we have a new rule created');
       cy.get(RULE_NAME_HEADER).should('contain', rule.name);

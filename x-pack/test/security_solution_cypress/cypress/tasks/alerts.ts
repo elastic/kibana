@@ -162,7 +162,7 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
     }
   });
-  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click();
+  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click({ force: true });
 };
 
 export const refreshAlertPageFilter = () => {
@@ -302,6 +302,12 @@ export const goToAcknowledgedAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+};
+
+export const markAlertsAcknowledged = () => {
+  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible');
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
 export const markAcknowledgedFirstAlert = () => {

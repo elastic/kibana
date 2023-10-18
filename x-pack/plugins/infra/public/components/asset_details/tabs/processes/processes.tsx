@@ -23,11 +23,7 @@ import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
-import {
-  SortBy,
-  useProcessList,
-  ProcessListContextProvider,
-} from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
+import { SortBy, useProcessList, ProcessListContextProvider } from '../../hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
@@ -109,7 +105,7 @@ export const Processes = () => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle data-test-subj="infraAssetDetailsAlertsTitle" size="xxs">
+              <EuiTitle data-test-subj="infraAssetDetailsTopProcessesTitle" size="xxs">
                 <span>
                   <FormattedMessage
                     id="xpack.infra.metrics.nodeDetails.processesHeader"

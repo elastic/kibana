@@ -51,10 +51,10 @@ export const generateEvent = (index: number, timestamp: Moment, interval: number
             },
           },
           user: {
-            pct: randomBetween(1, 4),
+            pct: 2.5,
           },
           system: {
-            pct: randomBetween(1, 4),
+            pct: 3,
           },
         },
       },

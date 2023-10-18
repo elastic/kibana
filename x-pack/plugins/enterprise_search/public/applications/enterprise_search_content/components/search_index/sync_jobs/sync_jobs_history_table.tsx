@@ -15,15 +15,12 @@ import { i18n } from '@kbn/i18n';
 
 import { SyncJobType, SyncStatus } from '@kbn/search-connectors';
 
+import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '@kbn/search-connectors';
+
 import { FormattedDateTime } from '../../../../shared/formatted_date_time';
 import { pageToPagination } from '../../../../shared/pagination/page_to_pagination';
 
 import { durationToText } from '../../../utils/duration_to_text';
-import {
-  syncJobTypeToText,
-  syncStatusToColor,
-  syncStatusToText,
-} from '../../../utils/sync_status_to_text';
 
 import { IndexViewLogic } from '../index_view_logic';
 

@@ -14,6 +14,7 @@ import { postActionsConnectorExecuteRoute } from './post_actions_connector_execu
 import { ElasticAssistantRequestHandlerContext } from '../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
@@ -54,6 +55,7 @@ const mockContext = {
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
+    savedObjects: coreMock.createRequestHandlerContext().savedObjects,
   },
 };
 
@@ -89,6 +91,8 @@ const mockResponse = {
 };
 
 describe('postActionsConnectorExecuteRoute', () => {
+  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -109,7 +113,8 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
     );
   });
 
@@ -131,7 +136,8 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
     );
   });
 });

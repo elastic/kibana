@@ -271,7 +271,45 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-server.MetricsDataClientMock",
+        "type": "Object",
+        "tags": [],
+        "label": "MetricsDataClientMock",
+        "description": [],
+        "path": "x-pack/plugins/metrics_data_access/server/client_mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-server.MetricsDataClientMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "metricsDataAccess",
+                "scope": "server",
+                "docId": "kibMetricsDataAccessPluginApi",
+                "section": "def-server.MetricsDataClient",
+                "text": "MetricsDataClient"
+              }
+            ],
+            "path": "x-pack/plugins/metrics_data_access/server/client_mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "metricsDataAccess",
       "id": "def-server.MetricsDataPluginSetup",

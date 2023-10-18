@@ -90,6 +90,7 @@
     "@kbn/search-response-warnings",
     "@kbn/logging",
     "@kbn/core-plugins-server",
+    "@kbn/field-utils"
   ],
   "exclude": [
     "target/**/*",

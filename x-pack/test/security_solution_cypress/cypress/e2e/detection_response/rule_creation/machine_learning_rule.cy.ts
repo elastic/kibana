@@ -51,7 +51,7 @@ import {
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -78,6 +78,7 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless', '@brokenInSer
     fillAboutRuleAndContinue(mlRule);
     fillScheduleRuleAndContinue(mlRule);
     createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

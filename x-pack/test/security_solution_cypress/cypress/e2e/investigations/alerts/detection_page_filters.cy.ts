@@ -108,7 +108,10 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/167914
+// Failing: See https://github.com/elastic/kibana/issues/167915
+// Failing: See https://github.com/elastic/kibana/issues/167914
+describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));

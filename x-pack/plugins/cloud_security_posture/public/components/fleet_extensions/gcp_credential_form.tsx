@@ -78,10 +78,12 @@ const GoogleCloudShellSetup = ({
   fields,
   onChange,
   input,
+  disabled,
 }: {
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
   input: NewPackagePolicyInput;
+  disabled: boolean;
 }) => {
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
@@ -142,6 +144,7 @@ const GoogleCloudShellSetup = ({
         {organizationIdFields && accountType === GCP_ORGANIZATION_ACCOUNT && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
+              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
               id={organizationIdFields.id}
               fullWidth
@@ -153,6 +156,7 @@ const GoogleCloudShellSetup = ({
         {projectIdFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
+              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
               fullWidth
@@ -173,12 +177,14 @@ const credentialOptionsList = [
       defaultMessage: 'Credentials File',
     }),
     value: 'credentials-file',
+    'data-test-subj': 'credentials_file_option_test_id',
   },
   {
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
       defaultMessage: 'Credentials JSON',
     }),
     value: 'credentials-json',
+    'data-test-subj': 'credentials_json_option_test_id',
   },
 ];
 
@@ -229,6 +235,7 @@ const getSetupFormatOptions = (): Array<{
   id: SetupFormatGCP;
   label: string;
   disabled: boolean;
+  testId: string;
 }> => [
   {
     id: SETUP_ACCESS_CLOUD_SHELL,
@@ -236,6 +243,7 @@ const getSetupFormatOptions = (): Array<{
       defaultMessage: 'Google Cloud Shell',
     }),
     disabled: false,
+    testId: 'gcpGoogleCloudShellOptionTestId',
   },
   {
     id: SETUP_ACCESS_MANUAL,
@@ -243,6 +251,7 @@ const getSetupFormatOptions = (): Array<{
       defaultMessage: 'Manual',
     }),
     disabled: false,
+    testId: 'gcpManualOptionTestId',
   },
 ];
 
@@ -253,6 +262,7 @@ interface GcpFormProps {
   packageInfo: PackageInfo;
   setIsValid: (isValid: boolean) => void;
   onChange: any;
+  disabled: boolean;
 }
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
@@ -356,6 +366,7 @@ export const GcpCredentialsForm = ({
   packageInfo,
   setIsValid,
   onChange,
+  disabled,
 }: GcpFormProps) => {
   /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
   const subsetOfGcpField = (({ ['gcp.credentials.file']: a, ['gcp.credentials.json']: b }) => ({
@@ -444,6 +455,7 @@ export const GcpCredentialsForm = ({
       <GCPSetupInfoContent />
       <EuiSpacer size="l" />
       <RadioGroup
+        disabled={disabled}
         size="s"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
@@ -454,6 +466,7 @@ export const GcpCredentialsForm = ({
       <EuiSpacer size="l" />
       {setupFormat === SETUP_ACCESS_CLOUD_SHELL ? (
         <GoogleCloudShellSetup
+          disabled={disabled}
           fields={fields}
           onChange={(key, value) =>
             updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
@@ -462,6 +475,7 @@ export const GcpCredentialsForm = ({
         />
       ) : (
         <GcpInputVarFields
+          disabled={disabled}
           fields={fields}
           onChange={(key, value) =>
             updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
@@ -481,10 +495,12 @@ const GcpInputVarFields = ({
   fields,
   onChange,
   isOrganization,
+  disabled,
 }: {
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
   isOrganization: boolean;
+  disabled: boolean;
 }) => {
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
@@ -508,6 +524,7 @@ const GcpInputVarFields = ({
         {organizationIdFields && isOrganization && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
+              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
               id={organizationIdFields.id}
               fullWidth
@@ -519,6 +536,7 @@ const GcpInputVarFields = ({
         {projectIdFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
+              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
               fullWidth
@@ -530,6 +548,7 @@ const GcpInputVarFields = ({
         {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
             <EuiSelect
+              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
@@ -543,6 +562,7 @@ const GcpInputVarFields = ({
         {credentialsTypeValue === credentialFieldValue && credentialFilesFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.file'].label}>
             <EuiFieldText
+              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
               fullWidth
@@ -554,6 +574,7 @@ const GcpInputVarFields = ({
         {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
             <EuiTextArea
+              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
               id={credentialJSONFields.id}
               fullWidth

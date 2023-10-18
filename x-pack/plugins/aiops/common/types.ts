@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, SignificantTermType, FieldValuePair } from '@kbn/ml-agg-utils';
 
 export interface SignificantTermDuplicateGroup {
   keys: Pick<SignificantTerm, keyof SignificantTerm>;
@@ -14,7 +14,7 @@ export interface SignificantTermDuplicateGroup {
 
 export type FieldValuePairCounts = Record<string, Record<string, number>>;
 
-export interface ItemsetResult {
+export interface ItemSet {
   set: Record<FieldValuePair['fieldName'], FieldValuePair['fieldValue']>;
   size: number;
   maxPValue: number;
@@ -23,7 +23,15 @@ export interface ItemsetResult {
   total_doc_count: number;
 }
 
+export interface FetchFrequentItemSetsResponse {
+  fields: string[];
+  itemSets: ItemSet[];
+  totalDocCount: number;
+}
+
 interface SimpleHierarchicalTreeNodeSet extends FieldValuePair {
+  key: string;
+  type: SignificantTermType;
   docCount: number;
   pValue: number | null;
 }

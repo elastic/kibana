@@ -6,12 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EuiColorPicker, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiColorPicker,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import chromajs from 'chroma-js';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 
 import { hasEnoughContrast } from '../../color/color_math';
@@ -54,8 +63,8 @@ export function RGBPicker({
     darkContrast === false ? 'dark' : undefined,
   ].filter(Boolean);
 
-  const isColorTextValid = chromajs.valid(colorTextInput);
-  const colorHasContrast = lightContrast && darkContrast;
+  const isColorTextInvalid = !chromajs.valid(colorTextInput);
+  const colorHasLowContrast = !lightContrast || !darkContrast;
 
   // debounce setting the color from the rgb picker by 500ms
   useDebounce(
@@ -67,6 +76,16 @@ export function RGBPicker({
     500,
     [color, customColorMappingColor]
   );
+  const invalidColor = isColorTextInvalid
+    ? euiThemeVars.euiColorDanger
+    : colorHasLowContrast
+    ? euiThemeVars.euiColorWarning
+    : '';
+  const invalidColorText = isColorTextInvalid
+    ? euiThemeVars.euiColorDangerText
+    : colorHasLowContrast
+    ? euiThemeVars.euiColorWarningText
+    : '';
   return (
     <EuiFlexGroup direction="column" gutterSize="s" style={{ padding: 8 }}>
       <EuiFlexItem>
@@ -86,56 +105,96 @@ export function RGBPicker({
       <EuiFlexItem>
         <div
           css={
-            !colorHasContrast && isColorTextValid
+            isColorTextInvalid || colorHasLowContrast
               ? css`
-                  svg {
-                    fill: ${euiThemeVars.euiColorWarningText} !important;
-                  }
                   input {
                     background-image: linear-gradient(
                       to top,
-                      ${euiThemeVars.euiColorWarning},
-                      ${euiThemeVars.euiColorWarning} 2px,
+                      ${invalidColor},
+                      ${invalidColor} 2px,
                       transparent 2px,
                       transparent 100%
                     ) !important;
+                    background-size: 100%;
+                    padding-right: 32px;
                   }
                   .euiFormErrorText {
-                    color: ${euiThemeVars.euiColorWarningText} !important;
+                    color: ${invalidColorText} !important;
                   }
                 `
               : undefined
           }
         >
-          <EuiFormRow
-            isInvalid={!isColorTextValid || !colorHasContrast}
-            error={
-              !isColorTextValid
-                ? `Please input a valid color hex code`
-                : !colorHasContrast
-                ? `This color has a low contrast in ${errorMessage} mode${
-                    errorMessage.length > 1 ? 's' : ''
-                  }`
-                : undefined
-            }
-          >
-            <EuiFieldText
-              placeholder="Please enter an hex color code"
-              value={colorTextInput}
-              compressed
-              isInvalid={!isColorTextValid || !colorHasContrast}
-              onChange={(e) => {
-                const textColor = e.currentTarget.value;
-                setColorTextInput(textColor);
-                if (chromajs.valid(textColor)) {
-                  setCustomColorMappingColor({
-                    type: 'colorCode',
-                    colorCode: chromajs(textColor).hex(),
-                  });
-                }
-              }}
-              aria-label="hex color input"
-            />
+          <EuiFormRow>
+            <EuiFlexGroup
+              css={css`
+                position: relative;
+              `}
+            >
+              <EuiFlexItem>
+                <EuiFieldText
+                  placeholder="#FF00FF"
+                  value={colorTextInput}
+                  compressed
+                  onChange={(e) => {
+                    const textColor = e.currentTarget.value;
+                    setColorTextInput(textColor);
+                    if (chromajs.valid(textColor)) {
+                      setCustomColorMappingColor({
+                        type: 'colorCode',
+                        colorCode: chromajs(textColor).hex(),
+                      });
+                    }
+                  }}
+                  aria-label={i18n.translate(
+                    'coloring.colorMapping.colorPicker.hexColorinputAriaLabel',
+                    {
+                      defaultMessage: 'hex color input',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+              {(isColorTextInvalid || colorHasLowContrast) && (
+                <div
+                  css={css`
+                    position: absolute;
+                    right: 8px;
+                    top: 6px;
+                  `}
+                >
+                  <EuiToolTip
+                    position="bottom"
+                    content={
+                      isColorTextInvalid
+                        ? i18n.translate('coloring.colorMapping.colorPicker.invalidColorHex', {
+                            defaultMessage: 'Please use a valid color hex code',
+                          })
+                        : colorHasLowContrast
+                        ? i18n.translate('coloring.colorMapping.colorPicker.lowContrastColor', {
+                            defaultMessage: `This color has a low contrast in {themes} {errorModes, plural, one {mode} other {# modes}}`,
+                            values: {
+                              themes: errorMessage.join(','),
+                              errorModes: errorMessage.length,
+                            },
+                          })
+                        : undefined
+                    }
+                  >
+                    <EuiIcon
+                      tabIndex={0}
+                      type="warning"
+                      color={
+                        isColorTextInvalid
+                          ? euiThemeVars.euiColorDangerText
+                          : colorHasLowContrast
+                          ? euiThemeVars.euiColorWarningText
+                          : euiThemeVars.euiColorPrimary
+                      }
+                    />
+                  </EuiToolTip>
+                </div>
+              )}
+            </EuiFlexGroup>
           </EuiFormRow>
         </div>
       </EuiFlexItem>

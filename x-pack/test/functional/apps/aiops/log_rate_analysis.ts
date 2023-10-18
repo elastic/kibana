@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { isTestDataExpectedWithSampleProbability, type TestData } from './types';
-import { logRateAnalysisTestData } from './test_data';
+import { logRateAnalysisTestData } from './log_rate_analysis_test_data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header', 'home', 'security']);

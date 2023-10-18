@@ -7,12 +7,12 @@
 
 import type {
   AggregatedMetric,
-  RuleExecutionStats,
-  RuleStats,
+  HealthOverviewStats,
+  HealthOverviewState,
   TotalEnabledDisabled,
 } from './health_stats';
 
-const getEmptyRuleStats = (): RuleStats => {
+const getEmptyHealthOverviewState = (): HealthOverviewState => {
   return {
     number_of_rules: {
       all: getZeroTotalEnabledDisabled(),
@@ -34,7 +34,7 @@ const getZeroTotalEnabledDisabled = (): TotalEnabledDisabled => {
   };
 };
 
-const getEmptyRuleExecutionStats = (): RuleExecutionStats => {
+const getEmptyHealthOverviewStats = (): HealthOverviewStats => {
   return {
     number_of_executions: {
       total: 0,
@@ -70,18 +70,15 @@ const getEmptyRuleExecutionStats = (): RuleExecutionStats => {
 const getZeroAggregatedMetric = (): AggregatedMetric<number> => {
   return {
     percentiles: {
-      '1.0': 0,
-      '5.0': 0,
-      '25.0': 0,
       '50.0': 0,
-      '75.0': 0,
       '95.0': 0,
       '99.0': 0,
+      '99.9': 0,
     },
   };
 };
 
 export const healthStatsMock = {
-  getEmptyRuleStats,
-  getEmptyRuleExecutionStats,
+  getEmptyHealthOverviewState,
+  getEmptyHealthOverviewStats,
 };

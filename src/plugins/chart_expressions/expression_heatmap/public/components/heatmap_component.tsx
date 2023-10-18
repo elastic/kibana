@@ -499,15 +499,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const overwriteColors = uiState?.get('vis.colors') ?? null;
     const hasSingleValue = max === min;
     const bands = ranges.map((start, index, array) => {
-      const isPenultimate = index === array.length - 1;
+      const isLastValue = index === array.length - 1;
       const nextValue = array[index + 1];
       // by default the last range is right-open
-      let endValue = isPenultimate ? Number.POSITIVE_INFINITY : nextValue;
-      const startValue = isPenultimate && hasSingleValue ? min : start;
+      let endValue = isLastValue ? Number.POSITIVE_INFINITY : nextValue;
+      const startValue =
+        isLastValue && hasSingleValue && paletteParams?.range !== 'number' ? min : start;
+
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
         const lastBand = hasSingleValue ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
-        endValue = isPenultimate ? lastBand : nextValue;
+        endValue = isLastValue ? lastBand : nextValue;
       }
 
       let overwriteArrayIdx;
@@ -736,6 +738,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
               ariaLabel={args.ariaLabel}
               ariaUseDefaultSummary={!args.ariaLabel}
+              locale={i18n.getLocale()}
               {...settingsOverrides}
             />
             <Heatmap

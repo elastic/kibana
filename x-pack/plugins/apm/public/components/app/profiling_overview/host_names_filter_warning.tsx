@@ -34,7 +34,8 @@ export function HostnamesFilterWarning({ hostNames = [] }: Props) {
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.apm.profiling.flamegraph.filteredLabel', {
-            defaultMessage: 'Displaying items from specific host names',
+            defaultMessage:
+              "Displaying profiling insights from the service's host(s)",
           })}
         </EuiText>
       </EuiFlexItem>

@@ -26,6 +26,17 @@ import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { SlackActionParams } from '../types';
 import { subtype } from '../slack/slack';
 
+const isChannelValid = (channels?: string[], channelIds?: string[]) => {
+  if (
+    (channels === undefined && !channelIds?.length) ||
+    (channelIds === undefined && !channels?.length) ||
+    (!channelIds?.length && !channels?.length)
+  ) {
+    return false;
+  }
+  return true;
+};
+
 export const getConnectorType = (): ConnectorTypeModel<
   SlackApiConfig,
   SlackApiSecrets,
@@ -50,7 +61,12 @@ export const getConnectorType = (): ConnectorTypeModel<
       if (!actionParams.subActionParams.text) {
         errors.text.push(MESSAGE_REQUIRED);
       }
-      if (!actionParams.subActionParams.channels?.length) {
+      if (
+        !isChannelValid(
+          actionParams.subActionParams.channels,
+          actionParams.subActionParams.channelIds
+        )
+      ) {
         errors.channels.push(CHANNEL_REQUIRED);
       }
     }

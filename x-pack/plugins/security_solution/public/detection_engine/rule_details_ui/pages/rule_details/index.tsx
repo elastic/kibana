@@ -64,8 +64,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepDefineRuleReadOnly } from '../../../../detections/components/rules/step_define_rule';
-import { StepScheduleRuleReadOnly } from '../../../../detections/components/rules/step_schedule_rule';
 import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
 import {
   buildAlertsFilter,
@@ -120,7 +118,6 @@ import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/t
 import { RuleDetailsContextProvider } from './rule_details_context';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
-import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
@@ -138,12 +135,13 @@ import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
-import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
+import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+import { castRuleAsRuleResponse } from './cast_rule_as_rule_response';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -174,7 +172,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearSelected,
 }) => {
   const {
-    data,
     application: {
       navigateToApp,
       capabilities: { actions },
@@ -259,38 +256,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     onFinish: hideDeleteConfirmation,
   });
 
-  const {
-    aboutRuleData,
-    modifiedAboutRuleDetailsData,
-    defineRuleData,
-    scheduleRuleData,
-    ruleActionsData,
-  } =
+  const { aboutRuleData, modifiedAboutRuleDetailsData, ruleActionsData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
       : {
           aboutRuleData: null,
           modifiedAboutRuleDetailsData: null,
-          defineRuleData: null,
-          scheduleRuleData: null,
           ruleActionsData: null,
         };
-  const [dataViewTitle, setDataViewTitle] = useState<string>();
-  useEffect(() => {
-    const fetchDataViewTitle = async () => {
-      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
-        const dataView = await data.dataViews.get(defineRuleData?.dataViewId);
-        setDataViewTitle(dataView.title);
-      }
-    };
-    fetchDataViewTitle();
-  }, [data.dataViews, defineRuleData?.dataViewId]);
-
-  const { indexPattern: ruleIndexPattern } = useRuleIndexPattern({
-    dataSourceType: defineRuleData?.dataSourceType ?? DataSourceType.IndexPatterns,
-    index: defineRuleData?.index ?? [],
-    dataViewId: defineRuleData?.dataViewId,
-  });
 
   const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
     useDataTableFilters(TableId.alertsOnRuleDetailsPage);
@@ -298,11 +271,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const mlCapabilities = useMlCapabilities();
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-
-  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery({
-    savedQueryId: rule?.saved_id,
-    ruleType: rule?.type,
-  });
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -504,7 +472,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       return (
         <AlertsTableComponent
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
-          flyoutSize="m"
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
           tableId={TableId.alertsOnRuleDetailsPage}
           onRuleChange={refreshRule}
@@ -666,30 +633,25 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer />
               <EuiFlexGroup>
                 <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
-                  <StepAboutRuleToggleDetails
-                    loading={isLoading}
-                    stepData={aboutRuleData}
-                    stepDataDetails={modifiedAboutRuleDetailsData}
-                  />
+                  {rule !== null && (
+                    <StepAboutRuleToggleDetails
+                      loading={isLoading}
+                      stepData={aboutRuleData}
+                      stepDataDetails={modifiedAboutRuleDetailsData}
+                      rule={rule}
+                    />
+                  )}
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={1}>
                   <EuiFlexGroup direction="column">
                     <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
-                      <StepPanel
-                        loading={isLoading || isSavedQueryLoading}
-                        title={ruleI18n.DEFINITION}
-                      >
-                        {defineRuleData != null && !isSavedQueryLoading && !isStartingJobs && (
-                          <StepDefineRuleReadOnly
-                            addPadding={false}
-                            descriptionColumns="singleSplit"
-                            defaultValues={{
-                              dataViewTitle,
-                              ...defineRuleData,
-                              queryBar: savedQueryBar ?? defineRuleData.queryBar,
-                            }}
-                            indexPattern={ruleIndexPattern}
+                      <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                        {rule !== null && !isStartingJobs && (
+                          <RuleDefinitionSection
+                            rule={castRuleAsRuleResponse(rule)}
+                            isInteractive
+                            dataTestSubj="definitionRule"
                           />
                         )}
                       </StepPanel>
@@ -697,12 +659,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <EuiSpacer />
                     <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                       <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                        {scheduleRuleData != null && (
-                          <StepScheduleRuleReadOnly
-                            addPadding={false}
-                            descriptionColumns="singleSplit"
-                            defaultValues={scheduleRuleData}
-                          />
+                        {rule != null && (
+                          <RuleScheduleSection rule={castRuleAsRuleResponse(rule)} />
                         )}
                       </StepPanel>
                     </EuiFlexItem>

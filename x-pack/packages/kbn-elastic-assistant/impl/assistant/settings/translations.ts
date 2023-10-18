@@ -49,10 +49,10 @@ export const ANONYMIZATION_MENU_ITEM = i18n.translate(
   }
 );
 
-export const ADVANCED_MENU_ITEM = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsAdvancedMenuItemTitle',
+export const KNOWLEDGE_BASE_MENU_ITEM = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsKnowledgeBaseMenuItemTitle',
   {
-    defaultMessage: 'Advanced',
+    defaultMessage: 'Knowledge Base',
   }
 );
 

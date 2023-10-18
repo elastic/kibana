@@ -41,7 +41,6 @@ export const getStylesheetPaths = ({
             themeVersion
           )}`,
           `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.min.css`,
           `${basePath}/ui/legacy_dark_theme.min.css`,
         ]
       : [
@@ -49,7 +48,6 @@ export const getStylesheetPaths = ({
             themeVersion
           )}`,
           `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.min.css`,
           `${basePath}/ui/legacy_light_theme.min.css`,
         ]),
   ];

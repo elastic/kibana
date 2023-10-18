@@ -24,6 +24,7 @@ import {
   cleanRiskEngineConfig,
   waitForRiskEngineTaskToBeGone,
   deleteRiskScoreIndices,
+  clearTransforms,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -61,6 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+        await clearTransforms({ es, log });
       });
 
       afterEach(async () => {
@@ -69,6 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+        await clearTransforms({ es, log });
       });
 
       describe('with some alerts containing hosts', () => {
@@ -107,6 +110,16 @@ export default ({ getService }: FtrProviderContext): void => {
                 .fill(0)
                 .map((_, index) => `host-${index}`)
             );
+          });
+
+          it('starts the latest transform', async () => {
+            await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
+
+            const transformStats = await es.transform.getTransformStats({
+              transform_id: 'risk_score_latest_transform_default',
+            });
+
+            expect(transformStats.transforms[0].state).to.eql('started');
           });
 
           describe('disabling and re-enabling the risk engine', () => {

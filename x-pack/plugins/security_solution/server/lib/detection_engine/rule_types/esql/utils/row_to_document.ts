@@ -18,8 +18,10 @@ export const rowToDocument = (
   row: EsqlResultRow
 ): Record<string, string | null> => {
   return columns.reduce<Record<string, string | null>>((acc, column, i) => {
-    acc[column.name] = row[i];
-
+    // skips nulls, as ES|QL return null for each existing mapping field
+    if (row[i] !== null) {
+      acc[column.name] = row[i];
+    }
     return acc;
   }, {});
 };

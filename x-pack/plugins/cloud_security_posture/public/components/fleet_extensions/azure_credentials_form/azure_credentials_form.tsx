@@ -78,6 +78,7 @@ interface Props {
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
 }
 
 const ARM_TEMPLATE_EXTERNAL_DOC_URL =
@@ -207,6 +208,7 @@ export const AzureCredentialsForm = ({
   packageInfo,
   onChange,
   setIsValid,
+  disabled,
 }: Props) => {
   const { setupFormat, onSetupFormatChange, integrationLink, hasArmTemplateUrl } =
     useAzureCredentialsForm({
@@ -260,6 +262,7 @@ export const AzureCredentialsForm = ({
       <AzureSetupInfoContent integrationLink={integrationLink} />
       <EuiSpacer size="l" />
       <RadioGroup
+        disabled={disabled}
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}

@@ -3481,7 +3481,7 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get.ts"
+                "path": "x-pack/plugins/actions/server/routes/connector/get/get.ts"
               },
               {
                 "plugin": "actions",
@@ -3581,7 +3581,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_tags.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.ts"
               },
               {
                 "plugin": "alerting",
@@ -4293,22 +4293,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timeline/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/resolve_timeline/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/get_draft_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
@@ -4366,6 +4350,10 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -4728,18 +4716,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get.test.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/find_rules.test.ts"
               },
@@ -4826,18 +4802,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/get_rule_state.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_tags.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_tags.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/get_rule_tags.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -5213,6 +5177,18 @@
               },
               {
                 "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/get/get.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/get/get.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/get/get.test.ts"
+              },
+              {
+                "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/get_all/get_all.test.ts"
               },
               {
@@ -5330,6 +5306,18 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
               },
               {
                 "plugin": "monitoringCollection",
@@ -6079,6 +6067,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alert_route.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.ts"
               },
               {
@@ -6703,26 +6695,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/create_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/import_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
@@ -6762,6 +6734,30 @@
                 "path": "x-pack/plugins/searchprofiler/server/routes/profile.ts"
               },
               {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
               },
@@ -6784,6 +6780,10 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
               },
               {
                 "plugin": "synthetics",
@@ -8579,7 +8579,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_disable_rules.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -8598,22 +8598,6 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/patch_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/persist_favorite/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/persist_note.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/pinned_events/persist_pinned_event.ts"
-              },
-              {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },
@@ -8628,22 +8612,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_disable_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_disable_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_disable_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_disable_rules.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8688,6 +8656,22 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -9120,16 +9104,12 @@
                 "path": "x-pack/plugins/logstash/server/routes/pipeline/delete.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/delete_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/delete_note.ts"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "snapshotRestore",
@@ -12915,6 +12895,10 @@
               },
               {
                 "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/existing_indices.ts"
+              },
+              {
+                "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
               },
               {
@@ -13472,6 +13456,22 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timeline/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/resolve_timeline/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/get_draft_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14558,6 +14558,18 @@
                 "path": "x-pack/plugins/maps/server/data_indexing/indexing_routes.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/create_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/import_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/index.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
               },
@@ -14664,6 +14676,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14954,6 +14974,22 @@
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/patch_rule/route.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/patch_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/persist_favorite/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/persist_note.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/pinned_events/persist_pinned_event.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
               }
@@ -15160,6 +15196,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/index/delete_index_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/delete_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/delete_note.ts"
               },
               {
                 "plugin": "securitySolution",

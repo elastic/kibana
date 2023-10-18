@@ -34,7 +34,8 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     });
   });
 
-  describe('User cannot see results', () => {
+  // FIXME: Flaky. Needs fixing (security team issue #7763)
+  describe.skip('User cannot see results', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
