@@ -43,16 +43,16 @@ describe('fetchConnectorExecuteAction', () => {
 
     await fetchConnectorExecuteAction(testProps);
 
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/actions/connector/foo/_execute',
-        {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":true}',
-          headers: { 'Content-Type': 'application/json' },
-          method: 'POST',
-          signal: undefined,
-        }
-      );
-    });
+    expect(mockHttp.fetch).toHaveBeenCalledWith(
+      '/internal/elastic_assistant/actions/connector/foo/_execute',
+      {
+        body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":true}',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        signal: undefined,
+      }
+    );
+  });
 
   it('calls the actions connector api when assistantLangChain is false', async () => {
     const testProps: FetchConnectorExecuteAction = {
@@ -64,16 +64,16 @@ describe('fetchConnectorExecuteAction', () => {
 
     await fetchConnectorExecuteAction(testProps);
 
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/actions/connector/foo/_execute',
-        {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":false}',
-          headers: { 'Content-Type': 'application/json' },
-          method: 'POST',
-          signal: undefined,
-        }
-      );
-    });
+    expect(mockHttp.fetch).toHaveBeenCalledWith(
+      '/internal/elastic_assistant/actions/connector/foo/_execute',
+      {
+        body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":false}',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        signal: undefined,
+      }
+    );
+  });
 
   it('returns API_ERROR when the response status is not ok', async () => {
     (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
