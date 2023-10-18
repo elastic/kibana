@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "author": "Elastic",
   "name": "@kbn/security-solution-plugin",
   "version": "1.0.0",
@@ -27,6 +28,7 @@
     "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
     "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:changed-specs-only:serverless": "yarn cypress:serverless --changed-specs-only --env burn=5",
-    "cypress:burn:serverless": "yarn cypress:serverless --env burn=5"
+    "cypress:burn:serverless": "yarn cypress:serverless --env burn=5",
+    "cypress:run:qa:serverless:parallel": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node ../../plugins/security_solution/scripts/start_cypress_parallel_serverless --config-file ../../test/security_solution_cypress/cypress/cypress_ci_serverless_qa.config.ts"
   }
 }

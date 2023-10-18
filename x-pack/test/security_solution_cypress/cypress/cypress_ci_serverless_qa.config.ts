@@ -19,9 +19,6 @@ export default defineCypressConfig({
     grepFilterSpecs: true,
     grepOmitFiltered: true,
     grepTags: '@serverlessQA --@brokenInServerless --@skipInServerless',
-    // Grep plugin is working taking under consideration the directory where cypress lives.
-    // https://github.com/elastic/kibana/pull/167494#discussion_r1340567022 for more context.
-    grepIntegrationFolder: '../',
   },
   execTimeout: 150000,
   pageLoadTimeout: 150000,
