@@ -12,7 +12,7 @@ import { ConcreteTaskInstance } from './task';
 import { Result, Err } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
-import { TaskRunResult } from './task_running';
+import { TaskRunError, TaskRunResult } from './task_running';
 import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
 import type { EventLoopDelayConfig } from './config';
 import { TaskManagerMetrics } from './metrics/task_metrics_collector';
@@ -75,7 +75,7 @@ export interface RanTask {
   isExpired: boolean;
 }
 export type ErroredTask = RanTask & {
-  error: Error;
+  error: TaskRunError;
 };
 
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;

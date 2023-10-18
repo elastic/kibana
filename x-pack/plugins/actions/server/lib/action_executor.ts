@@ -261,10 +261,7 @@ export class ActionExecutor {
             source,
           });
         } catch (err) {
-          if (
-            err.reason === ActionExecutionErrorReason.Validation ||
-            err.reason === ActionExecutionErrorReason.Authorization
-          ) {
+          if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
           } else {
             rawResult = {

@@ -26,6 +26,10 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
+import {
+  createTaskRunError,
+  TaskRunErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -187,9 +191,9 @@ export class TaskRunnerFactory {
           logger.error(`Action '${actionId}' failed: ${e.message}`);
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(e);
+            throwUnrecoverableError(e, TaskRunErrorSource.USER);
           }
-          throw e;
+          throw createTaskRunError(e); // FRAMEWORK
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
@@ -198,9 +202,11 @@ export class TaskRunnerFactory {
           logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
+
           throw throwRetryableError(
             new Error(executorResult.message),
-            executorResult.retry as boolean | Date
+            executorResult.retry as boolean | Date,
+            TaskRunErrorSource.USER
           );
         }
       },

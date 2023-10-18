@@ -9,7 +9,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
-import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '.';
+import { createTaskRunError, TaskManagerRunner, TaskRunningStage, TaskRunResult } from '.';
 import {
   TaskEvent,
   asTaskRunEvent,
@@ -1393,7 +1393,7 @@ describe('TaskManagerRunner', () => {
         );
       });
 
-      test('emits TaskEvent when a recurring task returns a success result with hasError=true', async () => {
+      test('emits TaskEvent when a recurring task returns a success result with controlledError', async () => {
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
         const onTaskEvent = jest.fn();
@@ -1408,7 +1408,11 @@ describe('TaskManagerRunner', () => {
               title: 'Bar!',
               createTaskRunner: () => ({
                 async run() {
-                  return { runAt, state: {}, hasError: true };
+                  return {
+                    runAt,
+                    state: {},
+                    controlledError: createTaskRunError(new Error('test')),
+                  };
                 },
               }),
             },
@@ -1433,7 +1437,7 @@ describe('TaskManagerRunner', () => {
         );
       });
 
-      test('emits TaskEvent when a recurring task returns a success result with hasError=true but completes after timeout', async () => {
+      test('emits TaskEvent when a recurring task returns a success result with controlledError but completes after timeout', async () => {
         fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
@@ -1450,7 +1454,11 @@ describe('TaskManagerRunner', () => {
               timeout: `1s`,
               createTaskRunner: () => ({
                 async run() {
-                  return { runAt, state: {}, hasError: true };
+                  return {
+                    runAt,
+                    state: {},
+                    controlledError: createTaskRunError(new Error('test')),
+                  };
                 },
               }),
             },
@@ -2086,7 +2094,7 @@ describe('TaskManagerRunner', () => {
                   return { data: { indirectParams: { foo: 'bar' } } };
                 },
                 async run() {
-                  return { state: {}, hasError: true };
+                  return { state: {}, controlledError: createTaskRunError(new Error('test')) };
                 },
               }),
               indirectParamsSchema: schema.object({
@@ -2103,7 +2111,9 @@ describe('TaskManagerRunner', () => {
         const instance = store.update.mock.calls[0][0];
         expect(instance.numSkippedRuns).toBe(mockTaskInstance.numSkippedRuns);
         expect(logger.warn).not.toHaveBeenCalled();
-        expect(result).toEqual(asOk({ state: {}, hasError: true }));
+        expect(result).toEqual(
+          asOk({ state: {}, controlledError: createTaskRunError(new Error('test')) })
+        );
       });
 
       test('does not resets skip attempts for a non-recurring task as long as there is an error', async () => {
@@ -2238,7 +2248,7 @@ describe('TaskManagerRunner', () => {
                   return { data: { indirectParams: { baz: 'bar' } } };
                 },
                 async run() {
-                  return { state: {}, hasError: true };
+                  return { state: {}, controlledError: createTaskRunError(new Error('test')) };
                 },
               }),
               indirectParamsSchema: schema.object({
@@ -2267,7 +2277,9 @@ describe('TaskManagerRunner', () => {
         expect(logger.warn).toHaveBeenCalledWith(
           'Task Manager has reached the max skip attempts for task bar/foo'
         );
-        expect(result).toEqual(asOk({ state: {}, hasError: true }));
+        expect(result).toEqual(
+          asOk({ state: {}, controlledError: createTaskRunError(new Error('test')) })
+        );
       });
     });
   });

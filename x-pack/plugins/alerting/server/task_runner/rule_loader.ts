@@ -12,15 +12,16 @@ import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
+import { TaskRunErrorSource } from '@kbn/actions-plugin/common';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
-  RuleExecutionStatusErrorReasons,
   RawRule,
-  RuleTypeRegistry,
-  RuleTypeParamsValidator,
-  SanitizedRule,
+  RuleExecutionStatusErrorReasons,
   RulesClientApi,
+  RuleTypeParamsValidator,
+  RuleTypeRegistry,
+  SanitizedRule,
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -71,21 +72,30 @@ export function validateRule<Params extends RuleTypeParams>(
   if (!enabled) {
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Disabled,
-      new Error(`Rule failed to execute because rule ran after it was disabled.`)
+      new Error(`Rule failed to execute because rule ran after it was disabled.`),
+      TaskRunErrorSource.USER
     );
   }
   alertingEventLogger.setRuleName(rule.name);
   try {
     ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
   } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
+    throw new ErrorWithReason(
+      RuleExecutionStatusErrorReasons.License,
+      err,
+      TaskRunErrorSource.RULE_TYPE
+    );
   }
 
   let validatedParams: Params;
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
   } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
+    throw new ErrorWithReason(
+      RuleExecutionStatusErrorReasons.Validate,
+      err,
+      TaskRunErrorSource.RULE_TYPE
+    );
   }
 
   if (rule.monitoring) {

@@ -13,6 +13,10 @@ import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  createTaskRunError,
+  TaskRunErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -538,7 +542,11 @@ export class TaskRunner<
               message: err,
               stackTrace: err.stack,
             };
-            throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+            throw new ErrorWithReason(
+              RuleExecutionStatusErrorReasons.Execute,
+              err,
+              TaskRunErrorSource.RULE_TYPE
+            );
           }
         }
 
@@ -825,7 +833,7 @@ export class TaskRunner<
     }
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
-    let schedule: Result<IntervalSchedule, Error>;
+    let schedule: Result<IntervalSchedule, ErrorWithReason>;
     try {
       const preparedResult = await this.prepareToRun();
 
@@ -890,32 +898,34 @@ export class TaskRunner<
       timings: this.timer.toJson(),
     });
 
-    return {
-      state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
-        stateWithMetrics,
-        (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
-          transformRunStateToTaskState(ruleRunStateWithMetrics),
-        (err: ElasticsearchError) => {
-          if (isAlertSavedObjectNotFoundError(err, ruleId)) {
-            const message = `Executing Rule ${spaceId}:${
-              this.ruleType.id
-            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
-            this.logger.debug(message);
-          } else {
-            const error = this.stackTraceLog ? this.stackTraceLog.message : err;
-            const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
-            const message = `Executing Rule ${spaceId}:${
-              this.ruleType.id
-            }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
-            this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: stack },
-            });
-          }
-          return originalState;
+    const transformedState = map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
+      stateWithMetrics,
+      (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
+        transformRunStateToTaskState(ruleRunStateWithMetrics),
+      (err: ElasticsearchError) => {
+        if (isAlertSavedObjectNotFoundError(err, ruleId)) {
+          const message = `Executing Rule ${spaceId}:${
+            this.ruleType.id
+          }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
+          this.logger.debug(message);
+        } else {
+          const error = this.stackTraceLog ? this.stackTraceLog.message : err;
+          const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
+          const message = `Executing Rule ${spaceId}:${
+            this.ruleType.id
+          }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
+          this.logger.error(message, {
+            tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+            error: { stack_trace: stack },
+          });
         }
-      ),
-      schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
+        return originalState;
+      }
+    );
+
+    const scheduleWithInterval = resolveErr<IntervalSchedule | undefined, Error>(
+      schedule,
+      (error) => {
         if (isAlertSavedObjectNotFoundError(error, ruleId)) {
           const spaceMessage = spaceId ? `in the "${spaceId}" space ` : '';
           this.logger.warn(
@@ -935,9 +945,20 @@ export class TaskRunner<
         }
 
         return { interval: retryInterval };
-      }),
-      monitoring: this.ruleMonitoring.getMonitoring(),
-      hasError: isErr(schedule),
+      }
+    );
+
+    const getControlledError = (scheduleResult: Result<IntervalSchedule, ErrorWithReason>) => {
+      if (isErr(scheduleResult)) {
+        const { error, source } = scheduleResult.error;
+        return createTaskRunError(error, source);
+      }
+    };
+
+    return {
+      state: transformedState,
+      schedule: scheduleWithInterval,
+      controlledError: getControlledError(schedule),
     };
   }
 

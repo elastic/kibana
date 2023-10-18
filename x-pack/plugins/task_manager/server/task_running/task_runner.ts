@@ -664,12 +664,12 @@ export class TaskManagerRunner implements TaskRunner {
           skipAttempts,
         }: SuccessfulRunResult & { attempts: number; skipAttempts: number }) => {
           const { startedAt, schedule, numSkippedRuns } = this.instance.task;
-          const { hasError } = unwrap(result);
+          const { controlledError } = unwrap(result);
           let requeueInvalidTaskAttempts = skipAttempts || numSkippedRuns || 0;
 
           // Alerting TaskRunner returns SuccessResult even though there is an error
-          // therefore we use "hasError" to be sure that there wasn't any error
-          if (isUndefined(skipAttempts) && !hasError) {
+          // therefore we use "controlledError" to be sure that there wasn't any error
+          if (isUndefined(skipAttempts) && controlledError === undefined) {
             requeueInvalidTaskAttempts = 0;
           }
 
@@ -747,7 +747,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     await eitherAsync(
       result,
-      async ({ runAt, schedule, hasError }: SuccessfulRunResult) => {
+      async ({ runAt, schedule, controlledError }: SuccessfulRunResult) => {
         const processedResult = {
           task,
           persistence:
@@ -757,24 +757,26 @@ export class TaskManagerRunner implements TaskRunner {
             : this.processResultWhenDone()),
         };
 
-        // Alerting task runner returns SuccessfulRunResult with hasError=true
+        // Alerting task runner returns SuccessfulRunResult with controlledError
         // when the alerting task fails, so we check for this condition in order
         // to emit the correct task run event for metrics collection
-        const taskRunEvent = hasError
-          ? asTaskRunEvent(
-              this.id,
-              asErr({
-                ...processedResult,
-                isExpired: taskHasExpired,
-                error: new Error(`Alerting task failed to run.`),
-              }),
-              taskTiming
-            )
-          : asTaskRunEvent(
-              this.id,
-              asOk({ ...processedResult, isExpired: taskHasExpired }),
-              taskTiming
-            );
+        // controlledError contains the "source" (TaskRunErrorSource) data
+        const taskRunEvent =
+          controlledError !== undefined
+            ? asTaskRunEvent(
+                this.id,
+                asErr({
+                  ...processedResult,
+                  isExpired: taskHasExpired,
+                  error: new Error(`Alerting task failed to run.`),
+                }),
+                taskTiming
+              )
+            : asTaskRunEvent(
+                this.id,
+                asOk({ ...processedResult, isExpired: taskHasExpired }),
+                taskTiming
+              );
         this.onTaskEvent(taskRunEvent);
       },
       async ({ error }: FailedRunResult) => {
@@ -804,7 +806,6 @@ export class TaskManagerRunner implements TaskRunner {
         }
       );
     }
-
     return result;
   }
 
