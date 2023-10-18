@@ -86,6 +86,41 @@ interface ESQLSearchReponse {
   values: unknown[][];
 }
 
+const requestCache: Array<{ key: number, response: any }> = [];
+
+function hashCode(string: string){
+  var hash = 0;
+  for (var i = 0; i < string.length; i++) {
+    var code = string.charCodeAt(i);
+    hash = ((hash<<5)-hash)+code;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
+
+const roundTimestamp = (time: string) => {
+  return time.replace(/\.\d+/, ".000");
+}
+const getHash = (request: any) => {
+  const params = JSON.stringify(request);
+  const hash = hashCode(params);
+  return hash;
+}
+
+const getCache = (key: number) => {
+  const element = requestCache.find((e) => e.key === key);
+  if (element) {
+    return element.response;
+  }
+}
+
+const addToCache = (key: number, response: any) => {
+  requestCache.push({ key, response });
+  while (requestCache.length > 100) {
+    requestCache.shift();
+  }
+}
+
 export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
   const essql: EsqlExpressionFunctionDefinition = {
     name: 'esql',
@@ -156,7 +191,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             );
             const timeFilter =
               input.timeRange &&
-              getTime(undefined, input.timeRange, {
+              getTime(undefined, {
+                ...input.timeRange,
+                from: roundTimestamp(input.timeRange.from),
+                to: roundTimestamp(input.timeRange.to),
+              }, {
                 fieldName: timeField,
               });
 
@@ -167,6 +206,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               esQueryConfigs
             );
           }
+
+          const hash = getHash(params);
+
+          let response: Observable<IKibanaSearchResponse<ESQLSearchReponse>> = getCache(hash);
 
           let startTime = Date.now();
           const logInspectorRequest = () => {
@@ -191,46 +234,53 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             return request;
           };
 
-          return search<
-            IKibanaSearchRequest<ESQLSearchParams>,
-            IKibanaSearchResponse<ESQLSearchReponse>
-          >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
-            catchError((error) => {
-              if (!error.err) {
-                error.message = `Unexpected error from Elasticsearch: ${error.message}`;
-              } else {
-                const { type, reason } = error.err.attributes;
-                if (type === 'parsing_exception') {
-                  error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
-                } else {
-                  error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
-                }
-              }
+          if (!response) {
+            response = search<
+                IKibanaSearchRequest<ESQLSearchParams>,
+                IKibanaSearchResponse<ESQLSearchReponse>
+            >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
+                catchError((error) => {
+                  if (!error.err) {
+                    error.message = `Unexpected error from Elasticsearch: ${error.message}`;
+                  } else {
+                    const { type, reason } = error.err.attributes;
+                    if (type === 'parsing_exception') {
+                      error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
+                    } else {
+                      error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+                    }
+                  }
 
-              return throwError(() => error);
-            }),
-            tap({
-              next({ rawResponse }) {
-                logInspectorRequest()
-                  .stats({
-                    hits: {
-                      label: i18n.translate('data.search.es_search.hitsLabel', {
-                        defaultMessage: 'Hits',
-                      }),
-                      value: `${rawResponse.values.length}`,
-                      description: i18n.translate('data.search.es_search.hitsDescription', {
-                        defaultMessage: 'The number of documents returned by the query.',
-                      }),
-                    },
-                  })
-                  .json(params)
-                  .ok({ json: rawResponse });
-              },
-              error(error) {
-                logInspectorRequest().error({ json: error });
-              },
-            })
-          );
+                  return throwError(() => error);
+                }),
+                tap({
+                  next({ rawResponse }) {
+                    logInspectorRequest()
+                        .stats({
+                          hits: {
+                            label: i18n.translate('data.search.es_search.hitsLabel', {
+                              defaultMessage: 'Hits',
+                            }),
+                            value: `${rawResponse.values.length}`,
+                            description: i18n.translate('data.search.es_search.hitsDescription', {
+                              defaultMessage: 'The number of documents returned by the query.',
+                            }),
+                          },
+                        })
+                        .json(params)
+                        .ok({ json: rawResponse });
+                  },
+                  error(error) {
+                    logInspectorRequest().error({ json: error });
+                  },
+                })
+            );
+            addToCache(hash, response.toPromise());
+          } else {
+            console.log('got cache hit!');
+          }
+
+          return response;
         }),
         map(({ rawResponse: body, warning }) => {
           const columns =
