@@ -19,6 +19,7 @@ import {
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
+import styled from '@emotion/styled';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
 import {
@@ -65,6 +66,11 @@ const isSystemCell = (columnId: string): columnId is SystemCellId => {
   return systemCells.includes(columnId as SystemCellId);
 };
 
+const Row = styled.div`
+  display: flex;
+  min-width: fit-content;
+`;
+
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [activeRowClasses, setActiveRowClasses] = useState<
@@ -84,6 +90,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     refresh: alertsRefresh,
     getInspectQuery,
   } = alertsData;
+
   const queryClient = useQueryClient();
   const { data: cases, isLoading: isLoadingCases } = props.cases;
   const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
@@ -355,11 +362,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       // ecsAlert is needed for security solution
       const ecsAlert = ecsAlertsData[idx];
       if (alert) {
-        const data: Array<{ field: string; value: string[] }> = [];
-        Object.entries(alert ?? {}).forEach(([key, value]) => {
-          data.push({ field: key, value: value as string[] });
-        });
-
         if (isSystemCell(_props.columnId)) {
           return (
             <SystemCellFactory
@@ -375,7 +377,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
         return renderCellValue({
           ..._props,
-          data,
+          data: oldAlertsData[idx],
           ecsData: ecsAlert,
         });
       } else if (isLoading) {
@@ -385,12 +387,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [
       alerts,
-      ecsAlertsData,
       cases,
-      maintenanceWindows,
+      ecsAlertsData,
       isLoading,
       isLoadingCases,
       isLoadingMaintenanceWindows,
+      maintenanceWindows,
+      oldAlertsData,
       pagination.pageIndex,
       pagination.pageSize,
       renderCellValue,
@@ -504,6 +507,40 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             rowHeightsOptions={props.rowHeightsOptions}
             onColumnResize={onColumnResize}
             ref={dataGridRef}
+            renderCustomGridBody={
+              props.dynamicRowHeight
+                ? ({ visibleColumns: _visibleColumns, Cell }) => {
+                    return (
+                      <>
+                        {oldAlertsData
+                          .concat(
+                            isLoading
+                              ? Array.from({ length: pagination.pageSize - oldAlertsData.length })
+                              : []
+                          )
+                          .map((_row, rowIndex) => (
+                            <Row
+                              role="row"
+                              className={`euiDataGridRow ${
+                                rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
+                              }`}
+                              key={rowIndex}
+                            >
+                              {_visibleColumns.map((_col, colIndex) => (
+                                <Cell
+                                  colIndex={colIndex}
+                                  visibleRowIndex={rowIndex}
+                                  key={`${rowIndex},${colIndex}`}
+                                  style={{ flexShrink: 0 }}
+                                />
+                              ))}
+                            </Row>
+                          ))}
+                      </>
+                    );
+                  }
+                : undefined
+            }
           />
         )}
       </section>

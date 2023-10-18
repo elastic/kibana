@@ -270,6 +270,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
       },
+      dynamicRowHeight: true,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
