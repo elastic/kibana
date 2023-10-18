@@ -45,7 +45,17 @@ export const InvokeAIActionParamsSchema = schema.object({
   stream: schema.boolean({ defaultValue: false }),
 });
 
-export const InvokeAIActionResponseSchema = schema.string();
+export const InvokeAIActionResponseSchema = schema.object({
+  message: schema.string(),
+  usage: schema.object(
+    {
+      prompt_tokens: schema.number(),
+      completion_tokens: schema.number(),
+      total_tokens: schema.number(),
+    },
+    { unknowns: 'ignore' }
+  ),
+});
 
 // Execute action schema
 export const StreamActionParamsSchema = schema.object({

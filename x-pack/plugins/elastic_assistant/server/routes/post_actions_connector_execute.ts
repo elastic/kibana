@@ -7,7 +7,7 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { executeAction } from '../lib/langchain/execute';
+import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
@@ -45,6 +45,14 @@ export const postActionsConnectorExecuteRoute = (
         if (!request.body.assistantLangChain) {
           const result = await executeAction({ actions, request, connectorId });
 
+          return response.ok({
+            body: result,
+          });
+        }
+
+        // if not langchain, call execute action directly and return the response:
+        if (!request.body.assistantLangChain) {
+          const result = await executeAction({ actions, request, connectorId });
           return response.ok({
             body: result,
           });
