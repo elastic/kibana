@@ -27,6 +27,7 @@ import type {
 } from './types';
 
 const EMPTY_INDEX_NAMES: string[] = [];
+export const INTERNAL_API_VERSION = '1';
 
 export const getIndexNames = ({
   ilmExplain,
@@ -282,7 +283,7 @@ export const getSizeInBytes = ({
 }: {
   indexName: string;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number => (stats && stats[indexName]?.primaries?.store?.size_in_bytes) ?? 0;
+}): number => (stats && stats[indexName]?.primaries?.store?.total_data_set_size_in_bytes) ?? 0;
 
 export const getTotalDocsCount = ({
   indexNames,
