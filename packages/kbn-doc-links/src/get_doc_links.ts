@@ -65,6 +65,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}canvas.html`,
     },
     cloud: {
+      beatsAndLogstashConfiguration: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-cloud-id.html`,
       indexManagement: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-configure-index-management.html`,
     },
     console: {
