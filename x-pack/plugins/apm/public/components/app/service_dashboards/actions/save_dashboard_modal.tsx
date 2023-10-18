@@ -93,7 +93,6 @@ export function SaveDashboardModal({
   const onClickSave = useCallback(
     async function () {
       const [newDashboard] = selectedDashboard;
-      console.log('ON SAVE', selectedDashboard);
       try {
         if (newDashboard.value) {
           await callApmApi('POST /internal/apm/custom-dashboard', {

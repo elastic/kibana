@@ -144,14 +144,6 @@ export function ServiceDashboards() {
     rangeTo,
   ]);
 
-  useEffect(() => {
-    console.log('dashboard id changed', dashboardId);
-  }, [dashboardId]);
-
-  useEffect(() => {
-    console.log('current dashboard changed', currentDashboard);
-  }, [currentDashboard]);
-
   const getLocatorParams = useCallback(
     (params) => {
       return {
