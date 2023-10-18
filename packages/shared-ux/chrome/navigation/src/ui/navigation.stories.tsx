@@ -201,6 +201,158 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
   );
 };
 
+const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
+  navigationTree: {
+    body: [
+      // My custom project
+      {
+        type: 'navGroup',
+        id: 'example_projet',
+        title: 'Example project',
+        icon: 'logoObservability',
+        defaultIsCollapsed: false,
+        children: [
+          {
+            title: 'Group 1',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
+          },
+          {
+            title: 'Group 2 - accordion',
+            renderAs: 'accordion',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
+          },
+          {
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
+          },
+          {
+            id: 'group:settings',
+            link: 'item1',
+            title: 'Settings as panel opener',
+            renderAs: 'panelOpener',
+            children: [
+              {
+                title: 'Group 1',
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    id: 'group:settings.signals-2',
+                    link: 'group:settings.signals',
+                    title: 'Signals - should NOT appear',
+                    sideNavStatus: 'hidden', // Should not appear
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                  },
+                ],
+              },
+              {
+                children: [
+                  {
+                    id: 'group.nestedGroup',
+                    link: 'group:settings.tracing',
+                    title: 'Group 2',
+                    children: [
+                      {
+                        id: 'item1',
+                        link: 'group:settings.signals',
+                        title: 'Some link title',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    footer: [
+      {
+        type: 'navGroup',
+        ...getPresets('devtools'),
+      },
+    ],
+  },
+};
+
+export const GroupsExampleDefinition = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    navLinks$: of([...navLinksMock, ...deepLinks]),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
+
+  return (
+    <NavigationWrapper>
+      <NavigationProvider {...services}>
+        <DefaultNavigation {...groupExamplesDefinition} />
+      </NavigationProvider>
+    </NavigationWrapper>
+  );
+};
+
 const navigationDefinition: ProjectNavigationDefinition<any> = {
   navigationTree: {
     body: [
@@ -215,6 +367,26 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
           {
             link: 'item1',
             title: 'Get started',
+          },
+          {
+            title: 'Group 1',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
           },
           {
             link: 'item2',
