@@ -1,7 +1,8 @@
 type: array
-description: Values for custom fields of a case
+description: Values for custom fields of a case.
 minItems: 0
-maxItems: 5
+maxItems: 10
+x-technical-preview: true
 items:
   type: object
   required:
@@ -10,22 +11,22 @@ items:
     - field
   properties:
     key:
-      description: The key identifying the custom field.
+      description: The key identifying the custom field. Must be unique. Must exist in the configuration.
       type: string
     type:
-      description: The type of the custom field. Should match the key and how the custom field was configured
+      description: The type of the custom field. Should match the key/type pair in the configuration.
+      enum:
+        - text
+        - toggle
       type: string
-    field:
-      description: An object containing the value of the field.
-      type: object
-      required:
-        - value
-      properties:
-        value:
-          description: The value of the field.
+    value:
+      anyOf:
+        - type: string
           nullable: true
-          type: array
-          items:
-            anyOf:
-              - type: string
-              - type: boolean
+          minLength: 1
+          maxLength: 160
+        - type: boolean
+          nullable: true
+      description: >
+        The value of the custom field. Cannot be explicitly set to null if the field is configured as required.
+        However, existing cases when the custom field was created will have this value null as default.

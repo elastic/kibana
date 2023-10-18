@@ -537,6 +537,13 @@
                       "version": {
                         "type": "string",
                         "example": "WzIwNzMsMV0="
+                      },
+                      "customFields": {
+                        "description": "An array containing the custom fields in the configuration.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/custom_fields_configuration"
+                        }
                       }
                     }
                   }
@@ -562,7 +569,7 @@
         ]
       },
       "post": {
-        "summary": "Sets external connection details, such as the closure type and default connector for cases in the default space.",
+        "summary": "Creates a case specific configuration that includes external connection details and custom fields.",
         "operationId": "setCaseConfigurationDefaultSpace",
         "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
         "tags": [
@@ -716,6 +723,13 @@
                     "version": {
                       "type": "string",
                       "example": "WzIwNzMsMV0="
+                    },
+                    "customFields": {
+                      "description": "An array containing the custom fields in the configuration.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/custom_fields_configuration"
+                      }
                     }
                   }
                 },
@@ -906,6 +920,13 @@
                       "version": {
                         "type": "string",
                         "example": "WzIwNzMsMV0="
+                      },
+                      "customFields": {
+                        "description": "An array containing the custom fields in the configuration.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/custom_fields_configuration"
+                        }
                       }
                     }
                   }
@@ -2367,6 +2388,13 @@
                       "version": {
                         "type": "string",
                         "example": "WzIwNzMsMV0="
+                      },
+                      "customFields": {
+                        "description": "An array containing the custom fields in the configuration.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/custom_fields_configuration"
+                        }
                       }
                     }
                   }
@@ -2549,6 +2577,13 @@
                     "version": {
                       "type": "string",
                       "example": "WzIwNzMsMV0="
+                    },
+                    "customFields": {
+                      "description": "An array containing the custom fields in the configuration.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/custom_fields_configuration"
+                      }
                     }
                   }
                 },
@@ -2742,6 +2777,13 @@
                       "version": {
                         "type": "string",
                         "example": "WzIwNzMsMV0="
+                      },
+                      "customFields": {
+                        "description": "An array containing the custom fields in the configuration.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/custom_fields_configuration"
+                        }
                       }
                     }
                   }
@@ -4581,9 +4623,10 @@
       },
       "custom_fields_property": {
         "type": "array",
-        "description": "Values for custom fields of a case",
+        "description": "Values for custom fields of a case.",
         "minItems": 0,
-        "maxItems": 5,
+        "maxItems": 10,
+        "x-technical-preview": true,
         "items": {
           "type": "object",
           "required": [
@@ -4593,36 +4636,31 @@
           ],
           "properties": {
             "key": {
-              "description": "The key identifying the custom field.",
+              "description": "The key identifying the custom field. Must be unique. Must exist in the configuration.",
               "type": "string"
             },
             "type": {
-              "description": "The type of the custom field. Should match the key and how the custom field was configured",
+              "description": "The type of the custom field. Should match the key/type pair in the configuration.",
+              "enum": [
+                "text",
+                "toggle"
+              ],
               "type": "string"
             },
-            "field": {
-              "description": "An object containing the value of the field.",
-              "type": "object",
-              "required": [
-                "value"
-              ],
-              "properties": {
-                "value": {
-                  "description": "The value of the field.",
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string",
                   "nullable": true,
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "boolean"
-                      }
-                    ]
-                  }
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                {
+                  "type": "boolean",
+                  "nullable": true
                 }
-              }
+              ],
+              "description": "The value of the custom field. Cannot be explicitly set to null if the field is configured as required. However, existing cases when the custom field was created will have this value null as default.\n"
             }
           }
         }
@@ -5387,6 +5425,37 @@
         ],
         "example": ".none"
       },
+      "custom_fields_configuration": {
+        "type": "object",
+        "description": "An object defining a custom field.",
+        "x-technical-preview": true,
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Internal identifier for the custom field. Must be lower case and only composed of a-z, 0-9, '_', or '-' characters. Will be used in API calls to refer to this specific custom field. Must be unique.",
+            "minLength": 1,
+            "maxLength": 36
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "The label used to display the custom field in the Case's pages."
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Defines if the custom field is required on case creation."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "toggle"
+            ],
+            "description": "The type of the custom field."
+          }
+        }
+      },
       "set_case_configuration_request": {
         "title": "Set case configuration request",
         "description": "External connection details, such as the closure type and default connector for cases.",
@@ -5446,6 +5515,15 @@
             "required": [
               "syncAlerts"
             ]
+          },
+          "customFields": {
+            "description": "An array containing the custom fields.",
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/custom_fields_configuration"
+            }
           }
         }
       },

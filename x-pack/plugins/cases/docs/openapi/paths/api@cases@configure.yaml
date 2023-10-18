@@ -16,7 +16,7 @@ get:
         application/json:
           schema:
             type: array
-            items: 
+            items:
               type: object
               properties:
                 $ref: '../components/schemas/case_configure_response_properties.yaml'
@@ -27,10 +27,10 @@ get:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
   servers:
-        - url: https://localhost:5601
+    - url: https://localhost:5601
 
 post:
-  summary: Sets external connection details, such as the closure type and default connector for cases in the default space.
+  summary: Creates a case specific configuration that includes external connection details and custom fields.
   operationId: setCaseConfigurationDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.
@@ -54,7 +54,7 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json:
+        application/json:
           schema:
             type: object
             properties:
@@ -69,6 +69,6 @@ post:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
   servers:
-     - url: https://localhost:5601
+    - url: https://localhost:5601
 servers:
-      - url: https://localhost:5601
+  - url: https://localhost:5601

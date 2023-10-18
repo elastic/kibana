@@ -1,6 +1,6 @@
 closure_type:
   $ref: 'closure_types.yaml'
-connector: 
+connector:
   type: object
   properties:
     $ref: 'case_configure_connector_properties.yaml'
@@ -48,3 +48,8 @@ updated_by:
 version:
   type: string
   example: WzIwNzMsMV0=
+customFields:
+  description: An array containing the custom fields in the configuration.
+  type: array
+  items:
+    $ref: 'custom_fields_configuration.yaml'

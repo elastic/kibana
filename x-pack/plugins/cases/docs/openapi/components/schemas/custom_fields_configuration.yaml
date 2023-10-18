@@ -1,0 +1,23 @@
+type: object
+description: An object defining a custom field.
+x-technical-preview: true
+properties:
+  key:
+    type: string
+    description: Internal identifier for the custom field. Must be lower case and only composed of a-z, 0-9, '_', or '-' characters. Will be used in API calls to refer to this specific custom field. Must be unique.
+    minLength: 1
+    maxLength: 36
+  label:
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: The label used to display the custom field in the Case's pages.
+  required:
+    type: boolean
+    description: Defines if the custom field is required on case creation.
+  type:
+    type: string
+    enum:
+      - text
+      - toggle
+    description: The type of the custom field.
