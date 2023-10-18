@@ -10,7 +10,10 @@ import { Observable } from 'rxjs';
 import { ScopedHistory, Capabilities } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
-import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
+import type {
+  AppDefinition,
+  CardsNavigationComponentProps,
+} from '@kbn/management-cards-navigation';
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
@@ -82,9 +85,9 @@ export interface CreateManagementItemArgs {
   redirectFrom?: string; // redirects from an old app id to the current app id
 }
 
-export interface NavigationCardsSubject
-  extends Pick<CardsNavigationComponentProps, 'hideLinksTo' | 'extendAppDefinitons'> {
+export interface NavigationCardsSubject extends Pick<CardsNavigationComponentProps, 'hideLinksTo'> {
   enabled: boolean;
+  extendAppDefinitons?: Record<string, AppDefinition>;
 }
 
 export interface AppDependencies {
