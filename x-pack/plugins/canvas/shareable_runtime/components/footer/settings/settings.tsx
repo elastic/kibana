@@ -6,7 +6,14 @@
  */
 
 import React, { useState, FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiThemeProvider,
+} from '@elastic/eui';
 import { useCanvasShareableState } from '../../../context';
 import { Refs } from '../../../types';
 import { ToolbarSettings } from './toolbar_settings';
@@ -25,12 +32,14 @@ interface Props {
 export const SettingsComponent: FC<Props> = ({ refs }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const button = (
-    <EuiButtonIcon
-      color="ghost"
-      iconType="gear"
-      aria-label="Settings"
-      onClick={() => setPopoverOpen(!isPopoverOpen)}
-    />
+    <EuiThemeProvider colorMode="dark">
+      <EuiButtonIcon
+        color="text"
+        iconType="gear"
+        aria-label="Settings"
+        onClick={() => setPopoverOpen(!isPopoverOpen)}
+      />
+    </EuiThemeProvider>
   );
 
   const flattenPanelTree = (tree: any, array: any[] = []) => {
