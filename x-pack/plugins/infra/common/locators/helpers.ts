@@ -12,6 +12,8 @@ import {
   LogViewColumnConfiguration,
   LogViewReference,
   ResolvedLogView,
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
 import { flowRight } from 'lodash';
 import type { InfraClientCoreSetup } from '../../public/types';
@@ -23,8 +25,6 @@ import {
   replaceLogPositionInQueryString,
   replaceLogViewInQueryString,
 } from '../url_state_storage_service';
-import type { LogsLocatorParams } from './logs_locator';
-import type { NodeLogsLocatorParams } from './node_logs_locator';
 
 interface LocationToDiscoverParams {
   core: InfraClientCoreSetup;

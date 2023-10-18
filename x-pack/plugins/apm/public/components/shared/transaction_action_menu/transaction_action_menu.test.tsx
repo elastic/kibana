@@ -10,11 +10,16 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { License } from '@kbn/licensing-plugin/common/license';
+import {
+  LOGS_LOCATOR_ID,
+  NODE_LOGS_LOCATOR_ID,
+} from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
+  infraLocatorsMock,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
@@ -31,6 +36,21 @@ const apmContextMock = {
   core: {
     ...mockApmPluginContextValue.core,
     application: { capabilities: { apm: { save: true }, ml: {} } },
+  },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn((id: string) => {
+          if (id === LOGS_LOCATOR_ID) {
+            return infraLocatorsMock.logsLocator;
+          }
+
+          if (id === NODE_LOGS_LOCATOR_ID) {
+            return infraLocatorsMock.nodeLogsLocator;
+          }
+        }),
+      },
+    },
   },
 } as unknown as ApmPluginContextValue;
 
@@ -68,12 +88,8 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 };
 
 const expectInfraLocatorsToBeCalled = () => {
-  expect(
-    apmContextMock.infra?.locators.nodeLogsLocator.getRedirectUrl
-  ).toBeCalled();
-  expect(
-    apmContextMock.infra?.locators.logsLocator.getRedirectUrl
-  ).toBeCalled();
+  expect(infraLocatorsMock.nodeLogsLocator.getRedirectUrl).toBeCalled();
+  expect(infraLocatorsMock.logsLocator.getRedirectUrl).toBeCalled();
 };
 
 describe('TransactionActionMenu component', () => {

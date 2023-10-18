@@ -135,7 +135,7 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const { core, uiActions, infra, share } = useApmPluginContext();
+  const { core, uiActions, share } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
 
