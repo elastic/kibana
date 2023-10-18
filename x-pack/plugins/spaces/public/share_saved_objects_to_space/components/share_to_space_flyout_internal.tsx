@@ -143,7 +143,6 @@ function createDefaultChangeSpacesHandler(
         defaultMessage: `'{object}' was removed from {spacesTarget}.`,
         values: {
           object: title,
-          relativesCount,
           spacesTarget: getSpacesTargetString(spacesToRemove),
         },
         description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example string: "'Finance dashboard' was removed from 1 space.", "'Finance dashboard' was removed from all spaces."`,
