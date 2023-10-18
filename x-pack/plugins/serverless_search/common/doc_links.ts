@@ -76,7 +76,7 @@ class ESDocLinks {
     this.phpClient = newDocLinks.serverlessClients.phpGettingStarted;
     // Python
     this.pythonApiReference = newDocLinks.serverlessClients.pythonGettingStarted;
-    this.pythonBasicConfig = newDocLinks.clients.pythonConnecting;
+    this.pythonBasicConfig = newDocLinks.serverlessClients.pythonGettingStarted;
     this.pythonClient = newDocLinks.serverlessClients.pythonGettingStarted;
     // Python
     this.rubyBasicConfig = newDocLinks.serverlessClients.rubyGettingStarted;

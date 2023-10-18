@@ -38,6 +38,7 @@ import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
+import { isAccessControlDisabledException } from '../../utils/identify_exceptions';
 import { validateEnum } from '../../utils/validate_enum';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
@@ -203,9 +204,27 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      await startSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
-      return response.ok();
+      try {
+        const { client } = (await context.core).elasticsearch;
+        await startSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
+        return response.ok();
+      } catch (error) {
+        if (isAccessControlDisabledException(error)) {
+          return createError({
+            errorCode: ErrorCode.ACCESS_CONTROL_DISABLED,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.connectors.accessControlSync.accessControlDisabledError',
+              {
+                defaultMessage:
+                  'Access control sync cannot be created. You must first enable Document Level Security.',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
     })
   );
 
