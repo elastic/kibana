@@ -33,6 +33,7 @@ export function dataRecognizer(
    * @apiName RecognizeIndex
    * @apiDescription By supplying an index pattern, discover if any of the modules are a match for data in that index.
    * @apiSchema (params) recognizeModulesSchema
+   * @apiSchema (query) moduleFilterSchema
    * @apiSuccess {object[]} modules Array of objects describing the modules which match the index pattern, sorted by module ID.
    * @apiSuccessExample {json} Success-Response:
    * [{
@@ -115,6 +116,7 @@ export function dataRecognizer(
    * @apiDescription Retrieve a whole ML module, containing jobs, datafeeds and saved objects. If
    *    no module ID is supplied, returns all modules.
    * @apiSchema (params) moduleIdParamSchema
+   * @apiSchema (query) moduleFilterSchema
    * @apiSuccess {object} module When a module ID is specified, returns a module object containing
    *      all of the jobs, datafeeds and saved objects which will be created when the module is setup.
    * @apiSuccess {object[]} modules If no module ID is supplied, an array of all modules will be returned.
