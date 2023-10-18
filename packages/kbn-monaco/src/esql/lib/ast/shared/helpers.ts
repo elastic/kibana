@@ -378,3 +378,21 @@ export function getDurationItemsWithQuantifier(quantifier: number = 1) {
       ...rest,
     }));
 }
+
+export function sourceExists(index: string, sources: Set<string>) {
+  if (sources.has(index)) {
+    return true;
+  }
+  // it is a fuzzy match
+  if (index[index.length - 1] === '*') {
+    const prefix = index.substring(0, index.length - 1);
+    for (const sourceName of sources.keys()) {
+      if (sourceName.includes(prefix)) {
+        // just to be sure that there's not an exact match here
+        // i.e. index-* should not match index-
+        return sourceName.length > prefix.length;
+      }
+    }
+  }
+  return false;
+}

@@ -122,7 +122,7 @@ function getFieldMapping(
   }
 ) {
   return params.map(({ name: _name, type, ...rest }) => {
-    const typeString = type;
+    const typeString: string = type;
     if (['string', 'number', 'date', 'boolean', 'ip'].includes(typeString)) {
       return {
         name: getFieldName(typeString as 'string' | 'number' | 'date' | 'boolean' | 'ip', {
@@ -223,6 +223,8 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from index (metadata _id)`, [
       'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "(metadata"',
     ]);
+    testErrorsAndWarnings(`from ind*, other*`, []);
+    testErrorsAndWarnings(`from index*`, ['Unknown index [index*]']);
   });
 
   describe('row', () => {

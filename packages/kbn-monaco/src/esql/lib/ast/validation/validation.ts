@@ -32,6 +32,7 @@ import {
   isTimeIntervalItem,
   inKnownTimeInterval,
   printFunctionSignature,
+  sourceExists,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -460,7 +461,7 @@ function validateSource(
         locations: source.location,
       })
     );
-  } else if (source.sourceType === 'index' && !sources.has(source.name)) {
+  } else if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
     messages.push(
       getMessageFromId({
         messageId: 'unknownIndex',
