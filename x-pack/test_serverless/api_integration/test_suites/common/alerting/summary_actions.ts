@@ -40,7 +40,10 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('Summary actions', () => {
+  describe('Summary actions', function () {
+    // flaky on MKI, see https://github.com/elastic/kibana/issues/169204
+    this.tags(['failsOnMKI']);
+
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
