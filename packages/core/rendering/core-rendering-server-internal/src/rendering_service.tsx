@@ -55,7 +55,7 @@ export class RenderingService {
         router,
         renderer: bootstrapRendererFactory({
           uiPlugins,
-          serverBasePath: http.basePath.serverBasePath,
+          baseHref: http.staticAssets.getHrefBase(),
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
         }),
@@ -79,7 +79,7 @@ export class RenderingService {
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
         uiPlugins,
-        serverBasePath: http.basePath.serverBasePath,
+        baseHref: http.staticAssets.getHrefBase(),
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
         userSettingsService: userSettings,

@@ -62,7 +62,7 @@ describe('bootstrapRenderer', () => {
       auth,
       packageInfo,
       uiPlugins,
-      serverBasePath: '/base-path',
+      baseHref: '/base-path',
     });
   });
 
@@ -134,7 +134,7 @@ describe('bootstrapRenderer', () => {
         auth,
         packageInfo,
         uiPlugins,
-        serverBasePath: '/base-path',
+        baseHref: '/base-path',
         userSettingsService,
       });
 
@@ -160,7 +160,7 @@ describe('bootstrapRenderer', () => {
         auth,
         packageInfo,
         uiPlugins,
-        serverBasePath: '/base-path',
+        baseHref: '/base-path',
         userSettingsService,
       });
 
@@ -186,7 +186,7 @@ describe('bootstrapRenderer', () => {
         auth,
         packageInfo,
         uiPlugins,
-        serverBasePath: '/base-path',
+        baseHref: '/base-path',
         userSettingsService,
       });
 
@@ -212,7 +212,7 @@ describe('bootstrapRenderer', () => {
         auth,
         packageInfo,
         uiPlugins,
-        serverBasePath: '/base-path',
+        baseHref: '/base-path',
         userSettingsService,
       });
 

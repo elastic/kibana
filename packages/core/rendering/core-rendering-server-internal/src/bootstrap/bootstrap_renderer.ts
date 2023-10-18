@@ -22,7 +22,8 @@ export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => Boots
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
 
 interface FactoryOptions {
-  serverBasePath: string;
+  /** Can be a URL, in the case of a CDN, or a base path if serving from Kibana */
+  baseHref: string;
   packageInfo: PackageInfo;
   uiPlugins: UiPlugins;
   auth: HttpAuth;
@@ -42,7 +43,7 @@ interface RendererResult {
 
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
-  serverBasePath,
+  baseHref,
   uiPlugins,
   auth,
   userSettingsService,
@@ -78,23 +79,23 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       darkMode,
     });
     const buildHash = packageInfo.buildNum;
-    const regularBundlePath = `${serverBasePath}/${buildHash}/bundles`;
+    const bundlesHref = `${baseHref}/${buildHash}/bundles`;
 
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,
-      regularBundlePath,
+      bundlesHref,
       isAnonymousPage,
     });
 
-    const jsDependencyPaths = getJsDependencyPaths(regularBundlePath, bundlePaths);
+    const jsDependencyPaths = getJsDependencyPaths(bundlesHref, bundlePaths);
 
     // These paths should align with the bundle routes configured in
     // src/optimize/bundles_route/bundles_route.ts
     const publicPathMap = JSON.stringify({
-      core: `${regularBundlePath}/core/`,
-      'kbn-ui-shared-deps-src': `${regularBundlePath}/kbn-ui-shared-deps-src/`,
-      'kbn-ui-shared-deps-npm': `${regularBundlePath}/kbn-ui-shared-deps-npm/`,
-      'kbn-monaco': `${regularBundlePath}/kbn-monaco/`,
+      core: `${bundlesHref}/core/`,
+      'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
+      'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
+      'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
       ...Object.fromEntries(
         [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
       ),
