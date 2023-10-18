@@ -26,8 +26,14 @@ import {
   Application,
   AppProps,
   AppId,
+  AppDefinition,
+  AppDefinitionExtention,
 } from './types';
 import { appCategories, appDefinitions as defaultCardNavigationDefinitions } from './consts';
+
+type AggregatedCardNavDefinitions =
+  | NonNullable<CardsNavigationComponentProps['extendCardNavigationDefinitions']>
+  | Record<AppId, AppDefinition>;
 
 // Retrieve the data we need from a given app from the management app registry
 const getDataFromManagementApp = (app: Application) => {
@@ -39,7 +45,10 @@ const getDataFromManagementApp = (app: Application) => {
 };
 
 // Compose a list of app ids that belong to a given category
-export const getAppIdsByCategory = (category: string, appDefinitions) => {
+export const getAppIdsByCategory = (
+  category: string,
+  appDefinitions: AggregatedCardNavDefinitions
+) => {
   const appKeys = Object.keys(appDefinitions) as AppId[];
   return appKeys.filter((appId: AppId) => {
     return appDefinitions[appId].category === category;
@@ -48,17 +57,21 @@ export const getAppIdsByCategory = (category: string, appDefinitions) => {
 
 // Given a category and a list of apps, build an array of apps that belong to that category
 const getAppsForCategoryFactory =
-  (appDefinitions: CardsNavigationComponentProps['extendCardNavigationDefinitions']) =>
+  (appDefinitions: AggregatedCardNavDefinitions) =>
   (category: string, filteredApps: { [key: string]: Application }) => {
     return getAppIdsByCategory(category, appDefinitions)
       .map((appId: AppId) => {
+        if ((appDefinitions[appId] as AppDefinitionExtention<boolean>).noVerify) {
+          return appDefinitions[appId];
+        }
+
         if (!filteredApps[appId]) {
           return null;
         }
 
         return {
           ...getDataFromManagementApp(filteredApps[appId]),
-          ...appDefinitions![appId],
+          ...appDefinitions[appId],
         };
       })
       .filter(Boolean) as AppProps[];
@@ -66,7 +79,7 @@ const getAppsForCategoryFactory =
 
 const getEnabledAppsByCategory = (
   sections: AppRegistrySections[],
-  cardNavigationDefintions: CardsNavigationComponentProps['extendCardNavigationDefinitions'],
+  cardNavigationDefintions: AggregatedCardNavDefinitions,
   hideLinksTo: string[]
 ) => {
   // Flatten all apps into a single array
@@ -125,7 +138,7 @@ export const CardsNavigation = ({
   hideLinksTo = [],
   extendCardNavigationDefinitions = {},
 }: CardsNavigationComponentProps) => {
-  const cardNavigationDefintions = useMemo(
+  const cardNavigationDefintions = useMemo<AggregatedCardNavDefinitions>(
     () => ({
       ...defaultCardNavigationDefinitions,
       ...extendCardNavigationDefinitions,
