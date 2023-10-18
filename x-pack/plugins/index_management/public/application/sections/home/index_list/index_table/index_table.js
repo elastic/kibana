@@ -65,17 +65,15 @@ const getHeaders = ({ showIndexStats }) => {
     headers.status = i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
       defaultMessage: 'Status',
     });
-  }
 
-  headers.primary = i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
-    defaultMessage: 'Primaries',
-  });
+    headers.primary = i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
+      defaultMessage: 'Primaries',
+    });
 
-  headers.replica = i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
-    defaultMessage: 'Replicas',
-  });
+    headers.replica = i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
+      defaultMessage: 'Replicas',
+    });
 
-  if (showIndexStats) {
     headers.documents = i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
       defaultMessage: 'Docs count',
     });
