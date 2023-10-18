@@ -123,6 +123,12 @@ export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
   }) => Promise<MatchedItem[]>;
   getRollupsEnabled: () => boolean;
   scriptedFieldsEnabled: boolean;
+  /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices - index pattern list
+   * @returns index pattern list of index patterns that match indices
+   */
+  getExistingIndices: (indices: string[]) => Promise<string[]>;
 }
 
 export type DataViewsContract = DataViewsServicePublic;

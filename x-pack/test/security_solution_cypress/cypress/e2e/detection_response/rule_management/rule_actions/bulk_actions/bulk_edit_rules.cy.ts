@@ -194,7 +194,7 @@ describe(
       });
 
       it('Only prebuilt rules selected', () => {
-        createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
+        createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
         // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
         filterByElasticRules();
@@ -213,7 +213,7 @@ describe(
 
       it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
         getRulesManagementTableRows().then((existedRulesRows) => {
-          createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
+          createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
           // modal window should show how many rules can be edit, how many not
           selectAllRules();
@@ -238,7 +238,7 @@ describe(
       });
 
       it('Prebuilt and custom rules selected: user cancels action', () => {
-        createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
+        createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
         getRulesManagementTableRows().then((rows) => {
           // modal window should show how many rules can be edit, how many not
