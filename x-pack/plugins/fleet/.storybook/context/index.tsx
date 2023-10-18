@@ -13,7 +13,8 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { CoreScopedHistory, PluginsServiceStart } from '@kbn/core/public';
+import type { PluginsServiceStart } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
