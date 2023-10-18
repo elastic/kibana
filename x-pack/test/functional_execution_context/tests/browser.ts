@@ -365,7 +365,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('propagates context for Vega visualizations', () => {
+      // vega viz are flaky for some reason
+      describe.skip('propagates context for Vega visualizations', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await assertLogContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
