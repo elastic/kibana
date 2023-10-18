@@ -7,8 +7,8 @@
 
 import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
-export async function getESCapabilities({ plugins }: APMRouteHandlerResources) {
-  const esPlugin = await plugins.elasticsearch.start();
+export async function getESCapabilities({ core }: APMRouteHandlerResources) {
+  const es = (await core.start()).elasticsearch;
 
-  return esPlugin.getCapabilities();
+  return es.getCapabilities();
 }
