@@ -9,14 +9,15 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DashboardLink } from './gen_ai/dashboard_link';
+import { ActionTypeModel } from '../../../..';
 
 export const ReadOnlyConnectorMessage: React.FC<{
-  actionTypeId: string;
   connectorId: string;
   connectorName: string;
+  extraComponent?: ActionTypeModel['actionReadOnlyElement'];
   href: string;
-}> = ({ actionTypeId, connectorId, connectorName, href }) => {
+}> = ({ connectorId, connectorName, extraComponent, href }) => {
+  const ExtraComponent = extraComponent;
   return (
     <>
       <EuiText>
@@ -30,10 +31,10 @@ export const ReadOnlyConnectorMessage: React.FC<{
           defaultMessage="Learn more about preconfigured connectors."
         />
       </EuiLink>
-      {actionTypeId === '.gen-ai' && (
+      {ExtraComponent && (
         <>
           <EuiSpacer size="m" />
-          <DashboardLink connectorId={connectorId} connectorName={connectorName} />
+          <ExtraComponent connectorId={connectorId} connectorName={connectorName} />
         </>
       )}
     </>

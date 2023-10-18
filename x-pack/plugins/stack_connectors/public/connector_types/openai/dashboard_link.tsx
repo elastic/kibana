@@ -7,16 +7,21 @@
 
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import * as i18n from './translations';
 import { useGetDashboard } from './use_get_dashboard';
-import { useKibana } from '../../../../..';
 
 interface Props {
   connectorId: string;
   connectorName: string;
+  selectedProvider?: string;
 }
 
-export const DashboardLink: React.FC<Props> = ({ connectorId, connectorName }) => {
+export const DashboardLink: React.FC<Props> = ({
+  connectorId,
+  connectorName,
+  selectedProvider = '',
+}) => {
   const { dashboardUrl } = useGetDashboard({ connectorId });
   const {
     services: {
@@ -34,11 +39,10 @@ export const DashboardLink: React.FC<Props> = ({ connectorId, connectorName }) =
   );
   return dashboardUrl != null ? (
     <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.editConnectorForm.genAi.dashboardLink"
-        values={{ connectorName }}
-        defaultMessage="View Usage Dashboard for { connectorName } Connector"
-      />
+      {i18n.USAGE_DASHBOARD_LINK(selectedProvider, connectorName)}
     </EuiLink>
   ) : null;
 };
+
+// eslint-disable-next-line import/no-default-export
+export { DashboardLink as default };
