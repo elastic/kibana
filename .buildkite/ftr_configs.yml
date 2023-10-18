@@ -447,16 +447,16 @@ enabled:
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
 
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/exceptions/workflows/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/exceptions/workflows/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/exceptions/operators_data_types/date_numeric_types/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/exceptions/operators_data_types/date_numeric_types/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/exceptions/operators_data_types/keyword_text_long/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/exceptions/operators_data_types/keyword_text_long/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/exceptions/operators_data_types/ips_text_array/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/exceptions/operators_data_types/ips_text_array/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/rule_creation/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/trail_license/rule_creation/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/date_numeric_types/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/date_numeric_types/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/keyword_text_long/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/keyword_text_long/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips_text_array/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips_text_array/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts
 
 
 
