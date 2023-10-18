@@ -33,7 +33,7 @@ export function createConfig(
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
 
-  const { kibanaServer: reportingServer } = config;
+  const { kibanaServer: reportingServer, statefulSettings } = config;
   const serverInfo = core.http.getServerInfo();
   // set kibanaServer.hostname, default to server.host, don't allow "0.0.0.0" as it breaks in Windows
   let kibanaServerHostname = reportingServer.hostname
@@ -42,7 +42,8 @@ export function createConfig(
 
   if (
     ipaddr.isValid(kibanaServerHostname) &&
-    !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
+    !sum(ipaddr.parse(kibanaServerHostname).toByteArray()) &&
+    statefulSettings.enabled
   ) {
     logger.warn(
       `Found 'server.host: "0.0.0.0"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname.` +
