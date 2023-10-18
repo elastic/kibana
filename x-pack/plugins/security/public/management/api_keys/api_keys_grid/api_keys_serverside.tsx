@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   Criteria,
+  EuiBasicTableColumn,
+  EuiSearchBarOnChangeArgs,
+  Query,
+  SearchFilterConfig,
+} from '@elastic/eui';
+import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
   EuiFilterButton,
@@ -19,14 +24,11 @@ import {
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
-  EuiTableSelectionType,
   EuiText,
   EuiToolTip,
-  Query,
-  SearchFilterConfig,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
-import { FunctionComponent, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -44,13 +46,13 @@ import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
 import type { ApiKey, AuthenticatedUser, RestApiKey } from '../../../../common/model';
+import type { QueryApiKeyResult } from '../../../../server/routes/api_keys';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
 import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
-import { QueryApiKeyResult } from '@kbn/security-plugin/server/routes/api_keys';
 
 interface UseAsyncTableResult {
   state: QueryApiKeyResult;
@@ -143,6 +145,13 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
   const onTableChange = ({ page }: Criteria<ApiKey>) => {
     setFrom(page?.index! * pageSize);
     setPageSize(page?.size!);
+  };
+
+  const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
+    if (!args.error) {
+      const queryString = EuiSearchBar.Query.toESQueryString(args.query);
+      setQuery(queryString);
+    }
   };
 
   if (!state.value) {
@@ -316,6 +325,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
                   totalItemCount={requestState.total}
                   pagination={pagination}
                   onTableChange={onTableChange}
+                  onSearchChange={onSearchChange}
                 />
               )}
             </InvalidateProvider>
@@ -404,6 +414,7 @@ export interface ApiKeysTableProps {
   totalItemCount?: number;
   onTableChange: any;
   pagination: any;
+  onSearchChange: any;
 }
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
@@ -419,16 +430,11 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   totalItemCount = 0,
   onTableChange,
   pagination,
+  onSearchChange,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
-  const [searchQuery, setQuery] = useState(initialQuery);
-  const [searchError, setError] = useState(null);
-
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [showPerPageOptions, setShowPerPageOptions] = useState(true);
 
   const { categorizedApiKeys, typeFilters, usernameFilters, expiredFilters } = useMemo(
     () => categorizeApiKeys(apiKeys),
@@ -639,7 +645,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         isSelectable={canManageOwnApiKeys}
       /> */}
 
-      {/* <EuiSearchBar
+      <EuiSearchBar
         defaultQuery={initialQuery}
         box={{
           placeholder: 'Search...',
@@ -647,7 +653,25 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         }}
         filters={filters}
         onChange={onSearchChange}
-      /> */}
+        toolsLeft={
+          selectedItems.length ? (
+            <EuiButton
+              onClick={() => onDelete(selectedItems)}
+              color="danger"
+              iconType="trash"
+              data-test-subj="bulkInvalidateActionButton"
+            >
+              <FormattedMessage
+                id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
+                defaultMessage="Delete {count, plural, one {API key} other {# API keys}}"
+                values={{
+                  count: selectedItems.length,
+                }}
+              />
+            </EuiButton>
+          ) : undefined
+        }
+      />
       <EuiSpacer />
 
       <EuiBasicTable
