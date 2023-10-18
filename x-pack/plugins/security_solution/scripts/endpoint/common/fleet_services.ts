@@ -153,14 +153,15 @@ export const waitForHostToEnroll = async (
     found = await retryOnError(
       async () =>
         fetchFleetAgents(kbnClient, {
-          perPage: 1,
-          kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
+          perPage: 2,
           showInactive: false,
         }).then((response) => {
           if (logger) {
             logger.info(JSON.stringify(response, null, 2));
           }
-          return response.items.filter((agent) => agent.status === 'online')[0];
+          return response.items.filter(
+            (agent) => agent.local_metadata.host.hostname === hostname && agent.status === 'online'
+          )[0];
         }),
       RETRYABLE_TRANSIENT_ERRORS,
       logger
