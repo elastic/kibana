@@ -35,5 +35,5 @@
       "job_id": "hosts_network_out"
     }
   ],
-  "tags": []
+  "tags": ["observability"]
 }

@@ -35,5 +35,5 @@
       "job_id": "k8s_network_out"
     }
   ],
-  "tags": []
+  "tags": ["observability"]
 }
