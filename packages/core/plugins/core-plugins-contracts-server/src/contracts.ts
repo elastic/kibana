@@ -15,17 +15,22 @@ import type { PluginName } from '@kbn/core-base-common';
  */
 export interface PluginsServiceSetup {
   /**
-   * Returns a promise that will resolve with the requested plugin setup contracts once all plugins have been setup.
+   * Returns a promise that will resolve with the requested plugin setup contracts once all plugins have been set up.
+   *
+   * If called when plugins are already setup, the returned promise will resolve instantly.
+   *
+   * The API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly
+   * defined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.
+   *
+   * **Important:** This API should only be used when trying to address cyclic dependency issues that can't easily
+   * be solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution
+   * is made available.
+   * Therefore, by using this API, you implicitly agree to:
+   * - consider it as technical debt and open an issue to track the tech debt resolution
+   * - accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team
    *
    * @remark The execution order is not guaranteed to be consistent. Only guarantee is that the returned promise will be
-   *         resolved once all plugins are setup, and before Core's `start` is initiated.
-   *
-   * @remark If called when plugins are already setup, the returned promise will resolve instantly.
-   *
-   * @remark This API **should only be used** when trying to address cyclic dependency issues that can't be solved otherwise.
-   *
-   * @remark Requested dependencies must be defined as `runtimePluginDependencies` in the plugin's manifest,
-   *         otherwise the API will throw when called.
+   *         resolved once all plugins are started, and before Core's `start` lifecycle is resumed.
    *
    * @example
    * ```ts
@@ -37,21 +42,28 @@ export interface PluginsServiceSetup {
    *         }
    *       });
    * }
+   *
+   * @experimental
    * ```
    */
   onSetup: PluginContractResolver;
   /**
    * Returns a promise that will resolve with the requested plugin start contracts once all plugins have been started.
    *
+   * If called when plugins are already started, the returned promise will resolve instantly.
+   *
+   * The API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly
+   * defined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.
+   *
+   * **Important:** This API should only be used when trying to address cyclic dependency issues that can't easily
+   * be solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution
+   * is made available.
+   * Therefore, by using this API, you implicitly agree to:
+   * - consider it as technical debt and open an issue to track the tech debt resolution
+   * - accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team
+   *
    * @remark The execution order is not guaranteed to be consistent. Only guarantee is that the returned promise will be
    *         resolved once all plugins are started, and before Core's `start` lifecycle is resumed.
-   *
-   * @remark If called when plugins are already started, the returned promise will resolve instantly.
-   *
-   * @remark This API **should only be used** when trying to address cyclic dependency issues that can't be solved otherwise.
-   *
-   * @remark Requested dependencies must be defined as `runtimePluginDependencies` in the plugin's manifest,
-   *         otherwise the API will throw when called.
    *
    * @example
    * ```ts
@@ -63,6 +75,8 @@ export interface PluginsServiceSetup {
    *         }
    *       });
    * }
+   *
+   * @experimental
    * ```
    */
   onStart: PluginContractResolver;
@@ -77,15 +91,20 @@ export interface PluginsServiceStart {
   /**
    * Returns a promise that will resolve with the requested plugin start contracts once all plugins have been started.
    *
+   * If called when plugins are already started, the returned promise will resolve instantly.
+   *
+   * The API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly
+   * defined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.
+   *
+   * **Important:** This API should only be used when trying to address cyclic dependency issues that can't easily
+   * be solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution
+   * is made available.
+   * Therefore, by using this API, you implicitly agree to:
+   * - consider it as technical debt and open an issue to track the tech debt resolution
+   * - accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team
+   *
    * @remark The execution order is not guaranteed to be consistent. Only guarantee is that the returned promise will be
    *         resolved once all plugins are started, and before Core's `start` lifecycle is resumed.
-   *
-   * @remark If called when plugins are already started, the returned promise will resolve instantly.
-   *
-   * @remark This API **should only be used** when trying to address cyclic dependency issues that can't be solved otherwise.
-   *
-   * @remark Requested dependencies must be defined as `runtimePluginDependencies` in the plugin's manifest,
-   *         otherwise the API will throw when called.
    *
    * @example
    * ```ts
@@ -98,6 +117,8 @@ export interface PluginsServiceStart {
    *       });
    * }
    * ```
+   *
+   * @experimental
    */
   onStart: PluginContractResolver;
 }
