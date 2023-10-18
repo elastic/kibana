@@ -96,22 +96,31 @@ describe.skip('Serverless', () => {
 
   it('sets service nav item as active', () => {
     cy.visitKibana('/app/apm/service-groups');
-    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-apm:services').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:services').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
 
     cy.visitKibana('/app/apm/service-maps');
-    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-apm:services').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:services').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
 
     cy.visitKibana('/app/apm/mobile-services/foo');
-    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-apm:services').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:services').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
@@ -119,15 +128,21 @@ describe.skip('Serverless', () => {
 
   it('sets dependencies nav item as active', () => {
     cy.visitKibana('/app/apm/dependencies/inventory');
-    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-apm:dependencies').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:dependencies').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
 
     cy.visitKibana('/app/apm/dependencies/operations?dependencyName=foo');
-    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-apm:dependencies').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:dependencies').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
@@ -136,15 +151,21 @@ describe.skip('Serverless', () => {
   it('sets traces nav item as active', () => {
     cy.visitKibana('/app/apm/traces/explorer/waterfall');
 
-    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-apm:traces').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:traces').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
 
     cy.visitKibana('/app/apm/traces/explorer/critical_path');
-    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-apm:traces').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:traces').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
@@ -153,15 +174,21 @@ describe.skip('Serverless', () => {
   it('sets AIOps nav item as active', () => {
     cy.visitKibana('/app/ml/aiops/explain_log_rate_spikes');
 
-    cy.getByTestSubj('nav-item-id-aiops').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-ml:logRateAnalysis').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.aiops').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.aiops.ml:logRateAnalysis').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
 
     cy.visitKibana('/app/ml/aiops/change_point_detection');
-    cy.getByTestSubj('nav-item-id-aiops').should('have.class', 'euiSideNavItemButton-isOpen');
-    cy.getByTestSubj('nav-item-id-ml:changePointDetections').should(
+    cy.getByTestSubj('nav-item-id-observability_project_nav.aiops').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
+    cy.getByTestSubj('nav-item-id-observability_project_nav.aiops.ml:changePointDetections').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
