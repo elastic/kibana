@@ -11766,7 +11766,7 @@
                         "label": "ui_restrictions",
                         "description": [],
                         "signature": [
-                          "never[]"
+                          "string[]"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -13408,7 +13408,7 @@
                         "label": "ui_restrictions",
                         "description": [],
                         "signature": [
-                          "never[]"
+                          "string[]"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
