@@ -320,7 +320,7 @@ export const dataLoadersForRealEndpoints = (
     const { log } = await stackServicesPromise;
     if (fleetServerContainerId) {
       try {
-        await execa.sync('docker', ['kill', fleetServerContainerId]);
+        execa.sync('docker', ['kill', fleetServerContainerId]);
       } catch (error) {
         log.error(error);
       }
