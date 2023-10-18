@@ -66,7 +66,7 @@ export interface RouteConfigOptionsBody {
   /**
    * A mime type string overriding the 'Content-Type' header value received.
    */
-  override?: string | undefined;
+  override?: string;
 
   /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
