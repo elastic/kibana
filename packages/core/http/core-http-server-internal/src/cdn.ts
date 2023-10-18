@@ -14,20 +14,20 @@ export interface Input {
 }
 
 export class CdnConfig {
-  #url: undefined | URL;
+  private url: undefined | URL;
   constructor(private readonly input: Input) {
     if (this.input.url) {
-      this.#url = new URL(this.input.url); // This will throw for invalid URLs
+      this.url = new URL(this.input.url); // This will throw for invalid URLs
     }
   }
 
   public get hostname(): undefined | string {
-    return this.#url?.hostname ?? undefined;
+    return this.url?.hostname ?? undefined;
   }
 
-  public get url(): undefined | string {
-    if (this.#url) {
-      return this.#url.pathname === '/' ? this.#url.origin : format(this.#url);
+  public get baseHref(): undefined | string {
+    if (this.url) {
+      return this.url.pathname === '/' ? this.url.origin : format(this.url);
     }
   }
 
