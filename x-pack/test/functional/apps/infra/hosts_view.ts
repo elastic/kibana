@@ -94,7 +94,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const observability = getService('observability');
   const retry = getService('retry');
-  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
     'assetDetails',
@@ -110,47 +109,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   // Helpers
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
-
-  const loginWithReadOnlyUser = async () => {
-    const roleCreation = await security.role.create('global_hosts_read_privileges_role', {
-      elasticsearch: {
-        indices: [{ names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] }],
-      },
-      kibana: [
-        {
-          feature: {
-            infrastructure: ['read'],
-            advancedSettings: ['read'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    });
-
-    const userCreation = security.user.create('global_hosts_read_privileges_user', {
-      password: 'global_hosts_read_privileges_user-password',
-      roles: ['global_hosts_read_privileges_role'],
-      full_name: 'test user',
-    });
-
-    await Promise.all([roleCreation, userCreation]);
-
-    await pageObjects.security.forceLogout();
-    await pageObjects.security.login(
-      'global_hosts_read_privileges_user',
-      'global_hosts_read_privileges_user-password',
-      {
-        expectSpaceSelector: false,
-      }
-    );
-  };
-
-  const logoutAndDeleteReadOnlyUser = () =>
-    Promise.all([
-      pageObjects.security.forceLogout(),
-      security.role.delete('global_hosts_read_privileges_role'),
-      security.user.delete('global_hosts_read_privileges_user'),
-    ]);
 
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
