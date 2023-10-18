@@ -82,11 +82,5 @@ export default function ({ getPageObject, getService, getPageObjects }: FtrProvi
       await filesTab.click();
       await commonScreenshots.takeScreenshot('cases-files', screenshotDirectories, 1400, 1024);
     });
-
-    it('case settings screenshot', async () => {
-      await pageObjects.common.navigateToApp('security', { path: 'cases' });
-      await testSubjects.click('configure-case-button');
-      await commonScreenshots.takeScreenshot('cases-ui-connector', screenshotDirectories);
-    });
   });
 }
