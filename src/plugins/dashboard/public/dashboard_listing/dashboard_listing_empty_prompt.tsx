@@ -108,7 +108,6 @@ export const DashboardListingEmptyPrompt = ({
     dashboardBackup,
     goToDashboard,
     setUnsavedDashboardIds,
-    unsavedDashboardIds,
   ]);
 
   if (!showWriteControls) {
