@@ -75,7 +75,15 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
-    setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    setBreadcrumbs: (breadcrumbs) => {
+      coreStart.chrome!.setBreadcrumbs(breadcrumbs);
+      if (deps.serverless) {
+        const serverlessBreadcrumbs = breadcrumbs.filter(
+          (breadcrumb) => !breadcrumb.hiddenInServerless
+        );
+        deps.serverless.setBreadcrumbs(serverlessBreadcrumbs);
+      }
+    },
   };
 
   const services = useMemo(() => {

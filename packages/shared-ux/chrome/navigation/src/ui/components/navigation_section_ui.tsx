@@ -106,7 +106,8 @@ const nodeToEuiCollapsibleNavProps = (
 
   const { id, title, href, icon, renderAs, isActive, deepLink, isGroupTitle } = navNode;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
-  const isSelected = hasChildren ? false : isActive;
+  const isSelected = hasChildren && !isItem ? false : isActive;
+
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,

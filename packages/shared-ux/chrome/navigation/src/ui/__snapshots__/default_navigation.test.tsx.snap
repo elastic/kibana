@@ -190,6 +190,26 @@ Array [
         "title": "Deeplink ml:notifications",
       },
       Object {
+        "children": undefined,
+        "deepLink": Object {
+          "baseUrl": "/mocked",
+          "href": "http://mocked/ml:memoryUsage",
+          "id": "ml:memoryUsage",
+          "title": "Deeplink ml:memoryUsage",
+          "url": "/mocked/ml:memoryUsage",
+        },
+        "href": undefined,
+        "id": "ml:memoryUsage",
+        "isActive": false,
+        "isGroup": false,
+        "path": Array [
+          "rootNav:ml",
+          "ml:memoryUsage",
+        ],
+        "sideNavStatus": "visible",
+        "title": "Deeplink ml:memoryUsage",
+      },
+      Object {
         "children": Array [
           Object {
             "children": undefined,
@@ -476,6 +496,7 @@ Array [
               "title": "Deeplink ml:dataDrift",
               "url": "/mocked/ml:dataDrift",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:dataDrift",
             "isActive": false,
@@ -512,6 +533,7 @@ Array [
               "title": "Deeplink ml:logRateAnalysis",
               "url": "/mocked/ml:logRateAnalysis",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:logRateAnalysis",
             "isActive": false,
@@ -533,6 +555,7 @@ Array [
               "title": "Deeplink ml:logPatternAnalysis",
               "url": "/mocked/ml:logPatternAnalysis",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:logPatternAnalysis",
             "isActive": false,
@@ -554,6 +577,7 @@ Array [
               "title": "Deeplink ml:changePointDetections",
               "url": "/mocked/ml:changePointDetections",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:changePointDetections",
             "isActive": false,

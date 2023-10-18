@@ -81,6 +81,8 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
         id,
         title: node.title || '',
         path: [...path, id],
+        ...(isBreadcrumbHidden(id as ProjectPageName) && { breadcrumbStatus: 'hidden' }),
+        getIsActive: node.getIsActive,
       };
       if (chrome.navLinks.has(id)) {
         const deepLink = chrome.navLinks.get(id);

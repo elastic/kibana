@@ -10,7 +10,7 @@ import type { RouteProps } from 'react-router-dom';
 import { type Location } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 
-import type { AppMountParameters, ChromeStart, ChromeBreadcrumb } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
@@ -19,6 +19,7 @@ import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_
 import { MlPage } from '../components/ml_page';
 import { MlPages } from '../../locator';
 import { type RouteResolverContext } from './use_resolver';
+import type { MlBreadcrumb } from './breadcrumbs';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -38,7 +39,7 @@ export interface MlRoute {
    */
   title?: string;
   render(props: MlRouteProps, deps: PageDependencies): JSX.Element;
-  breadcrumbs: ChromeBreadcrumb[];
+  breadcrumbs: MlBreadcrumb[];
   /**
    * Indicated if page contains a global date picker.
    */
@@ -56,7 +57,7 @@ export interface PageProps {
 export interface PageDependencies {
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
+  setBreadcrumbs: (newBreadcrumbs: MlBreadcrumb[]) => void;
 }
 
 export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {

@@ -79,6 +79,21 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Anomaly detection',
               }),
               link: 'ml:anomalyDetection',
+              renderAs: 'item',
+              children: [
+                {
+                  link: 'ml:singleMetricViewer',
+                  breadcrumbStatus: 'hidden',
+                },
+                {
+                  link: 'ml:anomalyExplorer',
+                  breadcrumbStatus: 'hidden',
+                },
+                {
+                  link: 'ml:settings',
+                  breadcrumbStatus: 'hidden',
+                },
+              ],
             },
             {
               title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
@@ -88,6 +103,7 @@ const navigationTree: NavigationTreeDefinition = {
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
               },
+              breadcrumbStatus: 'hidden',
             },
             {
               title: i18n.translate('xpack.serverlessObservability.ml.changePointDetection', {
@@ -97,12 +113,14 @@ const navigationTree: NavigationTreeDefinition = {
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.includes(prepend('/app/ml/aiops/change_point_detection'));
               },
+              breadcrumbStatus: 'hidden',
             },
             {
               title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
                 defaultMessage: 'Job notifications',
               }),
               link: 'ml:notifications',
+              breadcrumbStatus: 'hidden',
             },
           ],
         },

@@ -49,6 +49,7 @@ import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   getMlSharedServices,
   MlSharedServices,
@@ -91,6 +92,7 @@ export interface MlStartDependencies {
   savedSearch: SavedSearchPublicPluginStart;
   contentManagement: ContentManagementPublicStart;
   presentationUtil: PresentationUtilPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -179,6 +181,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             savedSearch: pluginsStart.savedSearch,
             contentManagement: pluginsStart.contentManagement,
             presentationUtil: pluginsStart.presentationUtil,
+            serverless: pluginsStart.serverless,
           },
           params,
           this.isServerless,

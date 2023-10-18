@@ -8,6 +8,7 @@
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { ExternalPageName } from '../links/constants';
 import type { ProjectPageName } from '../links/types';
+import { mlNavLinks } from '../links/sections/ml_links';
 
 // We need to hide breadcrumbs for some pages (tabs) because they appear duplicated.
 // These breadcrumbs are incorrectly processed as trailing breadcrumbs in SecuritySolution, because of `SpyRoute` architecture limitations.
@@ -30,7 +31,11 @@ const HIDDEN_BREADCRUMBS = new Set<ProjectPageName>([
   SecurityPageName.sessions,
 ]);
 
+const ML_HIDDEN_BREADCRUMBS = new Set<ProjectPageName>(mlNavLinks.map((link) => link.id));
+
 export const isBreadcrumbHidden = (id: ProjectPageName): boolean =>
   HIDDEN_BREADCRUMBS.has(id) ||
   /* management sub-pages set their breadcrumbs themselves, the main Management breadcrumb is configured with our navigationTree definition */
-  (id.startsWith(ExternalPageName.management) && id !== ExternalPageName.management);
+  (id.startsWith(ExternalPageName.management) && id !== ExternalPageName.management) ||
+  /* ml sub-pages set their breadcrumbs themselves */
+  ML_HIDDEN_BREADCRUMBS.has(id);

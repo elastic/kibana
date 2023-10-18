@@ -34,6 +34,9 @@ export const defaultNavigation: MlNodeDefinition = {
       link: 'ml:notifications',
     },
     {
+      link: 'ml:memoryUsage',
+    },
+    {
       title: i18n.translate('defaultNavigation.ml.anomalyDetection', {
         defaultMessage: 'Anomaly Detection',
       }),
@@ -111,6 +114,9 @@ export const defaultNavigation: MlNodeDefinition = {
             defaultMessage: 'Data drift',
           }),
           link: 'ml:dataDrift',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/data_drift'));
+          },
         },
       ],
     },
@@ -122,12 +128,21 @@ export const defaultNavigation: MlNodeDefinition = {
       children: [
         {
           link: 'ml:logRateAnalysis',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
+          },
         },
         {
           link: 'ml:logPatternAnalysis',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/aiops/log_categorization'));
+          },
         },
         {
           link: 'ml:changePointDetections',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/aiops/change_point_detection'));
+          },
         },
       ],
     },
