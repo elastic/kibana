@@ -144,13 +144,6 @@ const mockCorePlugins = {
   observability: {},
   observabilityShared: {},
   data: {},
-  elasticsearch: {
-    start: jest.fn().mockImplementation(() => ({
-      getESCapabilities: jest.fn().mockResolvedValue({
-        serverless: false,
-      }),
-    })),
-  },
 };
 
 const mockUnifiedSearch = {

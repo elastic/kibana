@@ -144,6 +144,8 @@ async function createAnomalyDetectionJob({
       ],
     });
 
+    // Waiting for the index is not enabled in serverless, this could potentially cause
+    // problems when creating jobs in parallels
     if (!serverless) {
       await waitForIndexStatus({
         client: esClient,

@@ -6,16 +6,16 @@
  */
 
 import React, { ReactNode } from 'react';
-import { css } from '@emotion/react';
-import { compact } from 'lodash';
+import { css } from '@emotion/css';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { ChatItem } from './chat_item';
 import { ChatWelcomePanel } from './chat_welcome_panel';
+import { ChatConsolidatedItems } from './chat_consolidated_items';
 import type { Feedback } from '../feedback_buttons';
-import type { Message } from '../../../common';
-import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import { ChatActionClickHandler } from './types';
+import { type Message } from '../../../common';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import type { ChatActionClickHandler } from './types';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -38,7 +38,7 @@ export interface ChatTimelineItem
 }
 
 export interface ChatTimelineProps {
-  items: ChatTimelineItem[];
+  items: Array<ChatTimelineItem | ChatTimelineItem[]>;
   knowledgeBase: UseKnowledgeBaseResult;
   onEdit: (item: ChatTimelineItem, message: Message) => Promise<void>;
   onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
@@ -56,35 +56,44 @@ export function ChatTimeline({
   onStopGenerating,
   onActionClick,
 }: ChatTimelineProps) {
-  const filteredItems = items.filter((item) => !item.display.hide);
-
   return (
     <EuiCommentList
       css={css`
         padding-bottom: 32px;
       `}
     >
-      {compact(
-        filteredItems.map((item, index) => (
-          <ChatItem
-            // use index, not id to prevent unmounting of component when message is persisted
-            key={index}
-            {...item}
-            onFeedbackClick={(feedback) => {
-              onFeedback(item, feedback);
-            }}
-            onRegenerateClick={() => {
-              onRegenerate(item);
-            }}
-            onEditSubmit={(message) => {
-              return onEdit(item, message);
-            }}
-            onStopGeneratingClick={onStopGenerating}
-            onActionClick={onActionClick}
-          />
-        ))
+      {items.length <= 1 ? (
+        <ChatWelcomePanel knowledgeBase={knowledgeBase} />
+      ) : (
+        items.map((item, index) =>
+          Array.isArray(item) ? (
+            <ChatConsolidatedItems
+              key={index}
+              consolidatedItem={item}
+              onFeedback={onFeedback}
+              onRegenerate={onRegenerate}
+              onEditSubmit={onEdit}
+              onStopGenerating={onStopGenerating}
+              onActionClick={onActionClick}
+            />
+          ) : (
+            <ChatItem
+              // use index, not id to prevent unmounting of component when message is persisted
+              key={index}
+              {...item}
+              onFeedbackClick={(feedback) => {
+                onFeedback(item, feedback);
+              }}
+              onRegenerateClick={() => {
+                onRegenerate(item);
+              }}
+              onEditSubmit={(message) => onEdit(item, message)}
+              onStopGeneratingClick={onStopGenerating}
+              onActionClick={onActionClick}
+            />
+          )
+        )
       )}
-      {filteredItems.length === 1 ? <ChatWelcomePanel knowledgeBase={knowledgeBase} /> : null}
     </EuiCommentList>
   );
 }

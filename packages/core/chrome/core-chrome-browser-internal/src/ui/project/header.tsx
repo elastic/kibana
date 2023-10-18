@@ -110,6 +110,7 @@ export interface Props {
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
+  toggleSideNav: (isCollapsed: boolean) => void;
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -172,6 +173,7 @@ export const ProjectHeader = ({
   children,
   prependBasePath,
   docLinks,
+  toggleSideNav,
   ...observables
 }: Props) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
@@ -196,7 +198,7 @@ export const ProjectHeader = ({
           <EuiHeader position="fixed" className="header__firstBar">
             <EuiHeaderSection grow={false}>
               <Router history={application.history}>
-                <ProjectNavigation>{children}</ProjectNavigation>
+                <ProjectNavigation toggleSideNav={toggleSideNav}>{children}</ProjectNavigation>
               </Router>
 
               <EuiHeaderSectionItem>
