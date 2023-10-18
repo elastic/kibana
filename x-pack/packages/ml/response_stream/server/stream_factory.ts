@@ -14,13 +14,12 @@ import type { Headers, ResponseHeaders } from '@kbn/core-http-server';
 
 import { acceptCompression } from './accept_compression';
 
-const KEEP_ALIVE_FLUSH_FIX_INTERVAL_MS = 500;
-
 // type guard to identify compressed stream
 function isCompressedSream(arg: unknown): arg is zlib.Gzip {
   return typeof arg === 'object' && arg !== null && typeof (arg as zlib.Gzip).flush === 'function';
 }
 
+const FLUSH_KEEP_ALIVE_INTERVAL_MS = 500;
 const FLUSH_PAYLOAD_SIZE = 4 * 1024;
 
 class UncompressedResponseStream extends Stream.PassThrough {}
@@ -78,6 +77,7 @@ export function streamFactory<T = unknown>(
   const flushPayload = flushFix
     ? crypto.randomBytes(FLUSH_PAYLOAD_SIZE).toString('hex')
     : undefined;
+  let chunkSizeSinceKeepAlive = 0;
 
   const stream = isCompressed ? zlib.createGzip() : new UncompressedResponseStream();
 
@@ -139,8 +139,11 @@ export function streamFactory<T = unknown>(
       if (flushFix && streamType === 'ndjson') {
         setTimeout(function repeat() {
           if (!tryToEnd) {
-            push({ flushPayload } as unknown as T);
-            setTimeout(repeat, KEEP_ALIVE_FLUSH_FIX_INTERVAL_MS);
+            if (chunkSizeSinceKeepAlive < FLUSH_PAYLOAD_SIZE) {
+              push({ flushPayload } as unknown as T);
+            }
+            chunkSizeSinceKeepAlive = 0;
+            setTimeout(repeat, FLUSH_KEEP_ALIVE_INTERVAL_MS);
           }
         }, 0);
       }
@@ -159,7 +162,12 @@ export function streamFactory<T = unknown>(
     }
 
     try {
-      const line = streamType === 'ndjson' ? `${JSON.stringify(d)}${DELIMITER}` : d;
+      const line =
+        streamType === 'ndjson' ? `${JSON.stringify(d)}${DELIMITER}` : (d as unknown as string);
+
+      if (streamType === 'ndjson') {
+        chunkSizeSinceKeepAlive += new Blob([line]).size;
+      }
 
       waitForCallbacks.push(1);
       const writeOk = stream.write(line, () => {
