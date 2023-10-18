@@ -47,6 +47,13 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
 };
 
+export type APMLogEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
+  body: {
+    size: number;
+    track_total_hits: boolean | number;
+  };
+};
+
 type APMEventWrapper<T> = Omit<T, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
@@ -63,6 +70,9 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   span: Span;
   metric: Metric;
 }[T];
+
+type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
+  InferSearchResponseOf<TParams>;
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
   InferSearchResponseOf<
@@ -197,10 +207,10 @@ export class APMEventClient {
     });
   }
 
-  async logEventSearch<TParams extends APMEventESSearchRequest>(
+  async logEventSearch<TParams extends APMLogEventESSearchRequest>(
     operationName: string,
     params: TParams
-  ): Promise<TypedSearchResponse<TParams>> {
+  ): Promise<TypedLogEventSearchResponse<TParams>> {
     // Reusing indices configured for errors since both events and errors are stored as logs.
     const index = processorEventsToIndex([ProcessorEvent.error], this.indices);
 
@@ -213,7 +223,7 @@ export class APMEventClient {
     ];
 
     const searchParams = {
-      ...omit(params, 'apm', 'body'),
+      ...omit(params, 'body'),
       index,
       body: {
         ...params.body,
@@ -233,7 +243,7 @@ export class APMEventClient {
     return this.callAsyncWithDebug({
       cb: (opts) =>
         this.esClient.search(searchParams, opts) as unknown as Promise<{
-          body: TypedSearchResponse<TParams>;
+          body: TypedLogEventSearchResponse<TParams>;
         }>,
       operationName,
       params: searchParams,

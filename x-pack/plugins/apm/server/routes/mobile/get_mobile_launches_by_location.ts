@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
@@ -68,9 +67,6 @@ export async function getLaunchesByLocation({
   const response = await apmEventClient.logEventSearch(
     'get_mobile_location_launches',
     {
-      apm: {
-        events: [ProcessorEvent.event],
-      },
       body: {
         track_total_hits: false,
         size: 0,
