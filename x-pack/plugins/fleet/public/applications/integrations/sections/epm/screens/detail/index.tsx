@@ -168,7 +168,6 @@ export function Detail() {
     }
     return getPackageInstallStatus(packageInfo?.name)?.status;
   }, [packageInfo, getPackageInstallStatus]);
-
   const isInstalled = useMemo(
     () =>
       packageInstallStatus === InstallStatus.installed ||
@@ -199,10 +198,18 @@ export function Detail() {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
+    isFetchedAfterMount: packageInfoIsFetchedAfterMount,
     refetch: refetchPackageInfo,
-  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, {
-    prerelease: prereleaseIntegrationsEnabled,
-  });
+  } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    {
+      prerelease: prereleaseIntegrationsEnabled,
+    },
+    {
+      refetchOnMount: 'always',
+    }
+  );
 
   const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
   const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
@@ -246,14 +253,18 @@ export function Detail() {
     }
   }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
-  const isLoading = packageInfoLoading || isPermissionCheckLoading || firstTimeUserLoading;
+  const isLoading =
+    packageInfoLoading ||
+    isPermissionCheckLoading ||
+    firstTimeUserLoading ||
+    !packageInfoIsFetchedAfterMount;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.item) {
+    if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
       const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
 
@@ -267,7 +278,7 @@ export function Detail() {
         setPackageInstallStatus({ name, status, version: installedVersion || null });
       }
     }
-  }, [packageInfoData, setPackageInstallStatus, setPackageInfo]);
+  }, [packageInfoData, packageInfoIsFetchedAfterMount, setPackageInstallStatus, setPackageInfo]);
 
   const integrationInfo = useMemo(
     () =>
