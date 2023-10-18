@@ -13,11 +13,11 @@ export const errorMessageStrings = {
     callout: {
       title: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.title', {
-          defaultMessage: 'Error encountered',
+          defaultMessage: 'Unable to load page',
         }),
       body: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.body', {
-          defaultMessage: 'Try refreshing this page.',
+          defaultMessage: 'Try refreshing the page to resolve the issue.',
         }),
       showDetailsButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.detailButton', {
@@ -44,7 +44,7 @@ export const errorMessageStrings = {
       },
       pageReloadButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.pageReloadButton', {
-          defaultMessage: 'Refresh',
+          defaultMessage: 'Refresh page',
         }),
     },
   },
@@ -52,16 +52,15 @@ export const errorMessageStrings = {
     callout: {
       title: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.title', {
-          defaultMessage: 'Please refresh the page',
+          defaultMessage: 'Refresh the page',
         }),
       body: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.body', {
-          defaultMessage:
-            'A part of this page encountered an issue loading. Please refresh this page in your browser to correct this issue.',
+          defaultMessage: 'A refresh fixes problems caused by upgrades or being offline.',
         }),
       pageReloadButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.pageReloadButton', {
-          defaultMessage: 'Refresh',
+          defaultMessage: 'Refresh page',
         }),
     },
   },
