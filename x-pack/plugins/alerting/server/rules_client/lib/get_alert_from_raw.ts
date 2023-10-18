@@ -37,6 +37,9 @@ export interface GetAlertFromRawParams {
   omitGeneratedValues?: boolean;
 }
 
+/**
+ * @deprecated in favor of transformRuleDomainToRule
+ */
 export function getAlertFromRaw<Params extends RuleTypeParams>(
   context: RulesClientContext,
   id: string,
