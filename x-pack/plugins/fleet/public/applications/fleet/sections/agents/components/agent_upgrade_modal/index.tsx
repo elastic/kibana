@@ -380,7 +380,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
                   <FormattedMessage
                     id="xpack.fleet.upgradeAgents.upgradeSingleTimeout"
                     // TODO: Add link to docs regarding agent upgrade cooldowns
-                    defaultMessage="Note that you may only restart an upgrade every {minutes} minutes."
+                    defaultMessage="Note that you may only restart an upgrade every {minutes} minutes to ensure that the upgrade will not be rolled back."
                     values={{
                       minutes: AGENT_UPGRADE_COOLDOWN_IN_MIN,
                     }}

@@ -82,7 +82,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       return response.customError({
         statusCode: 429,
         body: {
-          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago. Please wait ${timeToWaitString} before trying again.`,
+          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago. Please wait ${timeToWaitString} before trying again to ensure the upgrade will not be rolled back.`,
         },
         headers: {
           // retry-after expects seconds
