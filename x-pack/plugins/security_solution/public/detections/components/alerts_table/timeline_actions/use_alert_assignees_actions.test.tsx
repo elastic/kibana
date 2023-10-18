@@ -6,7 +6,6 @@
  */
 
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { renderHook } from '@testing-library/react-hooks';
 import type { UseAlertAssigneesActionsProps } from './use_alert_assignees_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
@@ -23,7 +22,7 @@ jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
 jest.mock('../../../containers/detection_engine/alerts/use_suggest_users');
 
-const mockUserProfiles: UserProfileWithAvatar[] = [
+const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
   { uid: 'user-id-2', enabled: true, user: { username: 'fakeUser2' }, data: {} },
 ];

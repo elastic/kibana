@@ -6,7 +6,6 @@
  */
 
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
@@ -17,7 +16,7 @@ import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_suggest_users');
 
-const mockUserProfiles: UserProfileWithAvatar[] = [
+const mockUserProfiles = [
   { uid: 'default-test-assignee-id-1', enabled: true, user: { username: 'user1' }, data: {} },
   { uid: 'default-test-assignee-id-2', enabled: true, user: { username: 'user2' }, data: {} },
 ];

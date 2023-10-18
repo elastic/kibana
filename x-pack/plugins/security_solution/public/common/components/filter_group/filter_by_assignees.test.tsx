@@ -7,13 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import { FilterByAssigneesPopover } from './filter_by_assignees';
 import { TEST_IDS } from './constants';
 import { TestProviders } from '../../mock';
 
-const mockUserProfiles: UserProfileWithAvatar[] = [
+const mockUserProfiles = [
   {
     uid: 'user-id-1',
     enabled: true,
