@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import {
