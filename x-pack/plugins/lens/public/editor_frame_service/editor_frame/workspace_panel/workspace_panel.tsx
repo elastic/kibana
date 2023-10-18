@@ -642,10 +642,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
+  const displayOptions =
+    localState.expressionToRender !== null
+      ? activeVisualization?.getDisplayOptions?.(visualization.state, datasourceLayers)
+      : undefined;
+
   return (
     <WorkspacePanelWrapper
       framePublicAPI={framePublicAPI}
-      visualizationState={visualization.state}
       visualizationId={visualization.activeId}
       datasourceStates={datasourceStates}
       datasourceMap={datasourceMap}
@@ -653,7 +657,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       isFullscreen={isFullscreen}
       lensInspector={lensInspector}
       getUserMessages={getUserMessages}
-      hasSomethingToRender={localState.expressionToRender !== null}
+      displayOptions={displayOptions}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>

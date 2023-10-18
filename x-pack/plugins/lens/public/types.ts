@@ -975,11 +975,23 @@ export interface VisualizationType {
   showExperimentalBadge?: boolean;
 }
 
-export interface VisualizationDisplayOptions {
+export type VisualizationDisplayOptions = {
   noPanelTitle?: boolean;
   noPadding?: boolean;
-  aspectRatio?: { x: number; y: number };
-}
+} & (
+  | {
+      // if maxDimensions are provided, the aspect ratio will be computed from them
+      maxDimensionsPX?: {
+        x: number;
+        y: number;
+      };
+      aspectRatio?: never;
+    }
+  | {
+      aspectRatio?: { x: number; y: number };
+      maxDimensionsPX?: never;
+    }
+);
 
 interface VisualizationStateFromContextChangeProps {
   suggestions: Suggestion[];
@@ -1294,7 +1306,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /**
    * Gets custom display options for showing the visualization.
    */
-  getDisplayOptions?: (state: T) => VisualizationDisplayOptions;
+  getDisplayOptions?: (state: T, datasourceLayers: DatasourceLayers) => VisualizationDisplayOptions;
 
   /**
    * Get RenderEventCounters events for telemetry

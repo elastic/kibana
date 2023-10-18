@@ -17,6 +17,7 @@ import {
   UserMessagesGetter,
   VisualizationMap,
   Visualization,
+  VisualizationDisplayOptions,
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { ChartSwitch } from './chart_switch';
@@ -25,7 +26,6 @@ import {
   useLensDispatch,
   updateVisualizationState,
   DatasourceStates,
-  VisualizationState,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
@@ -40,7 +40,6 @@ export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
-  visualizationState: VisualizationState['state'];
   visualizationMap: VisualizationMap;
   visualizationId: string | null;
   datasourceMap: DatasourceMap;
@@ -48,7 +47,7 @@ export interface WorkspacePanelWrapperProps {
   isFullscreen: boolean;
   lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
-  hasSomethingToRender: boolean;
+  displayOptions: VisualizationDisplayOptions | undefined;
 }
 
 export function VisualizationToolbar(props: {
@@ -93,13 +92,12 @@ export function VisualizationToolbar(props: {
 export function WorkspacePanelWrapper({
   children,
   framePublicAPI,
-  visualizationState,
   visualizationId,
   visualizationMap,
   datasourceMap,
   isFullscreen,
   getUserMessages,
-  hasSomethingToRender,
+  displayOptions,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
@@ -109,11 +107,30 @@ export function WorkspacePanelWrapper({
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const userMessages = getUserMessages('toolbar');
 
-  const displayOptions = hasSomethingToRender
-    ? activeVisualization?.getDisplayOptions?.(visualizationState)
-    : undefined;
-
   const aspectRatio = displayOptions?.aspectRatio;
+  const maxDimensionsPX = displayOptions?.maxDimensionsPX;
+
+  const visDimensionsCSS = aspectRatio
+    ? {
+        aspectRatio: `${aspectRatio.x}/${aspectRatio.y}`,
+        ...(aspectRatio.y > aspectRatio.x
+          ? {
+              height: '100%',
+              width: 'auto',
+            }
+          : {
+              height: 'auto',
+              width: '100%',
+            }),
+      }
+    : maxDimensionsPX
+    ? {
+        maxWidth: maxDimensionsPX && `${maxDimensionsPX.x}px`,
+        maxHeight: maxDimensionsPX && `${maxDimensionsPX.y}px`,
+        aspectRatio:
+          maxDimensionsPX.x && maxDimensionsPX.y && `${maxDimensionsPX.x}/${maxDimensionsPX.y}`,
+      }
+    : {};
 
   return (
     <EuiPageTemplate
@@ -216,21 +233,9 @@ export function WorkspacePanelWrapper({
             grow={false}
             css={{
               flexGrow: 0,
-              ...(!aspectRatio
-                ? {
-                    height: '100%',
-                    width: '100%',
-                  }
-                : aspectRatio.y > aspectRatio.x
-                ? {
-                    height: '100%',
-                    width: 'auto',
-                  }
-                : {
-                    height: 'auto',
-                    width: '100%',
-                  }),
-              aspectRatio: aspectRatio ? `${aspectRatio.x}/${aspectRatio.y}` : undefined,
+              height: '100%',
+              width: '100%',
+              ...visDimensionsCSS,
             }}
           >
             <WorkspaceTitle />
