@@ -237,6 +237,16 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
 } from '@kbn/core-plugins-server';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  NotFoundPluginContractResolverResponseItem,
+  FoundPluginContractResolverResponseItem,
+  PluginContractResolverResponseItem,
+  PluginContractMap,
+  PluginContractResolverResponse,
+  PluginContractResolver,
+} from '@kbn/core-plugins-contracts-server';
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 

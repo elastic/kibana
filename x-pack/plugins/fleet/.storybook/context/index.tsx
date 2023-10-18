@@ -13,7 +13,7 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { CoreScopedHistory } from '@kbn/core/public';
+import { CoreScopedHistory, PluginsServiceStart } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -93,6 +93,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       theme: {
         theme$: EMPTY,
       },
+      plugins: {} as unknown as PluginsServiceStart,
       authz: {
         fleet: {
           all: true,
