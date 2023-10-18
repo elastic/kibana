@@ -207,6 +207,7 @@ export function Detail() {
       prerelease: prereleaseIntegrationsEnabled,
     },
     {
+      enabled: !!settings, // Load only after settings are loaded
       refetchOnMount: 'always',
     }
   );
