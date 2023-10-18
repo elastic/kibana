@@ -46,8 +46,8 @@ import { getNewRule } from '../../../objects/rule';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../tasks/risk_scores';
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/filter_group';
 import { setRowsPerPageTo } from '../../../tasks/table_pagination';
-import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
-import { setEndDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
+import { kqlSearch } from '../../../tasks/security_header';
+import { setEndDate, updateDates } from '../../../tasks/date_picker';
 import {
   enableJob,
   navigateToNextPage,
@@ -62,14 +62,14 @@ const SIEM_KIBANA_HOST_ALERTS = 2;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 
-describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
     deleteRiskEngineConfiguration();
   });
 
-  describe('legcay risk score', () => {
+  describe('legacy risk score', () => {
     describe('Without data', () => {
       beforeEach(() => {
         login();
@@ -135,8 +135,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168490
-    describe.skip('With host risk data', () => {
+    describe('With host risk data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       });
@@ -163,7 +162,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         cy.get(HOSTS_TABLE_ALERT_CELL).should('have.length', 5);
       });
 
-      it('filters by risk level', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/168490
+      it.skip('filters by risk level', () => {
         openRiskTableFilterAndSelectTheLowOption();
 
         cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
@@ -177,8 +177,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
         cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
         cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
-
-        clearSearchBar();
       });
 
       describe('With alerts data', () => {
@@ -206,10 +204,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
           updateDates();
 
           cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
-
-          // CLEAR DATES
-          setEndDateNow();
-          updateDates();
         });
 
         it('opens alerts page when alerts count is clicked', () => {
@@ -265,8 +259,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
         cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
         cy.get(USERS_TABLE_ROWS).should('have.length', 1);
-
-        clearSearchBar();
       });
 
       describe('With alerts data', () => {
@@ -294,10 +286,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
           updateDates();
 
           cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
-
-          // CLEAR DATES
-          setEndDateNow();
-          updateDates();
         });
 
         it('opens alerts page when alerts count is clicked', () => {
@@ -398,8 +386,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
         cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
         cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
-
-        clearSearchBar();
       });
 
       describe('With alerts data', () => {
@@ -427,10 +413,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
           updateDates();
 
           cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
-
-          // CLEAR DATES
-          setEndDateNow();
-          updateDates();
         });
 
         it('opens alerts page when alerts count is clicked', () => {
@@ -491,8 +473,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
         cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
         cy.get(USERS_TABLE_ROWS).should('have.length', 1);
-
-        clearSearchBar();
       });
 
       describe('With alerts data', () => {
@@ -520,10 +500,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
           updateDates();
 
           cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
-
-          // CLEAR DATES
-          setEndDateNow();
-          updateDates();
         });
 
         it('opens alerts page when alerts count is clicked', () => {
