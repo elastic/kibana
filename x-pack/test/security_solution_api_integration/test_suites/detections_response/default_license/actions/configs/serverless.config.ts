@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './get_slack_action';
-export * from './get_web_hook_action';
-export * from './remove_uuid_from_actions';
-export * from './create_new_action';
+
+import { createTestConfig } from '../../../../../config/serverless/config.base';
+
+export default createTestConfig({
+  testFiles: [require.resolve('..')],
+  junit: {
+    reportName: 'Detection Engine Serverless/Actions API Integration Tests',
+  },
+});

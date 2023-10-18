@@ -457,7 +457,9 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips_text_array/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts
-
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/ess.config.ts
+ 
 
 
 

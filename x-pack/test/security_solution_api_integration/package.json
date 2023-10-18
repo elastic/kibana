@@ -24,6 +24,10 @@
     "rule_creation:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/default_license/rule_creation/configs/serverless.config.ts",
     "rule_creation:runner:serverless": "node ../../../scripts/functional_test_runner  --config=test_suites/detections_response/default_license/rule_creation/configs/serverless.config.ts --grep @serverless --grep  @brokenInServerless --invert",
     "rule_creation:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts",
-    "rule_creation:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts --grep @ess"
+    "rule_creation:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts --grep @ess",
+    "actions:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/default_license/actions/configs/serverless.config.ts",
+    "actions:runner:serverless": "node ../../../scripts/functional_test_runner  --config=test_suites/detections_response/default_license/actions/configs/serverless.config.ts --grep @serverless --grep  @brokenInServerless --invert",
+    "actions:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/default_license/actions/configs/ess.config.ts",
+    "actions:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/detections_response/default_license/actions/configs/ess.config.ts --grep @ess"
   }
 }
