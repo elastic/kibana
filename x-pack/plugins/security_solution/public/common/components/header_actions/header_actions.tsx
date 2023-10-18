@@ -24,7 +24,6 @@ import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
 import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_renderers_browser';
 import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
 import * as i18n from './translations';
 
