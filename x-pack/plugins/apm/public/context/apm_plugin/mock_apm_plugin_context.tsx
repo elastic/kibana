@@ -150,7 +150,7 @@ const mockCorePlugins = {
         serverless: false,
       }),
     })),
-  }
+  },
 };
 
 const mockUnifiedSearch = {
