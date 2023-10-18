@@ -26,9 +26,13 @@ export const DocumentViewModeToggle = ({
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
+  const tabsPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const tabsCss = css`
-    padding: 0 ${includesNormalTabsStyle ? euiTheme.size.s : 0};
-    margin-top: ${includesNormalTabsStyle ? '17px' : 0};
+    padding: ${tabsPadding} ${tabsPadding} 0 ${tabsPadding};
+
+    .euiTab__content {
+      line-height: ${euiTheme.size.xl};
+    }
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -38,16 +42,10 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs
-      size="m"
-      css={tabsCss}
-      data-test-subj="dscViewModeToggle"
-      bottomBorder={includesNormalTabsStyle}
-    >
+    <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
-        className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeDocumentButton"
       >
         <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
@@ -55,7 +53,6 @@ export const DocumentViewModeToggle = ({
       <EuiTab
         isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
-        className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeFieldStatsButton"
       >
         <FormattedMessage

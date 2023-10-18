@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
 import React, { useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -96,6 +96,7 @@ export const DiscoverMainContent = ({
           responsive={false}
           data-test-subj="dscMainContent"
         >
+          <EuiHorizontalRule margin="none" />
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
