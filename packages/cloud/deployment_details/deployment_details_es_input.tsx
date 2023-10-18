@@ -22,7 +22,7 @@ export const DeploymentDetailsEsInput: FC<{ elasticsearchUrl: string }> = ({
   return (
     <EuiFormRow
       label={i18n.translate('cloud.deploymentDetails.elasticEndpointLabel', {
-        defaultMessage: 'Elastic endpoint',
+        defaultMessage: 'Elasticsearch endpoint',
       })}
       fullWidth
     >

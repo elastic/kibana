@@ -8,3 +8,4 @@
 
 export { Navigation } from './navigation';
 export type { Props as RecentlyAccessedProps } from './recently_accessed';
+export type { PanelContent, PanelComponentProps } from './panel';

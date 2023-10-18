@@ -44,6 +44,7 @@ export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices>
       navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
       onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
       activeNodes$: params.activeNodes$ ?? new BehaviorSubject([]),
+      isSideNavCollapsed: true,
       cloudLinks: {
         billingAndSub: {
           title: 'Billing & Subscriptions',
