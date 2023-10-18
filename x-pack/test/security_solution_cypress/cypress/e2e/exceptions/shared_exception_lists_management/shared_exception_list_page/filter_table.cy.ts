@@ -38,7 +38,7 @@ const getExceptionList2 = () => ({
 });
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
 

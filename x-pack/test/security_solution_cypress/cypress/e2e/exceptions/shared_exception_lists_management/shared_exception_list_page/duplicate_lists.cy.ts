@@ -44,7 +44,7 @@ const getExceptionList2 = () => ({
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // Flaky in serverless tests
-describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
