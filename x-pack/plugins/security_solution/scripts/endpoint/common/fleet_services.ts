@@ -153,9 +153,14 @@ export const waitForHostToEnroll = async (
       async () =>
         fetchFleetAgents(kbnClient, {
           perPage: 1,
-          kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online) or (status:degraded)`,
+          kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
           showInactive: false,
-        }).then((response) => response.items[0]),
+        }).then((response) => {
+          if (logger) {
+            logger.info(JSON.stringify(response, null, 2));
+          }
+          return response.items.filter((agent) => agent.status === 'online')[0];
+        }),
       RETRYABLE_TRANSIENT_ERRORS,
       logger
     );
@@ -168,7 +173,9 @@ export const waitForHostToEnroll = async (
 
   if (!found) {
     throw new Error(
-      `Timed out waiting for host [${hostname}] to show up in Fleet in ${timeoutMs} ms`
+      `Timed out waiting for host [${hostname}] to show up in Fleet in ${
+        timeoutMs / 60
+      } second timeout after ${(Date.now() - started.getTime()) / 60} ms`
     );
   }
 
