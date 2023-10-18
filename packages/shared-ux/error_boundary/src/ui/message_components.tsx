@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
-  EuiAccordion,
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiEmptyPrompt,
-  EuiPanel,
-  EuiSpacer,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiLink,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -28,39 +29,65 @@ export interface ErrorCalloutProps {
   reloadWindow: () => void;
 }
 
-export const FatalPrompt = (props: ErrorCalloutProps) => {
-  const { error, errorInfo, name: errorComponentName, reloadWindow } = props;
-  const errorBoundaryAccordionId = useGeneratedHtmlId({ prefix: 'errorBoundaryAccordion' });
+const CodePanel = (props: ErrorCalloutProps & { onClose: () => void }) => {
+  const { error, errorInfo, name: errorComponentName, onClose } = props;
+  const simpleFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'simpleFlyoutTitle',
+  });
   return (
-    <EuiCallOut title={strings.fatal.callout.title()} color="danger" iconType="error">
-      <p>{strings.fatal.callout.body()}</p>
-      <EuiAccordion
-        id={errorBoundaryAccordionId}
-        buttonContent={strings.fatal.callout.showDetailsButton()}
-        data-test-subj="fatalPromptDetailsBtn"
-      >
-        <EuiPanel paddingSize="m">
-          <EuiCodeBlock>
-            {errorComponentName && (
-              <p>{strings.fatal.callout.details.componentName(errorComponentName)}</p>
-            )}
-            {error?.message && <p>{error.message}</p>}
-            {errorInfo?.componentStack}
-          </EuiCodeBlock>
-        </EuiPanel>
-      </EuiAccordion>
-      <EuiSpacer />
-      <p>
-        <EuiButton
-          color="danger"
-          fill={true}
-          onClick={reloadWindow}
-          data-test-subj="fatalPromptReloadBtn"
-        >
-          {strings.fatal.callout.pageReloadButton()}
-        </EuiButton>
-      </p>
-    </EuiCallOut>
+    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>{strings.fatal.callout.details.title()}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiCodeBlock>
+          {errorComponentName && (
+            <p>{strings.fatal.callout.details.componentName(errorComponentName)}</p>
+          )}
+          {error?.message && <p>{error.message}</p>}
+          {errorInfo?.componentStack}
+        </EuiCodeBlock>
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
+
+export const FatalPrompt = (props: ErrorCalloutProps) => {
+  const { reloadWindow } = props;
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  return (
+    <EuiEmptyPrompt
+      title={<h2>{strings.fatal.callout.title()}</h2>}
+      color="danger"
+      iconType="error"
+      body={
+        <>
+          <p>{strings.fatal.callout.body()}</p>
+          <p>
+            <EuiButton
+              color="danger"
+              iconType="refresh"
+              fill={true}
+              onClick={reloadWindow}
+              data-test-subj="fatalPromptReloadBtn"
+            >
+              {strings.fatal.callout.pageReloadButton()}
+            </EuiButton>
+          </p>
+          <p>
+            <EuiLink color="danger" onClick={() => setIsFlyoutVisible(true)}>
+              {strings.fatal.callout.showDetailsButton()}
+            </EuiLink>
+            {isFlyoutVisible ? (
+              <CodePanel {...props} onClose={() => setIsFlyoutVisible(false)} />
+            ) : null}
+          </p>
+        </>
+      }
+    />
   );
 };
 
@@ -68,12 +95,18 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
   const { reloadWindow } = props;
   return (
     <EuiEmptyPrompt
-      iconType="broom"
+      iconType="warning"
       title={<h2>{strings.recoverable.callout.title()}</h2>}
       body={<p>{strings.recoverable.callout.body()}</p>}
-      color="primary"
+      color="warning"
       actions={
-        <EuiButton fill={true} onClick={reloadWindow} data-test-subj="recoverablePromptReloadBtn">
+        <EuiButton
+          color="warning"
+          iconType="refresh"
+          fill={true}
+          onClick={reloadWindow}
+          data-test-subj="recoverablePromptReloadBtn"
+        >
           {strings.recoverable.callout.pageReloadButton()}
         </EuiButton>
       }

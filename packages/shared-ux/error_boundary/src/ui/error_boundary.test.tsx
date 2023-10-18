@@ -44,7 +44,7 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(await findByText('You need to refresh')).toBeVisible();
+    expect(await findByText('Please refresh the page')).toBeVisible();
     expect(await findByText('Refresh')).toBeVisible();
 
     (await findByTestId('recoverablePromptReloadBtn')).click();
@@ -62,7 +62,7 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(await findByText('An error was encountered')).toBeVisible();
+    expect(await findByText('Error encountered')).toBeVisible();
     expect(await findByText('Try refreshing this page.')).toBeVisible();
     expect(await findByText('Show details')).toBeVisible();
     expect(await findByText('Refresh')).toBeVisible();

@@ -10,16 +10,10 @@ import { i18n } from '@kbn/i18n';
 
 export const errorMessageStrings = {
   fatal: {
-    inline: {
-      title: () =>
-        i18n.translate('sharedUXPackages.error_boundary.fatal.inline.text', {
-          defaultMessage: 'Error: unable to load',
-        }),
-    },
     callout: {
       title: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.title', {
-          defaultMessage: 'An error was encountered',
+          defaultMessage: 'Error encountered',
         }),
       body: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.body', {
@@ -35,6 +29,10 @@ export const errorMessageStrings = {
             defaultMessage: 'An error occurred in {name}:',
             values: { name: errorComponentName },
           }),
+        title: () =>
+          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.title', {
+            defaultMessage: 'Error details',
+          }),
       },
       pageReloadButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.pageReloadButton', {
@@ -46,21 +44,15 @@ export const errorMessageStrings = {
     callout: {
       title: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.title', {
-          defaultMessage: 'You need to refresh',
+          defaultMessage: 'Please refresh the page',
         }),
       body: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.body', {
           defaultMessage:
-            'An error occurred when trying to load a part of the page. Refreshing the page should resolve the issue.',
+            'A part of this page encountered an issue loading. Please refresh this page in your browser to correct this issue.',
         }),
       pageReloadButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.pageReloadButton', {
-          defaultMessage: 'Refresh',
-        }),
-    },
-    inline: {
-      linkText: () =>
-        i18n.translate('sharedUXPackages.error_boundary.recoverable.inline.pageReloadButton', {
           defaultMessage: 'Refresh',
         }),
     },
