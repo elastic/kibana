@@ -17,8 +17,8 @@ export class StaticAssets {
    * other hrefs to static assets.
    */
   getHrefBase(request?: KibanaRequest): string {
-    if (this.cdnConfig.url) {
-      return this.cdnConfig.url;
+    if (this.cdnConfig.baseHref) {
+      return this.cdnConfig.baseHref;
     }
     // TODO: not sure if this is necessary for static asset HREFs.
     if (request) {

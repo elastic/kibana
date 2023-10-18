@@ -21,8 +21,8 @@ export class CdnConfig {
     }
   }
 
-  public get hostname(): undefined | string {
-    return this.url?.hostname ?? undefined;
+  public get host(): undefined | string {
+    return this.url?.host ?? undefined;
   }
 
   public get baseHref(): undefined | string {
@@ -32,7 +32,7 @@ export class CdnConfig {
   }
 
   public getCspConfig(): CspAdditionalConfig {
-    const hostname = this.hostname;
+    const hostname = this.host;
     if (!hostname) return {};
     return {
       default_src: [hostname],
