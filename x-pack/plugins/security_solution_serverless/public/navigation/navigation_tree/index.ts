@@ -14,7 +14,7 @@ import type { Services } from '../../common/services';
 import type { ProjectNavLinks, ProjectPageName } from '../links/types';
 import { getFormatChromeProjectNavNodes } from './chrome_navigation_tree';
 import { formatNavigationTree } from './navigation_tree';
-import { CATEGORIES } from '../side_navigation/categories';
+import { CATEGORIES } from '../categories';
 
 const projectCategories = CATEGORIES as Array<LinkCategory<ProjectPageName>>;
 

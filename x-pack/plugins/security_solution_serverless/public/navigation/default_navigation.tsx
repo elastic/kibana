@@ -4,44 +4,80 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import type { NavigationTreeDefinition } from '@kbn/shared-ux-chrome-navigation';
-import type { SideNavComponent } from '@kbn/core-chrome-browser';
-import type { Services } from '../common/services';
+import React, { useCallback, useMemo } from 'react';
+import { DefaultNavigation, NavigationKibanaProvider } from '@kbn/shared-ux-chrome-navigation';
+import type {
+  ContentProvider,
+  PanelComponentProps,
+} from '@kbn/shared-ux-chrome-navigation/src/ui/components/panel/types';
+import { SolutionSideNavPanelContent } from '@kbn/security-solution-side-nav/panel';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '../common/services';
+import type { ProjectNavigationLink, ProjectPageName } from './links/types';
+// import { processCloudLinks } from './links/nav_links';
+import { useFormattedSideNavItems } from './side_navigation/use_side_nav_items';
+import { CATEGORIES, FOOTER_CATEGORIES } from './categories';
+import { formatNavigationTree } from './navigation_tree/navigation_tree';
 
-const SecurityDefaultNavigationLazy = React.lazy(() =>
-  import('@kbn/shared-ux-chrome-navigation').then(
-    ({ DefaultNavigation, NavigationKibanaProvider }) => ({
-      default: React.memo<{
-        navigationTree: NavigationTreeDefinition;
-        services: Services;
-      }>(function SecurityDefaultNavigation({ navigationTree, services }) {
-        return (
-          <NavigationKibanaProvider
-            core={services}
-            serverless={services.serverless}
-            cloud={services.cloud}
-          >
-            <DefaultNavigation
-              navigationTree={navigationTree}
-              dataTestSubj="securitySolutionSideNav"
-            />
-          </NavigationKibanaProvider>
-        );
-      }),
-    })
-  )
-);
+const getPanelContentProvider = (
+  projectNavLinks: ProjectNavigationLink[]
+): React.FC<PanelComponentProps> =>
+  React.memo(function PanelContentProvider({ selectedNode: { path }, closePanel }) {
+    // const { cloud } = useKibana().services;
+    const linkId = path[path.length - 1] as ProjectPageName;
+    const currentPanelItem = projectNavLinks.find((item) => item.id === linkId);
 
-export const getDefaultNavigationComponent = (
-  navigationTree: NavigationTreeDefinition,
-  services: Services
-): SideNavComponent =>
-  function SecuritySideNavComponent() {
+    const { title = '', links = [], categories } = currentPanelItem ?? {};
+    // const panelLinks = processCloudLinks(links, cloud);
+    const items = useFormattedSideNavItems(links);
+
+    if (items.length === 0) {
+      return null;
+    }
     return (
-      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-        <SecurityDefaultNavigationLazy navigationTree={navigationTree} services={services} />
-      </Suspense>
+      <SolutionSideNavPanelContent
+        title={title}
+        items={items}
+        categories={categories}
+        onClose={closePanel}
+      />
     );
-  };
+  });
+
+const usePanelContentProvider = (projectNavLinks: ProjectNavigationLink[]): ContentProvider => {
+  return useCallback(
+    () => ({
+      content: getPanelContentProvider(projectNavLinks),
+    }),
+    [projectNavLinks]
+  );
+};
+
+export const SecuritySideNavComponent = React.memo(function SecuritySideNavComponent() {
+  const services = useKibana().services;
+  const projectNavLinks = useObservable(services.getProjectNavLinks$(), []);
+
+  const navigationTree = useMemo(
+    () => formatNavigationTree(projectNavLinks, CATEGORIES, FOOTER_CATEGORIES),
+    [projectNavLinks]
+  );
+
+  const panelContentProvider = usePanelContentProvider(projectNavLinks);
+
+  return (
+    <NavigationKibanaProvider
+      core={services}
+      serverless={services.serverless}
+      cloud={services.cloud}
+    >
+      <DefaultNavigation
+        dataTestSubj="securitySolutionSideNav"
+        navigationTree={navigationTree}
+        panelContentProvider={panelContentProvider}
+      />
+    </NavigationKibanaProvider>
+  );
+});
+
+// eslint-disable-next-line import/no-default-export
+export default SecuritySideNavComponent;
