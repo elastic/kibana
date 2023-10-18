@@ -82,7 +82,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.serverlessSearch.apiKey.panel.title', {
-                defaultMessage: 'Prepare an API Key',
+                defaultMessage: 'Add an API Key',
               })}
             </h3>
           </EuiTitle>
@@ -90,7 +90,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
           <EuiText size="s">
             {i18n.translate('xpack.serverlessSearch.apiKey.panel.description', {
               defaultMessage:
-                'An API key is a private, unique identifier for authentication and authorization.',
+                'Use an existing key, or create a new one and copy it somewhere safe.',
             })}
           </EuiText>
           <EuiSpacer size="l" />

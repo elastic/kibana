@@ -78,6 +78,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         login: {
           pathname: '/login',
         },
+        reportingManagement: {
+          pathname: '/app/management/insightsAndAlerting/reporting',
+        },
         securitySolution: {
           pathname: '/app/security',
         },
