@@ -8,12 +8,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { LogsLocatorDefinition, LogsLocatorDependencies } from './logs_locator';
 import { NodeLogsLocatorDefinition } from './node_logs_locator';
-import type { LogsLocatorParams } from './logs_locator';
-import type { NodeLogsLocatorParams } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findInventoryFields } from '../inventory_models';
 import moment from 'moment';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import {
+  DEFAULT_LOG_VIEW,
+  LogViewReference,
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 
 const setupLogsLocator = async () => {
   const deps: LogsLocatorDependencies = {
