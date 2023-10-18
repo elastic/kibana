@@ -7,6 +7,11 @@
 
 import { createMemoryHistory } from 'history';
 import { IBasePath } from '@kbn/core/public';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import {
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
 import {
@@ -65,8 +70,9 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         allDatasetsLocator,
-        logsLocator,
-        nodeLogsLocator,
+        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
+        nodeLogsLocator:
+          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
         infraLinksAvailable: false,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -131,8 +137,9 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        logsLocator,
-        nodeLogsLocator,
+        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
+        nodeLogsLocator:
+          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
         allDatasetsLocator,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
@@ -217,8 +224,9 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        logsLocator,
-        nodeLogsLocator,
+        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
+        nodeLogsLocator:
+          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
         allDatasetsLocator,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
