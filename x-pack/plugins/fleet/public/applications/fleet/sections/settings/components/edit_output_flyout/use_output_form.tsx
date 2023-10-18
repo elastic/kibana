@@ -32,6 +32,7 @@ import {
   sendPostOutput,
   useComboInput,
   useInput,
+  useSecretInput,
   useNumberInput,
   useSelectInput,
   useSwitchInput,
@@ -84,6 +85,7 @@ export interface OutputFormInputsType {
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
+  sslKeySecretInput: ReturnType<typeof useSecretInput>;
   sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   proxyIdInput: ReturnType<typeof useInput>;
   loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
@@ -249,6 +251,19 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isSSLEditable
   );
   const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isSSLEditable);
+
+  const validateSecretSSLKey = (value: string | { id: string } | undefined) => {
+    if (!value || typeof value === 'object') {
+      return undefined;
+    }
+
+    return validateSSLKey(value);
+  };
+  const sslKeySecretInput = useSecretInput(
+    output?.secrets?.ssl?.key,
+    validateSecretSSLKey,
+    isSSLEditable
+  );
 
   const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isDisabled('proxy_id'));
 
@@ -443,6 +458,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     caTrustedFingerprintInput,
     sslCertificateInput,
     sslKeyInput,
+    sslKeySecretInput,
     sslCertificateAuthoritiesInput,
     proxyIdInput,
     loadBalanceEnabledInput,
@@ -496,6 +512,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
+    const sslKeySecretValid = sslKeySecretInput.validate();
     const diskQueuePathValid = diskQueuePathInput.validate();
     const partitioningRandomGroupEventsValid = kafkaPartitionTypeRandomInput.validate();
     const partitioningRoundRobinGroupEventsValid = kafkaPartitionTypeRoundRobinInput.validate();
@@ -507,7 +524,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         additionalYamlConfigValid &&
         nameInputValid &&
         sslCertificateValid &&
-        sslKeyValid
+        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
       );
     }
     if (isKafka) {
@@ -554,6 +571,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     caTrustedFingerprintInput,
     sslCertificateInput,
     sslKeyInput,
+    sslKeySecretInput,
     diskQueuePathInput,
     kafkaPartitionTypeRandomInput,
     kafkaPartitionTypeRoundRobinInput,
@@ -732,11 +750,18 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               config_yaml: additionalYamlConfigInput.value,
               ssl: {
                 certificate: sslCertificateInput.value,
-                key: sslKeyInput.value,
+                key: sslKeyInput.value || undefined,
                 certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
                   (val) => val !== ''
                 ),
               },
+              ...(sslKeySecretInput.value && {
+                secrets: {
+                  ssl: {
+                    key: sslKeySecretInput.value,
+                  },
+                },
+              }),
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewLogstashOutput;
@@ -836,6 +861,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     logstashHostsInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
+    sslKeySecretInput.value,
     sslCertificateAuthoritiesInput.value,
     elasticsearchUrlInput.value,
     caTrustedFingerprintInput.value,

@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -43,6 +44,8 @@ import type { Output, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+
+import { SecretFormRow } from './output_form_secret_form_row';
 
 import { OutputFormKafkaSection } from './output_form_kafka';
 
@@ -161,28 +164,50 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             )}
           />
         </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
-              defaultMessage="Client SSL certificate key"
-            />
-          }
-          {...inputs.sslKeyInput.formRowProps}
-        >
-          <EuiTextArea
+        {output && output?.ssl?.key ? (
+          <EuiFormRow
             fullWidth
-            rows={5}
-            {...inputs.sslKeyInput.props}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
-              {
-                defaultMessage: 'Specify certificate key',
-              }
-            )}
-          />
-        </EuiFormRow>
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
+                defaultMessage="Client SSL certificate key"
+              />
+            }
+            {...inputs.sslKeyInput.formRowProps}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeyInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </EuiFormRow>
+        ) : (
+          <SecretFormRow
+            fullWidth
+            title={i18n.translate('xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle', {
+              defaultMessage: 'Client SSL certificate key',
+            })}
+            {...inputs.sslKeySecretInput.formRowProps}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeySecretInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
+        )}
       </>
     );
   };
