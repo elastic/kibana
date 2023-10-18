@@ -99,7 +99,6 @@ export function getPathForServiceDetail(
       ...defaultQueryParams,
       ...payload.query,
     };
-    console.log('query', payload.query, query);
 
     path = apmRouter.link(apmPath, {
       path: { serviceName: payload.serviceName },
