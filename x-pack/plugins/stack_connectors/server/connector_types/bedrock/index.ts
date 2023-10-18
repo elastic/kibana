@@ -43,7 +43,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.bedrock.configurationErrorApiProvider', {
-        defaultMessage: 'Error configuring AWS Bedrock action: {err}',
+        defaultMessage: 'Error configuring Amazon Bedrock action: {err}',
         values: {
           err,
         },

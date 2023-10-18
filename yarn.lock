@@ -5090,6 +5090,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-alerting-test-data@link:x-pack/packages/observability/alerting_test_data":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/observability":
   version "0.0.0"
   uid ""

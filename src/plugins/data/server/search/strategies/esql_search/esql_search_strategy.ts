@@ -11,6 +11,8 @@ import type { Logger } from '@kbn/core/server';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
 
+const ES_TIMEOUT_IN_MS = 120000;
+
 export const esqlSearchStrategyProvider = (
   logger: Logger,
   useInternalUser: boolean = false
@@ -23,6 +25,17 @@ export const esqlSearchStrategyProvider = (
    * @returns `Observable<IEsSearchResponse<any>>`
    */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
+    const abortController = new AbortController();
+    // We found out that there are cases where we are not aborting correctly
+    // For this reasons we want to manually cancel he abort signal after 2 mins
+
+    abortSignal?.addEventListener('abort', () => {
+      abortController.abort();
+    });
+
+    // Also abort after two mins
+    setTimeout(() => abortController.abort(), ES_TIMEOUT_IN_MS);
+
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
@@ -41,8 +54,10 @@ export const esqlSearchStrategyProvider = (
             },
           },
           {
-            signal: abortSignal,
+            signal: abortController.signal,
             meta: true,
+            // we don't want the ES client to retry (default value is 3)
+            maxRetries: 0,
           }
         );
         return {
