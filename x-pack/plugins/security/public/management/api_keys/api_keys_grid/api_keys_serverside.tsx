@@ -19,13 +19,14 @@ import {
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
+  EuiTableSelectionType,
   EuiText,
   EuiToolTip,
   Query,
   SearchFilterConfig,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
-import type { FunctionComponent } from 'react';
+import { FunctionComponent, useCallback } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -49,6 +50,64 @@ import { useCapabilities } from '../../../components/use_capabilities';
 import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
+import { QueryApiKeyResult } from '@kbn/security-plugin/server/routes/api_keys';
+
+interface UseAsyncTableResult {
+  state: QueryApiKeyResult;
+  isLoading: boolean;
+  query: string;
+  from: number;
+  pageSize: number;
+  setQuery: React.Dispatch<React.SetStateAction<string>>;
+  setFrom: React.Dispatch<React.SetStateAction<number>>;
+  setPageSize: React.Dispatch<React.SetStateAction<number>>;
+  fetchApiKeys: () => Promise<void>;
+}
+
+const useAsyncTable = (): UseAsyncTableResult => {
+  const [state, setState] = useState<QueryApiKeyResult>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>('');
+  const [from, setFrom] = useState<number>(0);
+  const [pageSize, setPageSize] = useState(10);
+  const { services } = useKibana<CoreStart>();
+
+  const fetchApiKeys = async () => {
+    setIsLoading(true);
+
+    const requestBody = {
+      query: query || undefined,
+      from,
+      size: pageSize,
+    };
+
+    try {
+      const response = await new APIKeysAPIClient(services.http).queryApiKeys(requestBody);
+
+      setState(response);
+    } catch (error) {
+      console.error('Error fetching API keys:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApiKeys();
+  }, [query, from]);
+
+  return {
+    state,
+    isLoading,
+    query,
+    from,
+    setQuery,
+    setFrom,
+    fetchApiKeys,
+    pageSize,
+    setPageSize,
+  };
+};
 
 export const APIKeysGridPageServer: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
@@ -64,13 +123,30 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
 
+  const {
+    state: requestState,
+    isLoading,
+    query,
+    from,
+    setQuery,
+    setFrom,
+    fetchApiKeys,
+    pageSize,
+    setPageSize,
+  } = useAsyncTable();
+
   useEffect(() => {
-    queryApiKeysFn({});
-    // queryApiKeysFn();
+    fetchApiKeys();
+    queryApiKeysFn();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const onTableChange = ({ page }: Criteria<ApiKey>) => {
+    setFrom(page?.index! * pageSize);
+    setPageSize(page?.size!);
+  };
+
   if (!state.value) {
-    if (state.loading) {
+    if (isLoading) {
       return (
         <SectionLoading>
           <FormattedMessage
@@ -80,10 +156,10 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
         </SectionLoading>
       );
     }
-
+    console.log({ state });
     return (
       <ApiKeysEmptyPrompt error={state.error}>
-        <EuiButton iconType="refresh" onClick={() => getApiKeys()}>
+        <EuiButton iconType="refresh" onClick={() => fetchApiKeys()}>
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeys.retryButton"
             defaultMessage="Try again"
@@ -93,17 +169,14 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
     );
   }
 
-  const [
-    {
-      apiKeys,
-      canManageCrossClusterApiKeys,
-      canManageApiKeys,
-      canManageOwnApiKeys,
-      total: totalItemCount,
-    },
+  const [_, currentUser] = state.value && state.value;
 
-    currentUser,
-  ] = state.value;
+  const pagination = {
+    pageIndex: from / pageSize,
+    pageSize,
+    totalItemCount: requestState.total,
+    pageSizeOptions: [10, 25, 50],
+  };
 
   return (
     <>
@@ -121,7 +194,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
               queryApiKeysFn();
             }}
             onCancel={() => history.push({ pathname: '/' })}
-            canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+            canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
           />
         </Breadcrumb>
       </Route>
@@ -146,7 +219,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
         />
       )}
 
-      {!apiKeys.length ? (
+      {!requestState.apiKeys.length ? (
         <ApiKeysEmptyPrompt readOnly={readOnly}>
           <EuiButton
             {...reactRouterNavigate(history, '/create')}
@@ -204,7 +277,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
               </>
             )}
 
-            {canManageOwnApiKeys && !canManageApiKeys ? (
+            {requestState.canManageOwnApiKeys && !requestState.canManageApiKeys ? (
               <>
                 <EuiCallOut
                   title={
@@ -219,13 +292,13 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
             ) : undefined}
 
             <InvalidateProvider
-              isAdmin={canManageApiKeys}
+              isAdmin={requestState.canManageApiKeys}
               notifications={services.notifications}
               apiKeysAPIClient={new APIKeysAPIClient(services.http)}
             >
               {(invalidateApiKeyPrompt) => (
                 <ApiKeysTable
-                  apiKeys={apiKeys}
+                  apiKeys={requestState.apiKeys}
                   onClick={(apiKey) => setOpenedApiKey(apiKey)}
                   onDelete={(apiKeysToDelete) =>
                     invalidateApiKeyPrompt(
@@ -235,12 +308,14 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
                   }
                   currentUser={currentUser}
                   createdApiKey={createdApiKey}
-                  canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-                  canManageApiKeys={canManageApiKeys}
-                  canManageOwnApiKeys={canManageOwnApiKeys}
+                  canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
+                  canManageApiKeys={requestState.canManageApiKeys}
+                  canManageOwnApiKeys={requestState.canManageOwnApiKeys}
                   readOnly={readOnly}
                   loading={state.loading}
-                  totalItemCount={totalItemCount}
+                  totalItemCount={requestState.total}
+                  pagination={pagination}
+                  onTableChange={onTableChange}
                 />
               )}
             </InvalidateProvider>
@@ -327,6 +402,8 @@ export interface ApiKeysTableProps {
   onClick(apiKey: CategorizedApiKey): void;
   onDelete(apiKeys: CategorizedApiKey[]): void;
   totalItemCount?: number;
+  onTableChange: any;
+  pagination: any;
 }
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
@@ -340,6 +417,8 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   readOnly = false,
   loading = false,
   totalItemCount = 0,
+  onTableChange,
+  pagination,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
@@ -350,36 +429,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [showPerPageOptions, setShowPerPageOptions] = useState(true);
-
-  const onTableChange = ({ page }: Criteria<CategorizedApiKey>) => {
-    if (page) {
-      const { index: pageIndexV, size: pageSizeV } = page;
-      setPageIndex(pageIndexV);
-      setPageSize(pageSizeV);
-    }
-  };
-  const onSearchQueryChange = ({ query, error }) => {
-    if (error) {
-      setError(error);
-    } else {
-      setError(null);
-      setQuery(query);
-      let esQueryDsl;
-      let esQueryString;
-
-      try {
-        esQueryDsl = EuiSearchBar.Query.toESQuery(query);
-      } catch (e) {
-        esQueryDsl = e.toString();
-      }
-      try {
-        esQueryString = EuiSearchBar.Query.toESQueryString(query);
-      } catch (e) {
-        esQueryString = e.toString();
-      }
-      console.log({ esQueryDsl, esQueryString });
-    }
-  };
 
   const { categorizedApiKeys, typeFilters, usernameFilters, expiredFilters } = useMemo(
     () => categorizeApiKeys(apiKeys),
@@ -535,33 +584,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       ],
     });
   }
-  const findApiKeys = (apiKeysList: CategorizedApiKey[], pageIndex: number, pageSize: number) => {
-    let pageOfItems;
 
-    if (!pageIndex && !pageSize) {
-      pageOfItems = apiKeysList;
-    } else {
-      const startIndex = pageIndex * pageSize;
-      pageOfItems = apiKeysList.slice(
-        startIndex,
-        Math.min(startIndex + pageSize, apiKeysList.length)
-      );
-    }
-
-    return {
-      pageOfItems,
-    };
-  };
-
-  const { pageOfItems } = findApiKeys(categorizedApiKeys, pageIndex, pageSize);
-
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount,
-    pageSizeOptions: [10, 0],
-    showPerPageOptions,
-  };
   return (
     <>
       {/* <EuiInMemoryTable
@@ -616,19 +639,19 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         isSelectable={canManageOwnApiKeys}
       /> */}
 
-      <EuiSearchBar
+      {/* <EuiSearchBar
         defaultQuery={initialQuery}
         box={{
           placeholder: 'Search...',
           incremental: true,
         }}
         filters={filters}
-        onChange={onSearchQueryChange}
-      />
+        onChange={onSearchChange}
+      /> */}
       <EuiSpacer />
 
       <EuiBasicTable
-        items={pageOfItems}
+        items={categorizedApiKeys}
         itemId="id"
         columns={columns}
         loading={loading}
