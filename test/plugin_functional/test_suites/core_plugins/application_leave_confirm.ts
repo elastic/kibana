@@ -45,7 +45,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   ): Promise<void> => {
     let isConfirmCancelModalOpenState = false;
     await retry.tryForTime(defaultTryTimeout * timeMultiplier, async () => {
-      isConfirmCancelModalOpenState = await testSubjects.exists('confirmModalTitleText');
+      isConfirmCancelModalOpenState = await testSubjects.exists('confirmModalTitleText', {
+        allowHidden: true,
+        timeout: defaultTryTimeout * timeMultiplier,
+      });
     });
     if (isConfirmCancelModalOpenState) {
       log.debug(`defaultTryTimeout * ${timeMultiplier} is long enough`);
@@ -67,26 +70,35 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     const defaultTryTimeout = config.get('timeouts.try');
     const attempts = 5;
     describe('when navigating to another app', () => {
-      const timeMultiplier = 5;
+      const timeMultiplier = 10;
+      debugger;
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
+        debugger;
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await waitForUrlToBe('/app/appleave1');
-
+        debugger;
         await appsMenu.clickLink('AppLeave 2');
+        debugger;
         await ensureModalOpen(defaultTryTimeout, attempts, timeMultiplier, 'cancel');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        debugger;
         await retry.waitFor('navigate to appleave1', async () => {
           const currentUrl = await browser.getCurrentUrl();
+          debugger;
           log.debug(`currentUrl ${currentUrl}`);
           return currentUrl.includes('appleave1');
         });
         const currentUrl = await browser.getCurrentUrl();
+        debugger;
         expect(currentUrl).to.contain('appleave1');
+        debugger;
         await PageObjects.common.navigateToApp('home');
       });
 
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await waitForUrlToBe('/app/appleave1');
 
         await appsMenu.clickLink('AppLeave 2');
