@@ -40,7 +40,7 @@ const apmContextMock = {
   share: {
     url: {
       locators: {
-        get: jest.fn((id: string) => {
+        get: (id: string) => {
           if (id === LOGS_LOCATOR_ID) {
             return infraLocatorsMock.logsLocator;
           }
@@ -48,7 +48,7 @@ const apmContextMock = {
           if (id === NODE_LOGS_LOCATOR_ID) {
             return infraLocatorsMock.nodeLogsLocator;
           }
-        }),
+        },
       },
     },
   },
