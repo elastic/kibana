@@ -1167,6 +1167,19 @@ export const WithUIComponents = (args: NavigationServices) => {
               </Navigation.Item>
               <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
 
+              <Navigation.Group<any> id="group:block" title="This is a block group">
+                <Navigation.Group id="group1">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+                <Navigation.Group id="group2" title="Nested group" renderAs="accordion">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+              </Navigation.Group>
+
               <Navigation.Group<any>
                 id="group:openPanel"
                 link="item1"
