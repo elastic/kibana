@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiCode,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -67,8 +68,15 @@ const getCompositeRuntimeFields = (dataView: DataView) =>
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor, savedObjectsManagement } =
-      useKibana<IndexPatternManagmentContext>().services;
+    const {
+      uiSettings,
+      overlays,
+      chrome,
+      dataViews,
+      IndexPatternEditor,
+      savedObjectsManagement,
+      application,
+    } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
       Record<string, RuntimeField>
@@ -261,6 +269,20 @@ export const EditIndexPattern = withRouter(
               <EuiSpacer />
               <EuiCallOut title={mappingConflictHeader} color="warning" iconType="warning">
                 <p>{mappingConflictLabel}</p>
+                <EuiLink
+                  href={application.getUrlForApp('management', {
+                    path: `/kibana/dataViews/dataView/${encodeURIComponent(
+                      indexPattern.id!
+                    )}#/?_a=(fieldTypes:!(conflict),tab:indexedFields)`,
+                  })}
+                >
+                  {i18n.translate(
+                    'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
+                    {
+                      defaultMessage: 'View fields',
+                    }
+                  )}
+                </EuiLink>
               </EuiCallOut>
             </>
           )}

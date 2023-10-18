@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { uniq } from 'lodash';
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
@@ -163,8 +164,11 @@ export function Tabs({
   const [syncingStateFunc, setSyncingStateFunc] = useState<{
     getCurrentTab: () => string;
     setCurrentTab?: (newTab: string) => { tab: string };
+    getCurrentFieldTypes: () => string[] | undefined;
+    setCurrentFieldTypes?: (newFieldTypes: string[]) => { fieldTypes: string[] | undefined };
   }>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
+    getCurrentFieldTypes: () => [],
   });
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
   const [isScriptedFieldFilterOpen, setIsScriptedFieldFilterOpen] = useState(false);
@@ -186,6 +190,22 @@ export function Tabs({
   ]);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
+
+  const filteredIndexedFieldTypeFilter = useMemo(() => {
+    return uniq(
+      indexedFieldTypeFilter.filter((fieldType) =>
+        indexedFieldTypes.some((item) => item.value === fieldType)
+      )
+    );
+  }, [indexedFieldTypeFilter, indexedFieldTypes]);
+
+  const updateFieldTypeFilter = useCallback(
+    (newIndexedFieldTypeFilter: string[]) => {
+      setIndexedFieldTypeFilter(newIndexedFieldTypeFilter);
+      syncingStateFunc?.setCurrentFieldTypes?.(newIndexedFieldTypeFilter);
+    },
+    [setIndexedFieldTypeFilter, syncingStateFunc]
+  );
 
   const updateFilterItem = (
     items: FilterItems[],
@@ -299,10 +319,8 @@ export function Tabs({
                         onClick={() => setIsIndexedFilterOpen(!isIndexedFilterOpen)}
                         isSelected={isIndexedFilterOpen}
                         numFilters={indexedFieldTypes.length}
-                        hasActiveFilters={!!indexedFieldTypes.find((item) => item.checked === 'on')}
-                        numActiveFilters={
-                          indexedFieldTypes.filter((item) => item.checked === 'on').length
-                        }
+                        hasActiveFilters={filteredIndexedFieldTypeFilter.length > 0}
+                        numActiveFilters={filteredIndexedFieldTypeFilter.length}
                       >
                         {filterLabel}
                       </EuiFilterButton>
@@ -310,25 +328,27 @@ export function Tabs({
                     isOpen={isIndexedFilterOpen}
                     closePopover={() => setIsIndexedFilterOpen(false)}
                   >
-                    {indexedFieldTypes.map((item, index) => (
-                      <EuiFilterSelectItem
-                        checked={item.checked}
-                        key={item.value}
-                        onClick={() => {
-                          setIndexedFieldTypeFilter(
-                            item.checked
-                              ? indexedFieldTypeFilter.filter((f) => f !== item.value)
-                              : [...indexedFieldTypeFilter, item.value]
-                          );
-                          updateFilterItem(indexedFieldTypes, index, setIndexedFieldTypes);
-                        }}
-                        data-test-subj={`indexedFieldTypeFilterDropdown-option-${item.value}${
-                          item.checked ? '-checked' : ''
-                        }`}
-                      >
-                        {item.name}
-                      </EuiFilterSelectItem>
-                    ))}
+                    {indexedFieldTypes.map((item, index) => {
+                      const isSelected = filteredIndexedFieldTypeFilter.includes(item.value);
+                      return (
+                        <EuiFilterSelectItem
+                          checked={isSelected ? 'on' : undefined}
+                          key={item.value}
+                          onClick={() => {
+                            updateFieldTypeFilter(
+                              isSelected
+                                ? filteredIndexedFieldTypeFilter.filter((f) => f !== item.value)
+                                : [...filteredIndexedFieldTypeFilter, item.value]
+                            );
+                          }}
+                          data-test-subj={`indexedFieldTypeFilterDropdown-option-${item.value}${
+                            item.checked ? '-checked' : ''
+                          }`}
+                        >
+                          {item.name}
+                        </EuiFilterSelectItem>
+                      );
+                    })}
                   </EuiPopover>
                   <EuiPopover
                     anchorPosition="downCenter"
@@ -438,7 +458,7 @@ export function Tabs({
     },
     [
       fieldFilter,
-      indexedFieldTypeFilter,
+      filteredIndexedFieldTypeFilter,
       indexedFieldTypes,
       isIndexedFilterOpen,
       scriptedFieldLanguageFilter,
@@ -449,6 +469,7 @@ export function Tabs({
       isSchemaFilterOpen,
       openFieldEditor,
       userEditPermission,
+      updateFieldTypeFilter,
     ]
   );
 
@@ -469,7 +490,7 @@ export function Tabs({
                     indexPattern={indexPattern}
                     fieldFilter={fieldFilter}
                     fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-                    indexedFieldTypeFilter={indexedFieldTypeFilter}
+                    indexedFieldTypeFilter={filteredIndexedFieldTypeFilter}
                     schemaFieldTypeFilter={schemaFieldTypeFilter}
                     helpers={{
                       editField: openFieldEditor,
@@ -547,7 +568,7 @@ export function Tabs({
       getFilterSection,
       history,
       indexPattern,
-      indexedFieldTypeFilter,
+      filteredIndexedFieldTypeFilter,
       schemaFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
@@ -583,18 +604,27 @@ export function Tabs({
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
 
   useEffect(() => {
-    const { startSyncingState, stopSyncingState, setCurrentTab, getCurrentTab } =
-      createEditIndexPatternPageStateContainer({
-        useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
-        defaultTab: TAB_INDEXED_FIELDS,
-      });
+    const {
+      startSyncingState,
+      stopSyncingState,
+      setCurrentTab,
+      getCurrentTab,
+      setCurrentFieldTypes,
+      getCurrentFieldTypes,
+    } = createEditIndexPatternPageStateContainer({
+      useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
+      defaultTab: TAB_INDEXED_FIELDS,
+    });
 
     startSyncingState();
     setSyncingStateFunc({
       setCurrentTab,
       getCurrentTab,
+      setCurrentFieldTypes,
+      getCurrentFieldTypes,
     });
     setSelectedTabId(getCurrentTab());
+    setIndexedFieldTypeFilter((currentValue) => getCurrentFieldTypes() || currentValue);
 
     return () => {
       stopSyncingState();

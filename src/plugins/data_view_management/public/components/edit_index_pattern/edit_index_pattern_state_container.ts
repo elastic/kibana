@@ -15,6 +15,7 @@ import {
 
 interface IEditIndexPatternState {
   tab: string;
+  fieldTypes?: string[];
 }
 
 /**
@@ -47,9 +48,14 @@ export function createEditIndexPatternPageStateContainer({
     },
     {
       setTab: (state: IEditIndexPatternState) => (tab: string) => ({ ...state, tab }),
+      setFieldTypes: (state: IEditIndexPatternState) => (fieldTypes: string[]) => ({
+        ...state,
+        fieldTypes: fieldTypes.length ? fieldTypes : undefined,
+      }),
     },
     {
       tab: (state: IEditIndexPatternState) => () => state.tab,
+      fieldTypes: (state: IEditIndexPatternState) => () => state.fieldTypes,
     }
   );
 
@@ -71,5 +77,8 @@ export function createEditIndexPatternPageStateContainer({
     stopSyncingState: stop,
     setCurrentTab: (newTab: string) => stateContainer.transitions.setTab(newTab),
     getCurrentTab: () => stateContainer.selectors.tab(),
+    setCurrentFieldTypes: (newFieldTypes: string[]) =>
+      stateContainer.transitions.setFieldTypes(newFieldTypes),
+    getCurrentFieldTypes: () => stateContainer.selectors.fieldTypes(),
   };
 }
