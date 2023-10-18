@@ -25,5 +25,5 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
 
   return i18nrc && i18nrc.paths
     ? findKey(i18nrc.paths, (v) => v === path) ?? 'app_not_found_in_i18nrc'
-    : 'app_not_found_in_i18nrc';
+    : 'could_not_find_i18nrc';
 }
