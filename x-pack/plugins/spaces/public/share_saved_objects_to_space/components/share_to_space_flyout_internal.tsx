@@ -119,14 +119,14 @@ function createDefaultChangeSpacesHandler(
     let toastText: string;
     if (spacesToAdd.length > 0 && spacesToRemove.length > 0 && !isSharedToAllSpaces) {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddRemoveText', {
-        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTargetAdd} and removed from {spacesTargetRemove}.`,
+        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTargetAdd}. '{object}' was removed from {spacesTargetRemove}.`,
         values: {
           object: title,
           relativesCount,
           spacesTargetAdd: getSpacesTargetString(spacesToAdd),
           spacesTargetRemove: getSpacesTargetString(spacesToRemove),
         },
-        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget...' inputs. Example strings: "'Finance dashboard' was added to 1 space and removed from 2 spaces.", "'Finance dashboard' and 2 related objects were added to 3 spaces and removed from all spaces."`,
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget...' inputs. Example strings: "'Finance dashboard' was added to 1 space. 'Finance dashboard' was removed from 2 spaces.", "'Finance dashboard' and 2 related objects were added to 3 spaces. 'Finance dashboard' was removed from all spaces."`,
       });
     } else if (spacesToAdd.length > 0) {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddText', {
@@ -140,13 +140,13 @@ function createDefaultChangeSpacesHandler(
       });
     } else {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessRemoveText', {
-        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} removed from {spacesTarget}.`,
+        defaultMessage: `'{object}' was removed from {spacesTarget}.`,
         values: {
           object: title,
           relativesCount,
           spacesTarget: getSpacesTargetString(spacesToRemove),
         },
-        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was removed from 1 space.", "'Finance dashboard' and 2 related objects were removed from all spaces."`,
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example string: "'Finance dashboard' was removed from 1 space.", "'Finance dashboard' was removed from all spaces."`,
       });
     }
     toastNotifications.addSuccess({ title: toastTitle, text: toastText });
