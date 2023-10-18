@@ -10,7 +10,7 @@ import { StringsShouldBeTranslatedWithI18n } from './rules/strings_should_be_tra
 import { StringsShouldBeTranslatedWithFormattedMessage } from './rules/strings_should_be_translated_with_formatted_message';
 
 /**
- * Custom ESLint rules, add `'@kbn/eslint-plugin-telemetry'` to your eslint config to use them
+ * Custom ESLint rules, add `'@kbn/eslint-plugin-i18n'` to your eslint config to use them
  * @internal
  */
 export const rules = {

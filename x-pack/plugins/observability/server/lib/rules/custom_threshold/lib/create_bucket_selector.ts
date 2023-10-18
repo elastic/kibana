@@ -19,7 +19,7 @@ export const createBucketSelector = (
   groupBy?: string | string[],
   lastPeriodEnd?: number
 ) => {
-  const hasGroupBy = groupBy != null;
+  const hasGroupBy = !!groupBy;
   const isPercentile = [Aggregators.P95, Aggregators.P99].includes(condition.aggType);
   const isCount = condition.aggType === Aggregators.COUNT;
   const isRate = condition.aggType === Aggregators.RATE;
