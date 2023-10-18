@@ -117,8 +117,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   expandCodeEditor,
   isCodeEditorExpanded,
   detectTimestamp = false,
-  errors,
-  warning,
+  errors: serverErrors,
+  warning: serverWarning,
   isDisabled,
   isDarkMode,
   hideMinimizeButton,
@@ -133,7 +133,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
-  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(errors ? code : '');
+  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(serverErrors ? code : '');
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
@@ -146,8 +146,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
   }>({
-    errors: errors ? parseErrors(errors, code) : [],
-    warnings: warning ? parseWarning(warning) : [],
+    errors: serverErrors ? parseErrors(serverErrors, code) : [],
+    warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
   const onTextLangQuerySubmitWrapped = useCallback(() => {
@@ -158,7 +158,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
 
-  const codeRef = useRef<string>('');
+  const codeRef = useRef<string>(code);
 
   // Registers a command to redirect users to the index management page
   // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
@@ -175,7 +175,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     editorHeight,
     isCodeEditorExpanded,
     Boolean(editorMessages.errors.length),
-    Boolean(warning),
+    Boolean(editorMessages.warnings.length),
     isCodeEditorExpandedFocused,
     Boolean(documentationSections)
   );
@@ -314,9 +314,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || language !== 'esql') return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const text = codeRef.current;
       const { warnings: parserWarnings, errors: parserErrors } = await ESQLLang.validate(
-        text,
+        code,
         esqlCallbacks
       );
       const markers = [];
@@ -333,16 +332,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return;
       }
     },
-    [esqlCallbacks, language]
+    [esqlCallbacks, language, code]
   );
 
   useDebounceWithOptions(
     () => {
       if (!editorModel.current) return;
       if (code === codeWhenSubmitted) {
-        if (errors || warning) {
-          const parsedErrors = parseErrors(errors || [], code);
-          const parsedWarning = parseWarning(warning || '');
+        if (serverErrors || serverWarning) {
+          const parsedErrors = parseErrors(serverErrors || [], code);
+          const parsedWarning = parseWarning(serverWarning || '');
           setEditorMessages({
             errors: parsedErrors,
             warnings: parsedErrors.length ? [] : parsedWarning,
@@ -364,7 +363,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     { skipFirstRender: false },
     256,
-    [errors, warning, code]
+    [serverErrors, serverWarning, code]
   );
 
   const suggestionProvider = useMemo(
@@ -411,7 +410,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         const text = getInlineEditorText(queryString, Boolean(hasLines));
         const queryLength = text.length;
         const unusedSpace =
-          (errors && errors.length) || warning
+          editorMessages.errors.length || editorMessages.warnings.length
             ? EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS
             : EDITOR_ONE_LINER_UNUSED_SPACE;
         const charactersAlowed = Math.floor((width - unusedSpace) / FONT_WIDTH);
@@ -424,7 +423,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
       }
     },
-    [isCompactFocused, queryString, errors, warning]
+    [isCompactFocused, queryString, editorMessages]
   );
 
   useEffect(() => {
@@ -663,7 +662,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         )}
                       </EuiBadge>
                     )}
-                    {!isCompactFocused && errors && errors.length > 0 && (
+                    {!isCompactFocused && editorMessages.errors.length > 0 && (
                       <EuiBadge
                         color={euiTheme.colors.danger}
                         css={styles.errorsBadge}
@@ -671,20 +670,22 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         iconSide="left"
                         data-test-subj="TextBasedLangEditor-inline-errors-badge"
                       >
-                        {errors.length}
+                        {editorMessages.errors.length}
                       </EuiBadge>
                     )}
-                    {!isCompactFocused && warning && (!errors || errors.length === 0) && (
-                      <EuiBadge
-                        color={euiTheme.colors.warning}
-                        css={styles.errorsBadge}
-                        iconType="warning"
-                        iconSide="left"
-                        data-test-subj="TextBasedLangEditor-inline-warning-badge"
-                      >
-                        {editorMessages.warnings.length}
-                      </EuiBadge>
-                    )}
+                    {!isCompactFocused &&
+                      editorMessages.warnings.length > 0 &&
+                      editorMessages.errors.length === 0 && (
+                        <EuiBadge
+                          color={euiTheme.colors.warning}
+                          css={styles.errorsBadge}
+                          iconType="warning"
+                          iconSide="left"
+                          data-test-subj="TextBasedLangEditor-inline-warning-badge"
+                        >
+                          {editorMessages.warnings.length}
+                        </EuiBadge>
+                      )}
                     <CodeEditor
                       languageId={languageId(language)}
                       value={codeOneLiner || code}
