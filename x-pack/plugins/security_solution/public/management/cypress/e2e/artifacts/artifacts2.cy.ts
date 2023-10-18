@@ -51,7 +51,7 @@ describe('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'
   Cypress._.times(5, (i) => {
     describe(`Run ${i}`, () => {
       it('loads the artifacts page', () => {
-        expect(true).toBe(true);
+        expect(true).to.equal(true);
       });
     });
   });
