@@ -17,6 +17,7 @@ import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytic
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 
 describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169033
   // FLAKY: https://github.com/elastic/kibana/issues/169034
   describe.skip('with legacy risk score', () => {
     before(() => {
