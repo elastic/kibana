@@ -40,7 +40,7 @@ const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
