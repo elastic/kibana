@@ -261,7 +261,7 @@ export async function pickTestGroupRunOrder() {
   const pipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG as string;
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
-  const { sources, types } = await ciStats.pickTestGroupRunOrder({
+  const ciStatsResponse = await ciStats.pickTestGroupRunOrder({
     sources: [
       // try to get times from a recent successful job on this PR
       ...(prNumber
@@ -331,6 +331,7 @@ export async function pickTestGroupRunOrder() {
       })),
     ],
   });
+  const { sources, types } = ciStatsResponse;
 
   console.log('test run order is determined by builds:');
   console.dir(sources, { depth: Infinity, maxArrayLength: Infinity });
@@ -395,6 +396,8 @@ export async function pickTestGroupRunOrder() {
     // write the config for functional steps to an artifact that can be used by the individual functional jobs
     Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
     bk.uploadArtifacts('ftr_run_order.json');
+    Fs.writeFileSync('full_ci_stats_response.json', JSON.stringify(ciStatsResponse, null, 2));
+    bk.uploadArtifacts('full_ci_stats_response.json');
   }
 
   // upload the step definitions to Buildkite

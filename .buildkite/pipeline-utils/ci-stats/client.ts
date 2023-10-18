@@ -183,6 +183,9 @@ export class CiStatsClient {
       data: body,
     });
 
+    console.log('full ci-stats response:');
+    console.log(JSON.stringify(resp.data));
+
     return resp.data;
   };
 
