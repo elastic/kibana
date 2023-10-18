@@ -8,7 +8,6 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
   SavedObjectsBulkUpdateObject,
