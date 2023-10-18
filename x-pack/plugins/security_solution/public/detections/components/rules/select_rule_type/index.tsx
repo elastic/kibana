@@ -22,8 +22,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useIsEsqlRuleTypeEnabled } from '../../../../detection_engine/rule_creation/hooks';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
@@ -50,9 +49,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
     const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
     const setEsql = useCallback(() => setType('esql'), [setType]);
 
-    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
-    const isEsqlFeatureFlagEnabled = !useIsExperimentalFeatureEnabled('esqlRulesDisabled');
-    const isEsqlFeatureEnabled = isEsqlSettingEnabled && isEsqlFeatureFlagEnabled;
+    const isEsqlRuleTypeEnabled = useIsEsqlRuleTypeEnabled();
 
     const eqlSelectableConfig = useMemo(
       () => ({
@@ -198,7 +195,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
               />
             </EuiFlexItem>
           )}
-          {isEsqlFeatureEnabled && (!isUpdateView || esqlSelectableConfig.isSelected) && (
+          {isEsqlRuleTypeEnabled && (!isUpdateView || esqlSelectableConfig.isSelected) && (
             <EuiFlexItem>
               <EuiCard
                 data-test-subj="esqlRuleType"

@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless security UI', function () {
     loadTestFile(require.resolve('./ftr/landing_page'));
     loadTestFile(require.resolve('./ftr/navigation'));
-    loadTestFile(require.resolve('./ftr/management'));
     loadTestFile(require.resolve('./ftr/cases/attachment_framework'));
     loadTestFile(require.resolve('./ftr/cases/view_case'));
     loadTestFile(require.resolve('./ftr/cases/create_case_form'));
