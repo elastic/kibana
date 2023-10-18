@@ -9,6 +9,7 @@ import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch
 import { useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
+import { INTERNAL_API_VERSION } from '../helpers';
 import * as i18n from '../translations';
 
 const ILM_EXPLAIN_ENDPOINT = '/internal/ecs_data_quality_dashboard/ilm_explain';
@@ -43,6 +44,7 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
           {
             method: 'GET',
             signal: abortController.signal,
+            version: INTERNAL_API_VERSION,
           }
         );
 

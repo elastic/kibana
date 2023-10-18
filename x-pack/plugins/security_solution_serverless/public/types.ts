@@ -38,5 +38,5 @@ export interface SecuritySolutionServerlessPluginStartDeps {
 
 export type ServerlessSecurityPublicConfig = Pick<
   ServerlessSecurityConfigSchema,
-  'productTypes' | 'developer' | 'enableExperimental'
+  'productTypes' | 'enableExperimental'
 >;
