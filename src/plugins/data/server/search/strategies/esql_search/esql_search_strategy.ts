@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { from } from 'rxjs';
-import type { Logger } from '@kbn/core/server';
+import { from, firstValueFrom } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
 
+const ES_TIMEOUT_IN_MS = 120000;
+
 export const esqlSearchStrategyProvider = (
   logger: Logger,
+  legacyConfig$: Observable<SharedGlobalConfig>,
   useInternalUser: boolean = false
 ): ISearchStrategy<any, any> => ({
   /**
@@ -32,6 +36,9 @@ export const esqlSearchStrategyProvider = (
     const search = async () => {
       try {
         const { terminateAfter, ...requestParams } = request.params ?? {};
+        const legacyConfig = await firstValueFrom(legacyConfig$);
+        const configuredTimeout = legacyConfig.elasticsearch.requestTimeout.asMilliseconds();
+        const finalTimeout = Math.min(ES_TIMEOUT_IN_MS, configuredTimeout);
         const { headers, body } = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
@@ -43,6 +50,9 @@ export const esqlSearchStrategyProvider = (
           {
             signal: abortSignal,
             meta: true,
+            // we don't want the ES client to retry (default value is 3)
+            maxRetries: 0,
+            requestTimeout: finalTimeout,
           }
         );
         return {

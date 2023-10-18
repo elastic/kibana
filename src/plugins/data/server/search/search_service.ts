@@ -178,7 +178,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         usage
       )
     );
-    this.registerSearchStrategy(ESQL_SEARCH_STRATEGY, esqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(
+      ESQL_SEARCH_STRATEGY,
+      esqlSearchStrategyProvider(this.logger, this.initializerContext.config.legacy.globalConfig$)
+    );
 
     // We don't want to register this because we don't want the client to be able to access this
     // strategy, but we do want to expose it to other server-side plugins
