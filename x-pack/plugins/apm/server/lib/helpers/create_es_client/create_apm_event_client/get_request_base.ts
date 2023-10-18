@@ -21,7 +21,6 @@ const processorEventIndexMap = {
   [ProcessorEvent.span]: 'span',
   [ProcessorEvent.metric]: 'metric',
   [ProcessorEvent.error]: 'error',
-  [ProcessorEvent.event]: 'event',
 } as const;
 
 export function processorEventsToIndex(
