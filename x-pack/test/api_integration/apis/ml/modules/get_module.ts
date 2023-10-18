@@ -36,6 +36,9 @@ const moduleIds = [
 ];
 
 const securityModuleIds = [
+  'auditbeat_process_docker_ecs',
+  'logs_ui_analysis',
+  'logs_ui_categories',
   'security_auth',
   'security_cloudtrail',
   'security_linux_v3',
