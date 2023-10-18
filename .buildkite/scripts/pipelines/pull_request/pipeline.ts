@@ -152,6 +152,14 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
+      ((await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
+        GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
+      !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
+    }
+
+    if (
       (await doAnyChangesMatch([
         /\.docnav\.json$/,
         /\.apidocs\.json$/,
