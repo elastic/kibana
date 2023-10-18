@@ -259,3 +259,45 @@ export const MAX_SPACE_PANEL_MESSAGE = i18n.translate(
     defaultMessage: 'Please disable a currently running engine before enabling it here.',
   }
 );
+
+
+export const CHECK_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.riskScore.errors.privileges.check',
+  {
+    defaultMessage: 'Check privileges',
+  }
+);
+
+export const NEED_TO_HAVE = i18n.translate(
+  'xpack.securitySolution.riskScore.errors.privileges.needToHave',
+  {
+    defaultMessage: 'You need to have:',
+  }
+);
+
+export const PRIVILEGES_FOR = i18n.translate(
+  'xpack.securitySolution.riskScore.errors.privileges.priviligesFor',
+  {
+    defaultMessage: 'privileges for',
+  }
+);
+export const INDEX = i18n.translate(
+  'xpack.securitySolution.riskScore.errors.privileges.priviligesFor',
+  {
+    defaultMessage: 'index',
+  }
+);
+
+export const SECURITY_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.riskScore.errors.privileges.securityPrivileges',
+  {
+    defaultMessage: ' security privileges',
+  }
+);
+
+export const KIBANA_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.riskScore.errors.privileges.kibanaPrivilege',
+  {
+    defaultMessage: 'Kibana privilege',
+  }
+);

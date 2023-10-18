@@ -78,6 +78,27 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
           ))}
         </>
       </EuiAccordion>
+
+      <EuiAccordion id={'risk-engine-erros'} buttonContent={i18n.CHECK_PRIVILEGES}>
+        <>
+          <p>
+            {i18n.NEED_TO_HAVE}
+            <ul>
+              <li>
+                <b>{'all'}</b> {i18n.PRIVILEGES_FOR} <b>{'risk-score.risk-score-*'}</b> {i18n.INDEX}
+              </li>
+              <li>
+                <b>{'manage_index_templates'}</b>
+                {','} <b>{'manage_transform'}</b>
+                {i18n.SECURITY_PRIVILEGES}
+              </li>
+              <li>
+                <b>{'Saved Objects Management'}</b> {i18n.KIBANA_PRIVILEGES}
+              </li>
+            </ul>
+          </p>
+        </>
+      </EuiAccordion>
     </EuiCallOut>
   </>
 );
