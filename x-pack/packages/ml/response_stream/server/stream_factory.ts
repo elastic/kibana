@@ -14,6 +14,8 @@ import type { Headers, ResponseHeaders } from '@kbn/core-http-server';
 
 import { acceptCompression } from './accept_compression';
 
+const KEEP_ALIVE_FLUSH_FIX_INTERVAL_MS = 500;
+
 // type guard to identify compressed stream
 function isCompressedSream(arg: unknown): arg is zlib.Gzip {
   return typeof arg === 'object' && arg !== null && typeof (arg as zlib.Gzip).flush === 'function';
@@ -132,6 +134,16 @@ export function streamFactory<T = unknown>(
     // otherwise check the integrity of the data to be pushed.
     if (streamType === undefined) {
       streamType = typeof d === 'string' ? 'string' : 'ndjson';
+
+      // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
+      if (flushFix && streamType === 'ndjson') {
+        setTimeout(function repeat() {
+          if (!tryToEnd) {
+            push({ flushPayload } as unknown as T);
+            setTimeout(repeat, KEEP_ALIVE_FLUSH_FIX_INTERVAL_MS);
+          }
+        }, 0);
+      }
     } else if (streamType === 'string' && typeof d !== 'string') {
       logger.error('Must not push non-string chunks to a string based stream.');
       return;
@@ -147,14 +159,7 @@ export function streamFactory<T = unknown>(
     }
 
     try {
-      const line =
-        streamType === 'ndjson'
-          ? `${JSON.stringify({
-              ...d,
-              // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-              ...(flushFix ? { flushPayload } : {}),
-            })}${DELIMITER}`
-          : d;
+      const line = streamType === 'ndjson' ? `${JSON.stringify(d)}${DELIMITER}` : d;
 
       waitForCallbacks.push(1);
       const writeOk = stream.write(line, () => {
