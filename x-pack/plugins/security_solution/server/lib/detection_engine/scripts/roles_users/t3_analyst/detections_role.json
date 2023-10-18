@@ -1,0 +1,59 @@
+{
+  "elasticsearch": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": [
+          "apm-*-transaction*",
+          "traces-apm*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "winlogbeat-*"
+        ],
+        "privileges": ["read", "write"]
+      },
+      {
+        "names": [".alerts-security*", ".siem-signals-*"],
+        "privileges": ["read", "write"]
+      },
+      {
+        "names": [".lists*", ".items*"],
+        "privileges": ["read", "write"]
+      },
+      {
+        "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+        "privileges": ["read"]
+      }
+    ]
+  },
+  "kibana": [
+    {
+      "feature": {
+        "ml": ["read"],
+        "siem": [
+          "all",
+          "read_alerts",
+          "crud_alerts",
+          "endpoint_list_all",
+          "trusted_applications_all",
+          "event_filters_all",
+          "host_isolation_exceptions_all",
+          "blocklist_all",
+          "policy_management_read",
+          "host_isolation_all",
+          "process_operations_all",
+          "actions_log_management_all",
+          "file_operations_all"
+        ],
+        "securitySolutionCases": ["all"],
+        "actions": ["read"],
+        "builtInAlerts": ["all"],
+        "osquery": ["all"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}

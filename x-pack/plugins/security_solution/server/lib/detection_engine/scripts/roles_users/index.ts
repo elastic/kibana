@@ -14,3 +14,4 @@ export * from './rule_author';
 export * from './soc_manager';
 export * from './t1_analyst';
 export * from './t2_analyst';
+export * from './t3_analyst';

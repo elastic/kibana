@@ -9,6 +9,7 @@ import { assertUnreachable } from '@kbn/security-solution-plugin/common/utility_
 import {
   t1AnalystUser,
   t2AnalystUser,
+  t3AnalystUser,
   hunterUser,
   hunterNoActionsUser,
   ruleAuthorUser,
@@ -18,6 +19,7 @@ import {
   readerUser,
   t1AnalystRole,
   t2AnalystRole,
+  t3AnalystRole,
   hunterRole,
   hunterNoActionsRole,
   ruleAuthorRole,
@@ -54,7 +56,7 @@ export const createUserAndRole = async (
     case ROLES.t2_analyst:
       return postRoleAndUser(ROLES.t2_analyst, t2AnalystRole, t2AnalystUser, getService);
     case ROLES.t3_analyst:
-      throw new Error('t3_analyst role is currently unsupported');
+      return postRoleAndUser(ROLES.t3_analyst, t3AnalystRole, t3AnalystUser, getService);
     case ROLES.hunter:
       return postRoleAndUser(ROLES.hunter, hunterRole, hunterUser, getService);
     case ROLES.hunter_no_actions:
