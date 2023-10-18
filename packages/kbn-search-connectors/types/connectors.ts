@@ -209,7 +209,7 @@ export interface SchedulingConfiguraton {
 
 export interface Connector {
   api_key_id: string | null;
-  configuration: ConnectorConfiguration | SharepointOnlineConfiguration;
+  configuration: ConnectorConfiguration;
   custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
   error: string | null;
@@ -270,13 +270,8 @@ export interface ConnectorSyncJob {
 export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;
 
 export interface NativeConnector {
-  configuration: ConnectorConfiguration | SharepointOnlineConfiguration;
+  configuration: ConnectorConfiguration;
   features: Connector['features'];
   name: string;
   serviceType: string;
 }
-
-export type SharepointOnlineConfiguration = ConnectorConfiguration & {
-  enumerate_all_sites?: ConnectorConfigProperties;
-  fetch_subsites?: ConnectorConfigProperties;
-};
