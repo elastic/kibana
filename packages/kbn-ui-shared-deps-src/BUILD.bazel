@@ -33,6 +33,7 @@ webpack_cli(
     "//packages/kbn-peggy",
     "//packages/kbn-peggy-loader",
     "//packages/kbn-rison",
+    "//packages/shared-ux/error-boundary",
   ],
   output_dir = True,
   args = [
