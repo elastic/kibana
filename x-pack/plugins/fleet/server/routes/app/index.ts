@@ -17,7 +17,7 @@ import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
-import { CheckPermissionsRequestSchema } from '../../types';
+import { CheckPermissionsRequestSchema, GenerateServiceTokenRequestSchema } from '../../types';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -61,16 +61,24 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
   }
 };
 
-export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
+export const generateServiceTokenHandler: RequestHandler<
+  null,
+  TypeOf<typeof GenerateServiceTokenRequestSchema.query>,
+  null
+> = async (context, request, response) => {
   // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const serviceAccount = request.query.remote ? 'fleet-server-remote' : 'fleet-server';
+  appContextService
+    .getLogger()
+    .debug(`Creating service token for account elastic/${serviceAccount}`);
   try {
     const tokenResponse = await esClient.transport.request<{
       created?: boolean;
       token?: GenerateServiceTokenResponse;
     }>({
       method: 'POST',
-      path: `_security/service/elastic/fleet-server/credential/token/token-${Date.now()}`,
+      path: `_security/service/elastic/${serviceAccount}/credential/token/token-${Date.now()}`,
     });
 
     if (tokenResponse.created && tokenResponse.token) {
@@ -111,9 +119,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {},
+        validate: {
+          request: GenerateServiceTokenRequestSchema,
+        },
       },
-
       generateServiceTokenHandler
     );
 

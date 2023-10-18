@@ -23,6 +23,7 @@ export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>(
   agentTamperProtectionEnabled: true,
   secretsStorage: true,
   kafkaOutput: true,
+  remoteESOutput: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -248,6 +248,16 @@ export function validateCATrustedFingerPrint(value: string) {
   }
 }
 
+export function validateServiceToken(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.serviceTokenRequiredErrorMessage', {
+        defaultMessage: 'Service Token is required',
+      }),
+    ];
+  }
+}
+
 export function validateSSLCertificate(value: string) {
   if (!value || value === '') {
     return [

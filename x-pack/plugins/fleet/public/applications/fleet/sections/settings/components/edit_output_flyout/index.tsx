@@ -73,10 +73,14 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     [proxies]
   );
 
-  const { kafkaOutput: isKafkaOutputEnabled } = ExperimentalFeaturesService.get();
+  const { kafkaOutput: isKafkaOutputEnabled, remoteESOutput: isRemoteESOutputEnabled } =
+    ExperimentalFeaturesService.get();
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
+    ...(isRemoteESOutputEnabled
+      ? [{ value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' }]
+      : []),
     { value: outputType.Logstash, text: 'Logstash' },
     ...(isKafkaOutputEnabled ? [{ value: outputType.Kafka, text: 'Kafka' }] : []),
   ];
@@ -229,6 +233,48 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     );
   };
 
+  const renderRemoteElasticsearchSection = () => {
+    return (
+      <>
+        <MultiRowInput
+          data-test-subj="settingsOutputsFlyout.hostUrlInput"
+          label={i18n.translate('xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputLabel', {
+            defaultMessage: 'Hosts',
+          })}
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputPlaceholder',
+            {
+              defaultMessage: 'Specify host URL',
+            }
+          )}
+          {...inputs.elasticsearchUrlInput.props}
+          isUrl
+        />
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
+              defaultMessage="Service Token"
+            />
+          }
+          {...inputs.serviceTokenInput.formRowProps}
+        >
+          <EuiFieldText
+            fullWidth
+            {...inputs.serviceTokenInput.props}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
+              {
+                defaultMessage: 'Specify service token',
+              }
+            )}
+          />
+        </EuiFormRow>
+      </>
+    );
+  };
+
   const renderKafkaSection = () => {
     if (isKafkaOutputEnabled) {
       return <OutputFormKafkaSection inputs={inputs} />;
@@ -242,6 +288,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         return renderLogstashSection();
       case outputType.Kafka:
         return renderKafkaSection();
+      case outputType.RemoteElasticsearch:
+        return renderRemoteElasticsearchSection();
       case outputType.Elasticsearch:
       default:
         return renderElasticsearchSection();
@@ -466,6 +514,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   }}
                 />
               }
+              disabled={inputs.typeInput.value === outputType.RemoteElasticsearch}
             />
           </EuiFormRow>
           <EuiFormRow fullWidth {...inputs.defaultMonitoringOutputInput.formRowProps}>

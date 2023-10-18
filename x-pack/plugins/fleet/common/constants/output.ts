@@ -13,6 +13,7 @@ export const outputType = {
   Elasticsearch: 'elasticsearch',
   Logstash: 'logstash',
   Kafka: 'kafka',
+  RemoteElasticsearch: 'remote-elasticsearch',
 } as const;
 
 export const DEFAULT_OUTPUT_ID = 'fleet-default-output';
