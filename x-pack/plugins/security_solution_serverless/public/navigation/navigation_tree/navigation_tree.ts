@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/shared-ux-chrome-navigation';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
-import type { NonEmptyArray } from '@kbn/shared-ux-chrome-navigation/src/ui/types';
 import type { LinkCategory } from '@kbn/security-solution-navigation';
 import {
   SecurityPageName,
@@ -37,72 +36,83 @@ const PROJECT_SETTINGS_TITLE = i18n.translate(
 export const formatNavigationTree = (
   projectNavLinks: ProjectNavigationLink[],
   categories?: Readonly<Array<LinkCategory<ProjectPageName>>>
-): NavigationTreeDefinition => ({
-  body: [
-    {
-      type: 'navGroup',
-      id: 'security_project_nav',
-      title: SECURITY_TITLE,
-      icon: 'logoSecurity',
-      breadcrumbStatus: 'hidden',
-      defaultIsCollapsed: false,
-      children: formatNodesFromLinks(projectNavLinks, categories),
-    },
-  ],
-  footer: [
-    {
-      type: 'navGroup',
-      id: 'getStarted',
-      title: GET_STARTED_TITLE,
-      link: getNavLinkIdFromProjectPageName(SecurityPageName.landing) as AppDeepLinkId,
-      icon: 'launch',
-    },
-    {
-      type: 'navGroup',
-      id: 'devTools',
-      title: DEV_TOOLS_TITLE,
-      link: 'dev_tools',
-      icon: 'editorCodeBlock',
-    },
-    {
-      type: 'navGroup',
-      id: 'project_settings_project_nav',
-      title: PROJECT_SETTINGS_TITLE,
-      icon: 'gear',
-      breadcrumbStatus: 'hidden',
-      children: [
-        {
-          id: 'settings',
-          children: [
-            {
-              link: 'management',
-              title: 'Management',
-            },
-            {
-              link: 'integrations',
-            },
-            {
-              link: 'fleet',
-            },
-            {
-              id: 'cloudLinkUserAndRoles',
-              cloudLink: 'userAndRoles',
-            },
-            {
-              id: 'cloudLinkBilling',
-              cloudLink: 'billingAndSub',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-});
+): NavigationTreeDefinition => {
+  const children = formatNodesFromLinks(projectNavLinks, categories);
+  return {
+    body: [
+      children
+        ? {
+            type: 'navGroup',
+            id: 'security_project_nav',
+            title: SECURITY_TITLE,
+            icon: 'logoSecurity',
+            breadcrumbStatus: 'hidden',
+            defaultIsCollapsed: false,
+            children,
+          }
+        : {
+            type: 'navItem',
+            id: 'security_project_nav',
+            title: SECURITY_TITLE,
+            icon: 'logoSecurity',
+            breadcrumbStatus: 'hidden',
+          },
+    ],
+    footer: [
+      {
+        type: 'navItem',
+        id: 'getStarted',
+        title: GET_STARTED_TITLE,
+        link: getNavLinkIdFromProjectPageName(SecurityPageName.landing) as AppDeepLinkId,
+        icon: 'launch',
+      },
+      {
+        type: 'navItem',
+        id: 'devTools',
+        title: DEV_TOOLS_TITLE,
+        link: 'dev_tools',
+        icon: 'editorCodeBlock',
+      },
+      {
+        type: 'navGroup',
+        id: 'project_settings_project_nav',
+        title: PROJECT_SETTINGS_TITLE,
+        icon: 'gear',
+        breadcrumbStatus: 'hidden',
+        children: [
+          {
+            id: 'settings',
+            children: [
+              {
+                link: 'management',
+                title: 'Management',
+              },
+              {
+                link: 'integrations',
+              },
+              {
+                link: 'fleet',
+              },
+              {
+                id: 'cloudLinkUserAndRoles',
+                cloudLink: 'userAndRoles',
+              },
+              {
+                id: 'cloudLinkBilling',
+                cloudLink: 'billingAndSub',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+};
 
 const formatNodesFromLinks = (
   projectNavLinks: ProjectNavigationLink[],
   parentCategories?: Readonly<Array<LinkCategory<ProjectPageName>>>
-): NonEmptyArray<NodeDefinition> | undefined => {
+): NodeDefinition[] | undefined => {
   if (projectNavLinks.length === 0) {
     return undefined;
   }
@@ -117,7 +127,7 @@ const formatNodesFromLinks = (
   if (nodes.length === 0) {
     return undefined;
   }
-  return nodes as NonEmptyArray<NodeDefinition>;
+  return nodes as NodeDefinition[];
 };
 
 const formatNodesFromLinksWithCategory = (
@@ -142,7 +152,7 @@ const formatNodesFromLinksWithCategory = (
       {
         id: `category-${category.label.toLowerCase().replace(' ', '_')}`,
         title: category.label,
-        children: children as NonEmptyArray<NodeDefinition>,
+        children: children as NodeDefinition[],
       },
     ];
   } else if (isSeparatorLinkCategory(category)) {
@@ -165,7 +175,7 @@ const formatNodesFromLinksWithCategory = (
 const formatNodesFromLinksWithoutCategory = (projectNavLinks: ProjectNavigationLink[]) =>
   projectNavLinks.map((projectNavLink) =>
     createNodeFromProjectNavLink(projectNavLink)
-  ) as NonEmptyArray<NodeDefinition>;
+  ) as NodeDefinition[];
 
 const createNodeFromProjectNavLink = (projectNavLink: ProjectNavigationLink): NodeDefinition => {
   const { id, title, links, categories } = projectNavLink;
