@@ -11,7 +11,7 @@ import { EuiAvatar, EuiMarkdownFormat, EuiText, tint } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
 import { StreamComment } from './stream_obs';
