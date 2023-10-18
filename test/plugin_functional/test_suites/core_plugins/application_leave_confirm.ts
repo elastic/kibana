@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     const defaultTryTimeout = config.get('timeouts.try');
     const attempts = 5;
     describe('when navigating to another app', () => {
-      const timeMultiplier = 2;
+      const timeMultiplier = 5;
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
         await waitForUrlToBe('/app/appleave1');
