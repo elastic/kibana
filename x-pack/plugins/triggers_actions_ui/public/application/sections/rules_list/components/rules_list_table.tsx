@@ -482,7 +482,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '14%',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
-          if (rule.consumer === AlertConsumers.SIEM || !rule.enabled) {
+          if (!rule.enabled) {
             return null;
           }
           return (
