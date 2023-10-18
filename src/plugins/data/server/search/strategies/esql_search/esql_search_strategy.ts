@@ -58,7 +58,6 @@ export const esqlSearchStrategyProvider = (
             meta: true,
             // we don't want the ES client to retry (default value is 3)
             maxRetries: 0,
-            requestTimeout: ES_TIMEOUT_IN_MS,
           }
         );
         return {
