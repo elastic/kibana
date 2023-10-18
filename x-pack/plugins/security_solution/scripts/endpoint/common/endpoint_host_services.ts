@@ -335,7 +335,7 @@ const enrollHostWithFleet = async ({
     ]);
   }
   log.info(`Waiting for Agent to check-in with Fleet`);
-  const agent = await waitForHostToEnroll(kbnClient, vmName, 240000);
+  const agent = await waitForHostToEnroll(kbnClient, vmName, 5 * 60 * 1000, log);
 
   return {
     agentId: agent.id,
