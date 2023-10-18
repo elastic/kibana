@@ -280,12 +280,9 @@ export const PRIVILEGES_FOR = i18n.translate(
     defaultMessage: 'privileges for',
   }
 );
-export const INDEX = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.priviligesFor',
-  {
-    defaultMessage: 'index',
-  }
-);
+export const INDEX = i18n.translate('xpack.securitySolution.riskScore.errors.privileges.index', {
+  defaultMessage: 'index',
+});
 
 export const SECURITY_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.riskScore.errors.privileges.securityPrivileges',
