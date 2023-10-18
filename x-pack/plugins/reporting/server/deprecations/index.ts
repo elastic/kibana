@@ -19,10 +19,12 @@ export const registerDeprecations = ({
 }) => {
   core.deprecations.registerDeprecations({
     getDeprecations: async (ctx) => {
-      return [
-        ...(await getIlmPolicyDeprecationsInfo(ctx, { reportingCore })),
-        ...(await getReportingRoleDeprecationsInfo(ctx, { reportingCore })),
-      ];
+      return reportingCore.getConfig().statefulSettings.enabled
+        ? [
+            ...(await getIlmPolicyDeprecationsInfo(ctx, { reportingCore })),
+            ...(await getReportingRoleDeprecationsInfo(ctx, { reportingCore })),
+          ]
+        : [];
     },
   });
 };
