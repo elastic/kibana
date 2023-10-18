@@ -118,6 +118,7 @@ const createNodeFromProjectNavLink = (projectNavLink: ProjectNavigationLink): No
   const { id, title, links, categories, disabled } = projectNavLink;
   const link = getNavLinkIdFromProjectPageName(id);
   const node: NodeDefinition = {
+    id,
     link: link as AppDeepLinkId,
     title,
     ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
@@ -171,6 +172,7 @@ const formatFooterNodesFromLinks = (
                   ...(isCloudLink(projectNavLink.id)
                     ? {
                         cloudLink: getCloudLink(projectNavLink.id),
+                        openInNewTab: true,
                       }
                     : {
                         link: getNavLinkIdFromProjectPageName(projectNavLink.id) as AppDeepLinkId,

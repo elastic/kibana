@@ -14,7 +14,6 @@ import { SolutionSideNavPanelContent } from '@kbn/security-solution-side-nav/pan
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../common/services';
 import type { ProjectNavigationLink, ProjectPageName } from './links/types';
-// import { processCloudLinks } from './links/nav_links';
 import { useFormattedSideNavItems } from './side_navigation/use_side_nav_items';
 import { CATEGORIES, FOOTER_CATEGORIES } from './categories';
 import { formatNavigationTree } from './navigation_tree/navigation_tree';
@@ -23,12 +22,10 @@ const getPanelContentProvider = (
   projectNavLinks: ProjectNavigationLink[]
 ): React.FC<PanelComponentProps> =>
   React.memo(function PanelContentProvider({ selectedNode: { path }, closePanel }) {
-    // const { cloud } = useKibana().services;
     const linkId = path[path.length - 1] as ProjectPageName;
     const currentPanelItem = projectNavLinks.find((item) => item.id === linkId);
 
     const { title = '', links = [], categories } = currentPanelItem ?? {};
-    // const panelLinks = processCloudLinks(links, cloud);
     const items = useFormattedSideNavItems(links);
 
     if (items.length === 0) {

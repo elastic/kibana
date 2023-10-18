@@ -53,6 +53,7 @@ describe('formatNavigationTree', () => {
 
     expect(securityNode?.children).toEqual([
       {
+        id: link1.id,
         link: chromeNavLink1.id,
         title: link1.title,
       },
@@ -75,6 +76,7 @@ describe('formatNavigationTree', () => {
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: link1.id,
             link: chromeNavLink1.id,
             title: link1.title,
           },
@@ -97,10 +99,12 @@ describe('formatNavigationTree', () => {
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: link1.id,
             link: chromeNavLink1.id,
             title: link1.title,
           },
           {
+            id: link2.id,
             link: chromeNavLink2.id,
             title: link2.title,
           },
@@ -125,6 +129,7 @@ describe('formatNavigationTree', () => {
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: link1.id,
             link: chromeNavLink1.id,
             title: link1.title,
           },
@@ -149,6 +154,7 @@ describe('formatNavigationTree', () => {
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: link1.id,
             link: chromeNavLink1.id,
             title: link1.title,
           },
@@ -163,6 +169,7 @@ describe('formatNavigationTree', () => {
 
     expect(securityNode?.children).toEqual([
       {
+        id: link3.id,
         link: chromeNavLink3.id,
         title: link3.title,
       },
@@ -179,13 +186,15 @@ describe('formatNavigationTree', () => {
 
     expect(securityNode?.children).toEqual([
       {
+        id: link1.id,
         link: chromeNavLink1.id,
         title: link1.title,
         children: [
           {
+            id: link2.id,
             link: chromeNavLink2.id,
             title: link2.title,
-            children: [{ link: chromeNavLink3.id, title: link3.title }],
+            children: [{ id: link3.id, link: chromeNavLink3.id, title: link3.title }],
             renderAs: 'panelOpener',
           },
         ],
@@ -208,11 +217,13 @@ describe('formatNavigationTree', () => {
 
     expect(securityNode?.children).toEqual([
       {
+        id: SecurityPageName.usersEvents,
         link: chromeNavLinkTest.id,
         title: link1.title,
         breadcrumbStatus: 'hidden',
       },
       {
+        id: link2.id,
         link: chromeNavLink2.id,
         title: link2.title,
       },
