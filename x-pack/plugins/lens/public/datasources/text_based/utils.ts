@@ -20,6 +20,8 @@ import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 import type { DataViewsState } from '../../state_management';
 
+export const MAX_NUM_OF_COLUMNS = 5;
+
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart
 ): Promise<IndexPatternRef[]> {
@@ -145,4 +147,17 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   // other textbased queries....
 
   return indexPattern;
+}
+
+export function canColumnBeUsedBeInMetricDimension(
+  columns: TextBasedLayerColumn[] | DatatableColumn[],
+  selectedColumnType?: string
+): boolean {
+  // check if at least one numeric field exists
+  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  return (
+    !hasNumberTypeColumns ||
+    columns.length >= MAX_NUM_OF_COLUMNS ||
+    (hasNumberTypeColumns && selectedColumnType === 'number')
+  );
 }

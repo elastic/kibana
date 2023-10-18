@@ -15,6 +15,25 @@ import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { fetchDataFromAggregateQuery } from '../../../datasources/text_based/fetch_data_from_aggregate_query';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
+export const getQueryColumns = async (
+  query: AggregateQuery,
+  dataView: DataView,
+  deps: LensPluginStartDependencies
+) => {
+  // fetch only columns for ES|QL for performance reasons with limit 0
+  const performantQuery = { ...query };
+  if ('esql' in performantQuery && performantQuery.esql) {
+    performantQuery.esql = `${performantQuery.esql} | limit 0`;
+  }
+  const table = await fetchDataFromAggregateQuery(
+    performantQuery,
+    dataView,
+    deps.data,
+    deps.expressions
+  );
+  return table?.columns;
+};
+
 export const getSuggestions = async (
   query: AggregateQuery,
   deps: LensPluginStartDependencies,
@@ -43,22 +62,11 @@ export const getSuggestions = async (
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }
-    // fetch only columns for ES|QL for performance reasons with limit 0
-    const performantQuery = { ...query };
-    if ('esql' in performantQuery && performantQuery.esql) {
-      performantQuery.esql = `${performantQuery.esql} | limit 0`;
-    }
-    const table = await fetchDataFromAggregateQuery(
-      performantQuery,
-      dataView,
-      deps.data,
-      deps.expressions
-    );
-
+    const columns = await getQueryColumns(query, dataView, deps);
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
-      textBasedColumns: table?.columns,
+      textBasedColumns: columns,
       query,
     };
 

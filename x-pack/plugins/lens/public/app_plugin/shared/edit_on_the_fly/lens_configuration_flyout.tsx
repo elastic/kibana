@@ -9,7 +9,7 @@ import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react'
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiAccordion, useEuiTheme } from '@elastic/eui';
+import { EuiTitle, EuiAccordion, useEuiTheme, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -53,6 +53,7 @@ export function LensEditConfigurationFlyout({
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+  const displayCallout = activeDatasource?.displaysLimitedColumns?.(datasourceState);
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
   }, []);
@@ -88,6 +89,16 @@ export function LensEditConfigurationFlyout({
       !isEqual(visualizationState, previousAttrs.state.visualization) || !datasourceStatesAreSame
     );
   }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
+
+  // useEffect(() => {
+  //   const renderSuggestionsCallout = async () => {
+  //     if (!isEqual(query, prevQuery.current)) {
+  //       const columns = await getQueryColumns(query, adHocDataViews)
+  //     }
+  //   };
+
+  //   renderSuggestionsCallout();
+  // }, [query]);
 
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
@@ -267,6 +278,20 @@ export function LensEditConfigurationFlyout({
               }}
               isDisabled={false}
             />
+          )}
+          {displayCallout && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                size="s"
+                title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                  defaultMessage:
+                    'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                })}
+                iconType="iInCircle"
+              />
+              <EuiSpacer size="s" />
+            </>
           )}
           <EuiAccordion
             id="layer-configuration"

@@ -46,8 +46,7 @@ import { LayerPanel } from './layerpanel';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
-
-const MAX_NUM_OF_COLUMNS = 10;
+import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -80,9 +79,6 @@ export function getTextBasedDatasource({
 }) {
   const getSuggestionsForState = (state: TextBasedPrivateState) => {
     return Object.entries(state.layers)?.map(([id, layer]) => {
-      const hasNumberTypeColumns = layer.columns?.some((c) => c?.meta?.type === 'number');
-      const columnForcedInMetricDimension =
-        !hasNumberTypeColumns || layer.allColumns.length > MAX_NUM_OF_COLUMNS;
       return {
         state: {
           ...state,
@@ -93,9 +89,10 @@ export function getTextBasedDatasource({
           layerId: id,
           columns:
             layer.columns?.map((f) => {
-              const inMetricDimension =
-                columnForcedInMetricDimension ||
-                (hasNumberTypeColumns && f?.meta?.type === 'number');
+              const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+                layer.allColumns,
+                f?.meta?.type
+              );
               return {
                 columnId: f.columnId,
                 operation: {
@@ -129,12 +126,11 @@ export function getTextBasedDatasource({
       // will not return number fields. In these cases we want to depict a table
       // Datatable works differently in this datasource. On the metrics dimension can be all type of fields
       const hasNumberTypeColumns = textBasedQueryColumns?.some((c) => c?.meta?.type === 'number');
-      const columnForcedInMetricDimension =
-        !hasNumberTypeColumns || textBasedQueryColumns.length > MAX_NUM_OF_COLUMNS;
-
       const newColumns = textBasedQueryColumns.map((c) => {
-        const inMetricDimension =
-          columnForcedInMetricDimension || (hasNumberTypeColumns && c?.meta?.type === 'number');
+        const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+          textBasedQueryColumns,
+          c?.meta?.type
+        );
         return {
           columnId: c.id,
           fieldName: c.name,
@@ -341,6 +337,13 @@ export function getTextBasedDatasource({
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
+    // there are cases where a query can return a big amount of columns
+    // at this case we don't render all columns in a table but the first
+    // MAX_NUM_OF_COLUMNS
+    displaysLimitedColumns(state: TextBasedPrivateState) {
+      const fieldsList = state?.fieldList ?? [];
+      return fieldsList.length >= MAX_NUM_OF_COLUMNS;
+    },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
       const { layers } = state;
@@ -427,9 +430,7 @@ export function getTextBasedDatasource({
         return {
           ...f,
           compatible:
-            props.isMetricDimension &&
-            hasNumberTypeColumns &&
-            allColumns.length <= MAX_NUM_OF_COLUMNS
+            props.isMetricDimension && hasNumberTypeColumns
               ? props.filterOperations({
                   dataType: f.meta.type as DataType,
                   isBucketed: Boolean(f?.meta?.type !== 'number'),

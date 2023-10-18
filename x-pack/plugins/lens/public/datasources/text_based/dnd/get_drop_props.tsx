@@ -10,8 +10,7 @@ import { isOperation } from '../../../types';
 import type { TextBasedPrivateState } from '../types';
 import type { GetDropPropsArgs } from '../../../types';
 import { isDraggedField, isOperationFromTheSameGroup } from '../../../utils';
-
-const MAX_NUM_OF_COLUMNS = 10;
+import { canColumnBeUsedBeInMetricDimension } from '../utils';
 
 export const getDropProps = (
   props: GetDropPropsArgs<TextBasedPrivateState>
@@ -24,9 +23,6 @@ export const getDropProps = (
   const targetColumn = layer.columns.find((f) => f.columnId === target.columnId);
   const targetField = layer.allColumns.find((f) => f.columnId === target.columnId);
   const sourceField = layer.allColumns.find((f) => f.columnId === source.id);
-  const hasNumberTypeColumns = layer.allColumns?.some((c) => c?.meta?.type === 'number');
-  const columnCanUsedInMetricDimension =
-    !hasNumberTypeColumns || layer.allColumns.length > MAX_NUM_OF_COLUMNS;
 
   if (isDraggedField(source)) {
     const nextLabel = source.humanData.label;
@@ -49,13 +45,15 @@ export const getDropProps = (
       return { dropTypes: ['reorder'], nextLabel };
     }
 
-    const sourceFieldCanMoveToMetricDimension =
-      columnCanUsedInMetricDimension ||
-      (hasNumberTypeColumns && sourceField?.meta?.type === 'number');
+    const sourceFieldCanMoveToMetricDimension = canColumnBeUsedBeInMetricDimension(
+      layer.allColumns,
+      sourceField?.meta?.type
+    );
 
-    const targetFieldCanMoveToMetricDimension =
-      columnCanUsedInMetricDimension ||
-      (hasNumberTypeColumns && targetField?.meta?.type === 'number');
+    const targetFieldCanMoveToMetricDimension = canColumnBeUsedBeInMetricDimension(
+      layer.allColumns,
+      targetField?.meta?.type
+    );
 
     const isMoveable =
       !target?.isMetricDimension ||

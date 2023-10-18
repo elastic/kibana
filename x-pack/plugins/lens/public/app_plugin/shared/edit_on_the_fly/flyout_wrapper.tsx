@@ -17,8 +17,6 @@ import {
   EuiToolTip,
   EuiButton,
   EuiLink,
-  EuiCallOut,
-  useEuiTheme,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -47,8 +45,6 @@ export const FlyoutWrapper = ({
   navigateToLensEditor,
   onApply,
 }: FlyoutWrapperProps) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <>
       <EuiFlyoutBody
@@ -95,7 +91,8 @@ export const FlyoutWrapper = ({
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         content={i18n.translate('xpack.lens.config.experimentalLabel', {
-                          defaultMessage: 'Technical preview',
+                          defaultMessage:
+                            'Technical preview, ES|QL currently offers limited configuration options',
                         })}
                       >
                         <EuiIcon type="beaker" size="m" />
@@ -116,21 +113,6 @@ export const FlyoutWrapper = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {datasourceId === 'textBased' && (
-            <EuiFlexItem
-              css={css`
-                padding: ${noPadding ? 0 : euiTheme.size.s};
-              `}
-            >
-              <EuiCallOut
-                size="s"
-                title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                  defaultMessage: 'ES|QL currently offers limited configuration options',
-                })}
-                iconType="iInCircle"
-              />
             </EuiFlexItem>
           )}
           {children}
