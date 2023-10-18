@@ -9,26 +9,23 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import {
-  SloListSearchFilterSortBar as Component,
-  SloListSearchFilterSortBarProps,
-} from './slo_list_search_filter_sort_bar';
+import { SloListSearchBar as Component, Props } from './slo_list_search_bar';
+import { DEFAULT_STATE } from '../hooks/use_url_search_state';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloListSearchFilterSortBar',
+  title: 'app/SLO/ListPage/SloListSearchBar',
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloListSearchFilterSortBarProps) => (
-  <Component {...props} />
-);
+const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
-const defaultProps: SloListSearchFilterSortBarProps = {
+const defaultProps: Props = {
   loading: false,
   onChangeQuery: () => {},
   onChangeSort: () => {},
+  initialState: DEFAULT_STATE,
 };
 
-export const SloListSearchFilterSortBar = Template.bind({});
-SloListSearchFilterSortBar.args = defaultProps;
+export const SloListSearchBar = Template.bind({});
+SloListSearchBar.args = defaultProps;
