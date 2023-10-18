@@ -32,8 +32,8 @@ export function SlosPage() {
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
-  const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
-  const { total } = sloList || { total: 0 };
+  const { isInitialLoading, isLoading, isError, data: sloList } = useFetchSloList();
+  const { total } = sloList ?? { total: 0 };
 
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(getAutoRefreshState());
