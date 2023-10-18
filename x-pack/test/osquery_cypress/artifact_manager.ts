@@ -6,5 +6,5 @@
  */
 
 export async function getLatestVersion(): Promise<string> {
-  return '8.12.0-SNAPSHOT';
+  return '8.10.4';
 }
