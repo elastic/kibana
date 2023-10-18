@@ -9,7 +9,7 @@
 /**
  * app ids shared by all solutions
  */
-export enum appIds {
+export enum AppIds {
   INGEST_PIPELINES = 'ingest_pipelines',
   PIPELINES = 'pipelines',
   INDEX_MANAGEMENT = 'index_management',
@@ -28,7 +28,7 @@ export enum appIds {
 }
 
 // Create new type that is a union of all the appId values
-export type AppId = `${appIds}`;
+export type AppId = `${AppIds}`;
 
 export const appCategories = {
   DATA: 'data',
