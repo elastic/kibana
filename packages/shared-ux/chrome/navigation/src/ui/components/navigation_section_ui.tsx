@@ -11,10 +11,10 @@ import React, { FC } from 'react';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
+  EuiSpacer,
   type EuiAccordionProps,
   type EuiCollapsibleNavItemProps,
   type EuiCollapsibleNavSubItemProps,
-  EuiSpacer,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
@@ -178,8 +178,11 @@ const nodeToEuiCollapsibleNavProps = (
     [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isSelected,
   });
+
   let spaceBefore = _spaceBefore;
   if (spaceBefore === undefined && treeDepth === 1 && hasChildren) {
+    // For groups at level 1 that don't have a space specified we default to add a "m"
+    // space. For all other groups, unless specified, there is no vertical space.
     spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS;
   }
 
