@@ -84,12 +84,12 @@ Array [
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <h5
+              <h3
                 class="euiTitle emotion-euiTitle-xxs"
                 data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
               >
                 Assigned:
-              </h5>
+              </h3>
             </div>
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -259,12 +259,12 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                <h5
+                <h3
                   class="euiTitle emotion-euiTitle-xxs"
                   data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
                 >
                   Assigned:
-                </h5>
+                </h3>
               </div>
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero"
