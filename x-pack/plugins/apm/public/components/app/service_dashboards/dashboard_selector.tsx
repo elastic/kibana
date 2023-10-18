@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
