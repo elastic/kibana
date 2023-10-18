@@ -905,6 +905,7 @@
     "getopts": "^2.2.5",
     "getos": "^3.1.0",
     "globby": "^11.1.0",
+    "gpt-tokenizer": "^2.1.2",
     "handlebars": "4.7.7",
     "he": "^1.2.0",
     "history": "^4.9.0",
