@@ -93,6 +93,7 @@ export const resetRulesTableState = () => {
 
 export const cleanKibana = () => {
   resetRulesTableState();
+  deletePrebuiltRulesAssets();
   deleteAlertsAndRules();
   deleteAllCasesItems();
   deleteTimelines();

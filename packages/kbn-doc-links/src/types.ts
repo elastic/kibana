@@ -46,6 +46,7 @@ export interface DocLinks {
     readonly guide: string;
   };
   readonly cloud: {
+    readonly beatsAndLogstashConfiguration: string;
     readonly indexManagement: string;
   };
   readonly console: {
