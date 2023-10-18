@@ -13,6 +13,8 @@ import semverGt from 'semver/functions/gt';
 import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 
+import moment from 'moment';
+
 import type { PostAgentUpgradeResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
@@ -29,7 +31,6 @@ import type { Agent } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
 import { getLatestAvailableVersion } from '../../services/agents/versions';
-import moment from 'moment';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
