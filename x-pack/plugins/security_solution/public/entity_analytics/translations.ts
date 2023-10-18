@@ -199,14 +199,14 @@ export const UPDATE_RISK_ENGINE_MODAL_BUTTON_YES = i18n.translate(
 export const ERROR_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.title',
   {
-    defaultMessage: 'Sorry, there was an error',
+    defaultMessage: 'There was an error',
   }
 );
 
 export const ERROR_PANEL_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.message',
   {
-    defaultMessage: 'Something went wrong. Try again later.',
+    defaultMessage: 'The risk engine status could not be changed. Fix the following and try again:',
   }
 );
 
@@ -271,29 +271,5 @@ export const NEED_TO_HAVE = i18n.translate(
   'xpack.securitySolution.riskScore.errors.privileges.needToHave',
   {
     defaultMessage: 'You need to have:',
-  }
-);
-
-export const PRIVILEGES_FOR = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.priviligesFor',
-  {
-    defaultMessage: 'privileges for',
-  }
-);
-export const INDEX = i18n.translate('xpack.securitySolution.riskScore.errors.privileges.index', {
-  defaultMessage: 'index',
-});
-
-export const SECURITY_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.securityPrivileges',
-  {
-    defaultMessage: ' security privileges',
-  }
-);
-
-export const KIBANA_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.kibanaPrivilege',
-  {
-    defaultMessage: 'Kibana privilege',
   }
 );
