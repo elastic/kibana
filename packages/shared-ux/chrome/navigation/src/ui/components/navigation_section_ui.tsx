@@ -179,7 +179,7 @@ const nodeToEuiCollapsibleNavProps = (
     [`nav-item-isActive`]: isSelected,
   });
   let spaceBefore = _spaceBefore;
-  if (spaceBefore === undefined && treeDepth === 1) {
+  if (spaceBefore === undefined && treeDepth === 1 && hasChildren) {
     spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS;
   }
 
