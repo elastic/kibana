@@ -19,9 +19,14 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { CardsNavigationComponentProps, AppRegistrySections, Application, AppProps } from './types';
+import {
+  CardsNavigationComponentProps,
+  AppRegistrySections,
+  Application,
+  AppProps,
+  AppId,
+} from './types';
 import { appCategories, appDefinitions, getAppIdsByCategory } from './consts';
-import type { AppId } from './consts';
 
 // Retrieve the data we need from a given app from the management app registry
 const getDataFromManagementApp = (app: Application) => {

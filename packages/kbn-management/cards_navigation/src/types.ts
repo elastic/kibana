@@ -5,7 +5,37 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AppId } from './consts';
+
+/**
+ * app ids shared by all solutions
+ */
+export enum appIds {
+  INGEST_PIPELINES = 'ingest_pipelines',
+  PIPELINES = 'pipelines',
+  INDEX_MANAGEMENT = 'index_management',
+  TRANSFORM = 'transform',
+  ML = 'jobsListLink',
+  SAVED_OBJECTS = 'objects',
+  TAGS = 'tags',
+  FILES_MANAGEMENT = 'filesManagement',
+  API_KEYS = 'api_keys',
+  DATA_VIEWS = 'dataViews',
+  REPORTING = 'reporting',
+  CONNECTORS = 'triggersActionsConnectors',
+  RULES = 'triggersActions',
+  MAINTENANCE_WINDOWS = 'maintenanceWindows',
+  SERVERLESS_SETTINGS = 'settings',
+}
+
+// Create new type that is a union of all the appId values
+export type AppId = `${appIds}`;
+
+export const appCategories = {
+  DATA: 'data',
+  ALERTS: 'alerts',
+  CONTENT: 'content',
+  OTHER: 'other',
+} as const;
 
 export interface Application {
   id: string;
@@ -34,7 +64,7 @@ export interface ManagementAppProps {
 }
 
 export interface AppDefinition {
-  category: string;
+  category: typeof appCategories[keyof typeof appCategories];
   description: string;
   icon: React.ReactElement;
 }
