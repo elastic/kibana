@@ -32,7 +32,7 @@ export interface DocumentCountContentProps
     | 'interval'
     | 'chartPointsSplitLabel'
   > {
-  brushSelectionUpdateHandler: BrushSelectionUpdateHandler;
+  brushSelectionUpdateHandler?: BrushSelectionUpdateHandler;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
