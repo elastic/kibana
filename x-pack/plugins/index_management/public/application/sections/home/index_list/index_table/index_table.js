@@ -264,7 +264,8 @@ export class IndexTable extends Component {
     return Object.entries(headers).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
       // we only want to make index name column 25% width when there are more columns displayed
-      const widthClassName = fieldName === 'name' && config.enableIndexStats ? 'indTable__header__width' : '';
+      const widthClassName =
+        fieldName === 'name' && config.enableIndexStats ? 'indTable__header__width' : '';
       return (
         <EuiTableHeaderCell
           key={fieldName}
