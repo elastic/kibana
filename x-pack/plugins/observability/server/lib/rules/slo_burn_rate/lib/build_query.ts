@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { Duration, SLO, toDurationUnit, toMomentUnitOfTime } from '../../../../domain/models';
+import { Duration, SLO, toDurationUnit } from '../../../../domain/models';
 import { BurnRateRuleParams, WindowSchema } from '../types';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
+import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';
 
 type BurnRateWindowWithDuration = WindowSchema & {
   longDuration: Duration;
@@ -213,21 +213,5 @@ export function buildQuery(
         },
       },
     },
-  };
-}
-
-function getLookbackDateRange(
-  startedAt: Date,
-  duration: Duration,
-  delayInSeconds = 0
-): { from: Date; to: Date } {
-  const unit = toMomentUnitOfTime(duration.unit);
-  const now = moment(startedAt).subtract(delayInSeconds, 'seconds').startOf('minute');
-  const from = now.clone().subtract(duration.value, unit);
-  const to = now.clone();
-
-  return {
-    from: from.toDate(),
-    to: to.toDate(),
   };
 }
