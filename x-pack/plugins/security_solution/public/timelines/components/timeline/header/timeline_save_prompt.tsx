@@ -14,6 +14,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../store/timeline';
 import { getTimelineSaveModalByIdSelector } from './selectors';
 import { SaveTimelineModal } from './save_timeline_modal';
+import { TimelineStatus } from '../../../../../common/api/timeline';
 
 interface TimelineSavePromptProps {
   timelineId: string;
@@ -27,7 +28,10 @@ interface TimelineSavePromptProps {
 export const TimelineSavePrompt = React.memo<TimelineSavePromptProps>(({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimelineSaveModal = useMemo(() => getTimelineSaveModalByIdSelector(), []);
-  const forceShow = useDeepEqualSelector((state) => getTimelineSaveModal(state, timelineId));
+  const { showSaveModal: forceShow, status } = useDeepEqualSelector((state) =>
+    getTimelineSaveModal(state, timelineId)
+  );
+  const isUnsaved = status === TimelineStatus.draft;
 
   const closeSaveTimeline = useCallback(() => {
     dispatch(
@@ -44,8 +48,8 @@ export const TimelineSavePrompt = React.memo<TimelineSavePromptProps>(({ timelin
 
   return forceShow && hasKibanaCrud ? (
     <SaveTimelineModal
+      initialFocusOn={isUnsaved ? 'title' : undefined}
       closeSaveTimeline={closeSaveTimeline}
-      initialFocus="title"
       timelineId={timelineId}
       showWarning={true}
     />

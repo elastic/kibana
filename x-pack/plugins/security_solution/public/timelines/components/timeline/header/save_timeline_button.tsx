@@ -93,7 +93,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
         {showEditTimelineOverlay && canEditTimeline ? (
           <SaveTimelineModal
             closeSaveTimeline={closeSaveTimeline}
-            initialFocus="title"
+            initialFocusOn={isUnsaved ? 'title' : 'save'}
             timelineId={timelineId}
             showWarning={false}
           />

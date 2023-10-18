@@ -37,7 +37,7 @@ import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 const CommonUseField = getUseField({ component: Field });
 interface SaveTimelineModalProps {
   closeSaveTimeline: () => void;
-  initialFocus: 'title' | 'description';
+  initialFocusOn?: 'title' | 'save';
   timelineId: string;
   /**
    * When showWarning is true, the modal is used as a reminder
@@ -47,7 +47,7 @@ interface SaveTimelineModalProps {
 }
 
 export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
-  ({ closeSaveTimeline, initialFocus, timelineId, showWarning }) => {
+  ({ closeSaveTimeline, initialFocusOn, timelineId, showWarning }) => {
     const { startTransaction } = useStartTransaction();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const {
@@ -161,7 +161,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
     const titleFieldProps = useMemo(
       () => ({
         'aria-label': i18n.TIMELINE_TITLE,
-        autoFocus: initialFocus === 'title',
+        autoFocus: initialFocusOn === 'title',
         'data-test-subj': 'save-timeline-title',
         disabled: isSaving,
         spellCheck: true,
@@ -170,18 +170,17 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
             ? commonI18n.UNTITLED_TEMPLATE
             : commonI18n.UNTITLED_TIMELINE,
       }),
-      [initialFocus, isSaving, timelineType]
+      [initialFocusOn, isSaving, timelineType]
     );
 
     const descriptionFieldProps = useMemo(
       () => ({
         'aria-label': i18n.TIMELINE_DESCRIPTION,
-        autoFocus: initialFocus === 'description',
         'data-test-subj': 'save-timeline-description',
         disabled: isSaving,
         placeholder: commonI18n.DESCRIPTION,
       }),
-      [initialFocus, isSaving]
+      [isSaving]
     );
 
     useEffect(() => {
@@ -247,6 +246,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} component="span">
                   <EuiButton
+                    autoFocus={initialFocusOn === 'save'}
                     size="s"
                     isDisabled={isSaving || isSubmitting}
                     fill={true}

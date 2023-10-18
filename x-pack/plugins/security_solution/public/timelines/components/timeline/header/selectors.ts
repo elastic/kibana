@@ -10,4 +10,7 @@ import { createSelector } from 'reselect';
 import { timelineSelectors } from '../../../store/timeline';
 
 export const getTimelineSaveModalByIdSelector = () =>
-  createSelector(timelineSelectors.selectTimeline, (timeline) => timeline?.showSaveModal ?? false);
+  createSelector(timelineSelectors.selectTimeline, (timeline) => ({
+    showSaveModal: timeline?.showSaveModal ?? false,
+    status: timeline?.status,
+  }));

@@ -33,7 +33,7 @@ jest.mock('react-redux', () => {
 describe('EditTimelineModal', () => {
   describe('save timeline', () => {
     const props = {
-      initialFocus: 'title' as const,
+      initialFocusOn: 'title' as const,
       closeSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
     };
@@ -118,7 +118,7 @@ describe('EditTimelineModal', () => {
 
   describe('update timeline', () => {
     const props = {
-      initialFocus: 'title' as const,
+      initialFocusOn: 'title' as const,
       closeSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
     };
@@ -196,7 +196,7 @@ describe('EditTimelineModal', () => {
 
   describe('showWarning', () => {
     const props = {
-      initialFocus: 'title' as const,
+      initialFocusOn: 'title' as const,
       closeSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
       showWarning: true,
