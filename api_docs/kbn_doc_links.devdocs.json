@@ -188,7 +188,7 @@
             "label": "cloud",
             "description": [],
             "signature": [
-              "{ readonly indexManagement: string; }"
+              "{ readonly beatsAndLogstashConfiguration: string; readonly indexManagement: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
