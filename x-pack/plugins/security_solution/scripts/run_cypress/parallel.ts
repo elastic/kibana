@@ -447,8 +447,6 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           concurrency: 1,
         }
       ).then((results) => {
-        log.info('Viewing the results.... ');
-        log.info(`${JSON.stringify(results)}`);
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
           results,

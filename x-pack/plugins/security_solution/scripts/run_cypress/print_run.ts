@@ -355,8 +355,6 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
       head: formatFooterSummary(parsedResults),
     });
 
-    console.log('Looking at runs...', runs);
-    console.log('Looking at runs...', JSON.stringify(runs));
     _.each(runs, (run) => {
       console.log('Looking at a single runs', run);
       const { spec, stats } = run;
