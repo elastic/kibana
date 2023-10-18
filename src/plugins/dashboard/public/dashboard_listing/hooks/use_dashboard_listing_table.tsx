@@ -127,11 +127,9 @@ export const useDashboardListingTable = ({
     async (props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>) => {
       await updateDashboardMeta(props);
 
-      setUnsavedDashboardIds(
-        dashboardBackup.getDashboardIdsWithUnsavedChanges(unsavedDashboardIds)
-      );
+      setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackup, updateDashboardMeta, unsavedDashboardIds]
+    [dashboardBackup, updateDashboardMeta]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -254,11 +252,9 @@ export const useDashboardListingTable = ({
         });
       }
 
-      setUnsavedDashboardIds(
-        dashboardBackup.getDashboardIdsWithUnsavedChanges(unsavedDashboardIds)
-      );
+      setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackup, deleteDashboards, toasts, unsavedDashboardIds]
+    [dashboardBackup, deleteDashboards, toasts]
   );
 
   const editItem = useCallback(
@@ -328,11 +324,8 @@ export const useDashboardListingTable = ({
   );
 
   const refreshUnsavedDashboards = useCallback(
-    () =>
-      setUnsavedDashboardIds(
-        dashboardBackup.getDashboardIdsWithUnsavedChanges(unsavedDashboardIds)
-      ),
-    [dashboardBackup, unsavedDashboardIds]
+    () => setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges()),
+    [dashboardBackup]
   );
 
   return {

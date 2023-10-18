@@ -43,6 +43,8 @@ class DashboardBackupService implements DashboardBackupServiceType {
   private notifications: DashboardNotificationsService;
   private spaces: DashboardSpacesService;
 
+  private oldDashboardsWithUnsavedChanges: string[] = [];
+
   constructor(requiredServices: DashboardBackupRequiredServices) {
     ({ notifications: this.notifications, spaces: this.spaces } = requiredServices);
     this.sessionStorage = new Storage(sessionStorage);
@@ -111,12 +113,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  /**
-   * Because we are storing these unsaved dashboard IDs in React component state, we only want things to be re-rendered
-   * if the **contents** change, not if the array reference changes; therefore, in order to maintain this reference, this
-   * method needs to take the old array in as an argument.
-   */
-  public getDashboardIdsWithUnsavedChanges(oldDashboardsWithUnsavedChanges: string[] = []) {
+  public getDashboardIdsWithUnsavedChanges() {
     try {
       const dashboardStatesInSpace =
         this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] || {};
@@ -132,9 +129,15 @@ class DashboardBackupService implements DashboardBackupServiceType {
           dashboardsWithUnsavedChanges.push(dashboardId);
       });
 
-      return isEqual(oldDashboardsWithUnsavedChanges, dashboardsWithUnsavedChanges)
-        ? oldDashboardsWithUnsavedChanges
-        : dashboardsWithUnsavedChanges;
+      /**
+       * Because we are storing these unsaved dashboard IDs in React component state, we only want things to be re-rendered
+       * if the **contents** change, not if the array reference changes
+       */
+      if (!isEqual(this.oldDashboardsWithUnsavedChanges, dashboardsWithUnsavedChanges)) {
+        this.oldDashboardsWithUnsavedChanges = dashboardsWithUnsavedChanges;
+      }
+
+      return this.oldDashboardsWithUnsavedChanges;
     } catch (e) {
       this.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsGetError(e.message),

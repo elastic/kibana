@@ -78,9 +78,7 @@ export const DashboardListingEmptyPrompt = ({
             onClick={() =>
               confirmDiscardUnsavedChanges(() => {
                 dashboardBackup.clearState(DASHBOARD_PANELS_UNSAVED_ID);
-                setUnsavedDashboardIds(
-                  dashboardBackup.getDashboardIdsWithUnsavedChanges(unsavedDashboardIds)
-                );
+                setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
               })
             }
             data-test-subj="discardDashboardPromptButton"
