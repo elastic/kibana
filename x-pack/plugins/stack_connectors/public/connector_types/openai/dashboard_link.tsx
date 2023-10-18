@@ -16,7 +16,7 @@ interface Props {
   connectorName: string;
   selectedProvider?: string;
 }
-
+// tested from ./connector.test.tsx
 export const DashboardLink: React.FC<Props> = ({
   connectorId,
   connectorName,
