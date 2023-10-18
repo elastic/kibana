@@ -125,7 +125,7 @@ function buildEuiGridColumn({
       : [];
   }
 
-  const columnType = columnTypes?.[columnName] ?? dataViewField?.type;
+  const columnType = dataViewField?.type ?? columnTypes?.[columnName];
 
   const column: EuiDataGridColumn = {
     id: columnName,
