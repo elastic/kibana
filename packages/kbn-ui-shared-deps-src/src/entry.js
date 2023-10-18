@@ -67,6 +67,7 @@ export const KbnEsQuery = require('@kbn/es-query');
 export const KbnStd = require('@kbn/std');
 export const SaferLodashSet = require('@kbn/safer-lodash-set');
 export const KbnRison = require('@kbn/rison');
+export const KibanaErrorBoundary = require('@kbn/shared-ux-error-boundary');
 export const History = require('history');
 export const Classnames = require('classnames');
 export const ReactQuery = require('@tanstack/react-query');
