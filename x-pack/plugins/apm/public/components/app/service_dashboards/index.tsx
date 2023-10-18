@@ -5,6 +5,8 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
@@ -151,17 +153,18 @@ export function ServiceDashboards() {
   };
 
   const getLocatorParams = useCallback(
-    (params) => ({
-      serviceName,
-      dashboardId: params.dashboardId,
-      query: {
-        environment,
-        kuery: params.query?.query ?? kuery,
-        rangeFrom: params.timeRange?.from ?? rangeFrom,
-        rangeTo: params.timeRange?.to ?? rangeTo,
+    (params) => {
+      return {
+        serviceName,
         dashboardId: params.dashboardId,
-      },
-    }),
+        query: {
+          environment,
+          kuery,
+          rangeFrom,
+          rangeTo,
+        },
+      };
+    },
     [serviceName, environment, kuery, rangeFrom, rangeTo]
   );
 

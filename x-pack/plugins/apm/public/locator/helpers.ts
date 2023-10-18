@@ -78,7 +78,11 @@ export function getPathForServiceDetail(
       path: {
         serviceName: payload.serviceName,
       },
-      query: { ...defaultQueryParams, dashboardId: payload.dashboardId },
+      query: {
+        ...defaultQueryParams,
+        ...payload.query,
+        dashboardId: payload.dashboardId,
+      },
     });
     return path;
   } else {
@@ -95,6 +99,7 @@ export function getPathForServiceDetail(
       ...defaultQueryParams,
       ...payload.query,
     };
+    console.log('query', payload.query, query);
 
     path = apmRouter.link(apmPath, {
       path: { serviceName: payload.serviceName },
