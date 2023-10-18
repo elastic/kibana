@@ -107,7 +107,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
   if (runtimePluginDependencies !== undefined && !isArrOfIds(runtimePluginDependencies)) {
     throw err(
       `plugin.runtimePluginDependencies`,
-      optionalPlugins,
+      runtimePluginDependencies,
       `must be an array of strings in camel or snake case`
     );
   }
