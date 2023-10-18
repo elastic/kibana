@@ -57,6 +57,7 @@ export async function mountManagementSection({
   enableIndexActions = true,
   enableLegacyTemplates = true,
   enableIndexStats = true,
+  enableDataStreamsStorageColumn = true,
   cloud,
 }: {
   coreSetup: CoreSetup<StartDependencies>;
@@ -68,6 +69,7 @@ export async function mountManagementSection({
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
   enableIndexStats?: boolean;
+  enableDataStreamsStorageColumn?: boolean;
   cloud?: CloudSetup;
 }) {
   const { element, setBreadcrumbs, history, theme$ } = params;
@@ -118,6 +120,7 @@ export async function mountManagementSection({
       enableIndexActions,
       enableLegacyTemplates,
       enableIndexStats,
+      enableDataStreamsStorageColumn,
     },
     history,
     setBreadcrumbs,

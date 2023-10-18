@@ -83,6 +83,7 @@ const appDependencies = {
     enableIndexActions: true,
     enableIndexStats: true,
     enableIndexDetailsPage: false,
+    enableDataStreamsStorageColumn: true,
   },
 } as any;
 

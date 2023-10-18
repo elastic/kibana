@@ -35,4 +35,5 @@ export interface ClientConfigType {
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
   enableIndexStats?: boolean;
+  enableDataStreamsStorageColumn?: boolean;
 }
