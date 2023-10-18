@@ -64,9 +64,6 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
         const [feature, permission] = value.split('.');
         const featureKey = feature.split('_')[1];
 
-        if (value === 'read' || value === 'all' || value === '*') {
-          features[value] = [value];
-        }
         if (!features[featureKey]) {
           features[featureKey] = [];
         }
