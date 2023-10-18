@@ -509,6 +509,9 @@ describe('SyntheticsService', () => {
 
       expect(syncSpy).toHaveBeenCalledTimes(72);
       expect(axios).toHaveBeenCalledTimes(72);
+      expect(logger.debug).toHaveBeenCalledTimes(112);
+      expect(logger.info).toHaveBeenCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(0);
     });
   });
 });
