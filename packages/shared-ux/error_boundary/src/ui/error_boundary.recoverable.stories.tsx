@@ -7,10 +7,9 @@
  */
 
 import { Meta, Story } from '@storybook/react';
-import React, { FC } from 'react';
+import React from 'react';
 
-import { EuiLink, EuiPageTemplate } from '@elastic/eui';
-
+import { Template } from '../../mocks/src/storybook_template';
 import { ChunkLoadErrorComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 import { KibanaErrorBoundary } from './error_boundary';
@@ -31,18 +30,6 @@ export default {
     },
   },
 } as Meta;
-
-const Template: FC = ({ children }) => {
-  return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header pageTitle="Welcome to my page" />
-      <EuiPageTemplate.Section grow={true}>{children}</EuiPageTemplate.Section>
-      <EuiPageTemplate.Section grow={false}>
-        <EuiLink>Contact us</EuiLink>
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
-  );
-};
 
 export const ErrorInCallout: Story = () => {
   const services = storybookMock.getServices();
