@@ -192,21 +192,19 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
-          'should not show collapsed actions menu for the model in the table'
+          'should show collapsed actions menu for the model in the table'
         );
         await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
           modelWithoutPipelineData.modelId,
-          false
+          true
         );
         await ml.testExecution.logTestStep('should show deploy action for the model in the table');
-        await ml.trainedModelsTable.assertModelDeployActionButtonExists(
+        await ml.trainedModelsTable.assertModelDeployActionButtonEnabled(
           modelWithoutPipelineData.modelId,
           true
         );
         await ml.testExecution.logTestStep('should open the deploy model flyout');
-        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
-          modelWithoutPipelineData.modelId
-        );
+        await ml.trainedModelsTable.clickDeployAction(modelWithoutPipelineData.modelId);
         await ml.testExecution.logTestStep('should complete the deploy model Details step');
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails({
           name: modelWithoutPipelineDataExpectedValues.name,
@@ -251,17 +249,15 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
           modelWithoutPipelineData.modelId,
-          false
+          true
         );
         await ml.testExecution.logTestStep('should show deploy action for the model in the table');
         await ml.trainedModelsTable.assertModelDeployActionButtonExists(
           modelWithoutPipelineData.modelId,
-          true
+          false
         );
         await ml.testExecution.logTestStep('should open the deploy model flyout');
-        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
-          modelWithoutPipelineData.modelId
-        );
+        await ml.trainedModelsTable.clickDeployAction(modelWithoutPipelineData.modelId);
         await ml.testExecution.logTestStep('should complete the deploy model Details step');
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails(
           {
