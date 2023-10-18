@@ -62,7 +62,10 @@ const getAppsForCategoryFactory =
     return getAppIdsByCategory(category, appDefinitions)
       .map((appId: AppId) => {
         if ((appDefinitions[appId] as CardNavExtensionDefinition<boolean>).noVerify) {
-          return appDefinitions[appId];
+          return {
+            id: appId,
+            ...appDefinitions[appId],
+          };
         }
 
         if (!filteredApps[appId]) {
