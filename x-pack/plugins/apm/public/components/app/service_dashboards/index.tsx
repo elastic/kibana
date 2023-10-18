@@ -100,15 +100,16 @@ export function ServiceDashboards() {
     );
 
     setServiceDashboards(filteredServiceDashbords);
+  }, [allAvailableDashboards, data?.serviceDashboards]);
 
-    const preselectedDashboard =
-      filteredServiceDashbords.find(
-        ({ dashboardSavedObjectId }) => dashboardSavedObjectId === dashboardId
-      ) ?? filteredServiceDashbords[0];
+  useEffect(() => {
+    const preselectedDashboard = serviceDashboards.find(
+      ({ dashboardSavedObjectId }) => dashboardSavedObjectId === dashboardId
+    );
 
     // preselect dashboard
-    setCurrentDashboard(preselectedDashboard);
-  }, [allAvailableDashboards, data?.serviceDashboards, dashboardId]);
+    if (preselectedDashboard) setCurrentDashboard(preselectedDashboard);
+  }, [serviceDashboards, dashboardId]);
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
@@ -143,13 +144,13 @@ export function ServiceDashboards() {
     rangeTo,
   ]);
 
-  const handleOnChange = (selectedId?: string) => {
-    setCurrentDashboard(
-      serviceDashboards?.find(
-        ({ dashboardSavedObjectId }) => dashboardSavedObjectId === selectedId
-      )
-    );
-  };
+  useEffect(() => {
+    console.log('dashboard id changed', dashboardId);
+  }, [dashboardId]);
+
+  useEffect(() => {
+    console.log('current dashboard changed', currentDashboard);
+  }, [currentDashboard]);
 
   const getLocatorParams = useCallback(
     (params) => {
@@ -212,7 +213,6 @@ export function ServiceDashboards() {
             <EuiFlexItem grow={false}>
               <DashboardSelector
                 serviceDashboards={serviceDashboards}
-                handleOnChange={handleOnChange}
                 currentDashboard={currentDashboard}
               />
             </EuiFlexItem>
@@ -233,6 +233,7 @@ export function ServiceDashboards() {
                     />,
                     <UnlinkDashboard
                       currentDashboard={currentDashboard}
+                      defaultDashboard={serviceDashboards[0]}
                       onRefresh={refetch}
                     />,
                   ]}
@@ -242,7 +243,7 @@ export function ServiceDashboards() {
           </EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <EuiSpacer size="l" />
-            {currentDashboard && (
+            {dashboardId && (
               <DashboardRenderer
                 locator={locator}
                 savedObjectId={dashboardId}

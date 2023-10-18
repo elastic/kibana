@@ -15,29 +15,13 @@ import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 interface Props {
   serviceDashboards: MergedServiceDashboard[];
   currentDashboard?: MergedServiceDashboard;
-  handleOnChange: (selectedId?: string) => void;
 }
 
 export function DashboardSelector({
   serviceDashboards,
   currentDashboard,
-  handleOnChange,
 }: Props) {
   const history = useHistory();
-
-  useEffect(
-    () =>
-      history.push({
-        ...history.location,
-        search: fromQuery({
-          ...toQuery(location.search),
-          dashboardId: currentDashboard?.dashboardSavedObjectId,
-        }),
-      }),
-    // It should only update when loaded
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
 
   function onChange(newDashboardId?: string) {
     history.push({
@@ -47,8 +31,8 @@ export function DashboardSelector({
         dashboardId: newDashboardId,
       }),
     });
-    handleOnChange(newDashboardId);
   }
+
   return (
     <EuiComboBox
       compressed
