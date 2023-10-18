@@ -24,7 +24,7 @@ import { Subject } from 'rxjs';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE, EMBEDDABLE_ORIGIN } from '../../common/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
 
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
@@ -137,6 +137,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
                   onRenderComplete={this.onRenderComplete.bind(this)}
                   onLoading={this.onLoading.bind(this)}
                   onError={this.onError.bind(this)}
+                  embeddingOrigin={this.parent?.type ?? EMBEDDABLE_ORIGIN}
                 />
               </Suspense>
             </DatePickerContextProvider>
