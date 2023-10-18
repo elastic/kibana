@@ -41,7 +41,19 @@ import { IngestionSelector } from './ingestion_selector';
 
 import './product_selector.scss';
 
-export const ProductSelector: React.FC = () => {
+interface ProductSelectorProps {
+  access: {
+    hasAppSearchAccess?: boolean;
+    hasWorkplaceSearchAccess?: boolean;
+  };
+  isWorkplaceSearchAdmin: boolean;
+}
+
+export const ProductSelector: React.FC<ProductSelectorProps> = ({
+  access,
+  isWorkplaceSearchAdmin,
+}) => {
+  const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config, security } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
 
@@ -138,9 +150,15 @@ export const ProductSelector: React.FC = () => {
             <EuiFlexItem>
               <ElasticsearchProductCard />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EnterpriseSearchProductCard />
-            </EuiFlexItem>
+            {(hasAppSearchAccess || hasWorkplaceSearchAccess) && (
+              <EuiFlexItem>
+                <EnterpriseSearchProductCard
+                  hasAppSearchAccess={hasAppSearchAccess ?? false}
+                  hasWorkplaceSearchAccess={hasWorkplaceSearchAccess ?? false}
+                  isWorkplaceSearchAdmin={isWorkplaceSearchAdmin}
+                />
+              </EuiFlexItem>
+            )}
             {!config.host && config.canDeployEntSearch && (
               <EuiFlexItem>
                 <SetupGuideCta />
