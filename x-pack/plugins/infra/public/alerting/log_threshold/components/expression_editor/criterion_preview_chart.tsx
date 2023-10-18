@@ -7,6 +7,7 @@
 
 import React, { ReactElement, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import {
   ScaleType,
   AnnotationDomainType,
@@ -330,7 +331,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
-          <Settings baseTheme={chartTheme.baseTheme} />
+          <Settings baseTheme={chartTheme.baseTheme} locale={i18n.getLocale()} />
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>
