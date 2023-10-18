@@ -9,8 +9,10 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: https://{kibanaUrl}
+    variables:
+      kibanaUrl:
+        default: localhost:5601
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -53,8 +55,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes one or more cases in the default space.
       operationId: deleteCaseDefaultSpace
@@ -74,8 +74,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     patch:
       summary: Updates one or more cases in the default space.
       operationId: updateCaseDefaultSpace
@@ -111,10 +109,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/_find:
     get:
       summary: Retrieves a paginated subset of cases in the default space.
@@ -174,10 +168,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/alerts/{alertId}:
     get:
       summary: Returns the cases associated with a specific alert in the default space.
@@ -216,10 +206,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601s
   /api/cases/configure:
     get:
       summary: Retrieves external connection details, such as the closure type and default connector for cases in the default space.
@@ -242,6 +228,27 @@ paths:
                   properties:
                     closure_type:
                       $ref: '#/components/schemas/closure_types'
+                    customFields:
+                      type: array
+                      description: Custom fields configuration details.
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            description: The key identifying the custom field.
+                            type: string
+                          label:
+                            description: The custom field label.
+                            type: string
+                          required:
+                            description: Indicates whether the field is required.
+                            type: boolean
+                          type:
+                            description: The type of the custom field.
+                            type: string
+                            enum:
+                              - text
+                              - toggle
                     connector:
                       type: object
                       properties:
@@ -331,14 +338,15 @@ paths:
                     version:
                       type: string
                       example: WzIwNzMsMV0=
+              examples:
+                getConfigurationResponse:
+                  $ref: '#/components/examples/get_case_configuration_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Sets external connection details, such as the closure type and default connector for cases in the default space.
       operationId: setCaseConfigurationDefaultSpace
@@ -366,6 +374,27 @@ paths:
                 properties:
                   closure_type:
                     $ref: '#/components/schemas/closure_types'
+                  customFields:
+                    type: array
+                    description: Custom fields configuration details.
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          description: The key identifying the custom field.
+                          type: string
+                        label:
+                          description: The custom field label.
+                          type: string
+                        required:
+                          description: Indicates whether the field is required.
+                          type: boolean
+                        type:
+                          description: The type of the custom field.
+                          type: string
+                          enum:
+                            - text
+                            - toggle
                   connector:
                     type: object
                     properties:
@@ -464,10 +493,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/configure/{configurationId}:
     patch:
       summary: Updates external connection details, such as the closure type and default connector for cases in the default space.
@@ -496,6 +521,27 @@ paths:
                   properties:
                     closure_type:
                       $ref: '#/components/schemas/closure_types'
+                    customFields:
+                      type: array
+                      description: Custom fields configuration details.
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            description: The key identifying the custom field.
+                            type: string
+                          label:
+                            description: The custom field label.
+                            type: string
+                          required:
+                            description: Indicates whether the field is required.
+                            type: boolean
+                          type:
+                            description: The type of the custom field.
+                            type: string
+                            enum:
+                              - text
+                              - toggle
                     connector:
                       type: object
                       properties:
@@ -591,10 +637,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/reporters:
     get:
       summary: Returns information about the users who opened cases in the default space.
@@ -640,10 +682,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/status:
     get:
       summary: Returns the number of cases that are open, closed, and in progress in the default space.
@@ -678,10 +716,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/tags:
     get:
       summary: Aggregates and returns a list of case tags in the default space.
@@ -711,10 +745,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}:
     get:
       summary: Retrieves information about a case in the default space.
@@ -742,10 +772,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/alerts:
     get:
       summary: Gets all alerts attached to a case in the default space.
@@ -775,10 +801,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/comments:
     post:
       summary: Adds a comment or alert to a case in the default space.
@@ -815,8 +837,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes all comments and alerts from a case in the default space.
       operationId: deleteCaseCommentsDefaultSpace
@@ -836,8 +856,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     patch:
       summary: Updates a comment or alert in a case in the default space.
       operationId: updateCaseCommentDefaultSpace
@@ -873,8 +891,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves all the comments from a case in the default space.
       operationId: getAllCaseCommentsDefaultSpace
@@ -898,10 +914,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/comments/{commentId}:
     delete:
       summary: Deletes a comment or alert from a case in the default space.
@@ -923,8 +935,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves a comment from a case in the default space.
       operationId: getCaseCommentDefaultSpace
@@ -953,10 +963,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/connector/{connectorId}/_push:
     post:
       summary: Pushes a case in the default space to an external service.
@@ -991,10 +997,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/user_actions:
     get:
       summary: Returns all user activity for a case in the default space.
@@ -1024,10 +1026,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/user_actions/_find:
     get:
       summary: Finds user activity for a case in the default space.
@@ -1070,10 +1068,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/configure/connectors/_find:
     get:
       summary: Retrieves information about connectors in the default space.
@@ -1124,10 +1118,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases:
     post:
       summary: Creates a case.
@@ -1164,8 +1154,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes one or more cases.
       operationId: deleteCase
@@ -1186,8 +1174,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     patch:
       summary: Updates one or more cases.
       operationId: updateCase
@@ -1224,10 +1210,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/_find:
     get:
       summary: Retrieves a paginated subset of cases.
@@ -1287,10 +1269,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/alerts/{alertId}:
     get:
       summary: Returns the cases associated with a specific alert.
@@ -1329,10 +1307,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure:
     get:
       summary: Retrieves external connection details, such as the closure type and default connector for cases.
@@ -1356,6 +1330,27 @@ paths:
                   properties:
                     closure_type:
                       $ref: '#/components/schemas/closure_types'
+                    customFields:
+                      type: array
+                      description: Custom fields configuration details.
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            description: The key identifying the custom field.
+                            type: string
+                          label:
+                            description: The custom field label.
+                            type: string
+                          required:
+                            description: Indicates whether the field is required.
+                            type: boolean
+                          type:
+                            description: The type of the custom field.
+                            type: string
+                            enum:
+                              - text
+                              - toggle
                     connector:
                       type: object
                       properties:
@@ -1445,14 +1440,15 @@ paths:
                     version:
                       type: string
                       example: WzIwNzMsMV0=
+              examples:
+                getConfigurationResponse:
+                  $ref: '#/components/examples/get_case_configuration_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Sets external connection details, such as the closure type and default connector for cases.
       operationId: setCaseConfiguration
@@ -1481,6 +1477,27 @@ paths:
                 properties:
                   closure_type:
                     $ref: '#/components/schemas/closure_types'
+                  customFields:
+                    type: array
+                    description: Custom fields configuration details.
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          description: The key identifying the custom field.
+                          type: string
+                        label:
+                          description: The custom field label.
+                          type: string
+                        required:
+                          description: Indicates whether the field is required.
+                          type: boolean
+                        type:
+                          description: The type of the custom field.
+                          type: string
+                          enum:
+                            - text
+                            - toggle
                   connector:
                     type: object
                     properties:
@@ -1579,10 +1596,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/{configurationId}:
     patch:
       summary: Updates external connection details, such as the closure type and default connector for cases.
@@ -1612,6 +1625,27 @@ paths:
                   properties:
                     closure_type:
                       $ref: '#/components/schemas/closure_types'
+                    customFields:
+                      type: array
+                      description: Custom fields configuration details.
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            description: The key identifying the custom field.
+                            type: string
+                          label:
+                            description: The custom field label.
+                            type: string
+                          required:
+                            description: Indicates whether the field is required.
+                            type: boolean
+                          type:
+                            description: The type of the custom field.
+                            type: string
+                            enum:
+                              - text
+                              - toggle
                     connector:
                       type: object
                       properties:
@@ -1707,10 +1741,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
       summary: Retrieves information about connectors.
@@ -1762,10 +1792,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/reporters:
     get:
       summary: Returns information about the users who opened cases.
@@ -1811,10 +1837,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/status:
     get:
       summary: Returns the number of cases that are open, closed, and in progress.
@@ -1850,10 +1872,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/tags:
     get:
       summary: Aggregates and returns a list of case tags.
@@ -1883,10 +1901,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}:
     get:
       summary: Retrieves information about a case.
@@ -1915,10 +1929,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/alerts:
     get:
       summary: Gets all alerts attached to a case.
@@ -1949,10 +1959,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments:
     post:
       summary: Adds a comment or alert to a case.
@@ -1990,8 +1996,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes all comments and alerts from a case.
       operationId: deleteCaseComments
@@ -2012,8 +2016,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     patch:
       summary: Updates a comment or alert in a case.
       operationId: updateCaseComment
@@ -2050,8 +2052,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves all the comments from a case.
       operationId: getAllCaseComments
@@ -2076,10 +2076,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments/_find:
     get:
       summary: Retrieves all the user comments from a case.
@@ -2107,10 +2103,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments/{commentId}:
     delete:
       summary: Deletes a comment or alert from a case.
@@ -2133,8 +2125,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves a comment from a case.
       operationId: getCaseComment
@@ -2164,10 +2154,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push:
     post:
       summary: Pushes a case to an external service.
@@ -2203,10 +2189,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/user_actions:
     get:
       summary: Returns all user activity for a case.
@@ -2237,10 +2219,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/user_actions/_find:
     get:
       summary: Finds user activity for a case.
@@ -2284,10 +2262,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -2892,7 +2866,7 @@ components:
       default: low
     custom_fields_property:
       type: array
-      description: Values for custom fields of a case
+      description: Values for custom fields of a case.
       minItems: 0
       maxItems: 5
       items:
@@ -2906,7 +2880,8 @@ components:
             description: The key identifying the custom field.
             type: string
           type:
-            description: The type of the custom field. Should match the key and how the custom field was configured
+            description: |
+              The type of the custom field. It should match the key and how the custom field was configured.
             type: string
           field:
             description: An object containing the value of the field.
@@ -4345,6 +4320,32 @@ components:
         count_open_cases: 1
         count_in_progress_cases: 0
         count_closed_cases: 0
+    get_case_configuration_response:
+      summary: Get the case configuration.
+      value:
+        - id: 856ee650-6c82-11ee-a20a-6164169afa58
+          closure_type: close-by-user
+          customFields:
+            - key: d312efda-ec2b-42ec-9e2c-84981795c581
+              label: my-field
+              required: false
+              type: text
+          owner: cases
+          created_at: '2023-06-01T17:07:17.767Z'
+          created_by:
+            username: elastic
+            email: null
+            full_name: null
+          updated_at: null
+          updated_by: null
+          connector:
+            id: none
+            name: none
+            type: .none
+            fields: null
+          mappings: []
+          version: WzUxLDRd
+          error: null
     set_case_configuration_request:
       summary: Set the closure type and default connector for Stack Management cases.
       value:

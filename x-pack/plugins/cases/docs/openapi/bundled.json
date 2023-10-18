@@ -14,8 +14,12 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601",
-      "description": "local"
+      "url": "https://{kibanaUrl}",
+      "variables": {
+        "kibanaUrl": {
+          "default": "localhost:5601"
+        }
+      }
     }
   ],
   "security": [
@@ -87,12 +91,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes one or more cases in the default space.",
@@ -123,12 +122,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "patch": {
         "summary": "Updates one or more cases in the default space.",
@@ -185,18 +179,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/_find": {
       "get": {
@@ -309,18 +293,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/alerts/{alertId}": {
       "get": {
@@ -380,18 +354,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601s"
         }
-      ]
+      }
     },
     "/api/cases/configure": {
       "get": {
@@ -418,6 +382,35 @@
                     "properties": {
                       "closure_type": {
                         "$ref": "#/components/schemas/closure_types"
+                      },
+                      "customFields": {
+                        "type": "array",
+                        "description": "Custom fields configuration details.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "description": "The key identifying the custom field.",
+                              "type": "string"
+                            },
+                            "label": {
+                              "description": "The custom field label.",
+                              "type": "string"
+                            },
+                            "required": {
+                              "description": "Indicates whether the field is required.",
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "description": "The type of the custom field.",
+                              "type": "string",
+                              "enum": [
+                                "text",
+                                "toggle"
+                              ]
+                            }
+                          }
+                        }
                       },
                       "connector": {
                         "type": "object",
@@ -540,6 +533,11 @@
                       }
                     }
                   }
+                },
+                "examples": {
+                  "getConfigurationResponse": {
+                    "$ref": "#/components/examples/get_case_configuration_response"
+                  }
                 }
               }
             }
@@ -554,12 +552,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Sets external connection details, such as the closure type and default connector for cases in the default space.",
@@ -597,6 +590,35 @@
                   "properties": {
                     "closure_type": {
                       "$ref": "#/components/schemas/closure_types"
+                    },
+                    "customFields": {
+                      "type": "array",
+                      "description": "Custom fields configuration details.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "description": "The key identifying the custom field.",
+                            "type": "string"
+                          },
+                          "label": {
+                            "description": "The custom field label.",
+                            "type": "string"
+                          },
+                          "required": {
+                            "description": "Indicates whether the field is required.",
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "description": "The type of the custom field.",
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "toggle"
+                            ]
+                          }
+                        }
+                      }
                     },
                     "connector": {
                       "type": "object",
@@ -737,18 +759,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/configure/{configurationId}": {
       "patch": {
@@ -787,6 +799,35 @@
                     "properties": {
                       "closure_type": {
                         "$ref": "#/components/schemas/closure_types"
+                      },
+                      "customFields": {
+                        "type": "array",
+                        "description": "Custom fields configuration details.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "description": "The key identifying the custom field.",
+                              "type": "string"
+                            },
+                            "label": {
+                              "description": "The custom field label.",
+                              "type": "string"
+                            },
+                            "required": {
+                              "description": "Indicates whether the field is required.",
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "description": "The type of the custom field.",
+                              "type": "string",
+                              "enum": [
+                                "text",
+                                "toggle"
+                              ]
+                            }
+                          }
+                        }
                       },
                       "connector": {
                         "type": "object",
@@ -923,18 +964,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/reporters": {
       "get": {
@@ -1000,18 +1031,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/status": {
       "get": {
@@ -1064,18 +1085,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/tags": {
       "get": {
@@ -1120,18 +1131,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/{caseId}": {
       "get": {
@@ -1175,18 +1176,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/{caseId}/alerts": {
       "get": {
@@ -1231,18 +1222,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/{caseId}/comments": {
       "post": {
@@ -1301,12 +1282,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes all comments and alerts from a case in the default space.",
@@ -1337,12 +1313,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "patch": {
         "summary": "Updates a comment or alert in a case in the default space.",
@@ -1400,12 +1371,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Retrieves all the comments from a case in the default space.",
@@ -1441,18 +1407,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/{caseId}/comments/{commentId}": {
       "delete": {
@@ -1487,12 +1443,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Retrieves a comment from a case in the default space.",
@@ -1542,18 +1493,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/{caseId}/connector/{connectorId}/_push": {
       "post": {
@@ -1610,18 +1551,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/{caseId}/user_actions": {
       "get": {
@@ -1666,18 +1597,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/{caseId}/user_actions/_find": {
       "get": {
@@ -1748,18 +1669,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/cases/configure/connectors/_find": {
       "get": {
@@ -1834,18 +1745,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases": {
       "post": {
@@ -1904,12 +1805,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes one or more cases.",
@@ -1943,12 +1839,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "patch": {
         "summary": "Updates one or more cases.",
@@ -2008,18 +1899,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/_find": {
       "get": {
@@ -2134,18 +2015,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/alerts/{alertId}": {
       "get": {
@@ -2207,18 +2078,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/configure": {
       "get": {
@@ -2248,6 +2109,35 @@
                     "properties": {
                       "closure_type": {
                         "$ref": "#/components/schemas/closure_types"
+                      },
+                      "customFields": {
+                        "type": "array",
+                        "description": "Custom fields configuration details.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "description": "The key identifying the custom field.",
+                              "type": "string"
+                            },
+                            "label": {
+                              "description": "The custom field label.",
+                              "type": "string"
+                            },
+                            "required": {
+                              "description": "Indicates whether the field is required.",
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "description": "The type of the custom field.",
+                              "type": "string",
+                              "enum": [
+                                "text",
+                                "toggle"
+                              ]
+                            }
+                          }
+                        }
                       },
                       "connector": {
                         "type": "object",
@@ -2370,6 +2260,11 @@
                       }
                     }
                   }
+                },
+                "examples": {
+                  "getConfigurationResponse": {
+                    "$ref": "#/components/examples/get_case_configuration_response"
+                  }
                 }
               }
             }
@@ -2384,12 +2279,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Sets external connection details, such as the closure type and default connector for cases.",
@@ -2430,6 +2320,35 @@
                   "properties": {
                     "closure_type": {
                       "$ref": "#/components/schemas/closure_types"
+                    },
+                    "customFields": {
+                      "type": "array",
+                      "description": "Custom fields configuration details.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "description": "The key identifying the custom field.",
+                            "type": "string"
+                          },
+                          "label": {
+                            "description": "The custom field label.",
+                            "type": "string"
+                          },
+                          "required": {
+                            "description": "Indicates whether the field is required.",
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "description": "The type of the custom field.",
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "toggle"
+                            ]
+                          }
+                        }
+                      }
                     },
                     "connector": {
                       "type": "object",
@@ -2570,18 +2489,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/configure/{configurationId}": {
       "patch": {
@@ -2623,6 +2532,35 @@
                     "properties": {
                       "closure_type": {
                         "$ref": "#/components/schemas/closure_types"
+                      },
+                      "customFields": {
+                        "type": "array",
+                        "description": "Custom fields configuration details.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "description": "The key identifying the custom field.",
+                              "type": "string"
+                            },
+                            "label": {
+                              "description": "The custom field label.",
+                              "type": "string"
+                            },
+                            "required": {
+                              "description": "Indicates whether the field is required.",
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "description": "The type of the custom field.",
+                              "type": "string",
+                              "enum": [
+                                "text",
+                                "toggle"
+                              ]
+                            }
+                          }
+                        }
                       },
                       "connector": {
                         "type": "object",
@@ -2759,18 +2697,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/configure/connectors/_find": {
       "get": {
@@ -2849,18 +2777,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/reporters": {
       "get": {
@@ -2928,18 +2846,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/status": {
       "get": {
@@ -2995,18 +2903,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/tags": {
       "get": {
@@ -3053,18 +2951,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/{caseId}": {
       "get": {
@@ -3111,18 +2999,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/{caseId}/alerts": {
       "get": {
@@ -3170,18 +3048,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/{caseId}/comments": {
       "post": {
@@ -3243,12 +3111,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes all comments and alerts from a case.",
@@ -3282,12 +3145,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "patch": {
         "summary": "Updates a comment or alert in a case.",
@@ -3348,12 +3206,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Retrieves all the comments from a case.",
@@ -3392,18 +3245,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/{caseId}/comments/_find": {
       "get": {
@@ -3451,18 +3294,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/{caseId}/comments/{commentId}": {
       "delete": {
@@ -3500,12 +3333,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Retrieves a comment from a case.",
@@ -3558,18 +3386,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push": {
       "post": {
@@ -3629,18 +3447,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/{caseId}/user_actions": {
       "get": {
@@ -3688,18 +3496,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/cases/{caseId}/user_actions/_find": {
       "get": {
@@ -3773,18 +3571,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     }
   },
   "components": {
@@ -4581,7 +4369,7 @@
       },
       "custom_fields_property": {
         "type": "array",
-        "description": "Values for custom fields of a case",
+        "description": "Values for custom fields of a case.",
         "minItems": 0,
         "maxItems": 5,
         "items": {
@@ -4597,7 +4385,7 @@
               "type": "string"
             },
             "type": {
-              "description": "The type of the custom field. Should match the key and how the custom field was configured",
+              "description": "The type of the custom field. It should match the key and how the custom field was configured.\n",
               "type": "string"
             },
             "field": {
@@ -6620,6 +6408,41 @@
           "count_in_progress_cases": 0,
           "count_closed_cases": 0
         }
+      },
+      "get_case_configuration_response": {
+        "summary": "Get the case configuration.",
+        "value": [
+          {
+            "id": "856ee650-6c82-11ee-a20a-6164169afa58",
+            "closure_type": "close-by-user",
+            "customFields": [
+              {
+                "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
+                "label": "my-field",
+                "required": false,
+                "type": "text"
+              }
+            ],
+            "owner": "cases",
+            "created_at": "2023-06-01T17:07:17.767Z",
+            "created_by": {
+              "username": "elastic",
+              "email": null,
+              "full_name": null
+            },
+            "updated_at": null,
+            "updated_by": null,
+            "connector": {
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+              "fields": null
+            },
+            "mappings": [],
+            "version": "WzUxLDRd",
+            "error": null
+          }
+        ]
       },
       "set_case_configuration_request": {
         "summary": "Set the closure type and default connector for Stack Management cases.",
