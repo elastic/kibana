@@ -11,7 +11,8 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('/api/telemetry/v2/config API Telemetry config', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169134
+  describe.skip('/api/telemetry/v2/config API Telemetry config', () => {
     const baseConfig = {
       allowChangingOptInStatus: false,
       optIn: true,
