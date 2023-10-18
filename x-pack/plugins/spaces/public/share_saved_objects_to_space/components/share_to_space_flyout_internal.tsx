@@ -210,7 +210,6 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     const getPermissions = spacesManager.getShareSavedObjectPermissions(type);
     Promise.all([spacesDataPromise, getShareableReferences, getPermissions])
       .then(([spacesData, shareableReferences, permissions]) => {
-        console.log(`***** OBJECTS: ${JSON.stringify(shareableReferences)}`);
         const activeSpaceId = !enableSpaceAgnosticBehavior && spacesData.activeSpaceId;
         const selectedSpaceIds = savedObjectTarget.namespaces.filter(
           (spaceId) => spaceId !== activeSpaceId
