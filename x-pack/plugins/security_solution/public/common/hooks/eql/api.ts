@@ -38,8 +38,8 @@ export const validateEql = async ({
         params: {
           index: dataViewTitle,
           body: { query, runtime_mappings: runtimeMappings, size: 0 },
+          validate: true,
         },
-        options: { ignore: [400] },
       },
       {
         strategy: EQL_SEARCH_STRATEGY,
