@@ -32,7 +32,6 @@
     "@kbn/std",
     "@kbn/stack-connectors-plugin",
     "@kbn/ml-plugin",
-    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",
