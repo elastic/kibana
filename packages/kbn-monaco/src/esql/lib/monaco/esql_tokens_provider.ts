@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams, Token } from 'antlr4ts';
+import { CharStreams, type Token } from 'antlr4ts';
 import { monaco } from '../../../monaco_imports';
 import { ANTLREErrorListener } from '../../../common/error_listener';
 

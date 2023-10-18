@@ -45,7 +45,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '../types';
-import { getMessageFromId, createWarning } from './errors';
+import { getMessageFromId, createMessage } from './errors';
 import type {
   ESQLPolicy,
   ESQLRealField,
@@ -272,7 +272,7 @@ function validateFunction(
       ...(astFunction.args.filter((arg) => !Array.isArray(arg)) as ESQLSingleAstItem[])
     );
     if (message) {
-      messages.push(createWarning(message, astFunction.location));
+      messages.push(createMessage('warning', message, astFunction.location));
     }
   }
   // at this point we're sure that at least one signature is matching

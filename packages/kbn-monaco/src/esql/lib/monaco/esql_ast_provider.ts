@@ -19,11 +19,6 @@ import { ESQLErrorListener } from './esql_error_listener';
 
 const ROOT_STATEMENT = 'singleStatement';
 
-function createParserListener() {
-  const parserListener = new AstListener();
-  return parserListener;
-}
-
 function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: ESQLMessage[]) {
   return messages.map((e) => {
     const startPosition = e.location
@@ -51,14 +46,14 @@ export function getLanguageProviders() {
     }
     const inputStream = CharStreams.fromString(text);
     const errorListener = new ESQLErrorListener();
-    const parseListener = createParserListener();
+    const parseListener = new AstListener();
     const parser = getParser(inputStream, errorListener, parseListener);
 
     parser[ROOT_STATEMENT]();
 
-    const ast = parseListener.getAst();
+    const { ast } = parseListener.getAst();
     return {
-      ...ast,
+      ast,
       errors: [],
     };
   };
@@ -66,9 +61,9 @@ export function getLanguageProviders() {
     // used for debugging purposes only
     getAst,
     validate: async (code: string, callbacks?: ESQLCallbacks) => {
-      const { ast, errors: syntaxErrors } = getAst(code);
+      const { ast } = getAst(code);
       const { errors, warnings } = await validateAst(ast, callbacks);
-      const monacoErrors = wrapAsMonacoMessage('error', code, errors.concat(syntaxErrors));
+      const monacoErrors = wrapAsMonacoMessage('error', code, errors);
       const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
       return { errors: monacoErrors, warnings: monacoWarnings };
     },
@@ -96,7 +91,7 @@ export function getLanguageProviders() {
     },
     getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
       return {
-        triggerCharacters: [',', '(', '=', ' '], // [',', '.', '(', '=', ' '],
+        triggerCharacters: [',', '(', '=', ' '],
         async provideCompletionItems(
           model: monaco.editor.ITextModel,
           position: monaco.Position,

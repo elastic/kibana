@@ -12,21 +12,31 @@ import { FunctionDefinition } from './types';
 function createNumericAggDefinition({
   name,
   description,
+  args = [],
 }: {
   name: string;
   description: string;
+  args?: Array<{ name: string; type: string; value: string }>;
 }): FunctionDefinition {
+  const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
     name,
     description,
     supportedCommands: ['stats'],
     signatures: [
       {
-        params: [{ name: 'colum', type: 'number', noNestingFunctions: true }],
+        params: [
+          { name: 'column', type: 'number', noNestingFunctions: true },
+          ...args.map(({ name: paramName, type }) => ({
+            name: paramName,
+            type,
+            noNestingFunctions: true,
+          })),
+        ],
         returnType: 'number',
         examples: [
-          `from index | stats result = ${name}(field)`,
-          `from index | stats ${name}(field)`,
+          `from index | stats result = ${name}(field${extraParamsExample})`,
+          `from index | stats ${name}(field${extraParamsExample})`,
         ],
       },
     ],
@@ -83,25 +93,11 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         'Returns the median of each data point’s deviation from the median of the entire sample.',
     }),
   },
-]
-  .map(createNumericAggDefinition)
-  .concat({
+  {
     name: 'percentile',
     description: i18n.translate('monaco.esql.definitions.percentiletDoc', {
       defaultMessage: 'Returns the n percentile of a field.',
     }),
-    supportedCommands: ['stats'],
-    signatures: [
-      {
-        params: [
-          { name: 'colum', type: 'number', noNestingFunctions: true },
-          { name: 'percentile', type: 'number', noNestingFunctions: true },
-        ],
-        returnType: 'number',
-        examples: [
-          `from index | stats result = percentile(field, 90)`,
-          `from index | stats percentile(field, 90)`,
-        ],
-      },
-    ],
-  });
+    args: [{ name: 'percentile', type: 'number', value: '90' }],
+  },
+].map(createNumericAggDefinition);

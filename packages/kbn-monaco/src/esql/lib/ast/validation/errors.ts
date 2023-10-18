@@ -169,10 +169,6 @@ export function getMessageFromId<K extends ErrorTypes>({
   return createMessage(type, message, locations);
 }
 
-export function createWarning(message: string, location: ESQLLocation) {
-  return createMessage('warning', message, location);
-}
-
 export function createMessage(type: 'error' | 'warning', message: string, location: ESQLLocation) {
   return {
     type,
