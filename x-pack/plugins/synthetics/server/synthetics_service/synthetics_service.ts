@@ -395,7 +395,7 @@ export class SyntheticsService {
       bucketsByLocation[location.id] = [];
     });
 
-    const synAllLocations = async (perBucket = 0) => {
+    const syncAllLocations = async (perBucket = 0) => {
       await pMap(
         this.locations,
         async (location) => {
@@ -452,7 +452,7 @@ export class SyntheticsService {
           });
         });
 
-        await synAllLocations(PER_PAGE);
+        await syncAllLocations(PER_PAGE);
       } catch (e) {
         sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
           reason: 'Failed to push configs to service',
@@ -467,7 +467,7 @@ export class SyntheticsService {
     }
 
     // execute the remaining monitors
-    await synAllLocations();
+    await syncAllLocations();
 
     await finder.close();
   }
