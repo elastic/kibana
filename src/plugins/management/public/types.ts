@@ -11,7 +11,7 @@ import { ScopedHistory, Capabilities } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import type {
-  AppDefinitionExtention,
+  CardNavExtensionDefinition,
   CardsNavigationComponentProps,
 } from '@kbn/management-cards-navigation';
 import { AppNavLinkStatus } from '@kbn/core/public';
@@ -92,7 +92,7 @@ export interface CreateManagementItemArgs {
 export interface NavigationCardsSubject<N extends boolean>
   extends Pick<CardsNavigationComponentProps, 'hideLinksTo'> {
   enabled: boolean;
-  extendCardNavDefinitons?: Record<string, AppDefinitionExtention<N>>;
+  extendCardNavDefinitons?: Record<string, CardNavExtensionDefinition<N>>;
 }
 
 export interface AppDependencies {

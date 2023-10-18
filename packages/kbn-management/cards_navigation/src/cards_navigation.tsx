@@ -27,12 +27,12 @@ import {
   AppProps,
   AppId,
   AppDefinition,
-  AppDefinitionExtention,
+  CardNavExtensionDefinition,
 } from './types';
 import { appCategories, appDefinitions as defaultCardNavigationDefinitions } from './consts';
 
 type AggregatedCardNavDefinitions =
-  | NonNullable<CardsNavigationComponentProps['extendCardNavigationDefinitions']>
+  | NonNullable<CardsNavigationComponentProps['cardNavExtensionDefinitions']>
   | Record<AppId, AppDefinition>;
 
 // Retrieve the data we need from a given app from the management app registry
@@ -61,7 +61,7 @@ const getAppsForCategoryFactory =
   (category: string, filteredApps: { [key: string]: Application }) => {
     return getAppIdsByCategory(category, appDefinitions)
       .map((appId: AppId) => {
-        if ((appDefinitions[appId] as AppDefinitionExtention<boolean>).noVerify) {
+        if ((appDefinitions[appId] as CardNavExtensionDefinition<boolean>).noVerify) {
           return appDefinitions[appId];
         }
 
@@ -136,7 +136,7 @@ export const CardsNavigation = ({
   appBasePath,
   onCardClick,
   hideLinksTo = [],
-  extendCardNavigationDefinitions = {},
+  cardNavExtensionDefinitions: extendCardNavigationDefinitions = {},
 }: CardsNavigationComponentProps) => {
   const cardNavigationDefintions = useMemo<AggregatedCardNavDefinitions>(
     () => ({
@@ -185,7 +185,11 @@ export const CardsNavigation = ({
                   titleSize="xs"
                   title={app.title}
                   description={app.description}
-                  href={appBasePath + app.href}
+                  href={
+                    (app as CardNavExtensionDefinition<boolean>).noVerify
+                      ? app.href
+                      : appBasePath + app.href
+                  }
                   onClick={onCardClick}
                 />
               </EuiFlexItem>
