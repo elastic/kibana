@@ -1456,6 +1456,10 @@ packages/react @elastic/appex-sharedux
 /packages/core/saved-objects/docs/openapi     @elastic/platform-docs
 /plugins/data_views/docs/openapi              @elastic/platform-docs
 
+# Plugin manifests
+/src/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
