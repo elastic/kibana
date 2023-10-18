@@ -23,6 +23,7 @@ import {
   RuleTypeState,
   RuleAction,
   RuleAlertData,
+  RuleMonitoring,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
@@ -32,6 +33,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 export interface RuleTaskRunResult {
   state: RuleTaskState;
   schedule: IntervalSchedule | undefined;
+  monitoring: RuleMonitoring | undefined;
   controlledError?: TaskRunError;
 }
 

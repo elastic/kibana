@@ -12,7 +12,7 @@ import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
-import { TaskRunErrorSource } from '@kbn/actions-plugin/common';
+import { TaskRunErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {

@@ -958,6 +958,7 @@ export class TaskRunner<
     return {
       state: transformedState,
       schedule: scheduleWithInterval,
+      monitoring: this.ruleMonitoring.getMonitoring(),
       controlledError: getControlledError(schedule),
     };
   }
