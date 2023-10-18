@@ -185,7 +185,7 @@ export function Detail() {
     boolean | undefined
   >();
 
-  const { data: settings } = useGetSettingsQuery();
+  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery();
 
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
@@ -207,7 +207,7 @@ export function Detail() {
       prerelease: prereleaseIntegrationsEnabled,
     },
     {
-      enabled: !!settings, // Load only after settings are loaded
+      enabled: !isSettingsInitialLoading, // Load only after settings are loaded
       refetchOnMount: 'always',
     }
   );
