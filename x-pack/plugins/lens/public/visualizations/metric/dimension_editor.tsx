@@ -225,11 +225,13 @@ function PrimaryMetricEditor(props: SubProps) {
 
   const currentData = frame.activeData?.[state.layerId];
 
-  if (accessor == null || !isNumericFieldForDatatable(currentData, accessor)) {
+  const isMetricNumeric = isNumericFieldForDatatable(currentData, accessor);
+
+  if (accessor == null) {
     return null;
   }
 
-  const hasDynamicColoring = Boolean(state?.palette);
+  const hasDynamicColoring = Boolean(isMetricNumeric && state?.palette);
 
   const supportsPercentPalette = Boolean(
     state.maxAccessor ||
@@ -265,62 +267,65 @@ function PrimaryMetricEditor(props: SubProps) {
 
   return (
     <>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
-          defaultMessage: 'Color mode',
-        })}
-      >
-        <EuiButtonGroup
-          isFullWidth
-          buttonSize="compressed"
-          legend={i18n.translate('xpack.lens.metric.colorMode.label', {
+      {isMetricNumeric && (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
             defaultMessage: 'Color mode',
           })}
-          data-test-subj="lnsMetric_color_mode_buttons"
-          options={[
-            {
-              id: `${idPrefix}static`,
-              label: i18n.translate('xpack.lens.metric.colorMode.static', {
-                defaultMessage: 'Static',
-              }),
-              'data-test-subj': 'lnsMetric_color_mode_static',
-            },
-            {
-              id: `${idPrefix}dynamic`,
-              label: i18n.translate('xpack.lens.metric.colorMode.dynamic', {
-                defaultMessage: 'Dynamic',
-              }),
-              'data-test-subj': 'lnsMetric_color_mode_dynamic',
-            },
-          ]}
-          idSelected={`${idPrefix}${state.palette ? 'dynamic' : 'static'}`}
-          onChange={(id) => {
-            const colorMode = id.replace(idPrefix, '') as 'static' | 'dynamic';
+        >
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.colorMode.label', {
+              defaultMessage: 'Color mode',
+            })}
+            data-test-subj="lnsMetric_color_mode_buttons"
+            options={[
+              {
+                id: `${idPrefix}static`,
+                label: i18n.translate('xpack.lens.metric.colorMode.static', {
+                  defaultMessage: 'Static',
+                }),
+                'data-test-subj': 'lnsMetric_color_mode_static',
+              },
+              {
+                id: `${idPrefix}dynamic`,
+                label: i18n.translate('xpack.lens.metric.colorMode.dynamic', {
+                  defaultMessage: 'Dynamic',
+                }),
+                'data-test-subj': 'lnsMetric_color_mode_dynamic',
+              },
+            ]}
+            idSelected={`${idPrefix}${state.palette ? 'dynamic' : 'static'}`}
+            onChange={(id) => {
+              const colorMode = id.replace(idPrefix, '') as 'static' | 'dynamic';
 
-            const params =
-              colorMode === 'dynamic'
-                ? {
-                    palette: {
-                      ...activePalette,
-                      params: {
-                        ...activePalette.params,
-                        stops: displayStops,
+              const params =
+                colorMode === 'dynamic'
+                  ? {
+                      palette: {
+                        ...activePalette,
+                        params: {
+                          ...activePalette.params,
+                          stops: displayStops,
+                        },
                       },
-                    },
-                  }
-                : {
-                    palette: undefined,
-                  };
-            setState({
-              ...state,
-              color: undefined,
-              ...params,
-            });
-          }}
-        />
-      </EuiFormRow>
+                      color: undefined,
+                    }
+                  : {
+                      palette: undefined,
+                      color: undefined,
+                    };
+              setState({
+                ...state,
+                ...params,
+              });
+            }}
+          />
+        </EuiFormRow>
+      )}
       {!hasDynamicColoring && <StaticColorControls {...props} />}
       {hasDynamicColoring && (
         <EuiFormRow
@@ -404,10 +409,18 @@ function PrimaryMetricEditor(props: SubProps) {
   );
 }
 
-function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setState'>) {
+function StaticColorControls({
+  state,
+  setState,
+  frame,
+}: Pick<Props, 'state' | 'setState' | 'frame'>) {
   const colorLabel = i18n.translate('xpack.lens.metric.color', {
     defaultMessage: 'Color',
   });
+  const currentData = frame.activeData?.[state.layerId];
+  const isMetricNumeric = Boolean(
+    state.metricAccessor && isNumericFieldForDatatable(currentData, state.metricAccessor)
+  );
 
   const setColor = useCallback(
     (color: string) => {
@@ -420,7 +433,7 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
     useDebouncedValue<string>(
       {
         onChange: setColor,
-        value: state.color || getDefaultColor(state),
+        value: state.color || getDefaultColor(state, isMetricNumeric),
       },
       { allowFalsyValue: true }
     );
@@ -448,10 +461,12 @@ export function DimensionEditorAdditionalSection({
   addLayer,
   removeLayer,
   accessor,
+  frame,
 }: VisualizationDimensionEditorProps<MetricVisualizationState>) {
   const { euiTheme } = useEuiTheme();
 
-  if (accessor !== state.metricAccessor) {
+  const currentData = frame.activeData?.[state.layerId];
+  if (accessor !== state.metricAccessor || !isNumericFieldForDatatable(currentData, accessor)) {
     return null;
   }
 

@@ -10,7 +10,7 @@ import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
 import {
   DatasourceLayers,
   DatasourcePublicAPI,
@@ -82,7 +82,14 @@ describe('metric visualization', () => {
     ...trendlineProps,
   };
 
-  const mockFrameApi = createMockFramePublicAPI();
+  const mockFrameApi = createMockFramePublicAPI({
+    activeData: generateActiveData([
+      {
+        id: 'first',
+        rows: Array(3).fill({ 'metric-col-id': 20, 'max-metric-col-id': 100 }),
+      },
+    ]),
+  });
 
   describe('initialization', () => {
     test('returns a default state', () => {
@@ -1107,6 +1114,30 @@ describe('metric visualization', () => {
     expect(visualization.getDisplayOptions!()).toEqual({
       noPanelTitle: false,
       noPadding: true,
+    });
+  });
+
+  describe('#getUserMessages', () => {
+    it('returns error for non numeric primary metric if maxAccessor exists', () => {
+      const frame = createMockFramePublicAPI({
+        activeData: generateActiveData([
+          {
+            id: 'first',
+            rows: Array(3).fill({ 'metric-col-id': '100', 'max-metric-col-id': 100 }),
+          },
+        ]),
+      });
+      expect(visualization.getUserMessages!(fullState, { frame })).toHaveLength(1);
+
+      const frameNoErrors = createMockFramePublicAPI({
+        activeData: generateActiveData([
+          {
+            id: 'first',
+            rows: Array(3).fill({ 'metric-col-id': 30, 'max-metric-col-id': 100 }),
+          },
+        ]),
+      });
+      expect(visualization.getUserMessages!(fullState, { frame: frameNoErrors })).toHaveLength(0);
     });
   });
 });
