@@ -18,6 +18,7 @@ import {
   EuiCard,
   EuiText,
   EuiHorizontalRule,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   CardsNavigationComponentProps,
@@ -167,7 +168,7 @@ export const CardsNavigation = ({
                 <EuiCard
                   data-test-subj={`app-card-${app.id}`}
                   layout="horizontal"
-                  icon={app.icon}
+                  icon={<EuiIcon type={app.icon} size={'l'} />}
                   titleSize="xs"
                   title={app.title}
                   description={app.description}

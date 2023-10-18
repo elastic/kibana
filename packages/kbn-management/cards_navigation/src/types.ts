@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { EuiIconProps } from '@elastic/eui';
+
 /**
  * app ids shared by all solutions
  */
@@ -67,7 +69,7 @@ export interface ManagementAppProps {
 export interface AppDefinition {
   category: typeof appCategories[keyof typeof appCategories];
   description: string;
-  icon: React.ReactElement;
+  icon: EuiIconProps['type'];
 }
 
 export type AppProps = ManagementAppProps & AppDefinition;
