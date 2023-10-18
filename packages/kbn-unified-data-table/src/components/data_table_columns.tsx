@@ -125,9 +125,11 @@ function buildEuiGridColumn({
       : [];
   }
 
+  const columnType = dataViewField?.type ?? columnTypes?.[columnName];
+
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(dataViewField?.type),
+    schema: getSchemaByKbnType(columnType),
     isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     display: showColumnTokens ? (
       <DataTableColumnHeaderMemoized
