@@ -55,9 +55,6 @@ type StartEs = () => Promise<{
   client: ElasticsearchClient;
 }>;
 
-// A test index that has 1M saved object docs from the '1m_dummy_so.zip' archive
-const ARCHIVE_INDEX_WITH_1M_SO = '.kibana_migrator_tests_8.8.0_001';
-
 export const runActionTestSuite = ({
   startEs,
   environment,
@@ -107,12 +104,35 @@ export const runActionTestSuite = ({
       { _source: { title: 'doc 3' } },
       { _source: { title: 'saved object 4', type: 'another_unused_type' } },
       { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
-      { _source: { title: new Array(1000).fill('a').join(), type: 'large' } }, // "large" saved object
+      {
+        _source: { title: new Array(1000).fill('a').join(), type: 'large' },
+      }, // "large" saved objects
     ] as unknown as SavedObjectsRawDoc[];
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_docs',
       operations: docs.map((doc) => createBulkIndexOperationTuple(doc)),
+      refresh: 'wait_for',
+    })();
+
+    await createIndex({
+      client,
+      indexName: 'existing_index_with_1k_docs',
+      aliases: ['existing_index_with_1k_docs_alias'],
+      esCapabilities,
+      mappings: {
+        dynamic: true,
+        properties: {},
+      },
+    })();
+    const docs1k = new Array(1000).fill({
+      _source: { title: new Array(1000).fill('a').join(), type: 'large' },
+    }) as unknown as SavedObjectsRawDoc[]; // 1000 "large" saved objects
+
+    await bulkOverwriteTransformedDocuments({
+      client,
+      index: 'existing_index_with_1k_docs',
+      operations: docs1k.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
 
@@ -1124,7 +1144,7 @@ export const runActionTestSuite = ({
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       const readyTaskRes = await waitForIndexStatus({
         client,
-        index: ARCHIVE_INDEX_WITH_1M_SO,
+        index: 'existing_index_with_1k_docs',
         status: 'yellow',
         timeout: '300s',
       })();
@@ -1133,7 +1153,7 @@ export const runActionTestSuite = ({
 
       const res = (await reindex({
         client,
-        sourceIndex: ARCHIVE_INDEX_WITH_1M_SO,
+        sourceIndex: 'existing_index_with_1k_docs',
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1471,7 +1491,7 @@ export const runActionTestSuite = ({
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        ARCHIVE_INDEX_WITH_1M_SO,
+        'existing_index_with_1k_docs',
         1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
