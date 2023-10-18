@@ -13,13 +13,12 @@ import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state'
 
 export const Osquery = () => {
   const { metadata, loading } = useMetadataStateProviderContext();
-  const agentId = useRef<string | null>(null);
+  const agentId = useRef<string | undefined>(undefined);
 
-  // When a host has multiple agents reporting metrics, it might be that one of them is not reporting an agent id.
-  // This returns the previous state when the current agent.id is null and the previous is not,
-  // ensuring that it doesn't lose the valid known agent.id
-  if (!loading && !!metadata?.info?.agent?.id && !agentId.current) {
-    agentId.current = metadata?.info?.agent?.id;
+  // When a host has multiple agents reporting metrics, it's possible that one of them may not report an agent id.
+  // This ensures that once an agent id is found, it won't be replaced.
+  if (metadata?.info?.agent?.id && !agentId.current) {
+    agentId.current = metadata.info.agent.id;
   }
 
   const { featureFlags } = usePluginConfig();
@@ -32,11 +31,11 @@ export const Osquery = () => {
   return isLoading ? (
     <EuiSkeletonText lines={10} />
   ) : (
-    <MemoOsQueryAction agentId={agentId.current ?? 'null'} />
+    <MemoOsQueryAction agentId={agentId.current} />
   );
 };
 
-const MemoOsQueryAction = React.memo(({ agentId }: { agentId: string }) => {
+const MemoOsQueryAction = React.memo(({ agentId }: { agentId?: string }) => {
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
