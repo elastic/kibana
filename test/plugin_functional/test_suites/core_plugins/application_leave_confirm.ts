@@ -41,10 +41,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     defaultTryTimeout: number,
     attempts: number,
     timeMultiplier: number,
-    action: 'cancel' | 'confirm'
+    action: 'cancel' | 'confirm',
+    linkText: string = 'home'
   ): Promise<void> => {
     let isConfirmCancelModalOpenState = false;
+
     await retry.tryForTime(defaultTryTimeout * timeMultiplier, async () => {
+      await appsMenu.clickLink(linkText);
       isConfirmCancelModalOpenState = await testSubjects.exists('confirmModalTitleText', {
         allowHidden: true,
         timeout: defaultTryTimeout * timeMultiplier,
@@ -61,7 +64,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         defaultTryTimeout,
         (attempts = attempts > 0 ? attempts - 1 : 0),
         (timeMultiplier = timeMultiplier < 10 ? timeMultiplier + 1 : 10),
-        action
+        action,
+        linkText
       );
     }
   };
@@ -71,28 +75,23 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     const attempts = 5;
     describe('when navigating to another app', () => {
       const timeMultiplier = 10;
-      debugger;
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('home');
+      });
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        debugger;
         await PageObjects.header.waitUntilLoadingHasFinished();
         await waitForUrlToBe('/app/appleave1');
-        debugger;
-        await appsMenu.clickLink('AppLeave 2');
-        debugger;
-        await ensureModalOpen(defaultTryTimeout, attempts, timeMultiplier, 'cancel');
+
+        await ensureModalOpen(defaultTryTimeout, attempts, timeMultiplier, 'cancel', 'AppLeave 2');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        debugger;
         await retry.waitFor('navigate to appleave1', async () => {
           const currentUrl = await browser.getCurrentUrl();
-          debugger;
           log.debug(`currentUrl ${currentUrl}`);
           return currentUrl.includes('appleave1');
         });
         const currentUrl = await browser.getCurrentUrl();
-        debugger;
         expect(currentUrl).to.contain('appleave1');
-        debugger;
         await PageObjects.common.navigateToApp('home');
       });
 
@@ -101,8 +100,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await PageObjects.header.waitUntilLoadingHasFinished();
         await waitForUrlToBe('/app/appleave1');
 
-        await appsMenu.clickLink('AppLeave 2');
-        await ensureModalOpen(defaultTryTimeout, attempts, timeMultiplier, 'confirm');
+        await ensureModalOpen(defaultTryTimeout, attempts, timeMultiplier, 'confirm', 'AppLeave 2');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('navigate to appleave1', async () => {
           const currentUrl = await browser.getCurrentUrl();
