@@ -15,8 +15,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // existence being near 0.
 
     loadTestFile(require.resolve('./aliases'));
-    loadTestFile(require.resolve('./add_actions'));
-    loadTestFile(require.resolve('./update_actions'));
     loadTestFile(require.resolve('./check_privileges'));
     loadTestFile(require.resolve('./create_index'));
     loadTestFile(require.resolve('./preview_rules'));
