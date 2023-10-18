@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiLoadingChart,
   EuiText,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
@@ -30,6 +31,7 @@ import { createFormatter } from '../../../../../common/formatters';
 import { MetricsExplorerAggregation } from '../../../../../common/http_api';
 import { Process } from './types';
 import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
+import { CpuNotAvailableExplanationTooltip } from '../../components/cpu_not_available_explanation';
 
 interface Props {
   command: string;
@@ -48,18 +50,24 @@ export const ProcessRowCharts = ({ command, hasCpuData }: Props) => {
   ) : hasCpuData ? (
     <ProcessChart timeseries={response!.cpu} color={Color.color2} label={cpuMetricLabel} />
   ) : (
-    <div
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      justifyContent="center"
+      responsive={false}
       css={css`
          {
           height: 140px;
-          display: flex;
-          justify-content: center;
         }
       `}
     >
-      <EmptyPlaceholder icon={IconChartLine} />
-      {/* TODO Tooltip */}
-    </div>
+      <EuiFlexItem grow={false}>
+        <EmptyPlaceholder icon={IconChartLine} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <CpuNotAvailableExplanationTooltip />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
   const memoryChart = error ? (
     <EuiEmptyPrompt iconType="warning" title={<EuiText>{failedToLoadChart}</EuiText>} />

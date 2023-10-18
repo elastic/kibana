@@ -25,6 +25,8 @@ import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiTableRow } from '@elastic/eui';
@@ -36,6 +38,8 @@ import { ProcessRow } from './process_row';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
+import { CpuNotAvailableExplanationTooltip } from '../../components/cpu_not_available_explanation';
+import { NOT_AVAILABLE_LABEL } from '../../translations';
 
 interface TableProps {
   processList: ProcessListAPIResponse['processList'];
@@ -326,7 +330,17 @@ const columns: Array<{
       defaultMessage: 'CPU',
     }),
     sortable: true,
-    render: (value: number | null) => (value === null ? 'N/A' : FORMATTERS.percent(value)),
+    render: (value: number | null) =>
+      value === null ? (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>{NOT_AVAILABLE_LABEL}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CpuNotAvailableExplanationTooltip />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        FORMATTERS.percent(value)
+      ),
   },
   {
     field: 'memory',
