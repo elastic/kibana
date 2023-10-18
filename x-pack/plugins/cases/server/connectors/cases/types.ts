@@ -43,6 +43,8 @@ export interface OracleRecord {
   version: string;
 }
 
+export type OracleRecordError = { id?: string } & SavedObjectError;
+
 export interface OracleRecordCreateRequest {
   cases: Array<{ id: string }>;
   rules: Array<{ id: string }>;

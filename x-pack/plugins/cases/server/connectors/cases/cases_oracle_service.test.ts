@@ -174,6 +174,67 @@ describe('CasesOracleService', () => {
 
       expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id', version: 'so-version' });
     });
+
+    it('calls the unsecuredSavedObjectsClient.get method correctly', async () => {
+      await service.getRecord('so-id');
+
+      expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('cases-oracle', 'so-id');
+    });
+  });
+
+  describe('bulkGetRecord', () => {
+    const cases = [{ id: 'test-case-id' }];
+    const rules = [{ id: 'test-rule-id' }];
+    const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
+
+    const bulkGetSOs = [
+      {
+        id: 'so-id',
+        version: 'so-version',
+        attributes: {
+          counter: 1,
+          cases,
+          rules,
+          grouping,
+          createdAt: '2023-10-10T10:23:42.769Z',
+          updatedAt: '2023-10-10T10:23:42.769Z',
+        },
+        type: CASE_ORACLE_SAVED_OBJECT,
+        references: [],
+      },
+      {
+        id: 'so-id-2',
+        type: CASE_ORACLE_SAVED_OBJECT,
+        error: {
+          message: 'Not found',
+          statusCode: 404,
+          error: 'Not found',
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      // @ts-expect-error: types of the SO client are wrong and they do not accept errors
+      unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: bulkGetSOs });
+    });
+
+    it('formats the response correctly', async () => {
+      const res = await service.bulkGetRecords(['so-id', 'so-id-2']);
+
+      expect(res).toEqual([
+        { ...bulkGetSOs[0].attributes, id: 'so-id', version: 'so-version' },
+        { ...bulkGetSOs[1].error, id: 'so-id-2' },
+      ]);
+    });
+
+    it('calls the unsecuredSavedObjectsClient.bulkGet method correctly', async () => {
+      await service.bulkGetRecords(['so-id', 'so-id-2']);
+
+      expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'so-id', type: 'cases-oracle' },
+        { id: 'so-id-2', type: 'cases-oracle' },
+      ]);
+    });
   });
 
   describe('createRecord', () => {
@@ -223,6 +284,89 @@ describe('CasesOracleService', () => {
         },
         { id }
       );
+    });
+  });
+
+  describe('bulkCreateRecord', () => {
+    const cases = [{ id: 'test-case-id' }];
+    const rules = [{ id: 'test-rule-id' }];
+    const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
+
+    const bulkCreateSOs = [
+      {
+        id: 'so-id',
+        version: 'so-version',
+        attributes: {
+          counter: 1,
+          cases,
+          rules,
+          grouping,
+          createdAt: '2023-10-10T10:23:42.769Z',
+          updatedAt: '2023-10-10T10:23:42.769Z',
+        },
+        type: CASE_ORACLE_SAVED_OBJECT,
+        references: [],
+      },
+      {
+        id: 'so-id-2',
+        type: CASE_ORACLE_SAVED_OBJECT,
+        error: {
+          message: 'Not found',
+          statusCode: 404,
+          error: 'Not found',
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      // @ts-expect-error: types of the SO client are wrong and they do not accept errors
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: bulkCreateSOs });
+    });
+
+    it('formats the response correctly', async () => {
+      const res = await service.bulkCreateRecord([
+        { recordId: 'so-id', payload: { cases, rules, grouping } },
+        { recordId: 'so-id-2', payload: { cases, rules, grouping } },
+      ]);
+
+      expect(res).toEqual([
+        { ...bulkCreateSOs[0].attributes, id: 'so-id', version: 'so-version' },
+        { ...bulkCreateSOs[1].error, id: 'so-id-2' },
+      ]);
+    });
+
+    it('calls the bulkCreate correctly', async () => {
+      await service.bulkCreateRecord([
+        { recordId: 'so-id', payload: { cases, rules, grouping } },
+        { recordId: 'so-id-2', payload: { cases, rules, grouping } },
+      ]);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: {
+            cases,
+            rules,
+            grouping,
+            counter: 1,
+            createdAt: expect.anything(),
+            updatedAt: null,
+          },
+          id: 'so-id',
+          type: 'cases-oracle',
+        },
+        {
+          attributes: {
+            cases,
+            rules,
+            grouping,
+            counter: 1,
+            createdAt: expect.anything(),
+            updatedAt: null,
+          },
+          id: 'so-id-2',
+          type: 'cases-oracle',
+        },
+      ]);
     });
   });
 
@@ -278,6 +422,117 @@ describe('CasesOracleService', () => {
         },
         { version: 'so-version' }
       );
+    });
+  });
+
+  describe('bulkGetOrCreateRecords', () => {
+    const cases = [{ id: 'test-case-id' }];
+    const rules = [{ id: 'test-rule-id' }];
+    const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
+
+    const bulkSOs = [
+      {
+        id: 'so-id',
+        version: 'so-version',
+        attributes: {
+          counter: 1,
+          cases,
+          rules,
+          grouping,
+          createdAt: '2023-10-10T10:23:42.769Z',
+          updatedAt: '2023-10-10T10:23:42.769Z',
+        },
+        type: CASE_ORACLE_SAVED_OBJECT,
+        references: [],
+      },
+      {
+        id: 'so-id-2',
+        type: CASE_ORACLE_SAVED_OBJECT,
+        error: {
+          message: 'Not found',
+          statusCode: 404,
+          error: 'Not found',
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      // @ts-expect-error: types of the SO client are wrong and they do not accept errors
+      unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: bulkSOs });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          // @ts-expect-error: types of the SO client are wrong and they do not accept errors
+          {
+            ...bulkSOs[0],
+            id: 'so-id-2',
+            attributes: { ...bulkSOs[0].attributes, cases: [{ id: 'test-case-id-2' }] },
+          },
+        ],
+      });
+    });
+
+    it('creates the new records if they do not exist', async () => {
+      const res = await service.bulkGetOrCreateRecords([
+        { recordId: 'so-id', payload: { cases, rules, grouping } },
+        { recordId: 'so-id-2', payload: { cases: [{ id: 'test-case-id-2' }], rules, grouping } },
+      ]);
+
+      expect(res).toEqual([
+        {
+          id: 'so-id',
+          cases: [{ id: 'test-case-id' }],
+          counter: 1,
+          createdAt: '2023-10-10T10:23:42.769Z',
+          grouping: { 'agent.id': '8a4f500d', 'host.ip': '0.0.0.1' },
+          rules: [{ id: 'test-rule-id' }],
+          updatedAt: '2023-10-10T10:23:42.769Z',
+          version: 'so-version',
+        },
+        {
+          grouping: { 'agent.id': '8a4f500d', 'host.ip': '0.0.0.1' },
+          id: 'so-id-2',
+          cases: [{ id: 'test-case-id-2' }],
+          counter: 1,
+          createdAt: '2023-10-10T10:23:42.769Z',
+          rules: [{ id: 'test-rule-id' }],
+          updatedAt: '2023-10-10T10:23:42.769Z',
+          version: 'so-version',
+        },
+      ]);
+    });
+
+    it('calls the unsecuredSavedObjectsClient.bulkGet correctly', async () => {
+      await service.bulkGetOrCreateRecords([
+        { recordId: 'so-id', payload: { cases, rules, grouping } },
+        { recordId: 'so-id-2', payload: { cases: [{ id: 'test-case-id-2' }], rules, grouping } },
+      ]);
+
+      expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'so-id', type: 'cases-oracle' },
+        { id: 'so-id-2', type: 'cases-oracle' },
+      ]);
+    });
+
+    it('calls the unsecuredSavedObjectsClient.bulkCreate correctly', async () => {
+      await service.bulkGetOrCreateRecords([
+        { recordId: 'so-id', payload: { cases, rules, grouping } },
+        { recordId: 'so-id-2', payload: { cases: [{ id: 'test-case-id-2' }], rules, grouping } },
+      ]);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: {
+            cases: [{ id: 'test-case-id-2' }],
+            counter: 1,
+            createdAt: expect.anything(),
+            grouping: { 'agent.id': '8a4f500d', 'host.ip': '0.0.0.1' },
+            rules: [{ id: 'test-rule-id' }],
+            updatedAt: null,
+          },
+          id: 'so-id-2',
+          type: 'cases-oracle',
+        },
+      ]);
     });
   });
 });

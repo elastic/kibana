@@ -32,7 +32,7 @@ export class CasesConnector extends SubActionConnector<
       /**
        * TODO: Think about permissions etc.
        * Should we use our own savedObjectsClient as we do
-       * in the cases client?
+       * in the cases client? Should we so the createInternalRepository?
        */
       unsecuredSavedObjectsClient: this.savedObjectsClient,
     });
@@ -116,6 +116,6 @@ export class CasesConnector extends SubActionConnector<
 
     const oracleKeys = oracleMap.keys();
 
-    const oracleBulkGetRes = this.casesOracleService.bulkGetRecord(Array.from(oracleKeys));
+    // const oracleBulkGetRes = this.casesOracleService.bulkGetRecords(Array.from(oracleKeys));
   }
 }
