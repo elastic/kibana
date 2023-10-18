@@ -1154,7 +1154,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('customFields', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168534
+    describe.skip('customFields', () => {
       const customFields = [
         {
           key: 'valid_key_1',
