@@ -578,6 +578,7 @@ export function reducer(state: State, action: Action): State {
       const { jobId } = state.form;
       // @ts-ignore
       const formStateFromJobConfig = getFormStateFromJobConfig(config, false);
+      // Ensure previous form settings are persisted. Form state does not include any nested attributes.
       const formState = { ...formStateFromJobConfig, ...state.form };
 
       if (typeof jobId === 'string' && jobId.trim() !== '') {
