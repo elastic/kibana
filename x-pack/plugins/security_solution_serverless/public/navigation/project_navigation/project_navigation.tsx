@@ -12,11 +12,11 @@ import type {
 } from '@kbn/shared-ux-chrome-navigation/src/ui/components/panel/types';
 import { SolutionSideNavPanelContent } from '@kbn/security-solution-side-nav/panel';
 import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../common/services';
-import type { ProjectNavigationLink, ProjectPageName } from './links/types';
-import { useFormattedSideNavItems } from './side_navigation/use_side_nav_items';
-import { CATEGORIES, FOOTER_CATEGORIES } from './categories';
-import { formatNavigationTree } from './navigation_tree/navigation_tree';
+import { useKibana } from '../../common/services';
+import type { ProjectNavigationLink, ProjectPageName } from '../links/types';
+import { useFormattedSideNavItems } from '../side_navigation/use_side_nav_items';
+import { CATEGORIES, FOOTER_CATEGORIES } from '../categories';
+import { formatNavigationTree } from '../navigation_tree/navigation_tree';
 
 const getPanelContentProvider = (
   projectNavLinks: ProjectNavigationLink[]
