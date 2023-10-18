@@ -25,6 +25,7 @@ import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { monaco as monacoEditor } from '@kbn/monaco';
 import { IndexSettingsResponse } from '../../../../../../common';
 import { Error } from '../../../../../shared_imports';
 import { documentationService, updateIndexSettings } from '../../../../services';
@@ -152,6 +153,14 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
       });
     }
   }, [originalSettings, editableSettings, indexName, reloadIndexSettings]);
+  const settingsSchemaProperties = {} as Record<string, unknown>;
+  Object.keys(originalSettings).forEach(
+    // allow any type of value
+    (setting) =>
+      (settingsSchemaProperties[setting] = {
+        type: ['null', 'boolean', 'object', 'array', 'number', 'string'],
+      })
+  );
   return (
     // using "rowReverse" to keep the card on the left side to be on top of the code block on smaller screens
     <EuiFlexGroup
@@ -267,6 +276,20 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           {isEditMode ? (
             <CodeEditor
               languageId="json"
+              editorDidMount={(editor) => {
+                monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+                  validate: true,
+                  schemas: [
+                    {
+                      uri: editor.getModel()?.uri.toString() ?? '',
+                      schema: {
+                        type: 'object',
+                        properties: settingsSchemaProperties,
+                      },
+                    },
+                  ],
+                });
+              }}
               value={editableSettings}
               data-test-subj="indexDetailsSettingsEditor"
               options={{
