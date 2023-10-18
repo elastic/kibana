@@ -13,11 +13,10 @@ categories.
 
 ### Adding new items to the navigation
 
-For adding a new item to the navigation all you have to do is edit the `cards_navigation/src/consts.tsx`
-file and add two things:
+For adding a new item to the navigation all you have to do is;
 
-* Add the app id into the `appIds` enum (make sure that the app_id value matches the one from the plugin)
-* Add a new entry to the `appDefinitions` object. In here you can specify the category where you want it to be, icon and description.
+* edit the `cards_navigation/src/types.tsx` file add the app id into the `appIds` enum (make sure that the app_id value matches the one from the plugin)
+* edit the `cards_navigation/src/const.tsx`, add a new entry to the `appDefinitions` object. In here you can specify the category where you want it to be, icon and description.
 
 ### Removing an item from the navigation
 

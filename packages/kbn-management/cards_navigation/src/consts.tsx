@@ -10,35 +10,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
-import { AppDefinition } from './types';
+import { appIds, AppId, AppDefinition, appCategories } from './types';
 
-export enum appIds {
-  INGEST_PIPELINES = 'ingest_pipelines',
-  PIPELINES = 'pipelines',
-  INDEX_MANAGEMENT = 'index_management',
-  TRANSFORM = 'transform',
-  ML = 'jobsListLink',
-  SAVED_OBJECTS = 'objects',
-  TAGS = 'tags',
-  FILES_MANAGEMENT = 'filesManagement',
-  API_KEYS = 'api_keys',
-  DATA_VIEWS = 'dataViews',
-  REPORTING = 'reporting',
-  CONNECTORS = 'triggersActionsConnectors',
-  RULES = 'triggersActions',
-  MAINTENANCE_WINDOWS = 'maintenanceWindows',
-  SERVERLESS_SETTINGS = 'settings',
-}
-
-// Create new type that is a union of all the appId values
-export type AppId = `${appIds}`;
-
-export const appCategories = {
-  DATA: 'data',
-  ALERTS: 'alerts',
-  CONTENT: 'content',
-  OTHER: 'other',
-};
+export { appIds, appCategories } from './types';
 
 export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.INDEX_MANAGEMENT]: {

@@ -93,6 +93,7 @@ export class ManagementPlugin
   private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
     enabled: false,
     hideLinksTo: [],
+    extendAppDefinitons: {},
   });
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -205,8 +206,8 @@ export class ManagementPlugin
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
-      setupCardsNavigation: ({ enabled, hideLinksTo }) =>
-        this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
+      setupCardsNavigation: ({ enabled, hideLinksTo, extendAppDefinitons }) =>
+        this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendAppDefinitons }),
     };
   }
 }
