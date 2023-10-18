@@ -19,6 +19,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const header = getPageObject('header');
+  const toasts = getService('toasts');
 
   describe('Cases persistable attachments', () => {
     describe('lens visualization', () => {
@@ -65,8 +66,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
-
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');
@@ -104,6 +105,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');
