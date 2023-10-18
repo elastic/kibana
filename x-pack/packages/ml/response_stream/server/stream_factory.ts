@@ -155,7 +155,7 @@ export function streamFactory<T = unknown>(
           ? `${JSON.stringify({
               ...d,
               // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-              ...(flushFix && sendFlushFix ? { flushPayload } : {}),
+              ...(flushFix ? { flushPayload } : {}),
             })}${DELIMITER}`
           : d;
 
