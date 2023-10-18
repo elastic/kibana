@@ -50,6 +50,10 @@ xpack.fleet.internal.registry.excludePackages: [
     'symantec',
     'cyberark',
   ]
+# fleet_server package installed to publish agent metrics
+xpack.fleet.packages:
+  - name: fleet_server
+    version: latest  
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
