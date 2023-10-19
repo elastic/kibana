@@ -191,10 +191,13 @@ const CasesTableFiltersComponent = ({
           </SeverityFilterWrapper>
           <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">
             <StatusFilter
-              selectedStatus={filterOptions.status}
+              selectedOptions={filterOptions?.status}
               onStatusChanged={onStatusChanged}
-              stats={stats}
               hiddenStatuses={hiddenStatuses}
+              countClosedCases={countClosedCases}
+              countInProgressCases={countInProgressCases}
+              countOpenCases={countOpenCases}
+              onChange={onChange}
             />
           </StatusFilterWrapper>
         </EuiFlexGroup>

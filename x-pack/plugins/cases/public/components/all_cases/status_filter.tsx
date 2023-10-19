@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiSuperSelect, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
+import { CaseStatuses } from '../../../common/types/domain';
 import { allCaseStatus, statuses } from '../status';
-import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
+import type { CaseStatusWithAllStatus, FilterOptions } from '../../../common/ui/types';
 import { StatusAll } from '../../../common/ui/types';
+import { MultiSelectFilter } from './multi_select_filter';
+import * as i18n from './translations';
 
 interface Props {
-  stats: Record<CaseStatusWithAllStatus, number | null>;
-  selectedStatus: CaseStatusWithAllStatus;
-  onStatusChanged: (status: CaseStatusWithAllStatus) => void;
+  countClosedCases: number | null;
+  countInProgressCases: number | null;
+  countOpenCases: number | null;
   hiddenStatuses?: CaseStatusWithAllStatus[];
+  onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
+  selectedOptions: string[];
 }
 
 const AllStatusBadge = () => {
@@ -30,37 +35,56 @@ const AllStatusBadge = () => {
 
 AllStatusBadge.displayName = 'AllStatusBadge';
 
-const StatusFilterComponent: React.FC<Props> = ({
-  stats,
-  selectedStatus,
-  onStatusChanged,
-  hiddenStatuses = [],
-}) => {
-  const caseStatuses = Object.keys(statuses) as CaseStatusWithAllStatus[];
-  const options: Array<EuiSuperSelectOption<CaseStatusWithAllStatus>> = [StatusAll, ...caseStatuses]
-    .filter((status) => !hiddenStatuses.includes(status))
-    .map((status) => ({
-      value: status,
-      inputDisplay: (
-        <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
-          <EuiFlexItem grow={false}>
-            <span>{status === 'all' ? <AllStatusBadge /> : <Status status={status} />}</span>
-          </EuiFlexItem>
-          {status !== StatusAll && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
-        </EuiFlexGroup>
-      ),
-      'data-test-subj': `case-status-filter-${status}`,
-    }));
+const caseStatuses = Object.keys(statuses) as CaseStatusWithAllStatus[];
 
+export const StatusFilterComponent = ({
+  countClosedCases,
+  countInProgressCases,
+  countOpenCases,
+  hiddenStatuses = [],
+  onChange,
+  selectedOptions,
+}: Props) => {
+  const stats = useMemo(
+    () => ({
+      [StatusAll]: null,
+      [CaseStatuses.open]: countOpenCases ?? 0,
+      [CaseStatuses['in-progress']]: countInProgressCases ?? 0,
+      [CaseStatuses.closed]: countClosedCases ?? 0,
+    }),
+    [countClosedCases, countInProgressCases, countOpenCases]
+  );
+  const options: CaseStatusWithAllStatus[] = useMemo(
+    () => [StatusAll, ...caseStatuses].filter((status) => !hiddenStatuses.includes(status)),
+    [hiddenStatuses]
+  );
+  const renderOption = (option: EuiSelectableOption) => {
+    const selectedStatus = (option?.label || 'all') as CaseStatusWithAllStatus;
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
+        <EuiFlexItem grow={1}>
+          <span>
+            {selectedStatus === 'all' ? <AllStatusBadge /> : <Status status={selectedStatus} />}
+          </span>
+        </EuiFlexItem>
+        {selectedStatus !== StatusAll && (
+          <EuiFlexItem grow={false}>{` (${stats[selectedStatus]})`}</EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  };
   return (
-    <EuiSuperSelect
+    <MultiSelectFilter
+      buttonLabel={i18n.STATUS}
+      id={'status'}
+      onChange={onChange}
       options={options}
-      valueOfSelected={selectedStatus}
-      onChange={onStatusChanged}
-      data-test-subj="case-status-filter"
+      renderOption={renderOption}
+      selectedOptions={selectedOptions}
     />
   );
 };
-StatusFilterComponent.displayName = 'StatusFilter';
 
-export const StatusFilter = memo(StatusFilterComponent);
+StatusFilterComponent.displayName = 'StatusFilterComponent';
+
+export const StatusFilter = React.memo(StatusFilterComponent);
