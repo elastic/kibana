@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import * as md from '@kbn/shared-ux-markdown';
 import { MarkdownVisParams } from './types';
 
 import './markdown_vis.scss';
@@ -26,9 +26,10 @@ const MarkdownVisComponent = ({
 
   return (
     <div className="mkdVis" style={{ fontSize: `${fontSize}pt` }}>
-      <Markdown
+      <md.Markdown
         data-test-subj="markdownBody"
-        markdown={markdown}
+        readOnly
+        markdownContent={markdown}
         openLinksInNewTab={openLinksInNewTab}
       />
     </div>

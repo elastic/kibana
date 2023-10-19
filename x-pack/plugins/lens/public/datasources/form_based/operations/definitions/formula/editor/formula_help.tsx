@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import * as md from '@kbn/shared-ux-markdown';
 import { groupBy } from 'lodash';
 import type { IndexPattern } from '../../../../../../types';
 import { tinymathFunctions } from '../util';
@@ -39,7 +39,7 @@ function createNewSection(
           <>
             <h3>{getFunctionSignatureLabel(key, operationDefinitionMap, false)}</h3>
 
-            {fnDescription ? <Markdown markdown={fnDescription} /> : null}
+            {fnDescription ? <md.Markdown readOnly markdownContent={fnDescription} /> : null}
           </>
         ),
       };
@@ -92,8 +92,9 @@ export function getDocumentationSections({
           defaultMessage: 'Filter ratio',
         }),
         description: (
-          <Markdown
-            markdown={i18n.translate(
+          <md.Markdown
+            readOnly
+            markdownContent={i18n.translate(
               'xpack.lens.formulaDocumentation.filterRatioDescription.markdown',
               {
                 defaultMessage: `### Filter ratio:
@@ -118,8 +119,7 @@ count(kql='response.status_code > 400') / count()
           defaultMessage: 'Week over week',
         }),
         description: (
-          <Markdown
-            markdown={i18n.translate(
+          <md.Markdown readOnly markdownContent={i18n.translate(
               'xpack.lens.formulaDocumentation.weekOverWeekDescription.markdown',
               {
                 defaultMessage: `### Week over week:
@@ -145,8 +145,7 @@ percentile(system.network.in.bytes, percentile=99, shift='1w')
           defaultMessage: 'Percent of total',
         }),
         description: (
-          <Markdown
-            markdown={i18n.translate(
+          <md.Markdown readOnly markdownContent={i18n.translate(
               'xpack.lens.formulaDocumentation.percentOfTotalDescription.markdown',
               {
                 defaultMessage: `### Percent of total
@@ -171,8 +170,7 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
           defaultMessage: 'Recent change',
         }),
         description: (
-          <Markdown
-            markdown={i18n.translate(
+          <md.Markdown readOnly markdownContent={i18n.translate(
               'xpack.lens.formulaDocumentation.recentChangeDescription.markdown',
               {
                 defaultMessage: `### Recent change
@@ -288,8 +286,7 @@ max(system.network.in.bytes, reducedTimeRange="30m")
   const sections = {
     groups: helpGroups,
     initialSection: (
-      <Markdown
-        markdown={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
+      <md.Markdown readOnly markdownContent={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
           defaultMessage: `## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
