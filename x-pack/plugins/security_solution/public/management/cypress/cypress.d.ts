@@ -22,6 +22,8 @@ import type {
   IndexEndpointHostsCyTaskOptions,
   LoadUserAndRoleCyTaskOptions,
   CreateUserAndRoleCyTaskOptions,
+  UninstallAgentFromHostTaskOptions,
+  IsAgentAndEndpointUninstalledFromHostTaskOptions,
 } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
@@ -203,6 +205,18 @@ declare global {
         arg: CreateUserAndRoleCyTaskOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<LoadedRoleAndUser>;
+
+      task(
+        name: 'uninstallAgentFromHost',
+        arg: UninstallAgentFromHostTaskOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<string>;
+
+      task(
+        name: 'isAgentAndEndpointUninstalledFromHost',
+        arg: IsAgentAndEndpointUninstalledFromHostTaskOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<boolean>;
     }
   }
 }
