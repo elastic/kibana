@@ -194,7 +194,7 @@ export function useChangePointResults(
 
         if (usageCollection?.reportUiCounter) {
           usageCollection.reportUiCounter(
-            `run_via_${embeddingOrigin}`,
+            embeddingOrigin,
             METRIC_TYPE.COUNT,
             CHANGE_POINT_DETECTION_EVENT.RUN
           );
@@ -207,7 +207,7 @@ export function useChangePointResults(
 
         if (usageCollection?.reportUiCounter) {
           usageCollection.reportUiCounter(
-            `run_via_${embeddingOrigin}`,
+            embeddingOrigin,
             METRIC_TYPE.COUNT,
             CHANGE_POINT_DETECTION_EVENT.SUCCESS
           );
@@ -280,7 +280,7 @@ export function useChangePointResults(
       } catch (e) {
         if (usageCollection?.reportUiCounter) {
           usageCollection.reportUiCounter(
-            `run_via_${embeddingOrigin}`,
+            embeddingOrigin,
             METRIC_TYPE.COUNT,
             CHANGE_POINT_DETECTION_EVENT.ERROR
           );
