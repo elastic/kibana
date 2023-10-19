@@ -16,8 +16,16 @@ That check is intended to provide earlier CI feedback after we remove the automa
 If you want, you can still manually install the pre-commit hook locally by running 'node scripts/register_git_hook locally'
 !!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
+# Run on all commits in a pull request
+# Run on the most recent commmit otherwise, assuming squash and merge
+if [[ "${BUILDKITE_PULL_REQUEST}" == "false" ]]; then
+  START_REF="HEAD~1"
+else
+  START_REF="$BUILDKITE_BRANCH"
+fi
+
 node scripts/precommit_hook.js \
-  --ref HEAD~1..HEAD \
+  --ref "$START_REF..HEAD" \
   --max-files 200 \
   --verbose \
   --fix \
