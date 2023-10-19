@@ -348,22 +348,25 @@ export const expandFirstTimelineEventDetails = () => {
 
 export const saveTimeline = () => {
   cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
-  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
 
-  cy.get(TIMELINE_TITLE_INPUT)
-    .invoke('val')
-    .then((value) => {
-      if (!value) {
-        cy.get(TIMELINE_TITLE_INPUT).type(`test{enter}`);
-        cy.get(TIMELINE_TITLE_INPUT).invoke('val').should('equal', 'test');
-      }
-      cy.get('[data-test-subj="save-timeline-modal"]').within(() => {
+  cy.get('[data-test-subj="save-timeline-modal"]').within(() => {
+    cy.get('[data-test-subj="progress-bar"]').should('not.exist');
+    cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
+
+    cy.get(TIMELINE_TITLE_INPUT)
+      .invoke('val')
+      .then((value) => {
+        if (!value) {
+          cy.get(TIMELINE_TITLE_INPUT).type(`test{enter}`);
+          cy.get(TIMELINE_TITLE_INPUT).invoke('val').should('equal', 'test');
+        }
+
         cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).should('not.be.disabled');
         cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
         cy.get('[data-test-subj="progress-bar"]').should('exist');
         cy.get('[data-test-subj="progress-bar"]').should('not.exist');
       });
-    });
+  });
 };
 
 export const deleteTimeline = () => {
