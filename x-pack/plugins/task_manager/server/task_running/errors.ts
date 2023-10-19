@@ -13,6 +13,7 @@ const CODE_SKIP = 'TaskManager/skip';
 
 const code = Symbol('TaskManagerErrorCode');
 const retry = Symbol('TaskManagerErrorRetry');
+const source = Symbol('TaskManagerErrorSource');
 
 export enum TaskErrorSource {
   FRAMEWORK = 'framework',
@@ -24,7 +25,7 @@ export enum TaskErrorSource {
 export interface TaskRunError extends Error {
   [code]?: string;
   [retry]?: Date | boolean;
-  source?: TaskErrorSource;
+  [source]?: TaskErrorSource;
 }
 
 export class EphemeralTaskRejectedDueToCapacityError extends Error {
@@ -50,7 +51,7 @@ export function isUnrecoverableError(error: Error | TaskRunError) {
 
 export function throwUnrecoverableError(error: Error, errorSource = TaskErrorSource.FRAMEWORK) {
   (error as TaskRunError)[code] = CODE_UNRECOVERABLE;
-  (error as TaskRunError).source = errorSource;
+  (error as TaskRunError)[source] = errorSource;
   throw error;
 }
 
@@ -61,7 +62,6 @@ export function isRetryableError(error: Error | TaskRunError) {
   return null;
 }
 
-// used only by Actions plugin
 export function throwRetryableError(
   error: Error,
   shouldRetry: Date | boolean,
@@ -69,7 +69,7 @@ export function throwRetryableError(
 ) {
   (error as TaskRunError)[code] = CODE_RETRYABLE;
   (error as TaskRunError)[retry] = shouldRetry;
-  (error as TaskRunError).source = errorSource;
+  (error as TaskRunError)[source] = errorSource;
   throw error;
 }
 
@@ -89,7 +89,7 @@ export function createTaskRunError(
   error: Error,
   errorSource = TaskErrorSource.FRAMEWORK
 ): TaskRunError {
-  (error as TaskRunError).source = errorSource;
+  (error as TaskRunError)[source] = errorSource;
   return error;
 }
 
