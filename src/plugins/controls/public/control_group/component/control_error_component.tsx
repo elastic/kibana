@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import * as md from '@kbn/shared-ux-markdown';
 
 interface ControlErrorProps {
   error: Error | string;
@@ -46,8 +46,9 @@ export const ControlError = ({ error }: ControlErrorProps) => {
         anchorClassName="errorEmbeddableCompact__popoverAnchor"
         closePopover={() => setPopoverOpen(false)}
       >
-        <Markdown
-          markdown={errorMessage}
+        <md.Markdown
+          readOnly
+          markdownContent={errorMessage}
           openLinksInNewTab={true}
           data-test-subj="errorMessageMarkdown"
         />
