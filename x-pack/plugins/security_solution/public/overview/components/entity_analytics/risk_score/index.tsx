@@ -26,7 +26,6 @@ import { RiskScoresNoDataDetected } from '../../../../explore/components/risk_sc
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
-import * as i18n from './translations';
 import { useEntityInfo } from './use_entity';
 import { RiskScoreHeaderContent } from './header_content';
 import { ChartContent } from './chart_content';
@@ -175,11 +174,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           id={entity.tableQueryId}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
-          tooltip={
-            riskEntity === RiskScoreEntity.host
-              ? i18n.HOST_RISK_TABLE_TOOLTIP
-              : i18n.USER_RISK_TABLE_TOOLTIP
-          }
         >
           <RiskScoreHeaderContent
             entityLinkProps={entity.linkProps}
