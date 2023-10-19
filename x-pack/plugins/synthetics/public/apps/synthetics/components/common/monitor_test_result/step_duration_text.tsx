@@ -29,7 +29,11 @@ export const StepDurationText = ({ step }: { step: JourneyStep }) => {
   }, [euiTheme.colors, step.synthetics.step?.duration?.us, step.synthetics.step?.status]);
 
   return (
-    <EuiText size="s" color={stepDuration.color}>
+    <EuiText
+      size="s"
+      color={stepDuration.color}
+      data-test-subj={`stepDurationText${step.synthetics.step?.index}`}
+    >
       {stepDuration.text}
     </EuiText>
   );

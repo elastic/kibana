@@ -16,7 +16,7 @@ export enum SYNTHETICS_API_URLS {
   RUN_ONCE_MONITOR = '/internal/synthetics/service/monitors/run_once',
   TRIGGER_MONITOR = '/internal/synthetics/service/monitors/trigger',
   SERVICE_ALLOWED = '/internal/synthetics/service/allowed',
-  SYNTHETICS_APIKEY = '/internal/synthetics/service/api_key',
+  SYNTHETICS_PROJECT_APIKEY = '/internal/synthetics/service/api_key',
   SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
 
   SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
