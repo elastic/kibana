@@ -148,7 +148,6 @@ export const StreamComment = ({ index, isLastComment, lastCommentRef, reader }: 
 
   if (response?.loading) {
     state = content ? 'streaming' : 'loading';
-    console.log('state', state);
   } else if (response && 'error' in response && response.error) {
     state = 'error';
     content = response.error;
