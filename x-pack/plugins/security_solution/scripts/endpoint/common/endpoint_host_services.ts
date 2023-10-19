@@ -10,6 +10,7 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import assert from 'assert';
+import fs from 'fs';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { cleanupDownloads, downloadAndStoreAgent } from './agent_downloads_service';
 import {
@@ -337,15 +338,17 @@ const enrollHostWithFleet = async ({
   log.info(`Waiting for Agent to check-in with Fleet`);
   const agent = await waitForHostToEnroll(kbnClient, vmName, 480000, log);
 
-  await execa('vagrant', ['ssh', '--', 'sudo elastic-agent status'], {
-    env: {
-      VAGRANT_CWD,
-    },
-    stdio: ['inherit', 'inherit', 'inherit'],
-  }).catch((e) => {
-    log.info(`Failed to get agent status`);
+  try {
+    const { stdout } = await execa('vagrant', ['ssh', '--', 'sudo elastic-agent status'], {
+      env: {
+        VAGRANT_CWD,
+      },
+    });
+    fs.writeFileSync('agent-status.txt', stdout);
+    log.info(stdout);
+  } catch (e) {
     log.info(e);
-  });
+  }
 
   // log.info(`Agent status: ${result?.stdout}`);
 
