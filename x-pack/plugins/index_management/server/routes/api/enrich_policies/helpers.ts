@@ -96,23 +96,6 @@ export function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
 }
 
 export async function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
-  // We will first rely on the indices aliases API to get the list of indices and their aliases.
-  const aliasResult = await dataClient.asCurrentUser.indices.getAlias(
-    {
-      index: pattern,
-      expand_wildcards: 'open',
-    },
-    {
-      ignore: [404],
-      meta: true,
-    }
-  );
-
-  if (aliasResult.statusCode !== 404) {
-    const indicesFromAliasResponse = getIndexNamesFromAliasesResponse(aliasResult.body);
-    return indicesFromAliasResponse.slice(0, limit);
-  }
-
   // If the indices aliases API fails or returns nothing, we will rely on the indices stats API to
   // get the list of indices.
   const response = await dataClient.asCurrentUser.search<unknown, { indices: IndicesAggs }>(
