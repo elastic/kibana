@@ -80,7 +80,6 @@ export const fetchConnectorExecuteAction = async ({
 
       const reader = response?.response?.body?.getReader();
 
-      console.log('is typeof incoming message', reader);
       if (!reader) {
         return {
           response: `${API_ERROR}\n\nCould not get reader from response`,
