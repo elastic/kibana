@@ -11,7 +11,7 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { RightPanelKey } from '../../flyout/right';
+import { RightPanelKey } from '../../flyout/document_details/right';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,

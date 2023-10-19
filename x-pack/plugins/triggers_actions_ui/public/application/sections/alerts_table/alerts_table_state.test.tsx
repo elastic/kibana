@@ -6,9 +6,15 @@
  */
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { AlertConsumers, ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -17,6 +23,7 @@ import {
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
   FetchAlertData,
+  RenderCustomActionsRowArgs,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
@@ -129,6 +136,7 @@ const alerts = [
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
     [AlertsField.uuid]: ['1047d115-670d-469e-af7a-86fdd2b2f814'],
+    [ALERT_UUID]: ['alert-id-1'],
     [ALERT_CASE_IDS]: ['test-id'],
     [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1'],
   },
@@ -256,6 +264,22 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
         jest.fn().mockImplementation((props) => {
           return `${props.colIndex}:${props.rowIndex}`;
         }),
+      useActionsColumn: () => ({
+        renderCustomActionsRow: ({ setFlyoutAlert }: RenderCustomActionsRowArgs) => {
+          return (
+            <button
+              data-test-subj="expandColumnCellOpenFlyoutButton-0"
+              onClick={() => {
+                setFlyoutAlert({
+                  fields: {
+                    [ALERT_UUID]: 'alert-id-1',
+                  },
+                });
+              }}
+            />
+          );
+        },
+      }),
     };
   }
   return {};
@@ -651,6 +675,104 @@ describe('AlertsTableState', () => {
     });
   });
 
+  describe('flyout', () => {
+    it('should show a flyout when selecting an alert', async () => {
+      const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+
+      const result = await wrapper.findAllByTestId('alertsFlyout');
+      expect(result.length).toBe(1);
+
+      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
+      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+
+      // Should paginate too
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
+      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
+
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
+      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+    });
+
+    it('should refetch data if flyout pagination exceeds the current page', async () => {
+      const wrapper = render(
+        <AlertsTableWithLocale
+          {...{
+            ...tableProps,
+            pageSize: 1,
+          }}
+        />
+      );
+
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      const result = await wrapper.findAllByTestId('alertsFlyout');
+      expect(result.length).toBe(1);
+
+      hookUseFetchAlerts.mockClear();
+
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 1,
+            pageSize: 1,
+          },
+        })
+      );
+
+      hookUseFetchAlerts.mockClear();
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 0,
+            pageSize: 1,
+          },
+        })
+      );
+    });
+
+    it('Should be able to go back from last page to n - 1', async () => {
+      const wrapper = render(
+        <AlertsTableWithLocale
+          {...{
+            ...tableProps,
+            pageSize: 2,
+          }}
+        />
+      );
+
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      const result = await wrapper.findAllByTestId('alertsFlyout');
+      expect(result.length).toBe(1);
+
+      hookUseFetchAlerts.mockClear();
+
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 1,
+            pageSize: 2,
+          },
+        })
+      );
+
+      hookUseFetchAlerts.mockClear();
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 0,
+            pageSize: 2,
+          },
+        })
+      );
+    });
+  });
+
   describe('field browser', () => {
     const browserFields: BrowserFields = {
       kibana: {
@@ -750,7 +872,7 @@ describe('AlertsTableState', () => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
         expect(
           getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[1]
+            .querySelectorAll('.euiDataGridHeaderCell__content')[2]
             .getAttribute('title')
         ).toBe(AlertsField.uuid);
       });
