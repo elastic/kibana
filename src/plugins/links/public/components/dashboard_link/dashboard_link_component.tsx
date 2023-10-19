@@ -8,7 +8,7 @@
 
 import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
@@ -27,9 +27,13 @@ import { fetchDashboard, getDashboardHref, getDashboardLocator } from './dashboa
 export const DashboardLinkComponent = ({
   link,
   layout,
+  onLoading,
+  onRender,
 }: {
   link: Link;
   layout: LinksLayoutType;
+  onLoading: () => void;
+  onRender: () => void;
 }) => {
   const linksEmbeddable = useLinks();
   const [error, setError] = useState<Error | undefined>();
@@ -132,6 +136,21 @@ export const DashboardLinkComponent = ({
       },
     };
   }, [link]);
+
+  useEffect(() => {
+    if (loadingDestinationDashboard || loadingOnClickProps) {
+      onLoading();
+    } else {
+      onRender();
+    }
+  }, [
+    link,
+    linksEmbeddable,
+    loadingDestinationDashboard,
+    loadingOnClickProps,
+    onLoading,
+    onRender,
+  ]);
 
   const id = `dashboardLink--${link.id}`;
 
