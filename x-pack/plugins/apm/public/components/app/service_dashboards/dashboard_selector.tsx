@@ -51,7 +51,7 @@ export function DashboardSelector({
       setSelectedDashboard(preselectedDashboard);
       setCurrentDashboard(preselectedDashboard);
     }
-  }, [serviceDashboards, currentDashboardId]);
+  }, [serviceDashboards, currentDashboardId, setCurrentDashboard]);
 
   function onChange(newDashboardId?: string) {
     history.push({
