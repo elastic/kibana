@@ -107,6 +107,7 @@ export function Histogram({
     timeRange: getTimeRange(),
     timeInterval,
     isPlainRecord,
+    timeField: dataView.timeFieldName,
   });
   const chartRef = useRef<HTMLDivElement | null>(null);
   const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
