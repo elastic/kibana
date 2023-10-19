@@ -32,3 +32,6 @@ node scripts/precommit_hook.js \
   --no-stage # we have to disable staging or check_for_changed_files won't see the changes
 
 check_for_changed_files 'node scripts/precommit_hook.js --ref HEAD~1..HEAD --fix' true
+
+
+# test
