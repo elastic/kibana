@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import { useMemo, useState, useCallback, useEffect, useReducer, useRef } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import {
   Sort,
@@ -154,6 +154,7 @@ export const useMetricsK8sAnomaliesResults = ({
   filteredDatasets?: string[];
 }) => {
   const { services } = useKibanaContextForPlugin();
+  const abortController = useRef(new AbortController());
   const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
     return {
       ...stateDefaults,
@@ -171,6 +172,13 @@ export const useMetricsK8sAnomaliesResults = ({
 
   const [metricsK8sAnomalies, setMetricsK8sAnomalies] = useState<MetricsK8sAnomalies>([]);
 
+  useEffect(() => {
+    const current = abortController?.current;
+    return () => {
+      current.abort();
+    };
+  }, []);
+
   const [getMetricsK8sAnomaliesRequest, getMetricsK8sAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
@@ -181,6 +189,11 @@ export const useMetricsK8sAnomaliesResults = ({
           paginationOptions,
           paginationCursor,
         } = reducerState;
+
+        abortController.current.abort();
+
+        abortController.current = new AbortController();
+
         return await callGetMetricsK8sAnomaliesAPI(
           {
             sourceId,
@@ -195,7 +208,8 @@ export const useMetricsK8sAnomaliesResults = ({
               cursor: paginationCursor,
             },
           },
-          services.http.fetch
+          services.http.fetch,
+          abortController.current.signal
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -313,7 +327,8 @@ interface RequestArgs {
 
 export const callGetMetricsK8sAnomaliesAPI = async (
   requestArgs: RequestArgs,
-  fetch: HttpHandler
+  fetch: HttpHandler,
+  signal?: AbortSignal | null
 ) => {
   const { sourceId, anomalyThreshold, startTime, endTime, metric, query, sort, pagination } =
     requestArgs;
@@ -335,6 +350,7 @@ export const callGetMetricsK8sAnomaliesAPI = async (
         },
       })
     ),
+    signal,
   });
 
   return decodeOrThrow(getMetricsK8sAnomaliesSuccessReponsePayloadRT)(response);
