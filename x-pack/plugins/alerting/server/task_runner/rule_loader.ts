@@ -12,7 +12,7 @@ import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
-import { TaskRunErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -73,7 +73,7 @@ export function validateRule<Params extends RuleTypeParams>(
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Disabled,
       new Error(`Rule failed to execute because rule ran after it was disabled.`),
-      TaskRunErrorSource.USER
+      TaskErrorSource.USER
     );
   }
   alertingEventLogger.setRuleName(rule.name);
@@ -83,7 +83,7 @@ export function validateRule<Params extends RuleTypeParams>(
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.License,
       err,
-      TaskRunErrorSource.RULE_TYPE
+      TaskErrorSource.RULE_TYPE
     );
   }
 
@@ -94,7 +94,7 @@ export function validateRule<Params extends RuleTypeParams>(
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Validate,
       err,
-      TaskRunErrorSource.RULE_TYPE
+      TaskErrorSource.RULE_TYPE
     );
   }
 

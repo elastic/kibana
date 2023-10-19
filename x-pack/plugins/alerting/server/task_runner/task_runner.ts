@@ -13,10 +13,7 @@ import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import {
-  createTaskRunError,
-  TaskRunErrorSource,
-} from '@kbn/task-manager-plugin/server/task_running';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -545,7 +542,7 @@ export class TaskRunner<
             throw new ErrorWithReason(
               RuleExecutionStatusErrorReasons.Execute,
               err,
-              TaskRunErrorSource.RULE_TYPE
+              TaskErrorSource.RULE_TYPE
             );
           }
         }

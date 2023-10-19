@@ -26,10 +26,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
-import {
-  createTaskRunError,
-  TaskRunErrorSource,
-} from '@kbn/task-manager-plugin/server/task_running';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -191,7 +188,7 @@ export class TaskRunnerFactory {
           logger.error(`Action '${actionId}' failed: ${e.message}`);
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(e, TaskRunErrorSource.USER);
+            throwUnrecoverableError(e, TaskErrorSource.USER);
           }
           throw createTaskRunError(e); // FRAMEWORK
         }
@@ -206,7 +203,7 @@ export class TaskRunnerFactory {
           throw throwRetryableError(
             new Error(executorResult.message),
             executorResult.retry as boolean | Date,
-            TaskRunErrorSource.USER
+            TaskErrorSource.USER
           );
         }
       },

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { TaskRunErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { RuleExecutionStatusErrorReasons } from '../types';
 
 export class ErrorWithReason extends Error {
   public readonly reason: RuleExecutionStatusErrorReasons;
   public readonly error: Error;
-  public readonly source: TaskRunErrorSource;
+  public readonly source: TaskErrorSource;
 
-  constructor(reason: RuleExecutionStatusErrorReasons, error: Error, source?: TaskRunErrorSource) {
+  constructor(reason: RuleExecutionStatusErrorReasons, error: Error, source?: TaskErrorSource) {
     super(error.message);
     this.error = error;
     this.reason = reason;
-    this.source = source || TaskRunErrorSource.FRAMEWORK;
+    this.source = source || TaskErrorSource.FRAMEWORK;
   }
 }
 

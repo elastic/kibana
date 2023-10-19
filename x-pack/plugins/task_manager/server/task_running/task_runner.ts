@@ -760,7 +760,7 @@ export class TaskManagerRunner implements TaskRunner {
         // Alerting task runner returns SuccessfulRunResult with controlledError
         // when the alerting task fails, so we check for this condition in order
         // to emit the correct task run event for metrics collection
-        // controlledError contains the "source" (TaskRunErrorSource) data
+        // controlledError contains the "source" (TaskErrorSource) data
         const taskRunEvent =
           controlledError !== undefined
             ? asTaskRunEvent(
