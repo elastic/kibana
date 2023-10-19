@@ -197,7 +197,7 @@ export function ContextAppContent({
               dataView={dataView}
               expandedDoc={expandedDoc}
               loadingState={isAnchorLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-              sampleSize={0}
+              sampleSizeState={0}
               sort={sort as SortOrder[]}
               isSortEnabled={false}
               showTimeCol={showTimeCol}
