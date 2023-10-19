@@ -20,7 +20,7 @@ import { login, ROLE } from '../../tasks/login';
 
 describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('User with no access can not create an endpoint response action', () => {
-    before(() => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_no_access);
     });
 
@@ -35,10 +35,10 @@ describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =>
     let ruleId: string;
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
-    before(() => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_access);
     });
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 
@@ -87,16 +87,14 @@ describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =>
     const testedCommand = 'isolate';
     const newDescription = 'Example isolate host description';
 
-    before(() => {
+    beforeEach(() => {
+      login(ROLE.endpoint_response_actions_access);
       loadRule().then((res) => {
         ruleId = res.id;
         ruleName = res.name;
       });
     });
-    beforeEach(() => {
-      login(ROLE.endpoint_response_actions_access);
-    });
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 
@@ -145,7 +143,7 @@ describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =>
   describe('User should not see endpoint action when no rbac', () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
-    before(() => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_no_access);
     });
 
@@ -162,13 +160,14 @@ describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =>
   describe('User without access can not edit, add nor delete an endpoint response action', () => {
     let ruleId: string;
 
-    before(() => {
+    beforeEach(() => {
+      login(ROLE.endpoint_response_actions_no_access);
       loadRule().then((res) => {
         ruleId = res.id;
       });
-      login(ROLE.endpoint_response_actions_no_access);
     });
-    after(() => {
+
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 
