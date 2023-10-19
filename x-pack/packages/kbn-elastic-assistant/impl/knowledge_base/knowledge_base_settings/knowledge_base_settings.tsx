@@ -27,12 +27,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
-import { useAssistantContext } from '../assistant_context';
-import { useDeleteKnowledgeBase } from './use_delete_knowledge_base';
-import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
-import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
+import { useAssistantContext } from '../../assistant_context';
+import { useDeleteKnowledgeBase } from '../use_delete_knowledge_base/use_delete_knowledge_base';
+import { useKnowledgeBaseStatus } from '../use_knowledge_base_status/use_knowledge_base_status';
+import { useSetupKnowledgeBase } from '../use_setup_knowledge_base/use_setup_knowledge_base';
 
-import type { KnowledgeBaseConfig } from '../assistant/types';
+import type { KnowledgeBaseConfig } from '../../assistant/types';
 
 const ESQL_RESOURCE = 'esql';
 const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-kb';
