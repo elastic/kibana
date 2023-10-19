@@ -105,7 +105,7 @@ export const runActionTestSuite = ({
       { _source: { title: 'saved object 4', type: 'another_unused_type' } },
       { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
       {
-        _source: { title: new Array(10000).fill('a').join(), type: 'large' },
+        _source: { title: new Array(1000).fill('a').join(), type: 'large' },
       }, // "large" saved objects
     ] as unknown as SavedObjectsRawDoc[];
     await bulkOverwriteTransformedDocuments({
@@ -125,14 +125,14 @@ export const runActionTestSuite = ({
         properties: {},
       },
     })();
-    const docs1k = new Array(1000).fill({
+    const docs10k = new Array(10000).fill({
       _source: { title: new Array(1000).fill('a').join(), type: 'large' },
-    }) as unknown as SavedObjectsRawDoc[]; // 1000 "large" saved objects
+    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
 
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_10k_docs',
-      operations: docs1k.map((doc) => createBulkIndexOperationTuple(doc)),
+      operations: docs10k.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
 
