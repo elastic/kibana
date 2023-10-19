@@ -119,7 +119,9 @@ count(kql='response.status_code > 400') / count()
           defaultMessage: 'Week over week',
         }),
         description: (
-          <md.Markdown readOnly markdownContent={i18n.translate(
+          <md.Markdown
+            readOnly
+            markdownContent={i18n.translate(
               'xpack.lens.formulaDocumentation.weekOverWeekDescription.markdown',
               {
                 defaultMessage: `### Week over week:
@@ -145,7 +147,9 @@ percentile(system.network.in.bytes, percentile=99, shift='1w')
           defaultMessage: 'Percent of total',
         }),
         description: (
-          <md.Markdown readOnly markdownContent={i18n.translate(
+          <md.Markdown
+            readOnly
+            markdownContent={i18n.translate(
               'xpack.lens.formulaDocumentation.percentOfTotalDescription.markdown',
               {
                 defaultMessage: `### Percent of total
@@ -170,7 +174,9 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
           defaultMessage: 'Recent change',
         }),
         description: (
-          <md.Markdown readOnly markdownContent={i18n.translate(
+          <md.Markdown
+            readOnly
+            markdownContent={i18n.translate(
               'xpack.lens.formulaDocumentation.recentChangeDescription.markdown',
               {
                 defaultMessage: `### Recent change
@@ -286,7 +292,9 @@ max(system.network.in.bytes, reducedTimeRange="30m")
   const sections = {
     groups: helpGroups,
     initialSection: (
-      <md.Markdown readOnly markdownContent={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
+      <md.Markdown
+        readOnly
+        markdownContent={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
           defaultMessage: `## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
