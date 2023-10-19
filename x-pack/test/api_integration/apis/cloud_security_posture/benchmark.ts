@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy',
@@ -36,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: agentPolicyResponse2 } = await supertest
         .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy 2',
@@ -46,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: agentPolicyResponse3 } = await supertest
         .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy 3',
@@ -56,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: agentPolicyResponse4 } = await supertest
         .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy 4',

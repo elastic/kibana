@@ -39,7 +39,7 @@ export interface DashboardContentManagementRequiredServices {
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
-  deleteDashboards: (ids: string[]) => void;
+  deleteDashboards: (ids: string[]) => Promise<void>;
   loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
