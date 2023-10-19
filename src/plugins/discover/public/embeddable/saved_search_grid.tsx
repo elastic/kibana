@@ -21,7 +21,9 @@ import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../components/discover_tour';
 
-export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
+export interface DiscoverGridEmbeddableProps
+  extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
+  sampleSizeState: number; // a required prop
   totalHitCount?: number;
   query?: AggregateQuery | Query;
   interceptedWarnings?: SearchResponseInterceptedWarning[];
