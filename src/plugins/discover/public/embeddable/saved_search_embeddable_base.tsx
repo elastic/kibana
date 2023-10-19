@@ -46,7 +46,7 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
     >
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
 
-      {(prepend || totalHitCount) && (
+      {Boolean(prepend || totalHitCount) && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             justifyContent="flexEnd"
