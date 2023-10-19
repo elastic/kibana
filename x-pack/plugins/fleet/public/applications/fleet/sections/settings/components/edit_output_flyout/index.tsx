@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
@@ -29,6 +29,7 @@ import {
   EuiComboBox,
   EuiBetaBadge,
   useEuiTheme,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -42,7 +43,7 @@ import { MultiRowInput } from '../multi_row_input';
 import type { Output, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
-import { useBreadcrumbs, useStartServices, useServiceToken } from '../../../../hooks';
+import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
 import { OutputFormKafkaSection } from './output_form_kafka';
 
@@ -67,11 +68,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
   const { euiTheme } = useEuiTheme();
-  const { serviceToken, isLoadingServiceToken, generateServiceToken } = useServiceToken();
-
-  useEffect(() => {
-    if (serviceToken) inputs.serviceTokenInput.setValue(serviceToken);
-  }, [serviceToken, inputs.serviceTokenInput]);
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
@@ -80,6 +76,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const { kafkaOutput: isKafkaOutputEnabled, remoteESOutput: isRemoteESOutputEnabled } =
     ExperimentalFeaturesService.get();
+  const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
@@ -256,55 +253,33 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           isUrl
         />
         <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
-                  defaultMessage="Service Token"
-                />
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
+              defaultMessage="Service Token"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.serviceTokenHelpText"
+              defaultMessage="Generate a service token in your remote cluster."
+            />
+          }
+          {...inputs.serviceTokenInput.formRowProps}
+        >
+          <EuiFieldText
+            fullWidth
+            {...inputs.serviceTokenInput.props}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
+              {
+                defaultMessage: 'Specify service token',
               }
-              helpText={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.serviceTokenHelpText"
-                  defaultMessage="A service token grants Fleet Server permissions to write to Elasticsearch, and can be used to configure this Elasticsearch cluster for remote output."
-                />
-              }
-              {...inputs.serviceTokenInput.formRowProps}
-            >
-              <EuiFieldText
-                fullWidth
-                {...inputs.serviceTokenInput.props}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
-                  {
-                    defaultMessage: 'Specify service token',
-                  }
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiButton
-                fill
-                isLoading={isLoadingServiceToken}
-                isDisabled={isLoadingServiceToken || !!serviceToken}
-                onClick={() => {
-                  generateServiceToken(true);
-                }}
-                data-test-subj="fleetServerGenerateServiceTokenBtn"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.editOutputFlyout.generateServiceTokenButton"
-                  defaultMessage="Generate service token"
-                />
-              </EuiButton>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            )}
+          />
+        </EuiFormRow>
         <EuiSpacer size="m" />
       </>
     );
@@ -334,7 +309,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const renderTypeSpecificWarning = () => {
     const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
     const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
-    if (!isKafkaOutput && !isESOutput) {
+    if (!isKafkaOutput && !isESOutput && !isRemoteESOutput) {
       return null;
     }
 
@@ -353,7 +328,26 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           });
       }
     };
-    return (
+    return isRemoteESOutput ? (
+      <>
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.remoteESTypeText"
+            defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
+            values={{
+              doc: (
+                <EuiLink href={docLinks.links.fleet.guide} target="_blank">
+                  {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
+                    defaultMessage: 'our documentation',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+      </>
+    ) : (
       <>
         <EuiSpacer size="xs" />
         <EuiCallOut
@@ -475,37 +469,39 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
           {renderOutputTypeSection(inputs.typeInput.value)}
 
-          <EuiFormRow
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
-                defaultMessage="Proxy"
-              />
-            }
-          >
-            <EuiComboBox
+          {isRemoteESOutput ? null : (
+            <EuiFormRow
               fullWidth
-              data-test-subj="settingsOutputsFlyout.proxyIdInput"
-              {...inputs.proxyIdInput.props}
-              onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
-              selectedOptions={
-                inputs.proxyIdInput.value !== ''
-                  ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
-                  : []
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
+                  defaultMessage="Proxy"
+                />
               }
-              options={proxiesOptions}
-              singleSelection={{ asPlainText: true }}
-              isDisabled={inputs.proxyIdInput.props.disabled}
-              isClearable={true}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.proxyIdPlaceholder',
-                {
-                  defaultMessage: 'Select proxy',
+            >
+              <EuiComboBox
+                fullWidth
+                data-test-subj="settingsOutputsFlyout.proxyIdInput"
+                {...inputs.proxyIdInput.props}
+                onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+                selectedOptions={
+                  inputs.proxyIdInput.value !== ''
+                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
+                    : []
                 }
-              )}
-            />
-          </EuiFormRow>
+                options={proxiesOptions}
+                singleSelection={{ asPlainText: true }}
+                isDisabled={inputs.proxyIdInput.props.disabled}
+                isClearable={true}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.proxyIdPlaceholder',
+                  {
+                    defaultMessage: 'Select proxy',
+                  }
+                )}
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow
             label={
               <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
@@ -549,7 +545,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   }}
                 />
               }
-              disabled={inputs.typeInput.value === outputType.RemoteElasticsearch}
+              disabled={isRemoteESOutput}
             />
           </EuiFormRow>
           <EuiFormRow fullWidth {...inputs.defaultMonitoringOutputInput.formRowProps}>
