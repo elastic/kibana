@@ -11,7 +11,8 @@ import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Inventory', { tags: ['@ess'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/169369
+describe.skip('ALL - Inventory', { tags: ['@ess'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
