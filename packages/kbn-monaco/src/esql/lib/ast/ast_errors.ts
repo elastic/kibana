@@ -15,9 +15,8 @@ function getExpectedSymbols(expectedTokens: RecognitionException['expectedTokens
   const list = [];
   for (const tokenId of tokenIds) {
     if (esql_parser.VOCABULARY.getSymbolicName(tokenId)) {
-      list.push(esql_parser.VOCABULARY.getSymbolicName(tokenId));
-    } else if (tokenId === -1) {
-      list.push('<EOF>');
+      const symbol = esql_parser.VOCABULARY.getSymbolicName(tokenId);
+      list.push(symbol === 'EOF' ? `<${symbol}>` : symbol);
     }
   }
   return list;
