@@ -188,14 +188,6 @@ export class InfraSources {
 
     return convertSavedObjectToSavedSourceConfiguration(savedObject);
   }
-
-  private async getAllSavedSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
-    const savedObjects = await savedObjectsClient.find({
-      type: infraSourceConfigurationSavedObjectName,
-    });
-
-    return savedObjects.saved_objects.map(convertSavedObjectToSavedSourceConfiguration);
-  }
 }
 
 export const mergeSourceConfiguration = (
