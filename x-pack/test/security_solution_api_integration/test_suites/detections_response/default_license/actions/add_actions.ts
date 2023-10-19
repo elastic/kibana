@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
@@ -59,6 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
           .send(getWebHookAction())
           .expect(200);
 
@@ -77,6 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
           .send(getWebHookAction())
           .expect(200);
 
@@ -93,6 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
           .send(getWebHookAction())
           .expect(200);
 
