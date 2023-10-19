@@ -14,6 +14,7 @@ import {
   createSymbolizerPackagePolicy,
   removeProfilingFromApmPackagePolicy,
 } from '../lib/setup/fleet_policies';
+import { getHasSetupPrivileges } from '../lib/setup/get_has_setup_privileges';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
@@ -34,13 +35,12 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const hasRequiredRole = true;
-        // dependencies.start.security
-        //   ? isSuperuser({
-        //       securityPluginStart: dependencies.start.security,
-        //       request,
-        //     })
-        //   : true;
+        const hasRequiredRole = dependencies.start.security
+          ? await getHasSetupPrivileges({
+              securityPluginStart: dependencies.start.security,
+              request,
+            })
+          : true;
 
         const esClient = (await context.core).elasticsearch.client;
         const core = await context.core;

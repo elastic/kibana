@@ -8,13 +8,22 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { ProfilingPluginStartDeps } from '../../types';
 
-export function isSuperuser({
+export async function getHasSetupPrivileges({
   securityPluginStart,
   request,
 }: {
   securityPluginStart: NonNullable<ProfilingPluginStartDeps['security']>;
   request: KibanaRequest;
 }) {
-  const user = securityPluginStart.authc.getCurrentUser(request);
-  return user?.roles.includes('superuser');
+  const { hasAllRequested } = await securityPluginStart.authz
+    .checkPrivilegesWithRequest(request)
+    .globally({
+      elasticsearch: {
+        cluster: ['manage', 'monitor'],
+        index: {
+          'profiling-*': ['read'],
+        },
+      },
+    });
+  return hasAllRequested;
 }
