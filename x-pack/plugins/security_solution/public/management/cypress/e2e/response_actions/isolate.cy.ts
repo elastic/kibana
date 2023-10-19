@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { openAlertDetailsView } from '../../screens/alerts';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
@@ -14,7 +15,6 @@ import {
   checkFlyoutEndpointIsolation,
   filterOutIsolatedHosts,
   isolateHostWithComment,
-  openAlertDetails,
   openCaseAlertDetails,
   releaseHostWithComment,
   toggleRuleOffAndOn,
@@ -139,7 +139,7 @@ describe.skip('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServe
       visitRuleAlerts(ruleName);
 
       closeAllToasts();
-      openAlertDetails();
+      openAlertDetailsView();
 
       isolateHostWithComment(isolateComment, createdHost.hostname);
 
@@ -147,7 +147,7 @@ describe.skip('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServe
       cy.contains(`Isolation on host ${createdHost.hostname} successfully submitted`);
 
       cy.getByTestSubj('euiFlyoutCloseButton').click();
-      openAlertDetails();
+      openAlertDetailsView();
 
       checkFlyoutEndpointIsolation();
 
@@ -156,7 +156,7 @@ describe.skip('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServe
 
       cy.contains(`Release on host ${createdHost.hostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
-      openAlertDetails();
+      openAlertDetailsView();
       cy.getByTestSubj('event-field-agent.status').within(() => {
         cy.get('[title="Isolated"]').should('not.exist');
       });
@@ -205,7 +205,7 @@ describe.skip('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServe
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
-      openAlertDetails();
+      openAlertDetailsView();
 
       cy.getByTestSubj('add-to-existing-case-action').click();
       cy.getByTestSubj(`cases-table-row-select-${caseId}`).click();

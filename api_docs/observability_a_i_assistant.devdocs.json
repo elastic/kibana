@@ -734,7 +734,7 @@
             "text": "Message"
           },
           "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; } & { query?: { stream: boolean; } | undefined; }; }) => Promise<",
-          "IncomingMessage",
+          "Readable",
           " | ",
           "CreateChatCompletionResponse",
           ">; } & ",
@@ -1123,7 +1123,7 @@
             "text": "Message"
           },
           "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; } & { query?: { stream: boolean; } | undefined; }; }) => Promise<",
-          "IncomingMessage",
+          "Readable",
           " | ",
           "CreateChatCompletionResponse",
           ">; } & ",
@@ -1618,7 +1618,7 @@
             "text": "Message"
           },
           "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; } & { query?: { stream: boolean; } | undefined; }; }) => Promise<",
-          "IncomingMessage",
+          "Readable",
           " | ",
           "CreateChatCompletionResponse",
           ">; } & ",
