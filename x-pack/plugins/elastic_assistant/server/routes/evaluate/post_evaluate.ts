@@ -105,6 +105,7 @@ export const postEvaluateRoute = (
                 messages: [],
               },
             },
+            assistantLangChain: true,
           },
         };
 

@@ -150,7 +150,7 @@ const generateSchemaLines = ({
         break;
       case 'object':
       case 'nested':
-        if (!isEnabled) {
+        if (!isEnabled || !isArray) {
           lineWriter.addLine(`${keyToWrite}: ${getSchemaDefinition('schemaUnknown', isArray)},`);
         } else if (isArray && null != fieldMap.properties) {
           lineWriter.addLineAndIndent(`${keyToWrite}: rt.array(`);
