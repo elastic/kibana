@@ -95,12 +95,7 @@ describe('SummaryClient', () => {
         });
         const summaryClient = new DefaultSLIClient(esClientMock);
 
-        const result = await summaryClient.fetchSLIDataFrom(
-          slo,
-          ALL_VALUE,
-          lookbackWindows,
-          TEST_DATE
-        );
+        const result = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
@@ -200,12 +195,7 @@ describe('SummaryClient', () => {
         });
         const summaryClient = new DefaultSLIClient(esClientMock);
 
-        const result = await summaryClient.fetchSLIDataFrom(
-          slo,
-          ALL_VALUE,
-          lookbackWindows,
-          TEST_DATE
-        );
+        const result = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
