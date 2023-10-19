@@ -7,19 +7,16 @@
  */
 
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const EQL_SEARCH_STRATEGY = 'eql';
 
-export type EqlRequestParams = EqlSearchRequest;
-
-export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlRequestParams> {
-  /**
-   * @deprecated: use IAsyncSearchOptions.transport instead.
-   */
-  options?: TransportRequestOptions;
+export interface EqlRequestParams extends EqlSearchRequest {
+  validate?: boolean;
 }
+
+export type EqlSearchStrategyRequest = IKibanaSearchRequest<EqlRequestParams>;
 
 export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<TransportResult<T>>;

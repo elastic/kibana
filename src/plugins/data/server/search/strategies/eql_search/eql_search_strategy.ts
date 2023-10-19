@@ -16,7 +16,11 @@ import {
   IAsyncSearchOptions,
   pollSearch,
 } from '../../../../common';
-import { toEqlKibanaSearchResponse } from './response_utils';
+import {
+  errorToEqlKibanaSearchResponse,
+  isEqlValidationResponseError,
+  toEqlKibanaSearchResponse,
+} from './response_utils';
 import { EqlSearchResponse } from './types';
 import { ISearchStrategy } from '../../types';
 import { getDefaultSearchParams } from '../es_search';
@@ -47,6 +51,7 @@ export const eqlSearchStrategyProvider = (
         const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(
           uiSettingsClient
         );
+        const { validate: isValidationRequest, ...eqlParams } = request.params ?? {};
         const params = id
           ? getCommonDefaultAsyncGetParams(searchConfig, options, {
               /* disable until full eql support */ disableSearchSessions: true,
@@ -57,27 +62,33 @@ export const eqlSearchStrategyProvider = (
               ...getCommonDefaultAsyncGetParams(searchConfig, options, {
                 /* disable until full eql support */ disableSearchSessions: true,
               }),
-              ...request.params,
+              ...eqlParams,
             };
-        const response = id
-          ? await client.get(
-              { ...params, id },
-              {
-                ...request.options,
+
+        try {
+          const response = id
+            ? await client.get(
+                { ...params, id },
+                {
+                  ...options.transport,
+                  signal: options.abortSignal,
+                  meta: true,
+                }
+              )
+            : // @ts-expect-error optional key cannot be used since search doesn't expect undefined
+              await client.search(params, {
                 ...options.transport,
                 signal: options.abortSignal,
                 meta: true,
-              }
-            )
-          : // @ts-expect-error optional key cannot be used since search doesn't expect undefined
-            await client.search(params as EqlSearchStrategyRequest['params'], {
-              ...request.options,
-              ...options.transport,
-              signal: options.abortSignal,
-              meta: true,
-            });
-
-        return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);
+              });
+          return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);
+        } catch (e) {
+          if (isValidationRequest && isEqlValidationResponseError(e)) {
+            return errorToEqlKibanaSearchResponse(e);
+          } else {
+            throw e;
+          }
+        }
       };
 
       const cancel = async () => {
