@@ -10,27 +10,26 @@ import type { AssetDetailsProps } from '../types';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 import { useMetadataStateProviderContext } from './use_metadata_state';
 
-export interface UseAssetDetailsRenderProps {
-  props: Pick<AssetDetailsProps, 'asset' | 'assetType' | 'overrides' | 'renderMode'>;
-}
+export type UseAssetDetailsRenderProps = Pick<
+  AssetDetailsProps,
+  'assetId' | 'assetName' | 'assetType' | 'overrides' | 'renderMode'
+>;
 
-export function useAssetDetailsRenderProps({ props }: UseAssetDetailsRenderProps) {
+export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
   const [urlState] = useAssetDetailsUrlState();
   const { metadata } = useMetadataStateProviderContext();
-  const { asset, assetType, overrides, renderMode } = props;
+  const { assetId, assetName, assetType, ...rest } = props;
 
   // When the asset asset.name is known we can load the page faster
   // Otherwise we need to use metadata response.
-  const loading = !asset.name && !urlState?.name && !metadata?.name;
-
+  const loading = !assetName && !urlState?.name && !metadata?.name;
   return {
+    ...rest,
     asset: {
-      ...asset,
-      name: asset.name || urlState?.name || metadata?.name || '',
+      id: assetId,
+      name: assetName || urlState?.name || metadata?.name || '',
+      type: assetType,
     },
-    assetType,
-    overrides,
-    renderMode,
     loading,
   };
 }
