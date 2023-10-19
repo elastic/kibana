@@ -72,10 +72,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
   const { euiTheme } = useEuiTheme();
-  const [useSecretStorage, setUseSecretStorage] = React.useState(outputSecretsStorageEnabled);
+  const [useSecretsStorage, setUseSecretsStorage] = React.useState(outputSecretsStorageEnabled);
 
   const onUsePlainText = () => {
-    setUseSecretStorage(false);
+    setUseSecretsStorage(false);
   };
 
   const proxiesOptions = useMemo(
@@ -171,7 +171,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             )}
           />
         </EuiFormRow>
-        {(output && output?.ssl?.key) || !useSecretStorage ? (
+        {(output && output?.ssl?.key) || !useSecretsStorage ? (
           <EuiFormRow
             fullWidth
             label={
@@ -264,7 +264,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const renderKafkaSection = () => {
     if (isKafkaOutputEnabled) {
-      return <OutputFormKafkaSection inputs={inputs} />;
+      return (
+        <OutputFormKafkaSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          onUsePlainText={onUsePlainText}
+        />
+      );
     }
     return null;
   };

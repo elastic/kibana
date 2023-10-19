@@ -539,14 +539,11 @@ export function getPolicySecretPaths(
   return [...packageLevelVarPaths, ...inputSecretPaths];
 }
 
-export async function isOutputSecretStorageEnabled(
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract
-): Promise<boolean> {
+export async function isOutputSecretStorageEnabled(): Promise<boolean> {
   const { outputSecretsStorage: outputSecretsStorageEnabled } =
     appContextService.getExperimentalFeatures();
 
-  return outputSecretsStorageEnabled && (await isSecretStorageEnabled(esClient, soClient));
+  return outputSecretsStorageEnabled;
 }
 
 export async function isSecretStorageEnabled(
