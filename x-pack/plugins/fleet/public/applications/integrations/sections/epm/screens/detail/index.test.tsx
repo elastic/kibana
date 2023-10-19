@@ -308,6 +308,11 @@ describe('when on integration detail', () => {
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should link to the create page', () => {
