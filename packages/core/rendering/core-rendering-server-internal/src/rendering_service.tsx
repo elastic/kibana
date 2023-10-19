@@ -213,7 +213,7 @@ export class RenderingService {
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          translationsUrl: `${staticAssetsHrefBase}/translations/${i18n.getLocale()}.json`,
+          translationsUrl: `${serverBasePath}/translations/${i18n.getLocale()}.json`,
         },
         theme: {
           darkMode,
