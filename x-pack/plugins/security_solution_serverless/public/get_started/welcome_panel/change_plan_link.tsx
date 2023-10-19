@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -43,7 +42,6 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
             <ProductTierBadge productTier={productTier} />
             <EuiLink
               className="eui-alignMiddle"
-              id={SecurityPageName.projectSettings}
               css={css`
                 color: ${euiTheme.colors.primaryText};
                 padding-left: ${euiTheme.size.m};

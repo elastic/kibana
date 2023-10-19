@@ -6,7 +6,13 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { ALL_VALUE, CreateSLOParams, HistogramIndicator, sloSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  CreateSLOParams,
+  HistogramIndicator,
+  sloSchema,
+  TimesliceMetricIndicator,
+} from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
 import {
@@ -87,6 +93,25 @@ export const createMetricCustomIndicator = (
     },
     timestampField: 'log_timestamp',
     ...params,
+  },
+});
+
+export const createTimesliceMetricIndicator = (
+  metrics: TimesliceMetricIndicator['params']['metric']['metrics'] = [],
+  equation: TimesliceMetricIndicator['params']['metric']['equation'] = '',
+  queryFilter = ''
+): TimesliceMetricIndicator => ({
+  type: 'sli.metric.timeslice',
+  params: {
+    index: 'test-*',
+    timestampField: '@timestamp',
+    filter: queryFilter,
+    metric: {
+      metrics,
+      equation,
+      threshold: 100,
+      comparator: 'GTE',
+    },
   },
 });
 

@@ -14,7 +14,6 @@ import { TimeUnitChar } from '../../../../common';
 export enum InfraRuleType {
   MetricThreshold = 'metrics.alert.threshold',
   InventoryThreshold = 'metrics.alert.inventory.threshold',
-  Anomaly = 'metrics.alert.anomaly',
 }
 
 export enum AlertStates {
