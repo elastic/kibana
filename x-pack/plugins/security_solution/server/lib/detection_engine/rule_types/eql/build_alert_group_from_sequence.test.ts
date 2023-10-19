@@ -12,6 +12,7 @@ import {
   buildAlertGroupFromSequence,
   objectArrayIntersection,
   objectPairIntersection,
+  unFlattenObject,
 } from './build_alert_group_from_sequence';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { getCompleteRuleMock, getQueryRuleParams } from '../../rule_schema/mocks';
@@ -142,6 +143,14 @@ describe('buildAlert', () => {
   });
 
   describe('recursive intersection between objects', () => {
+    test('unFlatten', () => {
+      const a = {
+        hello: { again: { to: 'me' } },
+        'hello.thing': 'yes',
+      };
+      const unFlat = unFlattenObject(a);
+      expect(unFlat).toEqual({ hello: { thing: 'yes', again: { to: 'me' } } });
+    });
     describe('objectPairIntersection', () => {
       test('returns the intersection of fields with identically-valued arrays', () => {
         const a = {
@@ -197,6 +206,55 @@ describe('buildAlert', () => {
           field1: [3, 4],
         };
         expect(intersection).toEqual(expected);
+      });
+
+      test.only('should treat dot and nested notation the same', () => {
+        const a = {
+          user: {
+            email: 'marshall@elastic.co',
+          },
+        };
+        const b = {
+          'user.email': 'marshall@elastic.co',
+        };
+        const intersection = objectPairIntersection(a, b);
+        const expected = {
+          user: {
+            email: 'marshall@elastic.co',
+          },
+        };
+        expect(intersection).toEqual(expected);
+      });
+
+      test.only('should treat dot and nested notation the same when values are same arrays', () => {
+        const a = {
+          user: {
+            email: ['marshall@elastic.co'],
+          },
+        };
+        const b = {
+          'user.email': ['marshall@elastic.co'],
+        };
+        const intersection = objectPairIntersection(a, b);
+        const expected = {
+          user: {
+            email: ['marshall@elastic.co'],
+          },
+        };
+        expect(intersection).toEqual(expected);
+      });
+
+      test.only('should treat dot and nested notation the same when values are different arrays', () => {
+        const a = {
+          user: {
+            email: ['1marshall@elastic.co'],
+          },
+        };
+        const b = {
+          'user.email': ['marshall@elastic.co'],
+        };
+        const intersection = objectPairIntersection(a, b);
+        expect(intersection).toEqual(undefined);
       });
     });
 
@@ -484,6 +542,80 @@ describe('buildAlert', () => {
       };
       expect(intersection).toEqual(expected);
     });
+    test('should work with exactly 2 objects where one field is nested and the other is dot notation', () => {
+      const a = {
+        field1: 1,
+        field2: 1,
+        field3: 10,
+        field5: 1,
+        field6: null,
+        array_field: [1, 2],
+        container_field: {
+          sub_field1: 1,
+          sub_field2: 1,
+          sub_field3: 10,
+          'dot.notation.field': 'hello',
+        },
+        container_field_without_intersection: {
+          sub_field1: 1,
+        },
+      };
+      const b = {
+        field1: 1,
+        field2: 2,
+        field4: 10,
+        field5: '1',
+        field6: null,
+        array_field: [1, 2],
+        container_field: {
+          sub_field1: 1,
+          sub_field2: 2,
+          sub_field4: 10,
+          dot: {
+            notation: {
+              field: 'hello',
+            },
+          },
+        },
+        container_field_without_intersection: {
+          sub_field2: 1,
+        },
+      };
+      const intersection = objectArrayIntersection([a, b]);
+      const expected = {
+        array_field: [1, 2],
+        field1: 1,
+        field6: null,
+        container_field: {
+          sub_field1: 1,
+          dot: {
+            notation: {
+              field: 'hello',
+            },
+          },
+        },
+      };
+      expect(intersection).toEqual(expected);
+
+      // now let's reverse the ordering
+      const intersection2 = objectArrayIntersection([b, a]);
+      const expected2 = {
+        array_field: [1, 2],
+        field1: 1,
+        field6: null,
+        container_field: {
+          sub_field1: 1,
+          dot: {
+            notation: {
+              field: 'hello',
+            },
+          },
+        },
+        container_field_without_intersection: undefined,
+      };
+      expect(intersection2).toEqual(expected2);
+    });
+
     test('should work with 3 or more objects', () => {
       const a = {
         field1: 1,
