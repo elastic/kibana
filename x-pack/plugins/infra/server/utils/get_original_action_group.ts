@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 
-export const getOriginalActionGroup = (
-  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
+export const getOriginalActionGroup = <
+  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)
+>(
+  alertHitSource: Partial<T> | undefined | null
 ) => {
   return alertHitSource?.[ALERT_ACTION_GROUP];
 };

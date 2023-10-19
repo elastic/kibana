@@ -187,6 +187,18 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
+    label: 'Osquery Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 50
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
     label: Trigger unsupported ftr tests
     timeout_in_minutes: 10
