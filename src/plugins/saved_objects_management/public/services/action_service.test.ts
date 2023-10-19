@@ -69,13 +69,13 @@ describe('SavedObjectsManagementActionRegistry', () => {
       const action = createAction('foo');
       setup.register(action);
       const start = service.start(spacesPluginMock.createStartContract(true));
-      expect(start.getAll()).toEqual(expect.not.arrayContaining(
-        [
+      expect(start.getAll()).toEqual(
+        expect.not.arrayContaining([
           expect.any(ShareToSpaceSavedObjectsManagementAction),
           expect.any(CopyToSpaceSavedObjectsManagementAction),
         ])
       );
-    })
+    });
   });
 
   describe('#has', () => {

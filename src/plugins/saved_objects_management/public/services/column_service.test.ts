@@ -7,7 +7,6 @@
  */
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { CopyToSpaceSavedObjectsManagementAction, ShareToSpaceSavedObjectsManagementAction } from './actions';
 import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,
@@ -64,11 +63,9 @@ describe('SavedObjectsManagementColumnRegistry', () => {
       const column = createColumn('foo');
       setup.register(column);
       const start = service.start(spacesPluginMock.createStartContract(true));
-      expect(start.getAll()).toEqual(expect.not.arrayContaining(
-        [
-          expect.any(ShareToSpaceSavedObjectsManagementColumn),
-        ])
+      expect(start.getAll()).toEqual(
+        expect.not.arrayContaining([expect.any(ShareToSpaceSavedObjectsManagementColumn)])
       );
-    })
+    });
   });
 });
