@@ -34,7 +34,6 @@ import {
   HIDE_ANNOUNCEMENTS,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
-  SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
@@ -59,6 +58,10 @@ import {
   DiscoverTourProvider,
 } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
+import {
+  getMaxAllowedSampleSize,
+  getAllowedSampleSize,
+} from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import { getRenderCustomToolbarWithElements } from '../../../../components/discover_grid/render_custom_toolbar';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
@@ -111,8 +114,8 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
-    (state) => {
+  const [query, sort, rowHeight, rowsPerPage, grid, columns, index, sampleSizeState] =
+    useAppStateSelector((state) => {
       return [
         state.query,
         state.sort,
@@ -121,9 +124,9 @@ function DiscoverDocumentsComponent({
         state.grid,
         state.columns,
         state.index,
+        state.sampleSize,
       ];
-    }
-  );
+    });
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       stateContainer.internalState.transitions.setExpandedDoc(doc);
@@ -136,7 +139,6 @@ function DiscoverDocumentsComponent({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -187,6 +189,13 @@ function DiscoverDocumentsComponent({
   const onUpdateRowsPerPage = useCallback(
     (nextRowsPerPage: number) => {
       stateContainer.appState.update({ rowsPerPage: nextRowsPerPage });
+    },
+    [stateContainer]
+  );
+
+  const onUpdateSampleSize = useCallback(
+    (newSampleSize: number) => {
+      stateContainer.appState.update({ sampleSize: newSampleSize });
     },
     [stateContainer]
   );
@@ -405,7 +414,6 @@ function DiscoverDocumentsComponent({
                   }
                   rows={rows}
                   sort={(sort as SortOrder[]) || []}
-                  sampleSize={sampleSize}
                   searchDescription={savedSearch.description}
                   searchTitle={savedSearch.title}
                   setExpandedDoc={setExpandedDoc}
@@ -422,6 +430,9 @@ function DiscoverDocumentsComponent({
                   isPlainRecord={isTextBasedQuery}
                   rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                   onUpdateRowsPerPage={onUpdateRowsPerPage}
+                  maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
+                  sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
+                  onUpdateSampleSize={!isTextBasedQuery ? onUpdateSampleSize : undefined}
                   onFieldEdited={onFieldEdited}
                   configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
                   showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}

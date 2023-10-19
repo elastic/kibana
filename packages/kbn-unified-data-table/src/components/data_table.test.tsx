@@ -10,6 +10,7 @@ import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
   EuiCopy,
+  EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
 } from '@elastic/eui';
@@ -52,7 +53,7 @@ function getProps(): UnifiedDataTableProps {
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
     rows: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
-    sampleSize: 30,
+    sampleSizeState: 30,
     searchDescription: '',
     searchTitle: '',
     setExpandedDoc: jest.fn(),
@@ -296,6 +297,74 @@ describe('UnifiedDataTable', () => {
       ).toMatchInlineSnapshot(`
         Object {
           "level": "sorting",
+        }
+      `);
+    });
+  });
+
+  describe('display settings', () => {
+    it('should include additional display settings if onUpdateSampleSize is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sampleSizeState: 150,
+        onUpdateSampleSize: jest.fn(),
+        onUpdateRowHeight: jest.fn(),
+      });
+
+      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": <React.Fragment />,
+          "showColumnSelector": false,
+          "showDisplaySelector": Object {
+            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              onChangeSampleSize={[MockFunction]}
+              sampleSize={150}
+            />,
+            "allowDensity": false,
+            "allowResetButton": false,
+            "allowRowHeight": true,
+          },
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
+        }
+      `);
+    });
+
+    it('should not include additional display settings if onUpdateSampleSize is not provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sampleSizeState: 200,
+        onUpdateRowHeight: jest.fn(),
+      });
+
+      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": <React.Fragment />,
+          "showColumnSelector": false,
+          "showDisplaySelector": Object {
+            "allowDensity": false,
+            "allowRowHeight": true,
+          },
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
+        }
+      `);
+    });
+
+    it('should hide display settings if no handlers provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        onUpdateRowHeight: undefined,
+        onUpdateSampleSize: undefined,
+      });
+
+      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": <React.Fragment />,
+          "showColumnSelector": false,
+          "showDisplaySelector": undefined,
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
         }
       `);
     });

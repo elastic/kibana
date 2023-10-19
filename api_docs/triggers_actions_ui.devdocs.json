@@ -6101,7 +6101,15 @@
           "EuiDataGridToolBarVisibilityOptions",
           " | undefined; shouldHighlightRow?: ((alert: ",
           "EcsFieldsResponse",
-          ") => boolean) | undefined; } & Partial<Pick<",
+          ") => boolean) | undefined; featureIds?: ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.AlertConsumers",
+            "text": "AlertConsumers"
+          },
+          "[] | undefined; } & Partial<Pick<",
           "EuiDataGridProps",
           ", \"gridStyle\" | \"rowHeightsOptions\">>"
         ],

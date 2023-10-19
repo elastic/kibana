@@ -29,6 +29,7 @@ import {
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomToolbarProps,
   EuiDataGridToolBarVisibilityOptions,
+  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
 } from '@elastic/eui';
@@ -66,6 +67,7 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
@@ -152,10 +154,6 @@ export interface UnifiedDataTableProps {
    */
   rows?: DataTableRecord[];
   /**
-   * The max size of the documents returned by Elasticsearch
-   */
-  sampleSize: number;
-  /**
    * Function to set the expanded document, which is displayed in a flyout
    */
   setExpandedDoc?: (doc?: DataTableRecord) => void;
@@ -219,6 +217,18 @@ export interface UnifiedDataTableProps {
    * Update rows per page state
    */
   onUpdateRowsPerPage?: (rowsPerPage: number) => void;
+  /**
+   * Configuration option to limit sample size slider
+   */
+  maxAllowedSampleSize?: number;
+  /**
+   * The max size of the documents returned by Elasticsearch
+   */
+  sampleSizeState: number;
+  /**
+   * Update rows per page state
+   */
+  onUpdateSampleSize?: (sampleSize: number) => void;
   /**
    * Callback to execute on edit runtime field
    */
@@ -348,7 +358,6 @@ export const UnifiedDataTable = ({
   onSetColumns,
   onSort,
   rows,
-  sampleSize,
   searchDescription,
   searchTitle,
   settings,
@@ -362,6 +371,9 @@ export const UnifiedDataTable = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  maxAllowedSampleSize,
+  sampleSizeState,
+  onUpdateSampleSize,
   isPlainRecord = false,
   rowsPerPageState,
   onUpdateRowsPerPage,
@@ -753,16 +765,27 @@ export const UnifiedDataTable = ({
     [renderCustomToolbar, additionalControls]
   );
 
-  const showDisplaySelector = useMemo(
-    () =>
-      !!onUpdateRowHeight
-        ? {
-            allowDensity: false,
-            allowRowHeight: true,
-          }
-        : undefined,
-    [onUpdateRowHeight]
-  );
+  const showDisplaySelector = useMemo(() => {
+    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {};
+
+    if (onUpdateRowHeight) {
+      options.allowDensity = false;
+      options.allowRowHeight = true;
+    }
+
+    if (onUpdateSampleSize) {
+      options.allowResetButton = false;
+      options.additionalDisplaySettings = (
+        <UnifiedDataTableAdditionalDisplaySettings
+          maxAllowedSampleSize={maxAllowedSampleSize}
+          sampleSize={sampleSizeState}
+          onChangeSampleSize={onUpdateSampleSize}
+        />
+      );
+    }
+
+    return Object.keys(options).length ? options : undefined;
+  }, [maxAllowedSampleSize, sampleSizeState, onUpdateRowHeight, onUpdateSampleSize]);
 
   const inMemory = useMemo(() => {
     return isPlainRecord && columns.length
@@ -877,7 +900,7 @@ export const UnifiedDataTable = ({
             <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}
               rowCount={rowCount}
-              sampleSize={sampleSize}
+              sampleSize={sampleSizeState}
               pageCount={pageCount}
               pageIndex={paginationObj?.pageIndex}
               totalHits={totalHits}

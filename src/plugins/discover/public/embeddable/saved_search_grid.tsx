@@ -22,7 +22,9 @@ import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { getRenderCustomToolbarWithElements } from '../components/discover_grid/render_custom_toolbar';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 
-export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
+export interface DiscoverGridEmbeddableProps
+  extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
+  sampleSizeState: number; // a required prop
   totalHitCount?: number;
   query?: AggregateQuery | Query;
   interceptedWarnings?: SearchResponseInterceptedWarning[];

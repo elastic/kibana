@@ -10,6 +10,11 @@ import { setupUserDataLoader } from '../../../test_serverless/functional/test_su
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './cypress/reporter_config.json',
+  },
+
   defaultCommandTimeout: 60000,
   execTimeout: 60000,
   pageLoadTimeout: 60000,
