@@ -1,0 +1,21 @@
+steps:
+  - label: Running exception_workflows:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_workflows:runner:serverless
+    key: exception_workflows:runner:serverless
+
+  - label: Running exception_operators_date_numeric_types:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_date_numeric_types:runner:serverless
+    key: exception_operators_date_numeric_types:runner:serverless
+
+  - label: Running exception_operators_keyword_text_long:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_keyword_text_long:runner:serverless
+    key: exception_operators_keyword_text_long:runner:serverless
+
+  - label: Running exception_operators_ips_text_array:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_ips_text_array:runner:serverless
+    key: exception_operators_ips_text_array:runner:serverless
+
+  - label: Running rule_creation:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_creation:runner:serverless
+    key: rule_creation:runner:serverless
+  
