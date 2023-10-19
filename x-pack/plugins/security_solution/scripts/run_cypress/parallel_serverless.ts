@@ -19,35 +19,36 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { createFailError } from '@kbn/dev-cli-errors';
 import axios from 'axios';
-import { renderSummaryTable } from './print_run';
-import { isSkipped, parseTestFileConfig, SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import path from 'path';
 import os from 'os';
+import { renderSummaryTable } from './print_run';
+import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
+import { isSkipped, parseTestFileConfig } from './utils';
 
-type ProductType = {
+interface ProductType {
   product_line: string;
   product_tier: string;
-};
+}
 
-type CreateEnvironmentRequestBody = {
+interface CreateEnvironmentRequestBody {
   name: string;
   region_id: string;
   product_types: ProductType[];
-};
+}
 
-type Environment = {
+interface Environment {
   name: string;
   id: string;
   region: string;
   es_url: string;
   kb_url: string;
   product: string;
-};
+}
 
-type Credentials = {
+interface Credentials {
   username: string;
   password: string;
-};
+}
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 let log: ToolingLog;
@@ -122,7 +123,7 @@ async function createEnvironment(
   onEarlyExit: (msg: string) => void
 ): Promise<Environment> {
   log.info(`${runnerId}: Creating environment ${projectName}...`);
-  let environment = {} as Environment;
+  const environment = {} as Environment;
   const body = {
     name: projectName,
     region_id: DEFAULT_REGION,
@@ -186,7 +187,7 @@ async function resetCredentials(
   apiKey: string
 ): Promise<Credentials> {
   log.info(`${runnerId} : Reseting credentials`);
-  let credentials = {} as Credentials;
+  const credentials = {} as Credentials;
 
   await poll(async () => {
     return axios
@@ -282,13 +283,13 @@ export const cli = () => {
 
       const PARALLEL_COUNT = process.env.PARALLEL_COUNT ? Number(process.env.PARALLEL_COUNT) : 1;
 
-      let BASE_ENV_URL = QA_BASE_ENV_URL;
+      const BASE_ENV_URL = QA_BASE_ENV_URL;
       if (!process.env.CLOUD_ENV) {
         log.warning(
           'The cloud environment to be provided with the env var CLOUD_ENV. Currently working only for QA so the script can proceed.'
         );
         // Abort when more environments will be integrated
-        // eslint-disable-next-line no-process-exit
+
         // return process.exit(0);
       }
 
@@ -427,7 +428,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = encode(`${credentials.username}:${credentials.password}`);
 
-            //Wait for elasticsearch status to go green.
+            // Wait for elasticsearch status to go green.
             await waitForEsStatusGreen(environment.es_url, auth, id);
 
             // Wait until Kibana is available
