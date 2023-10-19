@@ -59,7 +59,6 @@ import { visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
 describe('New Terms rules', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
