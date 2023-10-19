@@ -128,7 +128,7 @@ async function createEnvironment(
       environment.product = response.data.type;
     })
     .catch((error) => {
-      onEarlyExit(error);
+      onEarlyExit(`${error.code}:${error.data}`);
     });
   return environment;
 }
@@ -152,7 +152,7 @@ async function deleteEnvironment(
       console.log(`${runnerId} : Environment ${projectName} was successfully deleted...`);
     })
     .catch((error) => {
-      onEarlyExit(error);
+      onEarlyExit(`${error.code}:${error.data}`);
     });
 }
 
@@ -182,7 +182,7 @@ async function resetCredentials(
         credentials.username = response.data.username;
       })
       .catch((error) => {
-        throw error;
+        throw Error(`${error.code}:${error.data}`);
       });
   });
   return credentials;
@@ -425,7 +425,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               CLOUD_SERVERLESS: true,
             };
 
-            if (process.env.DEBUG) {
+            if (process.env.DEBUG && !process.env.CI) {
               log.info(`
               ----------------------------------------------
               Cypress run ENV for file: ${filePath}:
