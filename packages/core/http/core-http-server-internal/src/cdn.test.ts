@@ -37,4 +37,21 @@ describe('CdnConfig', () => {
     expect(CdnConfig.from({ url: '' }).baseHref).toBeUndefined();
     expect(CdnConfig.from({ url: '' }).host).toBeUndefined();
   });
+
+  it('generates the expected CSP additions', () => {
+    const cdnConfig = CdnConfig.from({ url: 'https://foo.bar' });
+    expect(cdnConfig.getCspConfig()).toEqual({
+      connect_src: ['foo.bar'],
+      font_src: ['foo.bar'],
+      img_src: ['foo.bar'],
+      script_src: ['foo.bar'],
+      style_src: ['foo.bar'],
+      worker_src: ['foo.bar'],
+    });
+  });
+
+  it('generates the expected CSP additions when no URL is provided', () => {
+    const cdnConfig = CdnConfig.from({ url: '' });
+    expect(cdnConfig.getCspConfig()).toEqual({});
+  });
 });

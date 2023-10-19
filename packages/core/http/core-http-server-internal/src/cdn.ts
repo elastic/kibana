@@ -35,14 +35,12 @@ export class CdnConfig {
     const hostname = this.host;
     if (!hostname) return {};
     return {
-      default_src: [hostname],
       font_src: [hostname],
       img_src: [hostname],
       script_src: [hostname],
       style_src: [hostname],
       worker_src: [hostname],
       connect_src: [hostname],
-      frame_src: [hostname],
     };
   }
 
