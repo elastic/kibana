@@ -180,16 +180,16 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
-              },
-              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -625,7 +625,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "transform",
@@ -4442,44 +4442,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-public.DataViewsService.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
-            ],
-            "signature": [
-              "(indices: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataViewsService.getExistingIndices.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "indices",
-                "description": [
-                  "index pattern list"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "index pattern list"
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -5586,6 +5548,46 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublic.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<",
+              "ExistingIndicesResponse",
+              ">"
+            ],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsServicePublic.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "- index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/public/data_views_service_public.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list of index patterns that match indices"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -6583,6 +6585,26 @@
             "tags": [],
             "label": "scriptedFieldsEnabled",
             "description": [],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublicDeps.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
             "path": "src/plugins/data_views/public/data_views_service_public.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8187,16 +8209,16 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
-              },
-              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8632,7 +8654,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "transform",
@@ -11451,44 +11473,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-server.DataViewsService.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
-            ],
-            "signature": [
-              "(indices: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.DataViewsService.getExistingIndices.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "indices",
-                "description": [
-                  "index pattern list"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "index pattern list"
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-server.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -12645,6 +12629,44 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.IndexPatternsFetcher.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.IndexPatternsFetcher.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "- index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list of index patterns that match indices"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -15255,16 +15277,16 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
-              },
-              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15700,7 +15722,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "transform",
@@ -19183,44 +19205,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DataViewsService.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
-            ],
-            "signature": [
-              "(indices: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataViewsService.getExistingIndices.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "indices",
-                "description": [
-                  "index pattern list"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "index pattern list"
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -22350,44 +22334,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DataViewsServicePublicMethods.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
-            ],
-            "signature": [
-              "(indices: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataViewsServicePublicMethods.getExistingIndices.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "indices",
-                "description": [
-                  "- index pattern list"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "index pattern list of index patterns that match indices"
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsServicePublicMethods.getIds",
             "type": "Function",
             "tags": [],
@@ -25243,7 +25189,7 @@
             "section": "def-common.FieldSpec",
             "text": "FieldSpec"
           },
-          "[]>; getExistingIndices: (indices: string[]) => Promise<string[]>; getFieldsForIndexPattern: (indexPattern: ",
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
