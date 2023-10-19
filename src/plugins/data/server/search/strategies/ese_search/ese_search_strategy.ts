@@ -83,7 +83,7 @@ export const enhancedEsSearchStrategyProvider = (
     };
 
     const cancel = async () => {
-      if (id) {
+      if (id && !options.isStored) {
         await cancelAsyncSearch(id, esClient);
       }
     };
