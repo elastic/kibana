@@ -20,8 +20,20 @@ import fs from 'fs';
 import { createFailError } from '@kbn/dev-cli-errors';
 import axios from 'axios';
 import { renderSummaryTable } from './print_run';
-import { isSkipped } from './utils';
+import { isSkipped, parseTestFileConfig, SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import path from 'path';
+import os from 'os';
+
+type ProductType = {
+  product_line: string;
+  product_tier: string;
+};
+
+type CreateEnvironmentRequestBody = {
+  name: string;
+  region_id: string;
+  product_types: ProductType[];
+};
 
 type Environment = {
   name: string;
@@ -36,6 +48,9 @@ type Credentials = {
   username: string;
   password: string;
 };
+
+const DEFAULT_REGION = 'aws-eu-west-1';
+let log: ToolingLog;
 
 /**
  * Retrieve test files using a glob pattern.
@@ -69,13 +84,13 @@ const retrieveIntegrations = (integrationsPaths: string[]) => {
 const encode = (str: string): string => Buffer.from(str, 'binary').toString('base64');
 
 const getApiKeyFromElasticCloudJsonFile = () => {
-  const userHomeDir = require('os').homedir();
+  const userHomeDir = os.homedir();
   try {
     const jsonString = fs.readFileSync(path.join(userHomeDir, '.elastic/cloud.json'), 'utf-8');
     const jsonData = JSON.parse(jsonString);
     return jsonData.api_key.qa;
   } catch (e) {
-    console.log('API KEY could not be found in ');
+    log.info('API KEY could not be found in ');
     return null;
   }
 };
@@ -83,14 +98,16 @@ const getApiKeyFromElasticCloudJsonFile = () => {
 // Poller function that is polling every 20s, forever until function is resolved.
 async function poll<T>(
   fn: () => Promise<T>,
-  retries: number = Infinity,
+  retries: number = 200,
   interval: number = 20000
 ): Promise<T> {
   return Promise.resolve()
     .then(fn)
-    .catch(async function retry(err: any) {
-      if (retries-- > 0)
+    .catch(async function retry(err: Error): Promise<T> {
+      if (retries-- > 0) {
+        retries -= 1;
         return new Promise((resolve) => setTimeout(resolve, interval)).then(fn).catch(retry);
+      }
       throw err;
     });
 }
@@ -101,24 +118,29 @@ async function createEnvironment(
   projectName: string,
   runnerId: string,
   apiKey: string,
+  ftrConfig: SecuritySolutionDescribeBlockFtrConfig,
   onEarlyExit: (msg: string) => void
 ): Promise<Environment> {
-  console.log(`${runnerId}: Creating environment ${projectName}...`);
+  log.info(`${runnerId}: Creating environment ${projectName}...`);
   let environment = {} as Environment;
+  const body = {
+    name: projectName,
+    region_id: DEFAULT_REGION,
+  } as CreateEnvironmentRequestBody;
+
+  const productTypes: ProductType[] = [];
+  ftrConfig?.productTypes?.forEach((t) => {
+    productTypes.push(t as ProductType);
+  });
+  if (productTypes.length > 0) body.product_types = productTypes;
+
   await axios
-    .post(
-      `${baseUrl}/api/v1/serverless/projects/security`,
-      {
-        name: `${projectName}`,
-        region_id: 'aws-eu-west-1',
+    .post(`${baseUrl}/api/v1/serverless/projects/security`, body, {
+      headers: {
+        Authorization: `ApiKey ${apiKey}`,
+        'Content-Type': 'application/json',
       },
-      {
-        headers: {
-          Authorization: `ApiKey ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+    })
     .then((response) => {
       environment.name = response.data.name;
       environment.id = response.data.id;
@@ -149,7 +171,7 @@ async function deleteEnvironment(
       },
     })
     .then((response) => {
-      console.log(`${runnerId} : Environment ${projectName} was successfully deleted...`);
+      log.info(`${runnerId} : Environment ${projectName} was successfully deleted...`);
     })
     .catch((error) => {
       onEarlyExit(`${error.code}:${error.data}`);
@@ -163,11 +185,11 @@ async function resetCredentials(
   runnerId: string,
   apiKey: string
 ): Promise<Credentials> {
-  console.log(`${runnerId} : Reseting credentials`);
+  log.info(`${runnerId} : Reseting credentials`);
   let credentials = {} as Credentials;
 
   await poll(async () => {
-    return await axios
+    return axios
       .post(
         `${baseUrl}/api/v1/serverless/projects/security/${environmentId}/_reset-credentials`,
         {},
@@ -182,7 +204,7 @@ async function resetCredentials(
         credentials.username = response.data.username;
       })
       .catch((error) => {
-        throw Error(`${error.code}:${error.data}`);
+        throw new Error(`${error.code}:${error.data}`);
       });
   });
   return credentials;
@@ -198,15 +220,13 @@ async function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: strin
         },
       })
       .then((response) => {
-        console.log(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
+        log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
       })
       .catch((error) => {
-        if (error.code == 'ENOTFOUND') {
-          console.log(
-            `${runnerId}: The elasticsearch url is not yet reachable. Retrying in 20s...`
-          );
+        if (error.code === 'ENOTFOUND') {
+          log.info(`${runnerId}: The elasticsearch url is not yet reachable. Retrying in 20s...`);
         }
-        throw error;
+        throw new Error(`${runnerId} - ${error.code}:${error.data}`);
       });
   });
 }
@@ -221,16 +241,16 @@ async function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: str
         },
       })
       .then((response) => {
-        if (response.data.status.overall.level != 'available') {
-          console.log(`${runnerId}: Kibana is not available. Retrying in 20s...`);
+        if (response.data.status.overall.level !== 'available') {
+          log.info(`${runnerId}: Kibana is not available. Retrying in 20s...`);
           throw new Error(`${runnerId}: Kibana is not available. Retrying in 20s...`);
         }
       })
       .catch((error) => {
-        if (error.code == 'ENOTFOUND') {
-          console.log(`${runnerId}: The kibana url is not yet reachable. Retrying in 20s...`);
+        if (error.code === 'ENOTFOUND') {
+          log.info(`${runnerId}: The kibana url is not yet reachable. Retrying in 20s...`);
         }
-        throw error;
+        throw new Error(`${runnerId} - ${error.code}:${error.data}`);
       });
   });
 }
@@ -238,7 +258,7 @@ async function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: str
 export const cli = () => {
   run(
     async () => {
-      const log = new ToolingLog({
+      log = new ToolingLog({
         level: 'info',
         writeTo: process.stdout,
       });
@@ -252,6 +272,7 @@ export const cli = () => {
         log.error(
           'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the api key.'
         );
+        // eslint-disable-next-line no-process-exit
         return process.exit(0);
       }
 
@@ -388,6 +409,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             };
             const id = crypto.randomBytes(8).toString('hex');
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
+            const specFileFTRConfig = parseTestFileConfig(filePath);
 
             // Creating environment for the test to run
             const environment = await createEnvironment(
@@ -395,6 +417,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               PROJECT_NAME,
               id,
               API_KEY,
+              specFileFTRConfig,
               onEarlyExit
             );
 
@@ -430,9 +453,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               ----------------------------------------------
               Cypress run ENV for file: ${filePath}:
               ----------------------------------------------
-              
               ${JSON.stringify(cyCustomEnv, null, 2)}
-              
               ----------------------------------------------
               `);
             }
