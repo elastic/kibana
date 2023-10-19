@@ -57,6 +57,7 @@ const CURSOR = ` ᠎  `;
 
 const loadingCursorPlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
+    console.log('node loadingCursorPlugin?', node);
     if ('children' in node) {
       const nodeAsParent = node as Parent;
       nodeAsParent.children.forEach((child) => {
@@ -91,6 +92,7 @@ const loadingCursorPlugin = () => {
 
 const esqlLanguagePlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
+    console.log('node esqlLanguagePlugin?', node);
     if ('children' in node) {
       const nodeAsParent = node as Parent;
       nodeAsParent.children.forEach((child) => {
@@ -109,7 +111,6 @@ const esqlLanguagePlugin = () => {
 };
 
 export function MessageText({ loading, content, onActionClick }: Props) {
-  console.log('content??', content);
   const containerClassName = css`
     overflow-wrap: break-word;
   `;
@@ -183,9 +184,8 @@ export function MessageText({ loading, content, onActionClick }: Props) {
   }, [loading]);
 
   return (
-    <EuiText size="s" className={containerClassName}>
+    <EuiText className={containerClassName}>
       <EuiMarkdownFormat
-        textSize="s"
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
       >
