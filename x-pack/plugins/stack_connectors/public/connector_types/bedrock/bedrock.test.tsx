@@ -26,8 +26,8 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.selectMessage).toBe('Send a request to AWS Bedrock.');
-    expect(actionTypeModel.actionTypeTitle).toBe('AWS Bedrock');
+    expect(actionTypeModel.selectMessage).toBe('Send a request to Amazon Bedrock.');
+    expect(actionTypeModel.actionTypeTitle).toBe('Amazon Bedrock');
   });
 });
 

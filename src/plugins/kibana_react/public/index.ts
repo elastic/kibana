@@ -73,7 +73,7 @@ export { ValidatedDualRange } from './validated_range';
 export type { ToastInput, KibanaReactNotifications } from './notifications';
 export { createNotifications } from './notifications';
 
-export { toMountPoint, MountPointPortal } from './util';
+export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
 
 /** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */

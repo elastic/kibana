@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { Document } from 'langchain/document';
-import { Callbacks } from 'langchain/callbacks';
-import { VectorStore } from 'langchain/vectorstores/base';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-
-import {
-  MappingTypeMapping,
-  QueryDslTextExpansionQuery,
-} from '@elastic/elasticsearch/lib/api/types';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
+import { Callbacks } from 'langchain/callbacks';
+import { Document } from 'langchain/document';
+import { VectorStore } from 'langchain/vectorstores/base';
 import * as uuid from 'uuid';
+
 import { ElasticsearchEmbeddings } from '../embeddings/elasticsearch_embeddings';
+import { FlattenedHit, getFlattenedHits } from './helpers/get_flattened_hits';
+import { getMsearchQueryBody } from './helpers/get_msearch_query_body';
+import { getTermsSearchQuery } from './helpers/get_terms_search_query';
+import { getVectorSearchQuery } from './helpers/get_vector_search_query';
+import type { MsearchResponse } from './helpers/types';
 import {
+  ESQL_RESOURCE,
   KNOWLEDGE_BASE_INDEX_PATTERN,
   KNOWLEDGE_BASE_INGEST_PIPELINE,
 } from '../../../routes/knowledge_base/constants';
+import { getRequiredKbDocsTermsQueryDsl } from './helpers/get_required_kb_docs_terms_query_dsl';
 
 interface CreatePipelineParams {
   id?: string;
@@ -34,6 +37,19 @@ interface CreateIndexParams {
 }
 
 /**
+ * A fallback for the the query `size` that determines how many documents to
+ * return from Elasticsearch when performing a similarity search.
+ *
+ * The size is typically determined by the implementation of LangChain's
+ * `VectorStoreRetriever._getRelevantDocuments` function, so this fallback is
+ * only required when using the `ElasticsearchStore` directly.
+ */
+export const FALLBACK_SIMILARITY_SEARCH_SIZE = 10;
+
+/** The maximum number of hits to return from a `terms` query, via the `size` parameter */
+export const TERMS_QUERY_SIZE = 10000;
+
+/**
  * Basic ElasticsearchStore implementation only leveraging ELSER for storage and retrieval.
  */
 export class ElasticsearchStore extends VectorStore {
@@ -44,17 +60,25 @@ export class ElasticsearchStore extends VectorStore {
   private readonly index: string;
   private readonly logger: Logger;
   private readonly model: string;
+  private readonly kbResource: string;
 
   _vectorstoreType(): string {
     return 'elasticsearch';
   }
 
-  constructor(esClient: ElasticsearchClient, index: string, logger: Logger, model?: string) {
+  constructor(
+    esClient: ElasticsearchClient,
+    index: string,
+    logger: Logger,
+    model?: string,
+    kbResource?: string | undefined
+  ) {
     super(new ElasticsearchEmbeddings(logger), { esClient, index });
     this.esClient = esClient;
     this.index = index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
     this.logger = logger;
     this.model = model ?? '.elser_model_2';
+    this.kbResource = kbResource ?? ESQL_RESOURCE;
   }
 
   /**
@@ -98,7 +122,7 @@ export class ElasticsearchStore extends VectorStore {
         i.index?._id != null && i.index.error == null ? [i.index._id] : []
       );
     } catch (e) {
-      this.logger.error('Error loading data into KB', e);
+      this.logger.error(`Error loading data into KB\n ${e}`);
       return [];
     }
   };
@@ -150,6 +174,9 @@ export class ElasticsearchStore extends VectorStore {
    * @param filter Optional filter to apply to the search
    * @param _callbacks Optional callbacks
    *
+   * Fun facts:
+   * - This function is called by LangChain's `VectorStoreRetriever._getRelevantDocuments`
+   * - The `k` parameter is typically determined by LangChain's `VectorStoreRetriever._getRelevantDocuments`, and has been observed to default to `4` in the wild (see langchain/dist/vectorstores/base.ts)
    * @returns Promise<Document[]> of similar documents
    */
   similaritySearch = async (
@@ -158,42 +185,42 @@ export class ElasticsearchStore extends VectorStore {
     filter?: this['FilterType'] | undefined,
     _callbacks?: Callbacks | undefined
   ): Promise<Document[]> => {
-    const queryBody: QueryDslQueryContainer = {
-      bool: {
-        must: [
-          {
-            text_expansion: {
-              'vector.tokens': {
-                model_id: this.model,
-                model_text: query,
-              },
-            } as unknown as QueryDslTextExpansionQuery,
-          },
-        ],
-        filter,
-      },
-    };
+    // requiredDocs is an array of filters that can be used in a `bool` Elasticsearch DSL query to filter in/out required KB documents:
+    const requiredDocs = getRequiredKbDocsTermsQueryDsl(this.kbResource);
+
+    // The `k` parameter is typically provided by LangChain's `VectorStoreRetriever._getRelevantDocuments`, which calls this function:
+    const vectorSearchQuerySize = k ?? FALLBACK_SIMILARITY_SEARCH_SIZE;
+
+    // build a vector search query:
+    const vectorSearchQuery = getVectorSearchQuery({
+      filter,
+      modelId: this.model,
+      mustNotTerms: requiredDocs,
+      query,
+    });
+
+    // build a (separate) terms search query:
+    const termsSearchQuery = getTermsSearchQuery(requiredDocs);
+
+    // combine the vector search query and the terms search queries into a single multi-search query:
+    const mSearchQueryBody = getMsearchQueryBody({
+      index: this.index,
+      termsSearchQuery,
+      termsSearchQuerySize: TERMS_QUERY_SIZE,
+      vectorSearchQuery,
+      vectorSearchQuerySize,
+    });
 
     try {
-      const result = await this.esClient.search<{
-        text: string;
-        metadata: Record<string, unknown>;
-      }>({
-        index: this.index,
-        size: k,
-        query: queryBody,
+      // execute both queries via a single multi-search request:
+      const result = await this.esClient.msearch<MsearchResponse>(mSearchQueryBody);
+
+      // flatten the results of the combined queries into a single array of hits:
+      const results: FlattenedHit[] = result.responses.flatMap((response) => {
+        const maybeEsqlMsearchResponse: MsearchResponse = response as MsearchResponse;
+
+        return getFlattenedHits(maybeEsqlMsearchResponse);
       });
-
-      const results = result.hits.hits.map(
-        (hit) =>
-          new Document({
-            pageContent: hit?._source?.text ?? '',
-            metadata: hit?._source?.metadata,
-          })
-      );
-
-      this.logger.debug(`Similarity Search Query:\n ${JSON.stringify(queryBody)}`);
-      this.logger.debug(`Similarity Search Results:\n ${JSON.stringify(results)}`);
 
       return results;
     } catch (e) {
@@ -223,6 +250,16 @@ export class ElasticsearchStore extends VectorStore {
   createIndex = async ({ index, pipeline }: CreateIndexParams = {}): Promise<boolean> => {
     const mappings: MappingTypeMapping = {
       properties: {
+        metadata: {
+          properties: {
+            /** the category of knowledge, e.g. `esql` */
+            kbResource: { type: 'keyword' },
+            /** when `true`, return this document in all searches for the `kbResource` */
+            required: { type: 'boolean' },
+            /** often a file path when the document was created via a LangChain `DirectoryLoader`, this metadata describes the origin of the document */
+            source: { type: 'keyword' },
+          },
+        },
         vector: {
           properties: { tokens: { type: 'rank_features' } },
         },
