@@ -43,6 +43,7 @@ export type {
   MetricsUIAggregation,
   SnapshotMetricType,
   TSVBMetricModelCreator,
+  TSVBMetricModel,
 } from './inventory_models/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
