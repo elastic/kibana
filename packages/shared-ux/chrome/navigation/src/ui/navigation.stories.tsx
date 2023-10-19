@@ -213,7 +213,7 @@ const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
         defaultIsCollapsed: false,
         children: [
           {
-            title: 'Group 1',
+            title: 'Block group',
             children: [
               {
                 id: 'item1',
@@ -233,7 +233,7 @@ const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
             ],
           },
           {
-            title: 'Group 2 - accordion',
+            title: 'Accordion group',
             renderAs: 'accordion',
             children: [
               {
@@ -258,24 +258,24 @@ const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
               {
                 id: 'item1',
                 link: 'item1',
-                title: 'Item 1',
+                title: 'Block group',
               },
               {
                 id: 'item2',
                 link: 'item1',
-                title: 'Item 2',
+                title: 'without',
               },
               {
                 id: 'item3',
                 link: 'item1',
-                title: 'Item 3',
+                title: 'title',
               },
             ],
           },
           {
             id: 'group:settings',
             link: 'item1',
-            title: 'Settings as panel opener',
+            title: 'Panel group',
             renderAs: 'panelOpener',
             children: [
               {
@@ -302,18 +302,14 @@ const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
                 ],
               },
               {
+                id: 'group.nestedGroup',
+                link: 'group:settings.tracing',
+                title: 'Group 2',
                 children: [
                   {
-                    id: 'group.nestedGroup',
-                    link: 'group:settings.tracing',
-                    title: 'Group 2',
-                    children: [
-                      {
-                        id: 'item1',
-                        link: 'group:settings.signals',
-                        title: 'Some link title',
-                      },
-                    ],
+                    id: 'item1',
+                    link: 'group:settings.signals',
+                    title: 'Some link title',
                   },
                 ],
               },
@@ -331,7 +327,7 @@ const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
   },
 };
 
-export const GroupsExampleDefinition = (args: NavigationServices) => {
+export const GroupsExamples = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of([...navLinksMock, ...deepLinks]),
@@ -855,7 +851,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                 id: 'root',
                 children: [
                   {
-                    title: 'Should act as item 1',
+                    title: 'Group renders as "item" (1)',
                     link: 'item1',
                     renderAs: 'item',
                     children: [
@@ -871,7 +867,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   },
                   {
                     link: 'group:settings.logs',
-                    title: 'Normal item',
+                    title: 'Item 2',
                   },
                   {
                     link: 'group:settings.logs2',
@@ -895,25 +891,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     ],
                   },
                   {
-                    title: 'Should act as item 2',
-                    renderAs: 'item', // This group renders as a normal item
-                    children: [
-                      {
-                        link: 'group:settings.logs',
-                        title: 'Logs',
-                      },
-                      {
-                        link: 'group:settings.signals',
-                        title: 'Signals',
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                children: [
-                  {
-                    title: 'Another group as Item',
+                    title: 'Group renders as "item" (2)',
                     id: 'group2.renderAsItem',
                     renderAs: 'item',
                     children: [
@@ -969,7 +947,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     children: [
                       {
                         id: 'group2-B',
-                        title: 'Group 2 (render as Item)',
+                        title: 'Group renders as "item" (3)',
                         renderAs: 'item', // This group renders as a normal item
                         children: [
                           {
