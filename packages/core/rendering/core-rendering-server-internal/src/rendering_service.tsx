@@ -213,6 +213,7 @@ export class RenderingService {
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
+          // TODO: Make this load as part of static assets!
           translationsUrl: `${serverBasePath}/translations/${i18n.getLocale()}.json`,
         },
         theme: {
