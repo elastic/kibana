@@ -354,9 +354,19 @@ export class ActionExecutor {
           };
 
           if (result.data instanceof Readable) {
+            let body: string;
+            if (!(validatedParams as { subActionParams: { body: string } }).subActionParams?.body) {
+              const { stream: _, ...rest } = (
+                validatedParams as { subActionParams: { [a: string]: string } }
+              ).subActionParams;
+              body = JSON.stringify(rest);
+            } else {
+              body = (validatedParams as { subActionParams: { body: string } }).subActionParams
+                .body;
+            }
             getTokenCountFromOpenAIStream({
               responseStream: result.data.pipe(new PassThrough()),
-              body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+              body,
             })
               .then(({ total, prompt, completion }) => {
                 event.kibana!.action!.execution!.gen_ai!.usage = {

@@ -8,6 +8,7 @@
 import { get } from 'lodash/fp';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { PassThrough, Readable } from 'stream';
 import { RequestBody } from './langchain/types';
 
 interface Props {
@@ -25,7 +26,7 @@ export const executeAction = async ({
   actions,
   request,
   connectorId,
-}: Props): Promise<StaticResponse> => {
+}: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
@@ -39,5 +40,7 @@ export const executeAction = async ({
       status: 'ok',
     };
   }
-  throw new Error('Unexpected action result');
+  const readable = get('data', actionResult);
+
+  return (readable as Readable).pipe(new PassThrough()) as Readable;
 };

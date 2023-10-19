@@ -44,15 +44,6 @@ export const postActionsConnectorExecuteRoute = (
         // if not langchain, call execute action directly and return the response:
         if (!request.body.assistantLangChain) {
           const result = await executeAction({ actions, request, connectorId });
-
-          return response.ok({
-            body: result,
-          });
-        }
-
-        // if not langchain, call execute action directly and return the response:
-        if (!request.body.assistantLangChain) {
-          const result = await executeAction({ actions, request, connectorId });
           return response.ok({
             body: result,
           });

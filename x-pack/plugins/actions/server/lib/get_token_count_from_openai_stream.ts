@@ -64,6 +64,7 @@ export async function getTokenCountFromOpenAIStream({
   });
 
   try {
+    console.log('finished', responseStream);
     await finished(responseStream);
   } catch {
     // no need to handle this explicitly

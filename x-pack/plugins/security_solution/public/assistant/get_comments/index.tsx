@@ -14,7 +14,7 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
-import { StreamComment } from './stream_obs';
+import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
