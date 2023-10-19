@@ -339,12 +339,33 @@ const enrollHostWithFleet = async ({
   const agent = await waitForHostToEnroll(kbnClient, vmName, 480000, log);
 
   try {
-    const { stdout } = await execa('vagrant', ['ssh', '--', 'sudo elastic-agent status'], {
-      env: {
-        VAGRANT_CWD,
-      },
-    });
-    fs.writeFileSync('agent-status.txt', stdout);
+    let stdout: string;
+    if (process.env.CI) {
+      const { stdout: vagrantSTDOUT } = await execa(
+        'vagrant',
+        ['ssh', '--', 'sudo elastic-agent status'],
+        {
+          env: {
+            VAGRANT_CWD,
+          },
+        }
+      );
+      stdout = vagrantSTDOUT;
+    } else {
+      const { stdout: mpSTDOUT } = await execa('multipass', [
+        'exec',
+        vmName,
+        '--',
+        'sudo',
+        'elastic-agent',
+        'status',
+      ]);
+      stdout = mpSTDOUT;
+    }
+    fs.writeFileSync(
+      '../../../../../../target/kibana-security-solution/cypress/results/agent-status.txt',
+      stdout
+    );
     log.info(stdout);
   } catch (e) {
     log.info(e);
