@@ -149,6 +149,15 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   return indexPattern;
 }
 
+export function canColumnBeDroppedInMetricDimension(
+  columns: TextBasedLayerColumn[] | DatatableColumn[],
+  selectedColumnType?: string
+): boolean {
+  // check if at least one numeric field exists
+  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  return !hasNumberTypeColumns || (hasNumberTypeColumns && selectedColumnType === 'number');
+}
+
 export function canColumnBeUsedBeInMetricDimension(
   columns: TextBasedLayerColumn[] | DatatableColumn[],
   selectedColumnType?: string
