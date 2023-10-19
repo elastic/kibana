@@ -1,5 +1,5 @@
 type: array
-description: Values for custom fields of a case.
+description: Values for custom fields of a case. Any missing optional custom field(keys) in the request will be set to null.
 minItems: 0
 maxItems: 10
 x-technical-preview: true

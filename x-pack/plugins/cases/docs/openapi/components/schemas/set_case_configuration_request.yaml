@@ -32,6 +32,7 @@ properties:
       - syncAlerts
   customFields:
     description: An array containing the custom fields.
+    x-technical-preview: true
     type: array
     minItems: 0
     maxItems: 10
