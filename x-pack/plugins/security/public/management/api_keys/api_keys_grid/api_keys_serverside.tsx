@@ -27,6 +27,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -57,10 +58,10 @@ import { APIKeysAPIClient } from '../api_keys_api_client';
 interface UseAsyncTableResult {
   state: QueryApiKeyResult;
   isLoading: boolean;
-  query: string;
+  query: QueryContainer;
   from: number;
   pageSize: number;
-  setQuery: React.Dispatch<React.SetStateAction<string>>;
+  setQuery: React.Dispatch<React.SetStateAction<QueryContainer>>;
   setFrom: React.Dispatch<React.SetStateAction<number>>;
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
   fetchApiKeys: () => Promise<void>;
@@ -69,7 +70,7 @@ interface UseAsyncTableResult {
 const useAsyncTable = (): UseAsyncTableResult => {
   const [state, setState] = useState<QueryApiKeyResult>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>('');
+  const [query, setQuery] = useState<QueryContainer>({});
   const [from, setFrom] = useState<number>(0);
   const [pageSize, setPageSize] = useState(10);
   const { services } = useKibana<CoreStart>();
@@ -78,7 +79,7 @@ const useAsyncTable = (): UseAsyncTableResult => {
     setIsLoading(true);
 
     const requestBody = {
-      query: query || undefined,
+      query: Object.keys(query).length === 0 ? undefined : query,
       from,
       size: pageSize,
     };
@@ -128,7 +129,6 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
   const {
     state: requestState,
     isLoading,
-    query,
     from,
     setQuery,
     setFrom,
@@ -149,8 +149,14 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
     if (!args.error) {
-      const queryString = EuiSearchBar.Query.toESQueryString(args.query);
-      setQuery(queryString);
+      try {
+        console.log(EuiSearchBar.Query.parse(args.queryText));
+      } catch (e) {
+        console.log(e);
+        throw e;
+      }
+      const queryContainer = EuiSearchBar.Query.toESQuery(args.query);
+      setQuery(queryContainer);
     }
   };
 
@@ -165,7 +171,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
         </SectionLoading>
       );
     }
-    console.log({ state });
+
     return (
       <ApiKeysEmptyPrompt error={state.error}>
         <EuiButton iconType="refresh" onClick={() => fetchApiKeys()}>
@@ -228,7 +234,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
         />
       )}
 
-      {!requestState.apiKeys.length ? (
+      {!requestState.apiKeys?.length ? (
         <ApiKeysEmptyPrompt readOnly={readOnly}>
           <EuiButton
             {...reactRouterNavigate(history, '/create')}
@@ -650,6 +656,10 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         box={{
           placeholder: 'Search...',
           incremental: true,
+          // schema: {
+          //   strict: true,
+
+          // }
         }}
         filters={filters}
         onChange={onSearchChange}
