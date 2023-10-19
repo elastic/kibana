@@ -642,7 +642,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           <>
             <EuiCallOut
               title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
-                defaultMessage: 'Agent Installation Required for Changes',
+                defaultMessage: 'Modifying Integration Details',
               })}
               color="warning"
               iconType="warning"
@@ -650,7 +650,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
               <p>
                 <FormattedMessage
                   id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
-                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts or change where CSPM is deployed (Organization vs Single Account), please install a new CSPM integration."
+                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
                 />
               </p>
             </EuiCallOut>
