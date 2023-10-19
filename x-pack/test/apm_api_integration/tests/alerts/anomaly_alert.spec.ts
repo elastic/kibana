@@ -28,14 +28,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {
-      const start = moment().subtract(1, 'days').toISOString();
-      const end = moment().toISOString();
+      const start = moment().subtract(1, 'days').valueOf();
+      const end = moment().valueOf();
 
       const spikeStart = moment().subtract(15, 'minutes').valueOf();
       const spikeEnd = moment().valueOf();
-
-      const NORMAL_DURATION = 100;
-      const NORMAL_RATE = 1;
 
       let ruleId: string;
 
@@ -46,13 +43,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'a', environment: 'production', agentName: 'java' })
           .instance('a');
 
-        const events = timerange(new Date(start).getTime(), new Date(end).getTime())
+        const events = timerange(start, end)
           .interval('1m')
           .rate(1)
           .generator((timestamp) => {
             const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
-            const count = isInSpike ? 4 : NORMAL_RATE;
-            const duration = isInSpike ? 1000 : NORMAL_DURATION;
+            const count = isInSpike ? 4 : 1;
+            const duration = isInSpike ? 1000 : 100;
             const outcome = isInSpike ? 'failure' : 'success';
 
             return [
