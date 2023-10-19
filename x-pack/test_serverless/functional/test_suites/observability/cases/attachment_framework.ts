@@ -20,7 +20,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const find = getService('find');
 
-  describe('Cases persistable attachments', function () {
+  // failing test https://github.com/elastic/kibana/issues/166592
+  describe.skip('Cases persistable attachments', function () {
     // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
     this.tags(['failsOnMKI']);
     describe('lens visualization', () => {
