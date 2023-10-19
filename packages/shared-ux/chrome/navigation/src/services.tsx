@@ -7,6 +7,7 @@
  */
 
 import React, { FC, useContext, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { NavigationKibanaDependencies, NavigationServices } from '../types';
 import { CloudLinks, getCloudLinks } from './cloud_links';
 
@@ -32,6 +33,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   const { navigateToUrl } = core.application;
 
   const cloudLinks: CloudLinks = useMemo(() => (cloud ? getCloudLinks(cloud) : {}), [cloud]);
+  const isSideNavCollapsed = useObservable(chrome.getIsSideNavCollapsed$(), true);
 
   const value: NavigationServices = {
     basePath,
@@ -42,6 +44,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     onProjectNavigationChange: serverless.setNavigation,
     activeNodes$: serverless.getActiveNavigationNodes$(),
     cloudLinks,
+    isSideNavCollapsed,
   };
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
