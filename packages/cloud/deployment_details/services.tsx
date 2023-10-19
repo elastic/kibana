@@ -12,7 +12,8 @@ export interface DeploymentDetailsContextValue {
   cloudId?: string;
   elasticsearchUrl?: string;
   managementUrl?: string;
-  learnMoreUrl: string;
+  apiKeysLearnMoreUrl: string;
+  cloudIdLearnMoreUrl: string;
   navigateToUrl(url: string): Promise<void>;
 }
 
@@ -64,6 +65,9 @@ export interface DeploymentDetailsKibanaDependencies {
       fleet: {
         apiKeysLearnMore: string;
       };
+      cloud: {
+        beatsAndLogstashConfiguration: string;
+      };
     };
   };
 }
@@ -86,6 +90,7 @@ export const DeploymentDetailsKibanaProvider: FC<DeploymentDetailsKibanaDependen
     docLinks: {
       links: {
         fleet: { apiKeysLearnMore },
+        cloud: { beatsAndLogstashConfiguration },
       },
     },
   } = services;
@@ -99,7 +104,8 @@ export const DeploymentDetailsKibanaProvider: FC<DeploymentDetailsKibanaDependen
       cloudId={isCloudEnabled ? cloudId : undefined}
       elasticsearchUrl={elasticsearchUrl}
       managementUrl={managementUrl}
-      learnMoreUrl={apiKeysLearnMore}
+      apiKeysLearnMoreUrl={apiKeysLearnMore}
+      cloudIdLearnMoreUrl={beatsAndLogstashConfiguration}
       navigateToUrl={navigateToUrl}
     >
       {children}
