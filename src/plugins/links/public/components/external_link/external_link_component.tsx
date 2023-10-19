@@ -22,12 +22,10 @@ import { Link, LinksLayoutType, LINKS_VERTICAL_LAYOUT } from '../../../common/co
 export const ExternalLinkComponent = ({
   link,
   layout,
-  onLoading,
   onRender,
 }: {
   link: Link;
   layout: LinksLayoutType;
-  onLoading: () => void;
   onRender: () => void;
 }) => {
   const [error, setError] = useState<string | undefined>();

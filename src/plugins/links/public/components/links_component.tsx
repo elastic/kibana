@@ -67,7 +67,6 @@ export const LinksComponent = () => {
                 key={currentLink.id}
                 link={currentLink}
                 layout={layout ?? LINKS_VERTICAL_LAYOUT}
-                onLoading={() => setLinkIsLoading(currentLink.id, true)}
                 onRender={() => setLinkIsLoading(currentLink.id, false)}
               />
             ),
