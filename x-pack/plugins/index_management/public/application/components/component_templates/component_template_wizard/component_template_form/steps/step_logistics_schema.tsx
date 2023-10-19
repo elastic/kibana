@@ -65,6 +65,13 @@ export const logisticsFormSchema: FormSchema = {
     }),
     formatters: [toInt],
   },
+  allow_auto_create: {
+    type: FIELD_TYPES.TOGGLE,
+    label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldAllowAutoCreateLabel', {
+      defaultMessage: 'Allow auto create (optional)',
+    }),
+    defaultValue: false,
+  },
   _meta: {
     label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.metaFieldLabel', {
       defaultMessage: '_meta field data (optional)',

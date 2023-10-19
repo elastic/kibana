@@ -16,6 +16,7 @@ export interface ComponentTemplateSerialized {
     mappings?: Mappings;
   };
   version?: number;
+  allow_auto_create?: boolean;
   _meta?: { [key: string]: any };
 }
 

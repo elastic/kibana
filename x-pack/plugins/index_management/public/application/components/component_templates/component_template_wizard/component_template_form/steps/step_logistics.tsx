@@ -157,6 +157,27 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           />
         </FormRow>
 
+        {/* Allow auto create */}
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.allowAutoCreateTitle"
+              defaultMessage="Allow auto create"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.allowAutoCreateDescription"
+              defaultMessage="Indices can be automatically created even if auto-creation of indices is disabled via actions.auto_create_index."
+            />
+          }
+        >
+          <UseField
+            path="allow_auto_create"
+            componentProps={{ 'data-test-subj': 'allowAutoCreateField' }}
+          />
+        </FormRow>
+
         {/* _meta field */}
         <FormRow
           title={
