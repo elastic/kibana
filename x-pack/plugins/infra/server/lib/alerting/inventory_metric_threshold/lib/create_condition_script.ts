@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { Comparator } from '../../../../../common/alerting/metrics';
-import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { convertMetricValue } from './convert_metric_value';
 
 export const createConditionScript = (

@@ -6,8 +6,8 @@
  */
 
 import { identity } from 'lodash';
-import { MetricsUIAggregationRT } from '../../../../common/inventory_models/types';
-import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
+import { MetricsUIAggregationRT } from '@kbn/metrics-data-access-plugin/common';
+import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import {
   MetricsAPIMetric,
