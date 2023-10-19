@@ -41,6 +41,12 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
+    editableIndexSettings: offeringBasedSchema({
+      // on serverless only a limited set of index settings can be edited
+      serverless: schema.oneOf([schema.literal('all'), schema.literal('limited')], {
+        defaultValue: 'all',
+      }),
+    }),
   },
   { defaultValue: undefined }
 );
@@ -51,6 +57,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableIndexActions: true,
     enableLegacyTemplates: true,
     enableIndexStats: true,
+    editableIndexSettings: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],
