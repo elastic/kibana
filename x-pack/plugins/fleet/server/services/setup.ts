@@ -199,6 +199,7 @@ async function createSetupSideEffects(
   }
 
   logger.debug('Migrating legacy data views');
+  await migrateLegacyDataViews({ savedObjectsClient: soClient, logger });
 
   logger.info('Fleet setup completed');
 
@@ -380,7 +381,6 @@ export async function migrateLegacyDataViews({
     const matchingDataView = indexPatternSavedObjects.find(({ id }) => id === existingDataView.id)!;
 
     // If a data view with the given ID already exists, we need to make sure it has the right `title` and `name`.
-    // This is essentially a "lazy migration" as a result of https://github.com/elastic/kibana/issues/120340.
     const shouldUpdateTitle =
       existingDataView.attributes.title !== matchingDataView.attributes.title;
     const shouldUpdateName = existingDataView.attributes.name !== matchingDataView.attributes.name;
