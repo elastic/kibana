@@ -117,22 +117,22 @@ export const runActionTestSuite = ({
 
     await createIndex({
       client,
-      indexName: 'existing_index_with_10k_docs',
-      aliases: ['existing_index_with_10k_docs_alias'],
+      indexName: 'existing_index_with_100k_docs',
+      aliases: ['existing_index_with_100k_docs_alias'],
       esCapabilities,
       mappings: {
         dynamic: true,
         properties: {},
       },
     })();
-    const docs10k = new Array(10000).fill({
+    const docs100k = new Array(100000).fill({
       _source: { title: new Array(1000).fill('a').join(), type: 'large' },
-    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
+    }) as unknown as SavedObjectsRawDoc[]; // 100k "large" saved objects
 
     await bulkOverwriteTransformedDocuments({
       client,
-      index: 'existing_index_with_10k_docs',
-      operations: docs10k.map((doc) => createBulkIndexOperationTuple(doc)),
+      index: 'existing_index_with_100k_docs',
+      operations: docs100k.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
 
@@ -1144,7 +1144,7 @@ export const runActionTestSuite = ({
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       const readyTaskRes = await waitForIndexStatus({
         client,
-        index: 'existing_index_with_10k_docs',
+        index: 'existing_index_with_100k_docs',
         status: 'yellow',
         timeout: '300s',
       })();
@@ -1153,7 +1153,7 @@ export const runActionTestSuite = ({
 
       const res = (await reindex({
         client,
-        sourceIndex: 'existing_index_with_10k_docs',
+        sourceIndex: 'existing_index_with_100k_docs',
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1491,7 +1491,7 @@ export const runActionTestSuite = ({
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_10k_docs',
+        'existing_index_with_100k_docs',
         1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
