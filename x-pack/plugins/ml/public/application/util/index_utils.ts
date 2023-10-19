@@ -6,10 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { Query, Filter } from '@kbn/es-query';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { getToastNotifications, getDataViews } from './dependency_cache';
 
 export async function getDataViewNames() {
@@ -114,4 +113,26 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
  */
 export function isCcsIndexPattern(dataViewIndexPattern: string) {
   return dataViewIndexPattern.includes(':');
+}
+
+export async function findMessageField(
+  dataView: DataView
+): Promise<{ dataView: DataView; field: DataViewField } | null> {
+  const foundFields: Record<string, DataViewField | null> = { message: null, errorMessage: null };
+
+  for (const f of dataView.fields) {
+    if (f.name === 'message' && f.toSpec().esTypes?.includes('text')) {
+      foundFields.message = f;
+    } else if (f.name === 'error.message' && f.toSpec().esTypes?.includes('text')) {
+      foundFields.errorMessage = f;
+    }
+  }
+
+  if (foundFields.message !== null) {
+    return { dataView, field: foundFields.message };
+  } else if (foundFields.errorMessage !== null) {
+    return { dataView, field: foundFields.errorMessage };
+  }
+
+  return null;
 }

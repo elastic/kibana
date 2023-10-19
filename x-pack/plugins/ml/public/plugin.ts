@@ -70,45 +70,45 @@ import type { MlCapabilities } from './shared';
 import { ElasticModels } from './application/services/elastic_models_service';
 
 export interface MlStartDependencies {
-  dataViewEditor: DataViewEditorStart;
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  licensing: LicensingPluginStart;
-  share: SharePluginStart;
-  uiActions: UiActionsStart;
-  spaces?: SpacesPluginStart;
-  embeddable: EmbeddableStart;
-  maps?: MapsStartApi;
-  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
-  dataVisualizer: DataVisualizerPluginStart;
-  fieldFormats: FieldFormatsStart;
-  dashboard: DashboardStart;
-  charts: ChartsPluginStart;
-  lens?: LensPublicStart;
   cases?: CasesUiStart;
-  security: SecurityPluginStart;
+  charts: ChartsPluginStart;
+  contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
+  data: DataPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
+  dataVisualizer: DataVisualizerPluginStart;
+  embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
+  lens?: LensPublicStart;
+  licensing: LicensingPluginStart;
+  maps?: MapsStartApi;
+  presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
-  contentManagement: ContentManagementPublicStart;
-  presentationUtil: PresentationUtilPluginStart;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
+  spaces?: SpacesPluginStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface MlSetupDependencies {
-  maps?: MapsSetupApi;
+  alerting?: AlertingSetup;
+  cases?: CasesUiSetup;
+  dashboard: DashboardSetup;
+  embeddable: EmbeddableSetup;
+  fieldFormats: FieldFormatsSetup;
+  home?: HomePublicPluginSetup;
+  kibanaVersion: string;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
-  licenseManagement?: LicenseManagementUIPluginSetup;
-  home?: HomePublicPluginSetup;
-  embeddable: EmbeddableSetup;
-  uiActions: UiActionsSetup;
-  kibanaVersion: string;
+  maps?: MapsSetupApi;
   share: SharePluginSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
-  alerting?: AlertingSetup;
+  uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
-  fieldFormats: FieldFormatsSetup;
-  dashboard: DashboardSetup;
-  cases?: CasesUiSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -154,31 +154,31 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         return renderApp(
           coreStart,
           {
+            cases: pluginsStart.cases,
             charts: pluginsStart.charts,
+            contentManagement: pluginsStart.contentManagement,
+            dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,
             dataViewEditor: pluginsStart.dataViewEditor,
-            unifiedSearch: pluginsStart.unifiedSearch,
-            dashboard: pluginsStart.dashboard,
-            share: pluginsStart.share,
-            security: pluginsStart.security,
+            dataVisualizer: pluginsStart.dataVisualizer,
+            embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
+            fieldFormats: pluginsStart.fieldFormats,
+            home: pluginsSetup.home,
+            kibanaVersion: this.initializerContext.env.packageInfo.version,
+            lens: pluginsStart.lens,
+            licenseManagement: pluginsSetup.licenseManagement,
             licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
-            licenseManagement: pluginsSetup.licenseManagement,
-            home: pluginsSetup.home,
-            embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             maps: pluginsStart.maps,
-            uiActions: pluginsStart.uiActions,
-            kibanaVersion: this.initializerContext.env.packageInfo.version,
-            triggersActionsUi: pluginsStart.triggersActionsUi,
-            dataVisualizer: pluginsStart.dataVisualizer,
-            usageCollection: pluginsSetup.usageCollection,
-            fieldFormats: pluginsStart.fieldFormats,
-            lens: pluginsStart.lens,
-            cases: pluginsStart.cases,
+            presentationUtil: pluginsStart.presentationUtil,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
-            contentManagement: pluginsStart.contentManagement,
-            presentationUtil: pluginsStart.presentationUtil,
+            security: pluginsStart.security,
+            share: pluginsStart.share,
+            triggersActionsUi: pluginsStart.triggersActionsUi,
+            uiActions: pluginsStart.uiActions,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            usageCollection: pluginsSetup.usageCollection,
           },
           params,
           this.isServerless,

@@ -31,8 +31,11 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { PLUGIN_ID } from '../../../../common/constants/app';
 import { mlJobService } from '../../services/job_service';
-import { getDataViewIdFromName } from '../../util/index_utils';
+import { findMessageField, getDataViewIdFromName } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
@@ -68,13 +71,18 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
   const [discoverUrlError, setDiscoverUrlError] = useState<string | undefined>();
 
+  const [messageField, setMessageField] = useState<{
+    dataView: DataView;
+    field: DataViewField;
+  } | null>(null);
+
   const isCategorizationAnomalyRecord = isCategorizationAnomaly(props.anomaly);
 
   const closePopover = props.onItemClick;
 
   const kibana = useMlKibana();
   const {
-    services: { data, share, application },
+    services: { data, share, application, uiActions },
   } = kibana;
 
   const job = useMemo(() => {
@@ -213,6 +221,22 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
       return dataViewId;
     };
+
+    (async () => {
+      const index = job.datafeed_config.indices[0];
+      const dataView = (await data.dataViews.find(index)).find(
+        (dv) => dv.getIndexPattern() === index
+      );
+
+      if (dataView === undefined) {
+        return;
+      }
+
+      const field = await findMessageField(dataView);
+      if (field !== null) {
+        setMessageField(field);
+      }
+    })();
 
     const generateDiscoverUrl = async () => {
       const interval = props.interval;
@@ -780,6 +804,30 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         </EuiContextMenuItem>
       );
     }
+
+    if (messageField !== null) {
+      items.push(
+        <EuiContextMenuItem
+          key="create_rule"
+          icon="controlsHorizontal"
+          onClick={() => {
+            closePopover();
+            uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec({
+              dataView: messageField.dataView,
+              field: messageField.field,
+              originatingApp: PLUGIN_ID,
+            });
+          }}
+          data-test-subj="mlAnomaliesListRowActionPatternAnalysisButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.patternAnalysisLabel"
+            defaultMessage="Pattern Analysis"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
     return items;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
