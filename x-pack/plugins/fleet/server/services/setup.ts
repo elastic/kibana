@@ -7,10 +7,13 @@
 
 import fs from 'fs/promises';
 
-import { compact } from 'lodash';
+import { compact, isEmpty } from 'lodash';
 import pMap from 'p-map';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
@@ -19,6 +22,7 @@ import type {
   BundledPackage,
   Installation,
 } from '../../common/types';
+import { KibanaSavedObjectType } from '../../common/types';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
@@ -54,6 +58,7 @@ import {
   getPreconfiguredFleetServerHostFromConfig,
 } from './preconfiguration/fleet_server_host';
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
+import { getFleetManagedDataViewDefinitions } from './epm/kibana/index_pattern/install';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -97,7 +102,7 @@ async function createSetupSideEffects(
     getPreconfiguredFleetProxiesFromConfig(appContextService.getConfig())
   );
 
-  logger.debug('Setting up Fleet Sever Hosts');
+  logger.debug('Setting up Fleet Server Hosts');
   await ensurePreconfiguredFleetServerHosts(
     soClient,
     esClient,
@@ -192,6 +197,8 @@ async function createSetupSideEffects(
     logger.info('Encountered non fatal errors during Fleet setup');
     formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));
   }
+
+  logger.debug('Migrating legacy data views');
 
   logger.info('Fleet setup completed');
 
@@ -332,5 +339,71 @@ export async function ensureFleetDirectories() {
     logger.warn(
       `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`
     );
+  }
+}
+
+/**
+ * Find preexisting fleet-managed data views like `logs-*` and `metrics-*` and update their `title` and `name` attributes
+ * as needed based on the newer values. See https://github.com/elastic/kibana/issues/120340.
+ */
+export async function migrateLegacyDataViews({
+  savedObjectsClient,
+  logger,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+}) {
+  const indexPatternSavedObjects = getFleetManagedDataViewDefinitions();
+
+  const existingDataViews = [];
+
+  // TODO - Might be worth refactoring this to a `bulkGet` or `find` instead, though Fleet only manages
+  // two dataviews right now so the gains are currently negligible.
+  for (const dataView of indexPatternSavedObjects) {
+    try {
+      const existingDataView = await savedObjectsClient.get<DataViewSavedObjectAttrs>(
+        KibanaSavedObjectType.indexPattern,
+        dataView.id,
+        {}
+      );
+
+      existingDataViews.push(existingDataView);
+    } catch (error) {
+      // If an existing data view is not found, ignore the erorr
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  for (const existingDataView of existingDataViews) {
+    const matchingDataView = indexPatternSavedObjects.find(({ id }) => id === existingDataView.id)!;
+
+    // If a data view with the given ID already exists, we need to make sure it has the right `title` and `name`.
+    // This is essentially a "lazy migration" as a result of https://github.com/elastic/kibana/issues/120340.
+    const shouldUpdateTitle =
+      existingDataView.attributes.title !== matchingDataView.attributes.title;
+    const shouldUpdateName = existingDataView.attributes.name !== matchingDataView.attributes.name;
+
+    let updateAttributes: Partial<DataViewSavedObjectAttrs> = {};
+
+    if (shouldUpdateTitle) {
+      updateAttributes = { ...updateAttributes, title: matchingDataView.attributes.title };
+    }
+    if (shouldUpdateName) {
+      updateAttributes = { ...updateAttributes, name: matchingDataView.attributes.name };
+    }
+
+    if (!isEmpty(updateAttributes)) {
+      logger.info(
+        `Found outdated data view with id: ${matchingDataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
+      );
+
+      await savedObjectsClient.update(
+        KibanaSavedObjectType.indexPattern,
+        matchingDataView.id,
+        updateAttributes
+      );
+    }
   }
 }

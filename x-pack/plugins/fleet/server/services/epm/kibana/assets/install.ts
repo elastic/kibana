@@ -16,13 +16,10 @@ import type {
   SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
-import { isEmpty, partition } from 'lodash';
+import { partition } from 'lodash';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
-
-import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
@@ -35,7 +32,7 @@ import type {
   PackageSpecTags,
 } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
-import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
+import { indexPatternTypes, getFleetManagedDataViewDefinitions } from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 
@@ -116,13 +113,12 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 }
 
 export async function installKibanaAssets(options: {
-  savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssets, savedObjectsClient, savedObjectsImporter, logger } = options;
+  const { kibanaAssets, savedObjectsImporter, logger } = options;
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
       return [];
@@ -147,11 +143,10 @@ export async function installKibanaAssets(options: {
   // As we use `import` to create our saved objects, we have to install
   // their references (the index patterns) at the same time
   // to prevent a reference error
-  const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
+  const indexPatternSavedObjects = getFleetManagedDataViewDefinitions() as ArchiveAsset[];
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
-    savedObjectsClient,
     savedObjectsImporter,
     kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
   });
@@ -195,7 +190,6 @@ export async function installKibanaAssetsAndReferences({
 
   const importedAssets = await installKibanaAssets({
     logger,
-    savedObjectsClient,
     savedObjectsImporter,
     pkgName,
     kibanaAssets,
@@ -300,13 +294,11 @@ async function retryImportOnConflictError(
 // only exported for testing
 export async function installKibanaSavedObjects({
   savedObjectsImporter,
-  savedObjectsClient,
   kibanaAssets,
   logger,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
-  savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
 }) {
   const toBeSavedObjects = await Promise.all(
@@ -315,19 +307,10 @@ export async function installKibanaSavedObjects({
 
   // Index patterns (now called "data views") have their own import logic, so separate by type here.
   // We have to use a type assertion because `partition` doesn't support multi-typed arrays via multiple generics.
-  const [_indexPatternSavedObjects, nonIndexPatternSavedObjects] = partition<any>(
+  const [indexPatternSavedObjects, nonIndexPatternSavedObjects] = partition<any>(
     toBeSavedObjects,
     ({ type }) => type === KibanaSavedObjectType.indexPattern
   );
-
-  const indexPatternSavedObjects = _indexPatternSavedObjects;
-
-  await handleIndexPatternImport({
-    indexPatternSavedObjects,
-    savedObjectsClient,
-    savedObjectsImporter,
-    logger,
-  });
 
   let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
@@ -339,16 +322,49 @@ export async function installKibanaSavedObjects({
       errors: importErrors = [],
       success,
     } = await retryImportOnConflictError(async () => {
+      // Create index pattern saved objects with `overwrite: false` as we can't blow
+      // away users' scripted fields or runtime fields.
+      const indexPatternResults = await savedObjectsImporter.import({
+        overwrite: false,
+        readStream: createListStream(indexPatternSavedObjects),
+        createNewCopies: false,
+        refresh: false,
+        managed: true,
+      });
+
       // Create non-index-pattern saved objects with `overwrite: true`.
       // These imports can also be retried by the wrapping `retryImportOnConflictError` helper, while
       // index pattern creation/update won't be retried on a conflict error.
-      return savedObjectsImporter.import({
+      const nonIndexPatternResults = await savedObjectsImporter.import({
         overwrite: true,
         readStream: createListStream(nonIndexPatternSavedObjects),
         createNewCopies: false,
         refresh: false,
         managed: true,
       });
+
+      const successResults = [
+        ...(indexPatternResults.successResults ?? []),
+        ...(nonIndexPatternResults.successResults ?? []),
+      ];
+
+      const errors = [
+        ...(indexPatternResults.errors ?? []),
+        ...(nonIndexPatternResults.errors ?? []),
+      ];
+
+      const importSuccess = indexPatternResults.success && nonIndexPatternResults.success;
+
+      const warnings = [...indexPatternResults.warnings, ...nonIndexPatternResults.warnings];
+
+      // Combine the results of the separate import processes and generate a single overall results object to return
+      return {
+        successResults,
+        successCount: successResults.length,
+        errors,
+        success: importSuccess,
+        warnings,
+      };
     });
 
     if (success) {
@@ -429,84 +445,4 @@ export function toAssetReference({ id, type }: SavedObject) {
   const reference: AssetReference = { id, type: type as KibanaSavedObjectType };
 
   return reference;
-}
-
-export async function handleIndexPatternImport({
-  indexPatternSavedObjects,
-  savedObjectsClient,
-  savedObjectsImporter,
-  logger,
-}: {
-  indexPatternSavedObjects: ReturnType<typeof getIndexPatternSavedObjects>;
-  savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: SavedObjectsImporterContract;
-  logger: Logger;
-}) {
-  // We want to figure out which data views being created already exist and which ones are brand new
-  const newDataViews = [];
-  const existingDataViews = [];
-
-  // TODO - Might be worth refactoring this to a `bulkGet` or `find` instead, though Fleet only manages
-  // two dataviews right now so the gains are currently negligible.
-  for (const dataView of indexPatternSavedObjects) {
-    try {
-      const existingDataView = await savedObjectsClient.get<DataViewSavedObjectAttrs>(
-        KibanaSavedObjectType.indexPattern,
-        dataView.id,
-        {}
-      );
-
-      existingDataViews.push(existingDataView);
-    } catch (error) {
-      // If an existing data view is not found, ignore the error and create a new data view
-      // Otherwise, re-throw the error
-      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        throw error;
-      }
-
-      newDataViews.push(dataView);
-    }
-  }
-
-  for (const existingDataView of existingDataViews) {
-    const matchingDataView = indexPatternSavedObjects.find(({ id }) => id === existingDataView.id)!;
-
-    // If a data view with the given ID already exists, we need to make sure it has the right `title` and `name`.
-    // This is essentially a "lazy migration" as a result of https://github.com/elastic/kibana/issues/120340.
-    const shouldUpdateTitle =
-      existingDataView.attributes.title !== matchingDataView.attributes.title;
-    const shouldUpdateName = existingDataView.attributes.name !== matchingDataView.attributes.name;
-
-    let updateAttributes: Partial<DataViewSavedObjectAttrs> = {};
-
-    if (shouldUpdateTitle) {
-      updateAttributes = { ...updateAttributes, title: matchingDataView.attributes.title };
-    }
-    if (shouldUpdateName) {
-      updateAttributes = { ...updateAttributes, name: matchingDataView.attributes.name };
-    }
-
-    if (!isEmpty(updateAttributes)) {
-      logger.info(
-        `Found outdated data view with id: ${matchingDataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
-      );
-
-      await savedObjectsClient.update(
-        KibanaSavedObjectType.indexPattern,
-        matchingDataView.id,
-        updateAttributes
-      );
-    }
-  }
-
-  // New data views can just be imported via the saved object importer.
-  // However, we need to make sure we pass `overwrite: false` to ensure we don't overwrite
-  // users' runtime fields or scripted fields.
-  await savedObjectsImporter.import({
-    overwrite: false,
-    readStream: createListStream(newDataViews),
-    createNewCopies: false,
-    refresh: false,
-    managed: true,
-  });
 }

@@ -6,7 +6,12 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
@@ -15,7 +20,7 @@ import { ensurePreconfiguredPackagesAndPolicies } from '.';
 import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
-import { setupFleet } from './setup';
+import { migrateLegacyDataViews, setupFleet } from './setup';
 
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
@@ -132,5 +137,68 @@ describe('setupFleet', () => {
         },
       ],
     });
+  });
+});
+
+describe('migrateLegacyDataViews', () => {
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockLogger: MockedLogger;
+
+  beforeEach(() => {
+    mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockLogger = loggingSystemMock.createLogger();
+  });
+
+  it('finds and updates existing data views to use new name/title values', async () => {
+    mockSavedObjectsClient.get.mockImplementation((type, id) => {
+      if (type !== 'index-pattern') {
+        throw new Error(`savedObjectsClient.get called with unexpected type ${type}`);
+      }
+
+      if (id === 'logs-*') {
+        return Promise.resolve({
+          id: 'logs-*',
+          type: 'index-pattern',
+          attributes: {
+            title: 'logs-*',
+            timeFieldName: '@timestamp',
+            allowNoIndex: true,
+          },
+          references: [],
+        });
+      } else if (id === 'metrics-*') {
+        return Promise.resolve({
+          id: 'metrics-*',
+          type: 'index-pattern',
+          attributes: {
+            title: 'metrics-*',
+            timeFieldName: '@timestamp',
+            allowNoIndex: true,
+          },
+          references: [],
+        });
+      }
+
+      return Promise.reject(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', id)
+      );
+    });
+
+    await migrateLegacyDataViews({
+      savedObjectsClient: mockSavedObjectsClient,
+      logger: mockLogger,
+    });
+
+    expect(mockSavedObjectsClient.update).toHaveBeenCalledTimes(2);
+    expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+      'index-pattern',
+      'logs-*',
+      expect.objectContaining({ title: 'logs-*,*:logs-*', name: 'Logs' })
+    );
+    expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+      'index-pattern',
+      'metrics-*',
+      expect.objectContaining({ title: 'metrics-*,*:metrics-*', name: 'Metrics' })
+    );
   });
 });

@@ -14,7 +14,7 @@ const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
 export const indexPatternTypes = Object.values(dataTypes);
 
-export function getIndexPatternSavedObjects() {
+export function getFleetManagedDataViewDefinitions() {
   return Object.entries(dataTypes).map(([name, indexPatternType]) => ({
     // Add an additional CCR compatible index pattern to the end of each pattern
     // e.g. `logs-*,*:logs-*`
