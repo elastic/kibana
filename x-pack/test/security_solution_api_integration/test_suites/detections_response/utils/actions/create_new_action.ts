@@ -22,6 +22,7 @@ export const createNewAction = async (
   const response = await supertest
     .post('/api/actions/action')
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
     .send(getWebHookAction());
   if (response.status !== 200) {
     log.error(
