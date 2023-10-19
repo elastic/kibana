@@ -9,20 +9,20 @@ import { BehaviorSubject, combineLatest, type Observable, Subscription } from 'r
 import { map, startWith, switchMap } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
-  TimefilterContract,
   isRunningResponse,
+  TimefilterContract,
 } from '@kbn/data-plugin/public';
 import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common';
 import {
-  AlertConsumers,
-  ALERT_RULE_TYPE_ID,
-  ALERT_UUID,
-  ALERT_TIME_RANGE,
   ALERT_RULE_NAME,
+  ALERT_RULE_TYPE_ID,
   ALERT_STATUS,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { getSeverityColor } from '@kbn/ml-anomaly-utils';
@@ -47,6 +47,8 @@ export interface AnomalyDetectionAlert {
   alertStatus: string;
 }
 
+export type AlertsQuery = Exclude<RuleRegistrySearchRequest['query'], undefined>;
+
 export class AnomalyDetectionAlertsStateService extends StateService {
   private readonly _aadAlerts$ = new BehaviorSubject<AnomalyDetectionAlert[]>([]);
 
@@ -56,7 +58,6 @@ export class AnomalyDetectionAlertsStateService extends StateService {
     private readonly timefilter: TimefilterContract
   ) {
     super();
-    this._init();
 
     this.selectedAlerts$ = combineLatest([
       this._aadAlerts$,
@@ -72,10 +73,53 @@ export class AnomalyDetectionAlertsStateService extends StateService {
         );
       })
     );
+
+    const timeBounds$ = this.timefilter.getTimeUpdate$().pipe(
+      startWith(null),
+      map(() => this.timefilter.getBounds())
+    );
+
+    this.alertsQuery$ = combineLatest([
+      this._anomalyTimelineStateServices.getSwimLaneJobs$(),
+      timeBounds$,
+    ]).pipe(
+      // Create a result query from the input
+      map(([selectedJobs, timeBounds]) => {
+        return {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [ALERT_RULE_TYPE_ID]: ML_ALERT_TYPES.ANOMALY_DETECTION,
+                },
+              },
+              {
+                range: {
+                  [ALERT_ANOMALY_TIMESTAMP]: {
+                    gte: timeBounds.min?.valueOf(),
+                    lte: timeBounds.max?.valueOf(),
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                terms: {
+                  [ALERT_ANOMALY_DETECTION_JOB_ID]: selectedJobs.map((job) => job.id),
+                },
+              },
+            ],
+          },
+        } as AlertsQuery;
+      })
+    );
+
+    this._init();
   }
 
   public readonly anomalyDetectionAlerts$: Observable<AnomalyDetectionAlert[]> =
     this._aadAlerts$.asObservable();
+
+  public readonly alertsQuery$: Observable<AlertsQuery>;
 
   public readonly selectedAlerts$: Observable<AnomalyDetectionAlert[] | null>;
 
@@ -98,41 +142,9 @@ export class AnomalyDetectionAlertsStateService extends StateService {
   protected _initSubscriptions(): Subscription {
     const subscription = new Subscription();
 
-    const timeBounds$ = this.timefilter.getTimeUpdate$().pipe(
-      startWith(null),
-      map(() => this.timefilter.getBounds())
-    );
-
     subscription.add(
-      combineLatest([this._anomalyTimelineStateServices.getSwimLaneJobs$(), timeBounds$])
+      this.alertsQuery$
         .pipe(
-          // Create a result query from the input
-          map(([selectedJobs, timeBounds]) => {
-            return {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      [ALERT_RULE_TYPE_ID]: ML_ALERT_TYPES.ANOMALY_DETECTION,
-                    },
-                  },
-                  {
-                    range: {
-                      [ALERT_ANOMALY_TIMESTAMP]: {
-                        gte: timeBounds.min?.valueOf(),
-                        lte: timeBounds.max?.valueOf(),
-                      },
-                    },
-                  },
-                  {
-                    terms: {
-                      [ALERT_ANOMALY_DETECTION_JOB_ID]: selectedJobs.map((job) => job.id),
-                    },
-                  },
-                ],
-              },
-            } as RuleRegistrySearchRequest['query'];
-          }),
           switchMap((query) => {
             return this.data.search.search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
               {

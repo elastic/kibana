@@ -42,13 +42,14 @@ import {
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import {
   getMlSharedServices,
   MlSharedServices,
@@ -81,7 +82,7 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   lens?: LensPublicStart;
@@ -244,7 +245,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               mlCapabilities.canUseMlAlerts &&
               mlCapabilities.canGetJobs
             ) {
-              registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+              registerMlAlerts(
+                pluginsSetup.triggersActionsUi,
+                core.getStartServices,
+                pluginsSetup.alerting
+              );
             }
 
             if (pluginsSetup.maps) {

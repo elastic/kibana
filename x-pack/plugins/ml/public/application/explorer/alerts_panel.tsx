@@ -7,80 +7,49 @@
 
 import React, { type FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiNotificationBadge,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ML_ALERTS_CONFIG_ID } from '../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
 import { CollapsiblePanel } from '../components/collapsible_panel';
-import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
-import { useFieldFormatter } from '../contexts/kibana';
+import { useFieldFormatter, useMlKibana } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 
 export const AlertsPanel: FC = () => {
+  const {
+    services: { triggersActionsUi },
+  } = useMlKibana();
+
   const [isOpen, setIsOpen] = useState(true);
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
-  const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);
 
   const { anomalyTimelineStateService, anomalyDetectionAlertsStateService } =
     useAnomalyExplorerContext();
 
   const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$);
-  const selectedAlertsData = useObservable(anomalyDetectionAlertsStateService.selectedAlerts$);
   const countByStatus = useObservable(anomalyDetectionAlertsStateService.countByStatus$);
+  const alertsQuery = useObservable(anomalyDetectionAlertsStateService.alertsQuery$, {});
 
   const annotationXDomain = useObservable(anomalyTimelineStateService.timeDomain$);
 
-  const swimlaneContainerWidth = useObservable(
-    anomalyTimelineStateService.getContainerWidth$(),
-    anomalyTimelineStateService.getContainerWidth()
-  );
-
-  const columns: Array<EuiBasicTableColumn<AnomalyDetectionAlert>> = [
-    {
-      field: 'ruleName',
-      name: 'Rule name',
-      sortable: true,
-      truncateText: false,
-    },
-    {
-      field: 'jobId',
-      name: 'Job ID',
-      sortable: true,
-      truncateText: false,
-    },
-    {
-      field: 'anomalyTimestamp',
-      name: 'Anomaly time',
-      sortable: true,
-      truncateText: false,
-      render: (value: number) => dateFormatter(value),
-    },
-    {
-      field: 'timestamp',
-      name: 'Triggered at',
-      sortable: true,
-      truncateText: false,
-      render: (value: number) => dateFormatter(value),
-    },
-    {
-      name: 'Duration',
-      truncateText: false,
-      render: (value: AnomalyDetectionAlert) =>
-        durationFormatter(value.end_timestamp - value.timestamp),
-    },
-  ];
+  const alertStateProps = {
+    alertsTableConfigurationRegistry: triggersActionsUi!.alertsTableConfigurationRegistry,
+    configurationId: ML_ALERTS_CONFIG_ID,
+    id: `ml-details-alerts`,
+    featureIds: [AlertConsumers.ML],
+    query: alertsQuery,
+    showExpandToDetails: true,
+  };
+  const alertsStateTable = triggersActionsUi!.getAlertsStateTable(alertStateProps);
 
   const yValueMap: Record<string, number> = {};
   const chartData = alertsData
     ?.map((alert, i) => {
       if (!yValueMap.hasOwnProperty(alert.ruleName)) {
-        yValueMap[alert.ruleName] = Math.max(...Object.values(yValueMap), 0) + 1;
+        yValueMap[alert.ruleName] = Math.max(...Object.values(yValueMap), -1) + 1;
       }
       const yV = yValueMap[alert.ruleName];
       return [
@@ -111,8 +80,14 @@ export const AlertsPanel: FC = () => {
           );
         })}
       >
-        <div style={{ height: '60px', width: '100%', paddingLeft: `${Y_AXIS_LABEL_WIDTH}px` }}>
-          <Chart title={''} description={''}>
+        <div
+          style={{
+            height: `${Object.keys(yValueMap).length * 40}px`,
+            width: '100%',
+            paddingLeft: `${Y_AXIS_LABEL_WIDTH}px`,
+          }}
+        >
+          <Chart>
             <Settings xDomain={annotationXDomain!} />
             <LineSeries
               id={'test'}
@@ -122,10 +97,12 @@ export const AlertsPanel: FC = () => {
               yAccessors={[1]}
               splitSeriesAccessors={[2]}
               data={chartData!}
+              y0AccessorFormat={(d) => '-'}
             />
             <Axis
               id="x"
               position={Position.Bottom}
+              tickFormat={(v) => dateFormatter(v)}
               style={{
                 tickLine: { size: 0.0001, padding: 4 },
                 tickLabel: {
@@ -139,12 +116,11 @@ export const AlertsPanel: FC = () => {
                 visible: true,
               }}
             />
+            <Axis id="left" position={Position.Left} tickFormat={(d) => ``} />
           </Chart>
         </div>
 
-        {selectedAlertsData && selectedAlertsData.length > 0 ? (
-          <EuiInMemoryTable columns={columns} items={selectedAlertsData} />
-        ) : null}
+        {alertsStateTable}
       </CollapsiblePanel>
       <EuiSpacer size="m" />
     </>
