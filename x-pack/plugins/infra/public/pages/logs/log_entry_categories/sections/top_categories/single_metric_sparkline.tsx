@@ -12,6 +12,7 @@ import {
   EUI_SPARKLINE_THEME_PARTIAL,
   EUI_CHARTS_THEME_DARK,
 } from '@elastic/eui/dist/eui_charts_theme';
+import { i18n } from '@kbn/i18n';
 import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';
 import { TimeRange } from '../../../../../../common/time';
@@ -55,7 +56,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   return (
     <Chart size={sparklineSize}>
       <Tooltip type={TooltipType.None} />
-      <Settings showLegend={false} theme={theme} xDomain={xDomain} />
+      <Settings showLegend={false} theme={theme} xDomain={xDomain} locale={i18n.getLocale()} />
       <AreaSeries
         id="metric"
         data={metric}

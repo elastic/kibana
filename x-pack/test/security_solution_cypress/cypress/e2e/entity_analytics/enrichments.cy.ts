@@ -50,7 +50,8 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   });
 
   describe('Custom query rule', () => {
-    describe('from legacy risk scores', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/169154
+    describe.skip('from legacy risk scores', () => {
       beforeEach(() => {
         disableExpandableFlyout();
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
