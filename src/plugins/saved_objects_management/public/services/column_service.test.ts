@@ -7,6 +7,7 @@
  */
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { CopyToSpaceSavedObjectsManagementAction, ShareToSpaceSavedObjectsManagementAction } from './actions';
 import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,
@@ -58,5 +59,16 @@ describe('SavedObjectsManagementColumnRegistry', () => {
         `"Saved Objects Management Column with id 'my-column' already exists"`
       );
     });
+
+    it('does not register saved object actions when SpacesApi.hasOnlyDefaultSpace is true', () => {
+      const column = createColumn('foo');
+      setup.register(column);
+      const start = service.start(spacesPluginMock.createStartContract(true));
+      expect(start.getAll()).toEqual(expect.not.arrayContaining(
+        [
+          expect.any(ShareToSpaceSavedObjectsManagementColumn),
+        ])
+      );
+    })
   });
 });
