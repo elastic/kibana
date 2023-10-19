@@ -21,7 +21,6 @@ import {
   PreconfiguredFleetProxiesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
-import { appContextService } from './services';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');

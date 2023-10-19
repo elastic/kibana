@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { appContextService } from '../server/services';
-
 export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 /**
