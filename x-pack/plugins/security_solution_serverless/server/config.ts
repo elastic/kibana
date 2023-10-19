@@ -8,13 +8,12 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { SecuritySolutionPluginSetup } from '@kbn/security-solution-plugin/server/plugin_contract';
-import { developerConfigSchema, productTypes } from '../common/config';
+import { productTypes } from '../common/config';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  developer: developerConfigSchema,
   productTypes,
   /**
    * For internal use. A list of string values (comma delimited) that will enable experimental
@@ -38,7 +37,6 @@ export const config: PluginConfigDescriptor<ServerlessSecuritySchema> = {
   exposeToBrowser: {
     enableExperimental: true,
     productTypes: true,
-    developer: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
