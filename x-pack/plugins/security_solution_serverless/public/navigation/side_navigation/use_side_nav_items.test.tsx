@@ -104,7 +104,6 @@ describe('useSideNavItems', () => {
         position: 'bottom',
         onClick: expect.any(Function),
         iconType: 'launch',
-        appendSeparator: true,
       },
     ]);
   });
@@ -129,7 +128,7 @@ describe('useSideNavItems', () => {
         label: 'Users & Roles',
         openInNewTab: true,
         iconType: 'someicon',
-        position: 'top',
+        position: 'bottom',
       },
     ]);
   });

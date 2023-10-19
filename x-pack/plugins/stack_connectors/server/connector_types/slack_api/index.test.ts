@@ -32,6 +32,10 @@ const requestMock = utils.request as jest.Mock;
 
 const services: Services = actionsMock.createServices();
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const headers = {
+  Authorization: 'Bearer some token',
+  'Content-type': 'application/json; charset=UTF-8',
+};
 
 let connectorType: SlackApiConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
@@ -266,9 +270,10 @@ describe('execute', () => {
     expect(requestMock).toHaveBeenCalledWith({
       axios,
       configurationUtilities,
+      headers,
       logger: mockedLogger,
       method: 'post',
-      url: 'chat.postMessage',
+      url: 'https://slack.com/api/chat.postMessage',
       data: { channel: 'general', text: 'some text' },
     });
 
@@ -317,9 +322,10 @@ describe('execute', () => {
     expect(requestMock).toHaveBeenCalledWith({
       axios,
       configurationUtilities,
+      headers,
       logger: mockedLogger,
       method: 'get',
-      url: 'conversations.info?channel=ZXCVBNM567',
+      url: 'https://slack.com/api/conversations.info?channel=ZXCVBNM567',
     });
 
     expect(response).toEqual({
