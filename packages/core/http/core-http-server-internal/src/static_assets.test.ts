@@ -9,7 +9,6 @@
 import { StaticAssets } from './static_assets';
 import { BasePath } from './base_path_service';
 import { CdnConfig } from './cdn';
-import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 describe('StaticAssets', () => {
   let basePath: BasePath;
@@ -22,12 +21,6 @@ describe('StaticAssets', () => {
   });
   it('provides fallsback to server base path', () => {
     expect(staticAssets.getHrefBase()).toEqual('/test');
-  });
-
-  it('can be scoped with Kibana request', () => {
-    const req = mockRouter.createKibanaRequest();
-    basePath.set(req, '/my-space');
-    expect(staticAssets.getHrefBase(req)).toEqual('/test/my-space');
   });
 
   it('provides the correct HREF given a CDN is configured', () => {

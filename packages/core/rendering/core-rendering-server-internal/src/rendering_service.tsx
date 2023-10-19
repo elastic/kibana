@@ -114,7 +114,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
     };
     const buildNum = env.packageInfo.buildNum;
-    const staticAssetsHrefBase = http.staticAssets.getHrefBase(request);
+    const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 

@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server/src/router';
 import type { BasePath } from './base_path_service';
 import { CdnConfig } from './cdn';
 
 export interface IStaticAssets {
-  getHrefBase(request?: KibanaRequest): string;
+  getHrefBase(): string;
 }
 
 export class StaticAssets implements IStaticAssets {
@@ -20,13 +19,9 @@ export class StaticAssets implements IStaticAssets {
    * Returns a href (hypertext reference) intended to be used as the base for constructing
    * other hrefs to static assets.
    */
-  getHrefBase(request?: KibanaRequest): string {
+  getHrefBase(): string {
     if (this.cdnConfig.baseHref) {
       return this.cdnConfig.baseHref;
-    }
-    // TODO: not sure if this is necessary for static asset HREFs.
-    if (request) {
-      return this.basePath.get(request);
     }
     return this.basePath.serverBasePath;
   }
