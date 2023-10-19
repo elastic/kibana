@@ -36,6 +36,7 @@ export const resolveRuleRoute = (
         // without fixing all of other solution types
         const rule = (await rulesClient.resolve({
           id,
+          includeSnoozeData: true,
         })) as ResolvedRule<RuleParamsV1>;
         const response: ResolveRuleResponseV1<RuleParamsV1> = {
           body: transformResolveResponseV1<RuleParamsV1>(rule),
