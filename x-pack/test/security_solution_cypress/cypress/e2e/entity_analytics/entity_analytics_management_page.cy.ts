@@ -134,7 +134,7 @@ describe(
         // init
         riskEngineStatusChange();
 
-        cy.get(RISK_SCORE_ERROR_PANEL).contains('Sorry, there was an error');
+        cy.get(RISK_SCORE_ERROR_PANEL).contains('There was an error');
       });
 
       it('should update if there legacy risk score installed', () => {
