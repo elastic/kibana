@@ -32,7 +32,7 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe.only('dashboard snapshots', function describeIndexTests() {
+  describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
