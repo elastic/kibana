@@ -14,18 +14,22 @@ import {
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
 
-const apiPath = API_URLS.DYNAMIC_SETTINGS;
-
 interface SaveApiRequest {
   settings: DynamicSettings;
 }
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
-  return await apiService.get(apiPath, undefined, DynamicSettingsCodec);
+  return await apiService.get(
+    API_URLS.DYNAMIC_SETTINGS,
+    { version: '2023-10-31' },
+    DynamicSettingsCodec
+  );
 };
 
 export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
-  return await apiService.put(apiPath, settings, DynamicSettingsSaveCodec);
+  return await apiService.put(API_URLS.DYNAMIC_SETTINGS, settings, DynamicSettingsSaveCodec, {
+    version: '2023-10-31',
+  });
 };

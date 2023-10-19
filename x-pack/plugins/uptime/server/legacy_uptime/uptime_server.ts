@@ -7,9 +7,15 @@
 
 import { Logger } from '@kbn/core/server';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { DynamicSettingsSchema } from './routes/dynamic_settings';
 import { UptimeRouter } from '../types';
 import { uptimeRequests } from './lib/requests';
-import { createRouteWithAuth, legacyUptimeRestApiRoutes, uptimeRouteWrapper } from './routes';
+import {
+  createRouteWithAuth,
+  legacyUptimePublicRestApiRoutes,
+  legacyUptimeRestApiRoutes,
+  uptimeRouteWrapper,
+} from './routes';
 import { UptimeServerSetup, UptimeCorePluginsSetup } from './lib/adapters';
 
 import { statusCheckAlertFactory } from './lib/alerts/status_check';
@@ -56,6 +62,70 @@ export const initUptimeServer = (
         break;
       case 'DELETE':
         router.delete(routeDefinition, handler);
+        break;
+      default:
+        throw new Error(`Handler for method ${method} is not defined`);
+    }
+  });
+
+  legacyUptimePublicRestApiRoutes.forEach((route) => {
+    const { method, options, handler, validate, path } = uptimeRouteWrapper(
+      createRouteWithAuth(libs, route),
+      server
+    );
+
+    const routeDefinition = {
+      path,
+      validate,
+      options,
+    };
+
+    switch (method) {
+      case 'GET':
+        router.versioned
+          .get({
+            access: 'public',
+            path: routeDefinition.path,
+          })
+          .addVersion(
+            {
+              version: '2023-10-31',
+              validate: {
+                request: {
+                  body: validate ? validate?.body : undefined,
+                },
+                response: {
+                  200: {
+                    body: DynamicSettingsSchema,
+                  },
+                },
+              },
+            },
+            handler
+          );
+        break;
+      case 'PUT':
+        router.versioned
+          .put({
+            access: 'public',
+            path: routeDefinition.path,
+          })
+          .addVersion(
+            {
+              version: '2023-10-31',
+              validate: {
+                request: {
+                  body: validate ? validate?.body : undefined,
+                },
+                response: {
+                  200: {
+                    body: DynamicSettingsSchema,
+                  },
+                },
+              },
+            },
+            handler
+          );
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);
