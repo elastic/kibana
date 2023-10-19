@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DataView, DataViewsContract, getTime } from '@kbn/data-plugin/common';
 import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
@@ -22,8 +21,9 @@ export interface FetchEsqlQueryOpts {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
-    dataViews: DataViewsContract;
   };
+  dateStart: string;
+  dateEnd: string;
 }
 
 export async function fetchEsqlQuery({
@@ -33,14 +33,12 @@ export async function fetchEsqlQuery({
   services,
   spacePrefix,
   publicBaseUrl,
+  dateStart,
+  dateEnd,
 }: FetchEsqlQueryOpts) {
-  const { logger, scopedClusterClient, dataViews } = services;
+  const { logger, scopedClusterClient } = services;
   const esClient = scopedClusterClient.asCurrentUser;
-  const dataView = await dataViews.create({
-    timeFieldName: params.timeField,
-  });
-
-  const { query, dateStart, dateEnd } = getEsqlQuery(dataView, params, alertLimit);
+  const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
   logger.debug(`ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
@@ -66,23 +64,15 @@ export async function fetchEsqlQuery({
       },
       resultLimit: alertLimit,
     }),
-    dateStart,
-    dateEnd,
   };
 }
 
 export const getEsqlQuery = (
-  dataView: DataView,
   params: OnlyEsqlQueryRuleParams,
-  alertLimit: number | undefined
+  alertLimit: number | undefined,
+  dateStart: string,
+  dateEnd: string
 ) => {
-  const timeRange = {
-    from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
-    to: 'now',
-  };
-  const timerangeFilter = getTime(dataView, timeRange);
-  const dateStart = timerangeFilter?.query.range[params.timeField].gte;
-  const dateEnd = timerangeFilter?.query.range[params.timeField].lte;
   const rangeFilter: unknown[] = [
     {
       range: {
@@ -103,9 +93,5 @@ export const getEsqlQuery = (
       },
     },
   };
-  return {
-    query,
-    dateStart,
-    dateEnd,
-  };
+  return query;
 };
