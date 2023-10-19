@@ -90,6 +90,7 @@ export interface InfraClientSetupDeps {
   lens: LensPublicStart;
   fieldFormats: FieldFormatsSetup;
   licensing: LicensingPluginSetup;
+  cloud?: { isCloudEnabled: boolean; isServerlessEnabled: boolean };
 }
 
 export interface InfraClientStartDeps {
@@ -100,6 +101,8 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   kibanaVersion?: string;
+  isCloudEnabled: boolean;
+  isServerlessEnabled: boolean;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   ml: MlPluginStart;

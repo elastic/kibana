@@ -11,11 +11,31 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
+const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
 
-const getSurveyFeedbackURL = (formUrl: string, kibanaVersion?: string) => {
+const getDeploymentType = (
+  isCloudEnabled?: boolean,
+  isServerlessEnabled?: boolean
+): string | undefined => {
+  if (isServerlessEnabled) {
+    return 'Serverless (fully-managed projects)';
+  }
+  if (isCloudEnabled) {
+    return 'Elastic Cloud (we manage)';
+  }
+  if (isCloudEnabled === false) {
+    return 'Self-Managed (you manage)';
+  }
+  return undefined;
+};
+
+const getSurveyFeedbackURL = (formUrl: string, kibanaVersion?: string, deploymentType?: string) => {
   const url = new URL(formUrl);
   if (kibanaVersion) {
     url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
+  }
+  if (deploymentType) {
+    url.searchParams.append(KIBANA_DEPLOYMENT_TYPE_PARAM, deploymentType);
   }
 
   return url.href;
@@ -31,11 +51,13 @@ export const FeatureFeedbackButton = ({
   'data-test-subj': dts,
 }: FeatureFeedbackButtonProps) => {
   const {
-    services: { kibanaVersion },
+    services: { kibanaVersion, isCloudEnabled, isServerlessEnabled },
   } = useKibanaContextForPlugin();
+
+  const deploymentType = getDeploymentType(isCloudEnabled, isServerlessEnabled);
   return (
     <EuiButton
-      href={getSurveyFeedbackURL(formUrl, kibanaVersion)}
+      href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType)}
       target="_blank"
       color="warning"
       iconType="editorComment"
