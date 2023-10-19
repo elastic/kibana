@@ -158,7 +158,11 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
           gridLine={{ visible: true }}
         />
         <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
-        <Settings baseTheme={chartTheme.baseTheme} theme={chartTheme.theme} />
+        <Settings
+          baseTheme={chartTheme.baseTheme}
+          theme={chartTheme.theme}
+          locale={i18n.getLocale()}
+        />
       </Chart>
     </div>
   );
