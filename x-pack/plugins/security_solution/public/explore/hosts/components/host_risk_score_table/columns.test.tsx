@@ -17,7 +17,7 @@ describe('getHostRiskScoreColumns', () => {
     });
 
     const riskScore = 10.11111111;
-    const riskScoreColumn = columns[1];
+    const riskScoreColumn = columns[2];
     const renderedColumn = riskScoreColumn.render!(riskScore, null);
 
     const { queryByTestId } = render(<TestProviders>{renderedColumn}</TestProviders>);

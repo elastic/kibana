@@ -300,7 +300,7 @@ describe('bulk action hooks', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    it('should not how the bulk actions when the user lacks any observability permissions', () => {
+    it('should not show the bulk actions when the user lacks any observability permissions', () => {
       mockKibana.mockImplementation(() => ({
         services: {
           application: { capabilities: {} },
@@ -364,6 +364,41 @@ describe('bulk action hooks', () => {
                 "disabledLabel": "Mark as untracked",
                 "key": "mark-as-untracked",
                 "label": "Mark as untracked",
+                "onClick": [Function],
+              },
+            ],
+          },
+        ]
+      `);
+    });
+
+    it('appends only the case bulk actions for SIEM', async () => {
+      const { result } = renderHook(
+        () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh, featureIds: ['siem'] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(result.current.bulkActions).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": 0,
+            "items": Array [
+              Object {
+                "data-test-subj": "attach-new-case",
+                "disableOnQuery": true,
+                "disabledLabel": "Add to new case",
+                "key": "attach-new-case",
+                "label": "Add to new case",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "attach-existing-case",
+                "disableOnQuery": true,
+                "disabledLabel": "Add to existing case",
+                "key": "attach-existing-case",
+                "label": "Add to existing case",
                 "onClick": [Function],
               },
             ],
