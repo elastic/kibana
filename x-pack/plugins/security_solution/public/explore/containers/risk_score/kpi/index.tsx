@@ -26,6 +26,7 @@ import type { InspectResponse } from '../../../../types';
 import type { inputsModel } from '../../../../common/store';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { useRiskScoreFeatureStatus } from '../feature_status';
 
 interface RiskScoreKpi {
   error: unknown;
@@ -60,6 +61,14 @@ export const useRiskScoreKpi = ({
       : getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
     : undefined;
 
+  const {
+    isDeprecated,
+    isEnabled,
+    isAuthorized,
+    isLoading: isDeprecatedLoading,
+    refetch: refetchFeatureStatus,
+  } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
+
   const { loading, result, search, refetch, inspect, error } =
     useSearchStrategy<RiskQueries.kpiRiskScore>({
       factoryQueryType: RiskQueries.kpiRiskScore,
@@ -72,21 +81,39 @@ export const useRiskScoreKpi = ({
 
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
 
+  const requestTimerange = useMemo(
+    () => (timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined),
+    [timerange]
+  );
+
   useEffect(() => {
     if (!skip && defaultIndex && featureEnabled) {
       search({
         filterQuery,
         defaultIndex: [defaultIndex],
         entity: riskEntity,
+        timerange: requestTimerange,
       });
     }
-  }, [defaultIndex, search, filterQuery, skip, riskEntity, featureEnabled]);
+  }, [
+    defaultIndex,
+    search,
+    filterQuery,
+    skip,
+    riskEntity,
+    requestTimerange,
+    isEnabled,
+    isDeprecated,
+    isAuthorized,
+    isDeprecatedLoading,
+  ]);
 
-  // since query does not take timerange arg, we need to manually refetch when time range updates
-  useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timerange?.to, timerange?.from]);
+  const refetchAll = useCallback(() => {
+    if (defaultIndex) {
+      refetchFeatureStatus(defaultIndex);
+      refetch();
+    }
+  }, [defaultIndex, refetch, refetchFeatureStatus]);
 
   useEffect(() => {
     if (error) {
@@ -110,5 +137,9 @@ export const useRiskScoreKpi = ({
     };
   }, [result, loading, error]);
 
-  return { error, severityCount, loading, isModuleDisabled, refetch, inspect };
+  return { error, severityCount, loading, isModuleDisabled, refetch: refetchAll, inspect };
 };
+function useCallback(arg0: () => void, arg1: any[]) {
+  throw new Error('Function not implemented.');
+}
+
