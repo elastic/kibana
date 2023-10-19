@@ -13,7 +13,6 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -330,16 +329,13 @@ function DiscoverDocumentsComponent({
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
-      <>
-        <EuiHorizontalRule />
-        <div className="dscDocuments__loading">
-          <EuiText size="xs" color="subdued">
-            <EuiLoadingSpinner />
-            <EuiSpacer size="s" />
-            <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
-          </EuiText>
-        </div>
-      </>
+      <div className="dscDocuments__loading">
+        <EuiText size="xs" color="subdued">
+          <EuiLoadingSpinner />
+          <EuiSpacer size="s" />
+          <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
+        </EuiText>
+      </div>
     );
   }
 

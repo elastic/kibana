@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
 import React, { useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -20,6 +20,7 @@ import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 const DROP_PROPS = {
   value: {
@@ -80,6 +81,8 @@ export const DiscoverMainContent = ({
     ) : undefined;
   }, [viewMode, setDiscoverViewMode, isPlainRecord]);
 
+  const showChart = useAppStateSelector((state) => !state.hideChart);
+
   return (
     <DragDrop
       draggable={false}
@@ -96,6 +99,7 @@ export const DiscoverMainContent = ({
           responsive={false}
           data-test-subj="dscMainContent"
         >
+          {showChart && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
