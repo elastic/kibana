@@ -95,7 +95,6 @@ function createDefaultChangeSpacesHandler(
       defaultMessage: 'Updated {objectNoun}',
       description: `Object noun can be plural or singular, examples: "Updated objects", "Updated job"`,
     });
-    let error: Error | undefined;
 
     // If removing spaces and there are referenced objects ("related objects" in UI),
     // only remove spaces from the target object.
