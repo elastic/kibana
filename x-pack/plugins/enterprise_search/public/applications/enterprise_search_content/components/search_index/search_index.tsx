@@ -83,7 +83,7 @@ export const SearchIndex: React.FC = () => {
     const subscription = guidedOnboarding?.guidedOnboardingApi
       ?.isGuideStepActive$('appSearch', 'add_data')
       .subscribe((isStepActive) => {
-        if (isStepActive) {
+        if (isStepActive && index?.count) {
           guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
         }
       });
@@ -94,7 +94,7 @@ export const SearchIndex: React.FC = () => {
     const subscription = guidedOnboarding?.guidedOnboardingApi
       ?.isGuideStepActive$('websiteSearch', 'add_data')
       .subscribe((isStepActive) => {
-        if (isStepActive) {
+        if (isStepActive && index?.count) {
           guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
         }
       });
@@ -105,7 +105,7 @@ export const SearchIndex: React.FC = () => {
     const subscription = guidedOnboarding?.guidedOnboardingApi
       ?.isGuideStepActive$('databaseSearch', 'add_data')
       .subscribe((isStepActive) => {
-        if (isStepActive) {
+        if (isStepActive && index?.count) {
           guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
         }
       });

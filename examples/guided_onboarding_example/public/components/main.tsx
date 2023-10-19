@@ -172,7 +172,7 @@ export const Main = (props: MainProps) => {
           <p>
             <FormattedMessage
               id="guidedOnboardingExample.guidesSelection.state.explanation"
-              defaultMessage="The guide state on this page is updated automatically via an Observable,
+              defaultMessage="The guide state on this page is updated automatically via an Observable subscription,
               so there is no need to 'load' the state from the server."
             />
           </p>

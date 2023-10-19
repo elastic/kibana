@@ -24,7 +24,7 @@
       "unifiedSearch",
       "observabilityAIAssistant"
     ],
-    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection", "guidedOnboarding"],
+    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection"],
     "requiredBundles": [
       "dataViews",
       "embeddable",
