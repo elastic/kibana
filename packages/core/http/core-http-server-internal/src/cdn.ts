@@ -15,9 +15,9 @@ export interface Input {
 
 export class CdnConfig {
   private url: undefined | URL;
-  constructor(private readonly input: Input) {
-    if (this.input.url) {
-      this.url = new URL(this.input.url); // This will throw for invalid URLs
+  constructor(url?: string) {
+    if (url) {
+      this.url = new URL(url); // This will throw for invalid URLs
     }
   }
 
@@ -47,6 +47,6 @@ export class CdnConfig {
   }
 
   public static from(input: Input = {}) {
-    return new CdnConfig(input);
+    return new CdnConfig(input.url);
   }
 }
