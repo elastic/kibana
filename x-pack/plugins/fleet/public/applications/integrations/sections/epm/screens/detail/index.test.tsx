@@ -277,6 +277,12 @@ describe('when on integration detail', () => {
       });
 
       await render();
+
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     afterEach(() => {
@@ -284,7 +290,7 @@ describe('when on integration detail', () => {
       lazyComponentWasRendered = undefined;
     });
 
-    it('should display "assets" tab in navigation', () => {
+    it('should display "assets" tab in navigation', async () => {
       expect(renderResult.getByTestId('tab-assets'));
     });
 
