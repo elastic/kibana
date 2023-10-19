@@ -13,3 +13,4 @@ export { importTimelinesRoute } from './import_timelines';
 export { patchTimelinesRoute } from './patch_timelines';
 export { persistFavoriteRoute } from './persist_favorite';
 export { resolveTimelineRoute } from './resolve_timeline';
+export { cloneTimelineRoute } from './clone_timeline';

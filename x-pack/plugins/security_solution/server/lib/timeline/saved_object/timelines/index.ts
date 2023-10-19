@@ -586,6 +586,57 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
   );
 };
 
+export const cloneTimeline = async (request: FrameworkRequest, timelineId: string) => {
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
+
+  // Fetch all objects that need to be cloned
+  // TODO: clone saved search
+  const [{ resolvedTimelineSavedObject: timeline }, notes, pinnedEvents] = await Promise.all([
+    resolveBasicSavedTimeline(request, timelineId),
+    note.getNotesByTimelineId(request, timelineId),
+    pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
+  ]);
+
+  const isImmutable = timeline.status === TimelineStatus.immutable;
+  const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
+
+  const { savedObjectId, version, ...newTimeline } = timeline;
+  const timelineResponse = await createTimeline({
+    savedObjectsClient,
+    timeline: newTimeline,
+    timelineId: null,
+    userInfo,
+  });
+
+  const newTimelineId = timelineResponse.timeline.savedObjectId;
+
+  const cloneNotes = Promise.all(
+    notes.map((_note) => {
+      return note.persistNote({
+        request,
+        noteId: null,
+        note: {
+          ..._note,
+          timelineId: newTimelineId,
+        },
+      });
+    })
+  );
+
+  const clonePinnedEvents = pinnedEvents.map((_pinnedEvent) => {
+    return pinnedEvent.persistPinnedEventOnTimeline(
+      request,
+      null,
+      _pinnedEvent.eventId,
+      newTimelineId
+    );
+  });
+
+  await Promise.all([cloneNotes, clonePinnedEvents]);
+
+  return Promise.resolve(newTimelineId);
+};
+
 const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const { saved_object: savedObject, ...resolveAttributes } =
