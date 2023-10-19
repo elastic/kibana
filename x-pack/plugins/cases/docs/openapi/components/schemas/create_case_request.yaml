@@ -39,7 +39,7 @@ properties:
       type: string
       maxLength: 256
   category:
-    description: Category for the case. It could be a word or a phrase to categorize the case.
+    description: A word or phrase that categorizes the case.
     type: string
     maxLength: 50
   title:
@@ -47,4 +47,4 @@ properties:
     type: string
     maxLength: 160
   customFields:
-    $ref: 'custom_fields_property.yaml'
+    $ref: 'customfields.yaml'

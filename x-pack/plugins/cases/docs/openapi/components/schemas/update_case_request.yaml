@@ -18,6 +18,10 @@ properties:
       properties:
         assignees:
           $ref: 'assignees.yaml'
+        category:
+          description: A word or phrase that categorizes the case.
+          type: string
+          maxLength: 50
         connector:
           oneOf:
             - $ref: 'connector_properties_none.yaml'
@@ -28,7 +32,7 @@ properties:
             - $ref: 'connector_properties_servicenow_sir.yaml'
             - $ref: 'connector_properties_swimlane.yaml'
         customFields:
-          $ref: 'custom_fields_property.yaml'
+          $ref: 'customfields.yaml'
         description:
           description: An updated description for the case.
           type: string
@@ -49,10 +53,6 @@ properties:
           items:
             type: string
             maxLength: 256
-        category:
-          description: Category for the case. It could be a word or a phrase to categorize the case.
-          type: string
-          maxLength: 50
         title:
           description: A title for the case.
           type: string
