@@ -1227,22 +1227,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-public.DataView.getAllowHidden",
-            "type": "Function",
-            "tags": [],
-            "label": "getAllowHidden",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-public.DataView.setIndexPattern",
             "type": "Function",
             "tags": [],
@@ -4458,44 +4442,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-public.DataViewsService.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
-            ],
-            "signature": [
-              "(indices: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataViewsService.getExistingIndices.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "indices",
-                "description": [
-                  "index pattern list"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "index pattern list"
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -5602,6 +5548,46 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublic.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<",
+              "ExistingIndicesResponse",
+              ">"
+            ],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsServicePublic.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "- index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/public/data_views_service_public.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list of index patterns that match indices"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -6142,22 +6128,6 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewAttributes.allowHidden",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allowHidden",
-            "description": [
-              "\nAllow hidden and system indices when loading field list"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6615,6 +6585,26 @@
             "tags": [],
             "label": "scriptedFieldsEnabled",
             "description": [],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublicDeps.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
             "path": "src/plugins/data_views/public/data_views_service_public.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7814,7 +7804,7 @@
             "section": "def-common.FieldAttrs",
             "text": "FieldAttrs"
           },
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -9263,22 +9253,6 @@
             "returnComment": [
               "index pattern string"
             ]
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.DataView.getAllowHidden",
-            "type": "Function",
-            "tags": [],
-            "label": "getAllowHidden",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           },
           {
             "parentPluginId": "dataViews",
@@ -11499,44 +11473,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-server.DataViewsService.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
-            ],
-            "signature": [
-              "(indices: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.DataViewsService.getExistingIndices.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "indices",
-                "description": [
-                  "index pattern list"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "index pattern list"
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-server.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -12565,7 +12501,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -12688,25 +12624,49 @@
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
                     "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.allowHidden",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "allowHidden",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
                   }
                 ]
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.IndexPatternsFetcher.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.IndexPatternsFetcher.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "- index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list of index patterns that match indices"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -16364,22 +16324,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DataView.getAllowHidden",
-            "type": "Function",
-            "tags": [],
-            "label": "getAllowHidden",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DataView.setIndexPattern",
             "type": "Function",
             "tags": [],
@@ -19261,44 +19205,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DataViewsService.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
-            ],
-            "signature": [
-              "(indices: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataViewsService.getExistingIndices.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "indices",
-                "description": [
-                  "index pattern list"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "index pattern list"
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -20797,22 +20703,6 @@
             ],
             "signature": [
               "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewAttributes.allowHidden",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allowHidden",
-            "description": [
-              "\nAllow hidden and system indices when loading field list"
-            ],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -22444,44 +22334,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DataViewsServicePublicMethods.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
-            ],
-            "signature": [
-              "(indices: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataViewsServicePublicMethods.getExistingIndices.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "indices",
-                "description": [
-                  "- index pattern list"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "index pattern list of index patterns that match indices"
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsServicePublicMethods.getIds",
             "type": "Function",
             "tags": [],
@@ -23145,20 +22997,6 @@
             "description": [],
             "signature": [
               "string[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.GetFieldsOptions.allowHidden",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allowHidden",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -23845,7 +23683,7 @@
                 "section": "def-common.FieldAttrs",
                 "text": "FieldAttrs"
               },
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
             "deprecated": false,
@@ -25351,7 +25189,7 @@
             "section": "def-common.FieldSpec",
             "text": "FieldSpec"
           },
-          "[]>; getExistingIndices: (indices: string[]) => Promise<string[]>; getFieldsForIndexPattern: (indexPattern: ",
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25568,7 +25406,7 @@
             "section": "def-common.FieldAttrs",
             "text": "FieldAttrs"
           },
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
