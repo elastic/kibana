@@ -153,6 +153,10 @@ export class CasesOracleService {
       }
     }
 
+    /**
+     * TODO: Create records with only 404 errors
+     * All others should throw an error and retry again
+     */
     const bulkCreateRes = await this.bulkCreateRecord(bulkCreateReq);
 
     /**

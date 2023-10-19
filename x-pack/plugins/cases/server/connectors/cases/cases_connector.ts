@@ -111,11 +111,15 @@ export class CasesConnector extends SubActionConnector<
 
   public async run(params: CasesConnectorRunParams) {
     const { alerts, groupingBy } = params;
+    /**
+     * TODO: Handle when grouping is not defined
+     * One case should be created per rule
+     */
     const groupingMap = this.groupAlerts({ alerts, groupingBy });
     const oracleMap = this.generateOracleKeys(params, groupingMap);
 
     const oracleKeys = oracleMap.keys();
 
-    // const oracleBulkGetRes = this.casesOracleService.bulkGetRecords(Array.from(oracleKeys));
+    const oracleBulkGetRes = this.casesOracleService.bulkGetOrCreateRecords(Array.from(oracleKeys));
   }
 }
