@@ -16,7 +16,6 @@
     "@kbn/lens-plugin",
     "@kbn/spaces-plugin",
     "@kbn/unified-search-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/discover-plugin",
     "@kbn/i18n",
     "@kbn/data-views-plugin",
