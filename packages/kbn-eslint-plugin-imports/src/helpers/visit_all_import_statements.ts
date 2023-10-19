@@ -45,14 +45,14 @@ interface VisitorContext {
 type Visitor = (req: string | null, context: VisitorContext) => void;
 
 const isIdent = (node: SomeNode): node is TSESTree.Identifier | T.Identifier =>
-  T.isIdentifier(node) || node.type === AST_NODE_TYPES.Identifier;
+  T.isIdentifier(node as T.Node) || node.type === AST_NODE_TYPES.Identifier;
 
 const isStringLiteral = (node: SomeNode): node is TSESTree.StringLiteral | T.StringLiteral =>
-  T.isStringLiteral(node) ||
+  T.isStringLiteral(node as T.Node) ||
   (node.type === AST_NODE_TYPES.Literal && typeof node.value === 'string');
 
 const isTemplateLiteral = (node: SomeNode): node is TSESTree.TemplateLiteral | T.TemplateLiteral =>
-  T.isTemplateLiteral(node) || node.type === AST_NODE_TYPES.TemplateLiteral;
+  T.isTemplateLiteral(node as T.Node) || node.type === AST_NODE_TYPES.TemplateLiteral;
 
 function passSourceAsString(
   fn: Visitor,
@@ -110,7 +110,7 @@ export function visitAllImportStatements(fn: Visitor) {
     CallExpression(node: TSESTree.CallExpression | T.CallExpression) {
       const { callee, arguments: args } = node;
       // babel parser used for .js files treats import() calls as CallExpressions with callees of type "Import"
-      if (T.isImport(callee)) {
+      if (T.isImport(callee as T.Node)) {
         passSourceAsString(fn, args[0], node, 'esm');
         return;
       }
