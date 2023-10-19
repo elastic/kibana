@@ -65,21 +65,7 @@ export function getFlamegraphModel({
 
   let legendItems: Array<{ label: string; color: string }>;
 
-  if (!comparisonFlamegraph) {
-    const usedFrameTypes = new Set([...primaryFlamegraph.FrameType]);
-    legendItems = compact(
-      Object.entries(FRAME_TYPE_COLOR_MAP).map(([frameTypeKey, colors]) => {
-        const frameType = Number(frameTypeKey) as FrameType;
-
-        return usedFrameTypes.has(frameType)
-          ? {
-              color: `#${colors[0].toString(16)}`,
-              label: describeFrameType(frameType),
-            }
-          : undefined;
-      })
-    );
-  } else {
+  if (comparisonFlamegraph) {
     const positiveChangeInterpolator = d3.interpolateRgb(colorNeutral, colorSuccess);
 
     const negativeChangeInterpolator = d3.interpolateRgb(colorNeutral, colorDanger);
@@ -162,6 +148,20 @@ export function getFlamegraphModel({
       const rgba = rgbToRGBA(Number(nodeColor.replace('#', '0x')));
       viewModel.color.set(rgba, 4 * index);
     });
+  } else {
+    const usedFrameTypes = new Set([...primaryFlamegraph.FrameType]);
+    legendItems = compact(
+      Object.entries(FRAME_TYPE_COLOR_MAP).map(([frameTypeKey, colors]) => {
+        const frameType = Number(frameTypeKey) as FrameType;
+
+        return usedFrameTypes.has(frameType)
+          ? {
+              color: `#${colors[0].toString(16)}`,
+              label: describeFrameType(frameType),
+            }
+          : undefined;
+      })
+    );
   }
 
   return {

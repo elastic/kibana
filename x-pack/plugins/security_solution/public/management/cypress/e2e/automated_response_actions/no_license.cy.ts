@@ -15,7 +15,8 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/169320
+describe.skip('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } }, () => {
   describe('User cannot use endpoint action in form', () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
