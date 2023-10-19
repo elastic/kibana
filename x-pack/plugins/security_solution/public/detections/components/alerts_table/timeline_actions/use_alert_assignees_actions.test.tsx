@@ -16,10 +16,12 @@ import React from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
+import { useGetUserProfiles } from '../../../containers/detection_engine/alerts/use_get_user_profiles';
 import { useSuggestUsers } from '../../../containers/detection_engine/alerts/use_suggest_users';
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
+jest.mock('../../../containers/detection_engine/alerts/use_get_user_profiles');
 jest.mock('../../../containers/detection_engine/alerts/use_suggest_users');
 
 const mockUserProfiles = [
@@ -159,6 +161,10 @@ describe('useAlertAssigneesActions', () => {
 
   it('should render the nested panel', async () => {
     (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
+    (useGetUserProfiles as jest.Mock).mockReturnValue({
+      loading: false,
+      userProfiles: mockUserProfiles,
+    });
     (useSuggestUsers as jest.Mock).mockReturnValue({
       loading: false,
       userProfiles: mockUserProfiles,
