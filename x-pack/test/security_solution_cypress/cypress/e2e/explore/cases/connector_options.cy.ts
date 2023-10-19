@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   getCase1,
   getConnectorIds,
@@ -28,6 +29,7 @@ import { CASES_URL } from '../../../urls/navigation';
 import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
 import { cleanKibana } from '../../../tasks/common';
 
+// FLAKY: https://github.com/elastic/kibana/issues/165712
 describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
@@ -69,7 +71,7 @@ describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, (
   });
 
   it('Correct incident fields show when connector is changed', () => {
-    visitWithoutDateRange(CASES_URL);
+    visit(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(getCase1());
     fillJiraConnectorOptions(getJiraConnectorOptions());

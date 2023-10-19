@@ -11,9 +11,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Query } from '@kbn/es-query';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+
+import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 
 import type { GroupTableItem } from '../../components/log_rate_analysis_results_table/types';
 
@@ -38,29 +40,69 @@ export function buildExtendedBaseFilterCriteria(
   if (selectedGroup) {
     const allItems = selectedGroup.groupItemsSortedByUniqueness;
     for (const item of allItems) {
-      const { fieldName, fieldValue } = item;
-      groupFilter.push({ term: { [fieldName]: fieldValue } });
+      const { fieldName, fieldValue, key, type, docCount } = item;
+      if (type === SIGNIFICANT_TERM_TYPE.KEYWORD) {
+        groupFilter.push({ term: { [fieldName]: fieldValue } });
+      } else {
+        groupFilter.push(
+          getCategoryQuery(fieldName, [
+            {
+              key,
+              count: docCount,
+              examples: [],
+            },
+          ])
+        );
+      }
     }
   }
 
   if (includeSelectedSignificantTerm) {
     if (selectedSignificantTerm) {
-      filterCriteria.push({
-        term: { [selectedSignificantTerm.fieldName]: selectedSignificantTerm.fieldValue },
-      });
+      if (selectedSignificantTerm.type === 'keyword') {
+        filterCriteria.push({
+          term: { [selectedSignificantTerm.fieldName]: selectedSignificantTerm.fieldValue },
+        });
+      } else {
+        filterCriteria.push(
+          getCategoryQuery(selectedSignificantTerm.fieldName, [
+            {
+              key: `${selectedSignificantTerm.key}`,
+              count: selectedSignificantTerm.doc_count,
+              examples: [],
+            },
+          ])
+        );
+      }
     } else if (selectedGroup) {
       filterCriteria.push(...groupFilter);
     }
   } else if (selectedSignificantTerm && !includeSelectedSignificantTerm) {
-    filterCriteria.push({
-      bool: {
-        must_not: [
-          {
-            term: { [selectedSignificantTerm.fieldName]: selectedSignificantTerm.fieldValue },
-          },
-        ],
-      },
-    });
+    if (selectedSignificantTerm.type === 'keyword') {
+      filterCriteria.push({
+        bool: {
+          must_not: [
+            {
+              term: { [selectedSignificantTerm.fieldName]: selectedSignificantTerm.fieldValue },
+            },
+          ],
+        },
+      });
+    } else {
+      filterCriteria.push({
+        bool: {
+          must_not: [
+            getCategoryQuery(selectedSignificantTerm.fieldName, [
+              {
+                key: `${selectedSignificantTerm.key}`,
+                count: selectedSignificantTerm.doc_count,
+                examples: [],
+              },
+            ]),
+          ],
+        },
+      });
+    }
   } else if (selectedGroup && !includeSelectedSignificantTerm) {
     filterCriteria.push({
       bool: {

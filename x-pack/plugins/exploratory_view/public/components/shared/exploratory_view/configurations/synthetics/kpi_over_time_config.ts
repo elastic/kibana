@@ -14,6 +14,7 @@ import {
   PERCENTILE,
   ReportTypes,
   FORMULA_COLUMN,
+  RECORDS_FIELD,
 } from '../constants';
 import {
   CLS_LABEL,
@@ -124,8 +125,8 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
       },
       {
         label: 'Total runs',
-        id: 'monitor.check_group',
-        field: 'monitor.check_group',
+        id: 'total_test_runs',
+        field: RECORDS_FIELD,
         columnType: OPERATION_COLUMN,
         columnFilters: [
           {

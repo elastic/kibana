@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TopNFunctions } from '../../../../common/functions';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 
 export const data = {
   TotalCount: 4,

@@ -10,5 +10,4 @@ export type {
   TimelineItem,
   TimelineNonEcsData,
   TimelineEventsAllStrategyResponse,
-  TimelineEventsAllRequestOptions,
 } from '@kbn/timelines-plugin/common';

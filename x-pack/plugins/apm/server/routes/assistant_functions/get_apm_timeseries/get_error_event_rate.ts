@@ -6,7 +6,6 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -40,7 +39,7 @@ export async function getErrorEventRate({
       documentType: ApmDocumentType.ErrorEvent,
       rollupInterval: RollupInterval.None,
       intervalString,
-      filter: filter.concat(...rangeQuery(start, end)),
+      filter,
       aggs: {
         value: {
           bucket_script: {

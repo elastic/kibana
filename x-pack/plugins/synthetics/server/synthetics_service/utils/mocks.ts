@@ -6,21 +6,54 @@
  */
 
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { cloneDeep } from 'lodash';
+import { syntheticsParamType } from '../../../common/types/saved_objects';
 
-export const mockEncryptedSO = (
-  data: any = { attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] }
-) => ({
-  getClient: jest.fn().mockReturnValue({
-    getDecryptedAsInternalUser: jest.fn().mockResolvedValue(data),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockImplementation(() => ({
-      close: jest.fn(),
-      find: jest.fn().mockReturnValue({
-        async *[Symbol.asyncIterator]() {
-          yield {
-            saved_objects: data === null ? [] : [data],
-          };
-        },
-      }),
-    })),
-  } as jest.Mocked<EncryptedSavedObjectsClient>),
-});
+export const mockEncryptedSO = ({
+  monitors = null,
+  params,
+}: { monitors?: any; params?: any } = {}) => {
+  const result = cloneDeep(monitors);
+  const mockParams = params ?? [
+    { attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] },
+  ];
+  return {
+    isEncryptionError: jest.fn(),
+    getClient: jest.fn().mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(monitors),
+      createPointInTimeFinderDecryptedAsInternalUser: jest
+        .fn()
+        .mockImplementation(({ perPage, type: soType }) => ({
+          close: jest.fn(),
+          find: jest.fn().mockReturnValue({
+            async *[Symbol.asyncIterator]() {
+              if (soType === syntheticsParamType) {
+                yield {
+                  saved_objects: mockParams,
+                };
+                return;
+              }
+              if (!perPage) {
+                yield {
+                  saved_objects: result,
+                };
+                return;
+              }
+              if (monitors === null) {
+                return;
+              }
+              do {
+                const currentPage = result.splice(0, perPage);
+                if (currentPage.length === 0) {
+                  return;
+                }
+                yield {
+                  saved_objects: currentPage,
+                };
+              } while (result.length > 0);
+            },
+          }),
+        })),
+    } as jest.Mocked<EncryptedSavedObjectsClient>),
+  };
+};

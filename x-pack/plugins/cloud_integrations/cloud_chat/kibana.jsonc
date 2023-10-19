@@ -13,11 +13,13 @@
       "chat"
     ],
     "requiredPlugins": [
-      "cloud",
-      "cloudChatProvider"
+      "cloud"
+    ],
+    "requiredBundles": [
     ],
     "optionalPlugins": [
-      "security"
+      "security",
+      "cloudExperiments"
     ]
   }
 }

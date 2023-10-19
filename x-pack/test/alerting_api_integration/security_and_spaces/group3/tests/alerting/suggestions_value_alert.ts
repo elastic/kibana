@@ -17,7 +17,6 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
   describe('alerts/suggestions/values', async () => {
     const esArchiver = getService('esArchiver');
     const supertest = getService('supertest');
-    const supertestWithoutAuth = getService('supertestWithoutAuth');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');

@@ -13,7 +13,7 @@ import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_ite
 import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
-import { RiskScore } from '../../../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../../../explore/components/risk_score/severity/common';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -28,7 +28,7 @@ import {
   LAST_SEEN_TITLE,
   USER_NAME_TITLE,
   USER_PANEL_TITLE,
-  USER_RISK_CLASSIFICATION,
+  USER_RISK_LEVEL,
   USER_RISK_SCORE,
 } from '../translation';
 import { SummaryPanel } from '../wrappers';
@@ -78,7 +78,7 @@ export const UserPanel = React.memo(
         ? Math.round(userRiskData.user.risk.calculated_score_norm)
         : getEmptyTagValue();
       const userRiskSeverity = userRiskData ? (
-        <RiskScore severity={userRiskData.user.risk.calculated_level} hideBackgroundColor />
+        <RiskScoreLevel severity={userRiskData.user.risk.calculated_level} hideBackgroundColor />
       ) : (
         getEmptyTagValue()
       );
@@ -121,9 +121,7 @@ export const UserPanel = React.memo(
                     <UserPanelSection title={USER_RISK_SCORE}>{userRiskScore}</UserPanelSection>
                   )}
                   {userRiskLevel && (
-                    <UserPanelSection title={USER_RISK_CLASSIFICATION}>
-                      {userRiskLevel}
-                    </UserPanelSection>
+                    <UserPanelSection title={USER_RISK_LEVEL}>{userRiskLevel}</UserPanelSection>
                   )}
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />

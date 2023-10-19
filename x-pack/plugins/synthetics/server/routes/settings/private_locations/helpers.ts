@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { AgentPolicyInfo } from '../../../../common/types';
 import type { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import type {
   SyntheticsPrivateLocationsAttributes,
@@ -14,19 +14,23 @@ import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const toClientContract = (
   attributes: SyntheticsPrivateLocationsAttributes,
-  agentPolicies?: AgentPolicy[]
+  agentPolicies?: AgentPolicyInfo[]
 ): SyntheticsPrivateLocations => {
   return {
-    locations: attributes.locations.map((location) => ({
-      label: location.label,
-      id: location.id,
-      agentPolicyId: location.agentPolicyId,
-      concurrentMonitors: location.concurrentMonitors,
-      isServiceManaged: false,
-      isInvalid: !Boolean(agentPolicies?.find((policy) => policy.id === location.agentPolicyId)),
-      tags: location.tags,
-      geo: location.geo,
-    })),
+    locations: attributes.locations.map((location) => {
+      const agPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
+      return {
+        label: location.label,
+        id: location.id,
+        agentPolicyId: location.agentPolicyId,
+        concurrentMonitors: location.concurrentMonitors,
+        isServiceManaged: false,
+        isInvalid: !Boolean(agPolicy),
+        tags: location.tags,
+        geo: location.geo,
+        namespace: agPolicy?.namespace,
+      };
+    }),
   };
 };
 
@@ -39,5 +43,6 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     tags: location.tags,
     isServiceManaged: false,
     geo: location.geo,
+    namespace: location.namespace,
   };
 };

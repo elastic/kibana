@@ -21,6 +21,7 @@ export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
   custom: [],
   ecsCompliant: [],
   incompatible: [],
+  sameFamily: [],
 };
 
 export async function checkIndex({

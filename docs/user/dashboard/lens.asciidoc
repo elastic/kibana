@@ -222,9 +222,11 @@ Annotations support two placement types:
 
 * *Custom query* &mdash; Displays annotations based on custom {es} queries. For detailed information about queries, check <<semi-structured-search>>. 
 
-Create the annotation layer. 
+Any annotation layer can be saved as an annotation group to the *Visualize Library* in order to reuse it in other visualizations. Any changes made to the annotation group will be reflected in all visualizations to which it is added.
 
-. In the layer pane, click *Add layer > Annotations*.
+Create a new annotation layer. 
+
+. In the layer pane, click *Add layer > Annotations > New annotation*.
 
 . Select the {data-source} for the annotation.
 
@@ -262,6 +264,20 @@ Specify the annotation appearance.
 . If you created a custom query annotation, click *Add field* to add a field to the annotation tooltip.
 
 . To close, click *X*.
+
+Save the annotation group to the library. 
+
+. In the layer pane, on your annotation layer, click image:images/lens_saveAnnotationLayerButton_8.9.0.png[Save button on annotations layer].
+
+. Enter the *Title*, *Description*, and add any applicable <<managing-tags,*Tags*>>.
+
+. Click *Save group*.
+
+Add a library annotation group to a visualization.
+
+. In the layer pane, click *Add layer > Annotations > Load from library*.
+
+. Select the annotation group you want to use.
 
 [float]
 [[add-reference-lines]]

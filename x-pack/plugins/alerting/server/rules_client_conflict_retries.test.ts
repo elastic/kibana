@@ -8,7 +8,11 @@
 import { cloneDeep } from 'lodash';
 
 import { RulesClient, ConstructorOptions } from './rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
@@ -20,6 +24,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
+
+jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
 
 let rulesClient: RulesClient;
 
@@ -34,6 +42,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const logger = loggingSystemMock.create().get();
@@ -48,13 +57,17 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger,
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -358,10 +371,12 @@ beforeEach(() => {
     async executor() {
       return { state: {} };
     },
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   }));
 
   ruleTypeRegistry.get.mockReturnValue({
@@ -375,10 +390,12 @@ beforeEach(() => {
     async executor() {
       return { state: {} };
     },
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   });
 
   rulesClient = new RulesClient(rulesClientParams);

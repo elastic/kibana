@@ -985,7 +985,7 @@ describe('Integration', () => {
       {
         name: 'Cursor rows after request end',
         cursor: { lineNumber: 5, column: 1 },
-        autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+        autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'PATCH'],
         prefixToAdd: '',
         suffixToAdd: ' ',
       },

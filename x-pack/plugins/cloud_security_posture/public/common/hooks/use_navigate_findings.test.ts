@@ -6,7 +6,11 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks/dom';
-import { useNavigateFindings, useNavigateFindingsByResource } from './use_navigate_findings';
+import {
+  useNavigateFindings,
+  useNavigateFindingsByResource,
+  useNavigateVulnerabilities,
+} from './use_navigate_findings';
 import { useHistory } from 'react-router-dom';
 
 jest.mock('react-router-dom', () => ({
@@ -29,9 +33,17 @@ jest.mock('./use_kibana', () => ({
     },
   }),
 }));
+jest.mock('../api/use_latest_findings_data_view', () => ({
+  useLatestFindingsDataView: jest.fn().mockReturnValue({
+    status: 'success',
+    data: {
+      id: 'data-view-id',
+    },
+  }),
+}));
 
 describe('useNavigateFindings', () => {
-  it('creates a URL to findings page with correct path and filter', () => {
+  it('creates a URL to findings page with correct path, filter and dataViewId', () => {
     const push = jest.fn();
     (useHistory as jest.Mock).mockReturnValueOnce({ push });
 
@@ -44,7 +56,7 @@ describe('useNavigateFindings', () => {
     expect(push).toHaveBeenCalledWith({
       pathname: '/cloud_security_posture/findings/configurations',
       search:
-        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,index:data-view-id,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
     expect(push).toHaveBeenCalledTimes(1);
   });
@@ -62,7 +74,7 @@ describe('useNavigateFindings', () => {
     expect(push).toHaveBeenCalledWith({
       pathname: '/cloud_security_posture/findings/configurations',
       search:
-        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!t,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,index:data-view-id,key:foo,negate:!t,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
     expect(push).toHaveBeenCalledTimes(1);
   });
@@ -80,7 +92,25 @@ describe('useNavigateFindings', () => {
     expect(push).toHaveBeenCalledWith({
       pathname: '/cloud_security_posture/findings/resource',
       search:
-        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,index:data-view-id,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
+    });
+    expect(push).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates a URL to vulnerabilities page with correct path, filter and dataViewId', () => {
+    const push = jest.fn();
+    (useHistory as jest.Mock).mockReturnValueOnce({ push });
+
+    const { result } = renderHook(() => useNavigateVulnerabilities());
+
+    act(() => {
+      result.current({ foo: 1 });
+    });
+
+    expect(push).toHaveBeenCalledWith({
+      pathname: '/cloud_security_posture/findings/vulnerabilities',
+      search:
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,index:security-solution-default,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
     expect(push).toHaveBeenCalledTimes(1);
   });

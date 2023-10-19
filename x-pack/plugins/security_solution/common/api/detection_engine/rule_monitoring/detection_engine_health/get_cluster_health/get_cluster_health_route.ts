@@ -51,9 +51,6 @@ export interface GetClusterHealthRequest {
  * Response body of the endpoint.
  */
 export interface GetClusterHealthResponse {
-  // TODO: https://github.com/elastic/kibana/issues/125642 Implement the endpoint and remove the `message` property
-  message: 'Not implemented';
-
   /**
    * Request processing times and durations.
    */

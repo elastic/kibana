@@ -149,6 +149,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.CONFIG_HASH]: '',
   [ConfigKey.MONITOR_QUERY_ID]: '',
   [ConfigKey.PARAMS]: '',
+  [ConfigKey.MAX_ATTEMPTS]: 2,
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {

@@ -9,6 +9,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../services/get_azure_arm_props_from_package_policy';
+
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -304,12 +306,21 @@ export function useOnSubmit({
         force,
       });
 
+      const hasAzureArmTemplate = data?.item
+        ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
+        : false;
+
       const hasCloudFormation = data?.item
         ? getCloudFormationPropsFromPackagePolicy(data.item).templateUrl
         : false;
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
+      if (hasAzureArmTemplate) {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+      } else {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
       if (hasCloudFormation) {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
       } else {
@@ -324,6 +335,10 @@ export function useOnSubmit({
         setSavedPackagePolicy(data!.item);
 
         const hasAgentsAssigned = agentCount && agentPolicy;
+        if (!hasAgentsAssigned && hasAzureArmTemplate) {
+          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+          return;
+        }
         if (!hasAgentsAssigned && hasCloudFormation) {
           setFormState('SUBMITTED_CLOUD_FORMATION');
           return;

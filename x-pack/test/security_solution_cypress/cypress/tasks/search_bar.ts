@@ -19,6 +19,8 @@ import {
   GLOBAL_KQL_INPUT,
   LOCAL_KQL_INPUT,
   GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON,
+  EDIT_AS_QUERY_DSL,
+  KIBANA_CODE_EDITOR,
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
@@ -74,4 +76,12 @@ export const fillLocalSearchBar = (query: string) => {
 
 export const submitLocalSearch = (localSearchBarSelector: string) => {
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(localSearchBarSelector)).click();
+};
+
+export const fillAddFilterFormAsQueryDSL = (query: string) => {
+  cy.get(EDIT_AS_QUERY_DSL).trigger('click');
+  cy.get(KIBANA_CODE_EDITOR).type(`{selectAll}{backspace}`);
+  cy.get(KIBANA_CODE_EDITOR).type(query, { parseSpecialCharSequences: false });
+  cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
+  cy.get(ADD_FILTER_FORM_SAVE_BUTTON).should('not.exist');
 };

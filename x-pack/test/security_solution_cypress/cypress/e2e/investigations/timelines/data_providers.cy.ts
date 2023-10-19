@@ -15,7 +15,8 @@ import {
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   addDataProvider,
   updateDataProviderbyDraggingField,
@@ -26,9 +27,10 @@ import {
   updateDataProviderByFieldHoverAction,
 } from '../../../tasks/timeline';
 import { getTimeline } from '../../../objects/timeline';
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { cleanKibana, scrollToBottom } from '../../../tasks/common';
 
+// Failing in serverless
 describe('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
@@ -36,7 +38,7 @@ describe('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
     scrollToBottom();
     createNewTimeline();

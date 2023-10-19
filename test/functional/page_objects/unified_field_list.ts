@@ -84,7 +84,7 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async toggleSidebarSection(sectionName: SidebarSectionName) {
     return await this.find.clickByCssSelector(
-      `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__iconButton`
+      `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__arrow`
     );
   }
 
@@ -95,6 +95,7 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async clickFieldListItem(field: string) {
+    await this.testSubjects.moveMouseTo(`field-${field}`);
     await this.testSubjects.click(`field-${field}`);
 
     await this.waitUntilFieldPopoverIsOpen();

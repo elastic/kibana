@@ -19,6 +19,7 @@ function generator(options: TemplateContext) {
     packageManager: options.baseImage.includes('ubi') ? 'microdnf' : 'apt-get',
     ubi: options.baseImage.includes('ubi'),
     ubuntu: options.baseImage === 'ubuntu',
+    opensslLegacyProvider: !(options.cloud || options.serverless),
     ...options,
   });
 }

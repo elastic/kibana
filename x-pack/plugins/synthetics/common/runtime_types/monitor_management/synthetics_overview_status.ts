@@ -33,7 +33,7 @@ export const OverviewStatusMetaDataCodec = t.interface({
   monitorQueryId: t.string,
   configId: t.string,
   status: t.string,
-  location: t.string,
+  locationId: t.string,
   timestamp: t.string,
   ping: OverviewPingCodec,
 });

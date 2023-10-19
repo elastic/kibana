@@ -114,6 +114,7 @@ export interface AiopsAppDependencies {
   presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;
   cases?: CasesUiStart;
+  isServerless?: boolean;
 }
 
 /**

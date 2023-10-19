@@ -20,5 +20,5 @@ export function indexManagementStore(services) {
   const enhancers = [applyMiddleware(thunk)];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
-  return createStore(getReducer(services), initialState, compose(...enhancers));
+  return createStore(getReducer(), initialState, compose(...enhancers));
 }

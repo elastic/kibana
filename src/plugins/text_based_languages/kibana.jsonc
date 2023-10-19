@@ -6,6 +6,14 @@
     "id": "textBasedLanguages",
     "server": false,
     "browser": true,
+    "optionalPlugins": [
+      "indexManagement"
+    ],
+    "requiredPlugins": [
+      "data",
+      "expressions",
+      "dataViews"
+    ],
     "requiredBundles": [
       "kibanaReact",
     ]

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
@@ -13,6 +14,8 @@ import { v1 as uuidv1 } from 'uuid';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCreateSlo() {
   const {
@@ -24,7 +27,7 @@ export function useCreateSlo() {
 
   return useMutation<
     CreateSLOResponse,
-    string,
+    ServerError,
     { slo: CreateSLOInput },
     { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
@@ -72,7 +75,7 @@ export function useCreateSlo() {
           queryClient.setQueryData(context.queryKey, context.previousData);
         }
 
-        toasts.addError(new Error(String(error)), {
+        toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.create.errorNotification', {
             defaultMessage: 'Something went wrong while creating {name}',
             values: { name: slo.name },

@@ -1,0 +1,11 @@
+{
+  "type": "plugin",
+  "id": "@kbn/resizable-layout-examples-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "plugin": {
+    "id": "resizableLayoutExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": ["developerExamples"]
+  }
+}

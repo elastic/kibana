@@ -30,7 +30,7 @@ type PostFlightRequestFn<TAggConfig> = (
   inspectorRequestAdapter?: RequestAdapter,
   abortSignal?: AbortSignal,
   searchSessionId?: string,
-  disableShardFailureWarning?: boolean
+  disableWarningToasts?: boolean
 ) => Promise<estypes.SearchResponse<any>>;
 
 export interface AggTypeConfig<

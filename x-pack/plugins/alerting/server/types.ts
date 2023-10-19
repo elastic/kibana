@@ -28,7 +28,11 @@ import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
-import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
+import {
+  RulesSettingsClient,
+  RulesSettingsFlappingClient,
+  RulesSettingsQueryDelayClient,
+} from './rules_settings_client';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
@@ -135,6 +139,7 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
+  getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -288,6 +293,7 @@ export interface RuleType<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
     AlertData
   >;
+  category: string;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
@@ -371,6 +377,7 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
 
 export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
@@ -468,3 +475,5 @@ export interface RawRule extends SavedObjectAttributes {
   revision: number;
   running?: boolean | null;
 }
+
+export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

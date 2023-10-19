@@ -92,6 +92,8 @@ const createPreflightCheckHelperMock = (): PreflightCheckHelperMock => {
     preflightCheckForBulkDelete: jest.fn(),
     preflightCheckNamespaces: jest.fn(),
     preflightCheckForUpsertAliasConflict: jest.fn(),
+    preflightGetDocForUpdate: jest.fn(),
+    preflightCheckNamespacesForUpdate: jest.fn(),
   };
 
   return mock;

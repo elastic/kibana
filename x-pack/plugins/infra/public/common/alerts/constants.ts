@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import type { AlertStatusFilter } from './types';
 
 export const ALERT_STATUS_ALL = 'all';
@@ -46,9 +51,24 @@ export const RECOVERED_ALERTS: AlertStatusFilter = {
   }),
 };
 
+export const UNTRACKED_ALERTS: AlertStatusFilter = {
+  status: ALERT_STATUS_UNTRACKED,
+  query: {
+    term: {
+      [ALERT_STATUS]: {
+        value: ALERT_STATUS_UNTRACKED,
+      },
+    },
+  },
+  label: i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.untracked', {
+    defaultMessage: 'Untracked',
+  }),
+};
+
 export const ALERT_STATUS_QUERY = {
   [ACTIVE_ALERTS.status]: ACTIVE_ALERTS.query,
   [RECOVERED_ALERTS.status]: RECOVERED_ALERTS.query,
+  [UNTRACKED_ALERTS.status]: UNTRACKED_ALERTS.query,
 };
 
 export const ALERTS_DOC_HREF =

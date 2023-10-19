@@ -14,7 +14,7 @@ import {
   ExportRulesRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
 import { getNonPackagedRulesCount } from '../../../logic/search/get_existing_prepackaged_rules';
@@ -40,8 +40,8 @@ export const exportRulesRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            query: buildRouteValidation(ExportRulesRequestQuery),
-            body: buildRouteValidation(ExportRulesRequestBody),
+            query: buildRouteValidationWithZod(ExportRulesRequestQuery),
+            body: buildRouteValidationWithZod(ExportRulesRequestBody),
           },
         },
       },

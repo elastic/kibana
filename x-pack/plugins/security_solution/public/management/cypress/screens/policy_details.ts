@@ -13,11 +13,18 @@ import type {
   UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import type { UserAuthzAccessLevel } from './types';
 import { APP_POLICIES_PATH } from '../../../../common/constants';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
-import { request, loadPage } from '../tasks/common';
+import { loadPage, request } from '../tasks/common';
 import { expectAndCloseSuccessToast } from '../tasks/toasts';
+import { getNoPrivilegesPage } from './common';
 
+/**
+ * Loads the Policy details page - either for the `policyId` provided on input, or if undefined,
+ * then the first policy displayed on the Policy List will be opened
+ * @param policyId
+ */
 export const visitPolicyDetailsPage = (policyId?: string) => {
   if (policyId) {
     loadPage(`${APP_POLICIES_PATH}/${policyId}`);
@@ -89,3 +96,23 @@ export class PackagePolicyBackupHelper {
     });
   }
 }
+
+export const ensurePolicyDetailsPageAuthzAccess = (
+  policyId: string,
+  accessLevel: UserAuthzAccessLevel,
+  visitPage: boolean = false
+): Cypress.Chainable => {
+  if (visitPage) {
+    visitPolicyDetailsPage(policyId);
+  }
+
+  if (accessLevel === 'none') {
+    return getNoPrivilegesPage().should('exist');
+  }
+
+  if (accessLevel === 'read') {
+    return cy.getByTestSubj('policyDetailsSaveButton').should('not.exist');
+  }
+
+  return cy.getByTestSubj('policyDetailsSaveButton').should('exist');
+};

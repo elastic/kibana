@@ -23,7 +23,7 @@ export const getTooltipContent = (type: string | undefined) =>
 
 export const EnrichmentIcon: React.FC<{ type: string | undefined }> = ({ type }) => {
   return (
-    <EuiToolTip title={getTooltipTitle(type)} content={getTooltipContent(type)}>
+    <EuiToolTip content={getTooltipContent(type)}>
       <EuiIcon type="iInCircle" size="m" />
     </EuiToolTip>
   );

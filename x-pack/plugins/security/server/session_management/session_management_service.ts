@@ -6,6 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
+import { switchMap } from 'rxjs';
 
 import type { ElasticsearchClient, HttpServiceSetup, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -90,13 +91,20 @@ export class SessionManagementService {
       auditLogger: audit.withoutRequest,
     });
 
-    this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
-      try {
-        await Promise.all([this.sessionIndex.initialize(), this.scheduleCleanupTask(taskManager)]);
-      } catch (err) {
-        scheduleRetry();
-      }
-    });
+    this.statusSubscription = online$
+      .pipe(
+        switchMap(async ({ scheduleRetry }) => {
+          try {
+            await Promise.all([
+              this.sessionIndex.initialize(),
+              this.scheduleCleanupTask(taskManager),
+            ]);
+          } catch (err) {
+            scheduleRetry();
+          }
+        })
+      )
+      .subscribe();
 
     return {
       session: new Session({

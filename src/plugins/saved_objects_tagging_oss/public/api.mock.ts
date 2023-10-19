@@ -16,6 +16,7 @@ const createClientMock = () => {
     getAll: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
+    findByName: jest.fn(),
   };
 
   return mock;

@@ -177,18 +177,11 @@ describe('rollTotals', () => {
       ],
       { overwrite: true }
     );
-    expect(savedObjectClient.delete).toHaveBeenCalledTimes(3);
-    expect(savedObjectClient.delete).toHaveBeenCalledWith(
-      SAVED_OBJECTS_DAILY_TYPE,
-      'appId-2:2020-01-01'
-    );
-    expect(savedObjectClient.delete).toHaveBeenCalledWith(
-      SAVED_OBJECTS_DAILY_TYPE,
-      'appId-1:2020-01-01'
-    );
-    expect(savedObjectClient.delete).toHaveBeenCalledWith(
-      SAVED_OBJECTS_DAILY_TYPE,
-      'appId-1:2020-01-01:viewId-1'
-    );
+    expect(savedObjectClient.bulkDelete).toHaveBeenCalledTimes(1);
+    expect(savedObjectClient.bulkDelete).toHaveBeenCalledWith([
+      { type: SAVED_OBJECTS_DAILY_TYPE, id: 'appId-2:2020-01-01' },
+      { type: SAVED_OBJECTS_DAILY_TYPE, id: 'appId-1:2020-01-01' },
+      { type: SAVED_OBJECTS_DAILY_TYPE, id: 'appId-1:2020-01-01:viewId-1' },
+    ]);
   });
 });

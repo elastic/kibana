@@ -15,7 +15,6 @@ import {
   EuiTableBody,
   EuiTableHeaderCell,
   EuiTableRowCell,
-  EuiLoadingChart,
   EuiEmptyPrompt,
   useEuiTheme,
   EuiText,
@@ -27,10 +26,13 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiTableRow } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import { FORMATTERS } from '../../../../../common/formatters';
-import type { SortBy } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
+import type { SortBy } from '../../hooks/use_process_list';
 import type { Process } from './types';
-import { ProcessRow } from '../../../../pages/metrics/inventory_view/components/node_details/tabs/processes/process_row';
+import { ProcessRow } from './process_row';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
@@ -40,6 +42,7 @@ interface TableProps {
   currentTime: number;
   isLoading: boolean;
   sortBy: SortBy;
+  error?: string;
   setSortBy: (s: SortBy) => void;
   clearSearchBar: () => void;
 }
@@ -73,6 +76,7 @@ export const ProcessesTable = ({
   currentTime,
   isLoading,
   sortBy,
+  error,
   setSortBy,
   clearSearchBar,
 }: TableProps) => {
@@ -106,9 +110,7 @@ export const ProcessesTable = ({
     [processList]
   );
 
-  if (isLoading) return <LoadingPlaceholder />;
-
-  if (currentItems.length === 0)
+  if (!isLoading && currentItems.length === 0)
     return (
       <EuiEmptyPrompt
         iconType="search"
@@ -174,34 +176,61 @@ export const ProcessesTable = ({
           </EuiTableHeaderCell>
         ))}
       </EuiTableHeader>
+
       <EuiTableBody
         css={css`
+          position: relative;
           & .euiTableCellContent {
             padding-top: 0;
             padding-bottom: 0;
           }
         `}
       >
-        <ProcessesTableBody items={currentItems} currentTime={currentTime} />
+        {isLoading && <EuiProgress size="xs" color="primary" position="absolute" />}
+        {isLoading && currentItems.length === 0 && !error && (
+          <ProcessesTableMessage>
+            <FormattedMessage
+              id="xpack.infra.assetDetails.processes.loading"
+              defaultMessage="Loading..."
+            />
+          </ProcessesTableMessage>
+        )}
+
+        {error ? (
+          <ProcessesTableMessage>
+            <EuiIcon type="minusInCircle" color="danger" /> {error}
+          </ProcessesTableMessage>
+        ) : (
+          <ProcessesTableBody items={currentItems} currentTime={currentTime} />
+        )}
       </EuiTableBody>
     </EuiTable>
   );
 };
 
-const LoadingPlaceholder = () => {
+interface ProcessesTableMessageProps {
+  children: React.ReactNode;
+}
+
+const ProcessesTableMessage = ({ children }: ProcessesTableMessageProps) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '200px',
-        padding: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <EuiLoadingChart size="xl" />
-    </div>
+    <EuiTableRow>
+      <EuiTableRowCell
+        data-test-subj="infraAssetDetailsProcessesSearchInputError"
+        style={{
+          paddingTop: `${euiTheme.size.s}`,
+          paddingBottom: `${euiTheme.size.s}`,
+        }}
+        align="center"
+        colSpan={columns.length + 1}
+        mobileOptions={{ width: '100%' }}
+        textOnly={true}
+      >
+        {children}
+      </EuiTableRowCell>
+    </EuiTableRow>
   );
 };
 

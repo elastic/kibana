@@ -1,0 +1,26 @@
+# This config is intended to be used with a stand-alone fleet-server instance for development.
+output:
+  elasticsearch:
+    hosts: '${ELASTICSEARCH_HOSTS}'
+    service_token: '${ELASTICSEARCH_SERVICE_TOKEN}'
+    ssl.ca_trusted_fingerprint: '${ELASTICSEARCH_CA_TRUSTED_FINGERPRINT}'
+
+fleet:
+  agent:
+    id: '${FLEET_SERVER_AGENT_ID:dev-fleet-server}'
+
+inputs:
+  - type: fleet-server
+    policy.id: '${FLEET_SERVER_POLICY_ID:fleet-server-policy}'
+    server:
+      ssl:
+        enabled: true
+        certificate: /fleet-server.crt
+        key: /fleet-server.key
+
+logging:
+  to_stderr: true # Force the logging output to stderr
+  pretty: true
+  level: '${LOG_LEVEL:DEBUG}'
+
+http.enabled: true

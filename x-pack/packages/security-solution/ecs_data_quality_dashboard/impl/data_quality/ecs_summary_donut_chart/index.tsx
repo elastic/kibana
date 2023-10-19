@@ -30,6 +30,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { i18n } from '@kbn/i18n';
 import { ChartLegend } from './chart_legend';
 import {
   getFillColor,
@@ -38,7 +39,7 @@ import {
   getTabId,
 } from '../data_quality_panel/tabs/summary_tab/helpers';
 import { allMetadataIsEmpty } from './helpers';
-import * as i18n from './translations';
+import * as translations from './translations';
 import type { PartitionedFieldMetadata } from '../types';
 
 export const DEFAULT_HEIGHT = 180; // px
@@ -135,7 +136,7 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h4 className="eui-textCenter">{i18n.CHART_TITLE}</h4>
+        <h4 className="eui-textCenter">{translations.CHART_TITLE}</h4>
       </EuiTitle>
 
       <EuiSpacer />
@@ -155,10 +156,14 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
             justifyContent="center"
           >
             <EuiFlexItem className="eui-textTruncate">
-              <EuiButtonEmpty aria-label={i18n.FIELDS} color="text" onClick={showDefaultTab}>
+              <EuiButtonEmpty
+                aria-label={translations.FIELDS}
+                color="text"
+                onClick={showDefaultTab}
+              >
                 <EuiText size="m">{partitionedFieldMetadata.all.length}</EuiText>
                 <EuiText className="eui-textTruncate" size="s">
-                  {i18n.FIELDS}
+                  {translations.FIELDS}
                 </EuiText>
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -169,6 +174,7 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
               baseTheme={baseTheme}
               onElementClick={onElementClick}
               theme={[donutTheme, theme]}
+              locale={i18n.getLocale()}
             />
             <Partition
               data={summaryData}

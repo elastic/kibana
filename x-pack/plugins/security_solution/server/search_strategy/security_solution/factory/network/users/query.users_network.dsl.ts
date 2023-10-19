@@ -5,12 +5,9 @@
  * 2.0.
  */
 
+import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import type {
-  Direction,
-  SortField,
-  NetworkUsersRequestOptions,
-} from '../../../../../../common/search_strategy';
+import type { Direction } from '../../../../../../common/search_strategy';
 import { NetworkUsersFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -19,10 +16,12 @@ export const buildUsersQuery = ({
   sort,
   filterQuery,
   flowTarget,
-  pagination: { querySize },
+  pagination,
   defaultIndex,
   timerange: { from, to },
 }: NetworkUsersRequestOptions) => {
+  const querySize = pagination?.querySize ?? 10;
+
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -93,13 +92,12 @@ export const buildUsersQuery = ({
 
 type QueryOrder = { _count: Direction } | { _key: Direction };
 
-const getQueryOrder = (sort: SortField<NetworkUsersFields>): QueryOrder => {
-  switch (sort.field) {
-    case NetworkUsersFields.name:
-      return { _key: sort.direction };
-    case NetworkUsersFields.count:
-      return { _count: sort.direction };
-    default:
-      return assertUnreachable(sort.field);
+const getQueryOrder = (sort: NetworkUsersRequestOptions['sort']): QueryOrder => {
+  if (sort.field === NetworkUsersFields.name) {
+    return { _key: sort.direction };
+  } else if (sort.field === NetworkUsersFields.count) {
+    return { _count: sort.direction };
+  } else {
+    return assertUnreachable(sort.field as never);
   }
 };

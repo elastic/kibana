@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiTabs, EuiTab, useEuiPaddingSize } from '@elastic/eui';
 import React from 'react';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -22,11 +21,11 @@ export const DocumentViewModeToggle = ({
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
 
   const tabsCss = css`
-    padding: 0 ${useEuiPaddingSize('s')};
-    background-color: ${euiThemeVars.euiPageBackgroundColor};
+    padding: 0 ${euiTheme.size.s};
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;

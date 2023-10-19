@@ -24,7 +24,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
-import { DASHBOARD_UI_METRIC_ID, DASHBOARD_APP_ID } from '../../../dashboard_constants';
+import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
 
 export function DashboardEmptyScreen() {
   const {
@@ -44,6 +44,14 @@ export function DashboardEmptyScreen() {
     [getVisTypeAliases]
   );
 
+  const dashboardContainer = useDashboardContainer();
+  const isDarkTheme = useObservable(theme$)?.darkMode;
+  const isEditMode =
+    dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
+  const embeddableAppContext = dashboardContainer.getAppContext();
+  const originatingPath = embeddableAppContext?.getCurrentPath?.() ?? '';
+  const originatingApp = embeddableAppContext?.currentAppId;
+
   const goToLens = useCallback(() => {
     if (!lensAlias || !lensAlias.aliasPath) return;
     const trackUiMetric = usageCollection.reportUiCounter?.bind(
@@ -57,16 +65,19 @@ export function DashboardEmptyScreen() {
     getStateTransfer().navigateToEditor(lensAlias.aliasApp, {
       path: lensAlias.aliasPath,
       state: {
-        originatingApp: DASHBOARD_APP_ID,
+        originatingApp,
+        originatingPath,
         searchSessionId: search.session.getSessionId(),
       },
     });
-  }, [getStateTransfer, lensAlias, search.session, usageCollection]);
-
-  const dashboardContainer = useDashboardContainer();
-  const isDarkTheme = useObservable(theme$)?.darkMode;
-  const isEditMode =
-    dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
+  }, [
+    getStateTransfer,
+    lensAlias,
+    originatingApp,
+    originatingPath,
+    search.session,
+    usageCollection,
+  ]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = basePath.prepend(

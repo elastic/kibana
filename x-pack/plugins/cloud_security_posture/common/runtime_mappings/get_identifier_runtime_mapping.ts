@@ -20,7 +20,6 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
           !doc["rule.benchmark.posture_type"].empty;
         def orchestratorIdAvailable = doc.containsKey("orchestrator.cluster.id") &&
           !doc["orchestrator.cluster.id"].empty;
-
         if (!postureTypeAvailable) {
           def identifier = orchestratorIdAvailable ?
             doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;

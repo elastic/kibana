@@ -63,12 +63,13 @@
                     "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
                     "section": "def-common.RandomSamplerOption",
                     "text": "RandomSamplerOption"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               },
               {
                 "parentPluginId": "@kbn/ml-random-sampler-utils",
@@ -80,7 +81,7 @@
                   "- callback to be called when random sampler mode is set"
                 ],
                 "signature": [
-                  "(mode: ",
+                  "((mode: ",
                   {
                     "pluginId": "@kbn/ml-random-sampler-utils",
                     "scope": "common",
@@ -88,12 +89,12 @@
                     "section": "def-common.RandomSamplerOption",
                     "text": "RandomSamplerOption"
                   },
-                  ") => void"
+                  ") => void) | undefined"
                 ],
                 "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               },
               {
                 "parentPluginId": "@kbn/ml-random-sampler-utils",
@@ -111,7 +112,8 @@
                     "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
                     "section": "def-common.RandomSamplerProbability",
                     "text": "RandomSamplerProbability"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
@@ -128,7 +130,7 @@
                   "- initial setter for random sampler probability"
                 ],
                 "signature": [
-                  "(prob: ",
+                  "((prob: ",
                   {
                     "pluginId": "@kbn/ml-random-sampler-utils",
                     "scope": "common",
@@ -136,12 +138,12 @@
                     "section": "def-common.RandomSamplerProbability",
                     "text": "RandomSamplerProbability"
                   },
-                  ") => void"
+                  ") => void) | undefined"
                 ],
                 "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []

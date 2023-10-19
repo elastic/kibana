@@ -6,6 +6,7 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
@@ -72,6 +73,7 @@ export const createQueryAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
+    category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const { runOpts, services, spaceId, state } = execOptions;

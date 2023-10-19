@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(newObjectCount - initialObjectCount).to.eql(82);
 
       // logstash by reference dashboard with drilldowns
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('by_reference_drilldown');
       // dashboard should load properly
       await PageObjects.dashboard.expectOnDashboard('by_reference_drilldown');

@@ -14,7 +14,7 @@ import { cloneDeep, remove } from 'lodash';
 import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
-import { createProjectSettingsLinkFromManage } from './sections/project_settings_links';
+import { createProjectSettingsLinksFromManage } from './sections/project_settings_links';
 
 // This function is called by the security_solution plugin to alter the app links
 // that will be registered to the Security Solution application on Serverless projects.
@@ -35,15 +35,12 @@ export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
   if (manageLinkItem) {
     // Add assets link
     projectAppLinks.push(createAssetsLinkFromManage(manageLinkItem));
+    // Add entity analytics link if exists
+    projectAppLinks.push(...createProjectSettingsLinksFromManage(manageLinkItem));
   }
 
   // Add ML link
   projectAppLinks.push(mlAppLink);
-
-  if (manageLinkItem) {
-    // Add project settings link
-    projectAppLinks.push(createProjectSettingsLinkFromManage(manageLinkItem));
-  }
 
   return projectAppLinks;
 };

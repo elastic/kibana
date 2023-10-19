@@ -4,19 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiText } from '@elastic/eui';
+import {
+  EuiMarkdownFormat,
+  EuiSpacer,
+  EuiText,
+  getDefaultEuiMarkdownParsingPlugins,
+  getDefaultEuiMarkdownProcessingPlugins,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
-import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import React, { useMemo, useRef } from 'react';
 import type { Node } from 'unist';
-import { v4 } from 'uuid';
+import { ChatActionClickHandler } from '../chat/types';
+import { EsqlCodeBlock } from './esql_code_block';
 
 interface Props {
   content: string;
   loading: boolean;
+  onActionClick: ChatActionClickHandler;
 }
 
 const ANIMATION_TIME = 1;
@@ -44,7 +50,10 @@ const cursorCss = css`
 
 const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
 
-const CURSOR = `{{${v4()}}`;
+// a weird combination of different whitespace chars to make sure it stays
+// invisible even when we cannot properly parse the text while still being
+// unique
+const CURSOR = ` ᠎  `;
 
 const loadingCursorPlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
@@ -72,9 +81,6 @@ const loadingCursorPlugin = () => {
     parent!.children.splice(indexOfNode + 1, 0, {
       type: 'cursor' as Text['type'],
       value: CURSOR,
-      data: {
-        hName: 'cursor',
-      },
     });
   };
 
@@ -83,28 +89,107 @@ const loadingCursorPlugin = () => {
   };
 };
 
-export function MessageText(props: Props) {
+const esqlLanguagePlugin = () => {
+  const visitor = (node: Node, parent?: Parent) => {
+    if ('children' in node) {
+      const nodeAsParent = node as Parent;
+      nodeAsParent.children.forEach((child) => {
+        visitor(child, nodeAsParent);
+      });
+    }
+
+    if (node.type === 'code' && node.lang === 'esql') {
+      node.type = 'esql';
+    }
+  };
+
+  return (tree: Node) => {
+    visitor(tree);
+  };
+};
+
+export function MessageText({ loading, content, onActionClick }: Props) {
   const containerClassName = css`
     overflow-wrap: break-word;
-
-    pre {
-      background: ${euiThemeVars.euiColorLightestShade};
-      padding: 0 8px;
-    }
   `;
+
+  const onActionClickRef = useRef(onActionClick);
+
+  onActionClickRef.current = onActionClick;
+
+  const { parsingPluginList, processingPluginList } = useMemo(() => {
+    const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+
+    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+
+    const { components } = processingPlugins[1][1];
+
+    processingPlugins[1][1].components = {
+      ...components,
+      cursor: Cursor,
+      esql: (props) => {
+        return (
+          <>
+            <EsqlCodeBlock
+              value={props.value}
+              actionsDisabled={loading}
+              onActionClick={onActionClickRef.current}
+            />
+            <EuiSpacer size="m" />
+          </>
+        );
+      },
+      table: (props) => (
+        <>
+          <div className="euiBasicTable">
+            {' '}
+            <table className="euiTable" {...props} />
+          </div>
+          <EuiSpacer size="m" />
+        </>
+      ),
+      th: (props) => {
+        const { children, ...rest } = props;
+        return (
+          <th className="euiTableHeaderCell" {...rest}>
+            <span className="euiTableCellContent">
+              <span className="euiTableCellContent__text" title={children}>
+                {children}
+              </span>
+            </span>
+          </th>
+        );
+      },
+      tr: (props) => <tr className="euiTableRow" {...props} />,
+      td: (props) => {
+        const { children, ...rest } = props;
+        return (
+          <td className="euiTableRowCell" {...rest}>
+            <div className="euiTableCellContent euiTableCellContent--truncateText">
+              <span className="euiTableCellContent__text" title={children}>
+                {children}
+              </span>
+            </div>
+          </td>
+        );
+      },
+    };
+
+    return {
+      parsingPluginList: [loadingCursorPlugin, esqlLanguagePlugin, ...parsingPlugins],
+      processingPluginList: processingPlugins,
+    };
+  }, [loading]);
 
   return (
     <EuiText size="s" className={containerClassName}>
-      <ReactMarkdown
-        plugins={[loadingCursorPlugin]}
-        components={
-          {
-            cursor: Cursor,
-          } as Record<string, any>
-        }
+      <EuiMarkdownFormat
+        textSize="s"
+        parsingPluginList={parsingPluginList}
+        processingPluginList={processingPluginList}
       >
-        {`${props.content}${props.loading ? CURSOR : ''}`}
-      </ReactMarkdown>
+        {`${content}${loading ? CURSOR : ''}`}
+      </EuiMarkdownFormat>
     </EuiText>
   );
 }

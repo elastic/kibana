@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { duplicatedRuleName } from '../objects/rule';
+import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
   COLLAPSED_ACTION_BTN,
   CUSTOM_RULES_BTN,
@@ -65,6 +65,7 @@ import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
+import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
@@ -107,8 +108,8 @@ export const duplicateRuleFromMenu = () => {
  * Check that the duplicated rule is on the table
  * and it is disabled (default)
  */
-export const checkDuplicatedRule = () => {
-  cy.contains(RULE_NAME, duplicatedRuleName)
+export const checkDuplicatedRule = (ruleName: string): void => {
+  cy.contains(RULE_NAME, ruleName)
     .parents(RULES_ROW)
     .find(RULE_SWITCH)
     .should('have.attr', 'aria-checked', 'false');
@@ -147,6 +148,20 @@ export const filterByTags = (tags: string[]) => {
   for (const tag of tags) {
     cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
   }
+
+  // close the popover
+  cy.get(RULES_TAGS_FILTER_BTN).click();
+};
+
+export const unselectTags = () => {
+  cy.get(RULES_TAGS_FILTER_BTN).click();
+
+  cy.get(RULES_TAGS_FILTER_POPOVER)
+    .find('[aria-checked="true"]')
+    .each((el) => cy.wrap(el).click());
+
+  // close the popover
+  cy.get(RULES_TAGS_FILTER_BTN).click();
 };
 
 export const waitForRuleExecution = (name: string) => {
@@ -179,14 +194,7 @@ export const filterByDisabledRules = () => {
   cy.get(DISABLED_RULES_BTN).click();
 };
 
-/**
- * @deprecated use goToTheRuleDetailsOf
- */
-export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).first().click();
-};
-
-export const goToTheRuleDetailsOf = (ruleName: string) => {
+export const goToRuleDetailsOf = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName).click();
 
   cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
@@ -277,11 +285,11 @@ export const waitForRuleToUpdate = () => {
 
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).click({ force: true });
+  cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).selectFile(rulesFile);
   cy.get(INPUT_FILE).trigger('change');
-  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
-  cy.get(INPUT_FILE).should('not.exist');
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click();
+  cy.get(INPUT_FILE, { timeout: 300000 }).should('not.exist');
 };
 
 export const expectRulesManagementTab = () => {
@@ -488,7 +496,7 @@ export const closeErrorToast = () => {
 };
 
 export const goToEditRuleActionsSettingsOf = (name: string) => {
-  goToTheRuleDetailsOf(name);
+  goToRuleDetailsOf(name);
   goToRuleEditSettings();
   // wait until first step loads completely. Otherwise cypress stuck at the first edit page
   cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');
@@ -509,4 +517,30 @@ const unselectRuleByName = (ruleName: string) => {
   getRuleRow(ruleName).find(EUI_CHECKBOX).uncheck();
   cy.log(`Make sure rule "${ruleName}" has been unselected`);
   getRuleRow(ruleName).find(EUI_CHECKBOX).should('not.be.checked');
+};
+
+/**
+ * Set Kibana `securitySolution:rulesTableRefresh` setting looking like
+ *
+ * ```
+ * { "on": true, "value": 60000 }
+ * ```
+ *
+ * @param enabled whether the auto-refresh is enabled
+ * @param refreshInterval refresh interval in milliseconds
+ */
+export const setRulesTableAutoRefreshIntervalSetting = ({
+  enabled,
+  refreshInterval,
+}: {
+  enabled: boolean;
+  refreshInterval: number; // milliseconds
+}) => {
+  setKibanaSetting(
+    DEFAULT_RULES_TABLE_REFRESH_SETTING,
+    JSON.stringify({
+      on: enabled,
+      value: refreshInterval,
+    })
+  );
 };

@@ -1053,43 +1053,6 @@
       },
       {
         "parentPluginId": "eventAnnotation",
-        "id": "def-common.EventAnnotationArgs",
-        "type": "Type",
-        "tags": [],
-        "label": "EventAnnotationArgs",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.ManualPointEventAnnotationArgs",
-            "text": "ManualPointEventAnnotationArgs"
-          },
-          " | ",
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.ManualRangeEventAnnotationArgs",
-            "text": "ManualRangeEventAnnotationArgs"
-          },
-          " | ",
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.QueryPointEventAnnotationArgs",
-            "text": "QueryPointEventAnnotationArgs"
-          }
-        ],
-        "path": "src/plugins/event_annotation/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "eventAnnotation",
         "id": "def-common.EventAnnotationGroupCreateIn",
         "type": "Type",
         "tags": [],
@@ -1122,6 +1085,139 @@
       },
       {
         "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupCreateOut",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationGroupCreateOut",
+        "description": [],
+        "signature": [
+          "{ item: ",
+          "EventAnnotationGroupSavedObject",
+          "; }"
+        ],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupCrudTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationGroupCrudTypes",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.ContentManagementCrudTypes",
+            "text": "ContentManagementCrudTypes"
+          },
+          "<\"event-annotation-group\", ",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.EventAnnotationGroupSavedObjectAttributes",
+            "text": "EventAnnotationGroupSavedObjectAttributes"
+          },
+          ", ",
+          "CreateOptions",
+          ", ",
+          "UpdateOptions",
+          ", {}>"
+        ],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupDeleteIn",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationGroupDeleteIn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.DeleteIn",
+            "text": "DeleteIn"
+          },
+          "<\"event-annotation-group\", object>"
+        ],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupDeleteOut",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationGroupDeleteOut",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.DeleteResult",
+            "text": "DeleteResult"
+          }
+        ],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupGetIn",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationGroupGetIn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.GetIn",
+            "text": "GetIn"
+          },
+          "<\"event-annotation-group\", object>"
+        ],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupGetOut",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationGroupGetOut",
+        "description": [],
+        "signature": [
+          "{ item: ",
+          "EventAnnotationGroupSavedObject",
+          "; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+        ],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
         "id": "def-common.EventAnnotationGroupSearchIn",
         "type": "Type",
         "tags": [],
@@ -1138,6 +1234,23 @@
           "<\"event-annotation-group\", ",
           "EventAnnotationGroupSearchQuery",
           ">"
+        ],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupSearchOut",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationGroupSearchOut",
+        "description": [],
+        "signature": [
+          "{ hits: ",
+          "EventAnnotationGroupSavedObject",
+          "[]; pagination: { total: number; cursor?: string | undefined; }; }"
         ],
         "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
         "deprecated": false,

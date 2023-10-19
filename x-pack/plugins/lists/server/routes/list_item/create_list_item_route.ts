@@ -15,67 +15,74 @@ import { buildRouteValidation, buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const createListItemRoute = (router: ListsPluginRouter): void => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
-      validate: {
-        body: buildRouteValidation(createListItemRequest),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            body: buildRouteValidation(createListItemRequest),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const { id, list_id: listId, value, meta } = request.body;
-        const lists = await getListClient(context);
-        const list = await lists.getList({ id: listId });
-        if (list == null) {
-          return siemResponse.error({
-            body: `list id: "${listId}" does not exist`,
-            statusCode: 404,
-          });
-        } else {
-          if (id != null) {
-            const listItem = await lists.getListItem({ id });
-            if (listItem != null) {
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const { id, list_id: listId, value, meta } = request.body;
+          const lists = await getListClient(context);
+          const list = await lists.getList({ id: listId });
+          if (list == null) {
+            return siemResponse.error({
+              body: `list id: "${listId}" does not exist`,
+              statusCode: 404,
+            });
+          } else {
+            if (id != null) {
+              const listItem = await lists.getListItem({ id });
+              if (listItem != null) {
+                return siemResponse.error({
+                  body: `list item id: "${id}" already exists`,
+                  statusCode: 409,
+                });
+              }
+            }
+            const createdListItem = await lists.createListItem({
+              deserializer: list.deserializer,
+              id,
+              listId,
+              meta,
+              serializer: list.serializer,
+              type: list.type,
+              value,
+            });
+            if (createdListItem != null) {
+              const [validated, errors] = validate(createdListItem, createListItemResponse);
+              if (errors != null) {
+                return siemResponse.error({ body: errors, statusCode: 500 });
+              } else {
+                return response.ok({ body: validated ?? {} });
+              }
+            } else {
               return siemResponse.error({
-                body: `list item id: "${id}" already exists`,
-                statusCode: 409,
+                body: 'list item invalid',
+                statusCode: 400,
               });
             }
           }
-          const createdListItem = await lists.createListItem({
-            deserializer: list.deserializer,
-            id,
-            listId,
-            meta,
-            serializer: list.serializer,
-            type: list.type,
-            value,
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
           });
-          if (createdListItem != null) {
-            const [validated, errors] = validate(createdListItem, createListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
-          } else {
-            return siemResponse.error({
-              body: 'list item invalid',
-              statusCode: 400,
-            });
-          }
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

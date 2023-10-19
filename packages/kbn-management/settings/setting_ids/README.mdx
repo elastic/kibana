@@ -1,0 +1,39 @@
+---
+id: kbn-management/settings/ids
+slug: /kbn-management/settings/setting_ids/
+title: Setting ID's
+description: ID's of all advanced settings.
+tags: ['management', 'settings']
+date: 2023-09-04
+---
+
+This package contains the id's of all advanced settings.
+
+When registering an advanced setting, add its id to this package and import it for use in the setting definition:
+
+**packages/kbn-management/settings/setting_ids/index.ts**
+
+```ts
+export const MY_SETTING_ID = 'mySetting';
+```
+
+**src/plugins/my_plugin/server/plugin.ts**
+
+```ts
+import { MY_SETTING_ID } from '@kbn/management-settings-ids';
+
+export class MyPlugin implements Plugin<object, object> {
+  public setup(core: CoreSetup, dependencies: SetupDependencies) {
+    core.uiSettings.register({
+      [MY_SETTING_ID]: {
+        name: 'My setting',
+        value: 10,
+        schema: schema.number(),
+      },
+    ...
+    });
+    
+    return {};
+  }
+}  
+```

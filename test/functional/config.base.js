@@ -34,6 +34,9 @@ export default async function ({ readConfigFile }) {
 
         // to be re-enabled once kibana/issues/102552 is completed
         '--xpack.reporting.enabled=false',
+
+        // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
       ],
     },
 

@@ -76,7 +76,7 @@ export function AddDataView() {
       steps: [
         {
           title: i18n.translate('xpack.profiling.tabs.kubernetesRepositoryStep', {
-            defaultMessage: 'Configure the Universal Profiling host-agent Helm repository:',
+            defaultMessage: 'Configure the Universal Profiling Agent Helm repository:',
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
@@ -330,7 +330,7 @@ EOF`}
               <EuiText style={{ fontWeight: 'bold' }} size="s">
                 {i18n.translate(
                   'xpack.profiling.tabs.elasticAgentIntegration.step1.collectionAgentUrl',
-                  { defaultMessage: 'Universal Profiling Collector url:' }
+                  { defaultMessage: 'Universal Profiling Collector URL:' }
                 )}
               </EuiText>
               <EuiCodeBlock paddingSize="s" isCopyable>
@@ -345,6 +345,7 @@ EOF`}
           }),
           content: (
             <EuiButton
+              data-test-subj="profilingAddDataViewManageUniversalProfilingAgentInFleetButton"
               iconType="gear"
               fill
               href={`${core.http.basePath.prepend(
@@ -392,6 +393,7 @@ EOF`}
           content: (
             <EuiText>
               <EuiLink
+                data-test-subj="profilingAddDataViewInstructionsHereLink"
                 target="_blank"
                 href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
               >
@@ -430,8 +432,9 @@ EOF`}
                   values={{
                     link: (
                       <EuiLink
+                        data-test-subj="profilingAddDataViewTheCorrespondingDocumentationPageLink"
                         target="_blank"
-                        href={`https://www.elastic.co/guide/en/observability/current/profiling-add-symbols.html`}
+                        href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
                       >
                         {i18n.translate('xpack.profiling.tabs.symbols.step3.doc-ref.link', {
                           defaultMessage: 'the corresponding documentation page',
@@ -487,12 +490,13 @@ EOF`}
             title={
               <FormattedMessage
                 id="xpack.profiling.tabs.debWarning"
-                defaultMessage="Due to a {linuxLink}, we have stopped host-agents on kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more."
+                defaultMessage="Due to a {linuxLink} which impacts stability, the profiling agent will refuse to run on kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running such a kernel with a backported fix, please refer to {advancedLink} for instructions to override the precautionary measure."
                 values={{
                   versionFrom: <strong>5.19</strong>,
                   versionTo: <strong>6.4</strong>,
                   linuxLink: (
                     <EuiLink
+                      data-test-subj="profilingAddDataViewLinuxKernelBugLink"
                       target="_blank"
                       href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d319f344561de23e810515d109c7278919bff7b0"
                     >
@@ -503,6 +507,7 @@ EOF`}
                   ),
                   debianLink: (
                     <EuiLink
+                      data-test-subj="profilingAddDataViewDebianLink"
                       target="_blank"
                       href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1033398"
                     >
@@ -513,11 +518,23 @@ EOF`}
                   ),
                   fedoraLink: (
                     <EuiLink
+                      data-test-subj="profilingAddDataViewFedoraCentOsLink"
                       target="_blank"
                       href="https://bugzilla.redhat.com/show_bug.cgi?id=2211455"
                     >
                       {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
                         defaultMessage: 'Fedora/CentOS',
+                      })}
+                    </EuiLink>
+                  ),
+                  advancedLink: (
+                    <EuiLink
+                      data-test-subj="profilingAddDataViewAdvancedConfigurationLink"
+                      target="_blank"
+                      href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
+                    >
+                      {i18n.translate('xpack.profiling.tabs.debWarning.advancedLink', {
+                        defaultMessage: 'Advanced configuration',
                       })}
                     </EuiLink>
                   ),
@@ -528,7 +545,7 @@ EOF`}
           <EuiSpacer />
           <EuiText>
             {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
-              defaultMessage: 'Select an option below to deploy the host-agent.',
+              defaultMessage: 'Select an option below to deploy the Universal Profiling Agent.',
             })}
           </EuiText>
           <EuiSpacer />

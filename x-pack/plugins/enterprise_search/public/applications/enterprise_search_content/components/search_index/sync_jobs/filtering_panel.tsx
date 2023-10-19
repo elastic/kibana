@@ -11,7 +11,7 @@ import { EuiCodeBlock, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringRule, FilteringRules } from '../../../../../../common/types/connectors';
+import { FilteringRule, FilteringRules } from '@kbn/search-connectors';
 
 import { FilteringRulesTable } from '../../shared/filtering_rules_table/filtering_rules_table';
 

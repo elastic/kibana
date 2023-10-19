@@ -28,6 +28,7 @@ export function PopoverTooltip({
       closePopover={() => setIsPopoverOpen(false)}
       button={
         <EuiButtonIcon
+          data-test-subj="apmPopoverTooltipButton"
           aria-label={ariaLabel}
           onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
             setIsPopoverOpen(!isPopoverOpen);

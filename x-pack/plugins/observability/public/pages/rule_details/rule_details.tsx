@@ -17,6 +17,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { PageTitle } from './components/page_title';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -64,7 +65,7 @@ export function RuleDetailsPage() {
       getRuleStatusPanel: RuleStatusPanel,
     },
   } = useKibana().services;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
@@ -73,9 +74,9 @@ export function RuleDetailsPage() {
   const baseTheme = useChartsBaseTheme();
 
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
-
+  const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useFetchRuleTypes({
-    filterByRuleTypeIds: observabilityRuleTypeRegistry.list(),
+    filterByRuleTypeIds: filteredRuleTypes,
   });
 
   useBreadcrumbs([

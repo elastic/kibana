@@ -8,6 +8,19 @@
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import { Alert as LegacyAlert } from '../alert/alert';
 import {
   AlertInstanceContext,
@@ -16,7 +29,6 @@ import {
   SummarizedAlerts,
   RawAlertInstance,
   RuleAlertData,
-  RuleNotifyWhenType,
   WithoutReservedActionGroups,
 } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -36,12 +48,17 @@ export interface AlertRuleData {
 }
 
 export interface AlertRule {
-  kibana?: {
-    alert: {
-      rule: Alert['kibana']['alert']['rule'];
-    };
-    space_ids: Alert['kibana']['space_ids'];
-  };
+  [ALERT_RULE_CATEGORY]: string;
+  [ALERT_RULE_CONSUMER]: string;
+  [ALERT_RULE_EXECUTION_UUID]: string;
+  [ALERT_RULE_NAME]: string;
+  [ALERT_RULE_PARAMETERS]: unknown;
+  [ALERT_RULE_PRODUCER]: string;
+  [ALERT_RULE_REVISION]: number;
+  [ALERT_RULE_TYPE_ID]: string;
+  [ALERT_RULE_TAGS]: string[];
+  [ALERT_RULE_UUID]: string;
+  [SPACE_IDS]: string[];
 }
 
 export interface IAlertsClient<
@@ -82,13 +99,14 @@ export interface ProcessAndLogAlertsOpts {
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
   flappingSettings: RulesSettingsFlappingProperties;
-  notifyWhen: RuleNotifyWhenType | null;
+  notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
 }
 
 export interface InitializeExecutionOpts {
   maxAlerts: number;
   ruleLabel: string;
+  startedAt: Date | null;
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;

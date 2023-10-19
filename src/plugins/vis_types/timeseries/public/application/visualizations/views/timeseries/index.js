@@ -9,6 +9,7 @@
 import React, { useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import {
   MULTILAYER_TIME_AXIS_STYLE,
   renderEndzoneTooltip,
@@ -231,6 +232,7 @@ export const TimeSeries = ({
         externalPointerEvents={{
           tooltip: { visible: syncTooltips, placement: Placement.Right },
         }}
+        locale={i18n.getLocale()}
       />
 
       {annotations.map(({ id, data, icon, color }) => {

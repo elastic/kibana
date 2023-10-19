@@ -14,6 +14,7 @@ export const searchConnectorsSo = async ({
 }: SearchConnectorsSoParams) => {
   return scopedClusterClient.asInternalUser.search({
     index: kibanaIndices,
+    ignore_unavailable: true,
     body: {
       aggs,
       size: 0,

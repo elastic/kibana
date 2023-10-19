@@ -20,6 +20,7 @@ exports[`Should render default props 1`] = `
   ownFocus={true}
   panelPaddingSize="m"
   repositionOnScroll={true}
+  repositionToCrossAxis={true}
 >
   <div
     style={
@@ -81,6 +82,7 @@ exports[`Should render metrics expression for metrics 1`] = `
   ownFocus={true}
   panelPaddingSize="m"
   repositionOnScroll={true}
+  repositionToCrossAxis={true}
 >
   <div
     style={

@@ -118,6 +118,32 @@ test('should render clusters field for remote indices', () => {
           grant: [],
         },
       }}
+      remoteClusters={[
+        {
+          name: 'test1',
+          mode: 'proxy',
+          isConnected: false,
+          initialConnectTimeout: '30s',
+          skipUnavailable: false,
+          proxyAddress: 'localhost:9400',
+          proxySocketConnections: 18,
+          connectedSocketsCount: 0,
+          serverName: 'localhost',
+          securityModel: 'certificate',
+        },
+        {
+          name: 'test2',
+          mode: 'proxy',
+          isConnected: false,
+          initialConnectTimeout: '30s',
+          skipUnavailable: false,
+          proxyAddress: 'localhost:9400',
+          proxySocketConnections: 18,
+          connectedSocketsCount: 0,
+          serverName: 'localhost',
+          securityModel: 'api_key',
+        },
+      ]}
       formIndex={0}
       indexPatterns={[]}
       indicesAPIClient={indicesAPIClientMock.create()}
@@ -130,7 +156,17 @@ test('should render clusters field for remote indices', () => {
       onDelete={jest.fn()}
     />
   );
-  expect(wrapper.find('[data-test-subj="clustersInput0"]')).toHaveLength(1);
+  const clustersInput = wrapper.find('[data-test-subj="clustersInput0"]');
+  expect(clustersInput).toHaveLength(1);
+  expect(clustersInput.prop('options')).toEqual([
+    { label: 'test2' },
+    { label: expect.anything(), isGroupLabelOption: true },
+    {
+      label: 'test1',
+      disabled: true,
+      append: expect.anything(),
+    },
+  ]);
 });
 
 describe('delete button', () => {

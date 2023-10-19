@@ -34,7 +34,7 @@ export interface IndexThresholdRuleParams extends RuleTypeParams {
   aggField?: string;
   groupBy?: string;
   termSize?: number;
-  termField?: string;
+  termField?: string | string[];
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;

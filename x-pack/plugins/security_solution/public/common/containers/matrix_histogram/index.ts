@@ -10,13 +10,13 @@ import { getOr, noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isErrorResponse, isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import type { MatrixHistogramRequestOptionsInput } from '../../../../common/api/search_strategy';
 import type { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import type { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { useKibana } from '../../lib/kibana';
 import type {
-  MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
 } from '../../../../common/search_strategy/security_solution';
@@ -76,7 +76,7 @@ export const useMatrixHistogram = ({
   const { startTracking } = useTrackHttpRequest();
 
   const [matrixHistogramRequest, setMatrixHistogramRequest] =
-    useState<MatrixHistogramRequestOptions>({
+    useState<MatrixHistogramRequestOptionsInput>({
       defaultIndex: indexNames,
       factoryQueryType: MatrixHistogramQuery,
       filterQuery: createFilter(filterQuery),
@@ -92,7 +92,7 @@ export const useMatrixHistogram = ({
       ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
       ...(includeMissingData != null ? { includeMissingData } : {}),
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
     data: [],
@@ -106,7 +106,7 @@ export const useMatrixHistogram = ({
   });
 
   const search = useCallback(
-    (request: MatrixHistogramRequestOptions) => {
+    (request: MatrixHistogramRequestOptionsInput) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -115,13 +115,13 @@ export const useMatrixHistogram = ({
         });
 
         searchSubscription$.current = data.search
-          .search<MatrixHistogramRequestOptions, MatrixHistogramStrategyResponse>(request, {
+          .search<MatrixHistogramRequestOptionsInput, MatrixHistogramStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 const histogramBuckets: Buckets = getOr(
                   bucketEmpty,
                   MatrixHistogramTypeToAggName[histogramType],
@@ -137,11 +137,6 @@ export const useMatrixHistogram = ({
                   buckets: histogramBuckets,
                 }));
                 endTracking('success');
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
-                endTracking('invalid');
                 searchSubscription$.current.unsubscribe();
               }
             },
@@ -160,7 +155,7 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, histogramType, addWarning, addError, errorMessage, startTracking]
+    [data.search, histogramType, addError, errorMessage, startTracking]
   );
 
   useEffect(() => {

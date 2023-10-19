@@ -19,6 +19,9 @@ export const useStyles = () => {
   `;
 
   const gridStyle = css`
+    & .euiDataGrid__content {
+      background: transparent;
+    }
     & .euiDataGridHeaderCell__icon {
       display: none;
     }
@@ -67,6 +70,8 @@ export const useStyles = () => {
 
   const groupBySelector = css`
     width: 188px;
+    display: inline-block;
+    margin-left: 8px;
   `;
 
   return {

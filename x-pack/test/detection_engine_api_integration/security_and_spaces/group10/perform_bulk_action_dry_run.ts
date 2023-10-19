@@ -8,6 +8,8 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
+import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
+
 import expect from 'expect';
 import {
   BulkActionType,
@@ -284,6 +286,59 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: mlRule.id,
                   name: mlRule.name,
+                },
+              ],
+            });
+          });
+        });
+      });
+
+      describe('validate updating index pattern for ES|QL rule', () => {
+        const actions = [
+          BulkActionEditType.add_index_patterns,
+          BulkActionEditType.set_index_patterns,
+          BulkActionEditType.delete_index_patterns,
+        ];
+
+        actions.forEach((editAction) => {
+          it(`should return error if ${editAction} action is applied to ES|QL rule`, async () => {
+            const esqlRule = await createRule(supertest, log, getCreateEsqlRulesSchemaMock());
+
+            const { body } = await postDryRunBulkAction()
+              .send({
+                ids: [esqlRule.id],
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
+                  {
+                    type: editAction,
+                    value: [],
+                  },
+                ],
+              })
+              .expect(500);
+
+            expect(body.attributes.summary).toEqual({
+              failed: 1,
+              skipped: 0,
+              succeeded: 0,
+              total: 1,
+            });
+            expect(body.attributes.results).toEqual({
+              updated: [],
+              skipped: [],
+              created: [],
+              deleted: [],
+            });
+
+            expect(body.attributes.errors).toHaveLength(1);
+            expect(body.attributes.errors[0]).toEqual({
+              err_code: 'ESQL_INDEX_PATTERN',
+              message: "ES|QL rule doesn't have index patterns",
+              status_code: 500,
+              rules: [
+                {
+                  id: esqlRule.id,
+                  name: esqlRule.name,
                 },
               ],
             });

@@ -16,7 +16,10 @@ Array [
       Errors found
     </p>
     <div
-      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
     >
       <p>
         There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
@@ -26,7 +29,7 @@ Array [
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           403 Forbidden
         </dt>
@@ -36,7 +39,7 @@ Array [
           no access for you
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           500 Internal Server Error
         </dt>

@@ -130,6 +130,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     }
   }, [rules]);
 
+  const addExceptionToRuleOrListSelection = useMemo(() => {
+    if (isBulkAction) return 'add_to_rules';
+    if (rules?.length === 1 || isAlertDataLoading !== undefined) return 'add_to_rule';
+    return 'select_rules_to_add_to';
+  }, [isAlertDataLoading, isBulkAction, rules]);
+
   const getListType = useMemo(() => {
     if (isEndpointItem) return ExceptionListTypeEnum.ENDPOINT;
     if (sharedListToAddTo) return ExceptionListTypeEnum.DETECTION;
@@ -159,14 +165,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
     ...initialState,
-    addExceptionToRadioSelection: isBulkAction
-      ? 'add_to_rules'
-      : rules != null && rules.length === 1
-      ? 'add_to_rule'
-      : 'select_rules_to_add_to',
+    addExceptionToRadioSelection: addExceptionToRuleOrListSelection,
     listType: getListType,
     selectedRulesToAddTo: rules != null ? rules : [],
   });
+
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
@@ -348,7 +351,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             exceptionItemName,
             // With "rule_default" type, there is only ever one rule associated.
             // That is why it's ok to pull just the first item from rules array here.
-            ruleCustomHighlightedFields: rules?.[0]?.investigation_fields ?? [],
+            ruleCustomHighlightedFields: rules?.[0]?.investigation_fields?.field_names ?? [],
           });
           if (populatedException) {
             setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));

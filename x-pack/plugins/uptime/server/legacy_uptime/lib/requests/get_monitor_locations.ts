@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  SUMMARY_FILTER,
+} from '../../../../common/constants/client_defaults';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
@@ -43,11 +47,8 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
               'monitor.id': monitorId,
             },
           },
-          {
-            exists: {
-              field: 'summary',
-            },
-          },
+          SUMMARY_FILTER,
+          EXCLUDE_RUN_ONCE_FILTER,
           {
             range: {
               '@timestamp': {

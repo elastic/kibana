@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Dispatch, SetStateAction, MouseEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';
 import { Ping } from '../../../../../../../../common/runtime_types';
 import { PingListExpandedRowComponent } from '../expanded_row';
+type PingExpandedRowMap = Record<string, JSX.Element>;
 
 export const toggleDetails = (
   ping: Ping,
-  expandedRows: Record<string, JSX.Element>,
-  setExpandedRows: (update: Record<string, JSX.Element>) => any
+  expandedRows: PingExpandedRowMap,
+  setExpandedRows: Dispatch<SetStateAction<PingExpandedRowMap>>
 ) => {
+  // prevent expanding on row click if not expandable
+  if (!rowShouldExpand(ping)) {
+    return;
+  }
+
   // If already expanded, collapse
   if (expandedRows[ping.docId]) {
     delete expandedRows[ping.docId];
@@ -43,14 +49,18 @@ export function rowShouldExpand(item: Ping) {
 
 interface Props {
   item: Ping;
-  expandedRows: Record<string, JSX.Element>;
-  setExpandedRows: (val: Record<string, JSX.Element>) => void;
+  expandedRows: PingExpandedRowMap;
+  setExpandedRows: Dispatch<SetStateAction<PingExpandedRowMap>>;
 }
 export const ExpandRowColumn = ({ item, expandedRows, setExpandedRows }: Props) => {
   return (
     <EuiButtonIcon
       data-test-subj="uptimePingListExpandBtn"
-      onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
+      onClick={(evt: MouseEvent<HTMLButtonElement>) => {
+        // for table row click
+        evt.stopPropagation();
+        toggleDetails(item, expandedRows, setExpandedRows);
+      }}
       isDisabled={!rowShouldExpand(item)}
       aria-label={
         expandedRows[item.docId]

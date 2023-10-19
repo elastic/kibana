@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   ERROR_ID,
   SPAN_ID,
@@ -18,35 +18,16 @@ export async function getEventMetadata({
   apmEventClient,
   processorEvent,
   id,
+  start,
+  end,
 }: {
   apmEventClient: APMEventClient;
   processorEvent: ProcessorEvent;
   id: string;
+  start: number;
+  end: number;
 }) {
-  const filter: QueryDslQueryContainer[] = [];
-
-  switch (processorEvent) {
-    case ProcessorEvent.error:
-      filter.push({
-        term: { [ERROR_ID]: id },
-      });
-      break;
-
-    case ProcessorEvent.transaction:
-      filter.push({
-        term: {
-          [TRANSACTION_ID]: id,
-        },
-      });
-      break;
-
-    case ProcessorEvent.span:
-      filter.push({
-        term: { [SPAN_ID]: id },
-      });
-      break;
-  }
-
+  const fieldName = getFieldName(processorEvent);
   const response = await apmEventClient.search('get_event_metadata', {
     apm: {
       events: [processorEvent],
@@ -54,7 +35,9 @@ export async function getEventMetadata({
     body: {
       track_total_hits: false,
       query: {
-        bool: { filter },
+        bool: {
+          filter: [...rangeQuery(start, end), { term: { [fieldName]: id } }],
+        },
       },
       size: 1,
       _source: false,
@@ -64,4 +47,20 @@ export async function getEventMetadata({
   });
 
   return response.hits.hits[0].fields;
+}
+
+function getFieldName(processorEvent: ProcessorEvent) {
+  switch (processorEvent) {
+    case ProcessorEvent.error:
+      return ERROR_ID;
+
+    case ProcessorEvent.transaction:
+      return TRANSACTION_ID;
+
+    case ProcessorEvent.span:
+      return SPAN_ID;
+
+    default:
+      throw new Error('Unknown processor event');
+  }
 }

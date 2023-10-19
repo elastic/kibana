@@ -7,7 +7,7 @@
  */
 
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { isCompleteResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Datatable, isExpressionValueError } from '@kbn/expressions-plugin/common';
@@ -206,10 +206,10 @@ const fetchTotalHitsSearchSource = async ({
       executionContext: {
         description: 'fetch total hits',
       },
-      disableShardFailureWarning: true, // TODO: show warnings as a badge next to total hits number
+      disableWarningToasts: true, // TODO: show warnings as a badge next to total hits number
     })
     .pipe(
-      filter((res) => isCompleteResponse(res)),
+      filter((res) => !isRunningResponse(res)),
       map((res) => res.rawResponse.hits.total as number),
       catchError((error: Error) => of(error))
     );

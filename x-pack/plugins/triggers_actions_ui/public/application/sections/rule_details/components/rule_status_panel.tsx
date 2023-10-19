@@ -126,12 +126,8 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <RuleStatusDropdown
-              disableRule={async () => {
-                await bulkDisableRules({ ids: [rule.id] });
-              }}
-              enableRule={async () => {
-                await bulkEnableRules({ ids: [rule.id] });
-              }}
+              disableRule={() => bulkDisableRules({ ids: [rule.id] })}
+              enableRule={() => bulkEnableRules({ ids: [rule.id] })}
               snoozeRule={async () => {}}
               unsnoozeRule={async () => {}}
               rule={rule}

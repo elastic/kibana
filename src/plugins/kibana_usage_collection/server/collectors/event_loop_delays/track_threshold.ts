@@ -45,7 +45,7 @@ export function startTrackingEventLoopDelaysThreshold(
       takeUntil(stopMonitoringEventLoop$),
       finalize(() => eventLoopDelaysMonitor.stop())
     )
-    .subscribe(async () => {
+    .subscribe(() => {
       const { mean: meanMS } = eventLoopDelaysMonitor.collect();
 
       if (meanMS > warnThreshold) {

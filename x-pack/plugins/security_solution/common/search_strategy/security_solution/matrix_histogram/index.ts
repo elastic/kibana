@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { Inspect, Maybe, TimerangeInput } from '../../common';
-import type { RequestBasicOptions } from '..';
+import type { MatrixHistogramRequestOptions } from '../../../api/search_strategy/matrix_histogram/matrix_histogram';
+import type { Inspect, Maybe } from '../../common';
 import type { AlertsGroupData } from './alerts';
 import type { AnomaliesActionGroupData } from './anomalies';
 import type { DnsHistogramGroupData } from './dns';
@@ -24,7 +23,7 @@ export * from './dns';
 export * from './events';
 export * from './preview';
 
-export const MatrixHistogramQuery = 'matrixHistogram';
+export { MatrixHistogramQuery } from '../../../api/search_strategy';
 
 export enum MatrixHistogramType {
   authentications = 'authentications',
@@ -43,26 +42,6 @@ export const MatrixHistogramTypeToAggName = {
   [MatrixHistogramType.events]: 'aggregations.eventActionGroup.buckets',
   [MatrixHistogramType.preview]: 'aggregations.preview.buckets',
 };
-
-export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
-  timerange: TimerangeInput;
-  histogramType: MatrixHistogramType;
-  stackByField: string;
-  threshold?:
-    | {
-        field: string[];
-        value: string;
-        cardinality?: {
-          field: string[];
-          value: string;
-        };
-      }
-    | undefined;
-  inspect?: Maybe<Inspect>;
-  isPtrIncluded?: boolean;
-  includeMissingData?: boolean;
-  runtimeMappings?: MappingRuntimeFields;
-}
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;

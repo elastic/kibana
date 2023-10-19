@@ -13,6 +13,7 @@ import {
   ConnectorUserActionPayloadRt,
   ConnectorUserActionPayloadWithoutConnectorIdRt,
 } from '../connector/v1';
+import { CustomFieldsUserActionPayloadRt } from '../custom_fields/v1';
 import { DescriptionUserActionPayloadRt } from '../description/v1';
 import { SettingsUserActionPayloadRt } from '../settings/v1';
 import { TagsUserActionPayloadRt } from '../tags/v1';
@@ -36,6 +37,7 @@ const CommonPayloadAttributesRt = rt.strict({
 const OptionalPayloadAttributesRt = rt.exact(
   rt.partial({
     category: CategoryUserActionPayloadRt.type.props.category,
+    customFields: CustomFieldsUserActionPayloadRt.type.props.customFields,
   })
 );
 

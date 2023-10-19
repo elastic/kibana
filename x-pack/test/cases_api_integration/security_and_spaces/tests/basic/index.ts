@@ -30,6 +30,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./configure/get_connectors'));
+    loadTestFile(require.resolve('./attachments_framework/registered_persistable_state_basic'));
 
     // Internal routes
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));

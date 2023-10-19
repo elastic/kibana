@@ -210,6 +210,14 @@ export const schema = Joi.object()
             scheme: /https?/,
           }),
         }),
+        files: Joi.array().items(Joi.string()),
+      })
+      .default(),
+
+    esServerlessOptions: Joi.object()
+      .keys({
+        host: Joi.string().ip(),
+        resources: Joi.array().items(Joi.string()).default([]),
       })
       .default(),
 

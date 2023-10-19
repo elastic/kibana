@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,33 +16,39 @@ import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/comm
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
-  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
-  const { asset, assetType, overrides, onTabsStateChange } = useAssetDetailsStateContext();
+  const ref = useRef<HTMLDivElement>(null);
+  const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDateRangeProviderContext();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { asset } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsProviderContext();
 
-  const { query: overrideQuery } = overrides?.logs ?? {};
   const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
-  const [textQuery, setTextQuery] = useState(overrideQuery ?? '');
-  const [textQueryDebounced, setTextQueryDebounced] = useState(overrideQuery ?? '');
+  const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
+  const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
   const currentTimestamp = getDateRangeInTimestamp().to;
-  const startTimestamp = currentTimestamp - 60 * 60 * 1000; // 60 minutes
+  const state = useIntersectingState(ref, {
+    currentTimestamp,
+    startTimestamp: currentTimestamp - 60 * 60 * 1000,
+    dateRange,
+    autoRefresh,
+  });
 
   useDebounce(
     () => {
-      if (onTabsStateChange) {
-        onTabsStateChange({ logs: { query: textQuery } });
-      }
+      setUrlState({ logsSearch: textQuery });
       setTextQueryDebounced(textQuery);
     },
     TEXT_QUERY_THROTTLE_INTERVAL_MS,
@@ -51,7 +57,7 @@ export const Logs = () => {
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(assetType).id}: "${asset.name}"`,
+      `${findInventoryFields(asset.type).id}: "${asset.name}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -59,7 +65,7 @@ export const Logs = () => {
       language: 'kuery',
       query,
     };
-  }, [assetType, asset.name, textQueryDebounced]);
+  }, [asset.type, asset.name, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -72,23 +78,23 @@ export const Logs = () => {
 
   const logsUrl = useMemo(() => {
     return locators.nodeLogsLocator.getRedirectUrl({
-      nodeType: assetType,
+      nodeType: asset.type,
       nodeId: asset.name,
-      time: startTimestamp,
+      time: state.startTimestamp,
       filter: textQueryDebounced,
       logView,
     });
   }, [
     locators.nodeLogsLocator,
     asset.name,
-    assetType,
-    startTimestamp,
+    asset.type,
+    state.startTimestamp,
     textQueryDebounced,
     logView,
   ]);
 
   return (
-    <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent">
+    <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent" ref={ref}>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
           <EuiFlexItem>
@@ -136,11 +142,18 @@ export const Logs = () => {
         ) : (
           <LogStream
             logView={logView}
-            startTimestamp={startTimestamp}
-            endTimestamp={currentTimestamp}
+            startTimestamp={state.startTimestamp}
+            endTimestamp={state.currentTimestamp}
+            startDateExpression={
+              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.from : undefined
+            }
+            endDateExpression={
+              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.to : undefined
+            }
             query={filter}
             height="60vh"
             showFlyoutAction
+            isStreaming={state.autoRefresh && !state.autoRefresh.isPaused}
           />
         )}
       </EuiFlexItem>

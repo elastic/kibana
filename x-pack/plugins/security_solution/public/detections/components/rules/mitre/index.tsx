@@ -18,7 +18,7 @@ import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import type { MitreTacticsOptions } from '../../../mitre/types';
+import type { MitreTactic } from '../../../mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -77,12 +77,12 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     }
   }, [field]);
 
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTacticsOptions[]>([]);
+  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
 
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setTacticsOptions(mitreConfig.tacticsOptions);
+      setTacticsOptions(mitreConfig.tactics);
     }
     getMitre();
   }, []);
@@ -128,7 +128,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                     ]
                   : []),
                 ...tacticsOptions.map((t) => ({
-                  inputDisplay: <>{t.text}</>,
+                  inputDisplay: <>{t.label}</>,
                   value: t.value,
                   disabled,
                 })),

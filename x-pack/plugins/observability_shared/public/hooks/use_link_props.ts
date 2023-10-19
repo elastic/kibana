@@ -19,6 +19,7 @@ export interface LinkDescriptor {
   pathname?: string;
   hash?: string;
   search?: Search;
+  state?: unknown;
 }
 
 export interface LinkProps {
@@ -31,7 +32,7 @@ export interface Options {
 }
 
 export const useLinkProps = (
-  { app, pathname, hash, search }: LinkDescriptor,
+  { app, pathname, hash, search, state }: LinkDescriptor,
   options: Options = {}
 ): LinkProps => {
   validateParams({ app, pathname, hash, search });
@@ -77,7 +78,7 @@ export const useLinkProps = (
       const navigate = () => {
         if (navigateToApp) {
           const navigationPath = mergedHash ? `#${mergedHash}` : mergedPathname;
-          navigateToApp(app, { path: navigationPath ? navigationPath : undefined });
+          navigateToApp(app, { path: navigationPath ? navigationPath : undefined, state });
         }
       };
 
@@ -94,7 +95,7 @@ export const useLinkProps = (
         navigate();
       }
     };
-  }, [navigateToApp, mergedHash, mergedPathname, app, prompt]);
+  }, [prompt, navigateToApp, mergedHash, mergedPathname, app, state]);
 
   return {
     href,

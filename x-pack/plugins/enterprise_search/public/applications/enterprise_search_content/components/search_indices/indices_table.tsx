@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { NATIVE_CONNECTOR_DEFINITIONS } from '../../../../../common/connectors/native_connectors';
+import { NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 import { healthColorsMap } from '../../../shared/constants/health_colors';

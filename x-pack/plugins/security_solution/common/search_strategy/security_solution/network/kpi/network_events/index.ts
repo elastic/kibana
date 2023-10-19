@@ -7,9 +7,6 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Inspect, Maybe } from '../../../../common';
-import type { RequestBasicOptions } from '../../..';
-
-export type NetworkKpiNetworkEventsRequestOptions = RequestBasicOptions;
 
 export interface NetworkKpiNetworkEventsStrategyResponse extends IEsSearchResponse {
   networkEvents: number;

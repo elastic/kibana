@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import type { Either } from 'fp-ts/lib/Either';
-import { left } from 'fp-ts/lib/Either';
-import type { Errors } from 'io-ts';
-
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import type { ErrorSchema } from '../../model/error_schema';
-
-import { ImportRulesResponse } from './import_rules_route';
+import { stringifyZodError } from '@kbn/securitysolution-es-utils';
+import { expectParseError, expectParseSuccess } from '../../../../test/zod_helpers';
+import type { ErrorSchema } from '../../model/error_schema.gen';
+import { ImportRulesResponse } from './import_rules_route.gen';
 
 describe('Import rules schema', () => {
   describe('response schema', () => {
@@ -31,12 +26,9 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('it should validate an empty import response with a single error', () => {
@@ -53,12 +45,9 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('it should validate an empty import response with a single exceptions error', () => {
@@ -75,12 +64,9 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('it should validate an empty import response with two errors', () => {
@@ -100,12 +86,9 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('it should validate an empty import response with two exception errors', () => {
@@ -125,12 +108,9 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('it should NOT validate a success_count that is a negative number', () => {
@@ -147,14 +127,11 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "-1" supplied to "success_count"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'success_count: Number must be greater than or equal to 0'
+      );
     });
 
     test('it should NOT validate a exceptions_success_count that is a negative number', () => {
@@ -171,35 +148,14 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "-1" supplied to "exceptions_success_count"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'exceptions_success_count: Number must be greater than or equal to 0'
+      );
     });
 
     test('it should NOT validate a success that is not a boolean', () => {
-      type UnsafeCastForTest = Either<
-        Errors,
-        {
-          success: string;
-          success_count: number;
-          errors: Array<
-            {
-              id?: string | undefined;
-              rule_id?: string | undefined;
-            } & {
-              error: {
-                status_code: number;
-                message: string;
-              };
-            }
-          >;
-        }
-      >;
       const payload: Omit<ImportRulesResponse, 'success'> & { success: string } = {
         success: 'hello',
         success_count: 0,
@@ -213,36 +169,12 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded as UnsafeCastForTest);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "hello" supplied to "success"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual('success: Expected boolean, received string');
     });
 
     test('it should NOT validate a exceptions_success that is not a boolean', () => {
-      type UnsafeCastForTest = Either<
-        Errors,
-        {
-          success: boolean;
-          exceptions_success: string;
-          success_count: number;
-          errors: Array<
-            {
-              id?: string | undefined;
-              rule_id?: string | undefined;
-            } & {
-              error: {
-                status_code: number;
-                message: string;
-              };
-            }
-          >;
-        }
-      >;
       const payload: Omit<ImportRulesResponse, 'exceptions_success'> & {
         exceptions_success: string;
       } = {
@@ -258,14 +190,11 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded as UnsafeCastForTest);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "hello" supplied to "exceptions_success"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'exceptions_success: Expected boolean, received string'
+      );
     });
 
     test('it should NOT validate a success an extra invalid field', () => {
@@ -283,12 +212,11 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_field"']);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        "Unrecognized key(s) in object: 'invalid_field'"
+      );
     });
 
     test('it should NOT validate an extra field in the second position of the errors array', () => {
@@ -311,12 +239,11 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_data"']);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        "errors.1: Unrecognized key(s) in object: 'invalid_data'"
+      );
     });
 
     test('it should validate an empty import response with a single connectors error', () => {
@@ -333,13 +260,11 @@ describe('Import rules schema', () => {
         action_connectors_errors: [{ error: { status_code: 400, message: 'some message' } }],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
+
     test('it should validate an empty import response with multiple errors', () => {
       const payload: ImportRulesResponse = {
         success: false,
@@ -357,33 +282,12 @@ describe('Import rules schema', () => {
         action_connectors_errors: [{ error: { status_code: 400, message: 'some message' } }],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
+
     test('it should NOT validate action_connectors_success that is not boolean', () => {
-      type UnsafeCastForTest = Either<
-        Errors,
-        {
-          success: boolean;
-          action_connectors_success: string;
-          success_count: number;
-          errors: Array<
-            {
-              id?: string | undefined;
-              rule_id?: string | undefined;
-            } & {
-              error: {
-                status_code: number;
-                message: string;
-              };
-            }
-          >;
-        }
-      >;
       const payload: Omit<ImportRulesResponse, 'action_connectors_success'> & {
         action_connectors_success: string;
       } = {
@@ -399,15 +303,13 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded as UnsafeCastForTest);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "invalid" supplied to "action_connectors_success"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'action_connectors_success: Expected boolean, received string'
+      );
     });
+
     test('it should NOT validate a action_connectors_success_count that is a negative number', () => {
       const payload: ImportRulesResponse = {
         success: false,
@@ -422,16 +324,13 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: [],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "-1" supplied to "action_connectors_success_count"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'action_connectors_success_count: Number must be greater than or equal to 0'
+      );
     });
-    test('it should  validate a action_connectors_warnings after importing successfully', () => {
+    test('it should validate a action_connectors_warnings after importing successfully', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
@@ -447,33 +346,12 @@ describe('Import rules schema', () => {
           { type: 'type', message: 'message', actionPath: 'actionPath' },
         ],
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
+
     test('it should NOT validate a action_connectors_warnings that is not WarningSchema', () => {
-      type UnsafeCastForTest = Either<
-        Errors,
-        {
-          success: boolean;
-          action_connectors_warnings: string;
-          success_count: number;
-          errors: Array<
-            {
-              id?: string | undefined;
-              rule_id?: string | undefined;
-            } & {
-              error: {
-                status_code: number;
-                message: string;
-              };
-            }
-          >;
-        }
-      >;
       const payload: Omit<ImportRulesResponse, 'action_connectors_warnings'> & {
         action_connectors_warnings: string;
       } = {
@@ -489,14 +367,11 @@ describe('Import rules schema', () => {
         action_connectors_errors: [],
         action_connectors_warnings: 'invalid',
       };
-      const decoded = ImportRulesResponse.decode(payload);
-      const checked = exactCheck(payload, decoded as UnsafeCastForTest);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "invalid" supplied to "action_connectors_warnings"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'action_connectors_warnings: Expected array, received string'
+      );
     });
   });
 });

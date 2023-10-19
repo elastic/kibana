@@ -36,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
   }
 
   const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}-${version}`).expect(200);
+    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
     return res.body.item.savedObject.attributes;
   };
 

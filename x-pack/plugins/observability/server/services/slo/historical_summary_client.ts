@@ -279,6 +279,7 @@ function generateSearchQuery(
               window: timeWindowDurationInDays * bucketsPerDay,
               shift: 1,
               script: 'MovingFunctions.sum(values)',
+              gap_policy: 'insert_zeros',
             },
           },
           cumulative_total: {
@@ -287,6 +288,7 @@ function generateSearchQuery(
               window: timeWindowDurationInDays * bucketsPerDay,
               shift: 1,
               script: 'MovingFunctions.sum(values)',
+              gap_policy: 'insert_zeros',
             },
           },
         },

@@ -41,7 +41,7 @@ const DefaultGroupPanelRenderer = ({
   <div>
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false} className="eui-textTruncate">
-        <EuiTitle size="xs" className="euiAccordionForm__title">
+        <EuiTitle size="xs">
           <h4 className="eui-textTruncate" title={title}>
             {title}
           </h4>

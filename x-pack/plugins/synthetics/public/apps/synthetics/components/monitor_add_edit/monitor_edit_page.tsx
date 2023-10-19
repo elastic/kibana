@@ -12,6 +12,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { EditMonitorNotFound } from './edit_monitor_not_found';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
@@ -50,11 +51,15 @@ export const MonitorEditPage: React.FC = () => {
     data?.id
   );
 
+  const canUsePublicLocations = useCanUsePublicLocations(data?.[ConfigKey.LOCATIONS]);
+
   if (monitorNotFoundError) {
     return <EditMonitorNotFound />;
   }
 
-  const isReadOnly = data?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+  const isReadOnly =
+    data?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT || !canUsePublicLocations;
+
   const projectId = data?.[ConfigKey.PROJECT_ID];
 
   if (locationsError) {
@@ -87,8 +92,13 @@ export const MonitorEditPage: React.FC = () => {
   return data && locationsLoaded && !loading && !error ? (
     <>
       <AlertingCallout isAlertingEnabled={data[ConfigKey.ALERT_CONFIG]?.status?.enabled} />
-      <MonitorForm defaultValues={data} readOnly={isReadOnly}>
+      <MonitorForm
+        defaultValues={data}
+        readOnly={isReadOnly}
+        canUsePublicLocations={canUsePublicLocations}
+      >
         <MonitorSteps
+          canUsePublicLocations={canUsePublicLocations}
           stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
           isEditFlow={true}
           readOnly={isReadOnly}

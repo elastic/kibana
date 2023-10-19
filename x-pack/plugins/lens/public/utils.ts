@@ -9,7 +9,7 @@ import { uniq, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
-
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -36,6 +36,7 @@ import {
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
+import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -349,29 +350,26 @@ export const getSearchWarningMessages = (
     searchService: ISearchStart;
   }
 ): UserMessage[] => {
-  const warningsMap: Map<string, UserMessage[]> = new Map();
+  const userMessages: UserMessage[] = [];
 
   deps.searchService.showWarnings(adapter, (warning, meta) => {
-    const { request, response, requestId } = meta;
+    const { request, response } = meta;
 
-    const warningMessages = datasource.getSearchWarningMessages?.(
+    const userMessagesFromWarning = datasource.getSearchWarningMessages?.(
       state,
       warning,
       request,
       response
     );
 
-    if (warningMessages?.length) {
-      const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
-      if (!warningsMap.has(key)) {
-        warningsMap.set(key, warningMessages);
-      }
+    if (userMessagesFromWarning?.length) {
+      userMessages.push(...userMessagesFromWarning);
       return true;
     }
     return false;
   });
 
-  return [...warningsMap.values()].flat();
+  return userMessages;
 };
 
 function getSafeLabel(label: string) {
@@ -424,3 +422,10 @@ export function shouldRemoveSource(
       dropType === 'replace_incompatible')
   );
 }
+
+export const getColorMappingDefaults = () => {
+  if (COLOR_MAPPING_OFF_BY_DEFAULT) {
+    return undefined;
+  }
+  return { ...DEFAULT_COLOR_MAPPING_CONFIG };
+};

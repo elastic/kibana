@@ -20,8 +20,6 @@ import {
   generateLinkedRulesMenuItems,
 } from '@kbn/securitysolution-exception-list-components';
 import { PopoverItems } from '../../../../common/components/popover_items';
-import { SecurityPageName } from '../../../../../common/constants';
-import { ListDetailsLinkAnchor } from '../../../../exceptions/components';
 import {
   enrichExceptionItemsWithOS,
   enrichNewExceptionItemsWithComments,
@@ -31,14 +29,12 @@ import {
   enrichSharedExceptions,
   lowercaseHashValues,
 } from '../../utils/helpers';
-import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
 } from '../../../../../common/api/detection_engine/rule_exceptions';
 import type { Rule } from '../../../rule_management/logic/types';
+import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
 
 /**
@@ -222,7 +218,7 @@ export const getSharedListsTableColumns = () => [
         actions={generateLinkedRulesMenuItems({
           dataTestSubj: 'addToSharedListsLinkedRulesMenu',
           linkedRules: references,
-          securityLinkAnchorComponent: ListDetailsLinkAnchor,
+          securityLinkAnchorComponent: LinkToRuleDetails,
         })}
         panelPaddingSize="none"
         disableActions={false}
@@ -237,14 +233,12 @@ export const getSharedListsTableColumns = () => [
     'data-test-subj': 'exceptionListRulesActionCell',
     render: (list: ExceptionListRuleReferencesSchema) => {
       return (
-        <SecuritySolutionLinkAnchor
-          data-test-subj="exceptionListActionCell-link"
-          deepLinkId={SecurityPageName.exceptions}
-          path={`/details/${list.list_id}`}
+        <LinkToListDetails
+          dataTestSubj="exceptionListActionCell-link"
+          linkTitle={i18n.VIEW_LIST_DETAIL_ACTION}
+          listId={list.list_id}
           external
-        >
-          {i18n.VIEW_LIST_DETAIL_ACTION}
-        </SecuritySolutionLinkAnchor>
+        />
       );
     },
   },
@@ -294,14 +288,11 @@ export const getRulesTableColumn = () => [
     'data-test-subj': 'ruleAction-view',
     render: (rule: Rule) => {
       return (
-        <SecuritySolutionLinkAnchor
-          data-test-subj="ruleAction-viewDetails"
-          deepLinkId={SecurityPageName.rules}
-          path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}
+        <LinkToRuleDetails
           external
-        >
-          {i18n.VIEW_RULE_DETAIL_ACTION}
-        </SecuritySolutionLinkAnchor>
+          referenceId={rule.id}
+          referenceName={i18n.VIEW_RULE_DETAIL_ACTION}
+        />
       );
     },
   },

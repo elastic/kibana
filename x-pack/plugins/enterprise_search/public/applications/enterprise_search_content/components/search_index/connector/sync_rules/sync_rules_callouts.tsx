@@ -11,7 +11,7 @@ import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } f
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringValidationState } from '../../../../../../../common/types/connectors';
+import { FilteringValidationState } from '@kbn/search-connectors';
 
 interface FilteringStatusCalloutsProps {
   applyDraft: () => void;

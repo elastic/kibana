@@ -6,8 +6,8 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
-import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 
 export const buildManagedUserDetailsQuery = ({
   userName,

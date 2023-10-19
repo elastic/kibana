@@ -6975,6 +6975,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.Datatable.warning",
+            "type": "string",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -18364,6 +18378,20 @@
                 "text": "DatatableRow"
               },
               "[]"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.Datatable.warning",
+            "type": "string",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -30133,6 +30161,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.Datatable.warning",
+            "type": "string",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -39366,7 +39408,7 @@
               },
               "[]; meta?: ",
               "DatatableMeta",
-              " | undefined; }"
+              " | undefined; warning?: string | undefined; }"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -39424,7 +39466,7 @@
               },
               "[]; meta?: ",
               "DatatableMeta",
-              " | undefined; }"
+              " | undefined; warning?: string | undefined; }"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -41815,7 +41857,7 @@
               },
               " | { [x: string]: any; })[]; type: \"datatable\"; meta?: ",
               "DatatableMeta",
-              " | undefined; }>"
+              " | undefined; warning?: string | undefined; }>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
             "deprecated": false,

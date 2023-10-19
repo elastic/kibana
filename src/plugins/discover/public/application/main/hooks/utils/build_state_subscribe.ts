@@ -53,7 +53,7 @@ export const buildStateSubscribe =
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
-    const { hideChart, interval, breakdownField, sort, index } = prevState;
+    const { hideChart, interval, breakdownField, sampleSize, sort, index } = prevState;
 
     const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
     if (isTextBasedQueryLang) {
@@ -68,6 +68,7 @@ export const buildStateSubscribe =
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
     const chartIntervalChanged = nextState.interval !== interval && !isTextBasedQueryLang;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
+    const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isTextBasedQueryLang;
     const dataViewChanged = !isEqual(nextState.index, index) && !isTextBasedQueryLang;
     let savedSearchDataView;
@@ -101,6 +102,7 @@ export const buildStateSubscribe =
       chartDisplayChanged ||
       chartIntervalChanged ||
       breakdownFieldChanged ||
+      sampleSizeChanged ||
       docTableSortChanged ||
       dataViewChanged ||
       queryChanged

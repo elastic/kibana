@@ -13,6 +13,7 @@ interface PopoverTooltipProps {
   iconType?: string;
   title?: string;
   children: React.ReactNode;
+  dataTestSubj: string;
 }
 
 export function PopoverTooltip({
@@ -20,6 +21,7 @@ export function PopoverTooltip({
   iconType = 'iInCircle',
   title,
   children,
+  dataTestSubj,
 }: PopoverTooltipProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -32,6 +34,7 @@ export function PopoverTooltip({
       style={{ margin: '-5px 0 0 -5px' }}
       button={
         <EuiButtonIcon
+          data-test-subj={dataTestSubj}
           aria-label={ariaLabel}
           onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
             setIsPopoverOpen(!isPopoverOpen);

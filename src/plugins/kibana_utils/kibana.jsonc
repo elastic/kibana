@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/kibana-utils-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "kibanaUtils",
     "server": false,

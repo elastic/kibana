@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('loads a landing page with product cards', async function () {
         await retry.waitFor(
           'Elasticsearch product card visible',
-          async () => await testSubjects.exists('elasticsearchProductCard')
+          async () => await testSubjects.exists('enterpriseSearchElasticsearchProductCard')
         );
         await retry.waitFor(
           'Search Applications product card visible',
@@ -152,15 +152,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
     });
-    describe('ESRE', () => {
+    describe('AI Search', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/esre');
+        await common.navigateToApp('enterprise_search/ai_search');
       });
 
-      it('loads ESRE page', async function () {
+      it('loads AI Search page', async function () {
         await retry.waitFor(
-          'esre header description',
-          async () => await testSubjects.exists('esre-description-text')
+          'ai search page header description',
+          async () => await testSubjects.exists('ai-search-description-text')
         );
         await a11y.testAppSnapshot();
       });

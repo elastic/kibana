@@ -94,7 +94,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const observability = getService('observability');
   const retry = getService('retry');
-  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
     'assetDetails',
@@ -110,47 +109,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   // Helpers
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
-
-  const loginWithReadOnlyUser = async () => {
-    const roleCreation = await security.role.create('global_hosts_read_privileges_role', {
-      elasticsearch: {
-        indices: [{ names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] }],
-      },
-      kibana: [
-        {
-          feature: {
-            infrastructure: ['read'],
-            advancedSettings: ['read'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    });
-
-    const userCreation = security.user.create('global_hosts_read_privileges_user', {
-      password: 'global_hosts_read_privileges_user-password',
-      roles: ['global_hosts_read_privileges_role'],
-      full_name: 'test user',
-    });
-
-    await Promise.all([roleCreation, userCreation]);
-
-    await pageObjects.security.forceLogout();
-    await pageObjects.security.login(
-      'global_hosts_read_privileges_user',
-      'global_hosts_read_privileges_user-password',
-      {
-        expectSpaceSelector: false,
-      }
-    );
-  };
-
-  const logoutAndDeleteReadOnlyUser = () =>
-    Promise.all([
-      pageObjects.security.forceLogout(),
-      security.role.delete('global_hosts_read_privileges_role'),
-      security.user.delete('global_hosts_read_privileges_user'),
-    ]);
 
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
@@ -200,65 +158,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(pageUrl).to.contain(HOSTS_VIEW_PATH);
     });
 
-    describe('#Landing page', () => {
-      beforeEach(async () => {
-        await setHostViewEnabled(false);
-      });
-
-      afterEach(async () => {
-        await setHostViewEnabled(true);
-      });
-
-      describe('User with read permission', () => {
-        beforeEach(async () => {
-          await loginWithReadOnlyUser();
-          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-          await pageObjects.header.waitUntilLoadingHasFinished();
-        });
-
-        afterEach(async () => {
-          await logoutAndDeleteReadOnlyUser();
-        });
-
-        it('Should show hosts landing page with callout when the hosts view is disabled', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
-          const landingPageDisabled =
-            await pageObjects.infraHostsView.getHostsLandingPageDisabled();
-          const learnMoreDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageDocsLink();
-          const parsedUrl = new URL(learnMoreDocsUrl);
-
-          expect(parsedUrl.host).to.be('www.elastic.co');
-          expect(parsedUrl.pathname).to.be('/guide/en/kibana/current/kibana-privileges.html');
-          expect(landingPageDisabled).to.contain(
-            'Your user role doesn’t have sufficient privileges to enable this feature'
-          );
-        });
-      });
-
-      describe('Admin user', () => {
-        beforeEach(async () => {
-          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-          await pageObjects.header.waitUntilLoadingHasFinished();
-        });
-
-        it('as an admin, should see an enable button when the hosts view is disabled', async () => {
-          const landingPageEnableButton =
-            await pageObjects.infraHostsView.getHostsLandingPageEnableButton();
-          const landingPageEnableButtonText = await landingPageEnableButton.getVisibleText();
-          expect(landingPageEnableButtonText).to.eql('Enable hosts view');
-        });
-
-        it('as an admin, should be able to enable the hosts view feature', async () => {
-          await pageObjects.infraHostsView.clickEnableHostViewButton();
-
-          const titleElement = await find.byCssSelector('h1');
-          const title = await titleElement.getVisibleText();
-
-          expect(title).to.contain('Hosts');
-        });
-      });
-    });
-
     describe('#Single Host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
@@ -305,9 +204,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 8 charts in the Metrics section', async () => {
+          it('should render 9 charts in the Metrics section', async () => {
             const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(8);
+            expect(hosts.length).to.equal(9);
           });
 
           it('should show alerts', async () => {
@@ -456,6 +355,37 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const hostRowsAfterRemovingFilter = await pageObjects.infraHostsView.getHostsTableData();
           expect(hostRowsAfterRemovingFilter.length).to.equal(6);
+        });
+      });
+
+      describe('Host details page navigation', () => {
+        after(async () => {
+          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_DATE.format(DATE_PICKER_FORMAT),
+            END_DATE.format(DATE_PICKER_FORMAT)
+          );
+
+          await waitForPageToLoad();
+        });
+
+        it('maintains selected date range when navigating to the individual host details', async () => {
+          const start = START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT);
+          const end = END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT);
+
+          await pageObjects.timePicker.setAbsoluteRange(start, end);
+
+          const hostDetailLinks = await pageObjects.infraHostsView.getAllHostDetailLinks();
+          expect(hostDetailLinks.length).not.to.equal(0);
+
+          await hostDetailLinks[0].click();
+
+          expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
+
+          const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+          expect(datePickerValue.start).to.equal(start);
+          expect(datePickerValue.end).to.equal(end);
         });
       });
 

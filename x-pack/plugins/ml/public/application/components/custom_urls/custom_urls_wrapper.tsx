@@ -18,6 +18,7 @@ export interface CustomUrlsWrapperProps {
   jobCustomUrls: MlUrlConfig[];
   setCustomUrls: (customUrls: MlUrlConfig[]) => void;
   editMode?: 'inline' | 'modal';
+  isPartialDFAJob?: boolean;
 }
 
 export const CustomUrlsWrapper: FC<CustomUrlsWrapperProps> = (props) => {

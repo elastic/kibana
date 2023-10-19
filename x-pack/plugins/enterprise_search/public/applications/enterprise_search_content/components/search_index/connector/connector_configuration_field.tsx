@@ -25,21 +25,18 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { DisplayType } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../common/types/api';
-import { DisplayType } from '../../../../../../common/types/connectors';
 import { LicensingLogic } from '../../../../shared/licensing';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
 import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
-import {
-  ConnectorConfigurationLogic,
-  ConfigEntryView,
-  ensureStringType,
-  ensureBooleanType,
-} from './connector_configuration_logic';
+import { ConnectorConfigurationLogic, ConfigEntryView } from './connector_configuration_logic';
 import { DocumentLevelSecurityPanel } from './document_level_security/document_level_security_panel';
+import { ensureBooleanType, ensureStringType } from './utils/connector_configuration_utils';
 
 interface ConnectorConfigurationFieldProps {
   configEntry: ConfigEntryView;

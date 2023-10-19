@@ -28,6 +28,7 @@ import {
 import {
   SIGNALS_ID,
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
@@ -57,7 +58,7 @@ import {
   RuleAuthorArray,
   RuleDescription,
   RuleFalsePositiveArray,
-  RuleCustomHighlightedFieldArray,
+  InvestigationFields,
   RuleFilterArray,
   RuleLicense,
   RuleMetadata,
@@ -98,7 +99,7 @@ export const baseRuleParams = t.exact(
     falsePositives: RuleFalsePositiveArray,
     from: RuleIntervalFrom,
     ruleId: RuleSignatureId,
-    investigationFields: t.union([RuleCustomHighlightedFieldArray, t.undefined]),
+    investigationFields: t.union([InvestigationFields, t.undefined]),
     immutable: IsRuleImmutable,
     license: t.union([RuleLicense, t.undefined]),
     outputIndex: AlertsIndex,
@@ -140,6 +141,15 @@ const eqlSpecificRuleParams = t.type({
 export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
 export type EqlSpecificRuleParams = t.TypeOf<typeof eqlSpecificRuleParams>;
 export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;
+
+const esqlSpecificRuleParams = t.type({
+  type: t.literal('esql'),
+  language: t.literal('esql'),
+  query: RuleQuery,
+});
+export const esqlRuleParams = t.intersection([baseRuleParams, esqlSpecificRuleParams]);
+export type EsqlSpecificRuleParams = t.TypeOf<typeof esqlSpecificRuleParams>;
+export type EsqlRuleParams = t.TypeOf<typeof esqlRuleParams>;
 
 const threatSpecificRuleParams = t.type({
   type: t.literal('threat_match'),
@@ -244,6 +254,7 @@ export type NewTermsRuleParams = t.TypeOf<typeof newTermsRuleParams>;
 
 export const typeSpecificRuleParams = t.union([
   eqlSpecificRuleParams,
+  esqlSpecificRuleParams,
   threatSpecificRuleParams,
   querySpecificRuleParams,
   savedQuerySpecificRuleParams,
@@ -265,6 +276,7 @@ export interface CompleteRule<T extends RuleParams> {
 export const allRuleTypes = t.union([
   t.literal(SIGNALS_ID),
   t.literal(EQL_RULE_TYPE_ID),
+  t.literal(ESQL_RULE_TYPE_ID),
   t.literal(INDICATOR_RULE_TYPE_ID),
   t.literal(ML_RULE_TYPE_ID),
   t.literal(QUERY_RULE_TYPE_ID),

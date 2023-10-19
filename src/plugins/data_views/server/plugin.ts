@@ -61,7 +61,10 @@ export class DataViewsServerPlugin
 
     contentManagement.register({
       id: DATA_VIEW_SAVED_OBJECT_TYPE,
-      storage: new DataViewsStorage(),
+      storage: new DataViewsStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.logger.get('storage'),
+      }),
       version: {
         latest: LATEST_VERSION,
       },

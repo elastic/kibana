@@ -236,7 +236,7 @@ describe('Response actions history page', () => {
           return {
             id: `agent-id-${i}`,
             name: `Host-name-${i}`,
-            selected: [0, 1, 3, 5].includes(i) ? true : false,
+            selected: [0, 1, 3, 5].includes(i),
           };
         }),
         page: 0,

@@ -438,6 +438,29 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginConfigDescriptor.dynamicConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "dynamicConfig",
+            "description": [
+              "\nList of configuration properties that can be dynamically changed via the PUT /_settings API."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-common.DynamicConfigDescriptor",
+                "text": "DynamicConfigDescriptor"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
             "id": "def-common.PluginConfigDescriptor.schema",
             "type": "Object",
             "tags": [],
@@ -1052,12 +1075,37 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.DynamicConfigDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "DynamicConfigDescriptor",
+        "description": [
+          "\nType defining the list of configuration properties that can be dynamically updated\nObject properties can either be fully exposed or narrowed down to specific keys.\n"
+        ],
+        "signature": [
+          "{ [Key in keyof T]?: (T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.DynamicConfigDescriptor",
+            "text": "DynamicConfigDescriptor"
+          },
+          "<T[Key]> : boolean) | undefined; }"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
         "id": "def-common.ExposedToBrowserDescriptor",
         "type": "Type",
         "tags": [],
         "label": "ExposedToBrowserDescriptor",
         "description": [
-          "\nType defining the list of configuration properties that will be exposed on the client-side\nObject properties can either be fully exposed\n"
+          "\nType defining the list of configuration properties that will be exposed on the client-side\nObject properties can either be fully exposed or narrowed down to specific keys.\n"
         ],
         "signature": [
           "{ [Key in keyof T]?: (T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",

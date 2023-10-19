@@ -118,6 +118,7 @@ export const useSetUpSections = ({
               borderRadius="none"
               css={css`
                 margin: ${euiTheme.size.l} 0;
+                padding-top: 4px;
               `}
               key={currentSection.id}
               data-test-subj={`section-${currentSection.id}`}

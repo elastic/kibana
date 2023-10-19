@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`displays Field statistics table in Dashboard when enabled`, async function () {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.addSavedSearch(savedSearchTitle);
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it(`doesn't display Field statistics table in Dashboard when disabled`, async function () {
         await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, false);
 
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardTitle);
         await PageObjects.header.waitUntilLoadingHasFinished();
 

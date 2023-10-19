@@ -13,8 +13,8 @@ import type { SetupPlugins } from '../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import {
-  PREBUILT_RULES_STATUS_URL,
   GetPrebuiltRulesAndTimelinesStatusResponse,
+  PREBUILT_RULES_STATUS_URL,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
@@ -89,16 +89,9 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
             timelines_not_updated: validatedPrebuiltTimelineStatus?.timelinesToUpdate.length ?? 0,
           };
 
-          const [validatedBody, validationError] = validate(
-            responseBody,
-            GetPrebuiltRulesAndTimelinesStatusResponse
-          );
-
-          if (validationError != null) {
-            return siemResponse.error({ statusCode: 500, body: validationError });
-          } else {
-            return response.ok({ body: validatedBody ?? {} });
-          }
+          return response.ok({
+            body: GetPrebuiltRulesAndTimelinesStatusResponse.parse(responseBody),
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

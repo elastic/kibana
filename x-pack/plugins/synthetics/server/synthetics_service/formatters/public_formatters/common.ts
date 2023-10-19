@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { secondsToCronFormatter } from '../formatting_utils';
+import { maxAttemptsFormatter, secondsToCronFormatter } from '../formatting_utils';
 import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
 import {
   CommonFields,
@@ -46,6 +46,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.CONFIG_HASH]: null,
   [ConfigKey.MONITOR_QUERY_ID]: null,
+  [ConfigKey.MAX_ATTEMPTS]: maxAttemptsFormatter,
   [ConfigKey.TIMEOUT]: secondsToCronFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,

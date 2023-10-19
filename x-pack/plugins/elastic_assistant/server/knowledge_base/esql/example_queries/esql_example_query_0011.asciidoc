@@ -1,0 +1,13 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+FROM traces-apm*
+| WHERE @timestamp >= NOW() - 24 hours
+| EVAL successful = CASE(event.outcome == "success", 1, 0),
+  failed = CASE(event.outcome == "failure", 1, 0)
+| STATS success_rate = AVG(successful),
+  avg_duration = AVG(transaction.duration),
+  total_requests = COUNT(transaction.id) BY service.name
+```

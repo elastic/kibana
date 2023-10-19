@@ -25,6 +25,7 @@ export const UserActionTypes = {
   create_case: 'create_case',
   delete_case: 'delete_case',
   category: 'category',
+  customFields: 'customFields',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;

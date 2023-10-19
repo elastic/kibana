@@ -20,5 +20,5 @@ export const journey = new Journey({
 
   .step('Go to Web Logs Dashboard', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic'));
-    await kibanaPage.waitForVisualizations(11);
+    await kibanaPage.waitForVisualizations({ count: 11 });
   });

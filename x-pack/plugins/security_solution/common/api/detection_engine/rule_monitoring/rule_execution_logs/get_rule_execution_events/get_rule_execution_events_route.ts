@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
-import { defaultCsvArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { defaultCsvArray, IsoDateString, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 import { DefaultSortOrderDesc, PaginationResult } from '../../../model';
 import { RuleExecutionEvent, TRuleExecutionEventType, TLogLevel } from '../../model';
@@ -32,13 +32,20 @@ export type GetRuleExecutionEventsRequestQuery = t.TypeOf<
   typeof GetRuleExecutionEventsRequestQuery
 >;
 export const GetRuleExecutionEventsRequestQuery = t.exact(
-  t.type({
-    event_types: defaultCsvArray(TRuleExecutionEventType),
-    log_levels: defaultCsvArray(TLogLevel),
-    sort_order: DefaultSortOrderDesc, // defaults to 'desc'
-    page: DefaultPage, // defaults to 1
-    per_page: DefaultPerPage, // defaults to 20
-  })
+  t.intersection([
+    t.partial({
+      search_term: NonEmptyString,
+      event_types: defaultCsvArray(TRuleExecutionEventType),
+      log_levels: defaultCsvArray(TLogLevel),
+      date_start: IsoDateString,
+      date_end: IsoDateString,
+    }),
+    t.type({
+      sort_order: DefaultSortOrderDesc, // defaults to 'desc'
+      page: DefaultPage, // defaults to 1
+      per_page: DefaultPerPage, // defaults to 20
+    }),
+  ])
 );
 
 /**

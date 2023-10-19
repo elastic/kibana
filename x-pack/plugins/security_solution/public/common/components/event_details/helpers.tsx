@@ -32,6 +32,7 @@ export const search = {
     incremental: true,
     placeholder: i18n.PLACEHOLDER,
     schema: true,
+    'data-test-subj': 'search-input',
   },
 };
 

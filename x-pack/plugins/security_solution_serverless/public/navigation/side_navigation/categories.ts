@@ -15,11 +15,12 @@ import { ExternalPageName } from '../links/constants';
 export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.dashboards],
+    linkIds: [ExternalPageName.discover, SecurityPageName.dashboards],
   },
   {
     type: LinkCategoryType.separator,
     linkIds: [
+      SecurityPageName.rulesLanding,
       SecurityPageName.alerts,
       SecurityPageName.cloudSecurityPostureFindings,
       SecurityPageName.case,
@@ -35,7 +36,7 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   },
   {
     type: LinkCategoryType.separator,
-    linkIds: [ExternalPageName.fleet, SecurityPageName.assets, SecurityPageName.rulesLanding],
+    linkIds: [ExternalPageName.fleet, SecurityPageName.assets],
   },
   {
     type: LinkCategoryType.separator,

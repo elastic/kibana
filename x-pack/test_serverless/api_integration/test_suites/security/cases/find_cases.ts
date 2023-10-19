@@ -8,35 +8,34 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import {
-  findCases,
-  createCase,
-  deleteAllCaseItems,
-  findCasesResp,
-  postCaseReq,
-} from './helpers/api';
-
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
-  const es = getService('es');
+  const svlCases = getService('svlCases');
+
+  let findCasesResp: any;
+  let postCaseReq: any;
 
   describe('find_cases', () => {
     describe('basic tests', () => {
+      before(async () => {
+        findCasesResp = svlCases.api.getFindCasesResp();
+        postCaseReq = svlCases.api.getPostCaseReq('securitySolution');
+      });
+
       afterEach(async () => {
-        await deleteAllCaseItems(es);
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('should return empty response', async () => {
-        const cases = await findCases({ supertest });
+        const cases = await svlCases.api.findCases({});
         expect(cases).to.eql(findCasesResp);
       });
 
       it('should return cases', async () => {
-        const a = await createCase(supertest, postCaseReq);
-        const b = await createCase(supertest, postCaseReq);
-        const c = await createCase(supertest, postCaseReq);
+        const a = await svlCases.api.createCase(postCaseReq);
+        const b = await svlCases.api.createCase(postCaseReq);
+        const c = await svlCases.api.createCase(postCaseReq);
 
-        const cases = await findCases({ supertest });
+        const cases = await svlCases.api.findCases({});
 
         expect(cases).to.eql({
           ...findCasesResp,
@@ -47,12 +46,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns empty response when trying to find cases with owner as cases', async () => {
-        const cases = await findCases({ supertest, query: { owner: 'cases' } });
+        const cases = await svlCases.api.findCases({ query: { owner: 'cases' } });
         expect(cases).to.eql(findCasesResp);
       });
 
       it('returns empty response when trying to find cases with owner as observability', async () => {
-        const cases = await findCases({ supertest, query: { owner: 'observability' } });
+        const cases = await svlCases.api.findCases({
+          query: { owner: 'observability' },
+        });
         expect(cases).to.eql(findCasesResp);
       });
     });

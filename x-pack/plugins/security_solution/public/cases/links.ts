@@ -18,7 +18,7 @@ const casesLinks = getCasesDeepLinks<LinkItem>({
   basePath: CASES_PATH,
   extend: {
     [SecurityPageName.case]: {
-      globalNavPosition: 4,
+      globalNavPosition: 5,
       capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
     },
     [SecurityPageName.caseConfigure]: {

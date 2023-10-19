@@ -12,13 +12,18 @@ export function CasesTestResourcesServiceProvider({ getService }: FtrProviderCon
 
   return {
     async installKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
-      await supertest.post(`/api/sample_data/${sampleDataId}`).set('kbn-xsrf', 'true').expect(200);
+      await supertest
+        .post(`/api/sample_data/${sampleDataId}`)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
+        .expect(200);
     },
 
     async removeKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
       await supertest
         .delete(`/api/sample_data/${sampleDataId}`)
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
         .expect(204);
     },
   };

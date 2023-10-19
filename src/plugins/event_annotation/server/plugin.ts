@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
@@ -29,6 +29,8 @@ export interface EventAnnotationStartDependencies {
 }
 
 export class EventAnnotationServerPlugin implements Plugin<object, object> {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   public setup(
     core: CoreSetup<EventAnnotationStartDependencies, object>,
     dependencies: SetupDependencies
@@ -42,7 +44,10 @@ export class EventAnnotationServerPlugin implements Plugin<object, object> {
 
     dependencies.contentManagement.register({
       id: CONTENT_ID,
-      storage: new EventAnnotationGroupStorage(),
+      storage: new EventAnnotationGroupStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.initializerContext.logger.get(),
+      }),
       version: {
         latest: LATEST_VERSION,
       },

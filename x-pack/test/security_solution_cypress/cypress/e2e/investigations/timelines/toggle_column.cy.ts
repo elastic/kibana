@@ -8,7 +8,8 @@
 import { ID_HEADER_FIELD, TIMESTAMP_HEADER_FIELD } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   clickIdToggleField,
@@ -17,7 +18,7 @@ import {
   clickTimestampToggleField,
 } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 describe('toggle column in timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -27,7 +28,7 @@ describe('toggle column in timeline', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
   });

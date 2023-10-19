@@ -15,10 +15,10 @@ import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 import { getMissingSignificantTerms } from './get_missing_significant_terms';
 import { transformSignificantTermToGroup } from './transform_significant_term_to_group';
-import type { ItemsetResult } from '../../../common/types';
+import type { ItemSet } from '../../../common/types';
 
 export function getSignificantTermGroups(
-  itemsets: ItemsetResult[],
+  itemsets: ItemSet[],
   significantTerms: SignificantTerm[],
   fields: string[]
 ): SignificantTermGroup[] {
@@ -33,7 +33,7 @@ export function getSignificantTermGroups(
   // and then summarize them in larger groups where possible.
 
   // Get a tree structure based on `frequent_item_sets`.
-  const { root } = getSimpleHierarchicalTree(itemsets, false, false, fields);
+  const { root } = getSimpleHierarchicalTree(itemsets, false, false, significantTerms, fields);
 
   // Each leave of the tree will be a summarized group of co-occuring field/value pairs.
   const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);

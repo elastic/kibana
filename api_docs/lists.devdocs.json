@@ -2596,6 +2596,24 @@
           },
           {
             "parentPluginId": "lists",
+            "id": "def-server.ListClient.deleteLegacyListTemplateIfExists",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteLegacyListTemplateIfExists",
+            "description": [
+              "\nChecks if legacy lists template exists and delete it"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lists",
             "id": "def-server.ListClient.deleteLegacyListItemTemplate",
             "type": "Function",
             "tags": [],
@@ -2613,6 +2631,24 @@
             "returnComment": [
               "The contents of the bootstrap response from Elasticsearch"
             ]
+          },
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ListClient.deleteLegacyListItemTemplateIfExists",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteLegacyListItemTemplateIfExists",
+            "description": [
+              "\nChecks if legacy list item template exists and delete it"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "lists",

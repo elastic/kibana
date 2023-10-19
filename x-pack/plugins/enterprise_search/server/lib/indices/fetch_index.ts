@@ -7,13 +7,18 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_JOBS_INDEX } from '../..';
+import {} from '../..';
+
+import {
+  CONNECTORS_JOBS_INDEX,
+  ConnectorSyncJobDocument,
+  fetchConnectorByIndexName,
+  SyncStatus,
+} from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
-import { ConnectorSyncJobDocument, SyncStatus } from '../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
-import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { mapIndexStats } from './utils/map_index_stats';
@@ -69,7 +74,7 @@ export const fetchIndex = async (
   }
   const indexStats = indices[index];
 
-  const connector = await fetchConnectorByIndexName(client, index);
+  const connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
   const hasInProgressSyncsResult = connector
     ? await hasInProgressSyncs(client, connector.id)
     : { inProgress: false, pending: false };

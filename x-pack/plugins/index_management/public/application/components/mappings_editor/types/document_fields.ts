@@ -58,6 +58,7 @@ export type MainType =
   | 'rank_features'
   | 'shape'
   | 'search_as_you_type'
+  | 'sparse_vector'
   | 'date'
   | 'date_nanos'
   | 'geo_point'

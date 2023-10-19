@@ -34,6 +34,7 @@ export const DashboardListingTable = ({
   getDashboardUrl,
   useSessionStorageIntegration,
   urlStateEnabled,
+  showCreateDashboardButton = true,
 }: DashboardListingProps) => {
   const {
     application,
@@ -61,6 +62,7 @@ export const DashboardListingTable = ({
     urlStateEnabled,
     useSessionStorageIntegration,
     initialFilter,
+    showCreateDashboardButton,
   });
 
   const savedObjectsTaggingFakePlugin = useMemo(

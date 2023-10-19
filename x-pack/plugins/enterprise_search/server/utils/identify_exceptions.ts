@@ -52,3 +52,7 @@ export const isMissingAliasException = (error: ElasticsearchResponseError) =>
   error.meta?.statusCode === 404 &&
   typeof error.meta?.body?.error === 'string' &&
   MISSING_ALIAS_ERROR.test(error.meta?.body?.error);
+
+export const isAccessControlDisabledException = (error: Error) => {
+  return error.message === ErrorCode.ACCESS_CONTROL_DISABLED;
+};

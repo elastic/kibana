@@ -15,7 +15,7 @@ export type LinkId =
   | 'anomalyDetection'
   | 'anomalyExplorer'
   | 'singleMetricViewer'
-  | 'dataComparison'
+  | 'dataDrift'
   | 'dataFrameAnalytics'
   | 'resultExplorer'
   | 'analyticsMap'

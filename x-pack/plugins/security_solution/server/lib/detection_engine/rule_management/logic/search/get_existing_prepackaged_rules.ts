@@ -6,10 +6,11 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+
 import {
   KQL_FILTER_IMMUTABLE_RULES,
   KQL_FILTER_MUTABLE_RULES,
-} from '../../../../../../common/utils/kql';
+} from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from './find_rules';
 import type { RuleAlertType } from '../../../rule_schema';

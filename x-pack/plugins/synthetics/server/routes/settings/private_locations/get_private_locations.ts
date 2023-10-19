@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { AgentPolicyInfo } from '../../../../common/types';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -33,7 +33,7 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
 export const getPrivateLocationsAndAgentPolicies = async (
   savedObjectsClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient
-): Promise<SyntheticsPrivateLocationsAttributes & { agentPolicies: AgentPolicy[] }> => {
+): Promise<SyntheticsPrivateLocationsAttributes & { agentPolicies: AgentPolicyInfo[] }> => {
   try {
     const [privateLocations, agentPolicies] = await Promise.all([
       getPrivateLocations(savedObjectsClient),

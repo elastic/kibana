@@ -22,7 +22,7 @@ import * as Registry from '../registry';
 
 import { createInstallation, handleInstallPackageFailure, installPackage } from './install';
 import * as install from './_install_package';
-import { getBundledPackages } from './bundled_packages';
+import { getBundledPackageByPkgKey } from './bundled_packages';
 
 import * as obj from '.';
 
@@ -80,7 +80,7 @@ jest.mock('../archive', () => {
 });
 jest.mock('../../audit_logging');
 
-const mockGetBundledPackages = jest.mocked(getBundledPackages);
+const mockGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
 const mockedAuditLoggingService = jest.mocked(auditLoggingService);
 
 describe('createInstallation', () => {
@@ -143,13 +143,13 @@ describe('install', () => {
       } as any)
     );
 
-    mockGetBundledPackages.mockReset();
+    mockGetBundledPackageByPkgKey.mockReset();
     (install._installPackage as jest.Mock).mockClear();
   });
 
   describe('registry', () => {
     beforeEach(() => {
-      mockGetBundledPackages.mockResolvedValue([]);
+      mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
     });
 
     it('should send telemetry on install failure, out of date', async () => {
@@ -265,13 +265,11 @@ describe('install', () => {
 
     it('should install from bundled package if one exists', async () => {
       (install._installPackage as jest.Mock).mockResolvedValue({});
-      mockGetBundledPackages.mockResolvedValue([
-        {
-          name: 'test_package',
-          version: '1.0.0',
-          buffer: Buffer.from('test_package'),
-        },
-      ]);
+      mockGetBundledPackageByPkgKey.mockResolvedValue({
+        name: 'test_package',
+        version: '1.0.0',
+        buffer: Buffer.from('test_package'),
+      });
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -332,7 +330,7 @@ describe('install', () => {
       expect(response.status).toEqual('already_installed');
     });
 
-    it('should not allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
+    it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValueOnce({
         internal: {
           fleetServerStandalone: true,
@@ -347,8 +345,7 @@ describe('install', () => {
         esClient: {} as ElasticsearchClient,
       });
 
-      expect(response.error).toBeDefined();
-      expect(response.error?.message).toMatch(/fleet_server installation is not authorized/);
+      expect(response.status).toEqual('installed');
     });
   });
 
@@ -429,7 +426,7 @@ describe('handleInstallPackageFailure', () => {
     jest.mocked(install._installPackage).mockClear();
     jest.mocked(install._installPackage).mockResolvedValue({} as any);
     mockedLogger.error.mockClear();
-    mockGetBundledPackages.mockResolvedValue([]);
+    mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
     jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
     jest.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
       const [pkgName, pkgVersion] = pkgKey.split('-');

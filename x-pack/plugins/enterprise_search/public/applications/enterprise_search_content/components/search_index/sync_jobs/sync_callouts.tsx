@@ -13,7 +13,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SyncStatus, TriggerMethod } from '../../../../../../common/types/connectors';
+import { SyncStatus, TriggerMethod } from '@kbn/search-connectors';
+
 import { FormattedDateTime } from '../../../../shared/formatted_date_time';
 
 import { durationToText } from '../../../utils/duration_to_text';

@@ -270,22 +270,13 @@ function WarningContent({
   groupStyles?: Partial<EuiFlexGroupProps>;
   'data-test-subj': string;
 }) {
-  const hasDescription = 'text' in originalWarning;
-
   return (
     <EuiFlexGroup gutterSize="xs" {...groupStyles} wrap>
       <EuiFlexItem grow={false}>
         <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningTitle`}>
-          {hasDescription ? <strong>{originalWarning.message}</strong> : originalWarning.message}
+          {originalWarning.message}
         </EuiText>
       </EuiFlexItem>
-      {hasDescription ? (
-        <EuiFlexItem grow={false}>
-          <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningMessage`}>
-            <p>{originalWarning.text}</p>
-          </EuiText>
-        </EuiFlexItem>
-      ) : null}
       {action ? <EuiFlexItem grow={false}>{action}</EuiFlexItem> : null}
     </EuiFlexGroup>
   );
@@ -306,6 +297,7 @@ function CalloutTitleWrapper({
           onClick={onCloseCallout}
           type="button"
           iconType="cross"
+          color="warning"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

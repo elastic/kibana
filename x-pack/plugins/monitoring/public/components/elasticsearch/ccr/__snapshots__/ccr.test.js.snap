@@ -128,6 +128,7 @@ exports[`Ccr that it renders normally 1`] = `
         }
         pagination={false}
         responsive={true}
+        searchFormat="eql"
         sorting={
           Object {
             "sort": Object {

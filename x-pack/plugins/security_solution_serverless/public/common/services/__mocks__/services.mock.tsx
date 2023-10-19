@@ -13,11 +13,14 @@ import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { ProjectNavigationLink } from '../../../navigation/links/types';
 import type { Services } from '..';
+import { allowedExperimentalValues as genericAllowedExperimentalValues } from '@kbn/security-solution-plugin/common';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 export const mockProjectNavLinks = jest.fn((): ProjectNavigationLink[] => []);
 
 export const mockServices: Services = {
   ...coreMock.createStart(),
+  experimentalFeatures: { ...allowedExperimentalValues, ...genericAllowedExperimentalValues },
   serverless: serverlessMock.createStart(),
   security: securityMock.createStart(),
   securitySolution: securitySolutionMock.createStart(),

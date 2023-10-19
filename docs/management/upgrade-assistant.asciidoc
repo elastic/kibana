@@ -26,4 +26,4 @@ The Upgrade assistant pulls information about deprecations from the following so
 * Elasticsearch deprecation logs
 * Kibana deprecations API
 
-For more information about the API's the Upgraed assistant provides, refer to <<upgrade-assistant-api, Upgrade Assistant APIs>>.
+For more information about Upgrade Assistant APIs, refer to <<upgrade-assistant-api, Upgrade Assistant APIs>>.

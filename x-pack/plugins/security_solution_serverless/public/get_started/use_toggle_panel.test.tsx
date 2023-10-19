@@ -167,7 +167,7 @@ describe('useTogglePanel', () => {
     );
   });
 
-  test('should call addFinishedStepToStorage when onStepClicked is executed', () => {
+  test('should reset all the card steps in storage when a step is expanded. (As it allows only one step open at a time)', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
     const { onStepClicked } = result.current;
@@ -181,14 +181,31 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
-    expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
+    expect(getStartedStorage.resetAllExpandedCardStepsToStorage).toHaveBeenCalledTimes(1);
+  });
+
+  test('should add the current step to storage when it is expanded', () => {
+    const { result } = renderHook(() => useTogglePanel({ productTypes }));
+
+    const { onStepClicked } = result.current;
+
+    act(() => {
+      onStepClicked({
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
+        cardId: GetSetUpCardId.introduction,
+        sectionId: SectionId.getSetUp,
+        isExpanded: true,
+      });
+    });
+
+    expect(getStartedStorage.addExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
+    expect(getStartedStorage.addExpandedCardStepToStorage).toHaveBeenCalledWith(
       GetSetUpCardId.introduction,
       IntroductionSteps.getToKnowElasticSecurity
     );
   });
 
-  test('should not call addFinishedStepToStorage when the step is going to be collapsed', () => {
+  test('should remove the current step from storage when it is collapsed', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
     const { onStepClicked } = result.current;
@@ -202,7 +219,11 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(getStartedStorage.addFinishedStepToStorage).not.toHaveBeenCalledTimes(1);
+    expect(getStartedStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
+    expect(getStartedStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledWith(
+      GetSetUpCardId.introduction,
+      IntroductionSteps.getToKnowElasticSecurity
+    );
   });
 
   test('should call addFinishedStepToStorage when onStepButtonClicked is executed', () => {

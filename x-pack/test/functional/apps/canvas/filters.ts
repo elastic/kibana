@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function canvasFiltersTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['canvas', 'common']);
+  const PageObjects = getPageObjects(['canvas']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/filter';
@@ -24,9 +24,8 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     before(async () => {
       await kibanaServer.importExport.load(archive);
       // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-b5618217-56d2-47fa-b756-1be2306cda68/page/1',
-      });
+      await PageObjects.canvas.goToListingPage();
+      await PageObjects.canvas.loadFirstWorkpad('Filter Debug Workpad');
     });
 
     after(async () => {

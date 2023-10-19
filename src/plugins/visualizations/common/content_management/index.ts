@@ -27,6 +27,7 @@ export type {
   VisualizationSearchIn,
   VisualizationSearchOut,
   VisualizationSearchQuery,
+  VisualizationCrudTypes,
 } from './latest';
 
 export * as VisualizationV1 from './v1';

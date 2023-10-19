@@ -611,7 +611,23 @@ class AgentPolicyService {
       );
     }
 
-    // Get updated agent policy
+    // Tamper protection is dependent on endpoint package policy
+    // Match tamper protection setting to the original policy
+    if (baseAgentPolicy.is_protected) {
+      await this._update(
+        soClient,
+        esClient,
+        newAgentPolicy.id,
+        { is_protected: true },
+        options?.user,
+        {
+          bumpRevision: false,
+          removeProtection: false,
+        }
+      );
+    }
+
+    // Get updated agent policy with package policies and adjusted tamper protection
     const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
     if (!updatedAgentPolicy) {
       throw new Error('Copied agent policy not found');
@@ -1013,6 +1029,7 @@ class AgentPolicyService {
   public async getFullAgentConfigMap(
     soClient: SavedObjectsClientContract,
     id: string,
+    agentVersion: string,
     options?: { standalone: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
@@ -1033,10 +1050,7 @@ class AgentPolicyService {
       };
 
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
-      const updateManifestVersion = elasticAgentStandaloneManifest.replace(
-        'VERSION',
-        appContextService.getKibanaVersion()
-      );
+      const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
     } else {
@@ -1046,12 +1060,10 @@ class AgentPolicyService {
 
   public async getFullAgentManifest(
     fleetServer: string,
-    enrolToken: string
+    enrolToken: string,
+    agentVersion: string
   ): Promise<string | null> {
-    const updateManifestVersion = elasticAgentManagedManifest.replace(
-      'VERSION',
-      appContextService.getKibanaVersion()
-    );
+    const updateManifestVersion = elasticAgentManagedManifest.replace('VERSION', agentVersion);
     let updateManifest = updateManifestVersion;
     if (fleetServer !== '') {
       updateManifest = updateManifest.replace('https://fleet-server:8220', fleetServer);

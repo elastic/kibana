@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { EcsBase, EcsEvent, EcsHost, EcsUser, EcsAgent } from '@kbn/ecs';
 import type { Inspect, Maybe } from '../../../common';
-import type { RequestBasicOptions } from '../..';
 
 export interface ManagedUserDetailsStrategyResponse extends IEsSearchResponse {
   userDetails?: AzureManagedUser;
   inspect?: Maybe<Inspect>;
-}
-
-export interface ManagedUserDetailsRequestOptions
-  extends Pick<RequestBasicOptions, 'defaultIndex' | 'factoryQueryType'>,
-    IEsSearchRequest {
-  userName: string;
 }
 
 export interface AzureManagedUser extends Pick<EcsBase, '@timestamp'> {

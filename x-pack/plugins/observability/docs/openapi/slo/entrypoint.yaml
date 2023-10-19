@@ -11,16 +11,10 @@ info:
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
-  - name: composite slo
-    description: Composite SLO APIs enable you to define, manage and track a group of SLOs.
 servers:
   - url: "http://localhost:5601"
     description: local
 paths:
-  #'/s/{spaceId}/api/observability/composite_slos':
-  #  $ref: 'paths/s@{spaceid}@api@composite_slos.yaml'
-  #'/s/{spaceId}/api/observability/composite_slos/{compositeSloId}':
-  #  $ref: 'paths/s@{spaceid}@api@composite_slos@{compositesloid}.yaml'
   "/s/{spaceId}/api/observability/slos":
     $ref: "paths/s@{spaceid}@api@slos.yaml"
   "/s/{spaceId}/api/observability/slos/{sloId}":
@@ -31,6 +25,8 @@ paths:
     $ref: "paths/s@{spaceid}@api@slos@{sloid}@{disable}.yaml"
   "/s/{spaceId}/internal/observability/slos/_historical_summary":
     $ref: "paths/s@{spaceid}@api@slos@_historical_summary.yaml"
+  "/s/{spaceId}/api/observability/slos/_delete_instances":
+    $ref: "paths/s@{spaceid}@api@slos@_delete_instances.yaml"
 components:
   securitySchemes:
     basicAuth:

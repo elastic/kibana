@@ -15,6 +15,7 @@ import {
   generateMlInferencePipelineBody,
   getMlInferencePrefixedFieldName,
   getMlModelTypesForModelConfig,
+  ML_INFERENCE_PREFIX,
   parseMlInferenceParametersFromPipeline,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { Status } from '../../../../../../../common/types/api';
@@ -533,7 +534,7 @@ export const MLInferenceLogic = kea<
 
         return generateMlInferencePipelineBody({
           model,
-          pipelineName: configuration.pipelineName,
+          pipelineName: `${ML_INFERENCE_PREFIX}${configuration.pipelineName}`,
           fieldMappings: configuration.fieldMappings ?? [],
           inferenceConfig: configuration.inferenceConfig,
         });

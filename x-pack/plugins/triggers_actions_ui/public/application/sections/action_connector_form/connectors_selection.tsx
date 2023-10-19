@@ -94,12 +94,8 @@ const getValueOfSelectedConnector = (
   actionTypeRegistered: ActionTypeModel,
   allowGroupConnector: string[] = []
 ): Array<EuiComboBoxOptionOption<ConnectorOption>> => {
-  let selectedConnector = connectors.find((connector) => connector.id === actionItemId);
-  if (allowGroupConnector.length > 0 && !selectedConnector) {
-    selectedConnector = connectors.find((connector) =>
-      allowGroupConnector.includes(connector.actionTypeId)
-    );
-  }
+  const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
+
   if (!selectedConnector) {
     return [];
   }

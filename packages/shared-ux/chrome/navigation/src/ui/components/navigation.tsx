@@ -27,6 +27,7 @@ import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
 import { NavigationUI } from './navigation_ui';
 import { RecentlyAccessed } from './recently_accessed';
+import { PanelProvider, type ContentProvider } from './panel';
 
 interface Context {
   register: RegisterFunction;
@@ -48,6 +49,12 @@ const NavigationContext = createContext<Context>({
 interface Props {
   children: ReactNode;
   /**
+   * Optional content provider for the navigation panels. Use it to render custom component
+   * inside the panel when the user clicks on a navigation item.
+   * If not provided the default content will be rendered.
+   */
+  panelContentProvider?: ContentProvider;
+  /**
    * Flag to indicate if the Navigation should not be styled with EUI components.
    * If set to true, the children will be rendered as is.
    */
@@ -55,7 +62,12 @@ interface Props {
   dataTestSubj?: string;
 }
 
-export function Navigation({ children, unstyled = false, dataTestSubj }: Props) {
+export function Navigation({
+  children,
+  panelContentProvider,
+  unstyled = false,
+  dataTestSubj,
+}: Props) {
   const { onProjectNavigationChange, activeNodes$ } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
@@ -134,11 +146,17 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
   }, [debouncedNavigationItems, onProjectNavigationChange]);
 
   return (
-    <NavigationContext.Provider value={contextValue}>
-      <NavigationUI footerChildren={footerChildren} unstyled={unstyled} dataTestSubj={dataTestSubj}>
-        {children}
-      </NavigationUI>
-    </NavigationContext.Provider>
+    <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>
+      <NavigationContext.Provider value={contextValue}>
+        <NavigationUI
+          footerChildren={footerChildren}
+          unstyled={unstyled}
+          dataTestSubj={dataTestSubj}
+        >
+          {children}
+        </NavigationUI>
+      </NavigationContext.Provider>
+    </PanelProvider>
   );
 }
 

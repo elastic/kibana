@@ -66,6 +66,22 @@ describe('Text based languages utils', () => {
 
       expect(indexPattern).toBe('');
     });
+
+    it('should return the index pattern for es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
+        esql: 'from foo | keep bytes, memory ',
+      });
+
+      expect(indexPattern).toBe('foo');
+    });
+
+    it('should return empty index pattern for non es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
+        lang1: 'from foo | keep bytes, memory ',
+      } as unknown as AggregateQuery);
+
+      expect(indexPattern).toBe('');
+    });
   });
 
   describe('loadIndexPatternRefs', () => {

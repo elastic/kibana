@@ -8,7 +8,7 @@
 import { NEVER } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+import { APP_SEARCH_PLUGIN, ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
 import { getSearchResultProvider } from './search_result_provider';
 
@@ -43,6 +43,18 @@ describe('Enterprise Search search provider', () => {
     type: 'Search',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?service_type=mongodb`,
+      prependBasePath: true,
+    },
+  };
+
+  const appSearchResult = {
+    icon: 'logoEnterpriseSearch',
+    id: 'app_search',
+    score: 100,
+    title: 'App Search',
+    type: 'Search',
+    url: {
+      path: `${APP_SEARCH_PLUGIN.URL}`,
       prependBasePath: true,
     },
   };
@@ -189,6 +201,42 @@ describe('Enterprise Search search provider', () => {
           )
         ).toBe('(a|)', {
           a: [crawlerResult],
+        });
+      });
+    });
+    it('returns results for legacy app search', () => {
+      const searchProvider = getSearchResultProvider(basePathMock, {
+        hasConnectors: false,
+        hasWebCrawler: false,
+        canDeployEntSearch: true,
+      } as any);
+      getTestScheduler().run(({ expectObservable }) => {
+        expectObservable(
+          searchProvider.find(
+            { term: 'app search' },
+            { aborted$: NEVER, maxResults: 1, preference: '' },
+            {} as any
+          )
+        ).toBe('(a|)', {
+          a: [appSearchResult],
+        });
+      });
+    });
+    it('does not return results for legacy workplace search', () => {
+      const searchProvider = getSearchResultProvider(basePathMock, {
+        hasConnectors: false,
+        hasWebCrawler: false,
+        canDeployEntSearch: true,
+      } as any);
+      getTestScheduler().run(({ expectObservable }) => {
+        expectObservable(
+          searchProvider.find(
+            { term: 'workplace search' },
+            { aborted$: NEVER, maxResults: 1, preference: '' },
+            {} as any
+          )
+        ).toBe('(a|)', {
+          a: [],
         });
       });
     });

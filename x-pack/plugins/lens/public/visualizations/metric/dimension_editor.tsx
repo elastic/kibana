@@ -219,7 +219,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
 }
 
 function PrimaryMetricEditor(props: SubProps) {
-  const { state, setState, frame, accessor, idPrefix } = props;
+  const { state, setState, frame, accessor, idPrefix, isInlineEditing } = props;
 
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
@@ -360,6 +360,10 @@ function PrimaryMetricEditor(props: SubProps) {
                 siblingRef={props.panelRef}
                 isOpen={isPaletteOpen}
                 handleClose={togglePalette}
+                title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
+                  defaultMessage: 'Color',
+                })}
+                isInlineEditing={isInlineEditing}
               >
                 <CustomizablePalette
                   palettes={props.paletteService}

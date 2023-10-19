@@ -11,7 +11,7 @@ import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined } from 'lodash';
+import { omitBy, isUndefined, compact } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -24,10 +24,12 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
-import { FindConnectorResult } from '../application/connector/types';
+import { ConnectorWithExtraFindData } from '../application/connector/types';
+import { ConnectorType } from '../application/connector/types';
+import { get } from '../application/connector/methods/get';
 import { getAll } from '../application/connector/methods/get_all';
+import { listTypes } from '../application/connector/methods/list_types';
 import {
-  ActionType,
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
@@ -48,18 +50,18 @@ import {
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
 } from '../types';
-
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from '../lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
+  ExecutionResponse,
 } from '../create_execute_function';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
-  getBulkAuthorizationModeBySource,
+  bulkGetAuthorizationModeBySource,
   AuthorizationMode,
 } from '../authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
@@ -88,6 +90,7 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
+import { ListTypesParams } from '../application/connector/methods/list_types/types';
 
 interface ActionUpdate {
   name: string;
@@ -104,7 +107,7 @@ export interface CreateOptions {
   options?: { id?: string };
 }
 
-interface ConstructorOptions {
+export interface ConstructorOptions {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
@@ -112,9 +115,8 @@ interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
-  executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -128,11 +130,6 @@ export interface UpdateOptions {
   action: ActionUpdate;
 }
 
-interface ListTypesOptions {
-  featureId?: string;
-  includeSystemActionTypes?: boolean;
-}
-
 export interface ActionsClientContext {
   logger: Logger;
   kibanaIndices: string[];
@@ -143,9 +140,8 @@ export interface ActionsClientContext {
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
-  executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
@@ -163,7 +159,6 @@ export class ActionsClient {
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
-    executionEnqueuer,
     ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
@@ -181,7 +176,6 @@ export class ActionsClient {
       kibanaIndices,
       inMemoryConnectors,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -403,7 +397,7 @@ export class ActionsClient {
   }
 
   /**
-   * Get an action
+   * Get a connector
    */
   public async get({
     id,
@@ -412,79 +406,15 @@ export class ActionsClient {
     id: string;
     throwIfSystemAction?: boolean;
   }): Promise<ActionResult> {
-    try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-
-    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === id
-    );
-
-    /**
-     * Getting system connector is not allowed
-     * if throwIfSystemAction is set to true.
-     * Default behavior is to throw
-     */
-    if (
-      foundInMemoryConnector !== undefined &&
-      foundInMemoryConnector.isSystemAction &&
-      throwIfSystemAction
-    ) {
-      throw Boom.notFound(`Connector ${id} not found`);
-    }
-
-    if (foundInMemoryConnector !== undefined) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-        })
-      );
-
-      return {
-        id,
-        actionTypeId: foundInMemoryConnector.actionTypeId,
-        name: foundInMemoryConnector.name,
-        isPreconfigured: foundInMemoryConnector.isPreconfigured,
-        isSystemAction: foundInMemoryConnector.isSystemAction,
-        isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
-      };
-    }
-
-    const result = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.GET,
-        savedObject: { type: 'action', id },
-      })
-    );
-
-    return {
-      id,
-      actionTypeId: result.attributes.actionTypeId,
-      isMissingSecrets: result.attributes.isMissingSecrets,
-      name: result.attributes.name,
-      config: result.attributes.config,
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: isConnectorDeprecated(result.attributes),
-    };
+    return get({ context: this.context, id, throwIfSystemAction });
   }
 
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false } = {}): Promise<FindConnectorResult[]> {
+  public async getAll({ includeSystemActions = false } = {}): Promise<
+    ConnectorWithExtraFindData[]
+  > {
     return getAll({ context: this.context, includeSystemActions });
   }
 
@@ -774,38 +704,19 @@ export class ActionsClient {
     });
   }
 
-  public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      /**
-       * For scheduled executions the additional authorization check
-       * for system actions (kibana privileges) will be performed
-       * inside the ActionExecutor at execution time
-       */
+  public async bulkEnqueueExecution(
+    options: EnqueueExecutionOptions[]
+  ): Promise<ExecutionResponse> {
+    const sources: Array<ActionExecutionSource<unknown>> = compact(
+      (options ?? []).map((option) => option.source)
+    );
 
-      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
-    } else {
-      trackLegacyRBACExemption('enqueueExecution', this.context.usageCounter);
-    }
-    return this.context.executionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
-  }
-
-  public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
-    const sources: Array<ActionExecutionSource<unknown>> = [];
-    options.forEach((option) => {
-      if (option.source) {
-        sources.push(option.source);
-      }
-    });
-
-    const authCounts = await getBulkAuthorizationModeBySource(
+    const authModes = await bulkGetAuthorizationModeBySource(
+      this.context.logger,
       this.context.unsecuredSavedObjectsClient,
       sources
     );
-    if (authCounts[AuthorizationMode.RBAC] > 0) {
+    if (authModes[AuthorizationMode.RBAC] > 0) {
       /**
        * For scheduled executions the additional authorization check
        * for system actions (kibana privileges) will be performed
@@ -813,11 +724,11 @@ export class ActionsClient {
        */
       await this.context.authorization.ensureAuthorized({ operation: 'execute' });
     }
-    if (authCounts[AuthorizationMode.Legacy] > 0) {
+    if (authModes[AuthorizationMode.Legacy] > 0) {
       trackLegacyRBACExemption(
         'bulkEnqueueExecution',
         this.context.usageCounter,
-        authCounts[AuthorizationMode.Legacy]
+        authModes[AuthorizationMode.Legacy]
       );
     }
     return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
@@ -839,21 +750,11 @@ export class ActionsClient {
     );
   }
 
-  /**
-   * Return all available action types
-   * expect system action types
-   */
   public async listTypes({
     featureId,
     includeSystemActionTypes = false,
-  }: ListTypesOptions = {}): Promise<ActionType[]> {
-    const actionTypes = this.context.actionTypeRegistry.list(featureId);
-
-    const filteredActionTypes = includeSystemActionTypes
-      ? actionTypes
-      : actionTypes.filter((actionType) => !Boolean(actionType.isSystemActionType));
-
-    return filteredActionTypes;
+  }: ListTypesParams = {}): Promise<ConnectorType[]> {
+    return listTypes(this.context, { featureId, includeSystemActionTypes });
   }
 
   public isActionTypeEnabled(

@@ -144,7 +144,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 });
 
-const convertHistoryStartToSize = (relativeTime: string) => {
+export const convertHistoryStartToSize = (relativeTime: string) => {
   if (relativeTime.startsWith('now-')) {
     return relativeTime.substring(4);
   } else {
@@ -231,7 +231,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    investigationFields: investigationFields ?? [],
+    investigationFields: investigationFields?.field_names ?? [],
     threat: threat as Threats,
     threatIndicatorPath,
   };
@@ -359,6 +359,7 @@ const commonRuleParamsKeys = [
   'version',
 ];
 const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id', 'response_actions'];
+const esqlRuleParams = ['filters', 'language', 'query', 'response_actions'];
 const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
 const thresholdRuleParams = ['threshold', ...queryRuleParams];
 
@@ -379,6 +380,8 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return machineLearningRuleParams;
     case 'threshold':
       return thresholdRuleParams;
+    case 'esql':
+      return esqlRuleParams;
     case 'new_terms':
     case 'threat_match':
     case 'query':

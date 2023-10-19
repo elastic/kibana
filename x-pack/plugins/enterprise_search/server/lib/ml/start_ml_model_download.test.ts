@@ -15,7 +15,7 @@ import * as mockGetStatus from './get_ml_model_deployment_status';
 import { startMlModelDownload } from './start_ml_model_download';
 
 describe('startMlModelDownload', () => {
-  const knownModelName = '.elser_model_1_SNAPSHOT';
+  const knownModelName = '.elser_model_2';
   const mockTrainedModelsProvider = {
     getTrainedModels: jest.fn(),
     getTrainedModelsStats: jest.fn(),

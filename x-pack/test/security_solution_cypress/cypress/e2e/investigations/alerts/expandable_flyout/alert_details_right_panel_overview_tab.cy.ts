@@ -43,7 +43,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   navigateToCorrelationsDetails,
@@ -56,7 +56,8 @@ import {
   toggleOverviewTabVisualizationsSection,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -69,9 +70,9 @@ import {
 
 describe(
   'Alert details expandable flyout right panel overview tab',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
-    const rule = getNewRule();
+    const rule = { ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } };
 
     beforeEach(() => {
       cleanKibana();
@@ -101,7 +102,7 @@ describe(
           .within(() => {
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON)
               .should('be.visible')
-              .and('have.text', 'Rule summary');
+              .and('have.text', 'Show rule summary');
           });
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS)
           .should('be.visible')
@@ -133,7 +134,8 @@ describe(
       });
     });
 
-    describe('visualizations section', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168222
+    describe.skip('visualizations section', () => {
       it('should display analyzer and session previews', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabVisualizationsSection();
@@ -169,7 +171,7 @@ describe(
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON)
           .should('be.visible')
-          .and('have.text', 'Investigation guide');
+          .and('have.text', 'Show investigation guide');
 
         cy.log('should navigate to left Investigation tab');
 
@@ -177,7 +179,7 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
 
-        cy.log('highlighted fields');
+        cy.log('highlighted fields section');
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE)
           .should('be.visible')
@@ -185,6 +187,17 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS).should(
           'be.visible'
         );
+
+        cy.log('custom highlighted fields');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL)
+          .should('be.visible')
+          .and('contain.text', 'host.os.name');
+        const customHighlightedField =
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('Mac OS X');
+        cy.get(customHighlightedField).should('be.visible').and('have.text', 'Mac OS X');
+
+        cy.log('system defined highlighted fields');
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL)
           .should('be.visible')
@@ -246,7 +259,7 @@ describe(
         ).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER)
           .should('be.visible')
-          .and('have.text', 'Threat Intelligence');
+          .and('have.text', 'Threat intelligence');
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT
         ).scrollIntoView();
@@ -257,13 +270,13 @@ describe(
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
               .eq(0)
               .should('be.visible')
-              .and('have.text', '0 threat match detected'); // TODO work on getting proper IoC data to get proper data here
+              .and('have.text', '0 threat matches detected'); // TODO work on getting proper IoC data to get proper data here
 
             // field with threat enrichement
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
               .eq(1)
               .should('be.visible')
-              .and('have.text', '0 field enriched with threat intelligence'); // TODO work on getting proper IoC data to get proper data here
+              .and('have.text', '0 fields enriched with threat intelligence'); // TODO work on getting proper IoC data to get proper data here
           });
 
         cy.log('should navigate to left panel Threat Intelligence tab');
@@ -293,7 +306,9 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT)
           .should('be.visible')
           .within(() => {
-            // TODO the order in which these appear is not deterministic currently, hence this can cause flakiness
+            // cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_SUPPRESSED_ALERTS)
+            //   .should('be.visible')
+            //   .and('have.text', '1 suppressed alert'); // TODO populate rule with alert suppression
             cy.get(
               DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_ANCESTRY
             )
@@ -348,14 +363,12 @@ describe(
     });
 
     describe('response section', () => {
-      it('should display empty message', () => {
+      it('should display button', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
         toggleOverviewTabResponseSection();
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE).should(
-          'be.visible'
-        );
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON).should('be.visible');
       });
     });
   }

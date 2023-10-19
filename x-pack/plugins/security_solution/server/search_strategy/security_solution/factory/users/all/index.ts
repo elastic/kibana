@@ -17,27 +17,27 @@ import { buildUsersQuery } from './query.all_users.dsl';
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
   User,
-  UsersRequestOptions,
   UsersStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/all';
 import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 import type { RiskSeverity, UserRiskScore } from '../../../../../../common/search_strategy';
 import {
-  RiskScoreEntity,
   buildUserNamesFilter,
   getUserRiskIndex,
+  RiskScoreEntity,
+  RiskQueries,
 } from '../../../../../../common/search_strategy';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
-  buildDsl: (options: UsersRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildUsersQuery(options);
   },
   parse: async (
-    options: UsersRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
@@ -78,7 +78,7 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
           userNames,
           deps.spaceId,
           deps.esClient,
-          options.isNewRiskScoreModuleAvailable
+          options.isNewRiskScoreModuleInstalled
         )
       : edges;
 
@@ -101,13 +101,13 @@ async function enhanceEdges(
   userNames: string[],
   spaceId: string,
   esClient: IScopedClusterClient,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): Promise<User[]> {
   const userRiskData = await getUserRiskData(
     esClient,
     spaceId,
     userNames,
-    isNewRiskScoreModuleAvailable
+    isNewRiskScoreModuleInstalled
   );
   const usersRiskByUserName: Record<string, RiskSeverity> | undefined =
     userRiskData?.hits.hits.reduce(
@@ -132,14 +132,15 @@ export async function getUserRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
   userNames: string[],
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ) {
   try {
     const userRiskResponse = await esClient.asCurrentUser.search<UserRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)],
+        defaultIndex: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
         filterQuery: buildUserNamesFilter(userNames),
         riskScoreEntity: RiskScoreEntity.user,
+        factoryQueryType: RiskQueries.usersRiskScore,
       })
     );
     return userRiskResponse;

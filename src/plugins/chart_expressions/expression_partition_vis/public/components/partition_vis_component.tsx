@@ -179,11 +179,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const onRenderChange = useCallback(
     (isRendered: boolean = true) => {
       if (isRendered) {
-        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-        window.requestAnimationFrame(() => {
-          props.renderComplete();
-          setChartIsLoaded(true);
-        });
+        props.renderComplete();
+        setChartIsLoaded(true);
       }
     },
     [props]
@@ -594,6 +591,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 onRenderChange={onRenderChange}
                 ariaLabel={props.visParams.ariaLabel}
                 ariaUseDefaultSummary={!props.visParams.ariaLabel}
+                locale={i18n.getLocale()}
                 {...settingsOverrides}
               />
               <Partition

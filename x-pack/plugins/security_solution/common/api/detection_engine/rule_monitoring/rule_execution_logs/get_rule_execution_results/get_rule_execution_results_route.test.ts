@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { stringifyZodError } from '@kbn/securitysolution-es-utils';
+import { expectParseError, expectParseSuccess } from '../../../../../test/zod_helpers';
+import { RuleExecutionStatus } from '../../model';
+import { GetRuleExecutionResultsRequestQuery } from './get_rule_execution_results_route.gen';
 
-import { RULE_EXECUTION_STATUSES } from '../../model/execution_status';
-import {
-  DefaultSortField,
-  DefaultRuleExecutionStatusCsvArray,
-} from './get_rule_execution_results_route';
+const StatusFiltersSchema = GetRuleExecutionResultsRequestQuery.shape.status_filters;
+const SortFieldSchema = GetRuleExecutionResultsRequestQuery.shape.sort_field;
 
 describe('Request schema of Get rule execution results', () => {
   describe('DefaultRuleExecutionStatusCsvArray', () => {
     describe('Validation succeeds', () => {
       describe('when input is a single rule execution status', () => {
-        const cases = RULE_EXECUTION_STATUSES.map((supportedStatus) => {
+        const cases = RuleExecutionStatus.options.map((supportedStatus) => {
           return { input: supportedStatus };
         });
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
             const expectedOutput = [input]; // note that it's an array after decode
+            const result = StatusFiltersSchema.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual(expectedOutput);
+            expectParseSuccess(result);
+            expect(result.data).toEqual(expectedOutput);
           });
         });
       });
@@ -43,12 +40,11 @@ describe('Request schema of Get rule execution results', () => {
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
             const expectedOutput = input;
+            const result = StatusFiltersSchema.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual(expectedOutput);
+            expectParseSuccess(result);
+            expect(result.data).toEqual(expectedOutput);
           });
         });
       });
@@ -67,11 +63,10 @@ describe('Request schema of Get rule execution results', () => {
 
         cases.forEach(({ input, expectedOutput }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
+            const result = StatusFiltersSchema.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual(expectedOutput);
+            expectParseSuccess(result);
+            expect(result.data).toEqual(expectedOutput);
           });
         });
       });
@@ -82,37 +77,30 @@ describe('Request schema of Get rule execution results', () => {
         const cases = [
           {
             input: 'val',
-            expectedErrors: [
-              'Invalid value "val" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors:
+              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'val'",
           },
           {
             input: '5',
-            expectedErrors: [
-              'Invalid value "5" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors:
+              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '5'",
           },
           {
             input: 5,
-            expectedErrors: [
-              'Invalid value "5" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors: 'Expected array, received number',
           },
           {
             input: {},
-            expectedErrors: [
-              'Invalid value "{}" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors: 'Expected array, received object',
           },
         ];
 
         cases.forEach(({ input, expectedErrors }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
+            const result = StatusFiltersSchema.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual(expectedErrors);
-            expect(message.schema).toEqual({});
+            expectParseError(result);
+            expect(stringifyZodError(result.error)).toEqual(expectedErrors);
           });
         });
       });
@@ -121,34 +109,27 @@ describe('Request schema of Get rule execution results', () => {
         const cases = [
           {
             input: ['value 1', 5],
-            expectedErrors: [
-              'Invalid value "value 1" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-              'Invalid value "5" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors:
+              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'value 1', 1: Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received number",
           },
           {
             input: ['value 1', 'succeeded'],
-            expectedErrors: [
-              'Invalid value "value 1" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors:
+              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'value 1'",
           },
           {
             input: ['', 5, {}],
-            expectedErrors: [
-              'Invalid value "" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-              'Invalid value "5" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-              'Invalid value "{}" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors:
+              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '', 1: Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received number, 2: Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received object",
           },
         ];
 
         cases.forEach(({ input, expectedErrors }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
+            const result = StatusFiltersSchema.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual(expectedErrors);
-            expect(message.schema).toEqual({});
+            expectParseError(result);
+            expect(stringifyZodError(result.error)).toEqual(expectedErrors);
           });
         });
       });
@@ -157,34 +138,27 @@ describe('Request schema of Get rule execution results', () => {
         const cases = [
           {
             input: 'value 1,5',
-            expectedErrors: [
-              'Invalid value "value 1" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-              'Invalid value "5" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors:
+              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'value 1', 1: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '5'",
           },
           {
             input: 'value 1,succeeded',
-            expectedErrors: [
-              'Invalid value "value 1" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors:
+              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'value 1'",
           },
           {
             input: ',5,{}',
-            expectedErrors: [
-              'Invalid value "" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-              'Invalid value "5" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-              'Invalid value "{}" supplied to "DefaultCsvArray<RuleExecutionStatus>"',
-            ],
+            expectedErrors:
+              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '', 1: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '5', 2: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '{}'",
           },
         ];
 
         cases.forEach(({ input, expectedErrors }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
+            const result = StatusFiltersSchema.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual(expectedErrors);
-            expect(message.schema).toEqual({});
+            expectParseError(result);
+            expect(stringifyZodError(result.error)).toEqual(expectedErrors);
           });
         });
       });
@@ -192,16 +166,14 @@ describe('Request schema of Get rule execution results', () => {
 
     describe('Validation returns default value (an empty array)', () => {
       describe('when input is', () => {
-        const cases = [{ input: null }, { input: undefined }, { input: '' }, { input: [] }];
+        const cases = [{ input: undefined }, { input: '' }, { input: [] }];
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const decoded = DefaultRuleExecutionStatusCsvArray.decode(input);
-            const message = pipe(decoded, foldLeftRight);
-            const expectedOutput: string[] = [];
+            const result = StatusFiltersSchema.safeParse(input);
 
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual(expectedOutput);
+            expectParseSuccess(result);
+            expect(result.data).toEqual([]);
           });
         });
       });
@@ -222,11 +194,9 @@ describe('Request schema of Get rule execution results', () => {
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const decoded = DefaultSortField.decode(input);
-            const message = pipe(decoded, foldLeftRight);
-
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual(input);
+            const result = SortFieldSchema.safeParse(input);
+            expectParseSuccess(result);
+            expect(result.data).toEqual(input);
           });
         });
       });
@@ -244,12 +214,10 @@ describe('Request schema of Get rule execution results', () => {
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const decoded = DefaultSortField.decode(input);
-            const message = pipe(decoded, foldLeftRight);
-            const expectedErrors = [`Invalid value "${input}" supplied to "DefaultSortField"`];
-
-            expect(getPaths(left(message.errors))).toEqual(expectedErrors);
-            expect(message.schema).toEqual({});
+            const expectedErrors = `Invalid enum value. Expected 'timestamp' | 'duration_ms' | 'gap_duration_s' | 'indexing_duration_ms' | 'search_duration_ms' | 'schedule_delay_ms', received '${input}'`;
+            const result = SortFieldSchema.safeParse(input);
+            expectParseError(result);
+            expect(stringifyZodError(result.error)).toEqual(expectedErrors);
           });
         });
       });
@@ -257,17 +225,37 @@ describe('Request schema of Get rule execution results', () => {
 
     describe('Validation returns the default sort field "timestamp"', () => {
       describe('when input is', () => {
-        const cases = [{ input: null }, { input: undefined }];
+        const cases = [{ input: undefined }];
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const decoded = DefaultSortField.decode(input);
-            const message = pipe(decoded, foldLeftRight);
-
-            expect(getPaths(left(message.errors))).toEqual([]);
-            expect(message.schema).toEqual('timestamp');
+            const result = SortFieldSchema.safeParse(input);
+            expectParseSuccess(result);
+            expect(result.data).toEqual('timestamp');
           });
         });
+      });
+    });
+  });
+
+  describe('GetRuleExecutionResultsRequestQuery', () => {
+    it('should convert string values to numbers', () => {
+      const result = GetRuleExecutionResultsRequestQuery.safeParse({
+        start: '2021-08-01T00:00:00.000Z',
+        end: '2021-08-02T00:00:00.000Z',
+        page: '1',
+        per_page: '10',
+      });
+      expectParseSuccess(result);
+      expect(result.data).toEqual({
+        end: '2021-08-02T00:00:00.000Z',
+        page: 1,
+        per_page: 10,
+        query_text: '',
+        sort_field: 'timestamp',
+        sort_order: 'desc',
+        start: '2021-08-01T00:00:00.000Z',
+        status_filters: [],
       });
     });
   });

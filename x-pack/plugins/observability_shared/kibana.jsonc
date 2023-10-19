@@ -7,9 +7,9 @@
     "server": false,
     "browser": true,
     "configPath": ["xpack", "observability_shared"],
-    "requiredPlugins": ["cases", "guidedOnboarding", "uiActions"],
+    "requiredPlugins": ["cases", "guidedOnboarding", "uiActions", "embeddable", "share"],
     "optionalPlugins": [],
-    "requiredBundles": ["data", "inspector", "kibanaReact", "kibanaUtils"],
+    "requiredBundles": ["data", "inspector", "kibanaReact", "kibanaUtils", "advancedSettings"],
     "extraPublicDirs": ["common"]
   }
 }

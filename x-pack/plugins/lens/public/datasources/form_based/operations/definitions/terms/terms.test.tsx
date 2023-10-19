@@ -2680,6 +2680,7 @@ describe('terms', () => {
             params: {
               ...(layer.columns.col1 as TermsIndexPatternColumn).params,
               size: 7,
+              otherBucket: true,
             },
           },
         },

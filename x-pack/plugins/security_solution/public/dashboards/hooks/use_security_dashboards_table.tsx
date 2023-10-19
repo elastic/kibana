@@ -8,9 +8,9 @@
 import React, { useMemo, useCallback } from 'react';
 import type { MouseEventHandler } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { LinkAnchor } from '../../common/components/links';
 import { useKibana, useNavigateTo } from '../../common/lib/kibana';
-import * as i18n from './translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 import { SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -56,7 +56,9 @@ export const useSecurityDashboardsTableColumns = (): Array<
     (): Array<EuiBasicTableColumn<DashboardTableItem>> => [
       {
         field: 'title',
-        name: i18n.DASHBOARD_TITLE,
+        name: i18n.translate('xpack.securitySolution.dashboards.title', {
+          defaultMessage: 'Title',
+        }),
         sortable: true,
         render: (title: string, { id }) => {
           const href = `${getSecuritySolutionUrl({
@@ -75,7 +77,9 @@ export const useSecurityDashboardsTableColumns = (): Array<
       },
       {
         field: 'description',
-        name: i18n.DASHBOARDS_DESCRIPTION,
+        name: i18n.translate('xpack.securitySolution.dashboards.description', {
+          defaultMessage: 'Description',
+        }),
         sortable: true,
         render: (description: string) => description || getEmptyValue(),
         'data-test-subj': 'dashboardTableDescriptionCell',

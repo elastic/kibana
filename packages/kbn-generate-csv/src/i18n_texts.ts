@@ -37,6 +37,12 @@ export const i18nTexts = {
         'Encountered an error with the number of CSV rows generated from the search: expected {expected}, received {received}.',
       values: { expected, received },
     }),
+  csvRowCountIndeterminable: ({ received }: { expected?: number; received: number }) =>
+    i18n.translate('generateCsv.indeterminableRowCount', {
+      defaultMessage:
+        'Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received {received}.',
+      values: { received },
+    }),
   csvUnableToClosePit: () =>
     i18n.translate('generateCsv.csvUnableToClosePit', {
       defaultMessage:

@@ -6,8 +6,6 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import {
   EuiTitle,
   EuiAccordion,
@@ -17,7 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
-import { RuleAboutSection } from './rule_about_section';
+import { RuleAboutSection, Description } from './rule_about_section';
 import { RuleDefinitionSection } from './rule_definition_section';
 import { RuleScheduleSection } from './rule_schedule_section';
 import { RuleSetupGuideSection } from './rule_setup_guide_section';
@@ -88,7 +86,7 @@ const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectio
 };
 
 interface RuleOverviewTabProps {
-  rule: Partial<RuleResponse>;
+  rule: RuleResponse;
   expandedOverviewSections: Record<keyof typeof defaultOverviewOpenSections, boolean>;
   toggleOverviewSection: Record<keyof typeof defaultOverviewOpenSections, () => void>;
 }
@@ -98,18 +96,15 @@ export const RuleOverviewTab = ({
   expandedOverviewSections,
   toggleOverviewSection,
 }: RuleOverviewTabProps) => (
-  <div
-    css={css`
-      padding: 0 ${euiThemeVars.euiSizeM};
-    `}
-  >
+  <>
     <EuiSpacer size="m" />
     <ExpandableSection
       title={i18n.ABOUT_SECTION_LABEL}
       isOpen={expandedOverviewSections.about}
       toggle={toggleOverviewSection.about}
     >
-      <RuleAboutSection rule={rule} />
+      {rule.description && <Description description={rule.description} />}
+      <RuleAboutSection rule={rule} hideDescription hideName />
     </ExpandableSection>
     <EuiHorizontalRule margin="m" />
     <ExpandableSection
@@ -127,9 +122,9 @@ export const RuleOverviewTab = ({
     >
       <RuleScheduleSection rule={rule} />
     </ExpandableSection>
-    <EuiHorizontalRule margin="m" />
     {rule.setup && (
       <>
+        <EuiHorizontalRule margin="m" />
         <ExpandableSection
           title={i18n.SETUP_GUIDE_SECTION_LABEL}
           isOpen={expandedOverviewSections.setup}
@@ -137,8 +132,7 @@ export const RuleOverviewTab = ({
         >
           <RuleSetupGuideSection setup={rule.setup} />
         </ExpandableSection>
-        <EuiHorizontalRule margin="m" />
       </>
     )}
-  </div>
+  </>
 );

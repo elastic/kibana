@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { IEventLogService } from '.';
 import { Plugin } from './plugin';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 
 describe('event_log plugin', () => {
   it('can setup and start', () => {
@@ -18,7 +19,9 @@ describe('event_log plugin', () => {
     const coreStart = coreMock.createStart() as CoreStart;
 
     const plugin = new Plugin(initializerContext);
-    const setup = plugin.setup(coreSetup);
+    const setup = plugin.setup(coreSetup, {
+      serverless: serverlessPluginMock.createSetupContract(),
+    });
     expect(typeof setup.getLogger).toBe('function');
     expect(typeof setup.getProviderActions).toBe('function');
     expect(typeof setup.isIndexingEntries).toBe('function');
@@ -40,7 +43,7 @@ describe('event_log plugin', () => {
 
     const plugin = new Plugin(initializerContext);
     const spaces = spacesMock.createStart();
-    plugin.setup(coreSetup);
+    plugin.setup(coreSetup, { serverless: serverlessPluginMock.createSetupContract() });
     plugin.start(coreStart, { spaces });
     await plugin.stop();
     expect(mockLogger.debug).toBeCalledWith('shutdown: waiting to finish');

@@ -54,13 +54,17 @@ import {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
 } from '@kbn/fleet-plugin/server';
-import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 
 import {
   CustomIntegrationsPluginSetup,
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
+import {
+  ProfilingDataAccessPluginSetup,
+  ProfilingDataAccessPluginStart,
+} from '@kbn/profiling-data-access-plugin/server';
 import { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -75,7 +79,7 @@ export interface APMPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  infra: InfraPluginSetup;
+  metricsDataAccess: MetricsDataPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
 
@@ -91,6 +95,7 @@ export interface APMPluginSetupDependencies {
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
+  profilingDataAccess?: ProfilingDataAccessPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -100,7 +105,7 @@ export interface APMPluginStartDependencies {
   licensing: LicensingPluginStart;
   observability: undefined;
   ruleRegistry: RuleRegistryPluginStartContract;
-  infra: InfraPluginStart;
+  metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
 
@@ -116,4 +121,5 @@ export interface APMPluginStartDependencies {
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
+  profilingDataAccess?: ProfilingDataAccessPluginStart;
 }

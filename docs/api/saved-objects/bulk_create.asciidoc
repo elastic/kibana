@@ -8,6 +8,12 @@ deprecated::[8.7.0, To be removed in an upcoming version]
 
 Create multiple {kib} saved objects.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 [[saved-objects-api-bulk-create-request]]
 ==== Request
 
@@ -32,7 +38,7 @@ Create multiple {kib} saved objects.
 ==== Request body
 
 `type`::
-  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`.
 
 `id`::
   (Optional, string) Specifies an ID instead of using a randomly generated ID.
@@ -74,7 +80,7 @@ Saved objects that are unable to persist are replaced with an error object.
 [[saved-objects-api-bulk-create-example]]
 ==== Example
 
-Create {a-data-source} with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
+Create a {data-source} with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
 
 [source,sh]
 --------------------------------------------------

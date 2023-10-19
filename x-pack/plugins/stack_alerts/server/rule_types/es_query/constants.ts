@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export const ES_QUERY_ID = '.es-query';
 export const ActionGroupId = 'query matched';
 export const ConditionMetAlertInstanceId = 'query matched';

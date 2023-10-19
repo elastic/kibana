@@ -7,9 +7,9 @@
 
 import React, { ReactNode, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { AppMountParameters } from '@kbn/core/public';
-
+import { useKibana } from '../../../../utils/kibana_react';
 export interface HeaderMenuPortalProps {
   children: ReactNode;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -22,11 +22,14 @@ export default function HeaderMenuPortal({
   setHeaderActionMenu,
   theme$,
 }: HeaderMenuPortalProps) {
+  const { i18n } = useKibana().services;
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
     setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$ });
+      const mount = toMountPoint(<OutPortal node={portalNode} />, {
+        ...{ theme: { theme$ }, i18n },
+      });
       return mount(element);
     });
 
@@ -34,7 +37,7 @@ export default function HeaderMenuPortal({
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-  }, [portalNode, setHeaderActionMenu, theme$]);
+  }, [portalNode, setHeaderActionMenu, i18n, theme$]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 }

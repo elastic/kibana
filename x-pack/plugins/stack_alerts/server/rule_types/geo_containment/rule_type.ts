@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectReference, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type {
   GeoContainmentRuleType,
   GeoContainmentExtractedRuleParams,
@@ -179,6 +179,7 @@ export function getRuleType(): GeoContainmentRuleType {
     doesSetRecoveryContext: true,
     defaultActionGroupId: ActionGroupId,
     executor,
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,

@@ -14,8 +14,7 @@ export const clearSearchBar = () => {
 };
 
 export const kqlSearch = (search: string) => {
-  clearSearchBar();
-  cy.get(KQL_INPUT).type(search);
+  cy.get(KQL_INPUT).type(search, { force: true });
 };
 
 export const navigateFromHeaderTo = (page: string) => {

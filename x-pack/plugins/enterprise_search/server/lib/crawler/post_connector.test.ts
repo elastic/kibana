@@ -7,8 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-import { ConnectorStatus } from '../../../common/types/connectors';
+import { CONNECTORS_INDEX, ConnectorStatus } from '@kbn/search-connectors';
 
 import { recreateConnectorDocument } from './post_connector';
 

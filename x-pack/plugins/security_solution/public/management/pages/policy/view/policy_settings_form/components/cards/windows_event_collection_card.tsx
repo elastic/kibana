@@ -17,7 +17,7 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
     name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
       {
-        defaultMessage: 'Credential Access',
+        defaultMessage: 'API',
       }
     ),
     protectionField: 'credential_access',

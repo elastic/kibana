@@ -19,6 +19,8 @@ import type { SignificantTerm } from './types';
  */
 export function isSignificantTerm(arg: unknown): arg is SignificantTerm {
   return isPopulatedObject(arg, [
+    'key',
+    'type',
     'fieldName',
     'fieldValue',
     'doc_count',

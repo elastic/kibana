@@ -135,6 +135,7 @@ export function useFetchActiveAlerts({ sloIdsAndInstanceIds = [] }: Params): Use
       }
     },
     refetchOnWindowFocus: false,
+    enabled: Boolean(sloIdsAndInstanceIds.length),
   });
 
   return {

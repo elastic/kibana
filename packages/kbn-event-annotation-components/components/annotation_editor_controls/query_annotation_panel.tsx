@@ -97,6 +97,7 @@ export const ConfigPanelQueryAnnotation = ({
         })}
       >
         <FieldPicker
+          compressed
           options={options}
           selectedOptions={
             selectedField

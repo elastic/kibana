@@ -44,6 +44,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
     <EuiContextMenu
       data-test-subj="layerTocActionsPanellayer1"
@@ -160,6 +161,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
     <EuiContextMenu
       data-test-subj="layerTocActionsPanellayer1"
@@ -276,6 +278,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
     <EuiContextMenu
       data-test-subj="layerTocActionsPanellayer1"
@@ -393,6 +396,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
     <EuiContextMenu
       data-test-subj="layerTocActionsPanellayer1"
@@ -509,6 +513,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
     <EuiContextMenu
       data-test-subj="layerTocActionsPanellayer1"
@@ -594,6 +599,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
     <EuiContextMenu
       data-test-subj="layerTocActionsPanellayer1"

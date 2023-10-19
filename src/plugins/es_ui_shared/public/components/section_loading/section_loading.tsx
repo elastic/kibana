@@ -15,13 +15,24 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 interface Props {
   inline?: boolean;
   children: React.ReactNode;
+  'data-test-subj'?: string;
   [key: string]: any;
 }
 
-export const SectionLoading: React.FunctionComponent<Props> = ({ inline, children, ...rest }) => {
+export const SectionLoading: React.FunctionComponent<Props> = ({
+  inline,
+  'data-test-subj': dataTestSubj,
+  children,
+  ...rest
+}) => {
   if (inline) {
     return (
-      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        alignItems="center"
+        gutterSize="s"
+        data-test-subj={dataTestSubj}
+      >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
@@ -38,7 +49,7 @@ export const SectionLoading: React.FunctionComponent<Props> = ({ inline, childre
     <KibanaPageTemplate.EmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}
       body={<EuiText color="subdued">{children}</EuiText>}
-      data-test-subj="sectionLoading"
+      data-test-subj={dataTestSubj ?? 'sectionLoading'}
     />
   );
 };

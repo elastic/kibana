@@ -9,7 +9,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { isDefaultTransactionType } from '../../../common/transaction_types';
 import { TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
@@ -45,7 +45,7 @@ export async function getTransactionsPerMinute({
           bool: {
             filter: [
               ...rangeQuery(start, end),
-              ...getDocumentTypeFilterForTransactions(
+              ...getBackwardCompatibleDocumentTypeFilter(
                 searchAggregatedTransactions
               ),
             ],

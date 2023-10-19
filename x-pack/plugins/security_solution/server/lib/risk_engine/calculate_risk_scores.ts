@@ -14,6 +14,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
+  ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type {
@@ -158,7 +159,7 @@ const buildIdentifierTypeAggregation = ({
     aggs: {
       inputs: {
         top_hits: {
-          size: 10,
+          size: 5,
           sort: { [ALERT_RISK_SCORE]: 'desc' },
           _source: false,
           docvalue_fields: ['@timestamp', ALERT_RISK_SCORE, ALERT_RULE_NAME],
@@ -213,7 +214,11 @@ export const calculateRiskScores = async ({
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
 
-    const filter = [{ exists: { field: ALERT_RISK_SCORE } }, filterFromRange(range)];
+    const filter = [
+      filterFromRange(range),
+      { bool: { must_not: { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } } } },
+      { exists: { field: ALERT_RISK_SCORE } },
+    ];
     if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
     }

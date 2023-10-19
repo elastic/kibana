@@ -7,9 +7,12 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 import type { Conversation } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiMarkdownFormat, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiMarkdownFormat, EuiText, tint } from '@elastic/eui';
 import React from 'react';
 
+import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
@@ -57,11 +60,25 @@ export const getComments = ({
       timelineAvatar: isUser ? (
         <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
       ) : (
-        <EuiAvatar name="machine" size="l" color="subdued" iconType="logoSecurity" />
+        <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
       ),
       timestamp: i18n.AT(
         message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
       ),
       username: isUser ? i18n.YOU : i18n.ASSISTANT,
+      ...(message.isError
+        ? {
+            eventColor: 'danger',
+            css: css`
+              .euiCommentEvent {
+                border: 1px solid ${tint(euiThemeVars.euiColorDanger, 0.75)};
+              }
+              .euiCommentEvent__header {
+                padding: 0 !important;
+                border-block-end: 1px solid ${tint(euiThemeVars.euiColorDanger, 0.75)};
+              }
+            `,
+          }
+        : {}),
     };
   });

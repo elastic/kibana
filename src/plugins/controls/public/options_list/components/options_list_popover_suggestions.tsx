@@ -17,6 +17,7 @@ import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;
@@ -33,6 +34,7 @@ export const OptionsListPopoverSuggestions = ({
   const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
   const totalCardinality = optionsList.select((state) => state.componentState.totalCardinality);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
 
   const sort = optionsList.select((state) => state.explicitInput.sort);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
@@ -41,9 +43,12 @@ export const OptionsListPopoverSuggestions = ({
   const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
   const isLoading = optionsList.select((state) => state.output.loading) ?? false;
 
   const listRef = useRef<HTMLDivElement>(null);
+
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   const canLoadMoreSuggestions = useMemo(
     () =>
@@ -84,9 +89,10 @@ export const OptionsListPopoverSuggestions = ({
         // this means that `showOnlySelected` is true, and doc count is not known when this is the case
         suggestion = { value: suggestion };
       }
+
       return {
         key: suggestion.value,
-        label: suggestion.value,
+        label: fieldFormatter(suggestion.value) ?? suggestion.value,
         checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
@@ -124,6 +130,7 @@ export const OptionsListPopoverSuggestions = ({
     invalidSelectionsSet,
     existsSelectableOption,
     canLoadMoreSuggestions,
+    fieldFormatter,
   ]);
 
   const loadMoreOptions = useCallback(() => {

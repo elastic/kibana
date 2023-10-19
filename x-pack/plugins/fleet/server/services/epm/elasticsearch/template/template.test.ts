@@ -12,6 +12,8 @@ import { safeLoad } from 'js-yaml';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
+import { errors } from '@elastic/elasticsearch';
+
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
@@ -1122,6 +1124,105 @@ describe('EPM template', () => {
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 
+  it('tests processing scaled_float fields in a dynamic template', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: numeric_labels
+  type: object
+  object_type: scaled_float
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      dynamic_templates: [
+        {
+          numeric_labels: {
+            match_mapping_type: '*',
+            path_match: 'numeric_labels.*',
+            mapping: {
+              type: 'scaled_float',
+              scaling_factor: 1000,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing aggregate_metric_double fields in a dynamic template', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: aggregate.*
+  type: aggregate_metric_double
+  metrics: ["min", "max", "sum", "value_count"]
+  default_metric: "max"
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      dynamic_templates: [
+        {
+          'aggregate.*': {
+            match_mapping_type: '*',
+            path_match: 'aggregate.*',
+            mapping: {
+              type: 'aggregate_metric_double',
+              metrics: ['min', 'max', 'sum', 'value_count'],
+              default_metric: 'max',
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing groub sub fields in a dynamic template', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: group.*.network
+  type: group
+  fields:
+  - name: bytes
+    type: integer
+    metric_type: counter
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      dynamic_templates: [
+        {
+          'group.*.network.bytes': {
+            match_mapping_type: 'long',
+            path_match: 'group.*.network.bytes',
+            mapping: {
+              type: 'long',
+              time_series_metric: 'counter',
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests unexpected type for field as dynamic template fails', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: object
+  object_type: constant_keyword
+`;
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    expect(() => {
+      const processedFields = processFields(fields);
+      generateMappings(processedFields);
+    }).toThrow();
+  });
+
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
     const dataStreamDatasetIsPrefixUnset = {
       type: 'metrics',
@@ -1260,6 +1361,135 @@ describe('EPM template', () => {
           data_retention: '7d',
         },
       });
+    });
+    it('should rollover on expected error', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+            },
+          },
+        } as any);
+      });
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.indices.rollover).toHaveBeenCalled();
+    });
+    it('should skip rollover on expected error when flag is on', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+            },
+          },
+        } as any);
+      });
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        {
+          skipDataStreamRollover: true,
+        }
+      );
+
+      expect(esClient.indices.rollover).not.toHaveBeenCalled();
+    });
+    it('should not rollover on unexpected error', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new Error();
+      });
+      const logger = loggerMock.create();
+      try {
+        await updateCurrentWriteIndices(esClient, logger, [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ]);
+        fail('expected updateCurrentWriteIndices to throw error');
+      } catch (err) {
+        // noop
+      }
+
+      expect(esClient.indices.rollover).not.toHaveBeenCalled();
+    });
+    it('should not throw on unexpected error when flag is on', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new Error();
+      });
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        {
+          ignoreMappingUpdateErrors: true,
+        }
+      );
+
+      expect(esClient.indices.rollover).not.toHaveBeenCalled();
     });
   });
 });

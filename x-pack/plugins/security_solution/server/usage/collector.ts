@@ -12,6 +12,8 @@ import { getDetectionsMetrics } from './detections/get_metrics';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
 import { getEndpointMetrics } from './endpoint/get_metrics';
 import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
+import { riskEngineMetricsSchema } from './risk_engine/schema';
+import { getRiskEngineMetrics } from './risk_engine/get_risk_engine_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 
@@ -19,6 +21,7 @@ export interface UsageData {
   detectionMetrics: {};
   endpointMetrics: {};
   dashboardMetrics: DashboardMetrics;
+  riskEngineMetrics: {};
 }
 
 export const registerCollector: RegisterCollector = ({
@@ -28,6 +31,7 @@ export const registerCollector: RegisterCollector = ({
   ml,
   usageCollection,
   logger,
+  riskEngineIndexPatterns,
 }) => {
   if (!usageCollection) {
     logger.debug('Usage collection is undefined, therefore returning early without registering it');
@@ -2441,29 +2445,33 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
+      riskEngineMetrics: riskEngineMetricsSchema,
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
-      const [detectionMetrics, endpointMetrics, dashboardMetrics] = await Promise.allSettled([
-        getDetectionsMetrics({
-          eventLogIndex,
-          signalsIndex,
-          esClient,
-          savedObjectsClient,
-          logger,
-          mlClient: ml,
-        }),
-        getEndpointMetrics({ esClient, logger }),
-        getDashboardMetrics({
-          savedObjectsClient,
-          logger,
-        }),
-      ]);
+      const [detectionMetrics, endpointMetrics, dashboardMetrics, riskEngineMetrics] =
+        await Promise.allSettled([
+          getDetectionsMetrics({
+            eventLogIndex,
+            signalsIndex,
+            esClient,
+            savedObjectsClient,
+            logger,
+            mlClient: ml,
+          }),
+          getEndpointMetrics({ esClient, logger }),
+          getDashboardMetrics({
+            savedObjectsClient,
+            logger,
+          }),
+          getRiskEngineMetrics({ esClient, logger, riskEngineIndexPatterns }),
+        ]);
       return {
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
         endpointMetrics: endpointMetrics.status === 'fulfilled' ? endpointMetrics.value : {},
         dashboardMetrics: dashboardMetrics.status === 'fulfilled' ? dashboardMetrics.value : {},
+        riskEngineMetrics: riskEngineMetrics.status === 'fulfilled' ? riskEngineMetrics.value : {},
       };
     },
   });

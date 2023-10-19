@@ -6,7 +6,13 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { ALL_VALUE, CreateSLOParams, HistogramIndicator, sloSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  CreateSLOParams,
+  HistogramIndicator,
+  sloSchema,
+  TimesliceMetricIndicator,
+} from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
 import {
@@ -58,7 +64,7 @@ export const createKQLCustomIndicator = (
 ): Indicator => ({
   type: 'sli.kql.custom',
   params: {
-    index: 'my-index*',
+    index: 'my-index*,my-other-index*',
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
@@ -72,7 +78,7 @@ export const createMetricCustomIndicator = (
 ): MetricCustomIndicator => ({
   type: 'sli.metric.custom',
   params: {
-    index: 'my-index*',
+    index: 'my-index*,my-other-index*',
     filter: 'labels.groupId: group-3',
     good: {
       metrics: [
@@ -90,12 +96,31 @@ export const createMetricCustomIndicator = (
   },
 });
 
+export const createTimesliceMetricIndicator = (
+  metrics: TimesliceMetricIndicator['params']['metric']['metrics'] = [],
+  equation: TimesliceMetricIndicator['params']['metric']['equation'] = '',
+  queryFilter = ''
+): TimesliceMetricIndicator => ({
+  type: 'sli.metric.timeslice',
+  params: {
+    index: 'test-*',
+    timestampField: '@timestamp',
+    filter: queryFilter,
+    metric: {
+      metrics,
+      equation,
+      threshold: 100,
+      comparator: 'GTE',
+    },
+  },
+});
+
 export const createHistogramIndicator = (
   params: Partial<HistogramIndicator['params']> = {}
 ): HistogramIndicator => ({
   type: 'sli.histogram.custom',
   params: {
-    index: 'my-index*',
+    index: 'my-index*,my-other-index*',
     filter: 'labels.groupId: group-3',
     good: {
       field: 'latency',

@@ -17,7 +17,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  INSTALLED_VERSION,
+  PrivateLocationTestService,
+} from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('PrivateLocationAddMonitor', function () {
@@ -78,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
             lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
+          namespace: 'default',
         },
       ]);
     });
@@ -537,7 +541,7 @@ export default function ({ getService }: FtrProviderContext) {
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
 
-        expect(packagePolicy.package.version).eql('1.0.4');
+        expect(packagePolicy.package.version).eql(INSTALLED_VERSION);
 
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
@@ -547,7 +551,7 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '1.0.4')).eql(true);
+        expect(semver.gte(packagePolicyAfterUpgrade.package.version, INSTALLED_VERSION)).eql(true);
       } finally {
         await supertestAPI
           .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

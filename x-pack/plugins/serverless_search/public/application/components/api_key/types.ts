@@ -11,4 +11,5 @@ export interface CreateApiKeyResponse {
   expiration?: number;
   api_key: string;
   encoded?: string;
+  beats_logstash_format: string;
 }

@@ -275,6 +275,16 @@ exports[`FieldIcon renders known field types shape is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types sparse_vector is rendered 1`] = `
+<EuiToken
+  aria-label="sparse_vector"
+  className="kbnFieldIcon"
+  iconType="tokenDenseVector"
+  size="s"
+  title="sparse_vector"
+/>
+`;
+
 exports[`FieldIcon renders known field types string is rendered 1`] = `
 <EuiToken
   aria-label="string"

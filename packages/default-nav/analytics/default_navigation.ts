@@ -21,18 +21,13 @@ export const defaultNavigation: AnalyticsNodeDefinition = {
   icon: 'stats',
   children: [
     {
-      id: 'root',
-      children: [
-        {
-          link: 'discover',
-        },
-        {
-          link: 'dashboards',
-        },
-        {
-          link: 'visualize',
-        },
-      ],
+      link: 'discover',
+    },
+    {
+      link: 'dashboards',
+    },
+    {
+      link: 'visualize',
     },
   ],
 };

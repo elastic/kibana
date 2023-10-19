@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ItemsetResult } from '../../../common/types';
+import type { ItemSet } from '../../../common/types';
 
-export function getValueCounts(df: ItemsetResult[], field: string) {
+export function getValueCounts(df: ItemSet[], field: string) {
   return df.reduce<Record<string, number>>((p, c) => {
     if (c.set[field] === undefined) {
       return p;

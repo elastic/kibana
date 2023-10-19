@@ -7,5 +7,5 @@
 
 import moment from 'moment';
 
-export const PINGS_DATE_RANGE_START = moment('2018-10-30T00:00:23.889Z').valueOf();
-export const PINGS_DATE_RANGE_END = moment('2018-10-31T00:00:00.889Z').valueOf();
+export const PINGS_DATE_RANGE_START = moment('2019-09-11T03:31:04.396Z').valueOf();
+export const PINGS_DATE_RANGE_END = moment('2020-10-31T00:00:00.889Z').valueOf();

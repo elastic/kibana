@@ -15,6 +15,12 @@ import {
   VALUE_LIST_TYPE_SELECTOR,
 } from '../screens/lists';
 
+export const KNOWN_VALUE_LIST_FILES = {
+  TEXT: 'value_list.txt',
+  IPs: 'ip_list.txt',
+  CIDRs: 'cidr_list.txt',
+};
+
 export const createListsIndex = () => {
   cy.request({
     method: 'POST',

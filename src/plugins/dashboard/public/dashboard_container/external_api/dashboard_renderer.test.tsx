@@ -28,6 +28,7 @@ describe('dashboard renderer', () => {
     mockDashboardContainer = {
       destroy: jest.fn(),
       render: jest.fn(),
+      select: jest.fn(),
       navigateToDashboard: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     mockDashboardFactory = {
@@ -143,6 +144,7 @@ describe('dashboard renderer', () => {
       destroy: jest.fn(),
       render: jest.fn(),
       navigateToDashboard: jest.fn(),
+      select: jest.fn(),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
@@ -210,5 +212,49 @@ describe('dashboard renderer', () => {
 
     // The shared UX not found prompt should be rendered.
     expect(wrapper!.find(NotFoundPrompt).exists()).toBeTruthy();
+  });
+
+  test('does not add a class to the parent element when expandedPanelId is undefined', async () => {
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(
+        <div id="superParent">
+          <DashboardRenderer />
+        </div>
+      );
+    });
+    await wrapper!.update();
+
+    expect(
+      wrapper!.find('#superParent').getDOMNode().classList.contains('dshDashboardViewportWrapper')
+    ).toBe(false);
+  });
+
+  test('adds a class to the parent element when expandedPanelId is truthy', async () => {
+    const mockSuccessEmbeddable = {
+      destroy: jest.fn(),
+      render: jest.fn(),
+      navigateToDashboard: jest.fn(),
+      select: jest.fn().mockReturnValue('WhatAnExpandedPanel'),
+    } as unknown as DashboardContainer;
+    const mockSuccessFactory = {
+      create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
+    } as unknown as DashboardContainerFactory;
+    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+      .fn()
+      .mockReturnValue(mockSuccessFactory);
+
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(
+        <div id="superParent">
+          <DashboardRenderer savedObjectId="saved_object_kibanana" />
+        </div>
+      );
+    });
+
+    expect(
+      wrapper!.find('#superParent').getDOMNode().classList.contains('dshDashboardViewportWrapper')
+    ).toBe(true);
   });
 });

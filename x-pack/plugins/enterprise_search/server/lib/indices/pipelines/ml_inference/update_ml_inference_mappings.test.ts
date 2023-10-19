@@ -44,7 +44,7 @@ describe('updateMlInferenceMappings', () => {
             input_one_expanded: {
               properties: {
                 predicted_value: {
-                  type: 'rank_features',
+                  type: 'sparse_vector',
                 },
                 model_id: {
                   type: 'keyword',
@@ -54,7 +54,7 @@ describe('updateMlInferenceMappings', () => {
             input_two_expanded: {
               properties: {
                 predicted_value: {
-                  type: 'rank_features',
+                  type: 'sparse_vector',
                 },
                 model_id: {
                   type: 'keyword',

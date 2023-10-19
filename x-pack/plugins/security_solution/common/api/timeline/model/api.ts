@@ -19,7 +19,7 @@ import {
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
 } from '../../detection_engine/model/rule_schema';
-import { errorSchema, success, success_count as successCount } from '../../detection_engine';
+import { ErrorSchema, success, success_count as successCount } from '../../detection_engine';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
@@ -336,6 +336,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   createdBy: unionWithNullType(runtimeTypes.string),
   updated: unionWithNullType(runtimeTypes.number),
   updatedBy: unionWithNullType(runtimeTypes.string),
+  savedSearchId: unionWithNullType(runtimeTypes.string),
 });
 
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
@@ -498,7 +499,7 @@ export const importTimelineResultSchema = runtimeTypes.exact(
     success_count: successCount,
     timelines_installed: PositiveInteger,
     timelines_updated: PositiveInteger,
-    errors: runtimeTypes.array(errorSchema),
+    errors: runtimeTypes.array(ErrorSchema),
   })
 );
 
@@ -666,6 +667,7 @@ export interface TimelineResult {
   updated?: Maybe<number>;
   updatedBy?: Maybe<string>;
   version: string;
+  savedSearchId?: Maybe<string>;
 }
 
 export interface ResponseTimeline {

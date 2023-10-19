@@ -62,6 +62,7 @@ export function WebCoreVitalsTitle({
               isOpen={isPopoverOpen}
               button={
                 <EuiButtonIcon
+                  data-test-subj="o11yWebCoreVitalsTitleButton"
                   aria-label={helpAriaLabel}
                   onClick={() => setIsPopoverOpen(true)}
                   color={'text'}
@@ -110,6 +111,7 @@ export function WebCoreVitalsTitle({
                 isOpen={isBrowserPopoverOpen}
                 button={
                   <EuiButtonIcon
+                    data-test-subj="o11yWebCoreVitalsTitleButton"
                     aria-label={helpAriaLabel}
                     onClick={() => setIsBrowserPopoverOpen(true)}
                     color={'text'}

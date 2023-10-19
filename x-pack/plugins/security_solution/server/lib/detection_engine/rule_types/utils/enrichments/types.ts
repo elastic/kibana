@@ -76,13 +76,13 @@ export type SearchEnrichments = (params: {
 export type GetIsRiskScoreAvailable = (params: {
   spaceId: string;
   services: RuleServices;
-  isNewRiskScoreModuleAvailable: boolean;
+  isNewRiskScoreModuleInstalled: boolean;
 }) => Promise<boolean>;
 
 export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     spaceId: string;
-    isNewRiskScoreModuleAvailable: boolean;
+    isNewRiskScoreModuleInstalled: boolean;
   }
 ) => Promise<EventsMapByEnrichments>;
 

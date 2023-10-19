@@ -86,13 +86,13 @@ export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
-  private ilmPolicyManager?: IlmPolicyManager;
+  config: ReportingCore['config'];
 
   constructor(private reportingCore: ReportingCore, private logger: Logger) {
-    const config = reportingCore.getConfig();
+    this.config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
-    this.indexInterval = config.queue.indexInterval;
+    this.indexInterval = this.config.queue.indexInterval;
     this.logger = logger.get('store');
   }
 
@@ -105,12 +105,8 @@ export class ReportingStore {
   }
 
   private async getIlmPolicyManager() {
-    if (!this.ilmPolicyManager) {
-      const client = await this.getClient();
-      this.ilmPolicyManager = IlmPolicyManager.create({ client });
-    }
-
-    return this.ilmPolicyManager;
+    const client = await this.getClient();
+    return IlmPolicyManager.create({ client });
   }
 
   private async createIndex(indexName: string) {
@@ -121,10 +117,8 @@ export class ReportingStore {
       return exists;
     }
 
-    try {
-      await client.indices.create({
-        index: indexName,
-        body: {
+    const indexSettings = this.config.statefulSettings.enabled
+      ? {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
@@ -132,6 +126,14 @@ export class ReportingStore {
               name: ILM_POLICY_NAME,
             },
           },
+        }
+      : {};
+
+    try {
+      await client.indices.create({
+        index: indexName,
+        body: {
+          ...indexSettings,
           mappings: {
             properties: mapping,
           },
@@ -185,6 +187,9 @@ export class ReportingStore {
    * configured for storage of reports.
    */
   public async start() {
+    if (!this.config.statefulSettings.enabled) {
+      return;
+    }
     const ilmPolicyManager = await this.getIlmPolicyManager();
     try {
       if (await ilmPolicyManager.doesIlmPolicyExist()) {

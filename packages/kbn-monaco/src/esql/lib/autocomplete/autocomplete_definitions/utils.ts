@@ -16,6 +16,48 @@ const examplesLabel = i18n.translate('monaco.esql.autocomplete.examplesLabel', {
   defaultMessage: 'Examples:',
 });
 
+/** @internal */
+export const buildFunctionDocumentation = (
+  signatures: Array<{
+    declaration: string;
+    examples?: string[];
+  }>
+) => `
+---
+\
+***${declarationLabel}***
+${signatures
+  .map(
+    ({ declaration }) => `
+\
+  - \`\`${declaration}\`\`
+\
+`
+  )
+  .join('\n\n')}
+---
+${
+  signatures.some((examples) => examples)
+    ? `\
+***${examplesLabel}***
+\
+${signatures
+  .filter(({ examples }) => examples)
+  .map(
+    ({ examples }) => `
+  ${examples!
+    .map(
+      (i) => `
+  - \`\`${i}\`\`)
+`
+    )
+    .join('')}
+  
+`
+  )}`
+    : ''
+}`;
+
 /** @internal **/
 export const buildDocumentation = (declaration: string, examples?: string[]) => `
 ---

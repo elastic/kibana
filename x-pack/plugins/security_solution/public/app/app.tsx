@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { History } from 'history';
 import type { FC } from 'react';
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -21,34 +20,24 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { UpsellingProvider } from '../common/components/upselling_provider';
-import { useAssistantTelemetry } from '../assistant/use_assistant_telemetry';
-import { getComments } from '../assistant/get_comments';
-import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from '../assistant/helpers';
-import { useConversationStore } from '../assistant/use_conversation_store';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME, APP_ID } from '../../common/constants';
+import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
 import type { State } from '../common/store';
-import { ASSISTANT_TITLE } from './translations';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
-import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from '../assistant/content/anonymization';
-import { PROMPT_CONTEXTS } from '../assistant/content/prompt_contexts';
-import { BASE_SECURITY_QUICK_PROMPTS } from '../assistant/content/quick_prompts';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from '../assistant/content/prompts/system';
-import { useAnonymizationStore } from '../assistant/use_anonymization_store';
-import { useAssistantAvailability } from '../assistant/use_assistant_availability';
+import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
+import { AssistantProvider } from '../assistant/provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -56,7 +45,6 @@ interface StartAppComponent {
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
   history,
-  setHeaderActionMenu,
   onAppLeave,
   store,
   theme$,
@@ -65,28 +53,11 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const {
     i18n,
     application: { capabilities },
-    http,
-    triggersActionsUi: { actionTypeRegistry },
     uiActions,
     upselling,
   } = services;
 
-  const assistantAvailability = useAssistantAvailability();
-  const { conversations, setConversations } = useConversationStore();
-  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
-    useAnonymizationStore();
-
-  const getInitialConversation = useCallback(() => {
-    return conversations;
-  }, [conversations]);
-
-  const nameSpace = `${APP_ID}.${LOCAL_STORAGE_KEY}`;
-
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = useKibana().services.docLinks;
-
-  const assistantTelemetry = useAssistantTelemetry();
 
   return (
     <EuiErrorBoundary>
@@ -95,28 +66,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
           <ReduxStoreProvider store={store}>
             <KibanaThemeProvider theme$={theme$}>
               <EuiThemeProvider darkMode={darkMode}>
-                <AssistantProvider
-                  actionTypeRegistry={actionTypeRegistry}
-                  augmentMessageCodeBlocks={augmentMessageCodeBlocks}
-                  assistantAvailability={assistantAvailability}
-                  assistantTelemetry={assistantTelemetry}
-                  defaultAllow={defaultAllow}
-                  defaultAllowReplacement={defaultAllowReplacement}
-                  docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
-                  baseAllow={DEFAULT_ALLOW}
-                  baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT}
-                  basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-                  baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS}
-                  baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS}
-                  getInitialConversations={getInitialConversation}
-                  getComments={getComments}
-                  http={http}
-                  nameSpace={nameSpace}
-                  setConversations={setConversations}
-                  setDefaultAllow={setDefaultAllow}
-                  setDefaultAllowReplacement={setDefaultAllowReplacement}
-                  title={ASSISTANT_TITLE}
-                >
+                <AssistantProvider>
                   <MlCapabilitiesProvider>
                     <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                       <ManageUserInfo>
@@ -126,13 +76,11 @@ const StartAppComponent: FC<StartAppComponent> = ({
                               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                             >
                               <UpsellingProvider upsellingService={upselling}>
-                                <PageRouter
-                                  history={history}
-                                  onAppLeave={onAppLeave}
-                                  setHeaderActionMenu={setHeaderActionMenu}
-                                >
-                                  {children}
-                                </PageRouter>
+                                <DiscoverInTimelineContextProvider>
+                                  <PageRouter history={history} onAppLeave={onAppLeave}>
+                                    {children}
+                                  </PageRouter>
+                                </DiscoverInTimelineContextProvider>
                               </UpsellingProvider>
                             </CellActionsProvider>
                           </ReactQueryClientProvider>
@@ -159,7 +107,6 @@ interface SecurityAppComponentProps {
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -169,7 +116,6 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   history,
   onAppLeave,
   services,
-  setHeaderActionMenu,
   store,
   theme$,
 }) => {
@@ -183,13 +129,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       }}
     >
       <CloudProvider>
-        <StartApp
-          history={history}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          store={store}
-          theme$={theme$}
-        >
+        <StartApp history={history} onAppLeave={onAppLeave} store={store} theme$={theme$}>
           {children}
         </StartApp>
       </CloudProvider>

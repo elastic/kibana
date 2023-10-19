@@ -69,6 +69,9 @@ describe('api', () => {
         incident: {
           tags: ['kibana', 'elastic'],
           description: 'Incident description',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
           title: 'Incident title',
         },
       });
@@ -148,6 +151,9 @@ describe('api', () => {
         incident: {
           tags: ['kibana', 'elastic'],
           description: 'Incident description',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
           title: 'Incident title',
         },
       });
@@ -162,6 +168,9 @@ describe('api', () => {
         incidentId: 'incident-3',
         incident: {
           description: 'Incident description',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
           title: 'Incident title',
           tags: ['kibana', 'elastic'],
         },

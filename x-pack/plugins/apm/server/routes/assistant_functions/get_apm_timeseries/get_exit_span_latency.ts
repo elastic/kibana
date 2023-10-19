@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -39,12 +39,11 @@ export async function getExitSpanLatency({
       start,
       end,
       operationName: 'assistant_get_exit_span_latency',
-      unit: 'rpm',
+      unit: 'ms',
       documentType: ApmDocumentType.ServiceDestinationMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
       filter: filter.concat(
-        ...rangeQuery(start, end),
         ...termQuery(
           SPAN_DESTINATION_SERVICE_RESOURCE,
           spanDestinationServiceResource

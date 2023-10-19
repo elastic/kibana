@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 
-import type { MapItem } from '../../../common/content_management';
+import type { MapAttributes, MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
   getMapsCapabilities,
@@ -23,7 +23,7 @@ import {
   getUsageCollection,
   getServerless,
 } from '../../kibana_services';
-import { mapsClient } from '../../content_management';
+import { getMapClient } from '../../content_management';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -55,7 +55,7 @@ const toTableListViewSavedObject = (mapItem: MapItem): MapUserContent => {
 };
 
 async function deleteMaps(items: Array<{ id: string }>) {
-  await Promise.all(items.map(({ id }) => mapsClient.delete(id)));
+  await Promise.all(items.map(({ id }) => getMapClient().delete(id)));
 }
 
 interface Props {
@@ -97,7 +97,7 @@ function MapsListViewComp({ history }: Props) {
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
-      return mapsClient
+      return getMapClient<MapAttributes>()
         .search({
           text: searchTerm ? `${searchTerm}*` : undefined,
           limit: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),

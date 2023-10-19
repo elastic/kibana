@@ -316,6 +316,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
     updatedBy: {
       type: 'text',
     },
+    savedSearchId: {
+      type: 'text',
+    },
   },
 };
 

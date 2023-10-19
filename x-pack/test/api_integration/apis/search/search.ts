@@ -455,8 +455,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/164856
-      it.skip('should delete a completed search', async function () {
+      it('should delete a completed search', async function () {
         await markRequiresShardDelayAgg(this);
 
         const resp = await supertest
@@ -483,7 +482,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(30000, async () => {
           const resp2 = await supertest
             .post(`/internal/search/ese/${id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, '1')

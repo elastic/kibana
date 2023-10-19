@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { callApmApi } from '../services/rest/create_call_apm_api';
+import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
 export function registerGetApmServiceSummaryFunction({
   registerFunction,
@@ -35,20 +36,20 @@ alerts and anomalies.`,
         type: 'object',
         properties: {
           'service.name': {
-            type: 'string',
+            ...NON_EMPTY_STRING,
             description: 'The name of the service that should be summarized.',
           },
           'service.environment': {
-            type: 'string',
+            ...NON_EMPTY_STRING,
             description: 'The environment that the service is running in',
           },
           start: {
-            type: 'string',
+            ...NON_EMPTY_STRING,
             description:
               'The start of the time range, in Elasticsearch date math, like `now`.',
           },
           end: {
-            type: 'string',
+            ...NON_EMPTY_STRING,
             description:
               'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },

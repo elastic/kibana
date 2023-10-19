@@ -7,10 +7,10 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiLink, EuiSteps, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiLink, EuiSteps, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { Error } from '../../../../../../../components';
-import { useKibanaVersion, useStartServices } from '../../../../../../../../../hooks';
+import { useStartServices, useAgentVersion } from '../../../../../../../../../hooks';
 
 import { CreatePackagePolicyBottomBar, NotObscuredByBottomBar } from '../..';
 import {
@@ -40,7 +40,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;
 
-  const kibanaVersion = useKibanaVersion();
+  const agentVersion = useAgentVersion();
 
   const [commandCopied, setCommandCopied] = useState(false);
   const [applyCommandCopied, setApplyCommandCopied] = useState(false);
@@ -66,7 +66,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     apiKey: enrollmentAPIKey.api_key,
     fleetProxy,
     fleetServerHosts,
-    kibanaVersion,
+    agentVersion: agentVersion || '',
   });
 
   const steps = [
@@ -78,6 +78,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       selectedApiKeyId: enrollmentAPIKey.id,
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
+      fleetServerHost: fleetServerHosts?.[0],
       onCopy: () => setCommandCopied(true),
     }),
   ];
@@ -101,6 +102,10 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       poll: commandCopied,
     })
   );
+
+  if (!agentVersion) {
+    return <EuiLoadingSpinner />;
+  }
 
   return (
     <>

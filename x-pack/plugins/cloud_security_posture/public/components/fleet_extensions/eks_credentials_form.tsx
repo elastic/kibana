@@ -24,8 +24,8 @@ import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 
 const AWSSetupInfoContent = () => (
   <>
-    <EuiHorizontalRule margin="xxl" />
-    <EuiTitle size="s">
+    <EuiHorizontalRule margin="xl" />
+    <EuiTitle size="xs">
       <h2>
         <FormattedMessage
           id="xpack.csp.eksIntegration.setupInfoContentTitle"

@@ -8,7 +8,7 @@
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
   DataPublicPluginStart,
-  isCompleteResponse,
+  isRunningResponse,
 } from '@kbn/data-plugin/public';
 import { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import {
@@ -117,7 +117,7 @@ async function esQuery<T>(
         })
         .subscribe({
           next: (result) => {
-            if (isCompleteResponse(result)) {
+            if (!isRunningResponse(result)) {
               resolve(result.rawResponse as any);
               search$.unsubscribe();
             }

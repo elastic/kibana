@@ -69,7 +69,7 @@ const mockVectorSource = {
   getInspectorAdapters: () => {
     return undefined;
   },
-  createField: () => {
+  getFieldByName: () => {
     return {
       getName: () => {
         return LEFT_FIELD;

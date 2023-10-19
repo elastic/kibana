@@ -34,7 +34,8 @@
       "screenshotMode",
       "usageCollection",
       "taskManager",
-      "serverless"
+      "serverless",
+      "noDataPage"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
   }

@@ -21,12 +21,13 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { chartDefaultSettings, useThemes } from '../../../../common/components/charts/common';
 import { useTimeZone } from '../../../../common/lib/kibana';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import * as i18n from './translations';
+import * as translations from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import type {
   HostRiskScore,
@@ -145,7 +146,12 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                   ) : (
                     <Chart>
                       <Tooltip headerFormatter={headerFormatter} />
-                      <Settings {...chartDefaultSettings} baseTheme={baseTheme} theme={theme} />
+                      <Settings
+                        {...chartDefaultSettings}
+                        baseTheme={baseTheme}
+                        theme={theme}
+                        locale={i18n.getLocale()}
+                      />
                       <Axis
                         id="bottom"
                         position={Position.Bottom}
@@ -176,7 +182,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                       />
                       <LineSeries
                         id="RiskOverTime"
-                        name={i18n.RISK_SCORE}
+                        name={translations.RISK_SCORE}
                         xScaleType={ScaleType.Time}
                         yScaleType={ScaleType.Linear}
                         xAccessor="x"
@@ -192,7 +198,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                           {
                             dataValue: RISKY_THRESHOLD,
                             details: `${RISKY_THRESHOLD}`,
-                            header: i18n.RISK_THRESHOLD,
+                            header: translations.RISK_THRESHOLD,
                           },
                         ]}
                         markerPosition="left"
@@ -205,7 +211,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                         }}
                         marker={
                           <StyledEuiText color={euiThemeVars.euiColorDarkestShade}>
-                            {i18n.RISKY}
+                            {translations.RISKY}
                           </StyledEuiText>
                         }
                       />

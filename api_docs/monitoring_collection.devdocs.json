@@ -54,9 +54,9 @@
             "signature": [
               "{ [Key in keyof Required<T>]: Required<T>[Key] extends (infer U)[] ? { type: \"array\"; items: ",
               "RecursiveMakeSchemaFrom",
-              "<U>; } : ",
+              "<U, false>; } : ",
               "RecursiveMakeSchemaFrom",
-              "<Required<T>[Key]>; }"
+              "<Required<T>[Key], false>; }"
             ],
             "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
             "deprecated": false,

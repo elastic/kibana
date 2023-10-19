@@ -376,6 +376,41 @@ describe('ruleParamsModifier', () => {
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
     });
+
+    test('should throw error on adding index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditType.add_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow("Index patterns can't be added. ES|QL rule doesn't have index patterns property");
+    });
+
+    test('should throw error on deleting index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditType.delete_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow("Index patterns can't be deleted. ES|QL rule doesn't have index patterns property");
+    });
+
+    test('should throw error on overwriting index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditType.set_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow(
+        "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
+      );
+    });
   });
 
   describe('timeline', () => {

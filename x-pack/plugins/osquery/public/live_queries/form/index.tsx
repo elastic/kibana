@@ -26,7 +26,7 @@ import { usePacks } from '../../packs/use_packs';
 import { useCreateLiveQuery } from '../use_create_live_query_action';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { AgentSelection } from '../../agents/types';
-import { LiveQueryQueryField } from './live_query_query_field';
+import LiveQueryQueryField from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';

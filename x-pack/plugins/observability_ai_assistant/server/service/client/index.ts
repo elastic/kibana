@@ -6,11 +6,10 @@
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
-import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IncomingMessage } from 'http';
 import { compact, isEmpty, merge, omit } from 'lodash';
 import type {
   ChatCompletionFunctions,
@@ -18,17 +17,18 @@ import type {
   CreateChatCompletionRequest,
   CreateChatCompletionResponse,
 } from 'openai';
+import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
 import {
-  type CompatibleJSONSchema,
   MessageRole,
+  type CompatibleJSONSchema,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
-import type { KnowledgeBaseService } from '../kb_service';
+import type { KnowledgeBaseService, RecalledEntry } from '../kb_service';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 
@@ -108,13 +108,15 @@ export class ObservabilityAIAssistantClient {
     messages,
     connectorId,
     functions,
+    functionCall,
     stream = true,
   }: {
     messages: Message[];
     connectorId: string;
     functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+    functionCall?: string;
     stream?: TStream;
-  }): Promise<TStream extends false ? CreateChatCompletionResponse : IncomingMessage> => {
+  }): Promise<TStream extends false ? CreateChatCompletionResponse : Readable> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
       messages
         .filter((message) => message.message.content || message.message.function_call?.name)
@@ -133,13 +135,49 @@ export class ObservabilityAIAssistantClient {
         })
     );
 
-    const functionsForOpenAI: ChatCompletionFunctions[] | undefined = functions;
+    // add recalled information to system message, so the LLM considers it more important
+
+    const recallMessages = messagesForOpenAI.filter((message) => message.name === 'recall');
+
+    const recalledDocuments: Map<string, { id: string; text: string }> = new Map();
+
+    recallMessages.forEach((message) => {
+      const entries = message.content
+        ? (JSON.parse(message.content) as Array<{ id: string; text: string }>)
+        : [];
+
+      const ids: string[] = [];
+
+      entries.forEach((entry) => {
+        const id = entry.id;
+        if (!recalledDocuments.has(id)) {
+          recalledDocuments.set(id, entry);
+        }
+        ids.push(id);
+      });
+
+      message.content = `The following documents, present in the system message, were recalled: ${ids.join(
+        ', '
+      )}`;
+    });
+
+    const systemMessage = messagesForOpenAI.find((message) => message.role === MessageRole.System);
+
+    if (systemMessage && recalledDocuments.size > 0) {
+      systemMessage.content += `The "recall" function is not available. Do not attempt to execute it. Recalled documents: ${JSON.stringify(
+        Array.from(recalledDocuments.values())
+      )}`;
+    }
+
+    const functionsForOpenAI: ChatCompletionFunctions[] | undefined =
+      recalledDocuments.size > 0 ? functions?.filter((fn) => fn.name !== 'recall') : functions;
 
     const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
       messages: messagesForOpenAI,
       stream: true,
       functions: functionsForOpenAI,
       temperature: 0,
+      function_call: functionCall ? { name: functionCall } : undefined,
     };
 
     const executeResult = await this.dependencies.actionsClient.execute({
@@ -157,7 +195,11 @@ export class ObservabilityAIAssistantClient {
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
     }
 
-    return executeResult.data as any;
+    const response = stream
+      ? ((executeResult.data as Readable).pipe(new PassThrough()) as Readable)
+      : (executeResult.data as CreateChatCompletionResponse);
+
+    return response as any;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
@@ -243,9 +285,17 @@ export class ObservabilityAIAssistantClient {
     });
 
     if ('object' in response && response.object === 'chat.completion') {
-      const title =
-        response.choices[0].message?.content?.slice(1, -1) ||
-        `Conversation on ${conversation['@timestamp']}`;
+      const input =
+        response.choices[0].message?.content || `Conversation on ${conversation['@timestamp']}`;
+
+      // This regular expression captures a string enclosed in single or double quotes.
+      // It extracts the string content without the quotes.
+      // Example matches:
+      // - "Hello, World!" => Captures: Hello, World!
+      // - 'Another Example' => Captures: Another Example
+      // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+      const match = input.match(/^["']?([^"']+)["']?$/);
+      const title = match ? match[1] : input;
 
       const updatedConversation: Conversation = merge(
         {},
@@ -312,20 +362,27 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
-  recall = async (query: string): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  recall = async ({
+    queries,
+    contexts,
+  }: {
+    queries: string[];
+    contexts?: string[];
+  }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      query,
+      queries,
+      contexts,
     });
   };
 
-  summarise = async ({
+  summarize = async ({
     entry,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
   }): Promise<void> => {
-    return this.dependencies.knowledgeBaseService.summarise({
+    return this.dependencies.knowledgeBaseService.summarize({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
       entry,

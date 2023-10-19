@@ -49,6 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               probability: 1,
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
+              useDurationSummary: true,
             },
           },
         });
@@ -192,6 +193,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 probability: 1,
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.OneMinute,
+                useDurationSummary: true,
               },
             },
           });
@@ -227,6 +229,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 probability: 1,
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.OneMinute,
+                useDurationSummary: true,
               },
             },
           });
@@ -264,6 +267,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 probability: 1,
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.OneMinute,
+                useDurationSummary: true,
               },
             },
           });
@@ -301,6 +305,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 probability: 1,
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.OneMinute,
+                useDurationSummary: true,
               },
             },
           });
@@ -328,6 +333,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 probability: 1,
                 documentType: ApmDocumentType.ServiceTransactionMetric,
                 rollupInterval: RollupInterval.OneMinute,
+                useDurationSummary: true,
               },
             },
           });
@@ -359,6 +365,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 probability: 1,
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.TenMinutes,
+                useDurationSummary: true,
               },
             },
           });
@@ -394,6 +401,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   probability: 1,
                   documentType: ApmDocumentType.TransactionMetric,
                   rollupInterval: RollupInterval.OneMinute,
+                  useDurationSummary: true,
                 },
               },
             });
@@ -451,6 +459,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 probability: 1,
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.OneMinute,
+                useDurationSummary: true,
               },
             },
           });
@@ -487,6 +496,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 probability: 1,
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.OneMinute,
+                useDurationSummary: true,
               },
             },
           });

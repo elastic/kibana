@@ -7,21 +7,17 @@
  */
 
 import { PresentationLabsService } from './labs/types';
-import { PresentationDashboardsService } from './dashboards/types';
 import { PresentationCapabilitiesService } from './capabilities/types';
 import { PresentationDataViewsService } from './data_views/types';
 import { PresentationUiActionsService } from './ui_actions/types';
+import { PresentationContentManagementService } from './content_management/types';
 
 export interface PresentationUtilServices {
+  contentManagement: PresentationContentManagementService;
   capabilities: PresentationCapabilitiesService;
-  dashboards: PresentationDashboardsService;
   dataViews: PresentationDataViewsService;
   uiActions: PresentationUiActionsService;
   labs: PresentationLabsService;
 }
 
-export type {
-  PresentationCapabilitiesService,
-  PresentationDashboardsService,
-  PresentationLabsService,
-};
+export type { PresentationCapabilitiesService, PresentationLabsService };

@@ -118,6 +118,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
       id="aiopsSamplingOptions"
       button={
         <EuiButtonEmpty
+          data-test-subj="aiopsLogPatternAnalysisShowSamplingOptionsButton"
           onClick={() => setShowSamplingOptionsPopover(!showSamplingOptionsPopover)}
           iconSide="right"
           iconType="arrowDown"

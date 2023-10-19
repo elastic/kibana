@@ -55,7 +55,47 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "() => { navigation: { registerSections: (sections$: ",
+              "(coreSetup: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, pluginsSetup: ",
+              "ObservabilitySharedSetup",
+              ") => { locators: { profiling: { flamegraphLocator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              "FlamegraphLocatorParams",
+              ">; topNFunctionsLocator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              "TopNFunctionsLocatorParams",
+              ">; stacktracesLocator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              "StacktracesLocatorParams",
+              ">; }; }; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -70,7 +110,45 @@
             "path": "x-pack/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.ObservabilitySharedPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreSetup",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "x-pack/plugins/observability_shared/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.ObservabilitySharedPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "pluginsSetup",
+                "description": [],
+                "signature": [
+                  "ObservabilitySharedSetup"
+                ],
+                "path": "x-pack/plugins/observability_shared/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -262,6 +340,72 @@
               "T"
             ],
             "path": "x-pack/plugins/observability_shared/public/hooks/use_es_search.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableFlamegraph",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableFlamegraph",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableFlamegraph.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableFunctions",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableFunctions",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_functions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableFunctions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_functions.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1052,6 +1196,74 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.useEditableSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "useEditableSettings",
+        "description": [],
+        "signature": [
+          "(app: ",
+          "ObservabilityApp",
+          ", settingsKeys: string[]) => { settingsEditableConfig: Record<string, ",
+          "FieldSetting",
+          ">; unsavedChanges: Record<string, ",
+          {
+            "pluginId": "advancedSettings",
+            "scope": "public",
+            "docId": "kibAdvancedSettingsPluginApi",
+            "section": "def-public.FieldState",
+            "text": "FieldState"
+          },
+          ">; handleFieldChange: (key: string, fieldState: ",
+          {
+            "pluginId": "advancedSettings",
+            "scope": "public",
+            "docId": "kibAdvancedSettingsPluginApi",
+            "section": "def-public.FieldState",
+            "text": "FieldState"
+          },
+          ") => void; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useEditableSettings.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              "ObservabilityApp"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useEditableSettings.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "settingsKeys",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.useEsSearch",
         "type": "Function",
         "tags": [],
@@ -1319,7 +1531,7 @@
         "label": "useLinkProps",
         "description": [],
         "signature": [
-          "({ app, pathname, hash, search }: ",
+          "({ app, pathname, hash, search, state }: ",
           {
             "pluginId": "observabilityShared",
             "scope": "public",
@@ -1347,7 +1559,7 @@
             "id": "def-public.useLinkProps.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ app, pathname, hash, search }",
+            "label": "{ app, pathname, hash, search, state }",
             "description": [],
             "signature": [
               {
@@ -1833,6 +2045,20 @@
             "description": [],
             "signature": [
               "Search | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_link_props.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.LinkDescriptor.state",
+            "type": "Unknown",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "unknown"
             ],
             "path": "x-pack/plugins/observability_shared/public/hooks/use_link_props.ts",
             "deprecated": false,
@@ -2350,6 +2576,40 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_FLAMEGRAPH",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_FLAMEGRAPH",
+        "description": [
+          "Profiling flamegraph embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_FLAMEGRAPH\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_FUNCTIONS",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_FUNCTIONS",
+        "description": [
+          "Profiling functions embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_FUNCTIONS\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.LazyObservabilityPageTemplateProps",
         "type": "Type",
         "tags": [],
@@ -2446,7 +2706,37 @@
         "label": "ObservabilitySharedPluginSetup",
         "description": [],
         "signature": [
-          "{ navigation: { registerSections: (sections$: ",
+          "{ locators: { profiling: { flamegraphLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "FlamegraphLocatorParams",
+          ">; topNFunctionsLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "TopNFunctionsLocatorParams",
+          ">; stacktracesLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "StacktracesLocatorParams",
+          ">; }; }; navigation: { registerSections: (sections$: ",
           "Observable",
           "<",
           {
@@ -2519,6 +2809,51 @@
           "\"guidedOnboarding.observability.tourStep\""
         ],
         "path": "x-pack/plugins/observability_shared/public/components/tour/tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.ProfilingLocators",
+        "type": "Type",
+        "tags": [],
+        "label": "ProfilingLocators",
+        "description": [],
+        "signature": [
+          "{ flamegraphLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "FlamegraphLocatorParams",
+          ">; topNFunctionsLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "TopNFunctionsLocatorParams",
+          ">; stacktracesLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "StacktracesLocatorParams",
+          ">; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3313,6 +3648,21 @@
           "\"transaction.marks.agent.largestContentfulPaint\""
         ],
         "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.LOGS_ONBOARDING_FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_ONBOARDING_FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/logs-onboarding-feedback\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

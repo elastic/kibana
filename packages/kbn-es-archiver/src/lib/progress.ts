@@ -13,7 +13,7 @@ const SECOND = 1000;
 export class Progress {
   private total?: number;
   private complete?: number;
-  private loggingInterval?: NodeJS.Timer;
+  private loggingInterval?: NodeJS.Timeout;
 
   getTotal() {
     return this.total;

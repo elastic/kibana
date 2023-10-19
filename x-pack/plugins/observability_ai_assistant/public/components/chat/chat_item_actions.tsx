@@ -53,6 +53,7 @@ export function ChatItemActions({
             }
           )}
           color="text"
+          data-test-subj="observabilityAiAssistantChatItemActionsEditPromptButton"
           display={editing ? 'fill' : 'empty'}
           iconType="documentEdit"
           onClick={onToggleEdit}
@@ -68,6 +69,7 @@ export function ChatItemActions({
             }
           )}
           color="text"
+          data-test-subj="observabilityAiAssistantChatItemActionsInspectPromptButton"
           display={expanded ? 'fill' : 'empty'}
           iconType={expanded ? 'eyeClosed' : 'eye'}
           onClick={onToggleExpand}
@@ -85,6 +87,7 @@ export function ChatItemActions({
                 }
               )}
               color="text"
+              data-test-subj="observabilityAiAssistantChatItemActionsCopyMessageButton"
               iconType="copyClipboard"
               display={isPopoverOpen === 'copy' ? 'fill' : 'empty'}
               onClick={() => {
@@ -98,14 +101,12 @@ export function ChatItemActions({
           closePopover={() => setIsPopoverOpen(undefined)}
         >
           <EuiText size="s">
-            <p>
-              {i18n.translate(
-                'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessageSuccessful',
-                {
-                  defaultMessage: 'Copied message',
-                }
-              )}
-            </p>
+            {i18n.translate(
+              'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessageSuccessful',
+              {
+                defaultMessage: 'Copied message',
+              }
+            )}
           </EuiText>
         </EuiPopover>
       ) : null}

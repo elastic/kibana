@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { ServiceLocation } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from './use_selected_monitor';
 import { selectSelectedLocationId, setMonitorDetailsLocationAction } from '../../../state';
 import { useUrlParams, useLocations } from '../../../hooks';
@@ -41,8 +42,12 @@ export const useSelectedLocation = (updateUrl = true) => {
     monitor?.locations,
   ]);
 
-  return useMemo(
-    () => locations.find((loc) => loc.id === urlLocationId) ?? null,
-    [urlLocationId, locations]
-  );
+  return useMemo(() => {
+    let selLoc = locations.find((loc) => loc.id === urlLocationId) ?? null;
+    if (!selLoc) {
+      selLoc =
+        (monitor?.locations?.find((loc) => loc.id === urlLocationId) as ServiceLocation) ?? null;
+    }
+    return selLoc;
+  }, [locations, urlLocationId, monitor?.locations]);
 };

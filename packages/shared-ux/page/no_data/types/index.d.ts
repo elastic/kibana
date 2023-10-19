@@ -31,9 +31,9 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
    */
   solution: string;
   /**
-   * Required to set the docs link for the whole solution
+   * Required in "kibana" flavor to set the docs link for the whole solution, otherwise optional
    */
-  docsLink: string;
+  docsLink?: string;
   /**
    * Optionally replace the auto-generated logo
    */
@@ -42,6 +42,10 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
    * Optionally replace the auto-generated page title (h1)
    */
   pageTitle?: string;
+  /**
+   * Optionally replace the auto-generated page description
+   */
+  pageDescription?: string;
 }
 
 /**

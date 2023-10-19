@@ -9,10 +9,11 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isDeepEqual } from 'react-use/lib/util';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
 
-import { IngestPipelineParams } from '../../../../../common/types/connectors';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../shared/kibana';
 

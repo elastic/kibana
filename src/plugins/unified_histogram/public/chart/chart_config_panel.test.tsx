@@ -13,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 import { setTimeout } from 'timers/promises';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
-import { lensTablesAdapterMock } from '../__mocks__/lens_table_adapter';
+import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import { ChartConfigPanel } from './chart_config_panel';
 import type { LensAttributesContext } from './utils/get_lens_attributes';
 
@@ -34,9 +34,9 @@ describe('ChartConfigPanel', () => {
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
           isPlainRecord: true,
-          lensTablesAdapter: lensTablesAdapterMock,
+          lensAdapters: lensAdaptersMock,
           query: {
-            sql: 'Select * from test',
+            esql: 'from test',
           },
         }}
       />

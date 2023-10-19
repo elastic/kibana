@@ -278,6 +278,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             getFlattenedObject(configDescriptor.exposeToUsage)
           );
         }
+        if (configDescriptor.dynamicConfig) {
+          const configKeys = Object.entries(getFlattenedObject(configDescriptor.dynamicConfig))
+            .filter(([, value]) => value === true)
+            .map(([key]) => key);
+          if (configKeys.length > 0) {
+            this.coreContext.configService.addDynamicConfigPaths(plugin.configPath, configKeys);
+          }
+        }
         this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
       }
     }

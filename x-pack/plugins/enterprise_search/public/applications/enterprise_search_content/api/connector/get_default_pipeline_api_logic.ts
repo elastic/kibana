@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestPipelineParams } from '../../../../../common/types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';

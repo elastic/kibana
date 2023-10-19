@@ -41,11 +41,11 @@ describe('formatHit', () => {
       fieldFormatsMock
     );
     expect(formatted).toEqual([
-      ['extension', 'formatted:png'],
-      ['message', 'formatted:foobar'],
-      ['object.value', 'formatted:42,13'],
-      ['_index', 'formatted:logs'],
-      ['_score', undefined],
+      ['extension', 'formatted:png', 'extension'],
+      ['message', 'formatted:foobar', 'message'],
+      ['object.value', 'formatted:42,13', 'object.value'],
+      ['_index', 'formatted:logs', '_index'],
+      ['_score', undefined, '_score'],
     ]);
   });
 
@@ -83,9 +83,9 @@ describe('formatHit', () => {
       fieldFormatsMock
     );
     expect(formatted).toEqual([
-      ['extension', 'formatted:png'],
-      ['message', 'formatted:foobar'],
-      ['and 3 more fields', ''],
+      ['extension', 'formatted:png', 'extension'],
+      ['message', 'formatted:foobar', 'message'],
+      ['and 3 more fields', '', null],
     ]);
   });
 
@@ -98,10 +98,10 @@ describe('formatHit', () => {
       fieldFormatsMock
     );
     expect(formatted).toEqual([
-      ['message', 'formatted:foobar'],
-      ['object.value', 'formatted:42,13'],
-      ['_index', 'formatted:logs'],
-      ['_score', undefined],
+      ['message', 'formatted:foobar', 'message'],
+      ['object.value', 'formatted:42,13', 'object.value'],
+      ['_index', 'formatted:logs', '_index'],
+      ['_score', undefined, '_score'],
     ]);
   });
 
@@ -114,9 +114,9 @@ describe('formatHit', () => {
       fieldFormatsMock
     );
     expect(formatted).toEqual([
-      ['bytesDisplayName', 'formatted:123'],
-      ['_index', 'formatted:logs'],
-      ['_score', undefined],
+      ['bytesDisplayName', 'formatted:123', 'bytes'],
+      ['_index', 'formatted:logs', '_index'],
+      ['_score', undefined, '_score'],
     ]);
   });
 });

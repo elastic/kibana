@@ -31,7 +31,11 @@ const defaultProps: ChatFlyoutProps = {
   isOpen: true,
   title: 'How is this working',
   messages: [getAssistantSetupMessage({ contexts: [] })],
+  startedFrom: 'appTopNavbar',
   onClose: () => {},
+  onChatComplete: () => {},
+  onChatTitleSave: () => {},
+  onChatUpdate: () => {},
 };
 
 export const ChatFlyout = Template.bind({});

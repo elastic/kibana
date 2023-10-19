@@ -65,6 +65,9 @@ const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       theme: {},
+      lens: {
+        EmbeddableComponent: () => <div data-test-subj="errorRateChart">mocked component</div>,
+      },
       application: { navigateToUrl: mockNavigate },
       charts: chartPluginMock.createStartContract(),
       http: {
@@ -121,7 +124,7 @@ describe('SLO Details Page', () => {
     it('navigates to the SLO List page', async () => {
       const slo = buildSlo();
       useParamsMock.mockReturnValue(slo.id);
-      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
 
       render(<SloDetailsPage />);
@@ -132,7 +135,7 @@ describe('SLO Details Page', () => {
 
   it('renders the PageNotFound when the SLO cannot be found', async () => {
     useParamsMock.mockReturnValue('nonexistent');
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo: undefined });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: undefined });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
     render(<SloDetailsPage />);
@@ -143,7 +146,7 @@ describe('SLO Details Page', () => {
   it('renders the loading spinner when fetching the SLO', async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: true, slo: undefined });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: true, data: undefined });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
     render(<SloDetailsPage />);
@@ -156,7 +159,7 @@ describe('SLO Details Page', () => {
   it('renders the SLO details page with loading charts when summary data is loading', async () => {
     const slo = buildSlo({ id: HEALTHY_STEP_DOWN_ROLLING_SLO });
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: true,
@@ -175,7 +178,7 @@ describe('SLO Details Page', () => {
   it('renders the SLO details page with the overview and chart panels', async () => {
     const slo = buildSlo({ id: HEALTHY_STEP_DOWN_ROLLING_SLO });
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
     render(<SloDetailsPage />);
@@ -184,13 +187,14 @@ describe('SLO Details Page', () => {
     expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
+    expect(screen.queryByTestId('errorRateChart')).toBeTruthy();
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(0);
   });
 
   it("renders a 'Edit' button under actions menu", async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
     render(<SloDetailsPage />);
@@ -202,7 +206,7 @@ describe('SLO Details Page', () => {
   it("renders a 'Create alert rule' button under actions menu", async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
     render(<SloDetailsPage />);
@@ -214,7 +218,7 @@ describe('SLO Details Page', () => {
   it("renders a 'Manage rules' button under actions menu", async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
     render(<SloDetailsPage />);
@@ -226,7 +230,7 @@ describe('SLO Details Page', () => {
   it("renders a 'Clone' button under actions menu", async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
     render(<SloDetailsPage />);
@@ -267,7 +271,7 @@ describe('SLO Details Page', () => {
   it("renders a 'Delete' button under actions menu", async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
     render(<SloDetailsPage />);
@@ -297,7 +301,7 @@ describe('SLO Details Page', () => {
   it('renders the Overview tab by default', async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
       isLoading: false,
@@ -316,7 +320,7 @@ describe('SLO Details Page', () => {
     it("renders a 'Explore in APM' button under actions menu", async () => {
       const slo = buildSlo({ indicator: buildApmAvailabilityIndicator() });
       useParamsMock.mockReturnValue(slo.id);
-      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
       render(<SloDetailsPage />);
@@ -330,7 +334,7 @@ describe('SLO Details Page', () => {
     it("does not render a 'Explore in APM' button under actions menu", async () => {
       const slo = buildSlo();
       useParamsMock.mockReturnValue(slo.id);
-      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
       render(<SloDetailsPage />);

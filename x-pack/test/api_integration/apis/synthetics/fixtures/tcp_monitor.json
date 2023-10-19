@@ -38,5 +38,6 @@
   "mode": "any",
   "ipv4": true,
   "ipv6": true,
-  "params": ""
+  "params": "",
+  "max_attempts": 2
 }

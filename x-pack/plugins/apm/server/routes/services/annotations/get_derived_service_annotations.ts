@@ -15,7 +15,7 @@ import {
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -37,7 +37,7 @@ export async function getDerivedServiceAnnotations({
 }) {
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
+    ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
     ...environmentQuery(environment),
   ];
 

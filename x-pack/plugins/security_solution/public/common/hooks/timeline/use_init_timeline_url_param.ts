@@ -33,6 +33,7 @@ export const useInitTimelineFromUrlParam = () => {
           updateIsLoading: (status: { id: string; isLoading: boolean }) =>
             dispatch(timelineActions.updateIsLoading(status)),
           updateTimeline: dispatchUpdateTimeline(dispatch),
+          savedSearchId: initialState.savedSearchId,
         });
       }
     },

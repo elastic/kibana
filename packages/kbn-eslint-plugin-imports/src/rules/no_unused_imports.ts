@@ -78,6 +78,7 @@ function isTsOrEslintIgnore(comment: Comment) {
 
 export const NoUnusedImportsRule: Rule.RuleModule = {
   meta: {
+    hasSuggestions: true,
     fixable: 'code',
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',

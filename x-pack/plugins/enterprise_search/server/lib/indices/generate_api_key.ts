@@ -7,8 +7,8 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-import { ConnectorDocument } from '../../../common/types/connectors';
+import { ConnectorDocument, CONNECTORS_INDEX } from '@kbn/search-connectors';
+
 import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
 export const generateApiKey = async (client: IScopedClusterClient, indexName: string) => {

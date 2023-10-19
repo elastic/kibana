@@ -64,6 +64,9 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
+  const authorizedToReadAnyRules =
+    authorizedToCreateAnyRules ||
+    authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.read);
 
   return {
     ruleTypesState: {
@@ -73,6 +76,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     },
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
+    authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     isSuccess,
   };

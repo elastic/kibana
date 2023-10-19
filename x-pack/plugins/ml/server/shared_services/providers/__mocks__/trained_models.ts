@@ -5,8 +5,19 @@
  * 2.0.
  */
 
+import { TrainedModels } from '../../../shared';
+
+const trainedModelsServiceMock = {
+  getTrainedModels: jest.fn().mockResolvedValue([]),
+  getTrainedModelsStats: jest.fn().mockResolvedValue([]),
+  startTrainedModelDeployment: jest.fn(),
+  stopTrainedModelDeployment: jest.fn(),
+  inferTrainedModel: jest.fn(),
+  deleteTrainedModel: jest.fn(),
+  updateTrainedModelDeployment: jest.fn(),
+  putTrainedModel: jest.fn(),
+  getELSER: jest.fn().mockResolvedValue({ name: '' }),
+} as jest.Mocked<TrainedModels>;
+
 export const createTrainedModelsProviderMock = () =>
-  jest.fn(() => ({
-    getTrainedModels: jest.fn(),
-    getTrainedModelStats: jest.fn(),
-  }));
+  jest.fn().mockReturnValue(trainedModelsServiceMock);

@@ -46,6 +46,7 @@ Array [
       <div
         class="euiHeader header__firstBar emotion-euiHeader-fixed-dark"
         data-fixed-header="true"
+        style="inset-block-start: 0px;"
       >
         <div
           class="euiHeaderSection emotion-euiHeaderSection"
@@ -148,6 +149,7 @@ Array [
       <div
         class="euiHeader header__secondBar emotion-euiHeader-fixed-default"
         data-fixed-header="true"
+        style="inset-block-start: 48px;"
       >
         <div
           class="euiHeaderSection emotion-euiHeaderSection"

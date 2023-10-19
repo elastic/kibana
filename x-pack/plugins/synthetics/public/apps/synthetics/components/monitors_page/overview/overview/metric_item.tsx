@@ -64,12 +64,11 @@ export const MetricItem = ({
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
-  const locationName =
-    useLocationName({ locationId: monitor.location?.id })?.label || monitor.location?.id;
-  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview(
-    monitor.configId,
-    locationName
-  );
+  const locationName = useLocationName(monitor);
+  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
+    configId: monitor.configId,
+    locationId: monitor.location.id,
+  });
   const theme = useTheme();
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
@@ -116,11 +115,12 @@ export const MetricItem = ({
                   configId: monitor.configId,
                   id: monitor.id,
                   location: locationName,
-                  locationId: monitor.location?.id,
+                  locationId: monitor.location.id,
                 });
               }
             }}
             baseTheme={DARK_THEME}
+            locale={i18n.getLocale()}
           />
           <Metric
             id={`${monitor.configId}-${monitor.location?.id}`}
@@ -149,7 +149,7 @@ export const MetricItem = ({
                       <EuiFlexItem grow={false} component="span">
                         <EuiIconTip
                           title={i18n.translate('xpack.synthetics.overview.duration.description', {
-                            defaultMessage: 'Median duration of last 24 checks',
+                            defaultMessage: 'Median duration of last 50 checks',
                           })}
                           content={i18n.translate(
                             'xpack.synthetics.overview.duration.description.values',

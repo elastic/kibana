@@ -9,20 +9,14 @@ import { RULES_ADD_PATH, RULES_UPDATES } from '@kbn/security-solution-plugin/com
 import {
   ADD_ELASTIC_RULES_BTN,
   ADD_ELASTIC_RULES_TABLE,
-  getInstallSingleRuleButtonByRuleId,
-  getUpgradeSingleRuleButtonByRuleId,
-  INSTALL_ALL_RULES_BUTTON,
-  INSTALL_SELECTED_RULES_BUTTON,
+  getInstallSingleRuleLoadingSpinnerByRuleId,
+  getUpgradeSingleRuleLoadingSpinnerByRuleId,
   RULES_MANAGEMENT_TABLE,
   RULES_UPDATES_TAB,
   RULES_UPDATES_TABLE,
-  RULE_CHECKBOX,
-  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
-  UPGRADE_ALL_RULES_BUTTON,
-  UPGRADE_SELECTED_RULES_BUTTON,
 } from '../screens/alerts_detection_rules';
-import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 
 export const addElasticRulesButtonClick = () => {
@@ -35,190 +29,116 @@ export const ruleUpdatesTabClick = () => {
   cy.location('pathname').should('include', RULES_UPDATES);
 };
 
-interface RuleInstallUpgradeAssertionPayload {
-  rules: Array<typeof SAMPLE_PREBUILT_RULE>;
-  didRequestFail?: boolean;
-}
-
-export const assertRuleAvailableForInstallAndInstallOne = ({
-  rules,
-  didRequestFail = false,
-}: RuleInstallUpgradeAssertionPayload) => {
-  interceptInstallationRequestToFail(rules, didRequestFail);
-  const rule = rules[0];
-  cy.get(getInstallSingleRuleButtonByRuleId(rule['security-rule'].rule_id)).click();
-  cy.wait('@installPrebuiltRules');
-  assertInstallationSuccessOrFailure([rule], didRequestFail);
-};
-
-export const assertRuleAvailableForInstallAndInstallSelected = ({
-  rules,
-  didRequestFail = false,
-}: RuleInstallUpgradeAssertionPayload) => {
-  interceptInstallationRequestToFail(rules, didRequestFail);
-  let i = 0;
+export const assertInstallationRequestIsComplete = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   for (const rule of rules) {
-    cy.get(RULE_CHECKBOX).eq(i).click();
-    cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
-    i++;
+    cy.get(getInstallSingleRuleLoadingSpinnerByRuleId(rule['security-rule'].rule_id)).should(
+      'exist'
+    );
   }
-  cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
-  cy.wait('@installPrebuiltRules');
-  assertInstallationSuccessOrFailure(rules, didRequestFail);
-};
-
-export const assertRuleAvailableForInstallAndInstallAllInPage = ({
-  rules,
-  didRequestFail = false,
-}: RuleInstallUpgradeAssertionPayload) => {
-  interceptInstallationRequestToFail(rules, didRequestFail);
   for (const rule of rules) {
-    cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
+    cy.get(getInstallSingleRuleLoadingSpinnerByRuleId(rule['security-rule'].rule_id)).should(
+      'not.exist'
+    );
   }
-  cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-  cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
-  cy.wait('@installPrebuiltRules');
-  assertInstallationSuccessOrFailure(rules, didRequestFail);
 };
 
-export const assertRuleAvailableForInstallAndInstallAll = ({
-  rules,
-  didRequestFail = false,
-}: RuleInstallUpgradeAssertionPayload) => {
-  interceptInstallationRequestToFail(rules, didRequestFail);
+export const assertUpgradeRequestIsComplete = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   for (const rule of rules) {
-    cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
+    cy.get(getUpgradeSingleRuleLoadingSpinnerByRuleId(rule['security-rule'].rule_id)).should(
+      'exist'
+    );
   }
-  cy.get(INSTALL_ALL_RULES_BUTTON).click();
-  cy.wait('@installPrebuiltRules');
-  assertInstallationSuccessOrFailure(rules, didRequestFail);
+  for (const rule of rules) {
+    cy.get(getUpgradeSingleRuleLoadingSpinnerByRuleId(rule['security-rule'].rule_id)).should(
+      'not.exist'
+    );
+  }
 };
 
-const assertInstallationSuccessOrFailure = (
-  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
-  didRequestFail: boolean
-) => {
+/**
+ * Assert that when the rule installation succeeds, the toast is shown with the right message
+ * -confirming the succesful install- and subsequently check that the rules available for installation
+ * are not present in the Add Elastic Rules table anymore
+ */
+export const assertInstallationSuccess = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
-  const toastMessage = didRequestFail
-    ? `${rules.length} ${rulesString} failed to install.`
-    : `${rules.length} ${rulesString} installed successfully.`;
+  const toastMessage = `${rules.length} ${rulesString} installed successfully.`;
   cy.get(TOASTER).should('be.visible').should('have.text', toastMessage);
-  if (didRequestFail) {
-    for (const rule of rules) {
-      cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
-    }
-  } else {
-    cy.get(BACK_TO_RULES_TABLE).click();
-    for (const rule of rules) {
-      cy.get(RULES_MANAGEMENT_TABLE).contains(rule['security-rule'].name);
-    }
-  }
-};
 
-const interceptInstallationRequestToFail = (
-  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
-  didRequestFail: boolean
-) => {
-  if (didRequestFail) {
-    cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform', {
-      body: {
-        summary: {
-          succeeded: [],
-          skipped: [],
-          failed: rules.length,
-        },
-      },
-    }).as('installPrebuiltRules');
-  }
-};
-
-export const assertRuleUpgradeAvailableAndUpgradeOne = ({
-  rules,
-  didRequestFail = false,
-}: RuleInstallUpgradeAssertionPayload) => {
-  interceptUpgradeRequestToFail(rules, didRequestFail);
-  const rule = rules[0];
-  cy.get(getUpgradeSingleRuleButtonByRuleId(rule['security-rule'].rule_id)).click();
-  cy.wait('@updatePrebuiltRules');
-  assertUpgradeSuccessOrFailure([rule], didRequestFail);
-};
-
-export const assertRuleUpgradeAvailableAndUpgradeSelected = ({
-  rules,
-  didRequestFail = false,
-}: RuleInstallUpgradeAssertionPayload) => {
-  interceptUpgradeRequestToFail(rules, didRequestFail);
-  let i = 0;
+  // Go back to rules table and assert that the rules are installed
+  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
   for (const rule of rules) {
-    cy.get(RULE_CHECKBOX).eq(i).click();
-    cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
-    i++;
+    cy.get(RULES_MANAGEMENT_TABLE).contains(rule['security-rule'].name);
   }
-  cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
-  cy.wait('@updatePrebuiltRules');
-  assertUpgradeSuccessOrFailure(rules, didRequestFail);
 };
 
-export const assertRuleUpgradeAvailableAndUpgradeAllInPage = ({
-  rules,
-  didRequestFail = false,
-}: RuleInstallUpgradeAssertionPayload) => {
-  interceptUpgradeRequestToFail(rules, didRequestFail);
-  for (const rule of rules) {
-    cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
-  }
-  cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-  cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
-  cy.wait('@updatePrebuiltRules');
-  assertUpgradeSuccessOrFailure(rules, didRequestFail);
-};
-
-export const assertRuleUpgradeAvailableAndUpgradeAll = ({
-  rules,
-  didRequestFail = false,
-}: RuleInstallUpgradeAssertionPayload) => {
-  interceptUpgradeRequestToFail(rules, didRequestFail);
-  for (const rule of rules) {
-    cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
-  }
-  cy.get(UPGRADE_ALL_RULES_BUTTON).click();
-  cy.wait('@updatePrebuiltRules');
-  assertUpgradeSuccessOrFailure(rules, didRequestFail);
-};
-
-const assertUpgradeSuccessOrFailure = (
-  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
-  didRequestFail: boolean
-) => {
+/**
+ * Assert that when the rule installation fails, the toast is shown with the right message
+ * -notifying that the installation failed- and subsequently check that the rules available for installation
+ * are still present in the Rule Update table
+ */
+export const assertInstallationFailure = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
-  const toastMessage = didRequestFail
-    ? `${rules.length} ${rulesString} failed to update.`
-    : `${rules.length} ${rulesString} updated successfully.`;
+  const toastMessage = `${rules.length} ${rulesString} failed to install.`;
   cy.get(TOASTER).should('be.visible').should('have.text', toastMessage);
-  if (didRequestFail) {
-    for (const rule of rules) {
-      cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
-    }
-  } else {
-    for (const rule of rules) {
-      cy.get(rule['security-rule'].name).should('not.exist');
-    }
+
+  // Check rules are still available for install
+  for (const rule of rules) {
+    cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
   }
 };
 
-const interceptUpgradeRequestToFail = (
-  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
-  didRequestFail: boolean
-) => {
-  if (didRequestFail) {
-    cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform', {
-      body: {
-        summary: {
-          succeeded: [],
-          skipped: [],
-          failed: rules.length,
-        },
+export const interceptInstallationRequestToFail = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
+  cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform', {
+    body: {
+      summary: {
+        succeeded: [],
+        skipped: [],
+        failed: rules.length,
       },
-    }).as('updatePrebuiltRules');
+    },
+    delay: 500, // Add delay to give Cypress time to find the loading spinner
+  }).as('installPrebuiltRules');
+};
+
+/**
+ * Assert that when the rule version upgrade succeeds, the toast is shown with the right message
+ * -confirming the succesful upgrade- and subsequently check that the rules available for upgrade
+ * are not present in the Rule Update table anymore
+ */
+export const assertUpgradeSuccess = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
+  const rulesString = rules.length > 1 ? 'rules' : 'rule';
+  const toastMessage = `${rules.length} ${rulesString} updated successfully.`;
+  cy.get(TOASTER).should('be.visible').should('have.text', toastMessage);
+  for (const rule of rules) {
+    cy.get(rule['security-rule'].name).should('not.exist');
   }
+};
+
+/**
+ * Assert that when the rule version upgrade fails, the toast is shown with the right message
+ * -notifying that the upgrade failed- and subsequently check that the rules available for upgrade
+ * are still present in the Rule Update table
+ */
+export const assertUpgradeFailure = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
+  const rulesString = rules.length > 1 ? 'rules' : 'rule';
+  const toastMessage = `${rules.length} ${rulesString} failed to update.`;
+  cy.get(TOASTER).should('be.visible').should('have.text', toastMessage);
+
+  for (const rule of rules) {
+    cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
+  }
+};
+
+export const interceptUpgradeRequestToFail = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
+  cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform', {
+    body: {
+      summary: {
+        succeeded: [],
+        skipped: [],
+        failed: rules.length,
+      },
+    },
+    delay: 500, // Add delay to give Cypress time to find the loading spinner
+  }).as('updatePrebuiltRules');
 };

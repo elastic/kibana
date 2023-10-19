@@ -24,10 +24,10 @@ test('addCombinedFieldsToMappings', () => {
     },
     properties: {
       lat: {
-        type: 'number',
+        type: 'float' as 'float',
       },
       lon: {
-        type: 'number',
+        type: 'float' as 'float',
       },
     },
   };
@@ -37,10 +37,10 @@ test('addCombinedFieldsToMappings', () => {
     },
     properties: {
       lat: {
-        type: 'number',
+        type: 'float',
       },
       lon: {
-        type: 'number',
+        type: 'float',
       },
       location: {
         type: 'geo_point',
@@ -56,13 +56,13 @@ test('removeCombinedFieldsFromMappings', () => {
     },
     properties: {
       lat: {
-        type: 'number',
+        type: 'float' as 'float',
       },
       lon: {
-        type: 'number',
+        type: 'float' as 'float',
       },
       location: {
-        type: 'geo_point',
+        type: 'geo_point' as 'geo_point',
       },
     },
   };
@@ -72,10 +72,10 @@ test('removeCombinedFieldsFromMappings', () => {
     },
     properties: {
       lat: {
-        type: 'number',
+        type: 'float',
       },
       lon: {
-        type: 'number',
+        type: 'float',
       },
     },
   });

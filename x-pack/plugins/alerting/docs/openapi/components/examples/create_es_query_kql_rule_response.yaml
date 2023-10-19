@@ -1,0 +1,43 @@
+summary: The create rule API returns a JSON object that contains details about the rule.
+value:
+  id: 7bd506d0-2284-11ee-8fad-6101956ced88
+  enabled: true
+  name: my Elasticsearch query KQL rule"
+  tags: []
+  rule_type_id: .es-query
+  consumer: alerts
+  schedule: 
+    interval: 1m
+  actions: []
+  params: 
+    searchConfiguration:
+      query:
+        query: '""geo.src : "US" ""'
+        language: kuery
+      index: 90943e30-9a47-11e8-b64d-95841ca0b247
+    searchType: searchSource
+    timeWindowSize: 5
+    timeWindowUnit: m
+    threshold:
+      - 1000
+    thresholdComparator: ">"
+    size: 100
+    aggType: count
+    groupBy: all
+    excludeHitsFromPreviousRun: true
+  created_by: elastic
+  updated_by: elastic
+  created_at: '2023-07-14T20:24:50.729Z'
+  updated_at: '2023-07-14T20:24:50.729Z'
+  api_key_owner: elastic
+  api_key_created_by_user: false
+  throttle: null
+  notify_when: null
+  mute_all: false
+  muted_alert_ids: []
+  scheduled_task_id: 7bd506d0-2284-11ee-8fad-6101956ced88
+  execution_status:
+    status: pending
+    last_execution_date: '2023-07-14T20:24:50.729Z'
+  revision: 0
+  running: false

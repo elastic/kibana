@@ -37,7 +37,7 @@ import { RuleStatusBadge } from '../../../../detections/components/rules/rule_ex
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
 import { useRulesTableContext } from './rules_table/rules_table_context';

@@ -31,6 +31,7 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
+import { addLensDocsToKb } from './service/kb_service/kb_docs/lens';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -61,9 +62,6 @@ export class ObservabilityAIAssistantPlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
-      management: {
-        insightsAndAlerting: ['triggersActionsConnectors'],
-      },
       minimumLicense: 'enterprise',
       // see x-pack/plugins/features/common/feature_kibana_privileges.ts
       privileges: {
@@ -78,9 +76,6 @@ export class ObservabilityAIAssistantPlugin
               CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
             ],
             read: [],
-          },
-          management: {
-            insightsAndAlerting: ['triggersActionsConnectors'],
           },
           ui: ['show'],
         },
@@ -114,7 +109,7 @@ export class ObservabilityAIAssistantPlugin
       taskManager: plugins.taskManager,
     });
 
-    // addLensDocsToKb(service);
+    addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
 
     registerServerRoutes({
       core,

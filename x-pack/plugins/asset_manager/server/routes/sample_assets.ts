@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
-import { ASSET_MANAGER_API_BASE } from '../constants';
+import { ASSET_MANAGER_API_BASE } from '../../common/constants_routes';
 import { getSampleAssetDocs, sampleAssets } from '../lib/sample_assets';
 import { writeAssets } from '../lib/write_assets';
 import { SetupRouteOptions } from './types';
-import { getEsClientFromContext } from './utils';
+import { getClientsFromContext } from './utils';
 
 export type WriteSamplesPostBody = {
   baseDateTime?: string | number;
@@ -62,12 +62,12 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
           },
         });
       }
-      const esClient = await getEsClientFromContext(context);
+      const { elasticsearchClient } = await getClientsFromContext(context);
       const assetDocs = getSampleAssetDocs({ baseDateTime: parsed, excludeEans });
 
       try {
         const response = await writeAssets({
-          esClient,
+          elasticsearchClient,
           assetDocs,
           namespace: 'sample_data',
           refresh,
@@ -101,9 +101,9 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
       validate: {},
     },
     async (context, req, res) => {
-      const esClient = await getEsClientFromContext(context);
+      const { elasticsearchClient } = await getClientsFromContext(context);
 
-      const sampleDataStreams = await esClient.indices.getDataStream({
+      const sampleDataStreams = await elasticsearchClient.indices.getDataStream({
         name: 'assets-*-sample_data',
         expand_wildcards: 'all',
       });
@@ -115,7 +115,7 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
       for (let i = 0; i < dataStreamsToDelete.length; i++) {
         const dsName = dataStreamsToDelete[i];
         try {
-          await esClient.indices.deleteDataStream({ name: dsName });
+          await elasticsearchClient.indices.deleteDataStream({ name: dsName });
           deletedDataStreams.push(dsName);
         } catch (error: any) {
           errorWhileDeleting =

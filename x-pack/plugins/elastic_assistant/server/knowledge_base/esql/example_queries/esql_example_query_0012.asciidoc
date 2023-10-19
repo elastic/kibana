@@ -1,0 +1,9 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+FROM metricbeat*
+| EVAL cpu_pct_normalized = (system.cpu.user.pct + system.cpu.system.pct) / system.cpu.cores
+| STATS AVG(cpu_pct_normalized) BY host.name
+```

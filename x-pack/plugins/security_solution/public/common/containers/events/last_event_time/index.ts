@@ -10,14 +10,14 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { inputsModel } from '../../../store';
 import { useKibana } from '../../../lib/kibana';
 import type {
-  TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
   LastTimeDetails,
   LastEventIndexKey,
+  TimelineEventsLastEventTimeRequestOptionsInput,
 } from '../../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
@@ -46,7 +46,7 @@ export const useTimelineLastEventTime = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [TimelineLastEventTimeRequest, setTimelineLastEventTimeRequest] =
-    useState<TimelineEventsLastEventTimeRequestOptions>({
+    useState<TimelineEventsLastEventTimeRequestOptionsInput>({
       defaultIndex: indexNames,
       factoryQueryType: TimelineEventsQueries.lastEventTime,
       indexKey,
@@ -59,17 +59,17 @@ export const useTimelineLastEventTime = ({
       refetch: refetch.current,
       errorMessage: undefined,
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const timelineLastEventTimeSearch = useCallback(
-    (request: TimelineEventsLastEventTimeRequestOptions) => {
+    (request: TimelineEventsLastEventTimeRequestOptionsInput) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         searchSubscription$.current = data.search
           .search<
-            TimelineEventsLastEventTimeRequestOptions,
+            TimelineEventsLastEventTimeRequestOptionsInput,
             TimelineEventsLastEventTimeStrategyResponse
           >(request, {
             strategy: 'timelineSearchStrategy',
@@ -77,7 +77,7 @@ export const useTimelineLastEventTime = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 setLoading(false);
                 setTimelineLastEventTimeResponse((prevResponse) => ({
                   ...prevResponse,
@@ -85,9 +85,6 @@ export const useTimelineLastEventTime = ({
                   lastSeen: response.lastSeen,
                   refetch: refetch.current,
                 }));
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_LAST_EVENT_TIME);
               }
             },
             error: (msg) => {
@@ -107,7 +104,7 @@ export const useTimelineLastEventTime = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning]
+    [data.search, addError]
   );
 
   useEffect(() => {

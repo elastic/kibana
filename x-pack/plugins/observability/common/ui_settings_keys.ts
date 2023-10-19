@@ -27,3 +27,7 @@ export const apmEnableContinuousRollups = 'observability:apmEnableContinuousRoll
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
 export const enableLegacyUptimeApp = 'observability:enableLegacyUptimeApp';
 export const apmEnableProfilingIntegration = 'observability:apmEnableProfilingIntegration';
+export const profilingUseLegacyFlamegraphAPI = 'observability:profilingUseLegacyFlamegraphAPI';
+export const profilingPerCoreWatt = 'observability:profilingPerCoreWatt';
+export const profilingCo2PerKWH = 'observability:profilingCo2PerKWH';
+export const profilingDatacenterPUE = 'observability:profilingDatacenterPUE';

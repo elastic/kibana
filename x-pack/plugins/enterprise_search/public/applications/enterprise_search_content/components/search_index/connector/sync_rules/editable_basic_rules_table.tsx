@@ -23,11 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  FilteringPolicy,
-  FilteringRule,
-  FilteringRuleRule,
-} from '../../../../../../../common/types/connectors';
+import { FilteringPolicy, FilteringRule, FilteringRuleRule } from '@kbn/search-connectors';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table/inline_editable_table';

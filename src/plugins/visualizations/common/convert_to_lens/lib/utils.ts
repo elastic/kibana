@@ -199,3 +199,17 @@ export const getMetricFromParentPipelineAgg = (
 
   return metric as SchemaConfig<METRIC_TYPES>;
 };
+
+const aggIdWithDecimalsRegexp = /^(\w)+\['([0-9]+\.[0-9]+)'\]$/;
+
+export const getAggIdAndValue = (aggId?: string) => {
+  if (!aggId) {
+    return [];
+  }
+  // agg value contains decimals
+  if (/\['/.test(aggId)) {
+    const [_, id, value] = aggId.match(aggIdWithDecimalsRegexp) || [];
+    return [id, value];
+  }
+  return aggId.split('.');
+};

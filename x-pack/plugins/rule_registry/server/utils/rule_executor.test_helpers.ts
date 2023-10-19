@@ -96,4 +96,8 @@ export const createDefaultAlertExecutorOptions = <
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
   ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
+  getTimeRange: () => {
+    const date = new Date(Date.now()).toISOString();
+    return { dateStart: date, dateEnd: date };
+  },
 });

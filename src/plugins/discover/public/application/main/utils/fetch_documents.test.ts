@@ -26,6 +26,7 @@ const getDeps = () =>
     searchSessionId: '123',
     services: discoverServiceMock,
     savedSearch: savedSearchMock,
+    getAppState: () => ({ sampleSize: 100 }),
   } as unknown as FetchDeps);
 
 describe('test fetchDocuments', () => {
@@ -37,17 +38,20 @@ describe('test fetchDocuments', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual({
+    expect(await fetchDocuments(savedSearchMock.searchSource, getDeps())).toEqual({
+      interceptedWarnings: [],
       records: documents,
     });
   });
 
-  test('rejects on query failure', () => {
+  test('rejects on query failure', async () => {
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
 
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual(
-      new Error('Oh noes!')
-    );
+    try {
+      await fetchDocuments(savedSearchMock.searchSource, getDeps());
+    } catch (e) {
+      expect(e).toEqual(new Error('Oh noes!'));
+    }
   });
 
   test('passes a correct session id', async () => {
@@ -66,7 +70,8 @@ describe('test fetchDocuments', () => {
 
     jest.spyOn(searchSourceRegular, 'fetch$');
 
-    expect(fetchDocuments(searchSourceRegular, deps)).resolves.toEqual({
+    expect(await fetchDocuments(searchSourceRegular, deps)).toEqual({
+      interceptedWarnings: [],
       records: documents,
     });
 
@@ -84,7 +89,8 @@ describe('test fetchDocuments', () => {
 
     jest.spyOn(searchSourceForLoadMore, 'fetch$');
 
-    expect(fetchDocuments(searchSourceForLoadMore, deps)).resolves.toEqual({
+    expect(await fetchDocuments(searchSourceForLoadMore, deps)).toEqual({
+      interceptedWarnings: [],
       records: documents,
     });
 

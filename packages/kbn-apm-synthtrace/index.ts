@@ -16,3 +16,8 @@ export { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_cli
 export { AssetsSynthtraceEsClient } from './src/lib/assets/assets_synthtrace_es_client';
 
 export { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_synthtrace_es_client';
+
+export {
+  addObserverVersionTransform,
+  deleteSummaryFieldTransform,
+} from './src/lib/utils/transform_helpers';

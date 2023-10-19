@@ -39,6 +39,10 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
       await this.selectSource(sourceName, 'mlAnalyticsCreationContainer');
     },
 
+    async selectSourceForDataDrift(sourceName: string) {
+      await this.selectSource(sourceName, 'mlPageDataDrift');
+    },
+
     async selectSourceForIndexBasedDataVisualizer(sourceName: string) {
       await this.selectSource(sourceName, 'dataVisualizerIndexPage');
     },

@@ -26,13 +26,13 @@ interface GetAllRelatedAssetsOptions {
 }
 
 export async function getAllRelatedAssets(
-  esClient: ElasticsearchClient,
+  elasticsearchClient: ElasticsearchClient,
   options: GetAllRelatedAssetsOptions
 ) {
   // How to put size into this?
   const { ean, from, to, relation, maxDistance, kind = [] } = options;
 
-  const primary = await findPrimary(esClient, { ean, from, to });
+  const primary = await findPrimary(elasticsearchClient, { ean, from, to });
 
   let assetsToFetch = [primary];
   let currentDistance = 1;
@@ -52,7 +52,7 @@ export async function getAllRelatedAssets(
 
     const results = flatten(
       await Promise.all(
-        assetsToFetch.map((asset) => findRelatedAssets(esClient, asset, queryOptions))
+        assetsToFetch.map((asset) => findRelatedAssets(elasticsearchClient, asset, queryOptions))
       )
     );
 
@@ -75,11 +75,11 @@ export async function getAllRelatedAssets(
 }
 
 async function findPrimary(
-  esClient: ElasticsearchClient,
+  elasticsearchClient: ElasticsearchClient,
   { ean, from, to }: Pick<GetAllRelatedAssetsOptions, 'ean' | 'from' | 'to'>
 ): Promise<Asset> {
   const primaryResults = await getAssets({
-    esClient,
+    elasticsearchClient,
     size: 1,
     filters: { ean, from, to },
   });
@@ -101,7 +101,7 @@ type FindRelatedAssetsOptions = Pick<
 > & { visitedEans: string[] };
 
 async function findRelatedAssets(
-  esClient: ElasticsearchClient,
+  elasticsearchClient: ElasticsearchClient,
   primary: Asset,
   { relation, from, to, kind, visitedEans }: FindRelatedAssetsOptions
 ): Promise<Asset[]> {
@@ -116,7 +116,7 @@ async function findRelatedAssets(
   const remainingEansToFind = without(directlyRelatedEans, ...visitedEans);
   if (remainingEansToFind.length > 0) {
     directlyRelatedAssets = await getAssets({
-      esClient,
+      elasticsearchClient,
       filters: { ean: remainingEansToFind, from, to, kind },
     });
   }
@@ -124,7 +124,7 @@ async function findRelatedAssets(
   debug('Directly related assets found:', JSON.stringify(directlyRelatedAssets));
 
   const indirectlyRelatedAssets = await getIndirectlyRelatedAssets({
-    esClient,
+    elasticsearchClient,
     ean: primary['asset.ean'],
     excludeEans: visitedEans.concat(directlyRelatedEans),
     relation,

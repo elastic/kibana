@@ -36,6 +36,7 @@ import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
+import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 
 export interface TaskManagerSetupContract {
   /**
@@ -60,6 +61,7 @@ export type TaskManagerStartContract = Pick<
   | 'bulkEnable'
   | 'bulkDisable'
   | 'bulkSchedule'
+  | 'bulkUpdateState'
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
@@ -88,6 +90,7 @@ export class TaskManagerPlugin
   private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private adHocTaskCounter: AdHocTaskCounter;
+  private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -249,6 +252,10 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
+        logger: this.logger,
+        store: taskStore,
+      });
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -285,9 +292,12 @@ export class TaskManagerPlugin
       this.ephemeralTaskLifecycle
     ).subscribe((stat) => this.monitoringStats$.next(stat));
 
-    metricsStream(this.config!, this.resetMetrics$, this.taskPollingLifecycle).subscribe((metric) =>
-      this.metrics$.next(metric)
-    );
+    metricsStream({
+      config: this.config!,
+      reset$: this.resetMetrics$,
+      taskPollingLifecycle: this.taskPollingLifecycle,
+      taskManagerMetricsCollector: this.taskManagerMetricsCollector,
+    }).subscribe((metric) => this.metrics$.next(metric));
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
@@ -316,6 +326,7 @@ export class TaskManagerPlugin
       supportsEphemeralTasks: () =>
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
+      bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
     };
   }
 }

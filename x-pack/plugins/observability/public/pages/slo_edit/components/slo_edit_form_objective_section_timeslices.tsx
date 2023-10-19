@@ -12,7 +12,8 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { CreateSLOForm } from '../types';
 
 export function SloEditFormObjectiveSectionTimeslices() {
-  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, watch } = useFormContext<CreateSLOForm>();
+  const indicator = watch('indicator.type');
 
   return (
     <>
@@ -47,6 +48,7 @@ export function SloEditFormObjectiveSectionTimeslices() {
               <EuiFieldNumber
                 {...field}
                 required
+                disabled={indicator === 'sli.metric.timeslice'}
                 isInvalid={fieldState.invalid}
                 value={field.value}
                 data-test-subj="sloFormObjectiveTimesliceTargetInput"

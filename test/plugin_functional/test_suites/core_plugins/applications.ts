@@ -11,8 +11,7 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
-
+  const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -20,6 +19,11 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const retry = getService('retry');
   const deployment = getService('deployment');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
+
+  function waitUntilLoadingIsDone() {
+    return PageObjects.header.waitUntilLoadingHasFinished();
+  }
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
@@ -38,22 +42,32 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       search,
     });
 
+  async function navigateToAppFromAppsMenu(title: string) {
+    await retry.try(async () => {
+      await appsMenu.clickLink(title);
+      await waitUntilLoadingIsDone();
+    });
+  }
+
   /** Use retry logic to make URL assertions less flaky */
   const waitForUrlToBe = (pathname?: string, search?: string) => {
     const expectedUrl = getKibanaUrl(pathname, search);
     return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
-      return (await browser.getCurrentUrl()) === expectedUrl;
+      const currentUrl = await browser.getCurrentUrl();
+      if (currentUrl !== expectedUrl)
+        log.debug(`expected url to be ${expectedUrl}, got ${currentUrl}`);
+      return currentUrl === expectedUrl;
     });
   };
 
   const navigateTo = async (path: string) =>
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/127545
-  describe.skip('ui applications', function describeIndexTests() {
+  describe('ui applications', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('foo');
+      await PageObjects.common.dismissBanner();
     });
 
     it('starts on home page', async () => {
@@ -91,9 +105,12 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('navigates to app root when navlink is clicked', async () => {
-      await appsMenu.clickLink('Foo');
+      await testSubjects.click('fooNavHome');
+
+      navigateToAppFromAppsMenu('Foo');
+
       await waitForUrlToBe('/app/foo/home');
-      // await loadingScreenNotShown();
+      await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
 
@@ -126,7 +143,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
 
       const wrapperHeight = await getAppWrapperHeight();
-      const windowHeight = (await browser.getWindowSize()).height;
+      const windowHeight = (await browser.getWindowInnerSize()).height;
       expect(wrapperHeight).to.eql(windowHeight);
     });
 
@@ -136,7 +153,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
 
       const wrapperHeight = await getAppWrapperHeight();
-      const windowHeight = (await browser.getWindowSize()).height;
+      const windowHeight = (await browser.getWindowInnerSize()).height;
       expect(wrapperHeight).to.be.below(windowHeight);
     });
   });

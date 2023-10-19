@@ -17,7 +17,6 @@ import {
   type SearchResponseInterceptedWarning,
 } from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
-import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 
 export async function fetchAnchor(
   anchorId: string,
@@ -35,7 +34,7 @@ export async function fetchAnchor(
   const adapter = new RequestAdapter();
   const { rawResponse } = await lastValueFrom(
     searchSource.fetch$({
-      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      disableWarningToasts: true,
       inspector: {
         adapter,
         title: 'anchor',
@@ -56,9 +55,6 @@ export async function fetchAnchor(
     interceptedWarnings: getSearchResponseInterceptedWarnings({
       services,
       adapter,
-      options: {
-        disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
-      },
     }),
   };
 }

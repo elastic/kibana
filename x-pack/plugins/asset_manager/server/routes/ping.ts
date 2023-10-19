@@ -6,7 +6,7 @@
  */
 
 import { RequestHandlerContextBase } from '@kbn/core-http-server';
-import { ASSET_MANAGER_API_BASE } from '../constants';
+import { ASSET_MANAGER_API_BASE } from '../../common/constants_routes';
 import { SetupRouteOptions } from './types';
 
 export function pingRoute<T extends RequestHandlerContextBase>({ router }: SetupRouteOptions<T>) {

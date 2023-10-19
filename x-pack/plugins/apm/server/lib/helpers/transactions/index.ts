@@ -121,7 +121,8 @@ export function getDurationFieldForTransactions(
   return TRANSACTION_DURATION;
 }
 
-export function getDocumentTypeFilterForTransactions(
+// The function returns Document type filter for 1m Transaction Metrics
+export function getBackwardCompatibleDocumentTypeFilter(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions

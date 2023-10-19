@@ -17,6 +17,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { Axes } from '../common/axes';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { Anomaly } from '../../../../common/results_loader';
@@ -78,6 +79,7 @@ export const EventRateChart: FC<Props> = ({
             onBrushEnd={onBrushEnd}
             // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
             theme={theme}
+            locale={i18n.getLocale()}
           />
 
           {overlayRanges &&

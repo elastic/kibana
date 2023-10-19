@@ -8,14 +8,14 @@
 import { Client } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
-  metadataIndexPattern,
-  eventsIndexPattern,
   alertsIndexPattern,
-  policyIndexPattern,
-  metadataCurrentIndexPattern,
-  telemetryIndexPattern,
-  METADATA_UNITED_INDEX,
+  eventsIndexPattern,
   METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
+  metadataCurrentIndexPattern,
+  metadataIndexPattern,
+  policyIndexPattern,
+  telemetryIndexPattern,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
 export function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
@@ -38,10 +38,8 @@ export async function deleteAllDocsFromIndex(
   const client = getService('es');
   await client.deleteByQuery(
     {
-      body: {
-        query: {
-          match_all: {},
-        },
+      query: {
+        match_all: {},
       },
       index,
       wait_for_completion: true,
@@ -132,12 +130,12 @@ export function bulkIndex(
   index: string,
   docs: unknown[]
 ) {
-  const body = docs.flatMap((doc) => [{ create: { _index: index } }, doc]);
+  const operations = docs.flatMap((doc) => [{ create: { _index: index } }, doc]);
   const client = getService('es');
 
   return client.bulk({
     index,
     refresh: 'wait_for',
-    body,
+    operations,
   });
 }

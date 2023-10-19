@@ -6,10 +6,7 @@
  */
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  RiskScoreRequestOptions,
-  RiskScoreSortField,
-} from '../../../../../../common/search_strategy';
+import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
 import {
   Direction,
   RiskScoreFields,
@@ -65,7 +62,7 @@ export const buildRiskScoreQuery = ({
   return dslQuery;
 };
 
-const getQueryOrder = (sort?: RiskScoreSortField): Sort => {
+const getQueryOrder = (sort?: RiskScoreRequestOptions['sort']): Sort => {
   if (!sort) {
     return [
       {

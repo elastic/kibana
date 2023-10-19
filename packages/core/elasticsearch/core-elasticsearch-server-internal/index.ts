@@ -29,4 +29,5 @@ export {
 export { CoreElasticsearchRouteHandlerContext } from './src/elasticsearch_route_handler_context';
 export { retryCallCluster, migrationRetryCallCluster } from './src/retry_call_cluster';
 export { isInlineScriptingEnabled } from './src/is_scripting_enabled';
+export { getCapabilitiesFromClient } from './src/get_capabilities';
 export type { ClusterInfo } from './src/get_cluster_info';

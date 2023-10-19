@@ -14,6 +14,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 
 jest.mock('../../contexts/kibana');
 jest.mock('../../services/toast_notification_service');
+jest.mock('../../capabilities/check_capabilities');
 
 describe('MlEntitySelector', () => {
   const getAllJobAndGroupIds = jest.fn(() => {

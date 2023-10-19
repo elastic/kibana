@@ -22,11 +22,19 @@ export function createTestConfig(options: CreateTestConfigOptions) {
 
       pageObjects,
       services,
+      esTestCluster: {
+        ...svlSharedConfig.get('esTestCluster'),
+        serverArgs: [
+          ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          ...(options.esServerArgs ?? []),
+        ],
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          ...(options.kbnServerArgs ?? []),
         ],
       },
       testFiles: options.testFiles,
@@ -52,11 +60,29 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
+        observabilityLogExplorer: {
+          pathname: '/app/observability-log-explorer',
+        },
         management: {
           pathname: '/app/management',
         },
         indexManagement: {
           pathname: '/app/management/data/index_management',
+        },
+        connectors: {
+          pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
+        },
+        settings: {
+          pathname: '/app/management/kibana/settings',
+        },
+        login: {
+          pathname: '/login',
+        },
+        reportingManagement: {
+          pathname: '/app/management/insightsAndAlerting/reporting',
+        },
+        securitySolution: {
+          pathname: '/app/security',
         },
       },
       // choose where screenshots should be saved

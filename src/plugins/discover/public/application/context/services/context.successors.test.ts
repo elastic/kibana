@@ -16,6 +16,7 @@ import { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -257,28 +258,13 @@ describe('context successors', function () {
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
-          expect(interceptedWarnings).toBeUndefined();
+          expect(interceptedWarnings).toEqual([]);
         }
       );
     });
   });
 
   describe('function fetchSuccessors with shard failures', function () {
-    const mockWarnings = [
-      {
-        originalWarning: {
-          message: 'Data might be incomplete because your request timed out 1',
-          type: 'timed_out',
-        },
-      },
-      {
-        originalWarning: {
-          message: 'Data might be incomplete because your request timed out 2',
-          type: 'timed_out',
-        },
-      },
-    ];
-
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
@@ -288,11 +274,7 @@ describe('context successors', function () {
             createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
           },
           showWarnings: jest.fn((adapter, callback) => {
-            callback(mockWarnings[0].originalWarning, {});
-            callback(mockWarnings[1].originalWarning, {});
-            // plus duplicates
-            callback(mockWarnings[0].originalWarning, {});
-            callback(mockWarnings[1].originalWarning, {});
+            callback(searchResponseIncompleteWarningLocalCluster, {});
           }),
         },
       } as unknown as DataPublicPluginStart;
@@ -345,7 +327,7 @@ describe('context successors', function () {
             buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
           );
           expect(dataPluginMock.search.showWarnings).toHaveBeenCalledTimes(1);
-          expect(interceptedWarnings).toEqual(mockWarnings);
+          expect(interceptedWarnings?.length).toBe(1);
         }
       );
     });

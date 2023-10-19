@@ -7,12 +7,14 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { getIndexTemplate, createOrUpdateIndexTemplate } from './create_or_update_index_template';
+import { createDataStreamAdapterMock } from './data_stream_adapter.mock';
+import { DataStreamAdapter } from './data_stream_adapter';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const IndexTemplate = (namespace: string = 'default') => ({
+const IndexTemplate = (namespace: string = 'default', useDataStream: boolean = false) => ({
   name: `.alerts-test.alerts-${namespace}-index-template`,
   body: {
     _meta: {
@@ -38,10 +40,15 @@ const IndexTemplate = (namespace: string = 'default') => ({
       settings: {
         auto_expand_replicas: '0-1',
         hidden: true,
-        'index.lifecycle': {
-          name: 'test-ilm-policy',
-          rollover_alias: `.alerts-test.alerts-${namespace}`,
-        },
+        ...(useDataStream
+          ? {}
+          : {
+              'index.lifecycle': {
+                name: 'test-ilm-policy',
+                rollover_alias: `.alerts-test.alerts-${namespace}`,
+              },
+            }),
+        'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': 2500,
       },
     },
@@ -65,7 +72,20 @@ const SimulateTemplateResponse = {
 };
 
 describe('getIndexTemplate', () => {
+  let dataStreamAdapter: DataStreamAdapter;
+  let useDataStream: boolean;
+
+  beforeEach(() => {
+    dataStreamAdapter = createDataStreamAdapterMock();
+    useDataStream = dataStreamAdapter.isUsingDataStreams();
+  });
+
   it(`should create index template with given parameters in default namespace`, () => {
+    dataStreamAdapter.getIndexTemplateFields = jest.fn().mockReturnValue({
+      index_patterns: ['.internal.alerts-test.alerts-default-*'],
+      rollover_alias: '.alerts-test.alerts-default',
+    });
+
     expect(
       getIndexTemplate({
         kibanaVersion: '8.6.1',
@@ -80,11 +100,17 @@ describe('getIndexTemplate', () => {
         namespace: 'default',
         componentTemplateRefs: ['mappings1', 'framework-mappings'],
         totalFieldsLimit: 2500,
+        dataStreamAdapter,
       })
     ).toEqual(IndexTemplate());
   });
 
   it(`should create index template with given parameters in custom namespace`, () => {
+    dataStreamAdapter.getIndexTemplateFields = jest.fn().mockReturnValue({
+      index_patterns: ['.internal.alerts-test.alerts-another-space-*'],
+      rollover_alias: '.alerts-test.alerts-another-space',
+    });
+
     expect(
       getIndexTemplate({
         kibanaVersion: '8.6.1',
@@ -99,8 +125,9 @@ describe('getIndexTemplate', () => {
         namespace: 'another-space',
         componentTemplateRefs: ['mappings1', 'framework-mappings'],
         totalFieldsLimit: 2500,
+        dataStreamAdapter,
       })
-    ).toEqual(IndexTemplate('another-space'));
+    ).toEqual(IndexTemplate('another-space', useDataStream));
   });
 });
 
@@ -164,7 +191,8 @@ describe('createOrUpdateIndexTemplate', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
 
     expect(logger.error).toHaveBeenCalledWith(
-      `Error installing index template .alerts-test.alerts-default-index-template - foo`
+      `Error installing index template .alerts-test.alerts-default-index-template - foo`,
+      expect.any(Error)
     );
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(4);
   });
@@ -182,7 +210,8 @@ describe('createOrUpdateIndexTemplate', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
 
     expect(logger.error).toHaveBeenCalledWith(
-      `Error installing index template .alerts-test.alerts-default-index-template - generic error`
+      `Error installing index template .alerts-test.alerts-default-index-template - generic error`,
+      expect.any(Error)
     );
   });
 
@@ -197,7 +226,8 @@ describe('createOrUpdateIndexTemplate', () => {
     });
 
     expect(logger.error).toHaveBeenCalledWith(
-      `Failed to simulate index template mappings for .alerts-test.alerts-default-index-template; not applying mappings - simulate error`
+      `Failed to simulate index template mappings for .alerts-test.alerts-default-index-template; not applying mappings - simulate error`,
+      expect.any(Error)
     );
     expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });

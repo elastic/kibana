@@ -29,9 +29,7 @@ export const ModelSelector: React.FC<Props> = React.memo(
   ({ models = DEFAULT_MODELS, onModelSelectionChange, selectedModel = DEFAULT_MODELS[0] }) => {
     // Form options
     const [options, setOptions] = useState<EuiComboBoxOptionOption[]>(
-      models.map((model) => ({
-        label: model,
-      }))
+      models.map((model) => ({ 'data-test-subj': model, label: model }))
     );
     const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(() => {
       return selectedModel ? [{ label: selectedModel }] : [];
@@ -92,6 +90,7 @@ export const ModelSelector: React.FC<Props> = React.memo(
       <EuiComboBox
         aria-label={i18n.HELP_LABEL}
         compressed
+        data-test-subj="model-selector"
         isClearable={false}
         placeholder={i18n.PLACEHOLDER_TEXT}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}

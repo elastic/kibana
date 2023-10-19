@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/core/server';
+import { Logger, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -105,6 +105,7 @@ export function getTransformHealthRuleType(
         },
       ],
     },
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: 'stackAlerts',
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,

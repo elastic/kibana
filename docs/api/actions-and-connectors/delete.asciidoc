@@ -11,7 +11,7 @@ WARNING: When you delete a connector, _it cannot be recovered_.
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification].
 ====
 
 [discrete]

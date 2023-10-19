@@ -29,6 +29,8 @@ import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
 import { JobType } from '../../../../../../../common/types/saved_objects';
 
+import { getDestinationIndex } from '../../../../common/get_destination_index';
+
 const DF_ANALYTICS_JOB_TYPE: JobType = 'data-frame-analytics';
 
 type DataFrameAnalyticsListRowEssentials = Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>;
@@ -51,7 +53,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     application: { capabilities },
   } = useMlKibana().services;
 
-  const indexName = item?.config.dest.index ?? '';
+  const indexName = getDestinationIndex(item?.config);
 
   const toastNotificationService = useToastNotificationService();
 

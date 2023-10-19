@@ -83,7 +83,10 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
           id,
           name,
           features: [...metricFeatures, ...cloudMetricsFeatures],
-          info,
+          info: {
+            ...info,
+            timestamp: info['@timestamp'],
+          },
         }),
       });
     }

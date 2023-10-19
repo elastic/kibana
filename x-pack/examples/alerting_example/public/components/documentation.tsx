@@ -10,10 +10,7 @@ import React from 'react';
 import {
   EuiText,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -34,33 +31,29 @@ export const DocumentationPage = (
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Documentation links</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
-        <EuiText>
-          <h2>Plugin Structure</h2>
-          <p>
-            This example solution has both `server` and a `public` plugins. The `server` handles
-            registration of example the RuleTypes, while the `public` handles creation of, and
-            navigation for, these rule types.
-          </p>
-          <EuiCallOut title="Transport Layer Security" iconType="warning" color="warning">
-            If you see a message about needing to enable the Transport Layer Security, start ES with{' '}
-            <code>yarn es snapshot --ssl --license trial</code> and Kibana with{' '}
-            <code>yarn start --run-examples --ssl</code>. If you running chrome on a mac, you may
-            need to type in <code>thisisunsafe</code> if you see the Certificate invalid screen with
-            no way to &lsquo;proceed anyway&rsquo;.
-          </EuiCallOut>
-        </EuiText>
-        <EuiSpacer />
-        <CreateAlert {...deps} />
-      </EuiPageContentBody>
-    </EuiPageContent>
+    <EuiPageSection>
+      <EuiPageHeader>
+        <EuiTitle>
+          <h2>Documentation links</h2>
+        </EuiTitle>
+      </EuiPageHeader>
+      <EuiText>
+        <h2>Plugin Structure</h2>
+        <p>
+          This example solution has both `server` and a `public` plugins. The `server` handles
+          registration of example the RuleTypes, while the `public` handles creation of, and
+          navigation for, these rule types.
+        </p>
+        <EuiCallOut title="Transport Layer Security" iconType="warning" color="warning">
+          If you see a message about needing to enable the Transport Layer Security, start ES with{' '}
+          <code>yarn es snapshot --ssl --license trial</code> and Kibana with{' '}
+          <code>yarn start --run-examples --ssl</code>. If you running chrome on a mac, you may need
+          to type in <code>thisisunsafe</code> if you see the Certificate invalid screen with no way
+          to &lsquo;proceed anyway&rsquo;.
+        </EuiCallOut>
+      </EuiText>
+      <EuiSpacer />
+      <CreateAlert {...deps} />
+    </EuiPageSection>
   </EuiPageBody>
 );

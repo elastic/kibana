@@ -96,6 +96,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: 'ACME Donuts',
           default_org_name: 'My Organization',
+          kibanaUIsEnabled: false,
         },
         account: {
           id: 'some-id-string',
@@ -188,6 +189,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: undefined,
           defaultOrgName: undefined,
+          kibanaUIsEnabled: false,
         },
         account: {
           id: undefined,

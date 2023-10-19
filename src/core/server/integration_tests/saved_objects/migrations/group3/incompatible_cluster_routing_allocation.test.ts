@@ -125,7 +125,9 @@ describe('incompatible_cluster_routing_allocation', () => {
     await root.preboot();
     await root.setup();
 
-    root.start();
+    root.start().catch(() => {
+      // Silent catch because the test might be done and call shutdown before starting is completed, causing unwanted thrown errors.
+    });
 
     // Wait for the INIT -> INIT action retry
     await retryAsync(

@@ -21,24 +21,20 @@ const renderHostMetadata = () =>
   render(
     <I18nProvider>
       <ContextProviders
-        props={{
-          assetType: 'host',
-          asset: {
-            id: 'host-1',
-            name: 'host-1',
+        assetType="host"
+        assetId="host-1"
+        assetName="host-1"
+        overrides={{
+          metadata: {
+            showActionsColumn: true,
           },
-          overrides: {
-            metadata: {
-              showActionsColumn: true,
-            },
-          },
-          dateRange: {
-            from: '2023-04-09T11:07:49Z',
-            to: '2023-04-09T11:23:49Z',
-          },
-          renderMode: {
-            mode: 'page',
-          },
+        }}
+        dateRange={{
+          from: '2023-04-09T11:07:49Z',
+          to: '2023-04-09T11:23:49Z',
+        }}
+        renderMode={{
+          mode: 'page',
         }}
       >
         <Metadata />

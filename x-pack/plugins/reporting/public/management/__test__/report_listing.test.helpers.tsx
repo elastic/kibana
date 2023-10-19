@@ -70,6 +70,7 @@ export const mockConfig = {
   roles: {
     enabled: false,
   },
+  statefulSettings: { enabled: true },
 };
 
 const validCheck = {
@@ -166,7 +167,7 @@ export const setup = async (props?: Partial<Props>) => {
       flyout: {
         open: async (jobId: string) => {
           await act(async () => {
-            find(`viewReportingLink${jobId}`).simulate('click');
+            find(`viewReportingLink-${jobId}`).simulate('click');
           });
           component.update();
         },

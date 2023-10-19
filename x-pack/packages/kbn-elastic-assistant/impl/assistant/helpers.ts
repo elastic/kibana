@@ -6,23 +6,27 @@
  */
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { FetchConnectorExecuteResponse } from './api';
 import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
-export const getMessageFromRawResponse = (rawResponse: string): Message => {
+export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResponse): Message => {
+  const { response, isError } = rawResponse;
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
   if (rawResponse) {
     return {
       role: 'assistant',
-      content: rawResponse,
+      content: response,
       timestamp: dateTimeString,
+      isError,
     };
   } else {
     return {
       role: 'assistant',
       content: 'Error: Response from LLM API is empty or undefined.',
       timestamp: dateTimeString,
+      isError: true,
     };
   }
 };
@@ -59,3 +63,24 @@ export const getDefaultConnector = (
   connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> | undefined
 ): ActionConnector<Record<string, unknown>, Record<string, unknown>> | undefined =>
   connectors?.length === 1 ? connectors[0] : undefined;
+
+/**
+ * When `content` is a JSON string, prefixed with "```json\n"
+ * and suffixed with "\n```", this function will attempt to parse it and return
+ * the `action_input` property if it exists.
+ */
+export const getFormattedMessageContent = (content: string): string => {
+  const formattedContentMatch = content.match(/```json\n([\s\S]+)\n```/);
+
+  if (formattedContentMatch) {
+    try {
+      const parsedContent = JSON.parse(formattedContentMatch[1]);
+
+      return parsedContent.action_input ?? content;
+    } catch {
+      // we don't want to throw an error here, so we'll fall back to the original content
+    }
+  }
+
+  return content;
+};

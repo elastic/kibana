@@ -35,7 +35,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
       },
       thresholdRule: { enabled: false },
     },
-    compositeSlo: { enabled: false },
   };
 
   const mockTheme: CoreTheme = {

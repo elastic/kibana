@@ -69,3 +69,27 @@ mappings snapshot used in the jest tests.
 Behavioral telemetry is recorded with the ui_metrics and application_usage methods from the Usage Collection plugin.
 
 Please fill this in with more details.
+
+## Event based telemetry
+
+Event-based telemetry (EBT) allows sending raw or minimally prepared data to the telemetry endpoints.
+
+EBT is part of the core analytics service in Kibana and the `TelemetryService` provides an easy way to track custom events that are specific to `APM`.
+
+#### Collect a new event type
+
+1. You need to define the event type in the [telemetry_events.ts](https://github.com/elastic/kibana/blob/4283802c195231f710be0d9870615fbc31382a31/x-pack/plugins/apm/public/services/telemetry/telemetry_events.ts#L36)
+2. Define the tracking method in the [telemetry_client.ts](https://github.com/elastic/kibana/blob/4283802c195231f710be0d9870615fbc31382a31/x-pack/plugins/apm/public/services/telemetry/telemetry_client.ts#L18)
+3. Use the tracking method with the telemetry client (`telemetry.reportSearchQuerySumbitted({property: test})`)
+
+In addition to the custom properties, analytics module automatically sends context properties. The list of the properties can be found [here](https://docs.elastic.dev/telemetry/collection/event-based-telemetry-context#browser-context)
+
+#### How to check the events
+
+In development, the events are sent to staging telemetry every hour and these events are stored in the `ebt-kibana-browser` dataview.
+
+For instance, you can use a query like the following as an example to filter the apm event Search Query Submitted.
+
+```
+context.applicationId : "apm" and event_type : "Search Query Submitted"
+```

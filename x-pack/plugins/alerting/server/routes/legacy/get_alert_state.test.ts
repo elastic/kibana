@@ -37,7 +37,7 @@ describe('getAlertStateRoute', () => {
         meta: {
           lastScheduledActions: {
             group: 'first_group',
-            date: new Date(),
+            date: new Date().toISOString(),
           },
         },
       },

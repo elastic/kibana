@@ -1,0 +1,6 @@
+{
+  "devOnly": true,
+  "id": "@kbn/openapi-generator",
+  "owner": "@elastic/security-detection-engine",
+  "type": "shared-common"
+}

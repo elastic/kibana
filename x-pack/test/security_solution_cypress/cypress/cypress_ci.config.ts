@@ -35,6 +35,7 @@ export default defineCypressConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);

@@ -40,7 +40,8 @@ export const sampleMetricFormulaAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'summary.up: *',
+                  query:
+                    'summary.final_attempt: true or (not summary.final_attempt: * and summary:*)',
                 },
                 isBucketed: false,
                 label: 'Availability',
@@ -62,7 +63,8 @@ export const sampleMetricFormulaAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: '(summary.up: *) AND (summary.down > 0)',
+                  query:
+                    '(summary.final_attempt: true or (not summary.final_attempt: * and summary:*)) AND (summary.down > 0)',
                 },
                 isBucketed: false,
                 label: 'Part of Availability',
@@ -78,7 +80,8 @@ export const sampleMetricFormulaAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'summary.up: *',
+                  query:
+                    'summary.final_attempt: true or (not summary.final_attempt: * and summary:*)',
                 },
                 isBucketed: false,
                 label: 'Part of Availability',

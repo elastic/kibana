@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiCallOut,
   EuiSpacer,
   EuiButtonEmpty,
@@ -426,8 +426,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           <ViewInApp rule={rule} />,
         ]}
       />
-      <EuiSpacer size="l" />
-      <EuiPageContentBody>
+      <EuiPageSection>
         {rule.enabled &&
         rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
@@ -519,7 +518,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

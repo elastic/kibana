@@ -210,6 +210,7 @@ describe('CasesService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
             "owner": "securitySolution",
@@ -721,6 +722,7 @@ describe('CasesService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
             "external_service": Object {
@@ -1086,15 +1088,15 @@ describe('CasesService', () => {
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
-            Object {
-              "connector": Object {
-                "fields": null,
-                "id": "none",
-                "name": "none",
-                "type": ".none",
-              },
-            }
-          `);
+          Object {
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+          }
+        `);
         expect(res.references).toMatchInlineSnapshot(`Array []`);
       });
 
@@ -1110,10 +1112,10 @@ describe('CasesService', () => {
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
-            Object {
-              "external_service": null,
-            }
-          `);
+          Object {
+            "external_service": null,
+          }
+        `);
         expect(res.references).toMatchInlineSnapshot(`Array []`);
       });
 
@@ -1142,10 +1144,10 @@ describe('CasesService', () => {
         });
 
         expect(res).toMatchInlineSnapshot(`
-            Object {
-              "attributes": Object {},
-            }
-          `);
+          Object {
+            "attributes": Object {},
+          }
+        `);
       });
 
       it('returns the default none connector when it cannot find the reference', async () => {
@@ -1887,7 +1889,8 @@ describe('CasesService', () => {
       'severity',
       'connector',
       'external_service',
-      'category'
+      'category',
+      'customFields'
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -1983,6 +1986,7 @@ describe('CasesService', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": null,
@@ -2072,6 +2076,7 @@ describe('CasesService', () => {
                   "full_name": "elastic",
                   "username": "elastic",
                 },
+                "customFields": Array [],
                 "description": "This is a brand new case of a bad meanie defacing data",
                 "duration": null,
                 "external_service": Object {
@@ -2164,6 +2169,7 @@ describe('CasesService', () => {
                     "full_name": "elastic",
                     "username": "elastic",
                   },
+                  "customFields": Array [],
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": Object {
@@ -2256,6 +2262,7 @@ describe('CasesService', () => {
                     "full_name": "elastic",
                     "username": "elastic",
                   },
+                  "customFields": Array [],
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": Object {
@@ -2361,6 +2368,7 @@ describe('CasesService', () => {
                     "full_name": "elastic",
                     "username": "elastic",
                   },
+                  "customFields": Array [],
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": Object {
@@ -2416,6 +2424,7 @@ describe('CasesService', () => {
                     "full_name": "elastic",
                     "username": "elastic",
                   },
+                  "customFields": Array [],
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": Object {
@@ -2517,6 +2526,7 @@ describe('CasesService', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": Object {

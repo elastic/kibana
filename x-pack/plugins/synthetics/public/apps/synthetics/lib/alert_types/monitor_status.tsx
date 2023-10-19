@@ -30,7 +30,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   description,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.links.observability.monitorStatus}`;
+    return `${docLinks.links.observability.syntheticsAlerting}`;
   },
   ruleParamsExpression: (paramProps: RuleTypeParamsExpressionProps<StatusRuleParams>) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={paramProps} />

@@ -21,12 +21,14 @@ export const InstallGoogleCloudShellManagedAgentStep = ({
   isComplete,
   cloudShellUrl,
   cloudShellCommand,
+  projectId,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   isComplete?: boolean;
   cloudShellUrl?: string | undefined;
   cloudShellCommand?: string;
+  projectId?: string;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -41,6 +43,7 @@ export const InstallGoogleCloudShellManagedAgentStep = ({
         <GoogleCloudShellInstructions
           cloudShellUrl={cloudShellUrl || ''}
           cloudShellCommand={cloudShellCommand || ''}
+          projectId={projectId || ''}
         />
       ) : (
         <React.Fragment />

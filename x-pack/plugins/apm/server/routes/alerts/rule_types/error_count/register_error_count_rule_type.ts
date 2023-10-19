@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
@@ -94,6 +95,7 @@ export function registerErrorCountRuleType({
       actionVariables: {
         context: errorCountActionVariables,
       },
+      category: DEFAULT_APP_CATEGORIES.observability.id,
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -102,6 +104,7 @@ export function registerErrorCountRuleType({
         services,
         spaceId,
         startedAt,
+        getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.ErrorCount,
@@ -117,7 +120,7 @@ export function registerErrorCountRuleType({
 
         const indices = await getApmIndices(savedObjectsClient);
 
-        const termFilterQuery = !ruleParams.kqlFilter
+        const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
           ? [
               ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
                 queryEmptyString: false,
@@ -128,6 +131,10 @@ export function registerErrorCountRuleType({
               ...environmentQuery(ruleParams.environment),
             ]
           : [];
+
+        const { dateStart } = getTimeRange(
+          `${ruleParams.windowSize}${ruleParams.windowUnit}`
+        );
 
         const searchParams = {
           index: indices.error,
@@ -140,13 +147,15 @@ export function registerErrorCountRuleType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: dateStart,
                       },
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
                   ...termFilterQuery,
-                  ...getParsedFilterQuery(ruleParams.kqlFilter),
+                  ...getParsedFilterQuery(
+                    ruleParams.searchConfiguration?.query?.query as string
+                  ),
                 ],
               },
             },

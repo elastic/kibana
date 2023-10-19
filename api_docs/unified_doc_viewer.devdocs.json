@@ -1,0 +1,263 @@
+{
+  "id": "unifiedDocViewer",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.JsonCodeEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "JsonCodeEditor",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "JsonCodeEditorProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_doc_viewer/public/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.JsonCodeEditor.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewer",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewer",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DocViewRenderProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_doc_viewer/public/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewer.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.useEsDocSearch",
+        "type": "Function",
+        "tags": [],
+        "label": "useEsDocSearch",
+        "description": [
+          "\nCustom react hook for querying a single doc in ElasticSearch"
+        ],
+        "signature": [
+          "({\n  id,\n  index,\n  dataView,\n  requestSource,\n  textBasedHits,\n}: ",
+          "EsDocSearchProps",
+          ") => [",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "common",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-common.ElasticRequestState",
+            "text": "ElasticRequestState"
+          },
+          ", ",
+          "DataTableRecord",
+          " | null, () => void]"
+        ],
+        "path": "src/plugins/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.useEsDocSearch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  index,\n  dataView,\n  requestSource,\n  textBasedHits,\n}",
+            "description": [],
+            "signature": [
+              "EsDocSearchProps"
+            ],
+            "path": "src/plugins/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.useUnifiedDocViewerServices",
+        "type": "Function",
+        "tags": [],
+        "label": "useUnifiedDocViewerServices",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UnifiedDocViewerServices"
+        ],
+        "path": "src/plugins/unified_doc_viewer/public/hooks/use_doc_viewer_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "unifiedDocViewer",
+      "id": "def-public.UnifiedDocViewerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedDocViewerSetup",
+      "description": [],
+      "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "unifiedDocViewer",
+          "id": "def-public.UnifiedDocViewerSetup.addDocView",
+          "type": "Function",
+          "tags": [],
+          "label": "addDocView",
+          "description": [],
+          "signature": [
+            "(docViewRaw: ",
+            "DocViewInput",
+            " | ",
+            "DocViewInputFn",
+            ") => void"
+          ],
+          "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "unifiedDocViewer",
+              "id": "def-public.UnifiedDocViewerSetup.addDocView.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "docViewRaw",
+              "description": [],
+              "signature": [
+                "DocViewInput",
+                " | ",
+                "DocViewInputFn"
+              ],
+              "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "unifiedDocViewer",
+      "id": "def-public.UnifiedDocViewerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedDocViewerStart",
+      "description": [],
+      "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "unifiedDocViewer",
+          "id": "def-public.UnifiedDocViewerStart.getDocViews",
+          "type": "Function",
+          "tags": [],
+          "label": "getDocViews",
+          "description": [],
+          "signature": [
+            "(hit: ",
+            "DataTableRecord",
+            ") => ",
+            "DocView",
+            "[]"
+          ],
+          "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "unifiedDocViewer",
+              "id": "def-public.UnifiedDocViewerStart.getDocViews.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "hit",
+              "description": [],
+              "signature": [
+                "DataTableRecord"
+              ],
+              "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

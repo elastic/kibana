@@ -12,7 +12,7 @@ import type { PolicyData } from '../../../../common/endpoint/types';
 import { allFleetHttpMocks } from '../../mocks';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { useFetchAgentByAgentPolicySummary } from './use_fetch_endpoint_policy_agent_summary';
-import { agentRouteService } from '@kbn/fleet-plugin/common';
+import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 
 const useQueryMock = _useQuery as jest.Mock;
 
@@ -57,6 +57,7 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
     expect(apiMocks.responseProvider.agentStatus).toHaveBeenCalledWith({
       path: agentRouteService.getStatusPath(),
       query: { policyId: policy.policy_id },
+      version: API_VERSIONS.public.v1,
     });
     expect(data).toEqual({
       total: 50,

@@ -1926,6 +1926,222 @@ describe('CaseUserActionService', () => {
               }
             `);
           });
+
+          it('constructs the user actions filter correctly', async () => {
+            const userAction = createUserActionSO();
+            const soFindRes = createSOFindResponse([createUserActionFindSO(userAction)]);
+            unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
+
+            await service.getMostRecentUserAction('123');
+
+            expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+              Object {
+                "filter": Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "comment",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "description",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "tags",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "title",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "or",
+                  "type": "function",
+                },
+                "hasReference": Object {
+                  "id": "123",
+                  "type": "cases",
+                },
+                "page": 1,
+                "perPage": 1,
+                "sortField": "created_at",
+                "sortOrder": "desc",
+                "type": "cases-user-actions",
+              }
+            `);
+          });
+
+          it('constructs the user actions filter correctly for the webhook connector', async () => {
+            const userAction = createUserActionSO();
+            const soFindRes = createSOFindResponse([createUserActionFindSO(userAction)]);
+            unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
+
+            await service.getMostRecentUserAction('123', true);
+
+            expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+              Object {
+                "filter": Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "comment",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "description",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "tags",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "title",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "severity",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "status",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "or",
+                  "type": "function",
+                },
+                "hasReference": Object {
+                  "id": "123",
+                  "type": "cases",
+                },
+                "page": 1,
+                "perPage": 1,
+                "sortField": "created_at",
+                "sortOrder": "desc",
+                "type": "cases-user-actions",
+              }
+            `);
+          });
         });
 
         describe('getCaseConnectorInformation', () => {

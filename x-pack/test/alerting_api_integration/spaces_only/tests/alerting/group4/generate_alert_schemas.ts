@@ -71,7 +71,7 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
 
             createSchemaFromFieldMap({
               outputFile: `schemas/generated/${alertsDefinition.context.replaceAll(
-                '.',
+                /[.\-]/g,
                 '_'
               )}_schema.ts`,
               fieldMap: alertsDefinition.mappings.fieldMap,

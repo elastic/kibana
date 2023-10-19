@@ -31,6 +31,7 @@ const ContextWrapper: React.FC = ({ children }) => (
     augmentMessageCodeBlocks={jest.fn()}
     baseAllow={[]}
     baseAllowReplacement={[]}
+    basePath={'https://localhost:5601/kbn'}
     defaultAllow={[]}
     defaultAllowReplacement={[]}
     docLinks={{

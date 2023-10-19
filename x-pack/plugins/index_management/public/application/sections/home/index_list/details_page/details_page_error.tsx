@@ -8,14 +8,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
-import { useLoadIndex } from '../../../../services';
 
 export const DetailsPageError = ({
   indexName,
   resendRequest,
 }: {
   indexName: string;
-  resendRequest: ReturnType<typeof useLoadIndex>['resendRequest'];
+  resendRequest: () => Promise<void>;
 }) => {
   return (
     <EuiPageTemplate.EmptyPrompt
@@ -35,7 +34,7 @@ export const DetailsPageError = ({
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.errorDescription"
-              defaultMessage="There was an error loading data for index {indexName}. Make sure the index name in the url is correct and try again."
+              defaultMessage="We encountered an error loading data for index {indexName}. Make sure that the index name in the URL is correct and try again."
               values={{
                 indexName,
               }}

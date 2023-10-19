@@ -33,10 +33,10 @@ export const HOST_RISK_SCORE = i18n.translate(
   }
 );
 
-export const HOST_RISK_CLASSIFICATION = i18n.translate(
-  'xpack.securitySolution.host.details.overview.hostRiskClassification',
+export const HOST_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.host.details.overview.hostRiskLevel',
   {
-    defaultMessage: 'Host risk classification',
+    defaultMessage: 'Host risk level',
   }
 );
 

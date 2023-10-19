@@ -206,7 +206,11 @@ export const buildOtherBucketAgg = (
   ) => {
     // make sure there are actually results for the buckets
     const agg = aggregations[aggId];
-    if (!agg || !agg.buckets.length) {
+    if (
+      !agg ||
+      // buckets can be either an array or an object in case there's also a filter at the same level
+      (Array.isArray(agg.buckets) ? !agg.buckets.length : !Object.values(agg.buckets).length)
+    ) {
       noAggBucketResults = true;
       return;
     }
@@ -392,7 +396,7 @@ export const createOtherBucketPostFlightRequest = (
     inspectorRequestAdapter,
     abortSignal,
     searchSessionId,
-    disableShardFailureWarning
+    disableWarningToasts
   ) => {
     if (!resp.aggregations) return resp;
     const nestedSearchSource = searchSource.createChild();
@@ -406,7 +410,7 @@ export const createOtherBucketPostFlightRequest = (
         nestedSearchSource.fetch$({
           abortSignal,
           sessionId: searchSessionId,
-          disableShardFailureWarning,
+          disableWarningToasts,
           inspector: {
             adapter: inspectorRequestAdapter,
             title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {

@@ -1,0 +1,11 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+FROM employees
+| EVAL hire_date_formatted = DATE_FORMAT(hire_date, "MMMM yyyy")
+| SORT hire_date
+| KEEP emp_no, hire_date_formatted
+| LIMIT 5
+```

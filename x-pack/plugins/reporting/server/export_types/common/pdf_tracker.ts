@@ -29,16 +29,16 @@ export function getTracker(): PdfTracker {
 
   return {
     startScreenshots() {
-      apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
+      apmScreenshots = apmTrans.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
     },
     endScreenshots() {
       if (apmScreenshots) apmScreenshots.end();
     },
     setCpuUsage(cpu: number) {
-      apmTrans?.setLabel('cpu', cpu, false);
+      apmTrans.setLabel('cpu', cpu, false);
     },
     setMemoryUsage(memory: number) {
-      apmTrans?.setLabel('memory', memory, false);
+      apmTrans.setLabel('memory', memory, false);
     },
     end() {
       if (apmTrans) apmTrans.end();

@@ -15,7 +15,7 @@ const queryClient = new QueryClient();
 export const getGlobalRuleEventLogListLazy = (props: GlobalRuleEventLogListProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <GlobalRuleEventLogList {...props} />;
+      <GlobalRuleEventLogList {...props} />
     </QueryClientProvider>
   );
 };

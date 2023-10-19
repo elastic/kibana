@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
 import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
@@ -313,18 +314,31 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(searchStrategySearch).toHaveBeenCalledWith(
-      {
-        params: {
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+    expect(arg0.params.body.fields.length).toEqual(
+      // +2 because of fields.push({ field: 'kibana.alert.*', include_unmapped: false }); and
+      // fields.push({ field: 'signal.*', include_unmapped: false });
+      ALERT_EVENTS_FIELDS.length + 2
+    );
+    expect.arrayContaining([
+      expect.objectContaining({
+        x: 2,
+        y: 3,
+      }),
+    ]);
+    expect(arg0).toEqual(
+      expect.objectContaining({
+        id: undefined,
+        params: expect.objectContaining({
           allow_no_indices: true,
-          body: {
+          body: expect.objectContaining({
             _source: false,
-            fields: [
-              {
-                field: '*',
+            fields: expect.arrayContaining([
+              expect.objectContaining({
+                field: '@timestamp',
                 include_unmapped: true,
-              },
-            ],
+              }),
+            ]),
             from: 0,
             query: {
               ids: {
@@ -333,13 +347,11 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
             },
             size: 1000,
             sort: [],
-          },
+          }),
           ignore_unavailable: true,
           index: ['security-siem'],
-        },
-      },
-      {},
-      { request: {} }
+        }),
+      })
     );
   });
 
@@ -349,7 +361,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       query: {
         ids: { values: ['test-id'] },
       },
-      fields: [{ field: '@timestamp', include_unmapped: true }],
+      fields: [{ field: 'my-super-field', include_unmapped: true }],
     };
     const options = {};
     const deps = {
@@ -363,13 +375,26 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(searchStrategySearch).toHaveBeenCalledWith(
-      {
-        params: {
+
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+    expect(arg0.params.body.fields.length).toEqual(
+      // +2 because of fields.push({ field: 'kibana.alert.*', include_unmapped: false }); and
+      // fields.push({ field: 'signal.*', include_unmapped: false }); + my-super-field
+      ALERT_EVENTS_FIELDS.length + 3
+    );
+    expect(arg0).toEqual(
+      expect.objectContaining({
+        id: undefined,
+        params: expect.objectContaining({
           allow_no_indices: true,
-          body: {
+          body: expect.objectContaining({
             _source: false,
-            fields: [{ field: '@timestamp', include_unmapped: true }],
+            fields: expect.arrayContaining([
+              expect.objectContaining({
+                field: 'my-super-field',
+                include_unmapped: true,
+              }),
+            ]),
             from: 0,
             query: {
               ids: {
@@ -378,13 +403,11 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
             },
             size: 1000,
             sort: [],
-          },
+          }),
           ignore_unavailable: true,
           index: ['security-siem'],
-        },
-      },
-      {},
-      { request: {} }
+        }),
+      })
     );
   });
 });

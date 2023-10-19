@@ -14,6 +14,8 @@ describe('isSignificantTerm', () => {
     expect(isSignificantTerm({ fieldValue: '500' })).toBeFalsy();
     expect(
       isSignificantTerm({
+        key: 'response_code:500',
+        type: 'keyword',
         fieldName: 'response_code',
         fieldValue: '500',
         doc_count: 1819,

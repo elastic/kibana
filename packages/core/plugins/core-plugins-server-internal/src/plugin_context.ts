@@ -246,7 +246,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
-      getAllIndices: deps.savedObjects.getAllIndices,
     },
     status: {
       core$: deps.status.core$,
@@ -259,6 +258,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       register: deps.uiSettings.register,
       registerGlobal: deps.uiSettings.registerGlobal,
+      setAllowlist: deps.uiSettings.setAllowlist,
     },
     userSettings: {
       setUserProfileSettings: deps.userSettings.setUserProfileSettings,
@@ -302,6 +302,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     elasticsearch: {
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
+      getCapabilities: deps.elasticsearch.getCapabilities,
     },
     executionContext: deps.executionContext,
     http: {

@@ -24,6 +24,7 @@ const indexPatternContractMock = {
     ])
   ),
   get: jest.fn().mockReturnValue(Promise.resolve({})),
+  getRollupsEnabled: jest.fn().mockReturnValue(true),
 } as unknown as jest.Mocked<DataViewsContract>;
 
 test('getting index patterns', async () => {

@@ -21,6 +21,7 @@ export const PrivateLocationAttributesCodec = t.intersection([
       lat: t.number,
       lon: t.number,
     }),
+    namespace: t.string,
   }),
 ]);
 

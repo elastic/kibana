@@ -205,7 +205,7 @@ function SummaryMetric({
   loading: boolean;
   hasData: boolean;
 }) {
-  const xlFontSize = useEuiFontSize('xl', { measurement: 'px' });
+  const xlFontSize = useEuiFontSize('xl', { unit: 'px' });
   const { euiTheme } = useEuiTheme();
 
   return (

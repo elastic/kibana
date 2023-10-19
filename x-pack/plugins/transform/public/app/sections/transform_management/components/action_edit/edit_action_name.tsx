@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useContext, FC } from 'react';
+import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiToolTip } from '@elastic/eui';
 
-import {
-  createCapabilityFailureMessage,
-  AuthorizationContext,
-} from '../../../../lib/authorization';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
+
+import { useTransformCapabilities } from '../../../../hooks';
 
 export const editActionNameText = i18n.translate(
   'xpack.transform.transformList.editActionNameText',
@@ -24,7 +23,7 @@ export const editActionNameText = i18n.translate(
 );
 
 export const EditActionName: FC = () => {
-  const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
+  const { canCreateTransform } = useTransformCapabilities();
 
   if (!canCreateTransform) {
     return (

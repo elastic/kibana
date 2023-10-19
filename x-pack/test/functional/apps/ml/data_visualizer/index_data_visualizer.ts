@@ -244,9 +244,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensMetricField.fieldName,
-            'legacyMtrVis'
+            'xyVisChart'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
           (f) => f.type === ML_JOB_FIELD_TYPES.KEYWORD
@@ -255,9 +255,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensNonMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensNonMetricField.fieldName,
-            'legacyMtrVis'
+            'xyVisChart'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
       });
     });

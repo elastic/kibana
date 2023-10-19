@@ -7,15 +7,16 @@
 
 import React, { useMemo } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface Props {
-  spanId: string;
+  span: Span;
 }
 
-export function SpanMetadata({ spanId }: Props) {
+export function SpanMetadata({ span }: Props) {
   const { data: spanEvent, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
@@ -24,13 +25,17 @@ export function SpanMetadata({ spanId }: Props) {
           params: {
             path: {
               processorEvent: ProcessorEvent.span,
-              id: spanId,
+              id: span.span.id,
+            },
+            query: {
+              start: span['@timestamp'],
+              end: span['@timestamp'],
             },
           },
         }
       );
     },
-    [spanId]
+    [span]
   );
 
   const sections = useMemo(

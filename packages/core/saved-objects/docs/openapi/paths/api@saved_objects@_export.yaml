@@ -57,8 +57,7 @@ post:
       content:
         application/json:
           schema:
-            type: object
-            additionalProperties: true
+            $ref: '../components/schemas/400_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

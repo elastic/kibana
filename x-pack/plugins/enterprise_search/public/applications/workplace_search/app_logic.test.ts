@@ -41,6 +41,7 @@ describe('AppLogic', () => {
     },
     organization: {
       defaultOrgName: 'My Organization',
+      kibanaUIsEnabled: false,
       name: 'ACME Donuts',
     },
   };

@@ -40,7 +40,7 @@ export function GaugeDimensionEditor(
     paletteService: PaletteRegistry;
   }
 ) {
-  const { state, setState, frame, accessor } = props;
+  const { state, setState, frame, accessor, isInlineEditing } = props;
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   if (state?.metricAccessor !== accessor) return null;
@@ -159,6 +159,10 @@ export function GaugeDimensionEditor(
                   siblingRef={props.panelRef}
                   isOpen={isPaletteOpen}
                   handleClose={togglePalette}
+                  title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
+                    defaultMessage: 'Color',
+                  })}
+                  isInlineEditing={isInlineEditing}
                 >
                   <CustomizablePalette
                     palettes={props.paletteService}

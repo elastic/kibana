@@ -113,6 +113,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
                     line: { stroke: lightEuiTheme.euiColorAccent },
                   },
                 }}
+                locale={i18n.getLocale()}
               />
               <BarSeries
                 id="executionDuration"

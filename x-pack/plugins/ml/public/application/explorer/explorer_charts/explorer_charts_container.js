@@ -238,7 +238,7 @@ function ExplorerChartContainer({
       {/* so that we can use chart's ref which controls the activeCursor api */}
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
-          <Settings noResults={<div />} width={0} height={0} />
+          <Settings noResults={<div />} width={0} height={0} locale={i18n.getLocale()} />
           {/* Just need an empty chart to access cursor service */}
           <BarSeries id={'count'} xAccessor="x" yAccessors={['y']} data={[]} />
         </Chart>

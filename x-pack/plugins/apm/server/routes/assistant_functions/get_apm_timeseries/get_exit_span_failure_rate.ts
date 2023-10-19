@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   EVENT_OUTCOME,
@@ -45,7 +45,6 @@ export async function getExitSpanFailureRate({
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
       filter: filter.concat(
-        ...rangeQuery(start, end),
         ...termQuery(
           SPAN_DESTINATION_SERVICE_RESOURCE,
           spanDestinationServiceResource

@@ -12,19 +12,10 @@ import { KPIGrid } from './kpis/kpi_grid';
 import { Tabs } from './tabs/tabs';
 import { AlertsQueryProvider } from '../hooks/use_alerts_query';
 import { HostsViewProvider } from '../hooks/use_hosts_view';
-import { HostsTableProvider, useHostsTableContext } from '../hooks/use_hosts_table';
+import { HostsTableProvider } from '../hooks/use_hosts_table';
 import { ErrorCallout } from './error_callout';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 
-const Container = ({ children }: { children: React.ReactNode }) => {
-  const { refs } = useHostsTableContext();
-  return (
-    <>
-      {children}
-      <div data-test-subj="popover-container" ref={refs.popoverContainerRef} />
-    </>
-  );
-};
 export const HostsContent = () => {
   const { error } = useUnifiedSearchContext();
 
@@ -35,21 +26,19 @@ export const HostsContent = () => {
       ) : (
         <HostsViewProvider>
           <HostsTableProvider>
-            <Container>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem grow={false}>
-                  <KPIGrid />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <HostsTable />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <AlertsQueryProvider>
-                    <Tabs />
-                  </AlertsQueryProvider>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Container>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <KPIGrid />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <HostsTable />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AlertsQueryProvider>
+                  <Tabs />
+                </AlertsQueryProvider>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </HostsTableProvider>
         </HostsViewProvider>
       )}

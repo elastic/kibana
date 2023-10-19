@@ -20,7 +20,6 @@ import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { NEW_INDEX_METHOD_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { CannotConnect } from '../search_index/components/cannot_connect';
@@ -37,7 +36,7 @@ const getAvailableMethodOptions = (productFeatures: ProductFeatures): INGESTION_
 };
 
 export const NewIndex: React.FC = () => {
-  const { capabilities, config, productFeatures } = useValues(KibanaLogic);
+  const { config, productFeatures } = useValues(KibanaLogic);
   const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
   const { errorConnectingMessage } = useValues(HttpLogic);
 
@@ -91,15 +90,6 @@ export const NewIndex: React.FC = () => {
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {capabilities.navLinks.integrations && (
-            <EuiFlexItem>
-              <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
-                {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
-                  defaultMessage: 'View additional integrations',
-                })}
-              </EuiLinkTo>
-            </EuiFlexItem>
-          )}
         </>
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>

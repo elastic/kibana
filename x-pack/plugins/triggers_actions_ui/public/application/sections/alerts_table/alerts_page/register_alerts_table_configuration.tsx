@@ -7,8 +7,7 @@
 
 import React, { lazy } from 'react';
 import { PLUGIN_ID } from '../../../../common/constants';
-import { AlertsTableConfigurationRegistry } from '../../../../types';
-import { TypeRegistry } from '../../../type_registry';
+import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
 
 const AlertsPageFlyoutHeader = lazy(() => import('./alerts_page_flyout_header'));
 const AlertsPageFlyoutBody = lazy(() => import('./alerts_page_flyout_body'));
@@ -22,7 +21,7 @@ const useInternalFlyout = () => ({
 export function registerAlertsTableConfiguration({
   alertsTableConfigurationRegistry,
 }: {
-  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
 }) {
   alertsTableConfigurationRegistry.register({
     id: PLUGIN_ID,

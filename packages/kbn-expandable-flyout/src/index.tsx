@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { useExpandableFlyoutContext } from './context';
@@ -27,10 +26,6 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
    */
   handleOnFlyoutClosed?: () => void;
 }
-
-const flyoutStyles = css`
-  overflow-y: scroll;
-`;
 
 const flyoutInnerStyles = { height: '100%' };
 
@@ -88,13 +83,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   const previewSectionWidth: number = leftSection ? 0.4 : 1;
 
   return (
-    <EuiFlyout
-      css={flyoutStyles}
-      {...flyoutProps}
-      size={flyoutWidth}
-      ownFocus={false}
-      onClose={onClose}
-    >
+    <EuiFlyout {...flyoutProps} size={flyoutWidth} ownFocus={false} onClose={onClose}>
       <EuiFlexGroup
         direction={leftSection ? 'row' : 'column'}
         wrap={false}

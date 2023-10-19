@@ -95,6 +95,11 @@ export const getAllSeries = (
   return allSeries;
 };
 
+/**
+ * This function joins every data series name available on each layer by the same color palette.
+ * The returned function `getRank` should return the position of a series name in this unified list by palette.
+ *
+ */
 export function getColorAssignments(
   layers: CommonXYLayerConfig[],
   titles: LayersAccessorsTitles,

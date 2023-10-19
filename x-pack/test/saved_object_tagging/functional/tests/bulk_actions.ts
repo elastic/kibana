@@ -27,7 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    describe('bulk delete', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/163817
+    describe.skip('bulk delete', () => {
       it('deletes multiple tags', async () => {
         const initialDisplayedTags = await tagManagementPage.getDisplayedTagNames();
         await tagManagementPage.selectTagByName('tag-1');

@@ -10,6 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleTypeParams,
@@ -19,6 +21,7 @@ import {
   RuleAddProps,
   RuleTypeIndex,
   TriggersActionsUiConfig,
+  RuleCreationValidConsumer,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
@@ -37,6 +40,14 @@ import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
+import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+
+const defaultCreateRuleErrorMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleAdd.saveErrorNotificationText',
+  {
+    defaultMessage: 'Cannot create rule.',
+  }
+);
 
 const RuleAdd = ({
   consumer,
@@ -48,9 +59,12 @@ const RuleAdd = ({
   initialValues,
   reloadRules,
   onSave,
+  hideGrouping,
   hideInterval,
   metadata: initialMetadata,
   filteredRuleTypes,
+  validConsumers,
+  useRuleProducer,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -83,6 +97,9 @@ const RuleAdd = ({
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
+  const [selectedConsumer, setSelectedConsumer] = useState<
+    RuleCreationValidConsumer | null | undefined
+  >();
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -196,10 +213,17 @@ const RuleAdd = ({
   };
 
   const ruleType = rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null;
-
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
-    () => getRuleErrors(rule as Rule, ruleType, config),
-    [rule, ruleType, config]
+    () =>
+      getRuleErrors(
+        {
+          ...rule,
+          ...(selectedConsumer !== undefined ? { consumer: selectedConsumer } : {}),
+        } as Rule,
+        ruleType,
+        config
+      ),
+    [rule, selectedConsumer, ruleType, config]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
@@ -207,7 +231,13 @@ const RuleAdd = ({
 
   async function onSaveRule(): Promise<Rule | undefined> {
     try {
-      const newRule = await createRule({ http, rule: rule as RuleUpdates });
+      const newRule = await createRule({
+        http,
+        rule: {
+          ...rule,
+          ...(selectedConsumer ? { consumer: selectedConsumer } : {}),
+        } as RuleUpdates,
+      });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.saveSuccessNotificationText', {
           defaultMessage: 'Created rule "{ruleName}"',
@@ -218,12 +248,17 @@ const RuleAdd = ({
       );
       return newRule;
     } catch (errorRes) {
-      toasts.addDanger(
-        errorRes.body?.message ??
-          i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.saveErrorNotificationText', {
-            defaultMessage: 'Cannot create rule.',
-          })
+      const message = parseRuleCircuitBreakerErrorMessage(
+        errorRes.body?.message || defaultCreateRuleErrorMessage
       );
+      toasts.addDanger({
+        title: message.summary,
+        ...(message.details && {
+          text: toMountPoint(
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+          ),
+        }),
+      });
     }
   }
 
@@ -250,6 +285,7 @@ const RuleAdd = ({
           <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               <RuleForm
+                canShowConsumerSelection
                 rule={rule}
                 config={config}
                 dispatch={dispatch}
@@ -261,12 +297,16 @@ const RuleAdd = ({
                     defaultMessage: 'create',
                   }
                 )}
+                validConsumers={validConsumers}
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
                 filteredRuleTypes={filteredRuleTypes}
+                hideGrouping={hideGrouping}
                 hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
+                setConsumer={setSelectedConsumer}
+                useRuleProducer={useRuleProducer}
               />
             </EuiFlyoutBody>
             <RuleAddFooter

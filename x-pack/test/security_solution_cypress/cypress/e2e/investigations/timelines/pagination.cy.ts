@@ -16,22 +16,24 @@ import {
 } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { populateTimeline } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
+// Flaky on serverless
 const defaultPageSize = 25;
 describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'timeline');
+    cy.task('esArchiverLoad', { archiveName: 'timeline' });
   });
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
   });

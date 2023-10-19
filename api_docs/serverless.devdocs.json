@@ -274,7 +274,40 @@
       "path": "x-pack/plugins/serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "serverless",
+          "id": "def-server.ServerlessPluginSetup.setupProjectSettings",
+          "type": "Function",
+          "tags": [],
+          "label": "setupProjectSettings",
+          "description": [],
+          "signature": [
+            "(keys: string[]) => void"
+          ],
+          "path": "x-pack/plugins/serverless/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "serverless",
+              "id": "def-server.ServerlessPluginSetup.setupProjectSettings.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "keys",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/plugins/serverless/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },

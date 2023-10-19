@@ -106,6 +106,15 @@ describe('isClusterShardLimitExceeded', () => {
       })
     ).toEqual(true);
   });
+  it('returns true with illegal_argument_exception and reason is maximum normal shards open', () => {
+    expect(
+      isClusterShardLimitExceeded({
+        type: 'illegal_argument_exception',
+        reason:
+          'Validation Failed: 1: this action would add [2] shards, but this cluster currently has [3]/[1] maximum normal shards open;',
+      })
+    ).toEqual(true);
+  });
   it('returns false for validation_exception with another reason', () => {
     expect(
       isClusterShardLimitExceeded({

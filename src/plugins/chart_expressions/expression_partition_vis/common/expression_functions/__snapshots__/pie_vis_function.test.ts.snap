@@ -61,6 +61,7 @@ Object {
           "type": "vis_dimension",
         },
       ],
+      "colorMapping": undefined,
       "dimensions": Object {
         "buckets": Array [
           Object {
@@ -203,6 +204,7 @@ Object {
           "type": "vis_dimension",
         },
       ],
+      "colorMapping": undefined,
       "dimensions": Object {
         "buckets": Array [
           Object {

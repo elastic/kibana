@@ -18,7 +18,6 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { Toast } from '@kbn/core/public';
 
-import { DashboardPanelState } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
 import { DashboardContainer } from '../dashboard_container';
@@ -58,30 +57,15 @@ export class ReplacePanelFlyout extends React.Component<Props> {
 
   public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
     const { panelToRemove, container } = this.props;
-    const { w, h, x, y } = (container.getInput().panels[panelToRemove.id] as DashboardPanelState)
-      .gridData;
 
-    const { id } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, {
-      savedObjectId,
-    });
-
-    const { [panelToRemove.id]: omit, ...panels } = container.getInput().panels;
-
-    container.updateInput({
-      panels: {
-        ...panels,
-        [id]: {
-          ...panels[id],
-          gridData: {
-            ...(panels[id] as DashboardPanelState).gridData,
-            w,
-            h,
-            x,
-            y,
-          },
-        } as DashboardPanelState,
+    const id = await container.replaceEmbeddable<SavedObjectEmbeddableInput>(
+      panelToRemove.id,
+      {
+        savedObjectId,
       },
-    });
+      type,
+      true
+    );
 
     (container as DashboardContainer).setHighlightPanelId(id);
     this.showToast(name);

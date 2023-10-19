@@ -216,6 +216,7 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
             <EuiSpacer size="m" />
             <StyledDescriptionList
               type="column"
+              columnWidths={['fit-content(8em)', 'auto']} // sets a max width of 8em on the title column
               align="left"
               titleProps={{
                 className: 'desc-title',
@@ -329,12 +330,8 @@ function EventDetailBreadcrumbs({
 }
 
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
-  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 8em;
-    overflow-wrap: break-word;
-  }
-  &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
-    max-width: calc(100% - 8.5em);
+  .euiDescriptionList__title,
+  .euiDescriptionList__description {
     overflow-wrap: break-word;
   }
 `);

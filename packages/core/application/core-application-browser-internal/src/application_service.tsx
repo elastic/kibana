@@ -112,6 +112,7 @@ export class ApplicationService {
   private stop$ = new Subject<void>();
   private registrationClosed = false;
   private history?: History<any>;
+  private location$?: Observable<string>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
@@ -136,10 +137,10 @@ export class ApplicationService {
         }),
       });
 
-    const location$ = getLocationObservable(window.location, this.history);
+    this.location$ = getLocationObservable(window.location, this.history);
     registerAnalyticsContextProvider({
       analytics,
-      location$,
+      location$: this.location$,
     });
 
     this.navigate = (url, state, replace) => {
@@ -311,6 +312,7 @@ export class ApplicationService {
         shareReplay(1)
       ),
       capabilities,
+      currentLocation$: this.location$!.pipe(takeUntil(this.stop$)),
       currentAppId$: this.currentAppId$.pipe(
         filter((appId) => appId !== undefined),
         distinctUntilChanged(),

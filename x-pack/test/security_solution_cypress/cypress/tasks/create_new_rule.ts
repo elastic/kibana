@@ -15,6 +15,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   EqlRuleCreateProps,
+  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -48,6 +49,9 @@ import {
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
+  ESQL_TYPE,
+  ESQL_QUERY_BAR,
+  ESQL_QUERY_BAR_INPUT_AREA,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
@@ -69,13 +73,12 @@ import {
   MITRE_TACTIC,
   QUERY_BAR,
   REFERENCE_URLS_INPUT,
-  REFRESH_BUTTON,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
-  RULE_STATUS,
+  RULE_NAME_OVERRIDE_FOR_ESQL,
   RULE_TIMESTAMP_OVERRIDE,
   RULES_CREATION_FORM,
   RULES_CREATION_PREVIEW_BUTTON,
@@ -111,6 +114,7 @@ import {
   CREATE_WITHOUT_ENABLING_BTN,
   RULE_INDICES,
   ALERTS_INDEX_BUTTON,
+  INVESTIGATIONS_INPUT,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -123,23 +127,18 @@ import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
-import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
-  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
+  cy.get(CREATE_AND_ENABLE_BTN).click();
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
-  cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const fillAboutRule = (rule: RuleCreateProps) => {
@@ -296,6 +295,23 @@ export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.reference
   return referenceUrls;
 };
 
+export const fillCustomInvestigationFields = (
+  fields: string[] = ruleFields.investigationFields.field_names
+) => {
+  fields.forEach((field) => {
+    cy.get(INVESTIGATIONS_INPUT).type(`${field}{enter}`, { force: true });
+  });
+  return fields;
+};
+
+export const fillAboutRuleMinimumAndContinue = (rule: RuleCreateProps) => {
+  cy.get(RULE_NAME_INPUT).clear();
+  cy.get(RULE_NAME_INPUT).type(rule.name);
+  cy.get(RULE_DESCRIPTION_INPUT).clear();
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
+  getAboutContinueButton().should('exist').click();
+};
+
 export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {
   fillAboutRule(rule);
   getAboutContinueButton().should('exist').click({ force: true });
@@ -359,6 +375,12 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
   });
 
   getAboutContinueButton().should('exist').click({ force: true });
+};
+
+export const fillOverrideEsqlRuleName = (value: string) => {
+  cy.get(RULE_NAME_OVERRIDE_FOR_ESQL).within(() => {
+    cy.get(COMBO_BOX_INPUT).type(`${value}{enter}`);
+  });
 };
 
 // called after import rule from saved timeline
@@ -491,6 +513,37 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type(historySizeNumber);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+};
+
+export const clearEsqlQueryBar = () => {
+  // monaco editor under the hood is quite complex in matter to clear it
+  // underlying textarea holds just the last character of query displayed in search bar
+  // in order to clear it - it requires to select all text within editor and type in it
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a');
+};
+
+export const fillEsqlQueryBar = (query: string) => {
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query);
+};
+
+export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
+  cy.get(ESQL_QUERY_BAR).contains('ES|QL query');
+  fillEsqlQueryBar(rule.query);
+
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
+};
+
+/**
+ * fills only required(name, description) and specific to ES|QL(rule name override) fields on about page
+ */
+export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
+  fillRuleName(rule.name);
+  fillDescription(rule.description);
+
+  expandAdvancedSettings();
+  // this field defined to be returned in rule query
+  fillOverrideEsqlRuleName(rule.rule_name_override ?? '');
+  getAboutContinueButton().click();
 };
 
 /**
@@ -675,6 +728,10 @@ export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
 };
 
+export const selectEsqlRuleType = () => {
+  cy.get(ESQL_TYPE).click();
+};
+
 export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
@@ -694,16 +751,6 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     { interval: 500, timeout: 12000 }
   );
   waitForAlerts();
-};
-
-export const waitForTheRuleToBeExecuted = () => {
-  cy.waitUntil(() => {
-    cy.get(REFRESH_BUTTON).click({ force: true });
-    return cy
-      .get(RULE_STATUS)
-      .invoke('text')
-      .then((ruleStatus) => ruleStatus === 'succeeded');
-  });
 };
 
 export const selectAndLoadSavedQuery = (queryName: string, queryValue: string) => {

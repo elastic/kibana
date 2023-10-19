@@ -91,6 +91,7 @@ export function PrimaryAndComparisonSearchBar() {
       <EuiFlexItem grow={false} style={{ padding: '0 8px' }}>
         <EuiToolTip position="top" content="Swap sides">
           <EuiButtonIcon
+            data-test-subj="profilingPrimaryAndComparisonSearchBarButton"
             iconType="merge"
             size="m"
             onClick={() => {

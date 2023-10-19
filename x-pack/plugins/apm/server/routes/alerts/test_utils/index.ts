@@ -15,6 +15,7 @@ import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alertin
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
+import { RegisterRuleDependencies } from '../register_apm_rule_types';
 
 export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
@@ -48,35 +49,37 @@ export const createRuleTypeMocks = () => {
     shouldWriteAlerts: () => true,
   };
 
+  const dependencies = {
+    alerting,
+    basePath: {
+      prepend: (path: string) => `http://localhost:5601/eyr${path}`,
+      publicBaseUrl: 'http://localhost:5601/eyr',
+      serverBasePath: '/eyr',
+    } as IBasePath,
+    apmConfig: { searchAggregatedTransactions: true } as any as APMConfig,
+    getApmIndices: async () => ({
+      error: 'apm-*',
+      transaction: 'apm-*',
+      span: 'apm-*',
+      metric: 'apm-*',
+      onboarding: 'apm-*',
+    }),
+    observability: {
+      getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
+    } as unknown as ObservabilityPluginSetup,
+    logger: loggerMock,
+    ruleDataClient: ruleRegistryMocks.createRuleDataClient(
+      '.alerts-observability.apm.alerts'
+    ) as IRuleDataClient,
+    alertsLocator: {
+      getLocation: jest.fn().mockImplementation(() => ({
+        path: 'mockedAlertsLocator > getLocation',
+      })),
+    } as any as LocatorPublic<AlertsLocatorParams>,
+  } as unknown as RegisterRuleDependencies;
+
   return {
-    dependencies: {
-      alerting,
-      basePath: {
-        prepend: (path: string) => `http://localhost:5601/eyr${path}`,
-        publicBaseUrl: 'http://localhost:5601/eyr',
-        serverBasePath: '/eyr',
-      } as IBasePath,
-      apmConfig: { searchAggregatedTransactions: true } as any as APMConfig,
-      getApmIndices: async () => ({
-        error: 'apm-*',
-        transaction: 'apm-*',
-        span: 'apm-*',
-        metric: 'apm-*',
-        onboarding: 'apm-*',
-      }),
-      observability: {
-        getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
-      } as unknown as ObservabilityPluginSetup,
-      logger: loggerMock,
-      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
-        '.alerts-observability.apm.alerts'
-      ) as IRuleDataClient,
-      alertsLocator: {
-        getLocation: jest.fn().mockImplementation(() => ({
-          path: 'mockedAlertsLocator > getLocation',
-        })),
-      } as any as LocatorPublic<AlertsLocatorParams>,
-    },
+    dependencies,
     services,
     scheduleActions,
     executor: async ({ params }: { params: Record<string, any> }) => {
@@ -92,6 +95,10 @@ export const createRuleTypeMocks = () => {
         },
         startedAt: new Date(),
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange: () => {
+          const date = new Date(Date.now()).toISOString();
+          return { dateStart: date, dateEnd: date };
+        },
       });
     },
   };

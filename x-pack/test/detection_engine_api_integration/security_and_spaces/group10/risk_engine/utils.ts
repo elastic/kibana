@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { v4 as uuidv4 } from 'uuid';
-import type SuperTest from 'supertest';
+import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EcsRiskScore, RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
@@ -100,6 +101,27 @@ export const createAndSyncRuleAndAlertsFactory =
     await waitForRuleSuccess({ supertest, log, id, namespace });
     await waitForSignalsToBePresent(supertest, log, alerts, [id], namespace);
   };
+
+export const deleteRiskScoreIndices = async ({
+  log,
+  es,
+  namespace = 'default',
+}: {
+  log: ToolingLog;
+  es: Client;
+  namespace?: string;
+}) => {
+  try {
+    await Promise.allSettled([
+      es.indices.deleteDataStream({ name: [`risk-score.risk-score-${namespace}`] }),
+      es.indices.delete({
+        index: [`risk-score.risk-score-latest-${namespace}`],
+      }),
+    ]);
+  } catch (e) {
+    log.error(`Error deleting risk score indices: ${e.message}`);
+  }
+};
 
 /**
  * Deletes all risk scores from a given index or indices, defaults to `risk-score.risk-score-*`
@@ -346,6 +368,34 @@ export const clearLegacyTransforms = async ({
   }
 };
 
+export const clearLegacyDashboards = async ({
+  supertest,
+  log,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  log: ToolingLog;
+}): Promise<void> => {
+  try {
+    await supertest
+      .post(
+        '/internal/risk_score/prebuilt_content/saved_objects/_bulk_delete/hostRiskScoreDashboards'
+      )
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200);
+
+    await supertest
+      .post(
+        '/internal/risk_score/prebuilt_content/saved_objects/_bulk_delete/userRiskScoreDashboards'
+      )
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200);
+  } catch (e) {
+    log.error(`Error deleting legacy dashboards: ${e.message}`);
+  }
+};
+
 export const createLegacyTransforms = async ({ es }: { es: Client }): Promise<void> => {
   const transforms = legacyTransformIds.map((transform) =>
     es.transform.putTransform({
@@ -379,6 +429,18 @@ export const createLegacyTransforms = async ({ es }: { es: Client }): Promise<vo
   await Promise.all(transforms);
 };
 
+export const getLegacyRiskScoreDashboards = async ({
+  kibanaServer,
+}: {
+  kibanaServer: KbnClient;
+}) => {
+  const savedObejectLens = await kibanaServer.savedObjects.find({
+    type: 'lens',
+  });
+
+  return savedObejectLens?.saved_objects.filter((s) => s?.attributes?.title?.includes('Risk'));
+};
+
 export const riskEngineRouteHelpersFactory = (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   namespace?: string
@@ -387,6 +449,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -394,6 +457,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -401,6 +465,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -408,6 +473,45 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 });
+
+export const installLegacyRiskScore = async ({
+  supertest,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+}) => {
+  await supertest
+    .post('/internal/risk_score')
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .send({ riskScoreEntity: 'host' })
+    .expect(200);
+
+  await supertest
+    .post('/internal/risk_score')
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .send({ riskScoreEntity: 'user' })
+    .expect(200);
+
+  await supertest
+    .post(
+      '/internal/risk_score/prebuilt_content/saved_objects/_bulk_create/hostRiskScoreDashboards'
+    )
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .send()
+    .expect(200);
+
+  await supertest
+    .post(
+      '/internal/risk_score/prebuilt_content/saved_objects/_bulk_create/userRiskScoreDashboards'
+    )
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .send()
+    .expect(200);
+};

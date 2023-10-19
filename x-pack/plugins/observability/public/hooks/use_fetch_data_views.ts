@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
@@ -19,9 +14,6 @@ export interface UseFetchDataViewsResponse {
   isSuccess: boolean;
   isError: boolean;
   data: DataView[] | undefined;
-  refetch: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<DataView[], unknown>>;
 }
 
 interface Params {
@@ -33,16 +25,15 @@ export function useFetchDataViews({ name = '', size = 10 }: Params): UseFetchDat
   const { dataViews } = useKibana().services;
   const search = name.endsWith('*') ? name : `${name}*`;
 
-  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
+  const { isLoading, isError, isSuccess, data } = useQuery({
     queryKey: ['fetchDataViews', search],
     queryFn: async () => {
-      try {
-        return await dataViews.find(search, size);
-      } catch (error) {
-        throw new Error(`Something went wrong. Error: ${error}`);
-      }
+      return dataViews.find(search, size);
     },
+    retry: false,
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
   });
 
-  return { isLoading, isError, isSuccess, data, refetch };
+  return { isLoading, isError, isSuccess, data };
 }

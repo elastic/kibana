@@ -81,6 +81,7 @@ export const UserActionsList = React.memo(
     userProfiles,
     currentUserProfile,
     data: caseData,
+    casesConfiguration,
     getRuleDetailsHref,
     actionsNavigation,
     onRuleDetailsClick,
@@ -129,6 +130,7 @@ export const UserActionsList = React.memo(
         const userActionBuilder = builder({
           appId,
           caseData,
+          casesConfiguration,
           caseConnectors,
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
@@ -156,14 +158,15 @@ export const UserActionsList = React.memo(
         return [...comments, ...userActionBuilder.build()];
       }, []);
     }, [
-      appId,
-      caseConnectors,
       caseUserActions,
-      userProfiles,
-      currentUserProfile,
+      appId,
+      caseData,
+      casesConfiguration,
+      caseConnectors,
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
-      caseData,
+      userProfiles,
+      currentUserProfile,
       commentRefs,
       manageMarkdownEditIds,
       selectedOutlineCommentId,

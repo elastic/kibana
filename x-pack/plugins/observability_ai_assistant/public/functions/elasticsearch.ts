@@ -21,7 +21,7 @@ export function registerElasticsearchFunction({
       name: 'elasticsearch',
       contexts: ['core'],
       description:
-        'Call Elasticsearch APIs on behalf of the user. Make sure the request body is valid for the API that you are using.',
+        'Call Elasticsearch APIs on behalf of the user. Make sure the request body is valid for the API that you are using. Only call this function when the user has explicitly requested it.',
       descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
       parameters: {
         type: 'object',
@@ -34,6 +34,10 @@ export function registerElasticsearchFunction({
           path: {
             type: 'string',
             description: 'The path of the Elasticsearch endpoint, including query parameters',
+          },
+          body: {
+            type: 'object',
+            description: 'The body of the request',
           },
         },
         required: ['method', 'path'] as const,

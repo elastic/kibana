@@ -14,6 +14,7 @@ import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
@@ -181,6 +182,9 @@ function getProps({
     }
     if (path === '/internal/security/_check_role_mapping_features') {
       return { canUseRemoteIndices };
+    }
+    if (path === REMOTE_CLUSTERS_PATH) {
+      return [];
     }
   });
 

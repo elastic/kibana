@@ -95,6 +95,7 @@ export function NormalizationMenu(props: Props) {
           prepend={NORMALIZE_BY_LABEL}
           append={
             <EuiButtonIcon
+              data-test-subj="profilingNormalizationMenuButton"
               iconType="arrowDown"
               aria-label={i18n.translate(
                 'xpack.profiling.normalizationMenu.menuPopoverButtonAriaLabel',
@@ -191,6 +192,7 @@ export function NormalizationMenu(props: Props) {
         prepend={<EuiFormLabel htmlFor={baselineScaleFactorInputId}>{SCALE_LABEL}</EuiFormLabel>}
       >
         <EuiFieldNumber
+          data-test-subj="profilingNormalizationMenuFieldNumber"
           controlOnly
           id={baselineScaleFactorInputId}
           value={baseline}
@@ -219,6 +221,7 @@ export function NormalizationMenu(props: Props) {
         prepend={<EuiFormLabel htmlFor={comparisonScaleFactorInputId}>{SCALE_LABEL}</EuiFormLabel>}
       >
         <EuiFieldNumber
+          data-test-subj="profilingNormalizationMenuFieldNumber"
           controlOnly
           id={comparisonScaleFactorInputId}
           value={comparison}
@@ -235,6 +238,7 @@ export function NormalizationMenu(props: Props) {
       </EuiFormControlLayout>
       <EuiSpacer size="m" />
       <EuiButton
+        data-test-subj="profilingNormalizationMenuApplyChangesButton"
         onClick={() => {
           props.onChange(mode, options);
           setIsPopoverOpen(false);

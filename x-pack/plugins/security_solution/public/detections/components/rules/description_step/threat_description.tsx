@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import type { BuildThreatDescription } from './types';
-import type {
-  MitreSubtechniquesOptions,
-  MitreTacticsOptions,
-  MitreTechniquesOptions,
-} from '../../../mitre/types';
+import type { MitreSubTechnique, MitreTactic, MitreTechnique } from '../../../mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
 const lazyMitreConfiguration = () => {
@@ -45,16 +41,16 @@ const TechniqueLinkItem = styled(EuiButtonEmpty)`
 `;
 
 export const ThreatEuiFlexGroup = ({ label, threat }: BuildThreatDescription) => {
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechniquesOptions[]>([]);
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTacticsOptions[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>([]);
+  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
+  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
+  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
-      setTechniquesOptions(mitreConfig.techniquesOptions);
-      setTacticsOptions(mitreConfig.tacticsOptions);
+      setSubtechniquesOptions(mitreConfig.subtechniques);
+      setTechniquesOptions(mitreConfig.techniques);
+      setTacticsOptions(mitreConfig.tactics);
     }
     getMitre();
   }, []);
@@ -70,7 +66,7 @@ export const ThreatEuiFlexGroup = ({ label, threat }: BuildThreatDescription) =>
               target="_blank"
             >
               {tactic != null
-                ? tactic.text
+                ? tactic.label
                 : `${singleThreat.tactic.name} (${singleThreat.tactic.id})`}
             </EuiLink>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
@@ -120,7 +116,6 @@ export const ThreatEuiFlexGroup = ({ label, threat }: BuildThreatDescription) =>
           </EuiFlexItem>
         );
       })}
-      <EuiSpacer />
     </ThreatEuiFlexGroupStyles>
   );
 };

@@ -1,0 +1,221 @@
+{
+  "id": "@kbn/management-settings-components-form",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-form",
+        "id": "def-common.Form",
+        "type": "Function",
+        "tags": [],
+        "label": "Form",
+        "description": [
+          "\nComponent for displaying a set of {@link FieldRow} in a form."
+        ],
+        "signature": [
+          "(props: ",
+          "FormProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-management/settings/components/form/form.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-form",
+            "id": "def-common.Form.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "The {@link FormProps } for the {@link Form } component."
+            ],
+            "signature": [
+              "FormProps"
+            ],
+            "path": "packages/kbn-management/settings/components/form/form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-form",
+        "id": "def-common.FormKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "FormKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}."
+        ],
+        "signature": [
+          "({ children, ...deps }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-common.FormKibanaDependencies",
+            "text": "FormKibanaDependencies"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-management/settings/components/form/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-form",
+            "id": "def-common.FormKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...deps }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/management-settings-components-form",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+                "section": "def-common.FormKibanaDependencies",
+                "text": "FormKibanaDependencies"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-management/settings/components/form/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-form",
+        "id": "def-common.FormProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "FormProvider",
+        "description": [
+          "\nReact Provider that provides services to a {@link Form} component and its dependents."
+        ],
+        "signature": [
+          "({ children, ...services }: ",
+          "FormProviderProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-management/settings/components/form/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-form",
+            "id": "def-common.FormProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "FormProviderProps"
+            ],
+            "path": "packages/kbn-management/settings/components/form/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-form",
+        "id": "def-common.FormKibanaDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "FormKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link Form} component and its dependents."
+        ],
+        "signature": [
+          "KibanaDependencies & ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.KibanaDependencies",
+            "text": "KibanaDependencies"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-common.FieldInputKibanaDependencies",
+            "text": "FieldInputKibanaDependencies"
+          }
+        ],
+        "path": "packages/kbn-management/settings/components/form/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-form",
+        "id": "def-common.FormServices",
+        "type": "Type",
+        "tags": [],
+        "label": "FormServices",
+        "description": [
+          "\nContextual services used by a {@link Form} component and its dependents."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-common.FieldInputServices",
+            "text": "FieldInputServices"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.Services",
+            "text": "Services"
+          },
+          " & ",
+          "Services"
+        ],
+        "path": "packages/kbn-management/settings/components/form/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

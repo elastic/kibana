@@ -29,7 +29,7 @@ export class CorePluginDeepLinksPlugin
         },
         {
           id: 'pageA',
-          title: 'DL Page A',
+          title: 'DL page A',
           path: '/page-a',
           navLinkStatus: AppNavLinkStatus.visible,
         },
@@ -39,7 +39,7 @@ export class CorePluginDeepLinksPlugin
           deepLinks: [
             {
               id: 'pageB',
-              title: 'DL Page B',
+              title: 'DL page B',
               path: '/page-b',
               navLinkStatus: AppNavLinkStatus.visible,
             },
@@ -47,7 +47,7 @@ export class CorePluginDeepLinksPlugin
         },
         {
           id: 'pageC',
-          title: 'DL Page C',
+          title: 'DL page C',
           path: '/page-c',
           // navLinkStatus hidden by default
         },

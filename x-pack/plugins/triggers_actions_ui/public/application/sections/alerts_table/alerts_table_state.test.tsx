@@ -20,7 +20,6 @@ import {
   FetchAlertData,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
-import { TypeRegistry } from '../../type_registry';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
@@ -32,6 +31,7 @@ import { getCasesMockMap } from './cases/index.mock';
 import { createCasesServiceMock } from './index.mock';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
@@ -261,10 +261,15 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
   }
   return {};
 });
+
+const updateMock = jest.fn();
+const getActionsMock = jest.fn();
 const alertsTableConfigurationRegistryMock = {
   has: hasMock,
   get: getMock,
-} as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+  getActions: getActionsMock,
+  update: updateMock,
+} as unknown as AlertTableConfigRegistry;
 
 const storageMock = Storage as jest.Mock;
 
@@ -325,7 +330,8 @@ describe('AlertsTableState', () => {
     const alertsTableConfigurationRegistryWithPersistentControlsMock = {
       has: hasMock,
       get: getMockWithUsePersistentControls,
-    } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+      update: updateMock,
+    } as unknown as AlertTableConfigRegistry;
 
     return {
       ...tableProps,
@@ -637,6 +643,7 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       expect(hasMock).toHaveBeenCalledWith(PLUGIN_ID);
       expect(getMock).toHaveBeenCalledWith(PLUGIN_ID);
+      expect(updateMock).toBeCalledTimes(2);
     });
 
     it('should render an empty error state when the plugin id owner is not registered', async () => {

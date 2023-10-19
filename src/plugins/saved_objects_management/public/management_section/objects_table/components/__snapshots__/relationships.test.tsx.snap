@@ -150,6 +150,7 @@ exports[`Relationships should render dashboards normally 1`] = `
           ],
         }
       }
+      searchFormat="eql"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -356,6 +357,7 @@ exports[`Relationships should render index patterns normally 1`] = `
           ],
         }
       }
+      searchFormat="eql"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -447,6 +449,7 @@ exports[`Relationships should render invalid relations 1`] = `
       pagination={true}
       responsive={true}
       rowProps={[Function]}
+      searchFormat="eql"
       tableLayout="fixed"
     />
     <EuiSpacer />
@@ -536,6 +539,7 @@ exports[`Relationships should render invalid relations 1`] = `
           ],
         }
       }
+      searchFormat="eql"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -698,6 +702,7 @@ exports[`Relationships should render searches normally 1`] = `
           ],
         }
       }
+      searchFormat="eql"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -854,6 +859,7 @@ exports[`Relationships should render visualizations normally 1`] = `
           ],
         }
       }
+      searchFormat="eql"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>

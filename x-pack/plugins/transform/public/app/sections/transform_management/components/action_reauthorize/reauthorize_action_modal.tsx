@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 import type { ReauthorizeAction } from './use_reauthorize_action';

@@ -93,7 +93,7 @@ export function CasesTableServiceProvider(
 
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases table', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         return await testSubjects.exists('case-details-link');
       });
       await header.waitUntilLoadingHasFinished();
@@ -101,7 +101,7 @@ export function CasesTableServiceProvider(
 
     async waitForCasesToBeDeleted() {
       await retry.waitFor('the cases table to be empty', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         return rows.length === 0;
       });

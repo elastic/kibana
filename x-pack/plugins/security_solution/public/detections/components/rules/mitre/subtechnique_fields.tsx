@@ -22,7 +22,7 @@ import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
-import type { MitreSubtechniquesOptions } from '../../../mitre/types';
+import type { MitreSubTechnique } from '../../../mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -57,12 +57,12 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   onFieldChange,
 }): JSX.Element => {
   const values = field.value as Threats;
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>([]);
+  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
+      setSubtechniquesOptions(mitreConfig.subtechniques);
     }
     getMitre();
   }, []);

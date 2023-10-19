@@ -12,7 +12,7 @@ import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Start as InspectorPublicPluginStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
@@ -162,12 +162,10 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
 
       props.coreStart.overlays.openFlyout(
         toMountPoint(
-          wrapWithTheme(
-            <Provider store={store}>
-              <Settings observable={settingsObservable} />
-            </Provider>,
-            props.coreStart.theme.theme$
-          )
+          <Provider store={store}>
+            <Settings observable={settingsObservable} />
+          </Provider>,
+          { theme: props.coreStart.theme, i18n: props.coreStart.i18n }
         ),
         {
           size: 'm',

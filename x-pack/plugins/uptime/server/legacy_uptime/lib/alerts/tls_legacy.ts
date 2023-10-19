@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
@@ -95,6 +96,7 @@ export const getCertSummary = (
 
 export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
   id: CLIENT_ALERT_TYPES.TLS_LEGACY,
+  category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
   name: tlsTranslations.legacyAlertFactoryName,
   validate: {

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import Fs from 'fs';
+import * as Url from 'url';
 import { EsArchiver } from '@kbn/es-archiver';
-import { KbnClient } from '@kbn/test';
-import { Client, HttpConnection } from '@elastic/elasticsearch';
+import { createEsClientForTesting, KbnClient, systemIndicesSuperuser } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export const esArchiver = (
   on: Cypress.PluginEvents,
@@ -16,14 +18,33 @@ export const esArchiver = (
 ): EsArchiver => {
   const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
 
-  const client = new Client({
-    node: config.env.ELASTICSEARCH_URL,
-    Connection: HttpConnection,
+  const isSnapshotServerless = config.env.IS_SERVERLESS;
+  const isCloudServerless = config.env.CLOUD_SERVERLESS;
+
+  const serverlessCloudUser = {
+    username: 'elastic',
+    password: config.env.ELASTICSEARCH_PASSWORD,
+  };
+
+  let authOverride;
+  if (!isSnapshotServerless) {
+    authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesSuperuser;
+  }
+
+  const client = createEsClientForTesting({
+    esUrl: Url.format(config.env.ELASTICSEARCH_URL),
+    // Use system indices user so tests can write to system indices
+    authOverride,
   });
+
+  const kibanaUrl = config.env.KIBANA_URL || config.env.BASE_URL;
 
   const kbnClient = new KbnClient({
     log,
-    url: config.env.CYPRESS_BASE_URL as string,
+    url: kibanaUrl as string,
+    ...(config.env.ELASTICSEARCH_URL.includes('https')
+      ? { certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)] }
+      : {}),
   });
 
   const esArchiverInstance = new EsArchiver({
@@ -34,7 +55,8 @@ export const esArchiver = (
   });
 
   on('task', {
-    esArchiverLoad: async (archiveName) => esArchiverInstance.load(archiveName),
+    esArchiverLoad: async ({ archiveName, ...options }) =>
+      esArchiverInstance.load(archiveName, options),
     esArchiverUnload: async (archiveName) => esArchiverInstance.unload(archiveName),
     esArchiverResetKibana: async () => esArchiverInstance.emptyKibanaIndex(),
   });

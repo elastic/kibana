@@ -10,12 +10,16 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiInMemoryTable,
-  EuiSearchBarProps,
+  EuiLink,
+  type EuiSearchBarProps,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   SearchFilterConfig,
 } from '@elastic/eui';
 import { groupBy } from 'lodash';
@@ -28,18 +32,21 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import {
-  BUILT_IN_MODEL_TYPE,
   BUILT_IN_MODEL_TAG,
+  BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
-} from '@kbn/ml-trained-models-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import {
+  DeploymentState,
   ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
+  ELSER_ID_V1,
   MODEL_STATE,
-  ModelState,
-} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+  type ModelState,
+} from '@kbn/ml-trained-models-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import { useStorage } from '@kbn/ml-local-storage';
+import { getModelStateColor } from './get_model_state_color';
+import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
@@ -62,7 +69,9 @@ import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
+import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
+import { useEnabledFeatures } from '../contexts/ml';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
@@ -73,6 +82,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   deployment_ids: string[];
   putModelConfig?: object;
   state: ModelState;
+  recommended?: boolean;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -82,10 +92,14 @@ interface PageUrlState {
   pageUrlState: ListingPageUrlState;
 }
 
+const modelIdColumnName = i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
+  defaultMessage: 'ID',
+});
+
 export const getDefaultModelsListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
-  sortField: ModelsTableToConfigMapping.id,
+  sortField: modelIdColumnName,
   sortDirection: 'asc',
 });
 
@@ -101,8 +115,17 @@ export const ModelsList: FC<Props> = ({
   const {
     services: {
       application: { capabilities },
+      docLinks,
     },
   } = useMlKibana();
+
+  const nlpElserDocUrl = docLinks.links.ml.nlpElser;
+
+  const { isNLPEnabled } = useEnabledFeatures();
+  const [isElserCalloutDismissed, setIsElserCalloutDismissed] = useStorage(
+    ML_ELSER_CALLOUT_DISMISSED,
+    false
+  );
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
@@ -141,6 +164,7 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [modelToTest, setModelToTest] = useState<ModelItem | null>(null);
+  const [dfaModelToTest, setDfaModelToTest] = useState<ModelItem | null>(null);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -151,6 +175,11 @@ export const ModelsList: FC<Props> = ({
     (item: ModelItem) => item.tags.includes(ELASTIC_MODEL_TAG),
     []
   );
+
+  // List of downloaded/existing models
+  const existingModels = useMemo(() => {
+    return items.filter((i) => !i.putModelConfig);
+  }, [items]);
 
   /**
    * Checks if the model download complete.
@@ -184,6 +213,7 @@ export const ModelsList: FC<Props> = ({
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
+        with_indices: true,
       });
 
       const newItems: ModelItem[] = [];
@@ -215,7 +245,35 @@ export const ModelsList: FC<Props> = ({
       // TODO combine fetching models definitions and stats into a single function
       await fetchModelsStats(newItems);
 
-      setItems(newItems);
+      let resultItems = newItems;
+      // don't add any of the built-in models (e.g. elser) if NLP is disabled
+      if (isNLPEnabled) {
+        const idMap = new Map<string, ModelItem>(
+          resultItems.map((model) => [model.model_id, model])
+        );
+        const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
+        const notDownloaded: ModelItem[] = forDownload
+          .filter(({ name, hidden, recommended }) => {
+            if (recommended && idMap.has(name)) {
+              idMap.get(name)!.recommended = true;
+            }
+            return !idMap.has(name) && !hidden;
+          })
+          .map<ModelItem>((modelDefinition) => {
+            return {
+              model_id: modelDefinition.name,
+              type: [ELASTIC_MODEL_TYPE],
+              tags: [ELASTIC_MODEL_TAG],
+              putModelConfig: modelDefinition.config,
+              description: modelDefinition.description,
+              state: MODEL_STATE.NOT_DOWNLOADED,
+              recommended: !!modelDefinition.recommended,
+            } as ModelItem;
+          });
+        resultItems = [...resultItems, ...notDownloaded];
+      }
+
+      setItems(resultItems);
 
       if (expandedItemsToRefresh.length > 0) {
         await fetchModelsStats(expandedItemsToRefresh);
@@ -238,7 +296,7 @@ export const ModelsList: FC<Props> = ({
     setIsInitialized(true);
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemIdToExpandedRowMap]);
+  }, [itemIdToExpandedRowMap, isNLPEnabled]);
 
   useEffect(
     function updateOnTimerRefresh() {
@@ -253,13 +311,13 @@ export const ModelsList: FC<Props> = ({
     return {
       total: {
         show: true,
-        value: items.length,
+        value: existingModels.length,
         label: i18n.translate('xpack.ml.trainedModels.modelsList.totalAmountLabel', {
           defaultMessage: 'Total trained models',
         }),
       },
     };
-  }, [items]);
+  }, [existingModels]);
 
   /**
    * Fetches models stats and update the original object
@@ -294,7 +352,7 @@ export const ModelsList: FC<Props> = ({
         );
         if (elasticModels.length > 0) {
           for (const model of elasticModels) {
-            if (model.state === MODEL_STATE.STARTED) {
+            if (Object.values(DEPLOYMENT_STATE).includes(model.state as DeploymentState)) {
               // no need to check for the download status if the model has been deployed
               continue;
             }
@@ -321,7 +379,7 @@ export const ModelsList: FC<Props> = ({
    * Unique inference types from models
    */
   const inferenceTypesOptions = useMemo(() => {
-    const result = items.reduce((acc, item) => {
+    const result = existingModels.reduce((acc, item) => {
       const type = item.inference_config && Object.keys(item.inference_config)[0];
       if (type) {
         acc.add(type);
@@ -335,13 +393,16 @@ export const ModelsList: FC<Props> = ({
         value: v,
         name: v,
       }));
-  }, [items]);
+  }, [existingModels]);
 
   const modelAndDeploymentIds = useMemo(
     () => [
-      ...new Set([...items.flatMap((v) => v.deployment_ids), ...items.map((i) => i.model_id)]),
+      ...new Set([
+        ...existingModels.flatMap((v) => v.deployment_ids),
+        ...existingModels.map((i) => i.model_id),
+      ]),
     ],
-    [items]
+    [existingModels]
   );
 
   /**
@@ -351,6 +412,7 @@ export const ModelsList: FC<Props> = ({
     isLoading,
     fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
+    onDfaTestAction: setDfaModelToTest,
     onModelsDeleteRequest: setModelsToDelete,
     onModelDeployRequest: setModelToDeploy,
     onLoading: setIsLoading,
@@ -396,31 +458,58 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableRowDetailsToggle',
     },
     {
-      field: ModelsTableToConfigMapping.id,
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
-        defaultMessage: 'ID',
-      }),
-      sortable: true,
+      name: modelIdColumnName,
+      width: '215px',
+      sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
+      textOnly: false,
       'data-test-subj': 'mlModelsTableColumnId',
+      render: ({ description, model_id: modelId }: ModelItem) => {
+        const isTechPreview = description?.includes('(Tech Preview)');
+
+        return (
+          <EuiFlexGroup gutterSize={'s'} alignItems={'center'} wrap={true}>
+            <EuiFlexItem grow={false}>{modelId}</EuiFlexItem>
+            {isTechPreview ? (
+              <EuiFlexItem grow={false}>
+                <TechnicalPreviewBadge compressed />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
-      field: ModelsTableToConfigMapping.description,
-      width: '350px',
+      width: '300px',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
         defaultMessage: 'Description',
       }),
-      sortable: false,
       truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
-      render: (description: string) => {
+      render: ({ description, recommended }: ModelItem) => {
         if (!description) return null;
-        const isTechPreview = description.includes('(Tech Preview)');
-        return (
-          <>
-            {description.replace('(Tech Preview)', '')}
-            {isTechPreview ? <TechnicalPreviewBadge compressed /> : null}
-          </>
+        const descriptionText = description.replace('(Tech Preview)', '');
+        return recommended ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+              />
+            }
+          >
+            <>
+              {descriptionText}&nbsp;
+              <b>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                  defaultMessage="(Recommended)"
+                />
+              </b>
+            </>
+          </EuiToolTip>
+        ) : (
+          descriptionText
         );
       },
     },
@@ -444,6 +533,7 @@ export const ModelsList: FC<Props> = ({
         </EuiFlexGroup>
       ),
       'data-test-subj': 'mlModelsTableColumnType',
+      width: '130px',
     },
     {
       field: 'state',
@@ -452,10 +542,16 @@ export const ModelsList: FC<Props> = ({
       }),
       align: 'left',
       truncateText: false,
-      render: (state: string) => {
-        return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
+      render: (state: ModelState) => {
+        const config = getModelStateColor(state);
+        return config ? (
+          <EuiHealth textSize={'xs'} color={config.color}>
+            {config.name}
+          </EuiHealth>
+        ) : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
+      width: '130px',
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
@@ -466,8 +562,10 @@ export const ModelsList: FC<Props> = ({
       render: (v: number) => dateFormatter(v),
       sortable: true,
       'data-test-subj': 'mlModelsTableColumnCreatedAt',
+      width: '210px',
     },
     {
+      width: '150px',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
@@ -581,21 +679,8 @@ export const ModelsList: FC<Props> = ({
       : {}),
   };
 
-  const resultItems = useMemo<ModelItem[]>(() => {
-    const idSet = new Set(items.map((i) => i.model_id));
-    const notDownloaded: ModelItem[] = Object.entries(ELASTIC_MODEL_DEFINITIONS)
-      .filter(([modelId]) => !idSet.has(modelId))
-      .map(([modelId, modelDefinition]) => {
-        return {
-          model_id: modelId,
-          type: [ELASTIC_MODEL_TYPE],
-          tags: [ELASTIC_MODEL_TAG],
-          putModelConfig: modelDefinition.config,
-          description: modelDefinition.description,
-        } as ModelItem;
-      });
-    return [...items, ...notDownloaded];
-  }, [items]);
+  const isElserCalloutVisible =
+    !isElserCalloutDismissed && items.findIndex((i) => i.model_id === ELSER_ID_V1) >= 0;
 
   if (!isInitialized) return null;
 
@@ -614,13 +699,14 @@ export const ModelsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
         <EuiInMemoryTable<ModelItem>
+          css={{ overflowX: 'auto' }}
+          isSelectable={true}
+          isExpandable={true}
+          hasActions={true}
           allowNeutralSort={false}
           columns={columns}
-          hasActions={true}
-          isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isSelectable={false}
-          items={resultItems}
+          items={items}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
           search={search}
@@ -632,6 +718,38 @@ export const ModelsList: FC<Props> = ({
           onTableChange={onTableChange}
           sorting={sorting}
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+          childrenBetween={
+            isElserCalloutVisible ? (
+              <>
+                <EuiCallOut
+                  size="s"
+                  title={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.newElserModelTitle"
+                      defaultMessage="New ELSER model now available"
+                    />
+                  }
+                  onDismiss={setIsElserCalloutDismissed.bind(null, true)}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
+                    defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
+                    values={{
+                      docLink: (
+                        <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
+                            defaultMessage="View documentation"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            ) : null
+          }
         />
       </div>
       {modelsToDelete.length > 0 && (
@@ -647,6 +765,9 @@ export const ModelsList: FC<Props> = ({
       )}
       {modelToTest === null ? null : (
         <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
+      )}
+      {dfaModelToTest === null ? null : (
+        <TestDfaModelsFlyout model={dfaModelToTest} onClose={setDfaModelToTest.bind(null, null)} />
       )}
       {modelToDeploy !== undefined ? (
         <AddInferencePipelineFlyout

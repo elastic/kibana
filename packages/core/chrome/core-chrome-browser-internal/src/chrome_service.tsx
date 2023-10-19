@@ -80,6 +80,7 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
   private mutationObserver: MutationObserver | undefined;
+  private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -203,15 +204,20 @@ export class ChromeService {
     };
 
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
-    const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!, chromeStyle$]).pipe(
-      map(([headerBanner, isVisible, chromeStyle]) => {
+    const bodyClasses$ = combineLatest([
+      headerBanner$,
+      this.isVisible$!,
+      chromeStyle$,
+      application.currentActionMenu$,
+    ]).pipe(
+      map(([headerBanner, isVisible, chromeStyle, actionMenu]) => {
         return [
           'kbnBody',
-          chromeStyle === 'project' ? 'kbnBody--projectLayout' : 'kbnBody--classicLayout',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
+          chromeStyle === 'project' && actionMenu ? 'kbnBody--hasProjectActionMenu' : '',
           getKbnVersionClass(),
-        ];
+        ].filter((className) => !!className);
       })
     );
 
@@ -277,6 +283,11 @@ export class ChromeService {
     const setProjectsUrl = (projectsUrl: string) => {
       validateChromeStyle();
       projectNavigation.setProjectsUrl(projectsUrl);
+    };
+
+    const setProjectName = (projectName: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectName(projectName);
     };
 
     const isIE = () => {
@@ -372,9 +383,13 @@ export class ChromeService {
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
                 homeHref$={projectNavigation.getProjectHome$()}
                 projectsUrl$={projectNavigation.getProjectsUrl$()}
+                projectName$={projectNavigation.getProjectName$()}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
+                toggleSideNav={(isCollapsed) => {
+                  this.isSideNavCollapsed$.next(isCollapsed);
+                }}
               >
                 <SideNavComponent activeNodes={activeNodes} />
               </ProjectHeader>
@@ -497,9 +512,11 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
+      getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
       project: {
         setHome: setProjectHome,
         setProjectsUrl,
+        setProjectName,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,

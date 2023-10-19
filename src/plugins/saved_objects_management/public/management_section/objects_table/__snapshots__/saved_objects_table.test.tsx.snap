@@ -133,6 +133,16 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "thrownError": null,
           },
         },
+        "currentLocation$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
         "navigateToUrl": [MockFunction],

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { TriggerMethod } from '../../../../../../common/types/connectors';
+import { TriggerMethod } from '@kbn/search-connectors';
 
 import { SyncJobEventsPanel } from './events_panel';
 

@@ -258,7 +258,7 @@ export const getTopNavConfig = (
 
   const navigateToOriginatingApp = () => {
     if (originatingApp) {
-      application.navigateToApp(originatingApp);
+      application.navigateToApp(originatingApp, { path: originatingPath });
     }
   };
 

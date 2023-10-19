@@ -20,7 +20,7 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
 
   const { data: policies, loading } = useSelector(selectAgentPolicies);
 
-  const policy = policies?.items.find((policyT) => policyT.id === agentPolicyId);
+  const policy = policies?.find((policyT) => policyT.id === agentPolicyId);
 
   if (loading) {
     return <EuiLoadingSpinner size="s" />;

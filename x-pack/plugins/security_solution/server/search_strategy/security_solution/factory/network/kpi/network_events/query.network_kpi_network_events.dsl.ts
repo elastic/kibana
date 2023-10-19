@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NetworkKpiNetworkEventsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkKpiEventsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { getIpFilter } from '../common';
 
@@ -13,7 +13,7 @@ export const buildNetworkEventsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: NetworkKpiNetworkEventsRequestOptions) => {
+}: NetworkKpiEventsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     ...getIpFilter(),

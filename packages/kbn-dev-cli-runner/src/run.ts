@@ -24,7 +24,7 @@ export interface RunContext {
   addCleanupTask: (task: CleanupTask) => void;
   flagsReader: FlagsReader;
 }
-export type RunFn = (context: RunContext) => Promise<void> | void;
+export type RunFn<T = void> = (context: RunContext) => Promise<T> | void;
 
 export interface RunOptions {
   usage?: string;
@@ -35,7 +35,7 @@ export interface RunOptions {
   flags?: FlagOptions;
 }
 
-export async function run(fn: RunFn, options: RunOptions = {}) {
+export async function run<T>(fn: RunFn<T>, options: RunOptions = {}): Promise<T | undefined> {
   const flags = getFlags(process.argv.slice(2), options.flags, options.log?.defaultLevel);
   const log = new ToolingLog({
     level: pickLevelFromFlags(flags, {
@@ -50,6 +50,7 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
     usage: options.usage,
     flagHelp: options.flags?.help,
     defaultLogLevel: options.log?.defaultLevel,
+    examples: options.flags?.examples,
   });
 
   if (flags.help) {
@@ -65,21 +66,23 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
     return;
   }
 
+  let result: T | undefined;
   try {
     await withProcRunner(log, async (procRunner) => {
-      await fn({
-        log,
-        flags,
-        procRunner,
-        statsMeta: metrics.meta,
-        addCleanupTask: cleanup.add.bind(cleanup),
-        flagsReader: new FlagsReader(flags, {
-          aliases: {
-            ...options.flags?.alias,
-            ...DEFAULT_FLAG_ALIASES,
-          },
-        }),
-      });
+      result =
+        (await fn({
+          log,
+          flags,
+          procRunner,
+          statsMeta: metrics.meta,
+          addCleanupTask: cleanup.add.bind(cleanup),
+          flagsReader: new FlagsReader(flags, {
+            aliases: {
+              ...options.flags?.alias,
+              ...DEFAULT_FLAG_ALIASES,
+            },
+          }),
+        })) || undefined;
     });
   } catch (error) {
     cleanup.execute(error);
@@ -91,4 +94,6 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
   }
 
   await metrics.reportSuccess();
+
+  return result;
 }

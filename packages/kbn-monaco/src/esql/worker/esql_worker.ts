@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams } from 'antlr4ts';
+import { CharStreams, type CodePointCharStream } from 'antlr4ts';
 import { monaco } from '../../monaco_imports';
 import { AutocompleteListener } from '../lib/autocomplete/autocomplete_listener';
 import type { BaseWorkerDefinition } from '../../types';
@@ -43,16 +43,9 @@ export class ESQLWorker implements BaseWorkerDefinition {
     return [];
   }
 
-  public async provideAutocompleteSuggestions(
-    modelUri: string,
-    meta: {
-      word: string;
-      line: number;
-      index: number;
-    }
+  private async provideAutocompleteSuggestionFromRawString(
+    inputStream: CodePointCharStream | undefined
   ) {
-    const inputStream = this.getModelCharStream(modelUri);
-
     if (inputStream) {
       const errorListener = new ANTLREErrorListener();
       const parseListener = new AutocompleteListener();
@@ -62,5 +55,20 @@ export class ESQLWorker implements BaseWorkerDefinition {
 
       return parseListener.getAutocompleteSuggestions();
     }
+  }
+
+  public async provideAutocompleteSuggestions(
+    modelUri: string,
+    meta: {
+      word: string;
+      line: number;
+      index: number;
+    }
+  ) {
+    return this.provideAutocompleteSuggestionFromRawString(this.getModelCharStream(modelUri));
+  }
+
+  public async provideAutocompleteSuggestionsFromString(text: string) {
+    return this.provideAutocompleteSuggestionFromRawString(CharStreams.fromString(text));
   }
 }

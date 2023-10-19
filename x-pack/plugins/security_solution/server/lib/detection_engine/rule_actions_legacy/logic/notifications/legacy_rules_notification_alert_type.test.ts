@@ -72,6 +72,10 @@ describe('legacyRules_notification_alert_type', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange: () => {
+        const date = new Date('2019-12-14T16:40:33.400Z').toISOString();
+        return { dateStart: date, dateEnd: date };
+      },
     };
 
     alert = legacyRulesNotificationAlertType({

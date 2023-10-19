@@ -127,6 +127,7 @@ describe('UPDATE remote clusters', () => {
         seeds: ['127.0.0.1:9300'],
         skipUnavailable: true,
         mode: 'sniff',
+        securityModel: 'certificate',
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
@@ -206,6 +207,7 @@ describe('UPDATE remote clusters', () => {
         name: 'test',
         skipUnavailable: true,
         mode: 'proxy',
+        securityModel: 'certificate',
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();

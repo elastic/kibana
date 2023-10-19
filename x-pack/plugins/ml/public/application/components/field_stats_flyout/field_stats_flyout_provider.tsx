@@ -76,7 +76,7 @@ export const FieldStatsFlyoutProvider: FC<{
           fields: ['*'],
           _source: false,
           ...queryAndRunTimeMappings,
-          size: 1000,
+          size: 500,
         },
       };
       const cacheKey = stringHash(JSON.stringify(esSearchRequestParams)).toString();

@@ -1692,9 +1692,6 @@
             "tags": [],
             "label": "originatingApp",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false

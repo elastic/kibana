@@ -12,13 +12,14 @@ import { pick } from 'lodash';
 
 import type { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
+import type { MlFeatures } from '../../common/constants/app';
 import { MlLicense } from '../../common/license';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
@@ -30,6 +31,7 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
+import { EnabledFeaturesContextProvider } from './contexts/ml';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -41,6 +43,8 @@ interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
   appMountParams: AppMountParameters;
+  isServerless: boolean;
+  mlFeatures: MlFeatures;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -67,7 +71,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFeatures }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
@@ -79,6 +83,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
       kibanaVersion: deps.kibanaVersion,
       share: deps.share,
       data: deps.data,
+      dataViewEditor: deps.dataViewEditor,
       security: deps.security,
       licenseManagement: deps.licenseManagement,
       storage: localStorage,
@@ -122,9 +127,10 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 
   if (!licenseReady || !mlCapabilities) return null;
 
-  const datePickerDeps = {
+  const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    showFrozenDataTierChoice: !isServerless,
   };
 
   const I18nContext = coreStart.i18n.Context;
@@ -138,7 +144,9 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
           <KibanaContextProvider services={services}>
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <MlRouter pageDeps={pageDeps} />
+                <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+                  <MlRouter pageDeps={pageDeps} />
+                </EnabledFeaturesContextProvider>
               </DatePickerContextProvider>
             </StorageContextProvider>
           </KibanaContextProvider>
@@ -151,7 +159,9 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 export const renderApp = (
   coreStart: CoreStart,
   deps: MlDependencies,
-  appMountParams: AppMountParameters
+  appMountParams: AppMountParameters,
+  isServerless: boolean,
+  mlFeatures: MlFeatures
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
@@ -180,7 +190,13 @@ export const renderApp = (
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
-    <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+    <App
+      coreStart={coreStart}
+      deps={deps}
+      appMountParams={appMountParams}
+      isServerless={isServerless}
+      mlFeatures={mlFeatures}
+    />,
     appMountParams.element
   );
 

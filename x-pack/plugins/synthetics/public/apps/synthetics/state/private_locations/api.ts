@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { AgentPolicyInfo } from '../../../../../common/types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
-import { AgentPoliciesList } from '.';
 
-export const fetchAgentPolicies = async (): Promise<AgentPoliciesList> => {
+export const fetchAgentPolicies = async (): Promise<AgentPolicyInfo[]> => {
   return await apiService.get(SYNTHETICS_API_URLS.AGENT_POLICIES);
 };
 

@@ -18,7 +18,11 @@ import type {
   FleetProxy,
   FleetServerHost,
 } from '../../types';
-import type { FullAgentPolicyOutputPermissions, PackageInfo } from '../../../common/types';
+import type {
+  FullAgentPolicyMonitoring,
+  FullAgentPolicyOutputPermissions,
+  PackageInfo,
+} from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 import { dataTypes, kafkaCompressionType, outputType } from '../../../common/constants';
 import { DEFAULT_OUTPUT } from '../../constants';
@@ -105,6 +109,35 @@ export async function getFullAgentPolicy(
     acc[name] = featureConfig;
     return acc;
   }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
+
+  const defaultMonitoringConfig: FullAgentPolicyMonitoring = {
+    enabled: false,
+    logs: false,
+    metrics: false,
+  };
+
+  let monitoring: FullAgentPolicyMonitoring = { ...defaultMonitoringConfig };
+
+  // If the agent policy has monitoring enabled for at least one of "logs" or "metrics", generate
+  // a monitoring config for the resulting compiled agent policy
+  if (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) {
+    monitoring = {
+      namespace: agentPolicy.namespace,
+      use_output: getOutputIdForAgentPolicy(monitoringOutput),
+      enabled: true,
+      logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
+      metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
+    };
+    // If the `keep_monitoring_alive` flag is set, enable monitoring but don't enable logs or metrics.
+    // This allows cloud or other environments to keep the monitoring server alive without tearing it down.
+  } else if (agentPolicy.keep_monitoring_alive) {
+    monitoring = {
+      enabled: true,
+      logs: false,
+      metrics: false,
+    };
+  }
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -128,16 +161,7 @@ export async function getFullAgentPolicy(
         sourceURI: downloadSourceUri,
         ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
       },
-      monitoring:
-        agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
-          ? {
-              namespace: agentPolicy.namespace,
-              use_output: getOutputIdForAgentPolicy(monitoringOutput),
-              enabled: true,
-              logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
-              metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-            }
-          : { enabled: false, logs: false, metrics: false },
+      monitoring,
       features,
       protection: {
         enabled: agentPolicy.is_protected,
@@ -363,7 +387,7 @@ export function transformOutputToFullPolicyOutput(
             topic: topicName,
             when: {
               [rest.when.type as string]: {
-                [keyName.replace(/\s/g, '')]: value.replace(/\s/g, ''),
+                [keyName.replace(/\s/g, '')]: value,
               },
             },
           };

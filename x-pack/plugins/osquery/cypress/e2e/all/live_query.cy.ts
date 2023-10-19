@@ -18,7 +18,7 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query', { tags: ['@serverless', '@ess'] }, () => {
+describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');

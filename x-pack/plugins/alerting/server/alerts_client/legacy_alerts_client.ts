@@ -49,6 +49,7 @@ export class LegacyAlertsClient<
   private maxAlerts: number = DEFAULT_MAX_ALERTS;
   private flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS;
   private ruleLogPrefix: string = '';
+  private startedAtString: string | null = null;
 
   // Alerts from the previous execution that are deserialized from the task state
   private trackedAlerts: TrackedAlerts<State, Context> = {
@@ -86,6 +87,7 @@ export class LegacyAlertsClient<
   public async initializeExecution({
     maxAlerts,
     ruleLabel,
+    startedAt,
     flappingSettings,
     activeAlertsFromState,
     recoveredAlertsFromState,
@@ -93,6 +95,7 @@ export class LegacyAlertsClient<
     this.maxAlerts = maxAlerts;
     this.flappingSettings = flappingSettings;
     this.ruleLogPrefix = ruleLabel;
+    this.startedAtString = startedAt ? startedAt.toISOString() : null;
 
     for (const id of keys(activeAlertsFromState)) {
       this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
@@ -136,7 +139,7 @@ export class LegacyAlertsClient<
     ruleRunMetricsStore,
     shouldLogAlerts,
     flappingSettings,
-    notifyWhen,
+    notifyOnActionGroupChange,
     maintenanceWindowIds,
   }: ProcessAndLogAlertsOpts) {
     const {
@@ -153,6 +156,7 @@ export class LegacyAlertsClient<
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       flappingSettings,
       maintenanceWindowIds,
+      startedAt: this.startedAtString,
     });
 
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
@@ -163,7 +167,7 @@ export class LegacyAlertsClient<
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       flappingSettings,
-      notifyWhen,
+      notifyOnActionGroupChange,
       this.options.ruleType.defaultActionGroupId,
       processedAlertsNew,
       processedAlertsActive,
@@ -232,4 +236,8 @@ export class LegacyAlertsClient<
   }
 
   public async persistAlerts() {}
+
+  public async setAlertStatusToUntracked() {
+    return;
+  }
 }

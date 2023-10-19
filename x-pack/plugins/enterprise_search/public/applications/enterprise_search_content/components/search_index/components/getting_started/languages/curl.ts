@@ -10,8 +10,10 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 
+import { ingestKeysToJSON } from './helpers';
+
 export const curlDefinition: LanguageDefinition = {
-  buildSearchQuery: `curl -X POST "\$\{ES_URL\}/books/_search?pretty" \\
+  buildSearchQuery: ({ indexName }) => `curl -X POST "\$\{ES_URL\}/${indexName}/_search?pretty" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
   -H "Content-Type: application/json" \\
   -d'
@@ -33,23 +35,28 @@ export API_KEY="${apiKey}"`,
   },
   iconType: 'curl.svg',
   id: Languages.CURL,
-  ingestData: `curl -X POST "\$\{ES_URL\}/_bulk?pretty" \\
+  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+    const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
+    return `curl -X POST "\$\{ES_URL\}/_bulk?pretty${
+      ingestPipeline ? `&pipeline=${ingestPipeline}` : ''
+    }" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
   -H "Content-Type: application/json" \\
   -d'
-{ "index" : { "_index" : "books" } }
-{"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470}
-{ "index" : { "_index" : "books" } }
-{"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585}
-{ "index" : { "_index" : "books" } }
-{"name": "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328}
-{ "index" : { "_index" : "books" } }
-{"name": "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227}
-{ "index" : { "_index" : "books" } }
-{"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268}
-{ "index" : { "_index" : "books" } }
-{"name": "The Handmaid'"'"'s Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
-'`,
+{ "index" : { "_index" : "${indexName}" } }
+{"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470${ingestDocumentKeys}}
+{ "index" : { "_index" : "${indexName}" } }
+{"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585${ingestDocumentKeys}}
+{ "index" : { "_index" : "${indexName}" } }
+{"name": "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328${ingestDocumentKeys}}
+{ "index" : { "_index" : "${indexName}" } }
+{"name": "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227${ingestDocumentKeys}}
+{ "index" : { "_index" : "${indexName}" } }
+{"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268${ingestDocumentKeys}}
+{ "index" : { "_index" : "${indexName}" } }
+{"name": "The Handmaid'"'"'s Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311${ingestDocumentKeys}}
+'`;
+  },
   ingestDataIndex: '',
   installClient: `# if cURL is not already installed on your system
 # then install it with the package manager of your choice
@@ -60,7 +67,7 @@ brew install curl`,
     defaultMessage: 'cURL',
   }),
   languageStyling: 'shell',
-  testConnection: `curl "\$\{ES_URL\}" \\
+  testConnection: ({ indexName }) => `curl "\$\{ES_URL\}/${indexName}" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
   -H "Content-Type: application/json"`,
 };

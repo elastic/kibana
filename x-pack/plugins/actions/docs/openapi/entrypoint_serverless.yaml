@@ -1,0 +1,33 @@
+openapi: 3.0.1
+info:
+  title: Connectors
+  description: OpenAPI schema for connectors in Serverless projects
+  version: '0.1'
+  contact:
+    name: Connectors Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: connectors
+    description: Connector APIs enable you to create and manage connectors.
+servers:
+  - url: 'http://localhost:5601'
+    description: local
+paths:
+  '/api/actions/connector':
+    $ref: 'paths/api@actions@connector.yaml'
+  '/api/actions/connector/{connectorId}':
+    $ref: 'paths/api@actions@connector@{connectorid}.yaml'
+  '/api/actions/connectors':
+    $ref: paths/api@actions@connectors.yaml
+  '/api/actions/connector_types':
+    $ref: paths/api@actions@connector_types.yaml
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+security:
+  - apiKeyAuth: []

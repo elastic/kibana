@@ -14,11 +14,15 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
+import { rulesLocatorID } from '../../../common';
+import { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useToasts } from '../../hooks/use_toast';
 import { LoadingObservability } from '../../components/loading_observability';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
@@ -52,6 +56,9 @@ function InternalAlertsPage() {
     },
     http,
     notifications: { toasts },
+    share: {
+      url: { locators },
+    },
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       getAlertsSearchBar: AlertsSearchBar,
@@ -59,10 +66,12 @@ function InternalAlertsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
   } = kibanaServices;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
+
+  const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const onBrushEnd: BrushEndListener = (brushEvent) => {
     const { x } = brushEvent as XYBrushEvent;
@@ -126,7 +135,8 @@ function InternalAlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
-        typesFilter: observabilityRuleTypeRegistry.list(),
+        typesFilter: filteredRuleTypes,
+        filterConsumers: observabilityAlertFeatureIds,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
@@ -175,13 +185,21 @@ function InternalAlertsPage() {
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
           ),
-          rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
+          rightSideItems: renderRuleStats(
+            ruleStats,
+            manageRulesHref,
+            ruleStatsLoading,
+            locators.get<RulesParams>(rulesLocatorID)
+          ),
         }}
       >
         <HeaderMenu />
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
-            <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+            <MaintenanceWindowCallout
+              kibanaServices={kibanaServices}
+              categories={[DEFAULT_APP_CATEGORIES.observability.id]}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <ObservabilityAlertSearchBar
@@ -206,7 +224,6 @@ function InternalAlertsPage() {
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
                 id={ALERTS_TABLE_ID}
-                flyoutSize="s"
                 featureIds={observabilityAlertFeatureIds}
                 query={esQuery}
                 showExpandToDetails={false}

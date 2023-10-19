@@ -53,7 +53,7 @@ export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
       const transaction = apm.startTransaction('build-api-docs', 'kibana-cli');
-      const spanSetup = transaction?.startSpan('build_api_docs.setup', 'setup');
+      const spanSetup = transaction.startSpan('build_api_docs.setup', 'setup');
 
       const collectReferences = flags.references as boolean;
       const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
@@ -82,7 +82,7 @@ export function runBuildApiDocsCli() {
       const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
 
       spanSetup?.end();
-      const spanInitialDocIds = transaction?.startSpan('build_api_docs.initialDocIds', 'setup');
+      const spanInitialDocIds = transaction.startSpan('build_api_docs.initialDocIds', 'setup');
 
       const initialDocIds =
         !pluginFilter && Fs.existsSync(outputFolder)
@@ -90,7 +90,7 @@ export function runBuildApiDocsCli() {
           : undefined;
 
       spanInitialDocIds?.end();
-      const spanPlugins = transaction?.startSpan('build_api_docs.findPlugins', 'setup');
+      const spanPlugins = transaction.startSpan('build_api_docs.findPlugins', 'setup');
 
       const plugins = findPlugins(stats && pluginFilter ? pluginFilter : undefined);
 
@@ -101,16 +101,13 @@ export function runBuildApiDocsCli() {
 
       spanPlugins?.end();
 
-      const spanPathsByPackage = transaction?.startSpan(
-        'build_api_docs.getPathsByPackage',
-        'setup'
-      );
+      const spanPathsByPackage = transaction.startSpan('build_api_docs.getPathsByPackage', 'setup');
 
       const pathsByPlugin = await getPathsByPackage(plugins);
 
       spanPathsByPackage?.end();
 
-      const spanProject = transaction?.startSpan('build_api_docs.getTsProject', 'setup');
+      const spanProject = transaction.startSpan('build_api_docs.getTsProject', 'setup');
 
       const project = getTsProject(
         REPO_ROOT,
@@ -119,7 +116,7 @@ export function runBuildApiDocsCli() {
 
       spanProject?.end();
 
-      const spanFolders = transaction?.startSpan('build_api_docs.check-folders', 'setup');
+      const spanFolders = transaction.startSpan('build_api_docs.check-folders', 'setup');
 
       // if the output folder already exists, and we don't have a plugin filter, delete all the files in the output folder
       if (Fs.existsSync(outputFolder) && !pluginFilter) {
@@ -132,7 +129,7 @@ export function runBuildApiDocsCli() {
       }
 
       spanFolders?.end();
-      const spanPluginApiMap = transaction?.startSpan('build_api_docs.getPluginApiMap', 'setup');
+      const spanPluginApiMap = transaction.startSpan('build_api_docs.getPluginApiMap', 'setup');
 
       const {
         pluginApiMap,
@@ -154,7 +151,7 @@ export function runBuildApiDocsCli() {
           continue;
         }
 
-        const spanApiStatsForPlugin = transaction?.startSpan(
+        const spanApiStatsForPlugin = transaction.startSpan(
           `build_api_docs.collectApiStatsForPlugin-${id}`,
           'stats'
         );
@@ -179,7 +176,7 @@ export function runBuildApiDocsCli() {
       }
 
       if (!stats) {
-        const spanWritePluginDirectoryDoc = transaction?.startSpan(
+        const spanWritePluginDirectoryDoc = transaction.startSpan(
           'build_api_docs.writePluginDirectoryDoc',
           'write'
         );
@@ -202,7 +199,7 @@ export function runBuildApiDocsCli() {
         const pluginStats = allPluginStats[id];
         const pluginTeam = plugin.manifest.owner.name;
 
-        const spanMetrics = transaction?.startSpan(
+        const spanMetrics = transaction.startSpan(
           `build_api_docs.collectApiStatsForPlugin-${id}`,
           'stats'
         );
@@ -369,7 +366,7 @@ export function runBuildApiDocsCli() {
           if (pluginStats.apiCount > 0) {
             log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
 
-            const spanWritePluginDocs = transaction?.startSpan(
+            const spanWritePluginDocs = transaction.startSpan(
               'build_api_docs.writePluginDocs',
               'write'
             );
@@ -381,7 +378,7 @@ export function runBuildApiDocsCli() {
             log.info(`Plugin ${pluginApi.id} has no public API.`);
           }
 
-          const spanWriteDeprecationDocByPlugin = transaction?.startSpan(
+          const spanWriteDeprecationDocByPlugin = transaction.startSpan(
             'build_api_docs.writeDeprecationDocByPlugin',
             'write'
           );
@@ -390,7 +387,7 @@ export function runBuildApiDocsCli() {
 
           spanWriteDeprecationDocByPlugin?.end();
 
-          const spanWriteDeprecationDueByTeam = transaction?.startSpan(
+          const spanWriteDeprecationDueByTeam = transaction.startSpan(
             'build_api_docs.writeDeprecationDueByTeam',
             'write'
           );
@@ -399,7 +396,7 @@ export function runBuildApiDocsCli() {
 
           spanWriteDeprecationDueByTeam?.end();
 
-          const spanWriteDeprecationDocByApi = transaction?.startSpan(
+          const spanWriteDeprecationDocByApi = transaction.startSpan(
             'build_api_docs.writeDeprecationDocByApi',
             'write'
           );
@@ -424,7 +421,7 @@ export function runBuildApiDocsCli() {
         await trimDeletedDocsFromNav(log, initialDocIds, outputFolder);
       }
 
-      transaction?.end();
+      transaction.end();
     },
     {
       log: {

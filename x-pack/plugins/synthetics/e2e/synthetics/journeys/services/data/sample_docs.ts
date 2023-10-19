@@ -29,6 +29,7 @@ export const getUpHit = ({
   summary: {
     up: 1,
     down: 0,
+    final_attempt: true,
   },
   tcp: {
     rtt: {
@@ -193,6 +194,7 @@ export const firstDownHit = ({
   summary: {
     up: 0,
     down: 1,
+    final_attempt: true,
   },
   tcp: {
     rtt: {

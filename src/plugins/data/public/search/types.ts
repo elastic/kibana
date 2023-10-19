@@ -7,6 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import type { ClusterDetails } from '@kbn/es-types';
 import type { PackageInfo } from '@kbn/core/server';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -96,63 +97,39 @@ export interface SearchServiceStartDependencies {
 }
 
 /**
- * A warning object for a search response with internal ES timeouts
+ * A warning object for a search response with incomplete ES results
+ * ES returns incomplete results when:
+ * 1) Set timeout flag on search and the timeout expires on cluster
+ * 2) Some shard failures on a cluster
+ * 3) skipped remote(s) (skip_unavailable=true)
+ *   a. all shards failed
+ *   b. disconnected/not-connected
  * @public
  */
-export interface SearchResponseTimeoutWarning {
+export interface SearchResponseIncompleteWarning {
   /**
-   * type: for sorting out timeout warnings
+   * type: for sorting out incomplete warnings
    */
-  type: 'timed_out';
+  type: 'incomplete';
   /**
    * message: human-friendly message
    */
   message: string;
   /**
-   * reason: not given for timeout. This exists so that callers do not have to cast when working with shard failure warnings.
+   * clusters: cluster details.
    */
-  reason: undefined;
-}
-
-/**
- * A warning object for a search response with internal ES shard failures
- * @public
- */
-export interface SearchResponseShardFailureWarning {
+  clusters: Record<string, ClusterDetails>;
   /**
-   * type: for sorting out shard failure warnings
+   * openInInspector: callback to open warning in inspector
    */
-  type: 'shard_failure';
-  /**
-   * message: human-friendly message
-   */
-  message: string;
-  /**
-   * text: text to show in ShardFailureModal (optional)
-   */
-  text?: string;
-  /**
-   * reason: ShardFailureReason from es client
-   */
-  reason: {
-    /**
-     * type: failure code from Elasticsearch
-     */
-    type: 'generic_shard_warning' | estypes.ShardFailure['reason']['type'];
-    /**
-     * reason: failure reason from Elasticsearch
-     */
-    reason?: estypes.ShardFailure['reason']['reason'];
-  };
+  openInInspector: () => void;
 }
 
 /**
  * A warning object for a search response with warnings
  * @public
  */
-export type SearchResponseWarning =
-  | SearchResponseTimeoutWarning
-  | SearchResponseShardFailureWarning;
+export type SearchResponseWarning = SearchResponseIncompleteWarning;
 
 /**
  * A callback function which can intercept warnings when passed to {@link showWarnings}. Pass `true` from the

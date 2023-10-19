@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import {
   AssetDetailsFlyoutViewedParams,
+  AssetDetailsPageViewedParams,
   HostEntryClickedParams,
   HostFlyoutFilterActionParams,
   HostsViewQueryHostsCountRetrievedParams,
@@ -64,5 +65,9 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportAssetDetailsFlyoutViewed = (params: AssetDetailsFlyoutViewedParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED, params);
+  };
+
+  public reportAssetDetailsPageViewed = (params: AssetDetailsPageViewedParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED, params);
   };
 }

@@ -51,9 +51,7 @@ export const deleteAnalyticsAndDestIndex = async (
   deleteDestIndexPattern: boolean,
   toastNotificationService: ToastNotificationService
 ) => {
-  const destinationIndex = Array.isArray(analyticsConfig.dest.index)
-    ? analyticsConfig.dest.index[0]
-    : analyticsConfig.dest.index;
+  const destinationIndex = analyticsConfig.dest.index;
   try {
     if (isDataFrameAnalyticsFailed(analyticsStats.state)) {
       await ml.dataFrameAnalytics.stopDataFrameAnalytics(analyticsConfig.id, true);
@@ -147,7 +145,10 @@ export const canDeleteIndex = async (
     if (!privilege) {
       return false;
     }
-    return privilege.securityDisabled === true || privilege.has_all_requested === true;
+
+    return (
+      privilege.hasPrivileges === undefined || privilege.hasPrivileges.has_all_requested === true
+    );
   } catch (e) {
     const error = extractErrorMessage(e);
     toastNotificationService.displayDangerToast(

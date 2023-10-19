@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { Inspect, Maybe } from '../../../common';
-import { TimelineRequestOptionsPaginated } from '../..';
 
 export interface TimelineEventsDetailsItem {
   ariaRowindex?: Maybe<number>;
@@ -27,11 +24,4 @@ export interface TimelineEventsDetailsStrategyResponse extends IEsSearchResponse
   ecs?: Maybe<Ecs>;
   inspect?: Maybe<Inspect>;
   rawEventData?: Maybe<object>;
-}
-
-export interface TimelineEventsDetailsRequestOptions
-  extends Partial<TimelineRequestOptionsPaginated> {
-  indexName: string;
-  eventId: string;
-  authFilter?: JsonObject;
 }

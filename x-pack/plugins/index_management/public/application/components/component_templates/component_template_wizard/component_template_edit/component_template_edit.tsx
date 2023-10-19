@@ -12,6 +12,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { History } from 'history';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
   ComponentTemplateDeserialized,
@@ -61,7 +62,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { api, breadcrumbs, overlays } = useComponentTemplatesContext();
+  const { api, overlays } = useComponentTemplatesContext();
   const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
   const redirectTo = useRedirectPath(history);
 
@@ -75,8 +76,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
 
   useEffect(() => {
-    breadcrumbs.setEditBreadcrumbs();
-  }, [breadcrumbs]);
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateEdit);
+  }, []);
 
   const onSave = async (updatedComponentTemplate: ComponentTemplateDeserialized) => {
     setIsSaving(true);

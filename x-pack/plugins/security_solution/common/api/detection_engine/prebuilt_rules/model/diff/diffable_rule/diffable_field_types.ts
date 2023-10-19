@@ -87,6 +87,14 @@ export const RuleEqlQuery = t.exact(
   })
 );
 
+export type RuleEsqlQuery = t.TypeOf<typeof RuleEsqlQuery>;
+export const RuleEsqlQuery = t.exact(
+  t.type({
+    query: RuleQuery,
+    language: t.literal('esql'),
+  })
+);
+
 // -------------------------------------------------------------------------------------------------
 // Rule schedule
 

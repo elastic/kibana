@@ -20,6 +20,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { finished } from 'stream/promises';
 import { IncomingMessage } from 'http';
+import { PassThrough } from 'stream';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
@@ -118,6 +119,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     method = 'get',
     responseSchema,
     headers,
+    timeout,
     ...config
   }: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
     try {
@@ -138,6 +140,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         data: this.normalizeData(data),
         configurationUtilities: this.configurationUtilities,
         headers: this.getHeaders(headers as AxiosHeaders),
+        timeout,
       });
 
       this.validateResponse(responseSchema, res.data);
@@ -156,11 +159,13 @@ export abstract class SubActionConnector<Config, Secrets> {
           try {
             const incomingMessage = error.response.data as IncomingMessage;
 
-            incomingMessage.on('data', (chunk) => {
+            const pt = incomingMessage.pipe(new PassThrough());
+
+            pt.on('data', (chunk) => {
               responseBody += chunk.toString();
             });
 
-            await finished(incomingMessage);
+            await finished(pt);
 
             error.response.data = JSON.parse(responseBody);
           } catch {

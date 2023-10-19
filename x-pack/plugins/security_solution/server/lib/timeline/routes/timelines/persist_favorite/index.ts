@@ -25,46 +25,51 @@ export const persistFavoriteRoute = (
   _: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.patch(
-    {
+  router.versioned
+    .patch({
       path: TIMELINE_FAVORITE_URL,
-      validate: {
-        body: buildRouteValidationWithExcess(persistFavoriteSchema),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+      access: 'public',
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { body: buildRouteValidationWithExcess(persistFavoriteSchema) },
+        },
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const { timelineId, templateTimelineId, templateTimelineVersion, timelineType } =
-          request.body;
+        try {
+          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const { timelineId, templateTimelineId, templateTimelineVersion, timelineType } =
+            request.body;
 
-        const timeline = await persistFavorite(
-          frameworkRequest,
-          timelineId || null,
-          templateTimelineId || null,
-          templateTimelineVersion || null,
-          timelineType || TimelineType.default
-        );
+          const timeline = await persistFavorite(
+            frameworkRequest,
+            timelineId || null,
+            templateTimelineId || null,
+            templateTimelineVersion || null,
+            timelineType || TimelineType.default
+          );
 
-        return response.ok({
-          body: {
-            data: {
-              persistFavorite: timeline,
+          return response.ok({
+            body: {
+              data: {
+                persistFavorite: timeline,
+              },
             },
-          },
-        });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

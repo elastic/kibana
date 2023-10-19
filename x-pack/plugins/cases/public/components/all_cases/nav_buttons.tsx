@@ -54,7 +54,6 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
           <EuiFlexItem grow={false}>
             <ConfigureCaseButton
               label={i18n.CONFIGURE_CASES_BUTTON}
-              isDisabled={!isEmpty(actionsErrors)}
               showToolTip={!isEmpty(actionsErrors)}
               msgTooltip={!isEmpty(actionsErrors) ? <>{actionsErrors[0].description}</> : <></>}
               titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}

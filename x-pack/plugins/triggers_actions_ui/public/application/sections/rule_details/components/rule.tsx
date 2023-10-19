@@ -190,6 +190,7 @@ export function alertToListItem(
   const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;
   const sortPriority = getSortPriorityByStatus(alert?.status);
+  const tracked = !!alert?.tracked;
   return {
     alert: alertId,
     status,
@@ -198,6 +199,7 @@ export function alertToListItem(
     isMuted,
     sortPriority,
     flapping: alert.flapping,
+    tracked,
     ...(alert.maintenanceWindowIds ? { maintenanceWindowIds: alert.maintenanceWindowIds } : {}),
   };
 }

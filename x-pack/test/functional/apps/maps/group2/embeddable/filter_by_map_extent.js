@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }) {
         ['test_logstash_reader', 'global_maps_all', 'global_dashboard_all'],
         { skipBrowserRefresh: true }
       );
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardEditMode('filter by map extent dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();

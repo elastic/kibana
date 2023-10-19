@@ -226,6 +226,10 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  const FTR_EXTRA_ARGS: Record<string, string> = process.env.FTR_EXTRA_ARGS
+    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
+    : {};
+
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
 
   const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
@@ -464,6 +468,7 @@ export async function pickTestGroupRunOrder() {
                   },
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
+                    ...FTR_EXTRA_ARGS,
                   },
                   retry: {
                     automatic: [

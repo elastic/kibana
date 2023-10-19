@@ -24,6 +24,16 @@ export const CspCustomAssetsExtension = () => {
 
   const viewsCNVM: CustomAssetsAccordionProps['views'] = [
     {
+      name: cloudPosturePages.vulnerability_dashboard.name,
+      url: application.getUrlForApp(SECURITY_APP_NAME, {
+        path: cloudPosturePages.vulnerability_dashboard.path,
+      }),
+      description: i18n.translate(
+        'xpack.csp.createPackagePolicy.customAssetsTab.vulnerabilityDashboardViewLabel',
+        { defaultMessage: 'View CNVM Dashboard' }
+      ),
+    },
+    {
       name: cloudPosturePages.findings.name,
       url: application.getUrlForApp(SECURITY_APP_NAME, {
         path: cloudPosturePages.findings.path + '/vulnerabilities',

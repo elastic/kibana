@@ -58,12 +58,6 @@ export const RulesTable = ({
     style: {
       background: row.metadata.id === selectedRuleId ? euiTheme.colors.highlight : undefined,
     },
-    onClick: (e: MouseEvent) => {
-      const tag = (e.target as HTMLDivElement).tagName;
-      // Ignore checkbox and switch toggle columns
-      if (tag === 'BUTTON' || tag === 'INPUT') return;
-      setSelectedRuleId(row.metadata.id);
-    },
   });
 
   return (
@@ -86,6 +80,13 @@ type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId'>;
 const getColumns = ({
   setSelectedRuleId,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspRuleTemplate>> => [
+  {
+    field: 'metadata.benchmark.rule_number',
+    name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {
+      defaultMessage: 'Rule Number',
+    }),
+    width: '10%',
+  },
   {
     field: 'metadata.name',
     name: i18n.translate('xpack.csp.rules.rulesTable.nameColumnLabel', {

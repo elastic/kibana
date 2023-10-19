@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, before, after } from '@elastic/synthetics';
+import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { recordVideo } from '../../helpers/record_video';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
@@ -48,6 +48,14 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
 
   step('Go to monitor summary page', async () => {
     await syntheticsApp.navigateToOverview(true);
+  });
+
+  step('verified overview card contents', async () => {
+    await page.waitForSelector('text=https://www.google.com');
+    const cardItem = await page.getByTestId('https://www.google.com-metric-item');
+    expect(await cardItem.textContent()).toBe(
+      'https://www.google.comNorth America - US CentralDuration155 ms'
+    );
   });
 
   step('Monitor is as up in summary page', async () => {

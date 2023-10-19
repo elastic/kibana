@@ -15,6 +15,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { AllControlStates, State } from './state';
 import { createInitialState } from './initial_state';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -63,6 +64,7 @@ describe('migrationsStateActionMachine', () => {
     },
     typeRegistry,
     docLinks,
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
     logger: mockLogger.get(),
   });
 

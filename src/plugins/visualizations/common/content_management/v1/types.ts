@@ -18,6 +18,7 @@ import {
   CreateResult,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
+import { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
 import { VisualizationContentType } from '../types';
 
@@ -127,3 +128,13 @@ export interface VisualizationSearchQuery {
 export type VisualizationSearchIn = SearchIn<VisualizationContentType, {}>;
 
 export type VisualizationSearchOut = SearchResult<VisualizationSavedObject>;
+
+// ----------- CRUD TYPES --------------
+
+export type VisualizationCrudTypes = ContentManagementCrudTypes<
+  VisualizationContentType,
+  VisualizationSavedObjectAttributes,
+  CreateOptions,
+  UpdateOptions,
+  {}
+>;

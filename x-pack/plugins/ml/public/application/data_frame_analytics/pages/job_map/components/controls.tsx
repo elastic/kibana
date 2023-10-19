@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
+import React, { FC, useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +38,7 @@ import {
   useNavigateToPath,
   useMlKibana,
 } from '../../../../contexts/kibana';
+import { useEnabledFeatures } from '../../../../contexts/ml';
 import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -47,34 +48,40 @@ import {
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 
 interface Props {
-  details: any;
+  details: Record<string, any>;
   getNodeData: any;
   modelId?: string;
   updateElements: (nodeId: string, nodeLabel: string, destIndexNode?: string) => void;
   refreshJobsCallback: () => void;
 }
 
-function getListItems(details: object): EuiDescriptionListProps['listItems'] {
-  return Object.entries(details).map(([key, value]) => {
-    let description;
-    if (key === 'create_time') {
-      description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
-    } else {
-      description =
-        typeof value === 'object' ? (
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-            {JSON.stringify(value, null, 2)}
-          </EuiCodeBlock>
-        ) : (
-          value
-        );
+function getListItemsFactory(showLicenseInfo: boolean) {
+  return (details: Record<string, any>): EuiDescriptionListProps['listItems'] => {
+    if (showLicenseInfo === false) {
+      delete details.license_level;
     }
 
-    return {
-      title: key,
-      description,
-    };
-  });
+    return Object.entries(details).map(([key, value]) => {
+      let description;
+      if (key === 'create_time') {
+        description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
+      } else {
+        description =
+          typeof value === 'object' ? (
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+              {JSON.stringify(value, null, 2)}
+            </EuiCodeBlock>
+          ) : (
+            value
+          );
+      }
+
+      return {
+        title: key,
+        description,
+      };
+    });
+  };
 }
 
 export const Controls: FC<Props> = React.memo(
@@ -87,6 +94,9 @@ export const Controls: FC<Props> = React.memo(
     const canCreateDataFrameAnalytics: boolean = usePermissionCheck('canCreateDataFrameAnalytics');
     const canDeleteDataFrameAnalytics: boolean = usePermissionCheck('canDeleteDataFrameAnalytics');
     const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
+    const { showLicenseInfo } = useEnabledFeatures();
+    const getListItems = useMemo(() => getListItemsFactory(showLicenseInfo), [showLicenseInfo]);
+
     const {
       closeDeleteJobCheckModal,
       deleteItem,
@@ -140,8 +150,7 @@ export const Controls: FC<Props> = React.memo(
       } else {
         toasts.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.dataViewMissingMessage', {
-            defaultMessage:
-              'To create a job from this index please create a data view for {indexTitle}.',
+            defaultMessage: 'To create a job from this index create a data view for {indexTitle}.',
             values: { indexTitle: nodeLabel },
           })
         );
@@ -161,6 +170,15 @@ export const Controls: FC<Props> = React.memo(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [share.url.locators, nodeLabel]);
+
+    const onAnalyzeDataDrift = useCallback(async () => {
+      closePopover();
+      const path = await mlLocator.getUrl({
+        page: ML_PAGES.DATA_DRIFT_CUSTOM,
+        pageState: { comparison: nodeLabel },
+      });
+      await navigateToPath(path);
+    }, [nodeLabel, navigateToPath, mlLocator]);
 
     const onCloneJobClick = useCallback(async () => {
       navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
@@ -250,6 +268,21 @@ export const Controls: FC<Props> = React.memo(
               <FormattedMessage
                 id="xpack.ml.dataframe.analyticsMap.flyout.cloneJobButton"
                 defaultMessage="Clone job"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
+      ...(nodeType === JOB_MAP_NODE_TYPES.INDEX
+        ? [
+            <EuiContextMenuItem
+              disabled={!canCreateDataFrameAnalytics}
+              key={`${nodeId}-drift-data`}
+              icon="visTagCloud"
+              onClick={onAnalyzeDataDrift}
+            >
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.flyout.analyzeDrift"
+                defaultMessage="Analyze data drift"
               />
             </EuiContextMenuItem>,
           ]

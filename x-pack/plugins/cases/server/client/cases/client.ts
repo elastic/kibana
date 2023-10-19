@@ -102,13 +102,13 @@ export const createCasesSubClient = (
   casesClientInternal: CasesClientInternal
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
-    create: (data: CasePostRequest) => create(data, clientArgs),
+    create: (data: CasePostRequest) => create(data, clientArgs, casesClient),
     find: (params: CasesFindRequest) => find(params, clientArgs),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
     bulkGet: (params) => bulkGet(params, clientArgs),
     push: (params: PushParams) => push(params, clientArgs, casesClient),
-    update: (cases: CasesPatchRequest) => update(cases, clientArgs),
+    update: (cases: CasesPatchRequest) => update(cases, clientArgs, casesClient),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),

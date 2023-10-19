@@ -43,6 +43,7 @@ export function DistinctProbabilisticValuesWarning({
       </EuiText>
       <EuiSpacer />
       <EuiButton
+        data-test-subj="profilingDistinctProbabilisticValuesWarningLearnHowButton"
         href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-probabilistic-profiling.html`}
         color="warning"
         target="_blank"

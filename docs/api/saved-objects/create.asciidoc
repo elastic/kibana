@@ -8,6 +8,12 @@ deprecated::[8.7.0, To be removed in an upcoming version]
 
 Create {kib} saved objects.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 [[saved-objects-api-create-request]]
 ==== Request
 
@@ -26,7 +32,7 @@ Create {kib} saved objects.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `<type>`::
-  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`.
 
 `<id>`::
   (Optional, string) Specifies an ID instead of using a randomly generated ID.

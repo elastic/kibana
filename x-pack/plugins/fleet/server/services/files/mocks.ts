@@ -10,12 +10,12 @@ import { Readable } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 
 import type {
+  FleetFile,
   FleetFromHostFileClientInterface,
   FleetToHostFileClientInterface,
   HapiReadableStream,
+  HostUploadedFileMetadata,
 } from './types';
-import type { FleetFile } from './types';
-import type { HostUploadedFileMetadata } from './types';
 
 export const createFleetFromHostFilesClientMock =
   (): jest.Mocked<FleetFromHostFileClientInterface> => {

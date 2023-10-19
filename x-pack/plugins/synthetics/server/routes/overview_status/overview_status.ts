@@ -38,9 +38,8 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
 export async function getStatus(context: RouteContext, params: OverviewStatusQuery) {
   const { uptimeEsClient, syntheticsMonitorClient, savedObjectsClient, server } = context;
 
-  const { query, locations: qLocations, scopeStatusByLocation = true } = params;
+  const { query, scopeStatusByLocation = true } = params;
 
-  const queryLocations = qLocations && !Array.isArray(qLocations) ? [qLocations] : qLocations;
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
@@ -48,7 +47,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
    * latest ping for all enabled monitors.
    */
 
-  const filtersStr = await getMonitorFilters({
+  const { filtersStr, locationFilter: queryLocations } = await getMonitorFilters({
     ...params,
     context,
   });
@@ -73,12 +72,12 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     allIds,
     disabledCount,
     maxPeriod,
-    listOfLocations,
+    monitorLocationIds,
     monitorLocationMap,
     disabledMonitorsCount,
     projectMonitorsCount,
     monitorQueryIdToConfigIdMap,
-  } = await processMonitors(
+  } = processMonitors(
     allMonitors,
     server,
     savedObjectsClient,
@@ -89,8 +88,8 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
   // Account for locations filter
   const listOfLocationAfterFilter =
     queryLocations && scopeStatusByLocation
-      ? intersection(listOfLocations, queryLocations)
-      : listOfLocations;
+      ? intersection(monitorLocationIds, queryLocations)
+      : monitorLocationIds;
 
   const range = {
     from: moment().subtract(maxPeriod, 'milliseconds').subtract(20, 'minutes').toISOString(),

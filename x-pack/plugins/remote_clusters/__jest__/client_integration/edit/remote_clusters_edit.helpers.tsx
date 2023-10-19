@@ -8,6 +8,7 @@
 import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 
+import { Cluster } from '../../../public';
 import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
 import { AppRouter, registerRouter } from '../../../public/application/services';
@@ -15,10 +16,11 @@ import { createRemoteClustersActions, WithAppDependencies } from '../helpers';
 
 export const REMOTE_CLUSTER_EDIT_NAME = 'new-york';
 
-export const REMOTE_CLUSTER_EDIT = {
+export const REMOTE_CLUSTER_EDIT: Cluster = {
   name: REMOTE_CLUSTER_EDIT_NAME,
   seeds: ['localhost:9400'],
   skipUnavailable: true,
+  securityModel: 'certificate',
 };
 
 const testBedConfig: TestBedConfig = {

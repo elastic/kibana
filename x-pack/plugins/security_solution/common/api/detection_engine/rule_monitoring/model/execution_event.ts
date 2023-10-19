@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { enumeration, IsoDateString } from '@kbn/securitysolution-io-ts-types';
+import { enumeration, IsoDateString, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { enumFromString } from '../../../../utils/enum_from_string';
 import { TLogLevel } from './log_level';
 
@@ -56,5 +56,6 @@ export const RuleExecutionEvent = t.type({
   sequence: t.number,
   level: TLogLevel,
   type: TRuleExecutionEventType,
+  execution_id: NonEmptyString,
   message: t.string,
 });

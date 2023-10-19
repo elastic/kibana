@@ -43,6 +43,10 @@ export function mappingFromFieldMap(
       : rest;
 
     set(mappings.properties, field.name.split('.').join('.properties.'), mapped);
+
+    if (name === '@timestamp') {
+      set(mappings.properties, `${name}.ignore_malformed`, false);
+    }
   });
 
   return mappings;

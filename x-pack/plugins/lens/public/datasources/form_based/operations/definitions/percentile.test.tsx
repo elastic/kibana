@@ -654,7 +654,7 @@ describe('percentile', () => {
       });
     });
 
-    it('should not update on invalid input, but show invalid value locally', () => {
+    it('should update on decimals input up to 2 digits', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
@@ -679,6 +679,41 @@ describe('percentile', () => {
 
       instance.update();
 
+      expect(updateLayerSpy).toHaveBeenCalled();
+
+      expect(
+        instance
+          .find('[data-test-subj="lns-indexPattern-percentile-input"]')
+          .find(EuiRange)
+          .prop('value')
+      ).toEqual('12.12');
+    });
+
+    it('should not update on invalid input, but show invalid value locally', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = mount(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col2"
+          currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
+        />
+      );
+
+      const input = instance
+        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
+        .find(EuiRange);
+
+      act(() => {
+        input.prop('onChange')!(
+          { currentTarget: { value: '12.1212312312312312' } } as ChangeEvent<HTMLInputElement>,
+          true
+        );
+      });
+
+      instance.update();
+
       expect(updateLayerSpy).not.toHaveBeenCalled();
 
       expect(
@@ -692,7 +727,7 @@ describe('percentile', () => {
           .find('[data-test-subj="lns-indexPattern-percentile-input"]')
           .find(EuiRange)
           .prop('value')
-      ).toEqual('12.12');
+      ).toEqual('12.1212312312312312');
     });
   });
 });

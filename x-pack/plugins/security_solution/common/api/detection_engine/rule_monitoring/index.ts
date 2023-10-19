@@ -11,13 +11,14 @@ export * from './detection_engine_health/get_space_health/get_space_health_route
 export * from './detection_engine_health/setup_health/setup_health_route';
 export * from './detection_engine_health/model';
 export * from './rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route';
-export * from './rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route';
+export * from './rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 export * from './urls';
 
 export * from './model/execution_event';
 export * from './model/execution_metrics';
-export * from './model/execution_result';
+export * from './model/execution_result.gen';
 export * from './model/execution_settings';
+export * from './model/execution_status.gen';
 export * from './model/execution_status';
 export * from './model/execution_summary';
 export * from './model/log_level';

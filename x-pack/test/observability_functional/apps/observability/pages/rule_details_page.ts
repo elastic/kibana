@@ -148,10 +148,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Alert summary widget component', () => {
       before(async () => {
-        await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+        await retry.waitFor(
+          'Rule details to be visible',
+          async () => await testSubjects.exists('ruleDetails')
+        );
       });
 
-      it('shows component on the rule detils page', async () => {
+      it('shows component on the rule details page', async () => {
         await observability.components.alertSummaryWidget.getCompactComponentSelectorOrFail();
 
         const timeRangeTitle =

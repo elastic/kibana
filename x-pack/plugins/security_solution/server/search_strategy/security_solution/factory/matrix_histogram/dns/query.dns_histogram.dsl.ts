@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import type { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
+import type { MatrixHistogramRequestOptions } from '../../../../../../common/api/search_strategy';
 import {
   calculateTimeSeriesInterval,
   createQueryFilterClauses,

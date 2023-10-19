@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
+import { EXCLUDE_RUN_ONCE_FILTER, FINAL_SUMMARY_FILTER } from '../constants/client_defaults';
 import type { CertificatesResults } from '../../server/queries/get_certs';
 import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
@@ -79,6 +80,8 @@ export const getCertsRequestBody = ({
               }
             : {}),
           filter: [
+            FINAL_SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
             ...(filters ? [filters] : []),
             ...(monitorIds && monitorIds.length > 0
               ? [{ terms: { 'monitor.id': monitorIds } }]

@@ -51,7 +51,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
-      spacesWithMatchingOrigins: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
+      // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
       inboundReferences: [{ type: 'sharedtype', id: CASES.DEFAULT_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in the default space
     },
     {
@@ -65,7 +65,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.DEFAULT_ONLY.id,
       spaces: [DEFAULT_SPACE_ID],
-      spacesWithMatchingOrigins: [DEFAULT_SPACE_ID], // The first test assertion for spacesWithMatchingOrigins is an object that doesn't have any matching origins in other spaces
+      // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
     {
@@ -86,7 +86,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
-      spacesWithMatchingOrigins: ['*'],
+      // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
   ],
@@ -94,7 +94,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
-      spacesWithMatchingOrigins: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
+      // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
       inboundReferences: [{ type: 'sharedtype', id: CASES.SPACE_1_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in space 1
     },
     {
@@ -116,7 +116,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       id: CASES.SPACE_1_ONLY.id,
       spaces: [SPACE_1_ID],
       spacesWithMatchingAliases: [DEFAULT_SPACE_ID, SPACE_2_ID], // aliases with a matching targetType and sourceId exist in two other spaces
-      spacesWithMatchingOrigins: ['other_space', SPACE_1_ID], // The second test assertion for spacesWithMatchingOrigins is an object that has a matching origin in one other space
+      spacesWithMatchingOrigins: ['other_space'], // The second test assertion for spacesWithMatchingOrigins is an object that has a matching origin in one other space
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
     {
@@ -130,7 +130,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
-      spacesWithMatchingOrigins: ['*'],
+      // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
   ],
@@ -138,7 +138,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
-      spacesWithMatchingOrigins: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
+      // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
       inboundReferences: [{ type: 'sharedtype', id: CASES.SPACE_2_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in space 2
     },
     {
@@ -173,7 +173,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
-      spacesWithMatchingOrigins: ['*'],
+      // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
   ],

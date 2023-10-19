@@ -77,7 +77,9 @@ export const EditIndexPattern = withRouter(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
-    const [tags, setTags] = useState<Array<{ key: string; name: string }>>([]);
+    const [tags, setTags] = useState<
+      Array<{ key: string; 'data-test-subj': string; name: string }>
+    >([]);
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
     const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
@@ -108,8 +110,10 @@ export const EditIndexPattern = withRouter(
     }, [indexPattern]);
 
     useEffect(() => {
-      setTags(getTags(indexPattern, indexPattern.id === defaultIndex));
-    }, [defaultIndex, indexPattern]);
+      setTags(
+        getTags(indexPattern, indexPattern.id === defaultIndex, dataViews.getRollupsEnabled())
+      );
+    }, [defaultIndex, indexPattern, dataViews]);
 
     const setDefaultPattern = useCallback(() => {
       uiSettings.set('defaultIndex', indexPattern.id);
@@ -125,7 +129,9 @@ export const EditIndexPattern = withRouter(
       },
     });
 
-    const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+    const isRollup =
+      new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+      dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
         onSave={() => {
@@ -237,7 +243,11 @@ export const EditIndexPattern = withRouter(
             {tags.map((tag) => (
               <EuiFlexItem grow={false} key={tag.key}>
                 {tag.key === 'default' ? (
-                  <EuiBadge iconType="starFilled" color="default">
+                  <EuiBadge
+                    iconType="starFilled"
+                    color="default"
+                    data-test-subj={tag['data-test-subj']}
+                  >
                     {tag.name}
                   </EuiBadge>
                 ) : (

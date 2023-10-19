@@ -14,14 +14,13 @@ import { buildManagedUserDetailsQuery } from './query.managed_user_details.dsl';
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
   AzureManagedUser,
-  ManagedUserDetailsRequestOptions,
   ManagedUserDetailsStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 
 export const managedUserDetails: SecuritySolutionFactory<UsersQueries.managedDetails> = {
-  buildDsl: (options: ManagedUserDetailsRequestOptions) => buildManagedUserDetailsQuery(options),
+  buildDsl: (options) => buildManagedUserDetailsQuery(options),
   parse: async (
-    options: ManagedUserDetailsRequestOptions,
+    options,
     response: IEsSearchResponse<AzureManagedUser>
   ): Promise<ManagedUserDetailsStrategyResponse> => {
     const inspect = {

@@ -46,7 +46,8 @@ import type {
 import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
-import { TechnicalPreviewBadge } from './technical_preview_badge';
+import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import type { LicenseService } from '../../../../../common/license';
 import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
@@ -449,6 +450,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'esql': {
+      return [
+        {
+          title: label,
+          description: <TechnicalPreviewBadge label={i18n.ESQL_TYPE_DESCRIPTION} />,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }
@@ -571,7 +580,7 @@ export const buildAlertSuppressionDescription = (
     </EuiFlexGroup>
   );
 
-  const title = <TechnicalPreviewBadge label={label} license={license} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
   return [
     {
       title,
@@ -591,7 +600,7 @@ export const buildAlertSuppressionWindowDescription = (
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
-  const title = <TechnicalPreviewBadge label={label} license={license} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
   return [
     {
       title,
@@ -614,7 +623,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
-  const title = <TechnicalPreviewBadge label={label} license={license} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
   return [
     {
       title,

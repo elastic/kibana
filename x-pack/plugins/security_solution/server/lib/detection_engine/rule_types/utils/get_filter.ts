@@ -132,6 +132,9 @@ export const getFilter = async ({
     case 'eql': {
       throw new BadRequestError('Unsupported Rule of type "eql" supplied to getFilter');
     }
+    case 'esql': {
+      throw new BadRequestError('Unsupported Rule of type "esql" supplied to getFilter');
+    }
     default: {
       return assertUnreachable(type);
     }

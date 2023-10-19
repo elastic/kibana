@@ -10,7 +10,8 @@ import type { GetLensAttributes } from '../../types';
 const layerId = uuidv4();
 
 export const getEventsHistogramLensAttributes: GetLensAttributes = (
-  stackByField = 'event.action'
+  stackByField = 'event.action',
+  extraOptions = {}
 ) => {
   return {
     title: 'Events',
@@ -55,7 +56,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         query: '',
         language: 'kuery',
       },
-      filters: [],
+      filters: extraOptions.filters ?? [],
       datasourceStates: {
         formBased: {
           layers: {

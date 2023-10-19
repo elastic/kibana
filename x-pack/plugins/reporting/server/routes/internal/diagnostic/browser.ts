@@ -54,6 +54,7 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
       const logsToHelpMap = logsToHelpMapFactory(docLinks);
       try {
         const { screenshotting } = await reporting.getPluginStartDeps();
+        if (!screenshotting) throw new Error('Screenshotting is not enabled!');
         const logs = await lastValueFrom(screenshotting.diagnose());
         const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 

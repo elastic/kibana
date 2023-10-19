@@ -7,11 +7,11 @@
 
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import {
-  INSIGHTS_CORRELATIONS_TEST_ID,
+  CORRELATIONS_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
-  INSIGHTS_PREVALENCE_TEST_ID,
+  PREVALENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/right/components/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER,
@@ -79,7 +79,7 @@ export const navigateToThreatIntelligenceDetails = () => {
  * Click on the header in the right section, Insights, Correlations
  */
 export const navigateToCorrelationsDetails = () => {
-  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_CORRELATIONS_TEST_ID);
+  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(CORRELATIONS_TEST_ID);
   cy.get(TEST_ID).scrollIntoView();
   cy.get(TEST_ID).should('be.visible').click();
 };
@@ -88,7 +88,7 @@ export const navigateToCorrelationsDetails = () => {
  * Click on the view all button under the right section, Insights, Prevalence
  */
 export const navigateToPrevalenceDetails = () => {
-  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
+  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(PREVALENCE_TEST_ID);
   cy.get(TEST_ID).scrollIntoView();
   cy.get(TEST_ID).should('be.visible').click();
 };

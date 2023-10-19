@@ -1,0 +1,893 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "logs*",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "logs*",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-07T17:23:20.906Z",
+  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-09-11T15:50:59.227Z",
+  "version": "WzIyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "Data view without fields",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-07T17:23:20.906Z",
+  "id": "data-view-without-fields",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-09-11T15:50:59.227Z",
+  "version": "WzIyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{\"hour_of_day\":{}}",
+    "fields": "[]",
+    "name": "To Delete!",
+    "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
+    "sourceFilters": "[]",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-07T17:23:20.906Z",
+  "id": "data-view-to-delete",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-09-11T15:50:59.227Z",
+  "version": "WzIyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "extraFields": [
+          "@message.raw"
+        ],
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "timeField": "@timestamp",
+        "type": "query"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "Group with additional fields"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-10-06T17:15:58.790Z",
+  "id": "12371e00-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-10-06T17:17:05.384Z",
+  "version": "WzE4MywxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 19"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T14:00:20.704Z",
+  "id": "b6071e00-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T14:00:20.704Z",
+  "version": "WzMxNywxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "i have a description",
+    "ignoreGlobalFilters": true,
+    "title": "group 21"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T14:00:12.994Z",
+  "id": "b16eaa20-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T14:00:12.994Z",
+  "version": "WzMxNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "search for me"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T14:01:40.768Z",
+  "id": "e5bfc2f0-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T14:02:00.597Z",
+  "version": "WzMyMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "to delete 1"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:53.977Z",
+  "id": "a618e690-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T14:00:06.429Z",
+  "version": "WzMxNSwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "to delete 2"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:47.961Z",
+  "id": "a282ee90-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:47.961Z",
+  "version": "WzMxMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 16"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:42.118Z",
+  "id": "9f075c60-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:42.118Z",
+  "version": "WzMxMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "missing data view"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:36.447Z",
+  "id": "9ba608f0-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "data-view-to-delete",
+      "name": "event-annotation-group_dataView-ref-data-view-to-delete",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:36.447Z",
+  "version": "WzMxMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 14"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:30.997Z",
+  "id": "98666e50-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:30.997Z",
+  "version": "WzMwOSwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 13"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:25.669Z",
+  "id": "95397150-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:25.669Z",
+  "version": "WzMwOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 12"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:20.653Z",
+  "id": "923c0fd0-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:20.653Z",
+  "version": "WzMwNywxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 11"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:14.944Z",
+  "id": "8ed4f000-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:14.944Z",
+  "version": "WzMwNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 10"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:09.600Z",
+  "id": "8ba58200-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:09.600Z",
+  "version": "WzMwNSwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 9"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:59:02.338Z",
+  "id": "87514310-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:59:02.338Z",
+  "version": "WzMwNCwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 8"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:58:55.464Z",
+  "id": "83388680-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:58:55.464Z",
+  "version": "WzMwMywxXQ=="
+}
+
+{
+  "attributes": {
+    "color": "#dac7c4",
+    "description": "a tag to filter by",
+    "name": "tag"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-08T18:40:42.018Z",
+  "id": "36a8f020-4e77-11ee-bb97-116581699678",
+  "managed": false,
+  "references": [],
+  "type": "tag",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-09-08T18:40:42.018Z",
+  "version": "WzI3NDUsMV0="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 7"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:58:46.671Z",
+  "id": "7dfad1f0-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:58:46.671Z",
+  "version": "WzMwMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 6"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:58:37.886Z",
+  "id": "78be55e0-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:58:37.886Z",
+  "version": "WzMwMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 5"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:58:32.312Z",
+  "id": "756bcf80-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:58:32.312Z",
+  "version": "WzMwMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 4"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:58:26.947Z",
+  "id": "72392d30-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:58:26.947Z",
+  "version": "WzI5OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 3"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:58:21.136Z",
+  "id": "6ec27d00-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:58:21.136Z",
+  "version": "WzI5OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 2"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:58:15.691Z",
+  "id": "6b83a5b0-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:58:15.691Z",
+  "version": "WzI5NywxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "timestamp": "2023-09-13T16:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group 1"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-12T13:58:07.740Z",
+  "id": "66c66bc0-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-12T13:58:07.740Z",
+  "version": "WzI5NiwxXQ=="
+}

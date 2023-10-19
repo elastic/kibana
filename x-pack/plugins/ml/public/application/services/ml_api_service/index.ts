@@ -53,6 +53,11 @@ import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
 
+export interface MlHasPrivilegesResponse {
+  hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
+  upgradeInProgress: boolean;
+}
+
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
   limits: MlServerLimits;
@@ -408,7 +413,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     hasPrivileges(obj: any) {
       const body = JSON.stringify(obj);
-      return httpService.http<any>({
+      return httpService.http<MlHasPrivilegesResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_has_privileges`,
         method: 'POST',
         body,
@@ -774,6 +779,23 @@ export function mlApiServicesProvider(httpService: HttpService) {
       return httpService.http<any>({
         path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}`,
         method: 'DELETE',
+        version: '1',
+      });
+    },
+
+    reindexWithPipeline(pipelineName: string, sourceIndex: string, destinationIndex: string) {
+      return httpService.http<estypes.ReindexResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
+        method: 'POST',
+        body: JSON.stringify({
+          source: {
+            index: sourceIndex,
+          },
+          dest: {
+            index: destinationIndex,
+            pipeline: pipelineName,
+          },
+        }),
         version: '1',
       });
     },

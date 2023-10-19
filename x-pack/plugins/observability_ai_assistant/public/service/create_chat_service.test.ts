@@ -156,6 +156,26 @@ describe('createChatService', () => {
       });
     });
 
+    it('propagates content errors', async () => {
+      respondWithChunks({
+        chunks: [
+          `data: {"error":{"message":"The server had an error while processing your request. Sorry about that!","type":"server_error","param":null,"code":null}}`,
+        ],
+      });
+
+      const response$ = chat();
+
+      const value = await lastValueFrom(response$);
+
+      expect(value).toEqual({
+        aborted: false,
+        error: expect.any(Error),
+        message: {
+          role: 'assistant',
+        },
+      });
+    });
+
     it('cancels a running http request when aborted', async () => {
       clientSpy.mockImplementationOnce((endpoint: string, options: HttpFetchOptions) => {
         options.signal?.addEventListener('abort', () => {

@@ -13,7 +13,6 @@ import { HostsTableType, HostsType } from '../../../../explore/hosts/store/model
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy/security_solution/risk_score';
 import { usersActions } from '../../../../explore/users/store';
-import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
 import { hostsActions } from '../../../../explore/hosts/store';
 import { SecurityPageName } from '../../../../app/types';
 
@@ -27,7 +26,6 @@ export const useEntityInfo = (riskEntity: RiskScoreEntity) => {
 
   return riskEntity === RiskScoreEntity.host
     ? {
-        docLink: RISKY_HOSTS_DOC_LINK,
         linkProps: {
           deepLinkId: SecurityPageName.hosts,
           path: getTabsOnHostsUrl(HostsTableType.risk),
@@ -44,7 +42,6 @@ export const useEntityInfo = (riskEntity: RiskScoreEntity) => {
         kpiQueryId: HOST_RISK_KPI_QUERY_ID,
       }
     : {
-        docLink: RISKY_USERS_DOC_LINK,
         linkProps: {
           deepLinkId: SecurityPageName.users,
           path: getTabsOnUsersUrl(UsersTableType.risk),

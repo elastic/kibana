@@ -13,13 +13,13 @@ import { withSpan } from '@kbn/apm-utils';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
-import { RawRule } from '../../types';
+import { RuleAttributes } from '../../data/rule/types';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 
 interface BulkOperationResult {
   errors: BulkOperationError[];
-  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
   accListSpecificForBulkOperation: string[][];
 }
 
@@ -63,7 +63,7 @@ const handler = async ({
   filter: KueryNode | null;
   accListSpecificForBulkOperation?: string[][];
   accErrors?: BulkOperationError[];
-  accRules?: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  accRules?: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
   retries?: number;
 }): Promise<BulkOperationResult> => {
   try {

@@ -136,7 +136,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertDataVisualizerTableExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`dataVisualizerTable`);
+        await testSubjects.existOrFail(`~dataVisualizerTable-loaded`);
       });
     },
 

@@ -34,6 +34,7 @@ import {
 } from '../../../../shared_imports';
 import { LegacyIndexTemplatesDeprecation } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
 import { useAppContext, useServices } from '../../../app_context';
 import {
@@ -79,6 +80,10 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     type: 'application',
     page: 'indexManagementIndexTemplatesTab',
   });
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.templates);
+  }, []);
 
   const [filters, setFilters] = useState<Filters<FilterName>>({
     managed: {

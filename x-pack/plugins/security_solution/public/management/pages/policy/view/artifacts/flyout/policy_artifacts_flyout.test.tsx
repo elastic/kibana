@@ -28,8 +28,11 @@ import { cleanEventFilterToUpdate } from '../../../../event_filters/service/serv
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
+const apiVersion = '2023-10-31';
+
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   path: '/api/exception_lists/items/_find',
+  version: apiVersion,
   query: {
     filter: customFilter,
     list_id: ['endpoint_event_filters'],
@@ -217,6 +220,7 @@ describe('Policy details artifacts flyout', () => {
       // verify the request with the new tag
       await waitFor(() => {
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: apiVersion,
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),
@@ -244,6 +248,7 @@ describe('Policy details artifacts flyout', () => {
       await waitFor(() => {
         // first exception
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: apiVersion,
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),
@@ -251,6 +256,7 @@ describe('Policy details artifacts flyout', () => {
         });
         // second exception
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: apiVersion,
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),

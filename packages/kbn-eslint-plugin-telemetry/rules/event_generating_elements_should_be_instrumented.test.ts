@@ -63,7 +63,8 @@ for (const [name, tester] of [tsTester, babelTester]) {
           ],
           output: `<${element} data-test-subj="Value${element
             .replace('Eui', '')
-            .replace('Empty', '')}">Value</${element}>`,
+            .replace('Empty', '')
+            .replace('Icon', '')}">Value</${element}>`,
         })),
       }
     );

@@ -39,7 +39,7 @@
             "label": "placement",
             "description": [],
             "signature": [
-              "\"top\" | \"disabled\""
+              "\"disabled\" | \"top\""
             ],
             "path": "x-pack/plugins/banners/common/types.ts",
             "deprecated": false,
@@ -137,7 +137,7 @@
         "label": "BannerPlacement",
         "description": [],
         "signature": [
-          "\"top\" | \"disabled\""
+          "\"disabled\" | \"top\""
         ],
         "path": "x-pack/plugins/banners/common/types.ts",
         "deprecated": false,

@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('lens by value works without library save permissions', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.preserveCrossAppState();
         await PageObjects.dashboard.clickNewDashboard();
       });
@@ -169,13 +169,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const modifiedMarkdownText = 'Modified markdown text';
 
       before(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.preserveCrossAppState();
         await PageObjects.dashboard.clickNewDashboard();
       });
 
       it('can add a markdown panel by value', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.waitForRenderComplete();
 

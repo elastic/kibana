@@ -8,6 +8,7 @@
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../constants';
 import type {
   EqlRule,
+  EsqlRule,
   MachineLearningRule,
   QueryRule,
   SavedQueryRule,
@@ -100,6 +101,15 @@ export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): MachineL
     type: 'machine_learning',
     anomaly_threshold: 59,
     machine_learning_job_id: 'some_machine_learning_job_id',
+  };
+};
+
+export const getEsqlRuleSchemaMock = (anchorDate: string = ANCHOR_DATE): EsqlRule => {
+  return {
+    ...getResponseBaseParams(anchorDate),
+    query: 'from auditbeat* | limit 10',
+    type: 'esql',
+    language: 'esql',
   };
 };
 

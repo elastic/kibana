@@ -7,6 +7,7 @@
 
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
 import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
+import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 
@@ -16,7 +17,9 @@ describe('getSimpleHierarchicalTree', () => {
     // and make it comparable against a static representation.
     expect(
       JSON.parse(
-        JSON.stringify(getSimpleHierarchicalTree(filteredFrequentItemSets, true, false, fields))
+        JSON.stringify(
+          getSimpleHierarchicalTree(filteredFrequentItemSets, true, false, significantTerms, fields)
+        )
       )
     ).toEqual({
       root: {
@@ -29,12 +32,16 @@ describe('getSimpleHierarchicalTree', () => {
             name: "792/1505 500 home.php '*'",
             set: [
               {
+                key: 'response_code:500',
+                type: 'keyword',
                 fieldName: 'response_code',
                 fieldValue: '500',
                 docCount: 792,
                 pValue: 0.010770456205312423,
               },
               {
+                key: 'url:home.php',
+                type: 'keyword',
                 fieldName: 'url',
                 fieldValue: 'home.php',
                 docCount: 792,
@@ -48,12 +55,16 @@ describe('getSimpleHierarchicalTree', () => {
                 name: "792/1505 500 home.php '*'",
                 set: [
                   {
+                    key: 'response_code:500',
+                    type: 'keyword',
                     fieldName: 'response_code',
                     fieldValue: '500',
                     docCount: 792,
                     pValue: 0.010770456205312423,
                   },
                   {
+                    key: 'url:home.php',
+                    type: 'keyword',
                     fieldName: 'url',
                     fieldValue: 'home.php',
                     docCount: 792,
@@ -75,15 +86,19 @@ describe('getSimpleHierarchicalTree', () => {
                 pValue: 0.010770456205312423,
                 set: [
                   {
-                    docCount: 792,
+                    key: 'url:home.php',
+                    type: 'keyword',
                     fieldName: 'url',
                     fieldValue: 'home.php',
+                    docCount: 792,
                     pValue: 0.010770456205312423,
                   },
                   {
-                    docCount: 634,
+                    key: 'user:Peter',
+                    type: 'keyword',
                     fieldName: 'user',
                     fieldValue: 'Peter',
+                    docCount: 634,
                     pValue: 0.010770456205312423,
                   },
                 ],
@@ -94,9 +109,11 @@ describe('getSimpleHierarchicalTree', () => {
             pValue: 0.010770456205312423,
             set: [
               {
-                docCount: 792,
+                key: 'url:home.php',
+                type: 'keyword',
                 fieldName: 'url',
                 fieldValue: 'home.php',
+                docCount: 792,
                 pValue: 0.010770456205312423,
               },
             ],
@@ -108,9 +125,11 @@ describe('getSimpleHierarchicalTree', () => {
             pValue: 0.010770456205312423,
             set: [
               {
-                docCount: 634,
+                key: 'user:Peter',
+                type: 'keyword',
                 fieldName: 'user',
                 fieldValue: 'Peter',
+                docCount: 634,
                 pValue: 0.010770456205312423,
               },
             ],

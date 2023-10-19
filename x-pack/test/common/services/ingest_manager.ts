@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fleetSetupRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS, fleetSetupRouteService } from '@kbn/fleet-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IngestManagerProvider({ getService }: FtrProviderContext) {
@@ -18,6 +19,7 @@ export function IngestManagerProvider({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         await supertest
           .post(fleetSetupRouteService.postFleetSetupPath())
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
           .set(headers)
           .send({ forceRecreate: true })
           .expect(200);

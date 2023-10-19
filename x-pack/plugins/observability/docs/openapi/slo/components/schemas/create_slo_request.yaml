@@ -27,6 +27,7 @@ properties:
       - $ref: "indicator_properties_apm_latency.yaml"
       - $ref: "indicator_properties_custom_metric.yaml"
       - $ref: 'indicator_properties_histogram.yaml'
+      - $ref: 'indicator_properties_timeslice_metric.yaml'
   timeWindow:
     $ref: "time_window.yaml"
   budgetingMethod:
@@ -39,3 +40,8 @@ properties:
     description: optional group by field to use to generate an SLO per distinct value
     type: string
     example: "some.field"
+  tags:
+    description: List of tags
+    type: array
+    items:
+      type: string

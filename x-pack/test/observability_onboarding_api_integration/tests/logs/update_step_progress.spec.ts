@@ -69,7 +69,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             body: {
               type: 'logFiles',
               name: 'name',
-              state: {},
+              state: {
+                datasetName: 'my-dataset',
+                serviceName: 'my-service',
+                namespace: 'my-namespace',
+                logFilePaths: ['my-service.log'],
+              },
             },
           },
         });

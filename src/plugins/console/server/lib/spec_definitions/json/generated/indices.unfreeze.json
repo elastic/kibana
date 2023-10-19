@@ -15,14 +15,18 @@
       ],
       "ignore_unavailable": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ],
       "timeout": [
+        "30s",
         "-1",
         "0"
       ],
-      "wait_for_active_shards": ""
+      "wait_for_active_shards": [
+        "1"
+      ]
     },
     "methods": [
       "POST"

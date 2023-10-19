@@ -15,6 +15,9 @@ import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
 export const initGetLogEntryCategoryDatasetsStatsRoute = ({ framework }: InfraBackendLibs) => {
+  if (!framework.config.featureFlags.logsUIEnabled) {
+    return;
+  }
   framework
     .registerVersionedRoute({
       access: 'internal',

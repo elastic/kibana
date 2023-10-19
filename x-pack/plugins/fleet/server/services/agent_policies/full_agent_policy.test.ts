@@ -283,6 +283,20 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should return a policy with monitoring enabled but no logs/metrics if keep_monitoring_alive is true', async () => {
+    mockAgentPolicy({
+      keep_monitoring_alive: true,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy?.agent?.monitoring).toEqual({
+      enabled: true,
+      logs: false,
+      metrics: false,
+    });
+  });
+
   it('should get the permissions for monitoring', async () => {
     mockAgentPolicy({
       namespace: 'testnamespace',

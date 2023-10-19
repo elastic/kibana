@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { hostMetricCharts } from './host/host_metric_charts';
-import { hostKPICharts, KPIChartProps } from './host/host_kpi_charts';
+import { hostMetricFlyoutCharts, hostMetricChartsFullPage } from './host/host_metric_charts';
+import { hostKPICharts } from './host/host_kpi_charts';
+import { kubernetesCharts } from './host/kubernetes_charts';
 
-export { type KPIChartProps };
 export const assetDetailsDashboards = {
-  host: { hostMetricCharts, hostKPICharts },
+  host: { hostMetricFlyoutCharts, hostMetricChartsFullPage, hostKPICharts, keyField: 'host.name' },
+  kubernetes: {
+    kubernetesCharts,
+    keyField: 'kubernetes.node.name',
+    dependsOn: ['kubernetes.node'],
+  },
 };

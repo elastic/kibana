@@ -44,5 +44,6 @@ export const createRuleDataClientMock = (
         bulk,
       })
     ),
+    isUsingDataStreams: jest.fn(() => false),
   };
 };

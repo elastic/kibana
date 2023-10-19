@@ -16,7 +16,7 @@ interface RuleSetupGuideSectionProps {
 export const RuleSetupGuideSection = ({ setup }: RuleSetupGuideSectionProps) => {
   return (
     <div>
-      <MarkdownRenderer>{setup}</MarkdownRenderer>
+      <MarkdownRenderer textSize="s">{setup}</MarkdownRenderer>
     </div>
   );
 };

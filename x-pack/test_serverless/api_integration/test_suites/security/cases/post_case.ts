@@ -9,22 +9,18 @@ import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { deleteCasesByESQuery, createCase, getPostCaseRequest, postCaseResp } from './helpers/api';
-import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
 
 export default ({ getService }: FtrProviderContext): void => {
-  const es = getService('es');
-  const supertest = getService('supertest');
+  const svlCases = getService('svlCases');
 
   describe('post_case', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
+      await svlCases.api.deleteCasesByESQuery();
     });
 
     it('should create a case', async () => {
-      const postedCase = await createCase(
-        supertest,
-        getPostCaseRequest({
+      const postedCase = await svlCases.api.createCase(
+        svlCases.api.getPostCaseRequest('securitySolution', {
           connector: {
             id: '123',
             name: 'Jira',
@@ -33,12 +29,13 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         })
       );
-      const data = removeServerGeneratedPropertiesFromCase(postedCase);
+      const data = svlCases.omit.removeServerGeneratedPropertiesFromCase(postedCase);
 
       expect(data).to.eql(
-        postCaseResp(
+        svlCases.api.postCaseResp(
+          'securitySolution',
           null,
-          getPostCaseRequest({
+          svlCases.api.getPostCaseRequest('securitySolution', {
             connector: {
               id: '123',
               name: 'Jira',
@@ -52,9 +49,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should throw 403 when trying to create a case with observability as owner', async () => {
       expect(
-        await createCase(
-          supertest,
-          getPostCaseRequest({
+        await svlCases.api.createCase(
+          svlCases.api.getPostCaseRequest('securitySolution', {
             owner: 'observability',
           }),
           403
@@ -64,9 +60,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should throw 403 when trying to create a case with cases as owner', async () => {
       expect(
-        await createCase(
-          supertest,
-          getPostCaseRequest({
+        await svlCases.api.createCase(
+          svlCases.api.getPostCaseRequest('securitySolution', {
             owner: 'cases',
           }),
           403

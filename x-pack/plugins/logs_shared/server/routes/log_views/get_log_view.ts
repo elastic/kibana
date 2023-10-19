@@ -8,16 +8,13 @@
 import { logViewsV1 } from '../../../common/http_api';
 import { LOG_VIEW_URL } from '../../../common/http_api/log_views';
 import { createValidationFunction } from '../../../common/runtime_types';
-import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
-import type { LogsSharedPluginStartServicesAccessor } from '../../types';
+import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
 
 export const initGetLogViewRoute = ({
+  config,
   framework,
   getStartServices,
-}: {
-  framework: KibanaFramework;
-  getStartServices: LogsSharedPluginStartServicesAccessor;
-}) => {
+}: LogsSharedBackendLibs) => {
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -39,7 +36,14 @@ export const initGetLogViewRoute = ({
         const logViewsClient = logViews.getScopedClient(request);
 
         try {
-          const logView = await logViewsClient.getLogView(logViewId);
+          /**
+           * Two possible paths for retrieving the log view
+           * - if the log view saved object is correctly registered, perform a lookup for retrieving it
+           * - else, skip the saved object lookup and immediately get the internal log view if exists.
+           */
+          const logView = config.savedObjects.logView.enabled
+            ? await logViewsClient.getLogView(logViewId)
+            : await logViewsClient.getInternalLogView(logViewId);
 
           return response.ok({
             body: logViewsV1.getLogViewResponsePayloadRT.encode({

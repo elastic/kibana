@@ -15,7 +15,7 @@ import {
 import { RollupInterval } from '../../../../common/rollup';
 import { termQuery } from '../../../../common/utils/term_query';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../spans/get_is_using_service_destination_metrics';
-import { getDocumentTypeFilterForTransactions } from '../transactions';
+import { getBackwardCompatibleDocumentTypeFilter } from '../transactions';
 
 const defaultRollupIntervals = [
   RollupInterval.OneMinute,
@@ -66,7 +66,7 @@ const documentTypeConfigMap: Record<
       bool: {
         filter:
           rollupInterval === RollupInterval.OneMinute
-            ? getDocumentTypeFilterForTransactions(true)
+            ? getBackwardCompatibleDocumentTypeFilter(true)
             : getDefaultFilter('transaction', rollupInterval),
       },
     }),

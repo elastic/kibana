@@ -236,6 +236,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
             totalNumDocs: totalCount,
             seed: RANDOM_SAMPLER_SEED,
           });
+
       const resp = await lastValueFrom(
         data.search.search(
           {

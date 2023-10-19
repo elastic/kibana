@@ -1086,6 +1086,23 @@
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser",
+            "id": "def-common.ApplicationStart.currentLocation$",
+            "type": "Object",
+            "tags": [],
+            "label": "currentLocation$",
+            "description": [
+              "\nAn observable that emits the current path#hash and each subsequent update using the global history instance"
+            ],
+            "signature": [
+              "Observable",
+              "<string>"
+            ],
+            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1171,12 +1188,12 @@
                 "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
               },
               {
-                "plugin": "management",
-                "path": "src/plugins/management/public/application.tsx"
-              },
-              {
                 "plugin": "@kbn/core-application-browser-mocks",
                 "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
+              },
+              {
+                "plugin": "management",
+                "path": "src/plugins/management/public/application.tsx"
               },
               {
                 "plugin": "fleet",

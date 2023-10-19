@@ -106,7 +106,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
         '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
       );
       await addVisualizationButton.moveMouseTo();
-      await new Promise((resolve) => setTimeout(resolve, 500)); // give tooltip time to open
+      await common.sleep(500); // give tooltip time to open
     },
 
     async assertCaseTitle(expectedTitle: string) {

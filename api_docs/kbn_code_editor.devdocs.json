@@ -27,7 +27,7 @@
         "label": "CodeEditor",
         "description": [],
         "signature": [
-          "({ languageId, value, onChange, width, options, overrideEditorWillMount, editorDidMount, editorWillMount, useDarkTheme: useDarkThemeProp, transparentBackground, suggestionProvider, signatureProvider, hoverProvider, placeholder, languageConfiguration, \"aria-label\": ariaLabel, isCopyable, allowFullScreen, }: React.PropsWithChildren<",
+          "({ languageId, value, onChange, width, height, options, overrideEditorWillMount, editorDidMount, editorWillMount, useDarkTheme: useDarkThemeProp, transparentBackground, suggestionProvider, signatureProvider, hoverProvider, placeholder, languageConfiguration, \"aria-label\": ariaLabel, isCopyable, allowFullScreen, }: React.PropsWithChildren<",
           "Props",
           ">) => JSX.Element"
         ],
@@ -40,7 +40,7 @@
             "id": "def-common.CodeEditor.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  languageId,\n  value,\n  onChange,\n  width,\n  options,\n  overrideEditorWillMount,\n  editorDidMount,\n  editorWillMount,\n  useDarkTheme: useDarkThemeProp,\n  transparentBackground,\n  suggestionProvider,\n  signatureProvider,\n  hoverProvider,\n  placeholder,\n  languageConfiguration,\n  'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {\n    defaultMessage: 'Code Editor',\n  }),\n  isCopyable = false,\n  allowFullScreen = false,\n}",
+            "label": "{\n  languageId,\n  value,\n  onChange,\n  width,\n  height = '100px',\n  options,\n  overrideEditorWillMount,\n  editorDidMount,\n  editorWillMount,\n  useDarkTheme: useDarkThemeProp,\n  transparentBackground,\n  suggestionProvider,\n  signatureProvider,\n  hoverProvider,\n  placeholder,\n  languageConfiguration,\n  'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {\n    defaultMessage: 'Code Editor',\n  }),\n  isCopyable = false,\n  allowFullScreen = false,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
