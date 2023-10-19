@@ -20,10 +20,10 @@ const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   searchFields: DEFAULT_SEARCH_FIELDS,
-  severity: SeverityAll,
+  severity: [SeverityAll],
   assignees: [],
   reporters: [],
-  status: StatusAll,
+  status: [StatusAll],
   tags: [],
   owner: [],
   category: [],

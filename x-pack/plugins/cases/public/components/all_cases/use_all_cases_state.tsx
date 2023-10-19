@@ -80,6 +80,30 @@ const validateQueryParams = (queryParams: QueryParams): QueryParams => {
   return { ...queryParams, perPage, sortOrder };
 };
 
+/**
+ * The filter options can be passed in the URL as an array of values, but the URLSearchParams
+ * returns a single value. This function parses the URL and returns the filter options as an array
+ * if they are defined in the DEFAULT_FILTER_OPTIONS as an array.
+ */
+const parseURLWithFilterOptions = (search: string) => {
+  const urlParams = new URLSearchParams(search);
+
+  const paramKeysWithTypeArray = Object.entries(DEFAULT_FILTER_OPTIONS)
+    .map(([key, val]) => (Array.isArray(val) ? key : undefined))
+    .filter(Boolean);
+
+  const parsedUrlParams: { [key in string]: string[] | string | null } = {};
+  urlParams.forEach((_, key) => {
+    if (paramKeysWithTypeArray.includes(key)) {
+      parsedUrlParams[key] = urlParams.getAll(key)[0].split(',');
+    } else {
+      parsedUrlParams[key] = urlParams.get(key);
+    }
+  });
+
+  return parsedUrlParams;
+};
+
 const getFilterOptions = (
   filterOptions: FilterOptions,
   params: FilterOptions,
@@ -168,7 +192,7 @@ export function useAllCasesState(
       const newFilterOptions: FilterOptions = getFilterOptions(
         filterOptions,
         params,
-        parseURL(location.search),
+        parseURLWithFilterOptions(location.search),
         localStorageFilterOptions
       );
 
@@ -192,7 +216,7 @@ export function useAllCasesState(
   );
 
   const updateLocation = useCallback(() => {
-    const parsedUrlParams = parseURL(location.search);
+    const parsedUrlParams = parseURLWithFilterOptions(location.search);
     const stateUrlParams = {
       ...parsedUrlParams,
       ...queryParams,

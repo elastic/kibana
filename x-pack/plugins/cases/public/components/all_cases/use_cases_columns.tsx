@@ -70,7 +70,7 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  filterStatus: string;
+  filterStatus: string[];
   userProfiles: Map<string, UserProfileWithAvatar>;
   isSelectorView: boolean;
   connectors?: ActionConnector[];
@@ -247,7 +247,8 @@ export const useCasesColumns = ({
     width: '100px',
   });
 
-  if (filterStatus === CaseStatuses.closed) {
+  // FIXME: rethink [0]
+  if (filterStatus[0] === CaseStatuses.closed) {
     columns.push({
       field: 'closedAt',
       name: i18n.CLOSED_ON,

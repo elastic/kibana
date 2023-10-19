@@ -140,14 +140,14 @@ const CasesTableFiltersComponent = ({
 
   const onStatusChanged = useCallback(
     (status: CaseStatusWithAllStatus) => {
-      onFilterChanged({ status });
+      onFilterChanged({ status: [status] });
     },
     [onFilterChanged]
   );
 
   const onSeverityChanged = useCallback(
     (severity: CaseSeverityWithAll) => {
-      onFilterChanged({ severity });
+      onFilterChanged({ severity: [severity] });
     },
     [onFilterChanged]
   );
@@ -196,7 +196,7 @@ const CasesTableFiltersComponent = ({
           </EuiFlexItem>
           <SeverityFilterWrapper grow={false} data-test-subj="severity-filter-wrapper">
             <SeverityFilter
-              selectedSeverity={initial.severity}
+              selectedSeverity={initial.severity[0]}
               onSeverityChange={onSeverityChanged}
               isLoading={false}
               isDisabled={false}
@@ -204,7 +204,7 @@ const CasesTableFiltersComponent = ({
           </SeverityFilterWrapper>
           <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">
             <StatusFilter
-              selectedStatus={initial.status}
+              selectedStatus={initial.status[0]}
               onStatusChanged={onStatusChanged}
               stats={stats}
               hiddenStatuses={hiddenStatuses}

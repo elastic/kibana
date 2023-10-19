@@ -81,7 +81,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const hasOwner = !!owner.length;
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
-      ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
+      ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: [firstAvailableStatus] }),
       owner: hasOwner ? owner : availableSolutions,
     };
 
@@ -160,19 +160,22 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
-        if (
-          newFilterOptions?.status === CaseStatuses.closed &&
-          queryParams.sortField === SortFieldCase.createdAt
-        ) {
-          setQueryParams({ sortField: SortFieldCase.closedAt });
-        } else if (
-          newFilterOptions.status &&
-          [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
-            newFilterOptions.status
-          ) &&
-          queryParams.sortField === SortFieldCase.closedAt
-        ) {
-          setQueryParams({ sortField: SortFieldCase.createdAt });
+        if (newFilterOptions?.status) {
+          // FIXME: rethink where status[0] is being used
+          if (
+            newFilterOptions.status[0] === CaseStatuses.closed &&
+            queryParams.sortField === SortFieldCase.createdAt
+          ) {
+            setQueryParams({ sortField: SortFieldCase.closedAt });
+          } else if (
+            newFilterOptions.status &&
+            [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
+              newFilterOptions.status[0]
+            ) &&
+            queryParams.sortField === SortFieldCase.closedAt
+          ) {
+            setQueryParams({ sortField: SortFieldCase.createdAt });
+          }
         }
 
         deselectCases();
