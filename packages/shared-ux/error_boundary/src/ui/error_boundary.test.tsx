@@ -12,6 +12,7 @@ import React, { FC } from 'react';
 import { KibanaErrorBoundary } from '../..';
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import { KibanaErrorBoundaryServices } from '../../types';
+import { errorMessageStrings as strings } from './message_strings';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 
 describe('<KibanaErrorBoundary>', () => {
@@ -44,8 +45,8 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(await findByText('Please refresh the page')).toBeVisible();
-    expect(await findByText('Refresh')).toBeVisible();
+    expect(await findByText(strings.recoverable.callout.title())).toBeVisible();
+    expect(await findByText(strings.recoverable.callout.pageReloadButton())).toBeVisible();
 
     (await findByTestId('recoverablePromptReloadBtn')).click();
 
@@ -62,10 +63,10 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(await findByText('Error encountered')).toBeVisible();
-    expect(await findByText('Try refreshing this page.')).toBeVisible();
-    expect(await findByText('Show details')).toBeVisible();
-    expect(await findByText('Refresh')).toBeVisible();
+    expect(await findByText(strings.fatal.callout.title())).toBeVisible();
+    expect(await findByText(strings.fatal.callout.body())).toBeVisible();
+    expect(await findByText(strings.fatal.callout.showDetailsButton())).toBeVisible();
+    expect(await findByText(strings.fatal.callout.pageReloadButton())).toBeVisible();
 
     (await findByTestId('fatalPromptReloadBtn')).click();
 
