@@ -265,4 +265,24 @@ describe('TextBasedLanguagesEditor', () => {
       expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
     });
   });
+
+  it('should render correctly if editorIsInline prop is set to true', async () => {
+    const onTextLangQuerySubmit = jest.fn();
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      hideRunQueryText: true,
+      editorIsInline: true,
+      onTextLangQuerySubmit,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-run-query-button"]').length
+      ).not.toBe(1);
+      findTestSubject(component, 'TextBasedLangEditor-run-query-button').simulate('click');
+      expect(onTextLangQuerySubmit).toHaveBeenCalled();
+    });
+  });
 });

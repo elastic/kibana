@@ -155,7 +155,7 @@ interface EditorFooterProps {
   warning?: MonacoError[];
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoError) => void;
-  refreshErrors: () => void;
+  runQuery: () => void;
   hideRunQueryText?: boolean;
   disableSubmitAction?: boolean;
   editorIsInline?: boolean;
@@ -169,7 +169,7 @@ export const EditorFooter = memo(function EditorFooter({
   warning,
   detectTimestamp,
   onErrorClick,
-  refreshErrors,
+  runQuery,
   hideRunQueryText,
   disableSubmitAction,
   editorIsInline,
@@ -277,8 +277,9 @@ export const EditorFooter = memo(function EditorFooter({
             color="text"
             size="s"
             fill
-            onClick={refreshErrors}
+            onClick={runQuery}
             isDisabled={Boolean(disableSubmitAction)}
+            data-test-subj="TextBasedLangEditor-run-query-button"
           >
             <EuiFlexGroup
               gutterSize="xs"
