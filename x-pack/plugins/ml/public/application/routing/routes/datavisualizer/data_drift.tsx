@@ -41,7 +41,7 @@ export const dataDriftRouteIndexOrSearchFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {
       text: DATA_VISUALIZER_BREADCRUMB.text,
-      hiddenInServerless: true,
+      isRootLevelCrumb: true,
       ...(navigateToPath
         ? {
             href: `${basePath}/app/ml${DATA_DRIFT_BREADCRUMB.href}`,
@@ -72,7 +72,7 @@ export const dataDriftRouteIndexPatternFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {
       text: DATA_VISUALIZER_BREADCRUMB.text,
-      hiddenInServerless: true,
+      isRootLevelCrumb: true,
       ...(navigateToPath
         ? {
             href: `${basePath}/app/ml${DATA_DRIFT_BREADCRUMB.href}`,

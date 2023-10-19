@@ -15,10 +15,11 @@ import { NavigateToPath } from '../contexts/kibana';
 
 export type MlBreadcrumb = ChromeBreadcrumb & {
   /**
+   * If this breadcrumb is a root level navigation item.
    * Root level navigational breadcrumbs shouldn't be set in serverless, as they are
    * controlled by each project's navigation tree
    */
-  hiddenInServerless?: true;
+  isRootLevelCrumb?: true;
 };
 
 export const ML_BREADCRUMB: MlBreadcrumb = Object.freeze({
@@ -26,7 +27,7 @@ export const ML_BREADCRUMB: MlBreadcrumb = Object.freeze({
     defaultMessage: 'Machine Learning',
   }),
   href: '/',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 export const SETTINGS_BREADCRUMB: MlBreadcrumb = Object.freeze({
@@ -41,7 +42,7 @@ export const ANOMALY_DETECTION_BREADCRUMB: MlBreadcrumb = Object.freeze({
     defaultMessage: 'Anomaly Detection',
   }),
   href: '/jobs',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 export const DATA_FRAME_ANALYTICS_BREADCRUMB: MlBreadcrumb = Object.freeze({
@@ -49,7 +50,7 @@ export const DATA_FRAME_ANALYTICS_BREADCRUMB: MlBreadcrumb = Object.freeze({
     defaultMessage: 'Data Frame Analytics',
   }),
   href: '/data_frame_analytics',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 export const TRAINED_MODELS: MlBreadcrumb = Object.freeze({
@@ -57,7 +58,7 @@ export const TRAINED_MODELS: MlBreadcrumb = Object.freeze({
     defaultMessage: 'Model Management',
   }),
   href: '/trained_models',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 export const DATA_VISUALIZER_BREADCRUMB: MlBreadcrumb = Object.freeze({
@@ -65,7 +66,7 @@ export const DATA_VISUALIZER_BREADCRUMB: MlBreadcrumb = Object.freeze({
     defaultMessage: 'Data Visualizer',
   }),
   href: '/datavisualizer',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 // we need multiple AIOPS_BREADCRUMB breadcrumb items as they each need to link
@@ -75,7 +76,7 @@ export const AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS: MlBreadcrumb = Object.freeze({
     defaultMessage: 'AIOps Labs',
   }),
   href: '/aiops/log_rate_analysis_index_select',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 export const AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS: MlBreadcrumb = Object.freeze({
@@ -83,7 +84,7 @@ export const AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS: MlBreadcrumb = Object.freeze
     defaultMessage: 'AIOps Labs',
   }),
   href: '/aiops/log_categorization_index_select',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 export const AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION: MlBreadcrumb = Object.freeze({
@@ -91,7 +92,7 @@ export const AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION: MlBreadcrumb = Object.free
     defaultMessage: 'AIOps Labs',
   }),
   href: '/aiops/change_point_detection_index_select',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 export const LOG_RATE_ANALYSIS: MlBreadcrumb = Object.freeze({
@@ -141,7 +142,7 @@ export const DATA_DRIFT_BREADCRUMB: MlBreadcrumb = Object.freeze({
     defaultMessage: 'Data drift',
   }),
   href: '/data_drift_index_select',
-  hiddenInServerless: true,
+  isRootLevelCrumb: true,
 });
 
 const breadcrumbs = {
@@ -181,7 +182,7 @@ export const getBreadcrumbWithUrlForApp = (
 ): MlBreadcrumb => {
   return {
     text: breadcrumbs[breadcrumbName].text,
-    hiddenInServerless: breadcrumbs[breadcrumbName].hiddenInServerless,
+    isRootLevelCrumb: breadcrumbs[breadcrumbName].isRootLevelCrumb,
     ...(navigateToPath
       ? {
           href: `${basePath}/app/ml${breadcrumbs[breadcrumbName].href}`,

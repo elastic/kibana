@@ -78,10 +78,12 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
     setBreadcrumbs: (breadcrumbs) => {
       coreStart.chrome!.setBreadcrumbs(breadcrumbs);
       if (deps.serverless) {
-        const serverlessBreadcrumbs = breadcrumbs.filter(
-          (breadcrumb) => !breadcrumb.hiddenInServerless
+        // Root level navigational breadcrumbs shouldn't be set in serverless, as they are
+        // controlled by each project's navigation tree, so we only set the deeper context breadcrumbs here.
+        const deeperContextBreadcrumbs = breadcrumbs.filter(
+          (breadcrumb) => !breadcrumb.isRootLevelCrumb
         );
-        deps.serverless.setBreadcrumbs(serverlessBreadcrumbs);
+        deps.serverless.setBreadcrumbs(deeperContextBreadcrumbs);
       }
     },
   };
