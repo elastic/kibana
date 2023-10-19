@@ -112,6 +112,7 @@ function useDeleteNote(noteId: string | null | undefined) {
       return http.fetch('/api/note', {
         method: 'DELETE',
         body: JSON.stringify({ noteId: id }),
+        version: '2023-10-31',
       });
     },
     onSuccess: () => {

@@ -26,8 +26,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlCommonPage.login();
       await svlSecNavigation.navigateToLandingPage();
       await testSubjects.click('solutionSideNavItemLink-cases');
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('configure-case-button exist', async () => {
+        return await testSubjects.exists('configure-case-button');
+      });
+
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
       await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('case-configure-title exist', async () => {
+        return await testSubjects.exists('case-configure-title');
+      });
     });
 
     after(async () => {
@@ -36,8 +46,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
-      // Error: Expected the radio group value to equal "close-by-pushing" (got "close-by-user")
-      this.tags(['failsOnMKI']);
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
