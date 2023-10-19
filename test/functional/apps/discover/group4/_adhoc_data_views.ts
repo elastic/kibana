@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/169434
+  // FLAKY: https://github.com/elastic/kibana/issues/169454
   describe.skip('adhoc data views', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
