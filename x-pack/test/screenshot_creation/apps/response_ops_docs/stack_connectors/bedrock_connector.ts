@@ -20,6 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('bedrock');
       await testSubjects.setValue('nameInput', 'Bedrock test connector');
+      await testSubjects.setValue('secrets.accessKey-input', 'testkey');
+      await testSubjects.setValue('secrets.secret-input', 'testsecret');
       await commonScreenshots.takeScreenshot(
         'bedrock-connector',
         screenshotDirectories,
@@ -27,6 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1200
       );
       await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('bedrock-params', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
     });
   });
 }
