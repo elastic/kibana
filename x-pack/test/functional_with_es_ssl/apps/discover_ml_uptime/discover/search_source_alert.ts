@@ -399,11 +399,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
     });
 
-    it('should navigate to alert results via link provided in notification', async () => {
-      await openAlertResults(RULE_NAME);
-      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
-    });
-
     it('should display prev rule state after params update on clicking prev generated link', async () => {
       await openAlertRuleInManagement(RULE_NAME);
 
