@@ -116,10 +116,14 @@ describe('Slack API service', () => {
       await service.validChannelId('channel_id_1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
         logger,
         configurationUtilities,
         method: 'get',
-        url: 'conversations.info?channel=channel_id_1',
+        url: 'https://slack.com/api/conversations.info?channel=channel_id_1',
       });
     });
 
@@ -146,10 +150,14 @@ describe('Slack API service', () => {
       expect(requestMock).toHaveBeenCalledTimes(1);
       expect(requestMock).toHaveBeenNthCalledWith(1, {
         axios,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
         logger,
         configurationUtilities,
         method: 'post',
-        url: 'chat.postMessage',
+        url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'general', text: 'a message' },
       });
     });
@@ -166,10 +174,14 @@ describe('Slack API service', () => {
       expect(requestMock).toHaveBeenCalledTimes(1);
       expect(requestMock).toHaveBeenNthCalledWith(1, {
         axios,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
         logger,
         configurationUtilities,
         method: 'post',
-        url: 'chat.postMessage',
+        url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'QWEERTYU987', text: 'a message' },
       });
     });
@@ -183,9 +195,13 @@ describe('Slack API service', () => {
       expect(requestMock).toHaveBeenNthCalledWith(1, {
         axios,
         logger,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
         configurationUtilities,
         method: 'post',
-        url: 'chat.postMessage',
+        url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'QWEERTYU987', text: 'a message' },
       });
     });

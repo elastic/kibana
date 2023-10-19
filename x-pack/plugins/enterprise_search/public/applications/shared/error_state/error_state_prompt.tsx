@@ -161,14 +161,8 @@ const nonCloudError = () => {
         <ul>
           <li>
             <FormattedMessage
-              id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthNative"
-              defaultMessage="You must authenticate using Elasticsearch Native auth, SSO/SAML, or OpenID Connect."
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthSAML"
-              defaultMessage="If using an external SSO provider, such as SAML or OpenID Connect, your SAML/OIDC realm must also be set up on Enterprise Search."
+              id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthMessage"
+              defaultMessage="Contact your administrator to setup an Enterprise Search role mapping to give you access to Enterprise Search"
             />
           </li>
         </ul>
