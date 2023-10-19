@@ -106,8 +106,8 @@ export const DashboardListingEmptyPrompt = ({
     createItem,
     disableCreateDashboardButton,
     dashboardBackup,
-    setUnsavedDashboardIds,
     goToDashboard,
+    setUnsavedDashboardIds,
   ]);
 
   if (!showWriteControls) {
