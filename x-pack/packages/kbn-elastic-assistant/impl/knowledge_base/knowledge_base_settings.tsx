@@ -110,7 +110,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
       );
     }, [
       isLoadingKb,
-      kbStatus?.elser_exists,
+      isSwitchDisabled,
       knowledgeBase.assistantLangChain,
       onEnableAssistantLangChainChange,
     ]);
