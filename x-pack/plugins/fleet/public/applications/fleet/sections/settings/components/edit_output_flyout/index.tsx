@@ -54,6 +54,8 @@ import { useOutputForm } from './use_output_form';
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 import { AdvancedOptionsSection } from './advanced_options_section';
 
+const { outputSecretsStorage: outputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
+
 export interface EditOutputFlyoutProps {
   output?: Output;
   onClose: () => void;
@@ -70,7 +72,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
   const { euiTheme } = useEuiTheme();
-  const [useSecretStorage, setUseSecretStorage] = React.useState(true);
+  const [useSecretStorage, setUseSecretStorage] = React.useState(outputSecretsStorageEnabled);
 
   const onUsePlainText = () => {
     setUseSecretStorage(false);
