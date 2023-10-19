@@ -156,7 +156,7 @@ export const DashboardLinkComponent = ({
 
   return loadingDestinationDashboard ? (
     <li id={`${id}--loading`}>
-      <EuiButtonEmpty size="s" isLoading={true} data-loading data-test-subj={`${id}--loading`}>
+      <EuiButtonEmpty size="s" isLoading={true} data-test-subj={`${id}--loading`}>
         {DashboardLinkStrings.getLoadingDashboardLabel()}
       </EuiButtonEmpty>
     </li>
