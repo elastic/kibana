@@ -59,8 +59,10 @@ import {
   deleteSecrets,
   extractAndUpdateOutputSecrets,
   extractAndWriteOutputSecrets,
-  isOutputSecretStorageEnabled,
 } from './secrets';
+
+const { outputSecretsStorage: outputSecretsStorageEnabled } =
+  appContextService.getExperimentalFeatures();
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -535,7 +537,7 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    if (outputSecretsStorageEnabled) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -718,7 +720,7 @@ class OutputService {
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    if (outputSecretsStorageEnabled) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,
