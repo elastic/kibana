@@ -29,7 +29,7 @@ describe('CdnConfig', () => {
     expect(CdnConfig.from({ url }).baseHref).toEqual(expected);
   });
 
-  it.each([['foo'], ['@#']])('throws for invalid URLs (%p)', (url) => {
+  it.each([['foo'], ['#!']])('throws for invalid URLs (%p)', (url) => {
     expect(() => CdnConfig.from({ url })).toThrow(/Invalid URL/);
   });
 
@@ -39,14 +39,14 @@ describe('CdnConfig', () => {
   });
 
   it('generates the expected CSP additions', () => {
-    const cdnConfig = CdnConfig.from({ url: 'https://foo.bar' });
+    const cdnConfig = CdnConfig.from({ url: 'https://foo.bar:9999' });
     expect(cdnConfig.getCspConfig()).toEqual({
-      connect_src: ['foo.bar'],
-      font_src: ['foo.bar'],
-      img_src: ['foo.bar'],
-      script_src: ['foo.bar'],
-      style_src: ['foo.bar'],
-      worker_src: ['foo.bar'],
+      connect_src: ['foo.bar:9999'],
+      font_src: ['foo.bar:9999'],
+      img_src: ['foo.bar:9999'],
+      script_src: ['foo.bar:9999'],
+      style_src: ['foo.bar:9999'],
+      worker_src: ['foo.bar:9999'],
     });
   });
 
