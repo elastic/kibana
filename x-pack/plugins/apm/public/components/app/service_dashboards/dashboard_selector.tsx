@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import useMount from 'react-use/lib/useMount';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MergedServiceDashboard } from '.';
@@ -14,14 +15,43 @@ import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
 interface Props {
   serviceDashboards: MergedServiceDashboard[];
-  currentDashboard?: MergedServiceDashboard;
+  currentDashboardId?: string;
+  setCurrentDashboard: (newDashboard: MergedServiceDashboard) => void;
 }
 
 export function DashboardSelector({
   serviceDashboards,
-  currentDashboard,
+  currentDashboardId,
+  setCurrentDashboard,
 }: Props) {
   const history = useHistory();
+
+  const [selectedDashboard, setSelectedDashboard] =
+    useState<MergedServiceDashboard>();
+
+  useMount(() => {
+    if (!currentDashboardId) {
+      history.push({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(location.search),
+          dashboardId: serviceDashboards[0].dashboardSavedObjectId,
+        }),
+      });
+    }
+  });
+
+  useEffect(() => {
+    const preselectedDashboard = serviceDashboards.find(
+      ({ dashboardSavedObjectId }) =>
+        dashboardSavedObjectId === currentDashboardId
+    );
+    // preselect dashboard
+    if (preselectedDashboard) {
+      setSelectedDashboard(preselectedDashboard);
+      setCurrentDashboard(preselectedDashboard);
+    }
+  }, [serviceDashboards, currentDashboardId]);
 
   function onChange(newDashboardId?: string) {
     history.push({
@@ -57,11 +87,11 @@ export function DashboardSelector({
         };
       })}
       selectedOptions={
-        currentDashboard
+        selectedDashboard
           ? [
               {
-                value: currentDashboard?.dashboardSavedObjectId,
-                label: currentDashboard?.title,
+                value: selectedDashboard?.dashboardSavedObjectId,
+                label: selectedDashboard?.title,
               },
             ]
           : []

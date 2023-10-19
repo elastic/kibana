@@ -102,15 +102,6 @@ export function ServiceDashboards() {
     setServiceDashboards(filteredServiceDashbords);
   }, [allAvailableDashboards, data?.serviceDashboards]);
 
-  useEffect(() => {
-    const preselectedDashboard = serviceDashboards.find(
-      ({ dashboardSavedObjectId }) => dashboardSavedObjectId === dashboardId
-    );
-
-    // preselect dashboard
-    if (preselectedDashboard) setCurrentDashboard(preselectedDashboard);
-  }, [serviceDashboards, dashboardId]);
-
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
       const getInitialInput = () => ({
@@ -204,8 +195,9 @@ export function ServiceDashboards() {
 
             <EuiFlexItem grow={false}>
               <DashboardSelector
+                currentDashboardId={dashboardId}
                 serviceDashboards={serviceDashboards}
-                currentDashboard={currentDashboard}
+                setCurrentDashboard={setCurrentDashboard}
               />
             </EuiFlexItem>
 
