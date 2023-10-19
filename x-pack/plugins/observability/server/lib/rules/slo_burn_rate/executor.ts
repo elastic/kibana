@@ -124,7 +124,6 @@ export const getRuleExecutor = ({
           const alertId = instanceId;
           const alert = alertWithLifecycle({
             id: alertId,
-
             fields: {
               [ALERT_REASON]: reason,
               [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
