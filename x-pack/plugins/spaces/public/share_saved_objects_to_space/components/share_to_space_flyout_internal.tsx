@@ -112,15 +112,20 @@ function createDefaultChangeSpacesHandler(
       );
 
       // Only if there are also spaces being added, affect any referenced/related objects
-      const updateRelated = spacesToAdd.length > 0 ? spacesManager.updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, []) : undefined;
+      const updateRelated =
+        spacesToAdd.length > 0
+          ? spacesManager.updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, [])
+          : undefined;
 
       await Promise.all([updateTarget, updateRelated]).catch((e) => {
         error = e;
       });
     } else {
-      await spacesManager.updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, spacesToRemove).catch((e) => {
-        error = e;
-      });
+      await spacesManager
+        .updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, spacesToRemove)
+        .catch((e) => {
+          error = e;
+        });
     }
 
     const isSharedToAllSpaces = spacesToAdd.includes(ALL_SPACES_ID);
@@ -142,8 +147,7 @@ function createDefaultChangeSpacesHandler(
           description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget...' inputs. Example strings: "'Finance dashboard' was added to 1 space. 'Finance dashboard' was removed from 2 spaces.", "'Finance dashboard' and 2 related objects were added to 3 spaces. 'Finance dashboard' was removed from all spaces."`,
         }),
       });
-    }
-    else {
+    } else {
       if (spacesToAdd.length > 0 && spacesToRemove.length > 0 && !isSharedToAllSpaces) {
         toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddRemoveText', {
           defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTargetAdd}. '{object}' was removed from {spacesTargetRemove}.`,
