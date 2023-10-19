@@ -16,9 +16,11 @@ import type {
 } from './use_bulk_alert_assignees_items';
 import { useBulkAlertAssigneesItems } from './use_bulk_alert_assignees_items';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
+import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/alerts/use_get_user_profiles';
 import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
 
 jest.mock('./use_set_alert_assignees');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_get_user_profiles');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_suggest_users');
 
 const mockUserProfiles: UserProfileWithAvatar[] = [
@@ -50,6 +52,10 @@ const renderPanel = (panel: UseBulkAlertAssigneesPanel) => {
 describe('useBulkAlertAssigneesItems', () => {
   beforeEach(() => {
     (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
+    (useGetUserProfiles as jest.Mock).mockReturnValue({
+      loading: false,
+      userProfiles: mockUserProfiles,
+    });
     (useSuggestUsers as jest.Mock).mockReturnValue({
       loading: false,
       userProfiles: mockUserProfiles,
