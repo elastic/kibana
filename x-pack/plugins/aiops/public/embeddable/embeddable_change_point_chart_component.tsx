@@ -40,8 +40,6 @@ export interface EmbeddableChangePointChartProps {
    * Last reload request time, can be used for manual reload
    */
   lastReloadRequestTime?: number;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin?: string;
 }
 export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {
   const { embeddable: embeddableStart } = plugins;

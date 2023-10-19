@@ -24,7 +24,6 @@ import {
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   type ChangePointType,
   COMPOSITE_AGG_SIZE,
@@ -121,12 +120,12 @@ export function useChangePointResults(
   fieldConfig: FieldConfig,
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer,
-  splitFieldCardinality: number | null,
-  embeddingOrigin: string = AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE
+  splitFieldCardinality: number | null
 ) {
   const {
     notifications: { toasts },
     usageCollection,
+    embeddingOrigin,
   } = useAiopsAppContext();
 
   const { dataView } = useDataSource();

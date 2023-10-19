@@ -44,7 +44,6 @@ export interface EmbeddableInputTrackerProps {
   onRenderComplete: () => void;
   onLoading: () => void;
   onError: (error: Error) => void;
-  embeddingOrigin?: string;
 }
 
 export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
@@ -55,7 +54,6 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
   onRenderComplete,
   onLoading,
   onError,
-  embeddingOrigin,
 }) => {
   const input = useObservable(input$, initialInput);
 
@@ -100,7 +98,6 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
               onError={onError}
               onChange={input.onChange}
               emptyState={input.emptyState}
-              embeddingOrigin={embeddingOrigin}
             />
           </FilterQueryContextProvider>
         </ChangePointDetectionControlsContextProvider>
@@ -125,7 +122,6 @@ export const ChartGridEmbeddableWrapper: FC<
     onRenderComplete: () => void;
     onLoading: () => void;
     onError: (error: Error) => void;
-    embeddingOrigin?: string;
   }
 > = ({
   fn,
@@ -138,7 +134,6 @@ export const ChartGridEmbeddableWrapper: FC<
   onRenderComplete,
   onChange,
   emptyState,
-  embeddingOrigin,
 }) => {
   const { filters, query, timeRange } = useFilerQueryUpdates();
 
@@ -203,8 +198,7 @@ export const ChartGridEmbeddableWrapper: FC<
     fieldConfig,
     requestParams,
     combinedQuery,
-    10000,
-    embeddingOrigin
+    10000
   );
 
   useEffect(() => {

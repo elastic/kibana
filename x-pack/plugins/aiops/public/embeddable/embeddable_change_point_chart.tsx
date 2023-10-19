@@ -123,10 +123,15 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     const input = this.getInput();
     const input$ = this.getInput$();
 
+    const aiopsAppContextValue = {
+      ...this.deps,
+      embeddingOrigin: this.parent?.type ?? EMBEDDABLE_ORIGIN,
+    } as unknown as AiopsAppDependencies;
+
     ReactDOM.render(
       <I18nContext>
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <AiopsAppContext.Provider value={this.deps as unknown as AiopsAppDependencies}>
+          <AiopsAppContext.Provider value={aiopsAppContextValue}>
             <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={null}>
                 <EmbeddableInputTracker
@@ -137,7 +142,6 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
                   onRenderComplete={this.onRenderComplete.bind(this)}
                   onLoading={this.onLoading.bind(this)}
                   onError={this.onError.bind(this)}
-                  embeddingOrigin={this.parent?.type ?? EMBEDDABLE_ORIGIN}
                 />
               </Suspense>
             </DatePickerContextProvider>
