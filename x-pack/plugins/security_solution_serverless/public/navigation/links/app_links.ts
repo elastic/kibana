@@ -14,39 +14,33 @@ import { cloneDeep, remove } from 'lodash';
 import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
-import { createProjectSettingsLinkFromManage } from './sections/project_settings_links';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { createProjectSettingsLinksFromManage } from './sections/project_settings_links';
 
 // This function is called by the security_solution plugin to alter the app links
 // that will be registered to the Security Solution application on Serverless projects.
 // The capabilities filtering is done after this function is called by the security_solution plugin.
-export const getProjectAppLinksSwitcher =
-  (experimentalFeatures: ExperimentalFeatures): AppLinksSwitcher =>
-  (appLinks) => {
-    const projectAppLinks = cloneDeep(appLinks) as LinkItem[];
+export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
+  const projectAppLinks = cloneDeep(appLinks) as LinkItem[];
 
-    // Remove timeline link
-    const [timelineLinkItem] = remove(projectAppLinks, { id: SecurityPageName.timelines });
-    if (timelineLinkItem) {
-      // Add investigations link
-      projectAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
-    }
+  // Remove timeline link
+  const [timelineLinkItem] = remove(projectAppLinks, { id: SecurityPageName.timelines });
+  if (timelineLinkItem) {
+    // Add investigations link
+    projectAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
+  }
 
-    // Remove manage link
-    const [manageLinkItem] = remove(projectAppLinks, { id: SecurityPageName.administration });
+  // Remove manage link
+  const [manageLinkItem] = remove(projectAppLinks, { id: SecurityPageName.administration });
 
-    if (manageLinkItem) {
-      // Add assets link
-      projectAppLinks.push(createAssetsLinkFromManage(manageLinkItem));
-    }
+  if (manageLinkItem) {
+    // Add assets link
+    projectAppLinks.push(createAssetsLinkFromManage(manageLinkItem));
+    // Add entity analytics link if exists
+    projectAppLinks.push(...createProjectSettingsLinksFromManage(manageLinkItem));
+  }
 
-    // Add ML link
-    projectAppLinks.push(mlAppLink);
+  // Add ML link
+  projectAppLinks.push(mlAppLink);
 
-    if (!experimentalFeatures.platformNavEnabled && manageLinkItem) {
-      // Add project settings link
-      projectAppLinks.push(createProjectSettingsLinkFromManage(manageLinkItem));
-    }
-
-    return projectAppLinks;
-  };
+  return projectAppLinks;
+};
