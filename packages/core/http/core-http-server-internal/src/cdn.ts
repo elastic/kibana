@@ -32,15 +32,15 @@ export class CdnConfig {
   }
 
   public getCspConfig(): CspAdditionalConfig {
-    const hostname = this.host;
-    if (!hostname) return {};
+    const host = this.host;
+    if (!host) return {};
     return {
-      font_src: [hostname],
-      img_src: [hostname],
-      script_src: [hostname],
-      style_src: [hostname],
-      worker_src: [hostname],
-      connect_src: [hostname],
+      font_src: [host],
+      img_src: [host],
+      script_src: [host],
+      style_src: [host],
+      worker_src: [host],
+      connect_src: [host],
     };
   }
 
