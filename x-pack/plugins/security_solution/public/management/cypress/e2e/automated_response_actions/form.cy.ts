@@ -30,7 +30,8 @@ describe(
     ],
   },
   () => {
-    describe('User with no access can not create an endpoint response action', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/169334
+    describe.skip('User with no access can not create an endpoint response action', () => {
       beforeEach(() => {
         login(ROLE.endpoint_response_actions_no_access);
       });
