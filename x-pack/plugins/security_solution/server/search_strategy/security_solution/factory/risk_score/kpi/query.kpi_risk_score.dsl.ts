@@ -13,8 +13,21 @@ export const buildKpiRiskScoreQuery = ({
   defaultIndex,
   filterQuery,
   entity,
+  timerange,
 }: RiskScoreKpiRequestOptions) => {
   const filter = [...createQueryFilterClauses(filterQuery)];
+
+  if (timerange) {
+    filter.push({
+      range: {
+        '@timestamp': {
+          gte: timerange.from,
+          lte: timerange.to,
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  }
 
   const dslQuery = {
     index: defaultIndex,
