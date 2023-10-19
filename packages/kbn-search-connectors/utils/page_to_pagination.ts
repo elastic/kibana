@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './configuration';
-export * from './sync_jobs';
+export function pageToPagination(page: { from: number; size: number; total: number }) {
+  // Prevent divide-by-zero-error
+  const pageIndex = page.size ? Math.trunc(page.from / page.size) : 0;
+  return {
+    pageIndex,
+    pageSize: page.size,
+    totalItemCount: page.total,
+  };
+}

@@ -6,5 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './configuration';
-export * from './sync_jobs';
+import React from 'react';
+
+import { shallow } from 'enzyme';
+
+import { FlyoutPanel } from './flyout_panel';
+
+describe('FlyoutPanel', () => {
+  it('renders', () => {
+    const wrapper = shallow(<FlyoutPanel title="Title" />);
+
+    expect(wrapper).toMatchSnapshot();
+  });
+});

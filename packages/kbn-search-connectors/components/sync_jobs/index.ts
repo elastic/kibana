@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './configuration';
-export * from './sync_jobs';
+export * from './sync_jobs_table';

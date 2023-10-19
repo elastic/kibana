@@ -27,8 +27,8 @@ import React, { useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
-import { CreateApiKeyResponse } from './types';
 import './api_key.scss';
+import { CreateApiKeyResponse } from '../../hooks/api/use_create_api_key';
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
   const { http, user } = useKibanaServices();

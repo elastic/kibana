@@ -150,7 +150,7 @@ export const EditConnector: React.FC = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section>
         <EuiFlexGroup direction="row">
-          <EuiFlexItem>
+          <EuiFlexItem grow={1}>
             <EditServiceType
               connectorId={id}
               serviceType={connector.service_type ?? ''}
@@ -163,7 +163,7 @@ export const EditConnector: React.FC = () => {
               onSuccess={refetch}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={2}>
             <EuiPanel hasBorder hasShadow={false}>
               <ConnectorConfiguration connector={connector} />
             </EuiPanel>

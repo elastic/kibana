@@ -7,4 +7,5 @@
  */
 
 export * from './is_category_entry';
+export * from './page_to_pagination';
 export * from './sync_status_to_text';

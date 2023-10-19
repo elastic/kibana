@@ -12,6 +12,8 @@ import {
   deleteConnectorById,
   fetchConnectorById,
   fetchConnectors,
+  fetchSyncJobsByConnectorId,
+  startConnectorSync,
   updateConnectorConfiguration,
   updateConnectorIndexName,
   updateConnectorNameAndDescription,
@@ -274,6 +276,59 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         client.asCurrentUser,
         request.params.connectorId,
         request.body.configuration
+      );
+
+      return response.ok({
+        body: result,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}/sync',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await startConnectorSync(client.asCurrentUser, {
+        connectorId: request.params.connectorId,
+      });
+
+      return response.ok({
+        body: result,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}/sync_jobs',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+        query: schema.object({
+          from: schema.maybe(schema.number()),
+          size: schema.maybe(schema.number()),
+          type: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await fetchSyncJobsByConnectorId(
+        client.asCurrentUser,
+        request.params.connectorId,
+        request.query.from || 0,
+        request.query.size || 20,
+        (request.query.type as 'content' | 'access_control' | 'all' | undefined) || 'all'
       );
 
       return response.ok({
