@@ -9,13 +9,14 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 import { cloneTimelineSchema } from '../../../../../../common/api/timeline';
+import type { CloneTimelinesResponse } from '../../../../../../common/api/timeline';
+import { cloneTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_CLONE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
-import { cloneTimeline } from '../../../saved_object/timelines';
 
 export const cloneTimelineRoute = (
   router: SecuritySolutionPluginRouter,
@@ -42,10 +43,10 @@ export const cloneTimelineRoute = (
 
         try {
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
-          const { id } = request.body;
+          const { timeline, savedObjectId } = request.body;
 
-          const cloneTimelineId = await cloneTimeline(frameworkRequest, id);
-          return response.ok({ body: { data: { cloneTimelineId } } });
+          const clonedTimeline = await cloneTimeline(frameworkRequest, timeline, savedObjectId);
+          return response.ok<CloneTimelinesResponse>({ body: { data: { clonedTimeline } } });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

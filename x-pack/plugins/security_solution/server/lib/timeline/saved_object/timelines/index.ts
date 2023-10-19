@@ -586,13 +586,16 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
   );
 };
 
-export const cloneTimeline = async (request: FrameworkRequest, timelineId: string) => {
+export const cloneTimeline = async (
+  request: FrameworkRequest,
+  timeline: SavedTimeline,
+  timelineId: string
+) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   // Fetch all objects that need to be cloned
   // TODO: clone saved search
-  const [{ resolvedTimelineSavedObject: timeline }, notes, pinnedEvents] = await Promise.all([
-    resolveBasicSavedTimeline(request, timelineId),
+  const [notes, pinnedEvents] = await Promise.all([
     note.getNotesByTimelineId(request, timelineId),
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
   ]);
@@ -600,10 +603,9 @@ export const cloneTimeline = async (request: FrameworkRequest, timelineId: strin
   const isImmutable = timeline.status === TimelineStatus.immutable;
   const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
 
-  const { savedObjectId, version, ...newTimeline } = timeline;
   const timelineResponse = await createTimeline({
     savedObjectsClient,
-    timeline: newTimeline,
+    timeline,
     timelineId: null,
     userInfo,
   });
@@ -634,7 +636,7 @@ export const cloneTimeline = async (request: FrameworkRequest, timelineId: strin
 
   await Promise.all([cloneNotes, clonePinnedEvents]);
 
-  return Promise.resolve(newTimelineId);
+  return resolveSavedTimeline(request, newTimelineId);
 };
 
 const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
