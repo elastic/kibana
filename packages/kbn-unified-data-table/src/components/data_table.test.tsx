@@ -313,7 +313,7 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": <React.Fragment />,
+          "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
@@ -339,7 +339,7 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": <React.Fragment />,
+          "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "allowDensity": false,
@@ -360,7 +360,7 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": <React.Fragment />,
+          "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": undefined,
           "showFullScreenSelector": true,
