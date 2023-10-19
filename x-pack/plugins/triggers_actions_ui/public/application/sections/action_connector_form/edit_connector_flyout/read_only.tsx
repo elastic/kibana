@@ -14,7 +14,7 @@ import { ActionTypeModel } from '../../../..';
 export const ReadOnlyConnectorMessage: React.FC<{
   connectorId: string;
   connectorName: string;
-  extraComponent?: ActionTypeModel['actionReadOnlyElement'];
+  extraComponent?: ActionTypeModel['actionReadOnlyExtraComponent'];
   href: string;
 }> = ({ connectorId, connectorName, extraComponent, href }) => {
   const ExtraComponent = extraComponent;

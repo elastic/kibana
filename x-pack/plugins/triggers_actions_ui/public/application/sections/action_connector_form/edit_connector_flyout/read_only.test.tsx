@@ -13,7 +13,7 @@ import { ActionTypeModel } from '../../../..';
 
 const ExtraComponent = jest.fn(() => (
   <div>Extra Component</div>
-)) as unknown as ActionTypeModel['actionReadOnlyElement'];
+)) as unknown as ActionTypeModel['actionReadOnlyExtraComponent'];
 describe('ReadOnlyConnectorMessage', () => {
   it('should render a readonly message with a link to the provided href', () => {
     const { getByTestId, getByText, queryByText } = render(

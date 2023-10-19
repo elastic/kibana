@@ -57,6 +57,6 @@ export function getConnectorType(): OpenAIConnector {
     },
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
-    actionReadOnlyElement: lazy(() => import('./dashboard_link')),
+    actionReadOnlyExtraComponent: lazy(() => import('./dashboard_link')),
   };
 }

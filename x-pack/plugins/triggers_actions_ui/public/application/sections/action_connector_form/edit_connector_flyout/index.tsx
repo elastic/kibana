@@ -277,7 +277,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
             ) : (
               <ReadOnlyConnectorMessage
                 href={docLinks.links.alerting.preconfiguredConnectors}
-                extraComponent={actionTypeModel?.actionReadOnlyElement}
+                extraComponent={actionTypeModel?.actionReadOnlyExtraComponent}
                 connectorId={connector.id}
                 connectorName={connector.name}
               />
