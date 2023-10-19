@@ -755,13 +755,14 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                   (val) => val !== ''
                 ),
               },
-              ...(sslKeySecretInput.value && {
-                secrets: {
-                  ssl: {
-                    key: sslKeySecretInput.value,
+              ...(!sslKeyInput.value &&
+                sslKeySecretInput.value && {
+                  secrets: {
+                    ssl: {
+                      key: sslKeySecretInput.value,
+                    },
                   },
-                },
-              }),
+                }),
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewLogstashOutput;

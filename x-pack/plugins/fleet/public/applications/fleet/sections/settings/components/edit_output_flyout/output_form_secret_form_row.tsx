@@ -28,11 +28,10 @@ export const SecretFormRow: React.FC<{
   title: string;
   clear: () => void;
   initialValue: any;
-}> = ({ fullWidth, error, isInvalid, children, clear, title, initialValue }) => {
+  onUsePlainText: () => void;
+}> = ({ fullWidth, error, isInvalid, children, clear, title, initialValue, onUsePlainText }) => {
   const hasInitialValue = initialValue !== undefined;
   const [editMode, setEditMode] = useState(!initialValue);
-  console.log('editMode', editMode);
-  console.log('hasInitialValue', hasInitialValue);
   const valueHiddenPanel = (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
       <EuiText size="s" color="subdued">
@@ -112,10 +111,33 @@ export const SecretFormRow: React.FC<{
     </span>
   );
 
+  const helpText = !initialValue ? (
+    <FormattedMessage
+      id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle"
+      defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above. {revertLink}"
+      values={{
+        revertLink: (
+          <EuiButtonEmpty onClick={onUsePlainText} color="primary" size="xs">
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
+              defaultMessage="Click to use plain text storage instead"
+            />
+          </EuiButtonEmpty>
+        ),
+      }}
+    />
+  ) : undefined;
+
   const inputComponent = editMode ? editValue : valueHiddenPanel;
 
   return (
-    <EuiFormRow fullWidth={fullWidth} label={label} error={error} isInvalid={isInvalid}>
+    <EuiFormRow
+      fullWidth={fullWidth}
+      label={label}
+      error={error}
+      isInvalid={isInvalid}
+      helpText={helpText}
+    >
       {inputComponent}
     </EuiFormRow>
   );

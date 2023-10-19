@@ -70,6 +70,11 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
   const { euiTheme } = useEuiTheme();
+  const [useSecretStorage, setUseSecretStorage] = React.useState(true);
+
+  const onUsePlainText = () => {
+    setUseSecretStorage(false);
+  };
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
@@ -164,7 +169,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             )}
           />
         </EuiFormRow>
-        {output && output?.ssl?.key ? (
+        {(output && output?.ssl?.key) || !useSecretStorage ? (
           <EuiFormRow
             fullWidth
             label={
@@ -194,6 +199,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               defaultMessage: 'Client SSL certificate key',
             })}
             {...inputs.sslKeySecretInput.formRowProps}
+            onUsePlainText={onUsePlainText}
           >
             <EuiTextArea
               fullWidth
