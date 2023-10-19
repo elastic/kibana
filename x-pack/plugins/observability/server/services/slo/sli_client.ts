@@ -49,8 +49,7 @@ export class DefaultSLIClient implements SLIClient {
   async fetchSLIDataFrom(
     slo: SLO,
     instanceId: string,
-    lookbackWindows: LookbackWindow[],
-    startedAt = new Date()
+    lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>> {
     const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
       a.duration.isShorterThan(b.duration) ? 1 : -1
@@ -58,7 +57,7 @@ export class DefaultSLIClient implements SLIClient {
     const longestLookbackWindow = sortedLookbackWindows[0];
     const delayInSeconds = getDelayInSecondsFromSLO(slo);
     const longestDateRange = getLookbackDateRange(
-      startedAt,
+      new Date(),
       longestLookbackWindow.duration,
       delayInSeconds
     );

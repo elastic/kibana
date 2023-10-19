@@ -34,6 +34,11 @@ describe('SummaryClient', () => {
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    jest.useFakeTimers().setSystemTime(TEST_DATE);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   describe('fetchSLIDataFrom', () => {
