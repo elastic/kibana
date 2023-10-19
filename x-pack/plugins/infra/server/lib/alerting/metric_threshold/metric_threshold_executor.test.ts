@@ -42,6 +42,8 @@ const logger = {
 
 const mockNow = new Date('2023-09-20T15:11:04.105Z');
 
+const STARTED_AT_MOCK_DATE = new Date();
+
 const mockOptions = {
   executionId: '',
   startedAt: mockNow,
