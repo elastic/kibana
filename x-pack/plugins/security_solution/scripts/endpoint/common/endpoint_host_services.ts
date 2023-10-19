@@ -366,7 +366,7 @@ const enrollHostWithFleet = async ({
 
     log.info(`pwd: ${pwdA}`);
     fs.writeFileSync(
-      '../../../target/kibana-security-solution/cypress/results/agent-status.txt',
+      '../../../../../target/kibana-security-solution/cypress/results/agent-status.txt',
       stdout
     );
     log.info(stdout);
