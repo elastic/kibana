@@ -78,6 +78,7 @@ import {
   RULES_PATH,
   SLOS_PATH,
 } from '../common/locators/paths';
+import { SloListLocatorDefinition } from './locators/slo_list';
 
 export interface ConfigSchema {
   unsafe: {
@@ -231,8 +232,8 @@ export class Plugin
     const sloDetailsLocator = pluginsSetup.share.url.locators.create(
       new SloDetailsLocatorDefinition()
     );
-
     const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
+    const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -372,6 +373,7 @@ export class Plugin
       ruleDetailsLocator,
       sloDetailsLocator,
       sloEditLocator,
+      sloListLocator,
     };
   }
 
