@@ -47,4 +47,18 @@ properties:
     type: string
     maxLength: 160
   customFields:
-    $ref: 'customfields.yaml'
+    type: array
+    description: >
+      Custom field values for a case.
+      Any optional custom fields that are not specified in the request are set to null.
+    x-technical-preview: true
+    minItems: 0
+    maxItems: 10
+    items:
+      type: object
+      required:
+        - key
+        - type
+        - value
+      properties:
+        $ref: 'case_customfields.yaml'

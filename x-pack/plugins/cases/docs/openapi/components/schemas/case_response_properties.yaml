@@ -65,7 +65,13 @@ properties:
   created_by:
     $ref: 'case_response_created_by_properties.yaml'
   customFields:
-    $ref: 'customfields.yaml'
+    type: array
+    description: Custom field values for the case.
+    x-technical-preview: true
+    items:
+      type: object
+      properties:
+        $ref: 'case_customfields.yaml'
   description:
     type: string
     example: A case description.

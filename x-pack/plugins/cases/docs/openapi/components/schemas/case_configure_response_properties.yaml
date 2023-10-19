@@ -7,21 +7,7 @@ customFields:
   items:
     type: object
     properties:
-      key:
-        description: The key identifying the custom field.
-        type: string
-      label:
-        description: The custom field label.
-        type: string
-      required:
-        description: Indicates whether the field is required.
-        type: boolean
-      type:
-        description: The type of the custom field.
-        type: string
-        enum:
-          - text
-          - toggle
+      $ref: 'case_configure_customfields.yaml'
 connector: 
   type: object
   properties:

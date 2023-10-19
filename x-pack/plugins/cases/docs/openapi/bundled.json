@@ -391,15 +391,19 @@
                           "type": "object",
                           "properties": {
                             "key": {
-                              "description": "The key identifying the custom field.",
-                              "type": "string"
+                              "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 36
                             },
                             "label": {
-                              "description": "The custom field label.",
-                              "type": "string"
+                              "description": "The custom field label that is displayed in the case.",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 50
                             },
                             "required": {
-                              "description": "Indicates whether the field is required.",
+                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
                               "type": "boolean"
                             },
                             "type": {
@@ -556,7 +560,7 @@
         }
       },
       "post": {
-        "summary": "Sets external connection details, such as the closure type and default connector for cases in the default space.",
+        "summary": "Creates a case specific configuration that includes external connection details and custom fields.",
         "operationId": "setCaseConfigurationDefaultSpace",
         "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
         "tags": [
@@ -600,15 +604,19 @@
                         "type": "object",
                         "properties": {
                           "key": {
-                            "description": "The key identifying the custom field.",
-                            "type": "string"
+                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 36
                           },
                           "label": {
-                            "description": "The custom field label.",
-                            "type": "string"
+                            "description": "The custom field label that is displayed in the case.",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
                           },
                           "required": {
-                            "description": "Indicates whether the field is required.",
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
                             "type": "boolean"
                           },
                           "type": {
@@ -813,15 +821,19 @@
                         "type": "object",
                         "properties": {
                           "key": {
-                            "description": "The key identifying the custom field.",
-                            "type": "string"
+                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 36
                           },
                           "label": {
-                            "description": "The custom field label.",
-                            "type": "string"
+                            "description": "The custom field label that is displayed in the case.",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
                           },
                           "required": {
-                            "description": "Indicates whether the field is required.",
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
                             "type": "boolean"
                           },
                           "type": {
@@ -2118,15 +2130,19 @@
                           "type": "object",
                           "properties": {
                             "key": {
-                              "description": "The key identifying the custom field.",
-                              "type": "string"
+                              "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 36
                             },
                             "label": {
-                              "description": "The custom field label.",
-                              "type": "string"
+                              "description": "The custom field label that is displayed in the case.",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 50
                             },
                             "required": {
-                              "description": "Indicates whether the field is required.",
+                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
                               "type": "boolean"
                             },
                             "type": {
@@ -2283,7 +2299,7 @@
         }
       },
       "post": {
-        "summary": "Sets external connection details, such as the closure type and default connector for cases.",
+        "summary": "Creates a case specific configuration that includes external connection details and custom fields.",
         "operationId": "setCaseConfiguration",
         "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
         "tags": [
@@ -2330,15 +2346,19 @@
                         "type": "object",
                         "properties": {
                           "key": {
-                            "description": "The key identifying the custom field.",
-                            "type": "string"
+                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 36
                           },
                           "label": {
-                            "description": "The custom field label.",
-                            "type": "string"
+                            "description": "The custom field label that is displayed in the case.",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
                           },
                           "required": {
-                            "description": "Indicates whether the field is required.",
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
                             "type": "boolean"
                           },
                           "type": {
@@ -2546,15 +2566,19 @@
                         "type": "object",
                         "properties": {
                           "key": {
-                            "description": "The key identifying the custom field.",
-                            "type": "string"
+                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 36
                           },
                           "label": {
-                            "description": "The custom field label.",
-                            "type": "string"
+                            "description": "The custom field label that is displayed in the case.",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
                           },
                           "required": {
-                            "description": "Indicates whether the field is required.",
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
                             "type": "boolean"
                           },
                           "type": {
@@ -4367,45 +4391,6 @@
         ],
         "default": "low"
       },
-      "customfields": {
-        "type": "array",
-        "description": "Custom field values for a case.",
-        "x-technical-preview": true,
-        "items": {
-          "type": "object",
-          "required": [
-            "key",
-            "type",
-            "value"
-          ],
-          "properties": {
-            "key": {
-              "description": "The unique identifier for the custom field.",
-              "type": "string"
-            },
-            "type": {
-              "description": "The custom field type.",
-              "type": "string",
-              "enum": [
-                "text",
-                "toggle"
-              ]
-            },
-            "value": {
-              "description": "The custom field value.",
-              "oneOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "boolean",
-                  "nullable": true
-                }
-              ]
-            }
-          }
-        }
-      },
       "create_case_request": {
         "title": "Create case request",
         "description": "The create case API request body varies depending on the type of connector.",
@@ -4481,7 +4466,47 @@
             "maxLength": 160
           },
           "customFields": {
-            "$ref": "#/components/schemas/customfields"
+            "type": "array",
+            "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+            "x-technical-preview": true,
+            "minItems": 0,
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "type",
+                "value"
+              ],
+              "properties": {
+                "key": {
+                  "description": "The unique identifier for the custom field. The key value must exist in the case configuration settings.\n",
+                  "type": "string"
+                },
+                "type": {
+                  "description": "The custom field type. It must match the type specified in the case configuration settings.\n",
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "toggle"
+                  ]
+                },
+                "value": {
+                  "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "nullable": true
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       },
@@ -4963,7 +4988,40 @@
             "$ref": "#/components/schemas/case_response_created_by_properties"
           },
           "customFields": {
-            "$ref": "#/components/schemas/customfields"
+            "type": "array",
+            "description": "Custom field values for the case.",
+            "x-technical-preview": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "description": "The unique identifier for the custom field. The key value must exist in the case configuration settings.\n",
+                  "type": "string"
+                },
+                "type": {
+                  "description": "The custom field type. It must match the type specified in the case configuration settings.\n",
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "toggle"
+                  ]
+                },
+                "value": {
+                  "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "nullable": true
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "description": {
             "type": "string",
@@ -5100,7 +5158,47 @@
                   ]
                 },
                 "customFields": {
-                  "$ref": "#/components/schemas/customfields"
+                  "type": "array",
+                  "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+                  "x-technical-preview": true,
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "key",
+                      "type",
+                      "value"
+                    ],
+                    "properties": {
+                      "key": {
+                        "description": "The unique identifier for the custom field. The key value must exist in the case configuration settings.\n",
+                        "type": "string"
+                      },
+                      "type": {
+                        "description": "The custom field type. It must match the type specified in the case configuration settings.\n",
+                        "type": "string",
+                        "enum": [
+                          "text",
+                          "toggle"
+                        ]
+                      },
+                      "value": {
+                        "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160,
+                            "nullable": true
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    }
+                  }
                 },
                 "description": {
                   "description": "An updated description for the case.",
@@ -5174,42 +5272,6 @@
         ],
         "example": ".none"
       },
-      "configure_custom_fields_request": {
-        "type": "array",
-        "description": "Custom fields case configuration.",
-        "x-technical-preview": true,
-        "items": {
-          "type": "object",
-          "required": [
-            "key",
-            "label",
-            "required",
-            "type"
-          ],
-          "properties": {
-            "key": {
-              "description": "A unique key for the custom field.",
-              "type": "string"
-            },
-            "label": {
-              "description": "The custom field label.",
-              "type": "string"
-            },
-            "required": {
-              "description": "Indicates whether the field is required.",
-              "type": "boolean"
-            },
-            "type": {
-              "description": "The type of the custom field.",
-              "type": "string",
-              "enum": [
-                "text",
-                "toggle"
-              ]
-            }
-          }
-        }
-      },
       "set_case_configuration_request": {
         "title": "Set case configuration request",
         "description": "External connection details, such as the closure type and default connector for cases.",
@@ -5254,7 +5316,46 @@
             ]
           },
           "customFields": {
-            "$ref": "#/components/schemas/configure_custom_fields_request"
+            "type": "array",
+            "description": "Custom fields case configuration.",
+            "x-technical-preview": true,
+            "minItems": 0,
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "label",
+                "required",
+                "type"
+              ],
+              "properties": {
+                "key": {
+                  "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 36
+                },
+                "label": {
+                  "description": "The custom field label that is displayed in the case.",
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "required": {
+                  "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                  "type": "boolean"
+                },
+                "type": {
+                  "description": "The type of the custom field.",
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "toggle"
+                  ]
+                }
+              }
+            }
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -5303,7 +5404,44 @@
             ]
           },
           "customFields": {
-            "$ref": "#/components/schemas/configure_custom_fields_request"
+            "type": "array",
+            "description": "Custom fields case configuration.",
+            "x-technical-preview": true,
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "label",
+                "required",
+                "type"
+              ],
+              "properties": {
+                "key": {
+                  "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 36
+                },
+                "label": {
+                  "description": "The custom field label that is displayed in the case.",
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "required": {
+                  "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                  "type": "boolean"
+                },
+                "type": {
+                  "description": "The type of the custom field.",
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "toggle"
+                  ]
+                }
+              }
+            }
           },
           "version": {
             "description": "The version of the connector. To retrieve the version value, use the get configuration API.\n",

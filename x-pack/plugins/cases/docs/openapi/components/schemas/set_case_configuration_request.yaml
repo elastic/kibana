@@ -19,6 +19,19 @@ properties:
       - name
       - type
   customFields:
-    $ref: 'configure_custom_fields_request.yaml'
+    type: array
+    description: Custom fields case configuration.
+    x-technical-preview: true
+    minItems: 0
+    maxItems: 10
+    items:
+      type: object
+      required:
+        - key
+        - label
+        - required
+        - type
+      properties:
+        $ref: 'case_configure_customfields.yaml'
   owner:
     $ref: 'owners.yaml'

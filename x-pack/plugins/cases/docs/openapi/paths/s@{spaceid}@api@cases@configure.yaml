@@ -32,7 +32,7 @@ get:
             $ref: '../components/schemas/4xx_response.yaml'
 
 post:
-  summary: Sets external connection details, such as the closure type and default connector for cases. 
+  summary: Creates a case specific configuration that includes external connection details and custom fields.
   operationId: setCaseConfiguration
   description: >
     You must have `all` privileges for the **Cases** feature in the

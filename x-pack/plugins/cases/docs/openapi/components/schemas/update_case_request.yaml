@@ -32,7 +32,21 @@ properties:
             - $ref: 'connector_properties_servicenow_sir.yaml'
             - $ref: 'connector_properties_swimlane.yaml'
         customFields:
-          $ref: 'customfields.yaml'
+          type: array
+          description: >
+            Custom field values for a case.
+            Any optional custom fields that are not specified in the request are set to null.
+          x-technical-preview: true
+          minItems: 0
+          maxItems: 10
+          items:
+            type: object
+            required:
+              - key
+              - type
+              - value
+            properties:
+              $ref: 'case_customfields.yaml'
         description:
           description: An updated description for the case.
           type: string

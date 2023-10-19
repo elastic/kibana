@@ -17,7 +17,18 @@ properties:
       - name
       - type
   customFields:
-    $ref: 'configure_custom_fields_request.yaml'
+    type: array
+    description: Custom fields case configuration.
+    x-technical-preview: true
+    items:
+      type: object
+      required:
+        - key
+        - label
+        - required
+        - type
+      properties:
+        $ref: 'case_configure_customfields.yaml'
   version:
     description: >
       The version of the connector.
