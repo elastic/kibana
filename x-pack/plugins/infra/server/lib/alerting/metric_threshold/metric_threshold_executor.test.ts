@@ -42,6 +42,8 @@ const logger = {
 
 const mockNow = new Date('2023-09-20T15:11:04.105Z');
 
+const STARTED_AT_MOCK_DATE = new Date();
+
 const mockOptions = {
   executionId: '',
   startedAt: mockNow,
@@ -73,6 +75,10 @@ const mockOptions = {
   },
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+  getTimeRange: () => {
+    const date = STARTED_AT_MOCK_DATE.toISOString();
+    return { dateStart: date, dateEnd: date };
+  },
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
