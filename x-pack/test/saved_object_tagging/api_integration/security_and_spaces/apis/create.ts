@@ -82,9 +82,11 @@ export default function (ftrContext: FtrProviderContext) {
         await supertest
           .post(`/api/saved_objects_tagging/tags/create`)
           .send({
-            name: 'My new tag',
-            description: 'I just created that',
-            color: '#009000',
+            attributes: {
+              name: 'My new tag',
+              description: 'I just created that',
+              color: '#009000',
+            },
           })
           .auth(username, password)
           .expect(httpCode)
