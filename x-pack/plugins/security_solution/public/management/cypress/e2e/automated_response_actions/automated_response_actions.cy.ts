@@ -5,58 +5,25 @@
  * 2.0.
  */
 
-import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
-import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
-import { createEndpointHost } from '../../tasks/create_endpoint_host';
-import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
-import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 // FLAKY: https://github.com/elastic/kibana/issues/168340
 describe.skip(
   'Automated Response Actions',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
-    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
-    let createdHost: CreateAndEnrollEndpointHostResponse;
-
     before(() => {
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version, 'automated_response_actions').then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
-
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
-            });
-          });
-        })
-      );
+      cy.createEndpointHost();
     });
 
     after(() => {
-      if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost);
-      }
-
-      if (indexedPolicy) {
-        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-      }
-
-      if (createdHost) {
-        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
-      }
+      cy.removeEndpointHost();
     });
 
     const hostname = new URL(Cypress.env('FLEET_SERVER_URL')).port;
@@ -87,7 +54,9 @@ describe.skip(
 
       it('should have generated endpoint and rule', () => {
         loadPage(APP_ENDPOINTS_PATH);
-        cy.contains(createdHost.hostname).should('exist');
+        cy.getCreatedHostData().then((hostData) =>
+          cy.contains(hostData.createdHost.hostname).should('exist')
+        );
 
         toggleRuleOffAndOn(ruleName);
 
@@ -99,9 +68,12 @@ describe.skip(
         cy.getByTestSubj('responseActionsViewTab').click();
         cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
 
-        cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
-          .should('contain', 'isolate completed successfully')
-          .and('contain', createdHost.hostname);
+        cy.getCreatedHostData().then((hostData) =>
+          cy
+            .getByTestSubj(`response-results-${hostData.createdHost.hostname}-details-tray`)
+            .should('contain', 'isolate completed successfully')
+            .and('contain', hostData.createdHost.hostname)
+        );
 
         cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
           .should('contain', 'The host does not have Elastic Defend integration installed')

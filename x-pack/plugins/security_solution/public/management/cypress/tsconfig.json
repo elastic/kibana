@@ -11,7 +11,8 @@
     "types": [
       "cypress",
       "node",
-      "cypress-react-selector"
+      "cypress-react-selector",
+      "cypress-data-session"
     ],
   },
   "kbn_references": [

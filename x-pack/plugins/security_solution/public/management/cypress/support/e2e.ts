@@ -24,13 +24,29 @@
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import 'cypress-react-selector';
+import 'cypress-data-session';
 // @ts-ignore
 import registerCypressGrep from '@cypress/grep';
 
-import { login, ROLE } from '../tasks/login';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type { PolicyData } from '../../../../common/endpoint/types';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import { loadPage } from '../tasks/common';
+import { login, ROLE } from '../tasks/login';
+import { createEndpointHost } from '../tasks/create_endpoint_host';
+import { enableAllPolicyProtections } from '../tasks/endpoint_policy';
+import { getEndpointIntegrationVersion, createAgentPolicyTask } from '../tasks/fleet';
+import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
 
 registerCypressGrep();
+
+const ENDPOINT_HOST_SESSION_NAME = 'endpointHost';
+
+export interface EndpointHostSession {
+  indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  policy: PolicyData;
+  createdHost: CreateAndEnrollEndpointHostResponse;
+}
 
 Cypress.Commands.addQuery<'getByTestSubj'>(
   'getByTestSubj',
@@ -102,7 +118,61 @@ Cypress.Commands.add(
 
 Cypress.on('uncaught:exception', () => false);
 
-// Login as a Platform Engineer to properly initialize Security Solution App
+Cypress.Commands.add('createEndpointHost', () =>
+  cy.dataSession(
+    ENDPOINT_HOST_SESSION_NAME,
+    () => {
+      let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+      let policy: PolicyData;
+      let createdHost: CreateAndEnrollEndpointHostResponse;
+
+      return getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+
+              return {
+                indexedPolicy,
+                policy,
+                createdHost,
+              };
+            });
+          });
+        })
+      );
+    },
+    true // don't invalidate the session when the test rerenders
+  )
+);
+
+Cypress.Commands.add('removeEndpointHost', () => {
+  cy.getCreatedHostData().then((endpointHost) => {
+    if (endpointHost) {
+      if (endpointHost.createdHost) {
+        cy.task('destroyEndpointHost', endpointHost.createdHost);
+      }
+
+      if (endpointHost.indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', endpointHost.indexedPolicy);
+      }
+
+      if (endpointHost.createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [endpointHost.createdHost.agentId] });
+      }
+    }
+  });
+});
+
+Cypress.Commands.add('getCreatedHostData', () =>
+  Cypress.getDataSession(ENDPOINT_HOST_SESSION_NAME)
+);
+
+// Login as a SOC Manager to properly initialize Security Solution App
 before(() => {
   login(ROLE.soc_manager);
   loadPage('/app/security/alerts');

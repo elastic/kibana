@@ -38,6 +38,7 @@ import type {
   IndexedEndpointRuleAlerts,
 } from '../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import type { LoadedRoleAndUser } from '../../../scripts/endpoint/common/role_and_user_loader';
+import type { EndpointHostSession } from './support/e2e';
 
 declare global {
   namespace Cypress {
@@ -92,6 +93,12 @@ declare global {
           timeout: number;
         }>
       ): Chainable<Subject>;
+
+      createEndpointHost(): Chainable<EndpointHostSession>;
+
+      removeEndpointHost(): Chainable<null>;
+
+      getCreatedHostData(): Chainable<EndpointHostSession>;
 
       task(
         name: 'indexFleetEndpointPolicy',

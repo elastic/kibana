@@ -6,6 +6,7 @@
  */
 
 import { merge } from 'lodash';
+import registerDataSession from 'cypress-data-session/src/plugin';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
 
@@ -62,6 +63,7 @@ export const getCypressBaseConfig = (
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+          registerDataSession(on, config);
           dataLoaders(on, config);
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);

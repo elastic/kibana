@@ -11,11 +11,14 @@ import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
 import { loadPage } from './common';
 import Chainable = Cypress.Chainable;
 
-export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
+export const waitForEndpointListPageToBeLoaded = (): void => {
   loadPage(APP_ENDPOINTS_PATH);
   closeAllToasts();
-  cy.contains(endpointHostname).should('exist');
+  cy.getCreatedHostData().then((hostData) => {
+    cy.contains(hostData.createdHost.hostname).should('exist');
+  });
 };
+
 export const openResponseConsoleFromEndpointList = (): void => {
   cy.getByTestSubj('endpointTableRowActions').first().click();
   cy.contains('Respond').click();
