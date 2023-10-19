@@ -219,7 +219,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     useListsConfig();
 
   const {
-    indexPattern,
+    sourcererDataView,
     runtimeMappings,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
@@ -541,7 +541,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
-            indexPattern={indexPattern}
+            sourcererDataView={sourcererDataView}
           />
         </FiltersGlobal>
         <RuleDetailsContextProvider>
