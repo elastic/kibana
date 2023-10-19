@@ -65,7 +65,7 @@ describe('SavedObjectsManagementActionRegistry', () => {
       );
     });
 
-    it('does not register saved object actions when SpacesApi.hasOnlyDefaultSpace is true', () => {
+    it('does not register spaces share and copy actions when SpacesApi.hasOnlyDefaultSpace is true', () => {
       const action = createAction('foo');
       setup.register(action);
       const start = service.start(spacesPluginMock.createStartContract(true));

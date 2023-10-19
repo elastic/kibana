@@ -60,7 +60,7 @@ describe('SavedObjectsManagementColumnRegistry', () => {
       );
     });
 
-    it('does not register saved object actions when SpacesApi.hasOnlyDefaultSpace is true', () => {
+    it('does not register space column when SpacesApi.hasOnlyDefaultSpace is true', () => {
       const column = createColumn('foo');
       setup.register(column);
       const start = service.start(spacesPluginMock.createStartContract(true));
