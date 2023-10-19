@@ -9,6 +9,7 @@ import { fireEvent, waitFor } from '@testing-library/dom';
 import { cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import Router from 'react-router-dom';
 
 import { paths } from '../../../common/locators/paths';
@@ -108,9 +109,13 @@ const mockKibana = () => {
         get: () => {},
       },
       triggersActionsUi: {
-        getAddRuleFlyout: jest
-          .fn()
-          .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
+        getAddRuleFlyout: jest.fn().mockReturnValue(
+          <div data-test-subj="add-rule-flyout">
+            {i18n.translate('xpack.observability.mockKibana.div.addRuleFlyoutLabel', {
+              defaultMessage: 'Add Rule Flyout',
+            })}
+          </div>
+        ),
       },
       uiSettings: {
         get: () => {},
