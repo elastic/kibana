@@ -91,7 +91,8 @@
     "@kbn/logging",
     "@kbn/core-plugins-server",
     "@kbn/text-based-languages",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/discover-utils"
   ],
   "exclude": [
     "target/**/*",
