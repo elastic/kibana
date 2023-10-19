@@ -190,7 +190,7 @@ export class RenderingService {
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
-      bootstrapScriptUrl: `${serverBasePath}/${bootstrapScript}`,
+      bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       darkMode,
@@ -214,7 +214,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           // TODO: Make this load as part of static assets!
-          translationsUrl: `${serverBasePath}/translations/${i18n.getLocale()}.json`,
+          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         theme: {
           darkMode,

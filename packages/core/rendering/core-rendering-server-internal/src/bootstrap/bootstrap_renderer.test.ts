@@ -319,7 +319,7 @@ describe('bootstrapRenderer', () => {
       expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
         isAnonymousPage,
         uiPlugins,
-        regularBundlePath: '/base-path/42/bundles',
+        bundlesHref: '/base-path/42/bundles',
       });
     });
   });

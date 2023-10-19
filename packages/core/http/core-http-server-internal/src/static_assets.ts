@@ -10,7 +10,11 @@ import type { KibanaRequest } from '@kbn/core-http-server/src/router';
 import type { BasePath } from './base_path_service';
 import { CdnConfig } from './cdn';
 
-export class StaticAssets {
+export interface IStaticAssets {
+  getHrefBase(request?: KibanaRequest): string;
+}
+
+export class StaticAssets implements IStaticAssets {
   constructor(private readonly basePath: BasePath, private readonly cdnConfig: CdnConfig) {}
   /**
    * Returns a href (hypertext reference) intended to be used as the base for constructing
