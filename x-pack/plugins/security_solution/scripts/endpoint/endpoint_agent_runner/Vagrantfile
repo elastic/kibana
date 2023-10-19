@@ -5,7 +5,7 @@ cachedAgentFilename = ENV["CACHED_AGENT_FILENAME"] || ''
 Vagrant.configure("2") do |config|
   config.vm.hostname = hostname
   config.vm.box = 'ubuntu/jammy64'
-  config.disksize.size = '40GB'
+  config.vm.disk :disk, size: "50GB", primary: true
 
   config.vm.provider :virtualbox do |vb|
     vb.memory = 6096
