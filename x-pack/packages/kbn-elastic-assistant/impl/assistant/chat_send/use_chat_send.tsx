@@ -54,8 +54,7 @@ export const useChatSend = ({
   setUserPrompt,
 }: UseChatSendProps): UseChatSend => {
   const { isLoading, sendMessages } = useSendMessages();
-  const { appendMessage, appendReplacements, appendStreamMessage, clearConversation } =
-    useConversation();
+  const { appendMessage, appendReplacements, clearConversation } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
     setPromptTextPreview(prompt);

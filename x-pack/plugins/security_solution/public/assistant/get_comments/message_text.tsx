@@ -57,7 +57,6 @@ const CURSOR = ` ᠎  `;
 
 const loadingCursorPlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
-    console.log('node loadingCursorPlugin?', node);
     if ('children' in node) {
       const nodeAsParent = node as Parent;
       nodeAsParent.children.forEach((child) => {
@@ -92,7 +91,6 @@ const loadingCursorPlugin = () => {
 
 const esqlLanguagePlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
-    console.log('node esqlLanguagePlugin?', node);
     if ('children' in node) {
       const nodeAsParent = node as Parent;
       nodeAsParent.children.forEach((child) => {
@@ -101,6 +99,13 @@ const esqlLanguagePlugin = () => {
     }
 
     if (node.type === 'code' && node.lang === 'esql') {
+      node.type = 'esql';
+    }
+    // TODO: make these renderers
+    if (
+      (node.type === 'code' && node.lang === 'kql') ||
+      (node.type === 'code' && node.lang === 'eql')
+    ) {
       node.type = 'esql';
     }
   };

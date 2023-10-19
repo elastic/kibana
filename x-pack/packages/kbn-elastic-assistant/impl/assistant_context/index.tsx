@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { AppendMessageProps } from '../assistant/use_conversation';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -35,7 +36,7 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
-import { AssistantAvailability, AssistantTelemetry } from './types';
+import { AssistantAvailability, AssistantTelemetry, Message } from './types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -104,10 +105,11 @@ export interface UseAssistantContext {
     currentConversation,
     lastCommentRef,
     showAnonymizedValues,
+    amendMessage,
   }: {
     currentConversation: Conversation;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
-
+    amendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;

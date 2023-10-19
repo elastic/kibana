@@ -6,7 +6,7 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation } from '@kbn/elastic-assistant';
+import type { Conversation, Message } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiMarkdownFormat, EuiText, tint } from '@elastic/eui';
 import React from 'react';
 
@@ -19,15 +19,36 @@ import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
 export const getComments = ({
+  amendMessage,
   currentConversation,
   lastCommentRef,
   showAnonymizedValues,
 }: {
+  amendMessage: ({
+    conversationId,
+    message,
+  }: {
+    conversationId: string;
+    message: Message;
+  }) => Message[];
   currentConversation: Conversation;
   lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
   showAnonymizedValues: boolean;
-}): EuiCommentProps[] =>
-  currentConversation.messages.map((message, index) => {
+}): EuiCommentProps[] => {
+  const amendMessageOfConversation = (content: string, index: number) => {
+    const replacementMessage = currentConversation.messages[index];
+    console.log('replacementMessage', { replacementMessage, content });
+    amendMessage({
+      conversationId: currentConversation.id,
+      message: {
+        content,
+        role: replacementMessage.role,
+        timestamp: replacementMessage.timestamp,
+      },
+    });
+  };
+
+  return currentConversation.messages.map((message, index) => {
     const isUser = message.role === 'user';
     const replacements = currentConversation.replacements;
     const errorStyles = {
@@ -94,6 +115,7 @@ export const getComments = ({
         ...messageProps,
         children: (
           <StreamComment
+            amendMessage={amendMessageOfConversation}
             reader={message.reader}
             index={index}
             lastCommentRef={lastCommentRef}
@@ -108,3 +130,4 @@ export const getComments = ({
       ...errorStyles,
     };
   });
+};

@@ -93,7 +93,7 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
-  const { createConversation } = useConversation();
+  const { amendMessage, createConversation } = useConversation();
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
@@ -339,6 +339,7 @@ const AssistantComponent: React.FC<Props> = ({
             currentConversation,
             lastCommentRef,
             showAnonymizedValues,
+            amendMessage,
           })}
           css={css`
             margin-right: 20px;
@@ -368,6 +369,7 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
+      amendMessage,
       currentConversation,
       editingSystemPromptId,
       getComments,

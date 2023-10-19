@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { concatMap, delay, Observable, of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import type { Subscription } from 'rxjs';
+import { concatMap, delay, Observable, of, share } from 'rxjs';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
 import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
@@ -35,27 +35,6 @@ interface Chunk {
   choices: ChunkChoice[];
 }
 
-const cursorCss = `
-  @keyframes blink {
-    0% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-
-  animation: blink 1s infinite;
-  width: 10px;
-  height: 16px;
-  vertical-align: middle;
-  display: inline-block;
-  background: rgba(0, 0, 0, 0.25);
-`;
-
 function getMessageFromChunks(chunks: Chunk[]) {
   let message = '';
   chunks.forEach((chunk) => {
@@ -65,14 +44,21 @@ function getMessageFromChunks(chunks: Chunk[]) {
 }
 
 interface Props {
+  amendMessage: (message: string, index: number) => void;
   index: number;
   isLastComment: boolean;
   lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
   reader: ReadableStreamDefaultReader<Uint8Array>;
 }
 
-export const StreamComment = ({ index, isLastComment, lastCommentRef, reader }: Props) => {
-  const response$ = useMemo(
+export const StreamComment = ({
+  amendMessage,
+  index,
+  isLastComment,
+  lastCommentRef,
+  reader,
+}: Props) => {
+  const observer$ = useMemo(
     () =>
       new Observable<PromptObservableState>((observer) => {
         observer.next({ chunks: [], loading: true });
@@ -135,23 +121,58 @@ export const StreamComment = ({ index, isLastComment, lastCommentRef, reader }: 
           reader.cancel();
         };
       }).pipe(concatMap((value) => of(value).pipe(delay(50)))),
+
     [reader]
   );
+  // const response = useObservable(observer$);
 
-  const response = useObservable(response$);
+  const [pendingMessage, setPendingMessage] = useState<string | undefined>();
 
-  useEffect(() => {}, [response$]);
+  // const [recalledMessages, setRecalledMessages] = useState<Message[] | undefined>(undefined);
 
-  let content = response?.message ?? '';
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+  const [subscription, setSubscription] = useState<Subscription | undefined>();
+
+  const onCompleteStream = useCallback(() => {
+    amendMessage(pendingMessage ?? '', index);
+  }, [amendMessage, index, pendingMessage]);
+
+  const [complete, setComplete] = useState(false);
+
+  useEffect(() => {
+    if (complete) {
+      onCompleteStream();
+    }
+  }, [complete, onCompleteStream]);
+
+  useEffect(() => {
+    console.log('observer$', { observer$ });
+    const newSubscription = observer$.pipe(share()).subscribe({
+      next: ({ message, loading: isLoading }) => {
+        setLoading(isLoading);
+
+        setPendingMessage(message);
+      },
+      complete: () => {
+        console.log('on complete');
+        setComplete(true);
+        setLoading(false);
+      },
+      error: (err) => {
+        setError(err.message);
+      },
+    });
+    setSubscription(newSubscription);
+  }, [observer$]);
 
   let state: 'init' | 'loading' | 'streaming' | 'error' | 'complete' = 'init';
 
-  if (response?.loading) {
-    state = content ? 'streaming' : 'loading';
-  } else if (response && 'error' in response && response.error) {
+  if (loading) {
+    state = pendingMessage ? 'streaming' : 'loading';
+  } else if (error) {
     state = 'error';
-    content = response.error;
-  } else if (content) {
+  } else if (pendingMessage) {
     state = 'complete';
   }
 
@@ -163,18 +184,19 @@ export const StreamComment = ({ index, isLastComment, lastCommentRef, reader }: 
       <MessagePanel
         body={
           <MessageText
-            content={content}
+            content={pendingMessage ?? ''}
             loading={isLoading || isStreaming}
             onActionClick={async () => {}}
           />
         }
-        error={response?.error ? new Error(response?.error) : undefined}
+        error={error ? new Error(error) : undefined}
         controls={
           isLoading || isStreaming ? (
             <StopGeneratingButton
               onClick={() => {
+                subscription?.unsubscribe();
+                setComplete(true);
                 console.log('stop generating');
-                // subscription?.unsubscribe();
                 // setLoading(false);
                 // setDisplayedMessages((prevMessages) =>
                 //   prevMessages.concat({

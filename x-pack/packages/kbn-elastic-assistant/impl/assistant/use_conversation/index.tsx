@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
@@ -31,7 +31,7 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
   },
 };
 
-interface AppendMessageProps {
+export interface AppendMessageProps {
   conversationId: string;
   message: Message;
 }
@@ -58,6 +58,7 @@ interface SetConversationProps {
 interface UseConversation {
   appendStreamMessage: ({ conversationId, message }: AppendMessageProps) => void;
   appendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
+  amendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
   appendReplacements: ({
     conversationId,
     replacements,
@@ -72,33 +73,35 @@ interface UseConversation {
 export const useConversation = (): UseConversation => {
   const { allSystemPrompts, assistantTelemetry, setConversations } = useAssistantContext();
 
-  const [pendingMessage, setPendingMessage] = useState();
-  useEffect(() => {
-    console.log('pendingMessage', pendingMessage);
-  }, [pendingMessage]);
+  /**
+   * Replaces the last message of conversation[] for a given conversationId
+   */
+  const amendMessage = useCallback(
+    ({ conversationId, message }) => {
+      let messages: Message[] = [];
+      setConversations((prev: Record<string, Conversation>) => {
+        const prevConversation: Conversation | undefined = prev[conversationId];
 
-  const appendStreamMessage = useCallback(({ conversationId, reader }) => {
-    // assistantTelemetry?.reportAssistantMessageSent({ conversationId, role });
-    let messages: Message[] = [];
-    setConversations((prev: Record<string, Conversation>) => {
-      const prevConversation: Conversation | undefined = prev[conversationId];
+        if (prevConversation != null) {
+          prevConversation.messages.pop();
+          messages = [...prevConversation.messages, message];
+          const newConversation = {
+            ...prevConversation,
+            messages,
+          };
+          return {
+            ...prev,
+            [conversationId]: newConversation,
+          };
+        } else {
+          return prev;
+        }
+      });
+      return messages;
+    },
+    [setConversations]
+  );
 
-      if (prevConversation != null) {
-        messages = [...prevConversation.messages, { reader, role: 'assistant' }];
-        const newConversation = {
-          ...prevConversation,
-          messages,
-        };
-        return {
-          ...prev,
-          [conversationId]: newConversation,
-        };
-      } else {
-        return prev;
-      }
-    });
-    return messages;
-  }, []);
   /**
    * Append a message to the conversation[] for a given conversationId
    */
@@ -290,9 +293,9 @@ export const useConversation = (): UseConversation => {
   );
 
   return {
+    amendMessage,
     appendMessage,
     appendReplacements,
-    appendStreamMessage,
     clearConversation,
     createConversation,
     deleteConversation,
