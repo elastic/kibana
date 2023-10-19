@@ -33,14 +33,18 @@ export function createConfig(
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
 
-  const { kibanaServer: reportingServer } = config;
+  const { kibanaServer: reportingServer, statefulSettings } = config;
   const serverInfo = core.http.getServerInfo();
   // set kibanaServer.hostname, default to server.host, don't allow "0.0.0.0" as it breaks in Windows
   let kibanaServerHostname = reportingServer.hostname
     ? reportingServer.hostname
     : serverInfo.hostname;
 
-  if (
+  if (statefulSettings.enabled === false) {
+    logger.warn(
+      `Found 'server.host: "0.0.0.0"' in Kibana configuration. Overriding 'xpack.reporting.kibanaServer.hostname' with 'localhost'`
+    );
+  } else if (
     ipaddr.isValid(kibanaServerHostname) &&
     !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
   ) {
