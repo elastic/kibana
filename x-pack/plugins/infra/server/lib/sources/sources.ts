@@ -27,7 +27,7 @@ import {
 import { SourceConfigurationSavedObjectRT } from '.';
 import { InfraConfig } from '../..';
 import { defaultSourceConfiguration } from './defaults';
-import { AnomalyThresholdRangeError, NotFoundError } from './errors';
+import { AnomalyThresholdRangeError } from './errors';
 import {
   extractSavedObjectReferences,
   resolveSavedObjectReferences,
@@ -43,7 +43,6 @@ interface Libs {
 export type IInfraSources = Pick<InfraSources, keyof InfraSources>;
 
 export class InfraSources {
-  private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
   private readonly libs: Libs;
 
   constructor(libs: Libs) {
@@ -55,28 +54,17 @@ export class InfraSources {
     sourceId: string
   ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
-    const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
-      .then((internalSourceConfiguration) => ({
-        id: sourceId,
-        version: undefined,
-        updatedAt: undefined,
-        origin: 'internal' as 'internal',
+    const savedSourceConfiguration = await this.getSavedSourceConfiguration(
+      savedObjectsClient,
+      sourceId
+    )
+      .then((result) => ({
+        ...result,
         configuration: mergeSourceConfiguration(
           staticDefaultSourceConfiguration,
-          internalSourceConfiguration
+          result.configuration
         ),
       }))
-      .catch((err) =>
-        err instanceof NotFoundError
-          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then((result) => ({
-              ...result,
-              configuration: mergeSourceConfiguration(
-                staticDefaultSourceConfiguration,
-                result.configuration
-              ),
-            }))
-          : Promise.reject(err)
-      )
       .catch((err) =>
         SavedObjectsErrorHelpers.isNotFoundError(err)
           ? Promise.resolve({
@@ -214,25 +202,6 @@ export class InfraSources {
         updatedSourceConfiguration.configuration
       ),
     };
-  }
-
-  public async defineInternalSourceConfiguration(
-    sourceId: string,
-    sourceProperties: InfraStaticSourceConfiguration
-  ) {
-    this.internalSourceConfigurations.set(sourceId, sourceProperties);
-  }
-
-  public async getInternalSourceConfiguration(sourceId: string) {
-    const internalSourceConfiguration = this.internalSourceConfigurations.get(sourceId);
-
-    if (!internalSourceConfiguration) {
-      throw new NotFoundError(
-        `Failed to load internal source configuration: no configuration "${sourceId}" found.`
-      );
-    }
-
-    return internalSourceConfiguration;
   }
 
   private async getStaticDefaultSourceConfiguration() {

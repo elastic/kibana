@@ -281,7 +281,6 @@ export class InfraServerPlugin
     });
 
     return {
-      defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
       inventoryViews,
       metricsExplorerViews,
     } as InfraPluginSetup;
