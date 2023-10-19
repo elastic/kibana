@@ -118,7 +118,7 @@ export class ObservabilityAIAssistantService {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
-            refresh_interval: '1s',
+            hidden: true,
           },
         },
       });
@@ -175,7 +175,7 @@ export class ObservabilityAIAssistantService {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
-            refresh_interval: '1s',
+            hidden: true,
           },
         },
       });
