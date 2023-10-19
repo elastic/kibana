@@ -13,7 +13,7 @@ import { withServicesProvider } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
-import { SecuritySideNavComponent } from './project_navigation/project_navigation';
+import { SecuritySideNavComponent } from './project_navigation';
 import { projectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
 
