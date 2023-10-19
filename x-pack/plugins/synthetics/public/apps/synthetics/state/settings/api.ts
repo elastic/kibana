@@ -26,7 +26,11 @@ interface SaveApiRequest {
 }
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
-  return await apiService.get(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, {}, DynamicSettingsCodec);
+  return await apiService.get(
+    SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
+    { version: '2023-10-31' },
+    DynamicSettingsCodec
+  );
 };
 
 export const setDynamicSettings = async ({
@@ -35,7 +39,10 @@ export const setDynamicSettings = async ({
   return await apiService.put(
     SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
     settings,
-    DynamicSettingsSaveCodec
+    DynamicSettingsSaveCodec,
+    {
+      version: '2023-10-31',
+    }
   );
 };
 
