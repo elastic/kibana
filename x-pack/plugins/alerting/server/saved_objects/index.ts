@@ -149,16 +149,21 @@ export function setupSavedObjects(
     mappings: {
       dynamic: false,
       properties: {
-        // Don't need to index
+        createdAt: {
+          type: 'date',
+        },
+        // Don't need to index right now
+        // will need to map in the future to enable "pausing" ad hoc runs
+        // enabled: {
+        //   type: 'boolean',
+        // },
+        // will need to map in the future to enable pausing and cancelling ad hoc runs
         // ruleId: {
         //   type: 'keyword',
         // },
         // spaceId: {
         //   type: 'keyword',
         // },
-        createdAt: {
-          type: 'date',
-        },
         // intervalStart: {
         //   type: 'date',
         // },

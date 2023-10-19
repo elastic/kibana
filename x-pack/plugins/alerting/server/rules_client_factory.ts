@@ -28,6 +28,7 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 import { AlertingRulesConfig } from './config';
 import { GetAlertIndicesAlias } from './lib';
 import { AlertsService } from './alerts_service/alerts_service';
+import { AdHocRuleRunClient } from './ad_hoc_runs/ad_hoc_rule_run_client';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -47,6 +48,7 @@ export interface RulesClientFactoryOpts {
   maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
   alertsService: AlertsService | null;
+  adHocRuleRunClient: AdHocRuleRunClient;
 }
 
 export class RulesClientFactory {
@@ -69,6 +71,7 @@ export class RulesClientFactory {
   private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
   private getAlertIndicesAlias!: GetAlertIndicesAlias;
   private alertsService!: AlertsService | null;
+  private adHocRuleRunClient!: AdHocRuleRunClient;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -93,6 +96,7 @@ export class RulesClientFactory {
     this.maxScheduledPerMinute = options.maxScheduledPerMinute;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
     this.alertsService = options.alertsService;
+    this.adHocRuleRunClient = options.adHocRuleRunClient;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -123,6 +127,7 @@ export class RulesClientFactory {
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
+      adHocRuleRunClient: this.adHocRuleRunClient,
       async getUserName() {
         if (!securityPluginStart) {
           return null;

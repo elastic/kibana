@@ -62,6 +62,7 @@ import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggest
 import { registerFieldsRoute } from './suggestions/fields_rules';
 import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
+import { scheduleAdHocRuleRun } from './rule/apis/ad_hoc_runs/schedule/schedule_ad_hoc_run_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -133,4 +134,7 @@ export function defineRoutes(opts: RouteOptions) {
   bulkGetMaintenanceWindowRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
   bulkUntrackAlertRoute(router, licenseState);
+
+  // ad-hoc rule executions
+  scheduleAdHocRuleRun(router, licenseState);
 }

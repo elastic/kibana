@@ -471,3 +471,13 @@ export interface RawRule extends SavedObjectAttributes {
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+
+export interface AdHocRuleRunParams extends SavedObjectAttributes {
+  ruleId: string;
+  spaceId: string;
+  createdAt: string;
+  enabled: boolean;
+  intervalStart: string;
+  intervalDuration: string;
+  intervalEnd?: string;
+}

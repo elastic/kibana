@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from '@kbn/core/server';
+import { CoreStart, ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { ScheduleAdHocRuleRunOptions } from '../application/rule/methods/ad_hoc_runs/schedule/types';
 import { AlertingPluginsStart } from '../plugin';
 
 interface ConstructorOpts {
@@ -18,9 +19,14 @@ interface ConstructorOpts {
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>;
 }
 
+type QueueOpts = ScheduleAdHocRuleRunOptions & {
+  spaceId: string;
+};
 export class AdHocRuleRunClient {
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
+  private savedObjectsRepository?: ISavedObjectsRepository;
+  private coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>;
   private readonly checkerTaskType = 'Ad-Hoc-Rule-Run-Check';
   private readonly adHocRuleRunTaskType = 'Ad-Hoc-Rule-Run';
   private readonly checkerTaskTimeout = '1m';
@@ -28,6 +34,7 @@ export class AdHocRuleRunClient {
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
+    this.coreStartServices = opts.coreStartServices;
 
     // Register the task that checks if there are any ad hoc rule
     // runs in the queue and schedules the run if there are
@@ -37,7 +44,7 @@ export class AdHocRuleRunClient {
         timeout: this.checkerTaskTimeout,
         createTaskRunner: () => {
           return {
-            run: async () => this.runCheckTask(opts.coreStartServices),
+            run: async () => this.runCheckTask(),
           };
         },
       },
@@ -74,9 +81,49 @@ export class AdHocRuleRunClient {
     }
   }
 
-  private runCheckTask = async (
-    coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
-  ) => {
+  public async queue({
+    ruleIds,
+    spaceId,
+    intervalStart,
+    intervalDuration,
+    intervalEnd,
+  }: QueueOpts) {
+    const savedObjectsRepository = await this.getSavedObjectsRepository();
+    const bulkResponse = await savedObjectsRepository.bulkCreate(
+      ruleIds.map((ruleId: string) => ({
+        type: 'ad_hoc_rule_run_params',
+        attributes: {
+          createdAt: Date.now(),
+          ruleId,
+          spaceId,
+          enabled: true,
+          intervalStart,
+          intervalDuration,
+          ...(intervalEnd ? { intervalEnd } : {}),
+        },
+      }))
+    );
+
+    // TODO retry errors
+    return bulkResponse.saved_objects.map((so, index) => ({
+      ruleId: ruleIds[index],
+      adHocRunId: so.error ? null : so.id,
+    }));
+  }
+
+  private async getSavedObjectsRepository(): Promise<ISavedObjectsRepository> {
+    if (this.savedObjectsRepository) {
+      return this.savedObjectsRepository;
+    }
+
+    const [coreStart] = await this.coreStartServices;
+    this.savedObjectsRepository = coreStart.savedObjects.createInternalRepository([
+      'ad_hoc_rule_run_params',
+    ]);
+    return this.savedObjectsRepository;
+  }
+
+  private runCheckTask = async () => {
     this.logger.info(`Running ad hoc rule run check task`);
     try {
       // Ensure no ad hoc task is currently running
@@ -91,10 +138,7 @@ export class AdHocRuleRunClient {
       }
 
       // Check if there are any ad hoc rule runs queued up
-      const [coreStart] = await coreStartServices;
-      const savedObjectsRepository = coreStart.savedObjects.createInternalRepository([
-        'ad_hoc_rule_run_params',
-      ]);
+      const savedObjectsRepository = await this.getSavedObjectsRepository();
       const findResponse = await savedObjectsRepository.find({
         type: 'ad_hoc_rule_run_params',
         sortField: 'createdAt',

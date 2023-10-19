@@ -508,6 +508,7 @@ export class AlertingPlugin {
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
+      adHocRuleRunClient: this.adHocRuleRunClient!,
     });
 
     rulesSettingsClientFactory.initialize({
