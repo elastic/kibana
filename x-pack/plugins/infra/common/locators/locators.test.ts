@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { LogsLocatorDefinition, LogsLocatorDependencies } from './logs_locator';
 import { NodeLogsLocatorDefinition } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
-import { findInventoryFields } from '../inventory_models';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import moment from 'moment';
 import {
   DEFAULT_LOG_VIEW,
