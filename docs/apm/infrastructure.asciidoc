@@ -2,6 +2,8 @@
 [[infrastructure]]
 === Infrastructure
 
+beta::[]
+
 The *Infrastructure* tab provides information about the containers, pods, and hosts,
 that the selected service is linked to.
 
