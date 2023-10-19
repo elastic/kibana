@@ -110,7 +110,6 @@ const mockKibana = () => {
       triggersActionsUi: {
         getAddRuleFlyout: jest
           .fn()
-          // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n, @kbn/i18n/strings_should_be_translated_with_formatted_message
           .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
       },
       uiSettings: {
