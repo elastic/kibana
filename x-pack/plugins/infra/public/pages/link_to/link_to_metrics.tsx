@@ -9,10 +9,10 @@ import React from 'react';
 import { match as RouteMatch, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { inventoryModels } from '@kbn/metrics-data-access-plugin/common';
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToHostDetailViaIP } from './redirect_to_host_detail_via_ip';
 import { RedirectToInventory } from './redirect_to_inventory';
-import { inventoryModels } from '../../../common/inventory_models';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
