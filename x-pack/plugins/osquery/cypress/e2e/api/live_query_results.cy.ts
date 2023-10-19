@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { request } from '../../tasks/common';
 import { loadLiveQuery } from '../../tasks/api_fixtures';
 import { API_VERSIONS } from '../../../common/constants';
@@ -25,7 +24,7 @@ describe('Live query', { tags: ['@ess', '@serverless'] }, () => {
 
   context('GET getLiveQueryDetailsRoute', () => {
     it('validates we get successful response', () => {
-      request<{ items: PackagePolicy[] }>({
+      request({
         url: `/api/osquery/live_queries/${liveQueryId}`,
         headers: {
           'Elastic-Api-Version': API_VERSIONS.public.v1,
@@ -37,7 +36,7 @@ describe('Live query', { tags: ['@ess', '@serverless'] }, () => {
   });
   context('GET getLiveQueryResultsRoute', () => {
     it('validates we get successful response', () => {
-      request<{ items: PackagePolicy[] }>({
+      request({
         url: `/api/osquery/live_queries/${liveQueryId}/results/${queriesQueryActionId}`,
         headers: {
           'Elastic-Api-Version': API_VERSIONS.public.v1,
