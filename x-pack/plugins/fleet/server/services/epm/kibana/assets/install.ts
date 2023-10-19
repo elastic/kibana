@@ -48,7 +48,7 @@ const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
   );
 const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
-type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
+export type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
   type: KibanaSavedObjectType;
 };
 export type ArchiveAsset = Pick<
@@ -312,16 +312,14 @@ export async function installKibanaSavedObjects({
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
-  // Index patterns (now called "data views") have their own import logic
-  const [_indexPatternSavedObjects, nonIndexPatternSavedObjects] = partition(
+  // Index patterns (now called "data views") have their own import logic, so separate by type here.
+  // We have to use a type assertion because `partition` doesn't support multi-typed arrays via multiple generics.
+  const [_indexPatternSavedObjects, nonIndexPatternSavedObjects] = partition<any>(
     toBeSavedObjects,
     ({ type }) => type === KibanaSavedObjectType.indexPattern
   );
 
-  // We have to use a type assertion here because `partition` doesn't support multi-typed arrays via multiple generics
-  const indexPatternSavedObjects = _indexPatternSavedObjects as Array<
-    SavedObject<DataViewSavedObjectAttrs>
-  >;
+  const indexPatternSavedObjects = _indexPatternSavedObjects;
 
   await handleIndexPatternImport({
     indexPatternSavedObjects,
@@ -432,23 +430,24 @@ export function toAssetReference({ id, type }: SavedObject) {
   return reference;
 }
 
-// Exported for testing
 export async function handleIndexPatternImport({
   indexPatternSavedObjects,
   savedObjectsClient,
   savedObjectsImporter,
   logger,
 }: {
-  indexPatternSavedObjects: Array<SavedObject<DataViewSavedObjectAttrs>>;
+  indexPatternSavedObjects: ReturnType<typeof getIndexPatternSavedObjects>;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
 }) {
   // We want to figure out which data views being created already exist and which ones are brand new
-  const newDataViews: Array<SavedObject<DataViewSavedObjectAttrs>> = [];
-  const existingDataViews: Array<SavedObject<DataViewSavedObjectAttrs>> = [];
+  const newDataViews = [];
+  const existingDataViews = [];
 
-  for (const dataView of indexPatternSavedObjects as Array<SavedObject<DataViewSavedObjectAttrs>>) {
+  // TODO - Might be worth refactoring this to a `bulkGet` or `find` instead, though Fleet only manages
+  // two dataviews right now so the gains are currently negligible.
+  for (const dataView of indexPatternSavedObjects) {
     try {
       const existingDataView = await savedObjectsClient.get<DataViewSavedObjectAttrs>(
         KibanaSavedObjectType.indexPattern,
@@ -466,33 +465,36 @@ export async function handleIndexPatternImport({
 
       newDataViews.push(dataView);
     }
+  }
 
-    for (const existingDataView of existingDataViews) {
-      // If a data view with the given ID already exists, we need to make sure it has the right `title` and `name`.
-      // This is essentially a "lazy migration" as a result of https://github.com/elastic/kibana/issues/120340.
-      const shouldUpdateTitle = existingDataView.attributes.title !== dataView.attributes.title;
-      const shouldUpdateName = existingDataView.attributes.name !== dataView.attributes.name;
+  for (const existingDataView of existingDataViews) {
+    const matchingDataView = indexPatternSavedObjects.find(({ id }) => id === existingDataView.id)!;
 
-      let updateAttributes: Partial<DataViewSavedObjectAttrs> = {};
+    // If a data view with the given ID already exists, we need to make sure it has the right `title` and `name`.
+    // This is essentially a "lazy migration" as a result of https://github.com/elastic/kibana/issues/120340.
+    const shouldUpdateTitle =
+      existingDataView.attributes.title !== matchingDataView.attributes.title;
+    const shouldUpdateName = existingDataView.attributes.name !== matchingDataView.attributes.name;
 
-      if (shouldUpdateTitle) {
-        updateAttributes = { ...updateAttributes, title: dataView.attributes.title };
-      }
-      if (shouldUpdateName) {
-        updateAttributes = { ...updateAttributes, name: dataView.attributes.name };
-      }
+    let updateAttributes: Partial<DataViewSavedObjectAttrs> = {};
 
-      if (!isEmpty(updateAttributes)) {
-        logger.info(
-          `Found outdated data view with id: ${dataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
-        );
+    if (shouldUpdateTitle) {
+      updateAttributes = { ...updateAttributes, title: matchingDataView.attributes.title };
+    }
+    if (shouldUpdateName) {
+      updateAttributes = { ...updateAttributes, name: matchingDataView.attributes.name };
+    }
 
-        await savedObjectsClient.update(
-          KibanaSavedObjectType.indexPattern,
-          dataView.id,
-          updateAttributes
-        );
-      }
+    if (!isEmpty(updateAttributes)) {
+      logger.info(
+        `Found outdated data view with id: ${matchingDataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
+      );
+
+      await savedObjectsClient.update(
+        KibanaSavedObjectType.indexPattern,
+        matchingDataView.id,
+        updateAttributes
+      );
     }
   }
 

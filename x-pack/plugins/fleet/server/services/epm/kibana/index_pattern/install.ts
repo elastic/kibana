@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { appContextService } from '../../..';
 import { getPackageSavedObjects } from '../../packages/get';
+import { SavedObjectToBe } from '../assets/install';
 const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
 export const indexPatternTypes = Object.values(dataTypes);
