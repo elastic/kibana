@@ -47,8 +47,6 @@ const goToRulesAndOpenValueListModal = () => {
   openValueListsModal();
 };
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-// Flaky on serverless
 describe('Use Value list in exception entry', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cleanKibana();
