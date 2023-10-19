@@ -42,8 +42,6 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-// Flaky in serverless tests
 describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
