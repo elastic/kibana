@@ -50,7 +50,6 @@ export async function queryPings<F>(
     pageIndex,
     locations,
     excludedLocations,
-    finalAttempt,
   } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
@@ -65,7 +64,6 @@ export async function queryPings<F>(
           { range: { '@timestamp': { gte: from, lte: to } } },
           ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(status ? [{ term: { 'monitor.status': status } }] : []),
-          ...(finalAttempt ? [{ term: { 'summary.final_attempt': finalAttempt } }] : []),
         ] as QueryDslQueryContainer[],
       },
     },
