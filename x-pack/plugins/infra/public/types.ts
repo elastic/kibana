@@ -46,10 +46,6 @@ import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
-import type {
-  SourceProviderProps,
-  UseNodeMetricsTableOptions,
-} from './components/infrastructure_node_metrics_tables/shared';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
@@ -65,15 +61,6 @@ export interface InfraClientStartExports {
   metricsExplorerViews?: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
   locators: InfraLocators;
-  ContainerMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
-  HostMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
-  PodMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
 }
 
 export interface InfraClientSetupDeps {
