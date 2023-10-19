@@ -8,12 +8,25 @@
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { userInfo } from 'os';
+import { ok } from 'assert';
+import {
+  isFleetServerRunning,
+  startFleetServer,
+} from '../common/fleet_server/fleet_server_services';
+import {
+  addSentinelOneIntegrationToAgentPolicy,
+  enrollHostVmWithFleet,
+  fetchFleetServerUrl,
+  getOrCreateDefaultAgentPolicy,
+} from '../common/fleet_services';
 import { installSentinelOneAgent } from './common';
 import { createVm } from '../common/vm_services';
 import { createRuntimeServices } from '../common/stack_services';
 
 export const cli = async () => {
   // TODO:PT add support for CPU, Disk and Memory input args
+
+  // TODO:PT is it possible to simplify the argumnets by only requiring that user provide S1 management console URL? and then we get download URL from it?
 
   return run(runCli, {
     description:
@@ -76,13 +89,28 @@ const runCli: RunFn = async ({ log, flags }) => {
   const s1SiteToken = flags.s1SiteToken as string;
   const policy = flags.policy as string;
   const force = flags.force as boolean;
+
+  const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
+
+  ok(s1AgentUrl, getRequiredArgMessage('s1AgentUrl'));
+  ok(s1ApiToken, getRequiredArgMessage('s1ApiToken'));
+  ok(s1SiteToken, getRequiredArgMessage('s1SiteToken'));
+
   const vmName =
     (flags.vmName as string) ||
     `${userInfo().username.toLowerCase().replaceAll('.', '-')}-sentinelone-${Math.random()
       .toString()
       .substring(2, 6)}`;
 
-  const { kbnClient, log: logger } = await createRuntimeServices({
+  // derive the SentinelOne management console URL from the download URL
+  const s1ManagementConsoleUri = new URL(s1AgentUrl);
+  s1ManagementConsoleUri.pathname = '';
+  s1ManagementConsoleUri.hash = '';
+  s1ManagementConsoleUri.username = '';
+  s1ManagementConsoleUri.pathname = '';
+  s1ManagementConsoleUri.search = '';
+
+  const { kbnClient } = await createRuntimeServices({
     kibanaUrl,
     elasticsearchUrl: elasticUrl,
     username,
@@ -98,6 +126,8 @@ const runCli: RunFn = async ({ log, flags }) => {
     disk: '10G',
   });
 
+  // TODO: can we validate tha the s1 URL + api token is valid?
+
   const s1Info = await installSentinelOneAgent({
     hostVm,
     log,
@@ -106,5 +136,37 @@ const runCli: RunFn = async ({ log, flags }) => {
     siteToken: s1SiteToken,
   });
 
-  // FIXME:PT Install Elastic Agent and connect it
+  if (force) {
+    await startFleetServer({ kbnClient, logger: log, version, force });
+  } else {
+    const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
+
+    if (!currentFleetServerUrl || !(await isFleetServerRunning(currentFleetServerUrl))) {
+      await startFleetServer({ kbnClient, logger: log, version });
+    }
+  }
+
+  const agentPolicyId = policy || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
+
+  await addSentinelOneIntegrationToAgentPolicy({
+    kbnClient,
+    agentPolicyId,
+    consoleUrl: s1ManagementConsoleUri.toString(),
+    apiToken: s1ApiToken,
+  });
+
+  await enrollHostVmWithFleet({
+    hostVm,
+    kbnClient,
+    log,
+    agentPolicyId,
+    version,
+  });
+
+  log.info(`Done!
+${hostVm.info()}
+
+SentinelOne Agent Status:
+${s1Info.status}
+`);
 };

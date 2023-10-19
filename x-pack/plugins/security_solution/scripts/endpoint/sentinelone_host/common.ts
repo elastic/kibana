@@ -6,6 +6,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import type { HostVm } from '../common/types';
 
 interface InstallSentinelOneAgentOptions {
   hostVm: HostVm;
