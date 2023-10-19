@@ -411,6 +411,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      featureIds,
     }),
     [
       alertsTableConfiguration,
@@ -439,6 +440,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      featureIds,
     ]
   );
 

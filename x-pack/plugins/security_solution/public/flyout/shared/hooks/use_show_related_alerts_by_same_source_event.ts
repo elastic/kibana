@@ -6,7 +6,7 @@
  */
 
 import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
-import { ORIGINAL_EVENT_ID } from '../constants/field_names';
+import { ANCESTOR_ID } from '../constants/field_names';
 import { getField } from '../utils';
 
 export interface ShowRelatedAlertsBySameSourceEventParams {
@@ -33,7 +33,7 @@ export interface ShowRelatedAlertsBySameSourceEventResult {
 export const useShowRelatedAlertsBySameSourceEvent = ({
   getFieldsData,
 }: ShowRelatedAlertsBySameSourceEventParams): ShowRelatedAlertsBySameSourceEventResult => {
-  const originalEventId = getField(getFieldsData(ORIGINAL_EVENT_ID));
+  const originalEventId = getField(getFieldsData(ANCESTOR_ID));
   return {
     show: originalEventId != null,
     ...(originalEventId && { originalEventId }),

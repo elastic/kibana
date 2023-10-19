@@ -65,6 +65,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}canvas.html`,
     },
     cloud: {
+      beatsAndLogstashConfiguration: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-cloud-id.html`,
       indexManagement: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-configure-index-management.html`,
     },
     console: {
@@ -456,6 +457,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       },
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
+      createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -848,9 +850,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
-    },
-    esql: {
-      statsBy: `${ELASTICSEARCH_DOCS}esql-stats-by.html`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
