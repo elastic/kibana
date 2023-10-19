@@ -29,8 +29,10 @@ export default function ({
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
-  describe('dashboard snapshots', function describeIndexTests() {
+  describe.only('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -96,6 +98,13 @@ export default function ({
     });
 
     describe('compare controls snapshot', async () => {
+      const waitForPageReady = async () => {
+        await PageObjects.dashboard.waitForRenderComplete();
+        await retry.waitFor('page ready for screenshot', async () => {
+          return await testSubjects.exists('globalQueryBar');
+        });
+      };
+
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
@@ -115,6 +124,7 @@ export default function ({
       });
 
       it('in light mode', async () => {
+        await waitForPageReady();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_controls_light',
           updateBaselines
@@ -127,8 +137,7 @@ export default function ({
           'theme:darkMode': true,
         });
         await browser.refresh();
-        await PageObjects.dashboard.waitForRenderComplete();
-
+        await waitForPageReady();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_controls_dark',
           updateBaselines
