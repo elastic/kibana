@@ -14,5 +14,4 @@ export * from './use_quick_start_form';
 // but exported here to support individual usage.
 export * from './use_wait_for_fleet_server';
 export * from './use_select_fleet_server_policy';
-export * from './use_service_token';
 export * from './use_fleet_server_host';

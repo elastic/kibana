@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
@@ -42,7 +42,7 @@ import { MultiRowInput } from '../multi_row_input';
 import type { Output, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import { useBreadcrumbs, useStartServices, useServiceToken } from '../../../../hooks';
 
 import { OutputFormKafkaSection } from './output_form_kafka';
 
@@ -67,6 +67,11 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
   const { euiTheme } = useEuiTheme();
+  const { serviceToken, isLoadingServiceToken, generateServiceToken } = useServiceToken();
+
+  useEffect(() => {
+    if (serviceToken) inputs.serviceTokenInput.setValue(serviceToken);
+  }, [serviceToken, inputs.serviceTokenInput]);
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
@@ -250,27 +255,57 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           {...inputs.elasticsearchUrlInput.props}
           isUrl
         />
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
-              defaultMessage="Service Token"
-            />
-          }
-          {...inputs.serviceTokenInput.formRowProps}
-        >
-          <EuiFieldText
-            fullWidth
-            {...inputs.serviceTokenInput.props}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
-              {
-                defaultMessage: 'Specify service token',
+        <EuiSpacer size="m" />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
+                  defaultMessage="Service Token"
+                />
               }
-            )}
-          />
-        </EuiFormRow>
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.serviceTokenHelpText"
+                  defaultMessage="A service token grants Fleet Server permissions to write to Elasticsearch, and can be used to configure this Elasticsearch cluster for remote output."
+                />
+              }
+              {...inputs.serviceTokenInput.formRowProps}
+            >
+              <EuiFieldText
+                fullWidth
+                {...inputs.serviceTokenInput.props}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
+                  {
+                    defaultMessage: 'Specify service token',
+                  }
+                )}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiButton
+                fill
+                isLoading={isLoadingServiceToken}
+                isDisabled={isLoadingServiceToken || !!serviceToken}
+                onClick={() => {
+                  generateServiceToken(true);
+                }}
+                data-test-subj="fleetServerGenerateServiceTokenBtn"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.editOutputFlyout.generateServiceTokenButton"
+                  defaultMessage="Generate service token"
+                />
+              </EuiButton>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
       </>
     );
   };
@@ -314,7 +349,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         case outputType.Elasticsearch:
           return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
             defaultMessage:
-              'This output type currently does not support connectivity to a remote Elasticsearch cluster.',
+              'This output type does not support connectivity to a remote Elasticsearch cluster, please the Remote Elasticsearch type for that.',
           });
       }
     };
