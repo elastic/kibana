@@ -362,6 +362,12 @@ const enrollHostWithFleet = async ({
       ]);
       stdout = mpSTDOUT;
     }
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      log.info(e);
+    });
     const { stdout: pwdA } = await execa('pwd');
     await execa('mkdir', [
       '-p',
