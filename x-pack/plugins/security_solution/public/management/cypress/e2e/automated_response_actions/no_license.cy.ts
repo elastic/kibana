@@ -34,61 +34,51 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     });
   });
 
-  // FIXME: Flaky. Needs fixing (security team issue #7763)
-  describe.skip(
-    'User cannot see results',
-    {
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      tags: ['@brokenInServerless'],
-    },
-    () => {
-      let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
-      let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
-      const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
-      before(() => {
-        login();
-        disableExpandableFlyoutAdvancedSettings();
-        indexEndpointRuleAlerts({
-          endpointAgentId,
-          endpointHostname,
-          endpointIsolated: false,
-        }).then((indexedAlert) => {
-          alertData = indexedAlert;
-          const alertId = alertData.alerts[0]._id;
-          return indexEndpointHosts({
-            withResponseActions: true,
-            numResponseActions: 1,
-            alertIds: [alertId],
-          }).then((indexEndpoints) => {
-            endpointData = indexEndpoints;
-          });
+  describe('User cannot see results', () => {
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
+    const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
+    before(() => {
+      login();
+      disableExpandableFlyoutAdvancedSettings();
+      indexEndpointRuleAlerts({
+        endpointAgentId,
+        endpointHostname,
+        endpointIsolated: false,
+      }).then((indexedAlert) => {
+        alertData = indexedAlert;
+        const alertId = alertData.alerts[0]._id;
+        return indexEndpointHosts({
+          withResponseActions: true,
+          numResponseActions: 1,
+          alertIds: [alertId],
+        }).then((indexEndpoints) => {
+          endpointData = indexEndpoints;
         });
       });
+    });
 
-      after(() => {
-        if (endpointData) {
-          endpointData.cleanup();
-          endpointData = undefined;
-        }
+    after(() => {
+      if (endpointData) {
+        endpointData.cleanup();
+        endpointData = undefined;
+      }
 
-        if (alertData) {
-          alertData.cleanup();
-          alertData = undefined;
-        }
-      });
-      it('show the permission denied callout', () => {
-        cy.visit(APP_ALERTS_PATH);
-        closeAllToasts();
-        cy.getByTestSubj('expand-event').first().click();
-        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-        cy.getByTestSubj('responseActionsViewTab').click();
-        cy.contains('Permission denied');
-        cy.contains(
-          'To access these results, ask your administrator for Elastic Defend Kibana privileges.'
-        );
-      });
-    }
-  );
+      if (alertData) {
+        alertData.cleanup();
+        alertData = undefined;
+      }
+    });
+    it('show the permission denied callout', () => {
+      cy.visit(APP_ALERTS_PATH);
+      closeAllToasts();
+      cy.getByTestSubj('expand-event').first().click();
+      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+      cy.getByTestSubj('responseActionsViewTab').click();
+      cy.contains('Permission denied');
+      cy.contains(
+        'To access these results, ask your administrator for Elastic Defend Kibana privileges.'
+      );
+    });
+  });
 });
