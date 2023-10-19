@@ -247,7 +247,7 @@ export const cli = () => {
       const QA_BASE_ENV_URL = 'https://global.qa.cld.elstc.co';
 
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
-      if (!process.env.API_KEY && !getApiKeyFromElasticCloudJsonFile()) {
+      if (!process.env.CLOUD_QA_API_KEY && !getApiKeyFromElasticCloudJsonFile()) {
         log.error('The api key for the environment needs to be provided with the env var API_KEY.');
         log.error(
           'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the api key.'
@@ -255,8 +255,8 @@ export const cli = () => {
         return process.exit(0);
       }
 
-      const API_KEY = process.env.API_KEY
-        ? process.env.API_KEY
+      const API_KEY = process.env.CLOUD_QA_API_KEY
+        ? process.env.CLOUD_QA_API_KEY
         : getApiKeyFromElasticCloudJsonFile();
 
       const PARALLEL_COUNT = process.env.PARALLEL_COUNT ? Number(process.env.PARALLEL_COUNT) : 1;

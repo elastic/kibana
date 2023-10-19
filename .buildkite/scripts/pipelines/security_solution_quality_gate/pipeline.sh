@@ -15,4 +15,4 @@ set +e
 
 QA_API_KEY=$(vault read -field=api-key secret/kibana-issues/dev/security-solution-qg-enc-key)
 
-API_KEY=$QA_API_KEY yarn cypress:run:qa:serverless:parallel; status=$?; yarn junit:merge || :; exit $status
+CLOUD_QA_API_KEY=$QA_API_KEY yarn cypress:run:qa:serverless:parallel; status=$?; yarn junit:merge || :; exit $status
