@@ -16361,7 +16361,6 @@
     "xpack.fleet.fleetServerSetup.cloudDeploymentLink": "编辑部署",
     "xpack.fleet.fleetServerSetup.cloudSetupTitle": "启用 Fleet 服务器",
     "xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle": "添加 Fleet 服务器主机时出错",
-    "xpack.fleet.fleetServerSetup.errorGeneratingTokenTitleText": "生成令牌时出错",
     "xpack.fleet.fleetServerSetup.errorRefreshingFleetServerStatus": "刷新 Fleet 服务器状态时出错",
     "xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder": "指定主机 URL",
     "xpack.fleet.fleetServerSetup.fleetServerHostsLabel": "Fleet 服务器主机",
