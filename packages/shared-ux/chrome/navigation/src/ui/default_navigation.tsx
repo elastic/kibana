@@ -194,6 +194,7 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
         }
 
         if (isGroupDefinition(navNode)) {
+          if (navNode.sideNavStatus === 'hidden') return null;
           return (
             <Navigation.Group {...navNode} key={navNode.id}>
               {/* Recursively build the tree */}
