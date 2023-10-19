@@ -45,7 +45,8 @@
       "kibanaReact",
       "ml",
       "embeddable",
-      "controls"
+      "controls",
+      "advancedSettings"
     ]
   }
 }
