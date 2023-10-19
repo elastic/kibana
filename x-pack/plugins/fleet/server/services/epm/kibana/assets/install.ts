@@ -7,7 +7,7 @@
 
 import { setTimeout } from 'timers/promises';
 
-import {
+import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
@@ -15,12 +15,14 @@ import {
   SavedObjectsImportSuccess,
   SavedObjectsImportFailure,
   Logger,
-  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 import { isEmpty, partition } from 'lodash';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
+
+import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
@@ -40,7 +42,6 @@ import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 import { withPackageSpan } from '../../packages/utils';
 
 import { tagKibanaAssets } from './tag_assets';
-import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 
 type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>

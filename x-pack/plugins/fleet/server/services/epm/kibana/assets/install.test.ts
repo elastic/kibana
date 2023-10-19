@@ -4,20 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   ISavedObjectsImporter,
   SavedObjectsImportFailure,
   SavedObjectsImportSuccess,
   SavedObjectsImportResponse,
   SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import { getIndexPatternSavedObjects } from '../index_pattern/install';
 
-import { ArchiveAsset, handleIndexPatternImport } from './install';
+import type { ArchiveAsset } from './install';
+import { handleIndexPatternImport } from './install';
 
 jest.mock('@kbn/utils');
 
