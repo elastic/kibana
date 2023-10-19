@@ -118,6 +118,10 @@ export class UnifiedFieldListPageObject extends FtrService {
     await this.testSubjects.click(`fieldToggle-${field}`);
   }
 
+  public async pressEnterFieldListItemToggle(field: string) {
+    await this.testSubjects.pressEnter(`field-${field}-showDetails`);
+  }
+
   public async clickFieldListItemAdd(field: string) {
     await this.waitUntilSidebarHasLoaded();
 

@@ -383,15 +383,15 @@ export class DiscoverPageObject extends FtrService {
 
   public async editField(field: string) {
     await this.retry.try(async () => {
-      await this.unifiedFieldList.clickFieldListItem(field);
-      await this.testSubjects.click(`discoverFieldListPanelEdit-${field}`);
+      await this.unifiedFieldList.pressEnterFieldListItemToggle(field);
+      await this.testSubjects.pressEnter(`discoverFieldListPanelEdit-${field}`);
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
   }
 
   public async removeField(field: string) {
-    await this.unifiedFieldList.clickFieldListItem(field);
-    await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
+    await this.unifiedFieldList.pressEnterFieldListItemToggle(field);
+    await this.testSubjects.pressEnter(`discoverFieldListPanelDelete-${field}`);
     await this.retry.waitFor('modal to open', async () => {
       return await this.testSubjects.exists('runtimeFieldDeleteConfirmModal');
     });
