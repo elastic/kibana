@@ -61,7 +61,7 @@
             "section": "def-common.NavigationID",
             "text": "NavigationID"
           },
-          "> & { children: NonEmptyArray<",
+          "> & { children: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
             "scope": "common",
@@ -93,7 +93,7 @@
             "section": "def-common.NavigationID",
             "text": "NavigationID"
           },
-          ">>; }"
+          ">[]; }"
         ],
         "path": "packages/default-nav/ml/default_navigation.ts",
         "deprecated": false,
@@ -167,12 +167,12 @@
           {
             "parentPluginId": "@kbn/default-nav-ml",
             "id": "def-common.defaultNavigation.children",
-            "type": "Object",
+            "type": "Array",
             "tags": [],
             "label": "children",
             "description": [],
             "signature": [
-              "[{ link: \"ml:overview\"; }, { link: \"ml:notifications\"; }, { title: string; id: \"anomaly_detection\"; children: [{ title: string; link: \"ml:anomalyDetection\"; }, { link: \"ml:anomalyExplorer\"; }, { link: \"ml:singleMetricViewer\"; }, { link: \"ml:settings\"; }]; }, { id: \"data_frame_analytics\"; title: string; children: [{ title: string; link: \"ml:dataFrameAnalytics\"; }, { link: \"ml:resultExplorer\"; }, { link: \"ml:analyticsMap\"; }]; }, { id: \"model_management\"; title: string; children: [{ link: \"ml:nodesOverview\"; }, { link: \"ml:nodes\"; }]; }, { id: \"data_visualizer\"; title: string; children: [{ title: string; link: \"ml:fileUpload\"; }, { title: string; link: \"ml:indexDataVisualizer\"; }, { title: string; link: \"ml:dataDrift\"; }]; }, { id: \"aiops_labs\"; title: string; children: [{ link: \"ml:logRateAnalysis\"; }, { link: \"ml:logPatternAnalysis\"; }, { link: \"ml:changePointDetections\"; }]; }]"
+              "({ link: \"ml:overview\"; } | { link: \"ml:notifications\"; } | { title: string; id: \"anomaly_detection\"; children: ({ title: string; link: \"ml:anomalyDetection\"; } | { link: \"ml:anomalyExplorer\"; } | { link: \"ml:singleMetricViewer\"; } | { link: \"ml:settings\"; })[]; } | { id: \"data_frame_analytics\"; title: string; children: ({ title: string; link: \"ml:dataFrameAnalytics\"; } | { link: \"ml:resultExplorer\"; } | { link: \"ml:analyticsMap\"; })[]; } | { id: \"model_management\"; title: string; children: ({ link: \"ml:nodesOverview\"; } | { link: \"ml:nodes\"; })[]; } | { id: \"data_visualizer\"; title: string; children: ({ title: string; link: \"ml:fileUpload\"; } | { title: string; link: \"ml:indexDataVisualizer\"; } | { title: string; link: \"ml:dataDrift\"; })[]; } | { id: \"aiops_labs\"; title: string; children: ({ link: \"ml:logRateAnalysis\"; } | { link: \"ml:logPatternAnalysis\"; } | { link: \"ml:changePointDetections\"; })[]; })[]"
             ],
             "path": "packages/default-nav/ml/default_navigation.ts",
             "deprecated": false,
