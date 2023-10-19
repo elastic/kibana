@@ -48,7 +48,9 @@ const createApiUiComponentsMock = () => {
   return mock;
 };
 
-const createStartContract = (hasOnlyDefaultSpace: boolean = false): jest.Mocked<SpacesPluginStart> => createApiMock(hasOnlyDefaultSpace);
+const createStartContract = (
+  hasOnlyDefaultSpace: boolean = false
+): jest.Mocked<SpacesPluginStart> => createApiMock(hasOnlyDefaultSpace);
 
 export const spacesPluginMock = {
   createStartContract,
