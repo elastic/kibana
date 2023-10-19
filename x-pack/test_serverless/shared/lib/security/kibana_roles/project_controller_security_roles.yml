@@ -1,3 +1,6 @@
+# -----
+# Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
   cluster: []
