@@ -26,10 +26,11 @@ const defaultParam: Record<string, FieldFormatParams> = {
 };
 
 export const getFieldFormatterProvider =
-  (fieldFormats: FieldFormatsRegistry) => (fieldType: FIELD_FORMAT_IDS) => {
+  (fieldFormats: FieldFormatsRegistry) =>
+  (fieldType: FIELD_FORMAT_IDS, params?: FieldFormatParams) => {
     const fieldFormatter = fieldFormats.deserialize({
       id: fieldType,
-      params: defaultParam[fieldType],
+      params: params ?? defaultParam[fieldType],
     });
     return fieldFormatter.convert.bind(fieldFormatter);
   };

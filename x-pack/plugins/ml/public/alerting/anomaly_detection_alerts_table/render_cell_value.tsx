@@ -70,7 +70,14 @@ export const getRenderCellValue =
       case ALERT_ANOMALY_TIMESTAMP:
         return <>{getFormatter(FIELD_FORMAT_IDS.DATE)(value)}</>;
       case ALERT_DURATION:
-        return <>{getFormatter(FIELD_FORMAT_IDS.DURATION)(value)}</>;
+        return (
+          <>
+            {getFormatter(FIELD_FORMAT_IDS.DURATION, {
+              inputFormat: 'nanoseconds',
+              outputFormat: 'humanizePrecise',
+            })(value)}
+          </>
+        );
       case ALERT_ANOMALY_SCORE:
         return (
           <EuiHealth textSize={'xs'} color={getSeverityColor(value)}>
