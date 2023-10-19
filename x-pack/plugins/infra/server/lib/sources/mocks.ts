@@ -15,5 +15,4 @@ export const createInfraSourcesMock = (): jest.Mocked<IInfraSources> => ({
   createSourceConfiguration: jest.fn(),
   deleteSourceConfiguration: jest.fn(),
   updateSourceConfiguration: jest.fn(),
-  getAllSourceConfigurations: jest.fn(),
 });

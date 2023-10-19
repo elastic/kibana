@@ -89,20 +89,6 @@ export class InfraSources {
     return sourceConfiguration;
   }
 
-  public async getAllSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
-    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(
-      savedObjectsClient
-    );
-
-    return savedSourceConfigurations.map((savedSourceConfiguration) => ({
-      ...savedSourceConfiguration,
-      configuration: mergeSourceConfiguration(
-        defaultSourceConfiguration,
-        savedSourceConfiguration.configuration
-      ),
-    }));
-  }
-
   public async createSourceConfiguration(
     savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
