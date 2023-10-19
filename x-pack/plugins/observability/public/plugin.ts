@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, from } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   AppDeepLink,
   AppMountParameters,
@@ -22,54 +21,44 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type {
+  NavigationEntry,
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
-  NavigationEntry,
 } from '@kbn/observability-shared-plugin/public';
-import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { BehaviorSubject, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
-  ActionTypeRegistryContract,
-  RuleTypeRegistryContract,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
-import { RulesLocatorDefinition } from './locators/rules';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { SloDetailsLocatorDefinition } from './locators/slo_details';
-import { SloEditLocatorDefinition } from './locators/slo_edit';
-import { observabilityAppId, observabilityFeatureId } from '../common';
-import { registerDataHandler } from './context/has_data_context/data_handler';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
-  createObservabilityRuleTypeRegistry,
-  ObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
-import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
-import { createUseRulesLink } from './hooks/create_use_rules_link';
+  ActionTypeRegistryContract,
+  RuleTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
   CASES_PATH,
@@ -78,7 +67,18 @@ import {
   RULES_PATH,
   SLOS_PATH,
 } from '../common/locators/paths';
+import { registerDataHandler } from './context/has_data_context/data_handler';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
+import { RulesLocatorDefinition } from './locators/rules';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { SloDetailsLocatorDefinition } from './locators/slo_details';
+import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
+import {
+  createObservabilityRuleTypeRegistry,
+  ObservabilityRuleTypeRegistry,
+} from './rules/create_observability_rule_type_registry';
+import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
