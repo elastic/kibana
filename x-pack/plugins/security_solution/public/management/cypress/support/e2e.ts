@@ -102,7 +102,7 @@ Cypress.Commands.add(
 
 Cypress.on('uncaught:exception', () => false);
 
-// Login as a Platform Engineer to properly initialize Security Solution App
+// Login as a SOC_MANAGER to properly initialize Security Solution App
 before(() => {
   login(ROLE.soc_manager);
   loadPage('/app/security/alerts');
