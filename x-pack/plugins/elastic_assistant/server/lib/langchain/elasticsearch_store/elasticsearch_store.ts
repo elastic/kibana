@@ -37,7 +37,7 @@ interface CreateIndexParams {
 }
 
 /**
- * A fallback for the the query `size` that determines how many documents to
+ * A fallback for the query `size` that determines how many documents to
  * return from Elasticsearch when performing a similarity search.
  *
  * The size is typically determined by the implementation of LangChain's
@@ -362,12 +362,15 @@ export class ElasticsearchStore extends VectorStore {
    */
   async isModelInstalled(modelId?: string): Promise<boolean> {
     try {
-      const getResponse = await this.esClient.ml.getTrainedModels({
+      const getResponse = await this.esClient.ml.getTrainedModelsStats({
         model_id: modelId ?? this.model,
-        include: 'definition_status',
       });
 
-      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
+      return getResponse.trained_model_stats.some(
+        (stats) =>
+          stats.deployment_stats?.state === 'started' &&
+          stats.deployment_stats?.allocation_status.state === 'fully_allocated'
+      );
     } catch (e) {
       // Returns 404 if it doesn't exist
       return false;

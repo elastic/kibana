@@ -57,8 +57,8 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const { mutate: deleteKB, isLoading: isDeletingUpKB } = useDeleteKnowledgeBase({ http });
 
     // Resource enabled state
-    const isKnowledgeBaseEnabled =
-      (kbStatus?.index_exists && kbStatus?.pipeline_exists && kbStatus?.elser_exists) ?? false;
+    const isElserEnabled = kbStatus?.elser_exists ?? false;
+    const isKnowledgeBaseEnabled = (kbStatus?.index_exists && kbStatus?.pipeline_exists) ?? false;
     const isESQLEnabled = kbStatus?.esql_exists ?? false;
 
     // Resource availability state
@@ -70,7 +70,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isSwitchDisabled = !kbStatus?.elser_exists && !knowledgeBase.assistantLangChain;
 
     // Calculated health state for EuiHealth component
-    const elserHealth = kbStatus?.elser_exists ? 'success' : 'subdued';
+    const elserHealth = isElserEnabled ? 'success' : 'subdued';
     const knowledgeBaseHealth = isKnowledgeBaseEnabled ? 'success' : 'subdued';
     const esqlHealth = isESQLEnabled ? 'success' : 'subdued';
 
