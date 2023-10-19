@@ -13,6 +13,16 @@ import type { LensEmbeddableOutput } from '../../../embeddable';
 import type { LensInspector } from '../../../lens_inspector_service';
 import type { Document } from '../../../persistence';
 
+export interface FlyoutWrapperProps {
+  children: JSX.Element;
+  isInlineFooterVisible: boolean;
+  attributesChanged: boolean;
+  displayFlyoutHeader?: boolean;
+  onCancel?: () => void;
+  onApply?: () => void;
+  navigateToLensEditor?: () => void;
+}
+
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;

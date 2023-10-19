@@ -90,16 +90,6 @@ export function LensEditConfigurationFlyout({
     );
   }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
 
-  // useEffect(() => {
-  //   const renderSuggestionsCallout = async () => {
-  //     if (!isEqual(query, prevQuery.current)) {
-  //       const columns = await getQueryColumns(query, adHocDataViews)
-  //     }
-  //   };
-
-  //   renderSuggestionsCallout();
-  // }, [query]);
-
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
@@ -227,7 +217,6 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        datasourceId={datasourceId}
       >
         <LayerConfiguration
           attributes={attributes}
@@ -252,8 +241,6 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        datasourceId={datasourceId}
-        noPadding
       >
         <>
           {isOfAggregateQueryType(query) && (

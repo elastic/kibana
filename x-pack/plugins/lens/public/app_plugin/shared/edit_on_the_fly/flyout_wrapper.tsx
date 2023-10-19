@@ -22,25 +22,13 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FlyoutWrapperProps } from './types';
 
-interface FlyoutWrapperProps {
-  datasourceId: 'textBased' | 'formBased';
-  children: JSX.Element;
-  isInlineFooterVisible: boolean;
-  attributesChanged: boolean;
-  displayFlyoutHeader?: boolean;
-  noPadding?: boolean;
-  onCancel?: () => void;
-  onApply?: () => void;
-  navigateToLensEditor?: () => void;
-}
 export const FlyoutWrapper = ({
-  datasourceId,
   children,
   attributesChanged,
   isInlineFooterVisible,
   displayFlyoutHeader,
-  noPadding,
   onCancel,
   navigateToLensEditor,
   onApply,

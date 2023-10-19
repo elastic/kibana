@@ -15,6 +15,8 @@ import {
   mockStoreDeps,
   mockDataPlugin,
 } from '../../../mocks';
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
@@ -56,28 +58,25 @@ describe('LensEditConfigurationFlyout', () => {
     props: ReturnType<typeof getDefaultProps>,
     query?: Query | AggregateQuery
   ) {
-    return mountWithProvider(
-      <LensEditConfigurationFlyout {...props} />,
-      {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              isLoading: false,
-              state: 'state',
-            },
+    const lensStore = {
+      preloadedState: {
+        datasourceStates: {
+          testDatasource: {
+            isLoading: false,
+            state: 'state',
           },
-          activeDatasourceId: 'testDatasource',
-          query: query as Query,
         },
-        storeDeps: mockStoreDeps({
-          datasourceMap: props.datasourceMap,
-          visualizationMap: props.visualizationMap,
-        }),
+        activeDatasourceId: 'testDatasource',
+        query: query as Query,
       },
-      {
-        attachTo: container,
-      }
-    );
+      storeDeps: mockStoreDeps({
+        datasourceMap: props.datasourceMap,
+        visualizationMap: props.visualizationMap,
+      }),
+    };
+    return mountWithProvider(<LensEditConfigurationFlyout {...props} />, lensStore, {
+      attachTo: container,
+    });
   }
 
   function getDefaultProps(
@@ -96,14 +95,12 @@ describe('LensEditConfigurationFlyout', () => {
         visualization: {},
         filters: [],
         query: {
-          language: 'lucene',
-          query: '',
+          esql: 'from index1 | limit 10',
         },
       },
       filters: [],
       query: {
-        language: 'lucene',
-        query: '',
+        esql: 'from index1 | limit 10',
       },
       references: [],
     } as unknown as TypedLensByValueInput['attributes'];
@@ -145,6 +142,19 @@ describe('LensEditConfigurationFlyout', () => {
     expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
     instance.find('[data-test-subj="cancelFlyoutButton"]').at(1).simulate('click');
     expect(closeFlyoutSpy).toHaveBeenCalled();
+  });
+
+  it('should call the updatePanelState callback if cancel button is clicked', async () => {
+    const updatePanelStateSpy = jest.fn();
+    const props = getDefaultProps();
+    const newProps = {
+      ...props,
+      updatePanelState: updatePanelStateSpy,
+    };
+    const { instance } = await prepareAndMountComponent(newProps);
+    expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
+    instance.find('[data-test-subj="cancelFlyoutButton"]').at(1).simulate('click');
+    expect(updatePanelStateSpy).toHaveBeenCalled();
   });
 
   it('should call the updateByRefInput callback if cancel button is clicked and savedObjectId exists', async () => {
@@ -454,5 +464,50 @@ describe('LensEditConfigurationFlyout', () => {
         ],
       }
     `);
+  });
+
+  it('should not display the editor if canEditTextBasedQuery prop is false', async () => {
+    const props = getDefaultProps();
+    const newProps = {
+      ...props,
+      canEditTextBasedQuery: false,
+    };
+    const { instance } = await prepareAndMountComponent(newProps);
+    expect(instance.find(TextBasedLangEditor).exists()).toBe(false);
+  });
+
+  it('should not display the editor if canEditTextBasedQuery prop is true but the query is not text based', async () => {
+    const props = getDefaultProps();
+    const newProps = {
+      ...props,
+      canEditTextBasedQuery: true,
+      attributes: {
+        ...props.attributes,
+        query: {
+          type: 'kql',
+          query: '',
+        },
+        state: {
+          ...props.attributes.state,
+          query: {
+            type: 'kql',
+            query: '',
+          },
+        },
+      } as unknown as TypedLensByValueInput['attributes'],
+    };
+    const { instance } = await prepareAndMountComponent(newProps);
+    expect(instance.find(TextBasedLangEditor).exists()).toBe(false);
+  });
+
+  it('should display the editor and the suggestions if canEditTextBasedQuery prop is true', async () => {
+    const props = getDefaultProps();
+    const newProps = {
+      ...props,
+      canEditTextBasedQuery: true,
+    };
+    const { instance } = await prepareAndMountComponent(newProps);
+    expect(instance.find(TextBasedLangEditor).exists()).toBe(true);
+    expect(instance.find(SuggestionPanel).exists()).toBe(true);
   });
 });
