@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { monaco } from '../../../../monaco_imports';
+import type { monaco } from '../../../../monaco_imports';
 import type { AutocompleteCommandDefinition, ESQLCallbacks } from './types';
 import { nonNullable } from '../ast_helpers';
 import {
@@ -217,7 +217,7 @@ export function getSignatureHelp(
   model: monaco.editor.ITextModel,
   position: monaco.Position,
   context: monaco.languages.SignatureHelpContext,
-  astProvider: (text: string | undefined) => { ast: ESQLAst }
+  astProvider: (text: string | undefined) => Promise<{ ast: ESQLAst }>
 ): monaco.languages.SignatureHelpResult {
   return {
     value: { signatures: [], activeParameter: 0, activeSignature: 0 },
@@ -225,16 +225,16 @@ export function getSignatureHelp(
   };
 }
 
-export function getHoverItem(
+export async function getHoverItem(
   model: monaco.editor.ITextModel,
   position: monaco.Position,
   token: monaco.CancellationToken,
-  astProvider: (text: string | undefined) => { ast: ESQLAst }
+  astProvider: (text: string | undefined) => Promise<{ ast: ESQLAst }>
 ) {
   const innerText = model.getValue();
   const offset = monacoPositionToOffset(innerText, position);
 
-  const { ast } = astProvider(innerText);
+  const { ast } = await astProvider(innerText);
   const astContext = getContext(innerText, ast, offset);
 
   if (astContext.type !== 'function') {
@@ -263,7 +263,7 @@ export async function suggest(
   model: monaco.editor.ITextModel,
   position: monaco.Position,
   context: monaco.languages.CompletionContext,
-  astProvider: (text: string | undefined) => { ast: ESQLAst },
+  astProvider: (text: string | undefined) => Promise<{ ast: ESQLAst }>,
   resourceRetriever?: ESQLCallbacks
 ): Promise<AutocompleteCommandDefinition[]> {
   const innerText = model.getValue();
@@ -280,7 +280,7 @@ export async function suggest(
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
 
-  const { ast } = astProvider(finalText);
+  const { ast } = await astProvider(finalText);
 
   const astContext = getContext(innerText, ast, offset);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(resourceRetriever);
@@ -544,8 +544,7 @@ async function getExpressionSuggestionsByType(
           };
           if (option.wrapped) {
             completeItem.insertText = `${option.wrapped[0]}${option.name} $0 ${option.wrapped[1]}`;
-            completeItem.insertTextRules =
-              monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+            completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
           }
           return completeItem;
         })

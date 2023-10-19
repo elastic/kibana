@@ -66,7 +66,7 @@ function createSuggestContext(text: string, triggerCharacter?: string) {
 }
 
 describe('autocomplete', () => {
-  const getAstAndErrors = (text: string) => {
+  const getAstAndErrors = async (text: string) => {
     const errorListener = new ESQLErrorListener();
     const parseListener = new AstListener();
     const parser = getParser(CharStreams.fromString(text), errorListener, parseListener);
@@ -87,7 +87,7 @@ describe('autocomplete', () => {
         model,
         position,
         context,
-        (text) => (text ? getAstAndErrors(text) : { ast: [] }),
+        async (text) => (text ? await getAstAndErrors(text) : { ast: [] }),
         callbackMocks
       );
       expect(suggestions.map((i) => i.label)).toEqual(expected);

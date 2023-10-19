@@ -7,4 +7,3 @@
  */
 
 export { ESQLTokensProvider } from './esql_tokens_provider';
-export { getLanguageProviders } from './esql_ast_provider';

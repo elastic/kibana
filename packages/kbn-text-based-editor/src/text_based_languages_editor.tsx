@@ -315,6 +315,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (!editorModel.current || language !== 'esql') return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await ESQLLang.validate(
+        editorModel.current,
         code,
         esqlCallbacks
       );

@@ -6,133 +6,63 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams } from 'antlr4ts';
-import { monaco } from '../../../monaco_imports';
-import { getParser } from '../antlr_facade';
-import type { ESQLMessage } from '../ast/types';
-import type { ESQLCallbacks } from '../ast/autocomplete/types';
-import { ESQLErrorListener } from './esql_error_listener';
-import type { AstListener } from '../ast/ast_factory';
+import type { ESQLCallbacks } from '../../../..';
+import type { monaco } from '../../../monaco_imports';
+import type { ESQLWorker } from '../../worker/esql_worker';
+import { getHoverItem, getSignatureHelp, suggest } from '../ast/autocomplete/autocomplete';
+import { validateAst } from '../ast/validation/validation';
 
-const ROOT_STATEMENT = 'singleStatement';
+export class ESQLAstAdapter {
+  constructor(
+    private worker: (...uris: monaco.Uri[]) => Promise<ESQLWorker>,
+    private callbacks?: ESQLCallbacks
+  ) {}
 
-// from linear offset to Monaco position
-export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
-  const lines = expression.split(/\n/);
-  let remainingChars = offset;
-  let lineNumber = 1;
-  for (const line of lines) {
-    if (line.length >= remainingChars) {
-      return new monaco.Position(lineNumber, remainingChars + 1);
-    }
-    remainingChars -= line.length + 1;
-    lineNumber++;
+  private async getAstWorker(model: monaco.editor.ITextModel) {
+    const worker = await this.worker(model.uri);
+    return worker.getAst;
   }
 
-  throw new Error('Algorithm failure');
-}
+  async getAst(model: monaco.editor.ITextModel, code?: string) {
+    const getAstFn = await this.getAstWorker(model);
+    return getAstFn(code ?? model.getValue());
+  }
 
-function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: ESQLMessage[]) {
-  return messages.map((e) => {
-    const startPosition = e.location
-      ? offsetToRowColumn(code, e.location.min)
-      : { column: 0, lineNumber: 0 };
-    const endPosition = e.location
-      ? offsetToRowColumn(code, e.location.max || 0)
-      : { column: 0, lineNumber: 0 };
+  async validate(model: monaco.editor.ITextModel, code: string) {
+    const { ast } = await this.getAst(model, code);
+    return validateAst(ast, this.callbacks);
+  }
+
+  async suggestSignature(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.SignatureHelpContext
+  ) {
+    const getAstFn = await this.getAstWorker(model);
+    return getSignatureHelp(model, position, context, getAstFn);
+  }
+
+  async getHover(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    token: monaco.CancellationToken
+  ) {
+    const getAstFn = await this.getAstWorker(model);
+    return getHoverItem(model, position, token, getAstFn);
+  }
+
+  async autocomplete(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext
+  ) {
+    const getAstFn = await this.getAstWorker(model);
+    const suggestionEntries = await suggest(model, position, context, getAstFn, this.callbacks);
     return {
-      message: e.text,
-      startColumn: startPosition.column,
-      startLineNumber: startPosition.lineNumber,
-      endColumn: endPosition.column + 1,
-      endLineNumber: endPosition.lineNumber,
-      severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
-      _source: 'client' as const,
+      suggestions: suggestionEntries.map((suggestion) => ({
+        ...suggestion,
+        range: undefined as unknown as monaco.IRange,
+      })),
     };
-  });
-}
-
-export function getLanguageProviders() {
-  const getAst = (text: string | undefined, parseListener: AstListener) => {
-    if (!text) {
-      return { ast: [], errors: [] };
-    }
-    const inputStream = CharStreams.fromString(text);
-    const errorListener = new ESQLErrorListener();
-    const parser = getParser(inputStream, errorListener, parseListener);
-
-    parser[ROOT_STATEMENT]();
-
-    const { ast } = parseListener.getAst();
-    return {
-      ast,
-      errors: [],
-    };
-  };
-
-  const getWrappedAstFn = (parseListener: AstListener) => (text: string | undefined) =>
-    getAst(text, parseListener);
-  return {
-    // used for debugging purposes only
-    getAst,
-    validate: async (code: string, callbacks?: ESQLCallbacks) => {
-      const { validateAst, AstListener } = await import('../ast');
-      const { ast } = await getAst(code, new AstListener());
-      const { errors, warnings } = await validateAst(ast, callbacks);
-      const monacoErrors = wrapAsMonacoMessage('error', code, errors);
-      const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
-      return { errors: monacoErrors, warnings: monacoWarnings };
-    },
-    getSignatureHelp: (callbacks?: ESQLCallbacks): monaco.languages.SignatureHelpProvider => {
-      return {
-        signatureHelpTriggerCharacters: [' ', '('],
-        async provideSignatureHelp(
-          model: monaco.editor.ITextModel,
-          position: monaco.Position,
-          _token: monaco.CancellationToken,
-          context: monaco.languages.SignatureHelpContext
-        ) {
-          const { getSignatureHelp, AstListener } = await import('../ast');
-          return getSignatureHelp(model, position, context, getWrappedAstFn(new AstListener()));
-        },
-      };
-    },
-    getHoverProvider: (): monaco.languages.HoverProvider => {
-      return {
-        async provideHover(
-          model: monaco.editor.ITextModel,
-          position: monaco.Position,
-          token: monaco.CancellationToken
-        ) {
-          const { getHoverItem, AstListener } = await import('../ast');
-          return getHoverItem(model, position, token, getWrappedAstFn(new AstListener()));
-        },
-      };
-    },
-    getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
-      return {
-        triggerCharacters: [',', '(', '=', ' '],
-        async provideCompletionItems(
-          model: monaco.editor.ITextModel,
-          position: monaco.Position,
-          context: monaco.languages.CompletionContext
-        ): Promise<monaco.languages.CompletionList> {
-          const { suggest, AstListener } = await import('../ast');
-          const suggestionEntries = await suggest(
-            model,
-            position,
-            context,
-            getWrappedAstFn(new AstListener()),
-            callbacks
-          );
-          return {
-            suggestions: suggestionEntries.map((suggestion) => ({
-              ...suggestion,
-              range: undefined as unknown as monaco.IRange,
-            })),
-          };
-        },
-      };
-    },
-  };
+  }
 }

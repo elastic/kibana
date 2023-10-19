@@ -25,6 +25,7 @@ export interface CompleteLangModuleType extends LangModuleType {
 
 export interface LanguageProvidersModule<Deps = unknown> {
   validate: (
+    model: monaco.editor.ITextModel,
     code: string,
     callbacks?: Deps
   ) => Promise<{ errors: monaco.editor.IMarkerData[]; warnings: monaco.editor.IMarkerData[] }>;

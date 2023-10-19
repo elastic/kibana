@@ -7,7 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { monaco } from '../../../../monaco_imports';
 import { AutocompleteCommandDefinition } from './types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionsDefinitions } from '../definitions/functions';
@@ -24,7 +23,7 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
   return {
     label: fullSignatures[0].declaration,
     insertText: `${fn.name}($0)`,
-    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    insertTextRules: 4, // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     kind: 1,
     detail: fn.description,
     documentation: {
@@ -38,7 +37,7 @@ export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
   return {
     label: fn.name,
     insertText: `${fn.name} $0`,
-    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    insertTextRules: 4, // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     kind: 11,
     detail: fn.description,
     documentation: {

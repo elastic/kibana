@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ESQLColumn, ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../types';
-import { ESQLVariable, ESQLRealField } from '../validation/types';
+import type { ESQLColumn, ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../types';
+import type { ESQLVariable, ESQLRealField } from '../validation/types';
 import {
   isColumnItem,
   isAssignment,

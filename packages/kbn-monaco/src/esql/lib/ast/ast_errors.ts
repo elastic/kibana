@@ -10,19 +10,12 @@ import type { RecognitionException } from 'antlr4ts';
 import { esql_parser } from '../../antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 
-const symbolsLookup: Record<number, string> = Object.entries(esql_parser)
-  .filter(([k, v]) => typeof v === 'number' && !/RULE_/.test(k) && k.toUpperCase() === k)
-  .reduce((memo, [k, v]: [string, number]) => {
-    memo[v] = k;
-    return memo;
-  }, {} as Record<number, string>);
-
-export function getExpectedSymbols(expectedTokens: RecognitionException['expectedTokens']) {
+function getExpectedSymbols(expectedTokens: RecognitionException['expectedTokens']) {
   const tokenIds = expectedTokens?.toIntegerList().toArray() || [];
   const list = [];
   for (const tokenId of tokenIds) {
-    if (tokenId in symbolsLookup) {
-      list.push(symbolsLookup[tokenId]);
+    if (esql_parser.VOCABULARY.getSymbolicName(tokenId)) {
+      list.push(esql_parser.VOCABULARY.getSymbolicName(tokenId));
     } else if (tokenId === -1) {
       list.push('<EOF>');
     }

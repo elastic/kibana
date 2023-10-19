@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../../../../monaco_imports';
+import type { monaco } from '../../../../monaco_imports';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';

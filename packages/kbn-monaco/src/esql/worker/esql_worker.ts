@@ -7,9 +7,10 @@
  */
 
 import { CharStreams } from 'antlr4ts';
-import { monaco } from '../../monaco_imports';
+import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
 import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';
+import { AstListener } from '../lib/ast/ast_factory';
 import { ESQLErrorListener } from '../lib/monaco/esql_error_listener';
 
 export class ESQLWorker implements BaseWorkerDefinition {
@@ -40,5 +41,23 @@ export class ESQLWorker implements BaseWorkerDefinition {
       return errorListener.getErrors();
     }
     return [];
+  }
+
+  async getAst(text: string | undefined) {
+    if (!text) {
+      return { ast: [], errors: [] };
+    }
+    const inputStream = CharStreams.fromString(text);
+    const errorListener = new ESQLErrorListener();
+    const parserListener = new AstListener();
+    const parser = getParser(inputStream, errorListener, parserListener);
+
+    parser[ROOT_STATEMENT]();
+
+    const { ast } = parserListener.getAst();
+    return {
+      ast,
+      errors: [],
+    };
   }
 }

@@ -24,8 +24,8 @@ import {
   type MvExpandCommandContext,
   type ShowCommandContext,
   type EnrichCommandContext,
+  type WhereCommandContext,
   esql_parser,
-  WhereCommandContext,
 } from '../../antlr/esql_parser';
 import { esql_parserListener as ESQLParserListener } from '../../antlr/esql_parser_listener';
 import { createCommand, createFunction, createOption, createLiteral } from './ast_helpers';
@@ -44,7 +44,7 @@ import {
   getMatchField,
   getEnrichClauses,
 } from './ast_walker';
-import { ESQLAst } from './types';
+import type { ESQLAst } from './types';
 
 export class AstListener implements ESQLParserListener {
   private ast: ESQLAst = [];

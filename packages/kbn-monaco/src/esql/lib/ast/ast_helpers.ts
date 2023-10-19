@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ParserRuleContext } from 'antlr4ts';
+import type { ParserRuleContext } from 'antlr4ts/ParserRuleContext';
 import { ErrorNode } from 'antlr4ts/tree/ErrorNode';
-import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
-import {
+import type { TerminalNode } from 'antlr4ts/tree/TerminalNode';
+import type {
   ArithmeticUnaryContext,
   DecimalValueContext,
-  esql_parser,
   IntegerValueContext,
   QualifiedIntegerLiteralContext,
 } from '../../antlr/esql_parser';
@@ -128,15 +127,15 @@ export function createFunction(
 
 function getQuotedText(ctx: ParserRuleContext) {
   return (
-    ctx.tryGetToken(esql_parser.SRC_QUOTED_IDENTIFIER, 0) ||
-    ctx.tryGetToken(esql_parser.QUOTED_IDENTIFIER, 0)
+    ctx.tryGetToken(73 /* esql_parser.SRC_QUOTED_IDENTIFIER*/, 0) ||
+    ctx.tryGetToken(64 /* esql_parser.QUOTED_IDENTIFIER */, 0)
   );
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
   return (
-    ctx.tryGetToken(esql_parser.SRC_UNQUOTED_IDENTIFIER, 0) ||
-    ctx.tryGetToken(esql_parser.UNQUOTED_IDENTIFIER, 0)
+    ctx.tryGetToken(72 /* esql_parser.SRC_UNQUOTED_IDENTIFIER */, 0) ||
+    ctx.tryGetToken(63 /* esql_parser.UNQUOTED_IDENTIFIER */, 0)
   );
 }
 
