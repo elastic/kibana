@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import { Plugin, CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 export class CoreAppLeavePlugin
   implements Plugin<CoreAppLeavePluginSetup, CoreAppLeavePluginStart>
@@ -15,6 +15,8 @@ export class CoreAppLeavePlugin
     core.application.register({
       id: 'appleave1',
       title: 'AppLeave 1',
+      appRoute: '/app/appleave1',
+      category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params) {
         const { renderApp } = await import('./application');
         params.onAppLeave((actions) => actions.confirm('confirm-message', 'confirm-title'));
@@ -24,9 +26,11 @@ export class CoreAppLeavePlugin
     core.application.register({
       id: 'appleave2',
       title: 'AppLeave 2',
+      appRoute: '/app/appleave2',
+      category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params) {
         const { renderApp } = await import('./application');
-        params.onAppLeave((actions) => actions.default());
+        params.onAppLeave((actions) => actions.confirm('confirm-message', 'confirm-title'));
         return renderApp('AppLeave 2', params);
       },
     });

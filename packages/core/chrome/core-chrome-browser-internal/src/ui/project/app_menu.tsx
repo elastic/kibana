@@ -17,13 +17,17 @@ interface AppMenuBarProps {
 }
 export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
   const { euiTheme } = useEuiTheme();
+  const zIndex =
+    typeof euiTheme.levels.header === 'number'
+      ? euiTheme.levels.header - 1 // We want it to appear right below the header
+      : euiTheme.levels.header;
 
   return (
     <div
       className="header__actionMenu"
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={css`
-        z-index: ${euiTheme.levels.header};
+        z-index: ${zIndex};
         background: ${euiTheme.colors.emptyShade};
         border-bottom: ${euiTheme.border.thin};
         display: flex;

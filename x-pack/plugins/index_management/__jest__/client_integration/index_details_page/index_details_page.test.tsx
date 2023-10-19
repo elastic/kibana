@@ -17,7 +17,8 @@ import {
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
 import {
-  testIndexEditableSettings,
+  testIndexEditableSettingsAll,
+  testIndexEditableSettingsLimited,
   testIndexMappings,
   testIndexMock,
   testIndexName,
@@ -429,13 +430,30 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.settings.clickEditModeSwitch();
       });
 
-      it('displays the editable settings (flattened and filtered)', () => {
+      it('displays all editable settings (flattened and filtered)', () => {
         const editorContent = testBed.actions.settings.getCodeEditorContent();
-        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
+      });
+
+      it('displays limited editable settings (flattened and filtered)', async () => {
+        await act(async () => {
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              config: { editableIndexSettings: 'limited' },
+            },
+          });
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+        await testBed.actions.settings.clickEditModeSwitch();
+        const editorContent = testBed.actions.settings.getCodeEditorContent();
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsLimited, null, 2));
       });
 
       it('updates the settings', async () => {
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.saveSettings();
         expect(httpSetup.put).toHaveBeenLastCalledWith(
@@ -452,7 +470,7 @@ describe('<IndexDetailsPage />', () => {
       it('reloads the settings after an update', async () => {
         const numberOfRequests = 2;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.saveSettings();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -463,11 +481,11 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resets the changes in the editor', async () => {
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.resetChanges();
         const editorContent = testBed.actions.settings.getCodeEditorContent();
-        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
       });
     });
   });
@@ -664,7 +682,7 @@ describe('<IndexDetailsPage />', () => {
     it('updates settings with the encoded index name', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       await testBed.actions.settings.clickEditModeSwitch();
-      const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+      const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
       await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
       await testBed.actions.settings.saveSettings();
       expect(httpSetup.put).toHaveBeenLastCalledWith(

@@ -46,6 +46,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     const docs = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.doc)
       .map((i: any) => i.doc);
+
     expect(ids).toEqual(idsToAction);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('upgrade_started_at');
