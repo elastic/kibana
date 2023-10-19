@@ -2372,8 +2372,8 @@ describe('Alerts Service', () => {
 
           await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
 
-          expect(logger.error).toHaveBeenCalledWith(
-            new Error(`Server is stopping; must stop all async operations`)
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Server is stopping; must stop all async operations`
           );
         });
       });
