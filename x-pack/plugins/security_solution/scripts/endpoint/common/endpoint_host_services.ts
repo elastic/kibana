@@ -363,6 +363,12 @@ const enrollHostWithFleet = async ({
       stdout = mpSTDOUT;
     }
     const { stdout: pwdA } = await execa('pwd');
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      log.info(e);
+    });
 
     log.info(`pwd: ${pwdA}`);
     fs.writeFileSync(
