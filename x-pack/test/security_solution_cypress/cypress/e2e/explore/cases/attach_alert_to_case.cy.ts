@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ROLES,
-  SecurityRoleName,
-  SERVERLESS_ROLES,
-} from '@kbn/security-solution-plugin/common/test';
+import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -41,7 +37,7 @@ describe('Alerts timeline', { tags: ['@ess'] }, () => {
 
   context('Privileges: read only', () => {
     beforeEach(() => {
-      loadDetectionsPage(SERVERLESS_ROLES.t1_analyst);
+      loadDetectionsPage(ROLES.t1_analyst);
     });
 
     it('should not allow user with read only privileges to attach alerts to existing cases', () => {

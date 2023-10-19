@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SERVERLESS_ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
@@ -54,8 +54,8 @@ describe('Exceptions viewer read only', { tags: ['@ess'] }, () => {
       );
     });
 
-    login(SERVERLESS_ROLES.t1_analyst);
-    visitRulesManagementTable(SERVERLESS_ROLES.t1_analyst);
+    login(ROLES.t1_analyst);
+    visitRulesManagementTable(ROLES.t1_analyst);
     goToRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
   });

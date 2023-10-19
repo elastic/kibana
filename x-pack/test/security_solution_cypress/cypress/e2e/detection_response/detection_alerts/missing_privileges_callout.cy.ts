@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SERVERLESS_ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
@@ -24,14 +24,14 @@ import {
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 const loadPageAsReadOnlyUser = (url: string) => {
-  login(SERVERLESS_ROLES.t1_analyst);
-  visit(url, { role: SERVERLESS_ROLES.t1_analyst });
+  login(ROLES.t1_analyst);
+  visit(url, { role: ROLES.t1_analyst });
   waitForPageTitleToBeShown();
 };
 
 const loadPageAsPlatformEngineer = (url: string) => {
-  login(SERVERLESS_ROLES.platform_engineer);
-  visit(url, { role: SERVERLESS_ROLES.platform_engineer });
+  login(ROLES.platform_engineer);
+  visit(url, { role: ROLES.platform_engineer });
   waitForPageTitleToBeShown();
 };
 
@@ -117,7 +117,7 @@ describe('Detections > Callouts', { tags: ['@ess', '@skipInServerless'] }, () =>
 
     context('On Rules Management page', () => {
       beforeEach(() => {
-        login(SERVERLESS_ROLES.platform_engineer);
+        login(ROLES.platform_engineer);
         loadPageAsPlatformEngineer(RULES_MANAGEMENT_URL);
       });
 

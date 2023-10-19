@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SERVERLESS_ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -88,8 +88,8 @@ describe('Timelines', (): void => {
 
     context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
-        login(SERVERLESS_ROLES.t1_analyst);
-        visitWithTimeRange(OVERVIEW_URL, { role: SERVERLESS_ROLES.t1_analyst });
+        login(ROLES.t1_analyst);
+        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.t1_analyst });
       });
 
       it('should not be able to create/update timeline ', () => {

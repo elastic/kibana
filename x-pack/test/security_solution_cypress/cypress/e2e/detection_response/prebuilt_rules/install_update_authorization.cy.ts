@@ -10,7 +10,7 @@ import {
   RULES_ADD_PATH,
   RULES_UPDATES,
 } from '@kbn/security-solution-plugin/common/constants';
-import { SERVERLESS_ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
@@ -57,13 +57,13 @@ const RULE_2 = createRuleAssetSavedObject({
 });
 
 const loadPageAsReadOnlyUser = (url: string) => {
-  login(SERVERLESS_ROLES.t1_analyst);
-  visit(url, { role: SERVERLESS_ROLES.t1_analyst });
+  login(ROLES.t1_analyst);
+  visit(url, { role: ROLES.t1_analyst });
 };
 
 const loginPageAsWriteAuthorizedUser = (url: string) => {
-  login(SERVERLESS_ROLES.t3_analyst);
-  visit(url, { role: SERVERLESS_ROLES.t3_analyst });
+  login(ROLES.t3_analyst);
+  visit(url, { role: ROLES.t3_analyst });
 };
 
 describe(
