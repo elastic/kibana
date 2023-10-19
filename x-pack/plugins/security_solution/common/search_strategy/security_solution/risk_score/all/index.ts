@@ -74,6 +74,8 @@ export interface RiskScoreItem {
   [RiskScoreFields.hostName]: Maybe<string>;
   [RiskScoreFields.userName]: Maybe<string>;
 
+  [RiskScoreFields.timestamp]: Maybe<string>;
+
   [RiskScoreFields.hostRisk]: Maybe<RiskSeverity>;
   [RiskScoreFields.userRisk]: Maybe<RiskSeverity>;
 

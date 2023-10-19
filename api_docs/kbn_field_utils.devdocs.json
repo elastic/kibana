@@ -83,6 +83,79 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
+        "id": "def-common.fieldNameWildcardMatcher",
+        "type": "Function",
+        "tags": [],
+        "label": "fieldNameWildcardMatcher",
+        "description": [
+          "\nChecks if field displayName or name matches the provided search string.\nThe search string can have wildcard."
+        ],
+        "signature": [
+          "(field: { name: string; displayName?: string | undefined; }, fieldSearchHighlight: string) => boolean"
+        ],
+        "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-common.fieldNameWildcardMatcher.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/field-utils",
+                "id": "def-common.fieldNameWildcardMatcher.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/field-utils",
+                "id": "def-common.fieldNameWildcardMatcher.$1.displayName",
+                "type": "string",
+                "tags": [],
+                "label": "displayName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-common.fieldNameWildcardMatcher.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fieldSearchHighlight",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-utils",
         "id": "def-common.getFieldIconProps",
         "type": "Function",
         "tags": [],
@@ -166,6 +239,56 @@
               "<T> | undefined"
             ],
             "path": "packages/kbn-field-utils/src/utils/get_field_icon_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-utils",
+        "id": "def-common.getFieldSearchMatchingHighlight",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldSearchMatchingHighlight",
+        "description": [
+          "\nGet `highlight` string to be used together with `EuiHighlight`"
+        ],
+        "signature": [
+          "(displayName: string, fieldSearchHighlight: string | undefined) => string"
+        ],
+        "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-common.getFieldSearchMatchingHighlight.$1",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-common.getFieldSearchMatchingHighlight.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fieldSearchHighlight",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
