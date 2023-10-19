@@ -158,13 +158,6 @@ export const schemas: Record<string, FormSchema> = {
       }),
       formatters: [toInt],
     },
-    allowAutoCreate: {
-      type: FIELD_TYPES.TOGGLE,
-      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldAllowAutoCreateLabel', {
-        defaultMessage: 'Allow auto create (optional)',
-      }),
-      defaultValue: false,
-    },
     _meta: {
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {
         defaultMessage: '_meta field data (optional)',

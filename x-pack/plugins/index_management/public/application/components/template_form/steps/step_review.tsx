@@ -39,7 +39,6 @@ const NoneDescriptionText = () => (
 );
 
 const getDescriptionText = (data: any) => {
-  // const hasEntries = !!data || (data && Object.entries(data).length > 0);
   const hasEntries = data && Object.entries(data).length > 0;
 
   return hasEntries ? (
@@ -89,7 +88,6 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       version,
       order,
       priority,
-      allowAutoCreate,
       composedOf,
       _meta,
       _kbnMeta: { isLegacy },
@@ -186,17 +184,6 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 {version ? version : <NoneDescriptionText />}
-              </EuiDescriptionListDescription>
-
-              {/* Allow auto create */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
-                  defaultMessage="Allow auto create"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(allowAutoCreate)}
               </EuiDescriptionListDescription>
 
               {/* components */}
