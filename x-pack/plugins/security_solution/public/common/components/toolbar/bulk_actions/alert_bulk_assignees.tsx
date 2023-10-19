@@ -13,6 +13,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
+import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/alerts/use_get_user_profiles';
 import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
 import * as i18n from './translations';
 import type { SetAlertAssigneesFunc } from './use_set_alert_assignees';
@@ -40,7 +41,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
 
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
 
-  const existingAssigneesIds = useMemo(
+  const originalIds = useMemo(
     () =>
       intersection(
         ...alertItems.map(
@@ -50,20 +51,21 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
       ),
     [alertItems]
   );
+
+  const { loading: isLoadingAssignedUserProfiles, userProfiles: assignedUserProfiles } =
+    useGetUserProfiles(originalIds);
   useEffect(() => {
-    if (isLoadingUsers) {
+    if (isLoadingAssignedUserProfiles) {
       return;
     }
-    const assignees = userProfiles.filter((user) => existingAssigneesIds.includes(user.uid));
-    setSelectedAssignees(assignees);
-  }, [existingAssigneesIds, isLoadingUsers, userProfiles]);
+    setSelectedAssignees(assignedUserProfiles);
+  }, [assignedUserProfiles, isLoadingAssignedUserProfiles]);
 
   const onAssigneesUpdate = useCallback(async () => {
-    const existingIds = existingAssigneesIds;
     const updatedIds = selectedAssignees.map((user) => user?.uid);
 
-    const assigneesToAddArray = updatedIds.filter((uid) => !existingIds.includes(uid));
-    const assigneesToRemoveArray = existingIds.filter((uid) => !updatedIds.includes(uid));
+    const assigneesToAddArray = updatedIds.filter((uid) => !originalIds.includes(uid));
+    const assigneesToRemoveArray = originalIds.filter((uid) => !updatedIds.includes(uid));
     if (assigneesToAddArray.length === 0 && assigneesToRemoveArray.length === 0) {
       closePopoverMenu();
       return;
@@ -87,7 +89,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
     alertItems,
     clearSelection,
     closePopoverMenu,
-    existingAssigneesIds,
+    originalIds,
     onSubmit,
     refetchQuery,
     refresh,
