@@ -38,12 +38,7 @@ export const PingHeaders = ({ headers }: Props) => {
         }
       >
         <EuiSpacer size="s" />
-        <EuiDescriptionList
-          titleProps={{ style: { width: '30%', paddingLeft: 30 } }}
-          compressed={true}
-          type="responsiveColumn"
-          listItems={headersList}
-        />
+        <EuiDescriptionList compressed={true} type="responsiveColumn" listItems={headersList} />
       </EuiAccordion>
     </>
   );
