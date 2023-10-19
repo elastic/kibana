@@ -99,9 +99,11 @@ export default function ({
 
     describe('compare controls snapshot', async () => {
       const waitForPageReady = async () => {
-        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('page ready for screenshot', async () => {
-          return await testSubjects.exists('globalQueryBar');
+          const queryBarVisible = await testSubjects.exists('globalQueryBar');
+          const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+          return queryBarVisible && controlGroupVisible;
         });
       };
 
