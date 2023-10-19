@@ -3600,6 +3600,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.ts"
+              },
+              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/get_alert_by_id.ts"
               },
@@ -5304,6 +5308,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.test.ts"
+              },
+              {
                 "plugin": "monitoringCollection",
                 "path": "x-pack/plugins/monitoring_collection/server/routes/api/v1/dynamic_route/get_metrics_by_type.test.ts"
               },
@@ -6084,6 +6092,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_alerts.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -7536,6 +7548,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_alert/mute_alert.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.test.ts"
               },
               {
                 "plugin": "home",
