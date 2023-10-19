@@ -97,6 +97,8 @@ export class ObservabilityAIAssistantPlugin
     const service = (this.service = createService({
       coreStart,
       securityStart: pluginsStart.security,
+      licenseStart: pluginsStart.licensing,
+      shareStart: pluginsStart.share,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
     }));
 
@@ -107,6 +109,7 @@ export class ObservabilityAIAssistantPlugin
         service,
         signal,
         pluginsStart,
+        coreStart,
         registerContext,
         registerFunction,
       });

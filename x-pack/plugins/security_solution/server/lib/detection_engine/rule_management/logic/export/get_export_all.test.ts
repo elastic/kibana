@@ -27,7 +27,7 @@ import { requestContextMock } from '../../../routes/__mocks__/request_context';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { Readable } from 'stream';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 const exceptionsClient = getExceptionListClientMock();
 
@@ -136,7 +136,7 @@ describe('getExportAll', () => {
       note: '# Investigative notes',
       version: 1,
       exceptions_list: getListArrayMock(),
-      investigation_fields: [],
+      investigation_fields: undefined,
     });
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,
@@ -320,7 +320,7 @@ describe('getExportAll', () => {
       version: 1,
       revision: 0,
       exceptions_list: getListArrayMock(),
-      investigation_fields: [],
+      investigation_fields: undefined,
     });
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,

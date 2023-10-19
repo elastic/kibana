@@ -28,15 +28,12 @@ export const AssetDetails = ({
   tabs,
   links,
   renderMode,
-  activeTabId,
   metricAlias,
   ...props
 }: AssetDetailsProps) => {
   return (
     <ContextProviders props={{ ...props, renderMode }}>
-      <TabSwitcherProvider
-        initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
-      >
+      <TabSwitcherProvider defaultActiveTabId={tabs[0]?.id}>
         <DataViewsProvider metricAlias={metricAlias}>
           <ContentTemplate header={{ tabs, links }} renderMode={renderMode} />
         </DataViewsProvider>

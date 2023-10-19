@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../tags';
 
 import {
   CASES,
@@ -33,13 +32,14 @@ import {
   ENTITY_ANALYTICS,
 } from '../../screens/security_header';
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit, visitWithTimeRange } from '../../tasks/navigation';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 
 import {
   ALERTS_URL,
   CASES_URL,
-  HOSTS_URL,
+  hostsUrl,
   KIBANA_HOME,
   ENDPOINTS_URL,
   TRUSTED_APPS_URL,
@@ -48,10 +48,9 @@ import {
   OVERVIEW_URL,
   TIMELINES_URL,
   EXCEPTIONS_URL,
-  DETECTIONS_RULE_MANAGEMENT_URL,
   USERS_URL,
   DASHBOARDS_URL,
-  DETECTION_RESPONSE_URL,
+  DETECTION_AND_RESPONSE_URL,
   EXPLORE_URL,
   MANAGE_URL,
   CSP_DASHBOARD_URL,
@@ -63,6 +62,7 @@ import {
   ENTITY_ANALYTICS_URL,
   INDICATORS_URL,
 } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import {
   openKibanaNavigation,
   navigateFromKibanaCollapsibleTo,
@@ -78,10 +78,10 @@ import {
   THREAT_INTELLIGENCE_PAGE,
 } from '../../screens/kibana_navigation';
 
-describe('top-level navigation common to all pages in the Security app', { tags: tag.ESS }, () => {
+describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
-    visit(TIMELINES_URL);
+    visitWithTimeRange(TIMELINES_URL);
   });
 
   it('navigates to the Dashboards landing page', () => {
@@ -96,7 +96,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
 
   it('navigates to the Detection & Response page', () => {
     navigateFromHeaderTo(DETECTION_RESPONSE);
-    cy.url().should('include', DETECTION_RESPONSE_URL);
+    cy.url().should('include', DETECTION_AND_RESPONSE_URL);
   });
 
   it('navigates to the Entity Analytics page', () => {
@@ -136,7 +136,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(HOSTS);
-    cy.url().should('include', HOSTS_URL);
+    cy.url().should('include', hostsUrl('allHosts'));
   });
 
   it('navigates to the Network page', () => {
@@ -156,7 +156,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
 
   it('navigates to the Rules page', () => {
     navigateFromHeaderTo(RULES);
-    cy.url().should('include', DETECTIONS_RULE_MANAGEMENT_URL);
+    cy.url().should('include', RULES_MANAGEMENT_URL);
   });
 
   it('navigates to the Exceptions page', () => {
@@ -200,7 +200,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
   });
 });
 
-describe('Kibana navigation to all pages in the Security app ', { tags: tag.ESS }, () => {
+describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
     visit(KIBANA_HOME);

@@ -22,6 +22,7 @@ describe('validateActions', () => {
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
     executor: jest.fn(),
+    category: 'test',
     producer: 'alerts',
     cancelAlertsOnRuleTimeout: true,
     ruleTaskTimeout: '5m',
@@ -32,6 +33,7 @@ describe('validateActions', () => {
       context: 'context',
       mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
     },
+    validLegacyConsumers: [],
   };
 
   const data = {

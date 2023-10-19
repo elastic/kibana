@@ -14,12 +14,12 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { connectorsMock } from '../../containers/mock';
+import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { CreateCaseFormProps } from './form';
 import { CreateCaseForm } from './form';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
@@ -28,13 +28,13 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 jest.mock('../app/use_available_owners');
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 
 const initialCaseValue: FormProps = {
@@ -45,6 +45,7 @@ const initialCaseValue: FormProps = {
   fields: null,
   syncAlerts: true,
   assignees: [],
+  customFields: {},
 };
 
 const casesFormProps: CreateCaseFormProps = {
@@ -69,6 +70,7 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
+      // @ts-expect-error ts upgrade v4.7.4
       <TestProviders {...testProviderProps}>
         <Form form={form}>{children}</Form>
       </TestProviders>
@@ -80,7 +82,7 @@ describe('CreateCaseForm', () => {
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability']);
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
-    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
   afterEach(() => {
@@ -215,6 +217,30 @@ describe('CreateCaseForm', () => {
     const descriptionInput = within(getByTestId('caseDescription')).getByRole('textbox');
     expect(titleInput).toHaveValue('');
     expect(descriptionInput).toHaveValue('');
+  });
+
+  it('should render custom fields when available', () => {
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: customFieldsConfigurationMock,
+      },
+    }));
+
+    const result = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(result.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+
+    for (const item of customFieldsConfigurationMock) {
+      expect(
+        result.getByTestId(`${item.key}-${item.type}-create-custom-field`)
+      ).toBeInTheDocument();
+    }
   });
 
   it('should prefill the form when provided with initialValue', () => {

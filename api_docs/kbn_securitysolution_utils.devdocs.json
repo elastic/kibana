@@ -54,6 +54,113 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.computeIsESQLQueryAggregating",
+        "type": "Function",
+        "tags": [],
+        "label": "computeIsESQLQueryAggregating",
+        "description": [
+          "\ncompute if esqlQuery is aggregating/grouping, i.e. using STATS...BY command"
+        ],
+        "signature": [
+          "(esqlQuery: string) => boolean"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.computeIsESQLQueryAggregating.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esqlQuery",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "boolean"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.getIndexListFromEsqlQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexListFromEsqlQuery",
+        "description": [
+          "\nparses ES|QL query and returns array of indices"
+        ],
+        "signature": [
+          "(query: string | undefined) => string[]"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/esql/get_index_list_from_esql_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.getIndexListFromEsqlQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-utils/src/esql/get_index_list_from_esql_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.getIndexListFromIndexString",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexListFromIndexString",
+        "description": [
+          "\ntransforms sting of indices, separated by commas to array\nindex*, index2* => [index*, index2*]"
+        ],
+        "signature": [
+          "(indexString: string | undefined) => string[]"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/esql/get_index_list_from_esql_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.getIndexListFromIndexString.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexString",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-utils/src/esql/get_index_list_from_esql_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.hasSimpleExecutableName",
         "type": "Function",
         "tags": [],
@@ -495,7 +602,7 @@
         "label": "BlocklistConditionEntryField",
         "description": [],
         "signature": [
-          "\"file.path\" | \"file.hash.*\" | \"file.Ext.code_signature\" | \"file.path.caseless\""
+          "\"file.path\" | \"file.Ext.code_signature\" | \"file.hash.*\" | \"file.path.caseless\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,

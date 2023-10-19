@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* eslint-disable cypress/no-unnecessary-waiting */
+
+import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { loadPage } from './common';
 
@@ -44,11 +47,6 @@ export const releaseHostWithComment = (comment: string, hostname: string): void 
   cy.getByTestSubj('host_isolation_comment').type(comment);
 };
 
-export const openAlertDetails = (): void => {
-  cy.getByTestSubj('expand-event').first().click();
-  cy.getByTestSubj('take-action-dropdown-btn').click();
-};
-
 export const openCaseAlertDetails = (alertId: string): void => {
   cy.getByTestSubj(`comment-action-show-alert-${alertId}`).click();
   cy.getByTestSubj('take-action-dropdown-btn').click();
@@ -82,7 +80,7 @@ export const checkFlyoutEndpointIsolation = (): void => {
     } else {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       cy.wait(5000);
-      openAlertDetails();
+      openAlertDetailsView();
       cy.getByTestSubj('event-field-agent.status').within(() => {
         cy.contains('Isolated');
       });
@@ -114,7 +112,7 @@ export const filterOutEndpoints = (endpointHostname: string): void => {
 };
 
 export const filterOutIsolatedHosts = (): void => {
-  cy.getByTestSubj('adminSearchBar').click().type('united.endpoint.Endpoint.state.isolation: true');
+  cy.getByTestSubj('adminSearchBar').type('united.endpoint.Endpoint.state.isolation: true');
   cy.getByTestSubj('querySubmitButton').click();
 };
 

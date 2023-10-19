@@ -5,39 +5,10 @@
  * 2.0.
  */
 
-import { getHostDetailsEventsKqlQueryExpression, getHostDetailsPageFilters } from './helpers';
+import { getHostDetailsPageFilters } from './helpers';
 import type { Filter } from '@kbn/es-query';
 
 describe('hosts page helpers', () => {
-  describe('getHostDetailsEventsKqlQueryExpression', () => {
-    const filterQueryExpression = 'user.name: "root"';
-    const hostName = 'foo';
-
-    it('combines the filterQueryExpression and hostname when both are NOT empty', () => {
-      expect(getHostDetailsEventsKqlQueryExpression({ filterQueryExpression, hostName })).toEqual(
-        'user.name: "root" and host.name: "foo"'
-      );
-    });
-
-    it('returns just the filterQueryExpression when it is NOT empty, but hostname is empty', () => {
-      expect(
-        getHostDetailsEventsKqlQueryExpression({ filterQueryExpression, hostName: '' })
-      ).toEqual('user.name: "root"');
-    });
-
-    it('returns just the hostname when filterQueryExpression is empty, but hostname is NOT empty', () => {
-      expect(
-        getHostDetailsEventsKqlQueryExpression({ filterQueryExpression: '', hostName })
-      ).toEqual('host.name: "foo"');
-    });
-
-    it('returns an empty string when both the filterQueryExpression and hostname are empty', () => {
-      expect(
-        getHostDetailsEventsKqlQueryExpression({ filterQueryExpression: '', hostName: '' })
-      ).toEqual('');
-    });
-  });
-
   describe('getHostDetailsPageFilters', () => {
     it('correctly constructs pageFilters for the given hostName', () => {
       const expected: Filter[] = [

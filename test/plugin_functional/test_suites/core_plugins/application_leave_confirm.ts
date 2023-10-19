@@ -25,7 +25,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
-  describe('application using leave confirmation', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/75963
+  // Failing: See https://github.com/elastic/kibana/issues/166838
+  describe.skip('application using leave confirmation', () => {
     describe('when navigating to another app', () => {
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');

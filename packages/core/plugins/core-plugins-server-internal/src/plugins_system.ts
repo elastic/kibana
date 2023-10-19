@@ -224,21 +224,38 @@ export class PluginsSystem<T extends PluginType> {
 
     this.log.info(`Stopping all plugins.`);
 
-    // Stop plugins in the reverse order of when they were set up.
-    while (this.satupPlugins.length > 0) {
-      const pluginName = this.satupPlugins.pop()!;
+    const reverseDependencyMap = buildReverseDependencyMap(this.plugins);
+    const pluginStopPromiseMap = new Map<PluginName, Promise<void>>();
+    for (let i = this.satupPlugins.length - 1; i > -1; i--) {
+      const pluginName = this.satupPlugins[i];
+      const plugin = this.plugins.get(pluginName)!;
+      const pluginDependant = reverseDependencyMap.get(pluginName)!;
+      const dependantPromises = pluginDependant.map(
+        (dependantName) => pluginStopPromiseMap.get(dependantName)!
+      );
 
-      this.log.debug(`Stopping plugin "${pluginName}"...`);
+      // Stop plugin as soon as all the dependant plugins are stopped.
+      const pluginStopPromise = Promise.all(dependantPromises).then(async () => {
+        this.log.debug(`Stopping plugin "${pluginName}"...`);
 
-      const resultMaybe = await withTimeout({
-        promise: this.plugins.get(pluginName)!.stop(),
-        timeoutMs: 30 * Sec,
+        try {
+          const resultMaybe = await withTimeout({
+            promise: plugin.stop(),
+            timeoutMs: 30 * Sec,
+          });
+          if (resultMaybe?.timedout) {
+            this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+          }
+        } catch (e) {
+          this.log.warn(`"${pluginName}" thrown during stop: ${e}`);
+        }
       });
-
-      if (resultMaybe?.timedout) {
-        this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
-      }
+      pluginStopPromiseMap.set(pluginName, pluginStopPromise);
     }
+
+    await Promise.allSettled(pluginStopPromiseMap.values());
+
+    this.log.info(`All plugins stopped.`);
   }
 
   /**
@@ -334,3 +351,23 @@ export class PluginsSystem<T extends PluginType> {
     return sortedPluginNames;
   }
 }
+
+const buildReverseDependencyMap = (
+  pluginMap: Map<PluginName, PluginWrapper>
+): Map<PluginName, PluginName[]> => {
+  const reverseMap = new Map<PluginName, PluginName[]>();
+  for (const pluginName of pluginMap.keys()) {
+    reverseMap.set(pluginName, []);
+  }
+  for (const [pluginName, pluginWrapper] of pluginMap.entries()) {
+    const allDependencies = [...pluginWrapper.requiredPlugins, ...pluginWrapper.optionalPlugins];
+    for (const dependency of allDependencies) {
+      // necessary to evict non-present optional dependency
+      if (pluginMap.has(dependency)) {
+        reverseMap.get(dependency)!.push(pluginName);
+      }
+    }
+    reverseMap.set(pluginName, []);
+  }
+  return reverseMap;
+};

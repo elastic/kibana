@@ -30,10 +30,6 @@
     {
       "name": "slo",
       "description": "SLO APIs enable you to define, manage and track service-level objectives"
-    },
-    {
-      "name": "composite slo",
-      "description": "Composite SLO APIs enable you to define, manage and track a group of SLOs."
     }
   ],
   "paths": {
@@ -160,7 +156,8 @@
             "description": "The number of SLOs to return per page",
             "schema": {
               "type": "integer",
-              "default": 25
+              "default": 25,
+              "maximum": 5000
             },
             "example": 25
           },
@@ -677,6 +674,74 @@
           }
         }
       }
+    },
+    "/s/{spaceId}/api/observability/slos/_delete_instances": {
+      "post": {
+        "summary": "Batch delete rollup and summary data for the matching list of sloId and instanceId",
+        "operationId": "deleteSloInstancesOp",
+        "description": "You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/delete_slo_instances_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful request"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -798,7 +863,9 @@
             "nullable": false,
             "required": [
               "index",
-              "timestampField"
+              "timestampField",
+              "good",
+              "total"
             ],
             "properties": {
               "index": {
@@ -1173,6 +1240,210 @@
           }
         }
       },
+      "timeslice_metric_basic_metric_with_field": {
+        "title": "Timeslice Metric Basic Metric with Field",
+        "required": [
+          "name",
+          "aggregation",
+          "field"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the metric. Only valid options are A-Z",
+            "type": "string",
+            "example": "A",
+            "pattern": "^[A-Z]$"
+          },
+          "aggregation": {
+            "description": "The aggregation type of the metric.",
+            "type": "string",
+            "example": "sum",
+            "enum": [
+              "sum",
+              "avg",
+              "min",
+              "max",
+              "std_deviation",
+              "last_value",
+              "cardinality"
+            ]
+          },
+          "field": {
+            "description": "The field of the metric.",
+            "type": "string",
+            "example": "processor.processed"
+          },
+          "filter": {
+            "description": "The filter to apply to the metric.",
+            "type": "string",
+            "example": "processor.outcome: \"success\""
+          }
+        }
+      },
+      "timeslice_metric_percentile_metric": {
+        "title": "Timeslice Metric Percentile Metric",
+        "required": [
+          "name",
+          "aggregation",
+          "field",
+          "percentile"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the metric. Only valid options are A-Z",
+            "type": "string",
+            "example": "A",
+            "pattern": "^[A-Z]$"
+          },
+          "aggregation": {
+            "description": "The aggregation type of the metric. Only valid option is \"percentile\"",
+            "type": "string",
+            "example": "percentile",
+            "enum": [
+              "percentile"
+            ]
+          },
+          "field": {
+            "description": "The field of the metric.",
+            "type": "string",
+            "example": "processor.processed"
+          },
+          "percentile": {
+            "description": "The percentile value.",
+            "type": "number",
+            "example": 95
+          },
+          "filter": {
+            "description": "The filter to apply to the metric.",
+            "type": "string",
+            "example": "processor.outcome: \"success\""
+          }
+        }
+      },
+      "timeslice_metric_doc_count_metric": {
+        "title": "Timeslice Metric Doc Count Metric",
+        "required": [
+          "name",
+          "aggregation"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the metric. Only valid options are A-Z",
+            "type": "string",
+            "example": "A",
+            "pattern": "^[A-Z]$"
+          },
+          "aggregation": {
+            "description": "The aggregation type of the metric. Only valid option is \"doc_count\"",
+            "type": "string",
+            "example": "doc_count",
+            "enum": [
+              "doc_count"
+            ]
+          },
+          "filter": {
+            "description": "The filter to apply to the metric.",
+            "type": "string",
+            "example": "processor.outcome: \"success\""
+          }
+        }
+      },
+      "indicator_properties_timeslice_metric": {
+        "title": "Timeslice metric",
+        "required": [
+          "type",
+          "params"
+        ],
+        "description": "Defines properties for a timeslice metric indicator type",
+        "type": "object",
+        "properties": {
+          "params": {
+            "description": "An object containing the indicator parameters.",
+            "type": "object",
+            "nullable": false,
+            "required": [
+              "index",
+              "timestampField",
+              "metric"
+            ],
+            "properties": {
+              "index": {
+                "description": "The index or index pattern to use",
+                "type": "string",
+                "example": "my-service-*"
+              },
+              "filter": {
+                "description": "the KQL query to filter the documents with.",
+                "type": "string",
+                "example": "field.environment : \"production\" and service.name : \"my-service\""
+              },
+              "timestampField": {
+                "description": "The timestamp field used in the source indice.\n",
+                "type": "string",
+                "example": "timestamp"
+              },
+              "metric": {
+                "description": "An object defining the metrics, equation, and threshold to determine if it's a good slice or not\n",
+                "type": "object",
+                "required": [
+                  "metrics",
+                  "equation",
+                  "comparator",
+                  "threshold"
+                ],
+                "properties": {
+                  "metrics": {
+                    "description": "List of metrics with their name, aggregation type, and field.",
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/timeslice_metric_basic_metric_with_field"
+                        },
+                        {
+                          "$ref": "#/components/schemas/timeslice_metric_percentile_metric"
+                        },
+                        {
+                          "$ref": "#/components/schemas/timeslice_metric_doc_count_metric"
+                        }
+                      ]
+                    }
+                  },
+                  "equation": {
+                    "description": "The equation to calculate the metric.",
+                    "type": "string",
+                    "example": "A"
+                  },
+                  "comparator": {
+                    "description": "The comparator to use to compare the equation to the threshold.",
+                    "type": "string",
+                    "example": "GT",
+                    "enum": [
+                      "GT",
+                      "GTE",
+                      "LT",
+                      "LTE"
+                    ]
+                  },
+                  "threshold": {
+                    "description": "The threshold used to determine if the metric is a good slice or not.",
+                    "type": "number",
+                    "example": 100
+                  }
+                }
+              }
+            }
+          },
+          "type": {
+            "description": "The type of indicator.",
+            "type": "string",
+            "example": "sli.metric.timeslice"
+          }
+        }
+      },
       "time_window": {
         "title": "Time window",
         "required": [
@@ -1332,6 +1603,7 @@
           "enabled",
           "groupBy",
           "instanceId",
+          "tags",
           "createdAt",
           "updatedAt"
         ],
@@ -1359,7 +1631,8 @@
                 "sli.kql.custom": "#/components/schemas/indicator_properties_custom_kql",
                 "sli.apm.transactionDuration": "#/components/schemas/indicator_properties_apm_latency",
                 "sli.metric.custom": "#/components/schemas/indicator_properties_custom_metric",
-                "sli.histogram.custom": "#/components/schemas/indicator_properties_histogram"
+                "sli.histogram.custom": "#/components/schemas/indicator_properties_histogram",
+                "sli.metric.timeslice": "#/components/schemas/indicator_properties_timeslice_metric"
               }
             },
             "oneOf": [
@@ -1377,6 +1650,9 @@
               },
               {
                 "$ref": "#/components/schemas/indicator_properties_histogram"
+              },
+              {
+                "$ref": "#/components/schemas/indicator_properties_timeslice_metric"
               }
             ]
           },
@@ -1414,6 +1690,13 @@
             "description": "the value derived from the groupBy field, if present, otherwise '*'",
             "type": "string",
             "example": "host-abcde"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "createdAt": {
             "description": "The creation date",
@@ -1586,6 +1869,9 @@
               },
               {
                 "$ref": "#/components/schemas/indicator_properties_histogram"
+              },
+              {
+                "$ref": "#/components/schemas/indicator_properties_timeslice_metric"
               }
             ]
           },
@@ -1605,6 +1891,13 @@
             "description": "optional group by field to use to generate an SLO per distinct value",
             "type": "string",
             "example": "some.field"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1673,6 +1966,9 @@
               },
               {
                 "$ref": "#/components/schemas/indicator_properties_histogram"
+              },
+              {
+                "$ref": "#/components/schemas/indicator_properties_timeslice_metric"
               }
             ]
           },
@@ -1687,6 +1983,13 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1694,10 +1997,10 @@
         "title": "Historical summary request",
         "type": "object",
         "required": [
-          "sloIds"
+          "list"
         ],
         "properties": {
-          "sloIds": {
+          "list": {
             "description": "The list of SLO identifiers to get the historical summary for",
             "type": "array",
             "items": {
@@ -1728,6 +2031,39 @@
               },
               "errorBudget": {
                 "$ref": "#/components/schemas/error_budget"
+              }
+            }
+          }
+        }
+      },
+      "delete_slo_instances_request": {
+        "title": "Delete SLO instances request",
+        "description": "The delete SLO instances request takes a list of SLO id and instance id, then delete the rollup and summary data. This API can be used to remove the staled data of an instance SLO that no longer get updated.\n",
+        "type": "object",
+        "required": [
+          "list"
+        ],
+        "properties": {
+          "list": {
+            "description": "An array of slo id and instance id",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "sloId",
+                "instanceId"
+              ],
+              "properties": {
+                "sloId": {
+                  "description": "The SLO unique identifier",
+                  "type": "string",
+                  "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+                },
+                "instanceId": {
+                  "description": "The SLO instance identifier",
+                  "type": "string",
+                  "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+                }
               }
             }
           }

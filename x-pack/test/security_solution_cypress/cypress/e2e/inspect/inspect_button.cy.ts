@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../tags';
 
 import {
   INSPECT_BUTTONS_IN_SECURITY,
@@ -17,16 +16,18 @@ import {
   openTab,
   openTableInspectModal,
 } from '../../tasks/inspect';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import { postDataView, waitForWelcomePanelToBeLoaded } from '../../tasks/common';
 import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe('Inspect Explore pages', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'risk_users');
-    cy.task('esArchiverLoad', 'risk_hosts');
+    // illegal_argument_exception: unknown setting [index.lifecycle.name]
+    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
 
     login();
     // Create and select data view
@@ -46,9 +47,11 @@ describe('Inspect Explore pages', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       login();
 
       visit(url, {
-        onLoad: () => {
-          waitForWelcomePanelToBeLoaded();
-          selectDataView(DATA_VIEW);
+        visitOptions: {
+          onLoad: () => {
+            waitForWelcomePanelToBeLoaded();
+            selectDataView(DATA_VIEW);
+          },
         },
       });
 

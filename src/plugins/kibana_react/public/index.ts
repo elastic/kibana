@@ -54,17 +54,13 @@ export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolb
 export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';
 
 export type {
-  KibanaPageTemplateProps,
   NoDataPageActions,
   NoDataPageActionsProps,
   NoDataPageProps,
   ElasticAgentCardProps,
 } from './page_template';
 export {
-  KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
-  NO_DATA_PAGE_MAX_WIDTH,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
   NO_DATA_RECOMMENDED,
   NoDataPage,
   ElasticAgentCard,
@@ -80,7 +76,7 @@ export { createNotifications } from './notifications';
 /** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 export { Markdown, MarkdownSimple } from './markdown';
 
-export { toMountPoint, MountPointPortal } from './util';
+export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
 
 /** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */

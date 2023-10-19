@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
@@ -424,9 +424,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             />
           </EuiFormRow>
           <EuiFormRow
-            label={i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
-              defaultMessage: 'Advanced YAML configuration',
-            })}
+            label={
+              <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
+                {i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
+                  defaultMessage: 'Advanced YAML configuration',
+                })}
+              </EuiLink>
+            }
             {...inputs.additionalYamlConfigInput.formRowProps}
             fullWidth
           >

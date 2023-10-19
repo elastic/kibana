@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Tls, X509Expiry } from '../../../../../../common/runtime_types';
 import { CERTIFICATES_ROUTE } from '../../../../../../common/constants';
-import { MonListDescription, MonListTitle } from './status_bar';
 import { CertStatusColumn } from '../../../overview/monitor_list/columns/cert_status_column';
 
 interface Props {
@@ -38,19 +37,17 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
 
   return (
     <>
-      <MonListTitle>
+      <EuiDescriptionListTitle>
         <FormattedMessage
           id="xpack.uptime.monitorStatusBar.sslCertificate.title"
           defaultMessage="TLS Certificate"
         />
-      </MonListTitle>
-
-      <EuiSpacer size="s" />
-      <MonListDescription>
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>
         <Link to={CERTIFICATES_ROUTE} className="eui-displayInline">
           <CertStatusColumn expiry={expiry} boldStyle={true} />
         </Link>
-      </MonListDescription>
+      </EuiDescriptionListDescription>
     </>
   );
 };

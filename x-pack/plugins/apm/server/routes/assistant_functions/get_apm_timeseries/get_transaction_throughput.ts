@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
@@ -43,10 +43,7 @@ export async function getTransactionThroughput({
       documentType: ApmDocumentType.TransactionMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
-      filter: filter.concat(
-        ...rangeQuery(start, end),
-        ...termQuery(TRANSACTION_TYPE, transactionType)
-      ),
+      filter: filter.concat(...termQuery(TRANSACTION_TYPE, transactionType)),
       groupBy: 'transaction.type',
       aggs: {
         value: {
@@ -70,7 +67,7 @@ export async function getTransactionThroughput({
       ...fetchedSerie,
       value:
         fetchedSerie.value !== null
-          ? fetchedSerie.value / rangeInMinutes
+          ? (fetchedSerie.value * bucketSizeInMinutes) / rangeInMinutes
           : null,
       data: fetchedSerie.data.map((bucket) => {
         return {

@@ -215,6 +215,29 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.UiSettingsParams.readonlyMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "readonlyMode",
+            "description": [
+              "a flag indicating the level of restriction of the readonly settings {@link ReadonlyModeType}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.ReadonlyModeType",
+                "text": "ReadonlyModeType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
             "id": "def-common.UiSettingsParams.sensitive",
             "type": "CompoundType",
             "tags": [],
@@ -331,6 +354,10 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "@kbn/management-settings-field-definition",
+                "path": "packages/kbn-management/settings/field_definition/get_definition.ts"
+              },
+              {
                 "plugin": "advancedSettings",
                 "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
               },
@@ -431,6 +458,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.ReadonlyModeType",
+        "type": "Type",
+        "tags": [],
+        "label": "ReadonlyModeType",
+        "description": [
+          "\nType for the readonly mode of the readonly settings.\n'strict' indicates that the value cannot be changed through API and is not displayed in the UI\n'ui' indicates that the value is just not displayed in the UI"
+        ],
+        "signature": [
+          "\"strict\" | \"ui\""
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
         "id": "def-common.TIMEZONE_OPTIONS",

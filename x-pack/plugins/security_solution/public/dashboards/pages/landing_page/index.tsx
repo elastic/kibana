@@ -17,10 +17,11 @@ import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { LandingLinksImageCards } from '@kbn/security-solution-navigation/landing_links';
+import { useObservable } from 'react-use';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../common/constants';
-import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
+import { useCapabilities, useKibana, useNavigateTo } from '../../../common/lib/kibana';
 import { useRootNavLink } from '../../../common/links/nav_links';
 import { Title } from '../../../common/components/header_page/title';
 import { LinkButton } from '../../../common/components/links/helpers';
@@ -82,6 +83,8 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
+  const { getComponent$ } = useKibana().services;
+  const dashboardLandingCallout = useObservable(getComponent$('dashboardsLandingCallout'));
   const { links = [] } = useRootNavLink(SecurityPageName.dashboards) ?? {};
   const urlState = useGlobalQueryString();
   const { show: canReadDashboard, createNew: canCreateDashboard } =
@@ -96,20 +99,18 @@ export const DashboardsLandingPage = () => {
       })}`,
     [getSecuritySolutionUrl]
   );
-  const { isLoading: loadingCreateDashboardUrl, url: createDashboardUrl } =
-    useCreateSecurityDashboardLink();
-
-  const getHref = useCallback(
-    (id: string | undefined) => (id ? getSecuritySolutionDashboardUrl(id) : createDashboardUrl),
-    [createDashboardUrl, getSecuritySolutionDashboardUrl]
-  );
 
   const goToDashboard = useCallback(
     (dashboardId: string | undefined) => {
       track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
-      navigateTo({ url: getHref(dashboardId) });
+      navigateTo({
+        url: getSecuritySolutionUrl({
+          deepLinkId: SecurityPageName.dashboards,
+          path: dashboardId ?? 'create',
+        }),
+      });
     },
-    [getHref, navigateTo]
+    [getSecuritySolutionUrl, navigateTo]
   );
 
   const securityTags = useSecurityTags();
@@ -120,6 +121,13 @@ export const DashboardsLandingPage = () => {
     <SecuritySolutionPageWrapper>
       <Header canCreateDashboard={canCreateDashboard} />
       <EuiSpacer size="xl" />
+
+      {dashboardLandingCallout && (
+        <>
+          {dashboardLandingCallout}
+          <EuiSpacer size="xl" />
+        </>
+      )}
 
       <EuiTitle size="xxxs">
         <h2>{i18n.DASHBOARDS_PAGE_SECTION_DEFAULT}</h2>
@@ -141,11 +149,12 @@ export const DashboardsLandingPage = () => {
           <EuiHorizontalRule margin="s" />
           <EuiSpacer size="m" />
           <DashboardListingTable
-            disableCreateDashboardButton={loadingCreateDashboardUrl}
+            disableCreateDashboardButton={!canCreateDashboard}
             getDashboardUrl={getSecuritySolutionDashboardUrl}
             goToDashboard={goToDashboard}
             initialFilter={initialFilter}
             urlStateEnabled={false}
+            showCreateDashboardButton={false}
           />
         </>
       )}

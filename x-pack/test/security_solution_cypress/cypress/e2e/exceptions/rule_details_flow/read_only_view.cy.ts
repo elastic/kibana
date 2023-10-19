@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
-import { goToTheRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
+import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -27,7 +27,8 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539 Do we need this to run in Serverless?
+describe('Exceptions viewer read only', { tags: ['@ess', '@skipInServerless'] }, () => {
   const exceptionList = getExceptionList();
 
   beforeEach(() => {
@@ -55,8 +56,8 @@ describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
     });
 
     login(ROLES.reader);
-    visitSecurityDetectionRulesPage(ROLES.reader);
-    goToTheRuleDetailsOf('Test exceptions rule');
+    visitRulesManagementTable(ROLES.reader);
+    goToRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
   });
 

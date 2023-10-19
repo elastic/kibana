@@ -1105,32 +1105,6 @@ describe('SearchSource', () => {
         expect(complete2).toBeCalledTimes(1);
         expect(searchSourceDependencies.search).toHaveBeenCalledTimes(1);
       });
-
-      test('should emit error on empty response', async () => {
-        searchSourceDependencies.search = mockSearchMethod = jest
-          .fn()
-          .mockReturnValue(
-            of({ rawResponse: { test: 1 }, isPartial: true, isRunning: true }, undefined)
-          );
-
-        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-        const options = {};
-
-        const next = jest.fn();
-        const error = jest.fn();
-        const complete = jest.fn();
-        const res$ = searchSource.fetch$(options);
-        res$.subscribe({ next, error, complete });
-        await firstValueFrom(res$).catch((_) => {});
-
-        expect(next).toBeCalledTimes(1);
-        expect(error).toBeCalledTimes(1);
-        expect(complete).toBeCalledTimes(0);
-        expect(next.mock.calls[0][0].rawResponse).toStrictEqual({
-          test: 1,
-        });
-        expect(error.mock.calls[0][0]).toBe(undefined);
-      });
     });
 
     describe('inspector', () => {

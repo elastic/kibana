@@ -11,8 +11,8 @@ import numeral from '@elastic/numeral';
 import { getColor } from './get_color';
 import { TimeseriesVisualization } from './timeseries_visualization';
 
-function formatTicksFor(series) {
-  const format = get(series, 'metric.format', '0,0.0');
+function formatTicksFor(series, formatProperty = 'metric.format') {
+  const format = get(series, formatProperty, '0,0.0');
   const units = get(series, 'metric.units', '');
 
   return function formatTicks(val) {
@@ -38,12 +38,15 @@ export function MonitoringTimeseries({ series, onBrush }) {
   const firstSeries = first(series);
   const timeRange = get(firstSeries, 'timeRange');
   const formatTicks = formatTicksFor(firstSeries);
+  const legendFormatter =
+    firstSeries.metric.legendFormat && formatTicksFor(firstSeries, 'metric.legendFormat');
 
   return (
     <TimeseriesVisualization
       series={dataset}
       timeRange={timeRange}
       tickFormatter={formatTicks}
+      legendFormatter={legendFormatter}
       onBrush={onBrush}
     />
   );

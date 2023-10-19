@@ -159,7 +159,23 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-apps-server-internal",
+        "id": "def-common.CoreAppConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "CoreAppConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly allowDynamicConfigOverrides: boolean; }"
+        ],
+        "path": "packages/core/apps/core-apps-server-internal/src/core_app_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

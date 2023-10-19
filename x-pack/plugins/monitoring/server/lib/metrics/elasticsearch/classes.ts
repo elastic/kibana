@@ -15,7 +15,14 @@ import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 type ElasticsearchMetricOptions = Pick<
   MetricOptions,
-  'format' | 'metricAgg' | 'field' | 'label' | 'description' | 'units' | 'derivative'
+  | 'format'
+  | 'metricAgg'
+  | 'field'
+  | 'label'
+  | 'description'
+  | 'units'
+  | 'derivative'
+  | 'legendFormat'
 > &
   Partial<Pick<MetricOptions, 'title'>> & { type: string; min?: number };
 

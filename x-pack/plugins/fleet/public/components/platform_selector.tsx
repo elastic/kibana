@@ -24,15 +24,9 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
 import { type PLATFORM_TYPE } from '../hooks';
-import {
-  REDUCED_PLATFORM_OPTIONS,
-  PLATFORM_OPTIONS,
-  PLATFORM_OPTIONS_CLOUD_SHELL,
-  usePlatform,
-} from '../hooks';
+import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
-import { GoogleCloudShellInstructions } from './agent_enrollment_flyout/google_cloud_shell_instructions';
 import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';
 
 interface Props {
@@ -42,7 +36,6 @@ interface Props {
   linuxDebCommand: string;
   linuxRpmCommand: string;
   k8sCommand: string;
-  googleCloudShellCommand?: string | undefined;
   hasK8sIntegration: boolean;
   cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   hasK8sIntegrationMultiPage: boolean;
@@ -50,6 +43,7 @@ interface Props {
   hasFleetServer?: boolean;
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
+  fleetServerHost?: string;
   onCopy?: () => void;
 }
 
@@ -65,20 +59,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxDebCommand,
   linuxRpmCommand,
   k8sCommand,
-  googleCloudShellCommand,
   hasK8sIntegration,
   cloudSecurityIntegration,
   hasK8sIntegrationMultiPage,
   isManaged,
   enrollToken,
   hasFleetServer,
+  fleetServerHost,
   fullCopyButton,
   onCopy,
 }) => {
   const getInitialPlatform = useCallback(() => {
-    if (cloudSecurityIntegration?.cloudShellUrl) {
-      return 'googleCloudShell';
-    }
     if (
       hasK8sIntegration ||
       (cloudSecurityIntegration?.integrationType ===
@@ -88,12 +79,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       return 'kubernetes';
 
     return 'linux';
-  }, [
-    hasK8sIntegration,
-    cloudSecurityIntegration?.integrationType,
-    isManaged,
-    cloudSecurityIntegration?.cloudShellUrl,
-  ]);
+  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType, isManaged]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
@@ -104,12 +90,9 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
 
   const getPlatformOptions = useCallback(() => {
     const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
-    const platformOptionsWithCloudShell = cloudSecurityIntegration?.cloudShellUrl
-      ? PLATFORM_OPTIONS_CLOUD_SHELL
-      : platformOptions;
 
-    return platformOptionsWithCloudShell;
-  }, [isReduced, cloudSecurityIntegration?.cloudShellUrl]);
+    return platformOptions;
+  }, [isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -164,7 +147,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
-    googleCloudShell: k8sCommand,
   };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -225,15 +207,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               onCopy={onCopy}
               onDownload={onCopy}
               enrollmentAPIKey={enrollToken}
-            />
-            <EuiSpacer size="s" />
-          </>
-        )}
-        {platform === 'googleCloudShell' && isManaged && (
-          <>
-            <GoogleCloudShellInstructions
-              cloudShellUrl={cloudSecurityIntegration?.cloudShellUrl || ''}
-              cloudShellCommand={googleCloudShellCommand || ''}
+              fleetServerHost={fleetServerHost}
             />
             <EuiSpacer size="s" />
           </>
@@ -250,19 +224,18 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 <EuiSpacer size="m" />
               </EuiText>
             )}
-            {platform !== 'googleCloudShell' && (
-              <EuiCodeBlock
-                onClick={onTextAreaClick}
-                fontSize="m"
-                isCopyable={!fullCopyButton}
-                paddingSize="m"
-                css={`
-                  max-width: 1100px;
-                `}
-              >
-                <CommandCode>{commandsByPlatform[platform]}</CommandCode>
-              </EuiCodeBlock>
-            )}
+
+            <EuiCodeBlock
+              onClick={onTextAreaClick}
+              fontSize="m"
+              isCopyable={!fullCopyButton}
+              paddingSize="m"
+              css={`
+                max-width: 1100px;
+              `}
+            >
+              <CommandCode>{commandsByPlatform[platform]}</CommandCode>
+            </EuiCodeBlock>
 
             <EuiSpacer size="s" />
             {fullCopyButton && (

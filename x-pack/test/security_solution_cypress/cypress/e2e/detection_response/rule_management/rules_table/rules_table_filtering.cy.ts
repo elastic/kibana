@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   expectRulesWithExecutionStatus,
   filterByExecutionStatus,
   expectNumberOfRulesShownOnPage,
 } from '../../../../tasks/rule_filters';
+
+import {
+  expectManagementTableRules,
+  filterByTags,
+  unselectTags,
+} from '../../../../tasks/alerts_detection_rules';
 
 import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 import {
@@ -24,7 +29,7 @@ import {
 import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
-describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -80,7 +85,7 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
       waitForRulesToFinishExecution(['successful_rule', 'warning_rule', 'failed_rule'], new Date());
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       // Initial table state - before filtering by status
@@ -103,6 +108,47 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       filterByExecutionStatus('Failed');
       expectNumberOfRulesShownOnPage(1);
       expectRulesWithExecutionStatus(1, 'Failed');
+    });
+  });
+
+  describe('Tags filter', () => {
+    beforeEach(() => {
+      createRule(
+        getNewRule({
+          name: 'Rule 1',
+          tags: [],
+        })
+      );
+
+      createRule(
+        getNewRule({
+          name: 'Rule 2',
+          tags: ['simpleTag'],
+        })
+      );
+
+      createRule(
+        getNewRule({
+          name: 'Rule 3',
+          tags: ['category:tag'],
+        })
+      );
+    });
+
+    it('filter by different tags', () => {
+      visitRulesManagementTable();
+
+      expectManagementTableRules(['Rule 1', 'Rule 2', 'Rule 3']);
+
+      filterByTags(['simpleTag']);
+
+      expectManagementTableRules(['Rule 2']);
+
+      unselectTags();
+
+      filterByTags(['category:tag']);
+
+      expectManagementTableRules(['Rule 3']);
     });
   });
 });

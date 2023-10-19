@@ -29,7 +29,7 @@ export async function getSearchStatus(
         { meta: true }
       );
     const response = apiResponse.body;
-    if ((response.is_partial && !response.is_running) || response.completion_status >= 400) {
+    if (response.completion_status >= 400) {
       return {
         status: SearchStatus.ERROR,
         error: i18n.translate('data.search.statusError', {
@@ -37,7 +37,7 @@ export async function getSearchStatus(
           values: { searchId: asyncId, errorCode: response.completion_status },
         }),
       };
-    } else if (!response.is_partial && !response.is_running) {
+    } else if (!response.is_running) {
       return {
         status: SearchStatus.COMPLETE,
         error: undefined,

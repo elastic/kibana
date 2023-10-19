@@ -36,6 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const defaultBody = { data_view_id: '.alerts-security.alerts-default' };
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
+      .set('elastic-api-version', '1')
       .set('kbn-xsrf', 'true')
       .send({ ...defaultBody, ...body })
       .expect(200);
@@ -55,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await previewRiskScores({ body: {} });
   };
 
-  describe('Risk Engine Scoring - Preview', () => {
+  describe('Risk Engine - Risk Scoring Preview API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,

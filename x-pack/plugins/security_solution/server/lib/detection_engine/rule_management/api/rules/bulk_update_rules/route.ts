@@ -41,95 +41,102 @@ export const bulkUpdateRulesRoute = (
   ml: SetupPlugins['ml'],
   logger: Logger
 ) => {
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_UPDATE,
-      validate: {
-        body: buildRouteValidation(BulkUpdateRulesRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
-      logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_UPDATE);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: buildRouteValidation(BulkUpdateRulesRequestBody),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
+        logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_UPDATE);
 
-      const siemResponse = buildSiemResponse(response);
+        const siemResponse = buildSiemResponse(response);
 
-      const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
+        const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
-      const rulesClient = ctx.alerting.getRulesClient();
-      const savedObjectsClient = ctx.core.savedObjects.client;
+        const rulesClient = ctx.alerting.getRulesClient();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
-      const mlAuthz = buildMlAuthz({
-        license: ctx.licensing.license,
-        ml,
-        request,
-        savedObjectsClient,
-      });
+        const mlAuthz = buildMlAuthz({
+          license: ctx.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
 
-      const rules = await Promise.all(
-        request.body.map(async (payloadRule) => {
-          const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
-          try {
-            const validationErrors = validateUpdateRuleProps(payloadRule);
-            if (validationErrors.length) {
-              return createBulkErrorObject({
+        const rules = await Promise.all(
+          request.body.map(async (payloadRule) => {
+            const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
+            try {
+              const validationErrors = validateUpdateRuleProps(payloadRule);
+              if (validationErrors.length) {
+                return createBulkErrorObject({
+                  ruleId: payloadRule.rule_id,
+                  statusCode: 400,
+                  message: validationErrors.join(),
+                });
+              }
+
+              throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
+
+              const existingRule = await readRules({
+                rulesClient,
                 ruleId: payloadRule.rule_id,
-                statusCode: 400,
-                message: validationErrors.join(),
+                id: payloadRule.id,
               });
+
+              validateRulesWithDuplicatedDefaultExceptionsList({
+                allRules: request.body,
+                exceptionsList: payloadRule.exceptions_list,
+                ruleId: idOrRuleIdOrUnknown,
+              });
+              await validateRuleDefaultExceptionList({
+                exceptionsList: payloadRule.exceptions_list,
+                rulesClient,
+                ruleRuleId: payloadRule.rule_id,
+                ruleId: payloadRule.id,
+              });
+
+              const rule = await updateRules({
+                rulesClient,
+                existingRule,
+                ruleUpdate: payloadRule,
+              });
+              if (rule != null) {
+                return transformValidateBulkError(rule.id, rule);
+              } else {
+                return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
+              }
+            } catch (err) {
+              return transformBulkError(idOrRuleIdOrUnknown, err);
             }
+          })
+        );
 
-            throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
-
-            const existingRule = await readRules({
-              rulesClient,
-              ruleId: payloadRule.rule_id,
-              id: payloadRule.id,
-            });
-
-            validateRulesWithDuplicatedDefaultExceptionsList({
-              allRules: request.body,
-              exceptionsList: payloadRule.exceptions_list,
-              ruleId: idOrRuleIdOrUnknown,
-            });
-            await validateRuleDefaultExceptionList({
-              exceptionsList: payloadRule.exceptions_list,
-              rulesClient,
-              ruleRuleId: payloadRule.rule_id,
-              ruleId: payloadRule.id,
-            });
-
-            const rule = await updateRules({
-              rulesClient,
-              existingRule,
-              ruleUpdate: payloadRule,
-            });
-            if (rule != null) {
-              return transformValidateBulkError(rule.id, rule);
-            } else {
-              return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
-            }
-          } catch (err) {
-            return transformBulkError(idOrRuleIdOrUnknown, err);
-          }
-        })
-      );
-
-      const [validated, errors] = validate(rules, BulkCrudRulesResponse);
-      if (errors != null) {
-        return siemResponse.error({
-          statusCode: 500,
-          body: errors,
-          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
-        });
-      } else {
-        return response.ok({
-          body: validated ?? {},
-          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
-        });
+        const [validated, errors] = validate(rules, BulkCrudRulesResponse);
+        if (errors != null) {
+          return siemResponse.error({
+            statusCode: 500,
+            body: errors,
+            headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
+          });
+        } else {
+          return response.ok({
+            body: validated ?? {},
+            headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
+          });
+        }
       }
-    }
-  );
+    );
 };

@@ -42,15 +42,46 @@ Cypress.Commands.add('getByTestSubj', (selector: string) => {
   return cy.get(`[data-test-subj="${selector}"]`);
 });
 
-Cypress.Commands.add('visitKibana', (url: string, rangeFrom?: string, rangeTo?: string) => {
+Cypress.Commands.add('visitKibana', (url, query) => {
   const urlPath = URL.format({
     pathname: url,
-    query: { rangeFrom, rangeTo },
+    query,
   });
 
   cy.visit(urlPath);
   cy.getByTestSubj('kbnLoadingMessage').should('exist');
   cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
     timeout: 50000,
+  });
+});
+
+Cypress.Commands.add(
+  'addKqlFilter',
+  ({ key, value, dataTestSubj = 'profilingUnifiedSearchBar', waitForSuggestion = true }) => {
+    cy.getByTestSubj(dataTestSubj).type(key);
+    cy.contains(key);
+    cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
+    // Do not close quotes here as it will not display the suggestion box
+    cy.getByTestSubj(dataTestSubj).type(`: "${value}`);
+    if (waitForSuggestion) {
+      cy.getByTestSubj(
+        Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`)
+      ).click();
+    }
+    cy.getByTestSubj(dataTestSubj).type('{enter}');
+  }
+);
+
+Cypress.Commands.add('updateAdvancedSettings', (settings: Record<string, unknown>) => {
+  const kibanaUrl = Cypress.env('KIBANA_URL');
+  cy.request({
+    log: false,
+    method: 'POST',
+    url: `${kibanaUrl}/internal/kibana/settings`,
+    body: { changes: settings },
+    headers: {
+      'kbn-xsrf': 'e2e_test',
+    },
+    auth: { user: 'elastic', pass: 'changeme' },
   });
 });

@@ -18,12 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
   isRoot: boolean;
@@ -38,7 +38,6 @@ interface Props {
   comparisonCountExclusive?: number;
   comparisonTotalSamples?: number;
   comparisonTotalSeconds?: number;
-  samplingRate?: number;
   onShowMoreClick?: () => void;
 }
 
@@ -55,10 +54,10 @@ export function FlameGraphTooltip({
   comparisonCountExclusive,
   comparisonTotalSamples,
   comparisonTotalSeconds,
-  samplingRate,
   onShowMoreClick,
 }: Props) {
   const theme = useEuiTheme();
+  const calculateImpactEstimates = useCalculateImpactEstimate();
 
   const impactEstimates = calculateImpactEstimates({
     countExclusive,
@@ -79,8 +78,6 @@ export function FlameGraphTooltip({
           totalSeconds: comparisonTotalSeconds,
         })
       : undefined;
-
-  const prependString = samplingRate === 1.0 ? ' ' : '~';
 
   return (
     <TooltipContainer>
@@ -104,7 +101,6 @@ export function FlameGraphTooltip({
                 formatValue={asPercentage}
                 showDifference
                 formatDifferenceAsPercentage
-                prependValue={prependString}
               />
               <TooltipRow
                 label={
@@ -120,7 +116,6 @@ export function FlameGraphTooltip({
                 showDifference
                 formatDifferenceAsPercentage
                 formatValue={asPercentage}
-                prependValue={prependString}
               />
             </>
           )}
@@ -138,7 +133,6 @@ export function FlameGraphTooltip({
             }
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           <TooltipRow
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
@@ -149,7 +143,6 @@ export function FlameGraphTooltip({
             formatValue={asWeight}
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           <TooltipRow
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
@@ -160,7 +153,6 @@ export function FlameGraphTooltip({
             formatValue={asCost}
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           {onShowMoreClick && (
             <>
@@ -169,7 +161,12 @@ export function FlameGraphTooltip({
                 style={{ background: theme.euiTheme.border.color }}
               />
               <EuiFlexItem>
-                <EuiButtonEmpty size="s" iconType="inspect" onClick={onShowMoreClick}>
+                <EuiButtonEmpty
+                  data-test-subj="profilingFlameGraphTooltipButton"
+                  size="s"
+                  iconType="inspect"
+                  onClick={onShowMoreClick}
+                >
                   <EuiText size="xs">
                     {i18n.translate('xpack.profiling.flameGraphTooltip.showMoreButton', {
                       defaultMessage: `Show more information`,

@@ -22,5 +22,5 @@ export type {
   LensSearchIn,
   LensSearchOut,
   LensSearchQuery,
-  Reference,
+  LensCrudTypes,
 } from './types';

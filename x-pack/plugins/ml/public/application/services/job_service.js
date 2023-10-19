@@ -8,7 +8,6 @@
 import { cloneDeep, each, find, get, isNumber } from 'lodash';
 import moment from 'moment';
 
-import { i18n } from '@kbn/i18n';
 import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
 
 import { parseInterval } from '../../../common/util/parse_interval';
@@ -47,50 +46,6 @@ class JobService {
     this.jobDescriptions = {};
     this.detectorsByJob = {};
     this.customUrlsByJob = {};
-    this.jobStats = {
-      activeNodes: {
-        label: i18n.translate('xpack.ml.jobService.activeMLNodesLabel', {
-          defaultMessage: 'Active ML nodes',
-        }),
-        value: 0,
-        show: true,
-      },
-      total: {
-        label: i18n.translate('xpack.ml.jobService.totalJobsLabel', {
-          defaultMessage: 'Total jobs',
-        }),
-        value: 0,
-        show: true,
-      },
-      open: {
-        label: i18n.translate('xpack.ml.jobService.openJobsLabel', {
-          defaultMessage: 'Open jobs',
-        }),
-        value: 0,
-        show: true,
-      },
-      closed: {
-        label: i18n.translate('xpack.ml.jobService.closedJobsLabel', {
-          defaultMessage: 'Closed jobs',
-        }),
-        value: 0,
-        show: true,
-      },
-      failed: {
-        label: i18n.translate('xpack.ml.jobService.failedJobsLabel', {
-          defaultMessage: 'Failed jobs',
-        }),
-        value: 0,
-        show: false,
-      },
-      activeDatafeeds: {
-        label: i18n.translate('xpack.ml.jobService.activeDatafeedsLabel', {
-          defaultMessage: 'Active datafeeds',
-        }),
-        value: 0,
-        show: true,
-      },
-    };
   }
 
   loadJobs() {

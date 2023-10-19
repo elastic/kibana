@@ -1,0 +1,17 @@
+title: Bad request
+type: object
+required:
+  - error
+  - message
+  - statusCode
+properties:
+  error:
+    type: string
+    enum:
+      - Bad Request
+  message:
+    type: string
+  statusCode:
+    type: integer
+    enum:
+      - 400

@@ -8,12 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
-import { TopNFunctions } from '../../../common/functions';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
   baselineTopNFunctions?: TopNFunctions;
@@ -38,6 +38,8 @@ export function TopNFunctionsSummary({
   baselineDuration,
   comparisonDuration,
 }: Props) {
+  const calculateImpactEstimates = useCalculateImpactEstimate();
+
   const baselineScaledTotalSamples = baselineTopNFunctions
     ? baselineTopNFunctions.TotalCount * baselineScaleFactor
     : 0;
@@ -87,6 +89,7 @@ export function TopNFunctionsSummary({
     baselineDuration,
     baselineScaledTotalSamples,
     baselineTopNFunctions,
+    calculateImpactEstimates,
     comparisonDuration,
     comparisonScaledTotalSamples,
     comparisonTopNFunctions,
@@ -94,6 +97,7 @@ export function TopNFunctionsSummary({
 
   const data = [
     {
+      id: 'overallPerformance',
       title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.performance', {
         defaultMessage: '{label} overall performance by',
         values: {
@@ -113,6 +117,7 @@ export function TopNFunctionsSummary({
       titleHint: ESTIMATED_VALUE_LABEL,
     },
     {
+      id: 'annualizedCo2',
       title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.co2', {
         defaultMessage: 'Annualized CO2 emission impact',
       }) as string,
@@ -124,6 +129,7 @@ export function TopNFunctionsSummary({
       titleHint: ESTIMATED_VALUE_LABEL,
     },
     {
+      id: 'annualizedCost',
       title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.cost', {
         defaultMessage: 'Annualized cost impact',
       }) as string,
@@ -135,6 +141,7 @@ export function TopNFunctionsSummary({
       titleHint: ESTIMATED_VALUE_LABEL,
     },
     {
+      id: 'totalNumberOfSamples',
       title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.samples', {
         defaultMessage: 'Total number of samples',
       }) as string,

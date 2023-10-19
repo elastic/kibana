@@ -15,7 +15,8 @@ export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-excepti
 export const ALERT_COUNT_TABLE_COLUMN = (column: number) =>
   `[data-test-subj="embeddablePanel"] [data-test-subj="dataGridRowCell"]:nth-child(${column}) [data-test-subj="lnsTableCellContent"]`;
 
-export const ALERT_EMBEDDABLE_PROGRESS_BAR = '[data-test-subj="embeddablePanel"] .euiProgress';
+export const ALERT_EMBEDDABLE_PROGRESS_BAR =
+  '[data-test-subj="chartPanels"] [data-test-subj="embeddablePanel"] .euiProgress';
 
 export const ALERT_EMBEDDABLE_EMPTY_PROMPT =
   '[data-test-subj="embeddablePanel"] [data-test-subj="emptyPlaceholder"]';
@@ -42,8 +43,6 @@ export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
-export const DESTINATION_IP = '[data-test-subj^=formatted-field][data-test-subj$=destination\\.ip]';
-
 export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
@@ -58,10 +57,6 @@ export const GROUP_BY_TOP_INPUT = '[data-test-subj="groupByTop"] [data-test-subj
 
 export const HOST_NAME = '[data-test-subj^=formatted-field][data-test-subj$=host\\.name]';
 
-export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
-
-export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
-
 export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
@@ -70,8 +65,6 @@ export const ALERTS_REFRESH_BTN = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="
 
 export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
 
-export const ALERTS_CONTAINER_LOADING_BAR = '[data-test-subj="events-container-loading-true"]';
-
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
@@ -79,8 +72,8 @@ export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 export const OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN =
   '[data-test-subj="open-alert-details-page-menu-item"]';
 
-export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
-export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
+export const COLUMN_HEADER = '[data-test-subj="dataGridHeader"]';
+export const TIMESTAMP_COLUMN = '[data-test-subj="dataGridHeaderCell-@timestamp"]';
 export const MESSAGE = '[data-test-subj="formatted-field-message"]';
 
 export const REASON =
@@ -107,8 +100,6 @@ export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=sour
 export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActionsButton"]';
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
-
-export const TIMELINE_CONTEXT_MENU = '[data-test-subj="actions-context-menu"]';
 
 export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
@@ -178,13 +169,9 @@ export const LEGEND_ACTIONS = {
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
 
-export const TREND_CHART_LEGEND = '[data-test-subj="draggable-legend"]';
-
 export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
 
 export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
-
-export const CLOSE_OVERLAY = '[data-test-subj="close-overlay"]';
 
 export const ALERT_SUMMARY_SEVERITY_DONUT_CHART =
   getDataTestSubjectSelector('severity-level-donut');
@@ -212,10 +199,6 @@ export const EVENT_SUMMARY_COLUMN = '[data-gridcell-column-id="eventSummary"]';
 export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
 
 export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
-
-export const ALERT_TABLE_ADDITIONAL_CONTROLS = '[data-test-subj="additionalFilters-popover"]';
-
-export const ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
 
 export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';

@@ -7,19 +7,19 @@
 
 import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
-import { createConcreteWriteIndex } from '@kbn/alerting-plugin/server';
+import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import { KnowledgeBaseEntry } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import { KnowledgeBaseService } from './kb_service';
+import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './kb_service';
 import type { ObservabilityAIAssistantResourceNames } from './types';
+import { splitKbText } from './util/split_kb_text';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -28,6 +28,15 @@ function getResourceName(resource: string) {
 export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
 
 export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
+
+type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> } & (
+  | {
+      text: string;
+    }
+  | {
+      texts: string[];
+    }
+);
 
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -50,9 +59,6 @@ export class ObservabilityAIAssistantService {
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
       kb: getResourceName('index-template-kb'),
-    },
-    ilmPolicy: {
-      conversations: getResourceName('ilm-policy-conversations'),
     },
     pipelines: {
       kb: getResourceName('kb-ingest-pipeline'),
@@ -82,7 +88,7 @@ export class ObservabilityAIAssistantService {
           return {
             run: async () => {
               if (this.kbService) {
-                // await this.kbService.processQueue();
+                await this.kbService.processQueue();
               }
             },
           };
@@ -103,23 +109,6 @@ export class ObservabilityAIAssistantService {
         template: conversationComponentTemplate,
       });
 
-      await esClient.ilm.putLifecycle({
-        name: this.resourceNames.ilmPolicy.conversations,
-        policy: {
-          phases: {
-            hot: {
-              min_age: '0s',
-              actions: {
-                rollover: {
-                  max_age: '90d',
-                  max_primary_shard_size: '50gb',
-                },
-              },
-            },
-          },
-        },
-      });
-
       await esClient.indices.putIndexTemplate({
         name: this.resourceNames.indexTemplate.conversations,
         composed_of: [this.resourceNames.componentTemplate.conversations],
@@ -130,6 +119,7 @@ export class ObservabilityAIAssistantService {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
             refresh_interval: '1s',
+            hidden: true,
           },
         },
       });
@@ -147,6 +137,7 @@ export class ObservabilityAIAssistantService {
           name: `${conversationAliasName}-000001`,
           template: this.resourceNames.indexTemplate.conversations,
         },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
       await esClient.cluster.putComponentTemplate({
@@ -186,6 +177,7 @@ export class ObservabilityAIAssistantService {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
             refresh_interval: '1s',
+            hidden: true,
           },
         },
       });
@@ -203,6 +195,7 @@ export class ObservabilityAIAssistantService {
           name: `${kbAliasName}-000001`,
           template: this.resourceNames.indexTemplate.kb,
         },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
       this.kbService = new KnowledgeBaseService({
@@ -256,20 +249,56 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  async addToKnowledgeBase(
-    entries: Array<
-      Omit<KnowledgeBaseEntry, 'is_correction' | 'public' | 'confidence' | '@timestamp'>
-    >
-  ): Promise<void> {
-    await this.init();
-    this.kbService!.store(
-      entries.map((entry) => ({
-        ...entry,
-        '@timestamp': new Date().toISOString(),
-        public: true,
-        confidence: 'high',
-        is_correction: false,
-      }))
+  addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
+    this.init()
+      .then(() => {
+        this.kbService!.queue(
+          entries.flatMap((entry) => {
+            const entryWithSystemProperties = {
+              ...entry,
+              '@timestamp': new Date().toISOString(),
+              public: true,
+              confidence: 'high' as const,
+              is_correction: false,
+              labels: {
+                ...entry.labels,
+                document_id: entry.id,
+              },
+            };
+
+            const operations =
+              'texts' in entryWithSystemProperties
+                ? splitKbText(entryWithSystemProperties)
+                : [
+                    {
+                      type: KnowledgeBaseEntryOperationType.Index,
+                      document: entryWithSystemProperties,
+                    },
+                  ];
+
+            return operations;
+          })
+        );
+      })
+      .catch((error) => {
+        this.logger.error(
+          `Could not index ${entries.length} entries because of an initialisation error`
+        );
+        this.logger.error(error);
+      });
+  }
+
+  addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
+    this.addToKnowledgeBase(
+      entries.map((entry) => {
+        return {
+          ...entry,
+          labels: {
+            ...entry.labels,
+            category: categoryId,
+          },
+        };
+      })
     );
   }
 }

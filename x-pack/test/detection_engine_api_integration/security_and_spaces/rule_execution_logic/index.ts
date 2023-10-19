@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('detection engine api security and spaces enabled - rule execution logic', function () {
     loadTestFile(require.resolve('./eql'));
+    loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./machine_learning'));
     loadTestFile(require.resolve('./new_terms'));
     loadTestFile(require.resolve('./saved_query'));

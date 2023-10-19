@@ -7,8 +7,8 @@
 
 import { of } from 'rxjs';
 import { CoreSetup } from '@kbn/core/server';
-import { executor, getSearchParams, getValidTimefieldSort, tryToParseAsDate } from './executor';
-import { ExecutorOptions, OnlyEsQueryRuleParams } from './types';
+import { executor, getValidTimefieldSort, tryToParseAsDate } from './executor';
+import { ExecutorOptions } from './types';
 import { Comparator } from '../../../common/comparator_types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -17,6 +17,7 @@ import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { EsQueryRuleParams } from './rule_type_params';
 import { FetchEsQueryOpts } from './lib/fetch_es_query';
 import { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
+import { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -43,6 +44,10 @@ const mockFetchSearchSourceQuery = jest.fn();
 jest.mock('./lib/fetch_search_source_query', () => ({
   fetchSearchSourceQuery: (...args: [FetchSearchSourceQueryOpts]) =>
     mockFetchSearchSourceQuery(...args),
+}));
+const mockFetchEsqlQuery = jest.fn();
+jest.mock('./lib/fetch_esql_query', () => ({
+  fetchEsqlQuery: (...args: [FetchEsqlQueryOpts]) => mockFetchEsqlQuery(...args),
 }));
 
 const mockGetRecoveredAlerts = jest.fn().mockReturnValue([]);
@@ -86,6 +91,8 @@ describe('es_query executor', () => {
     excludeHitsFromPreviousRun: true,
     aggType: 'count',
     groupBy: 'all',
+    searchConfiguration: {},
+    esqlQuery: { esql: 'test-query' },
   };
 
   describe('executor', () => {
@@ -110,6 +117,10 @@ describe('es_query executor', () => {
       state: { latestTimestamp: undefined },
       spaceId: 'default',
       logger,
+      getTimeRange: () => {
+        const date = new Date(Date.now()).toISOString();
+        return { dateStart: date, dateEnd: date };
+      },
     } as unknown as ExecutorOptions<EsQueryRuleParams>;
 
     it('should throw error for invalid comparator', async () => {
@@ -134,8 +145,6 @@ describe('es_query executor', () => {
           ],
           truncated: false,
         },
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
       });
       await executor(coreMock, defaultExecutorOptions);
       expect(mockFetchEsQuery).toHaveBeenCalledWith({
@@ -150,6 +159,8 @@ describe('es_query executor', () => {
           scopedClusterClient: scopedClusterClientMock,
           logger,
         },
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
       });
       expect(mockFetchSearchSourceQuery).not.toHaveBeenCalled();
     });
@@ -166,17 +177,15 @@ describe('es_query executor', () => {
           ],
           truncated: false,
         },
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
       });
       await executor(coreMock, {
         ...defaultExecutorOptions,
-        params: { ...defaultProps, searchConfiguration: {}, searchType: 'searchSource' },
+        params: { ...defaultProps, searchType: 'searchSource' },
       });
       expect(mockFetchSearchSourceQuery).toHaveBeenCalledWith({
         ruleId: 'test-rule-id',
         alertLimit: 1000,
-        params: { ...defaultProps, searchConfiguration: {}, searchType: 'searchSource' },
+        params: { ...defaultProps, searchType: 'searchSource' },
         latestTimestamp: undefined,
         services: {
           searchSourceClient: searchSourceClientMock,
@@ -184,8 +193,45 @@ describe('es_query executor', () => {
           share: undefined,
         },
         spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
       });
       expect(mockFetchEsQuery).not.toHaveBeenCalled();
+    });
+
+    it('should call fetchEsqlQuery if searchType is esqlQuery', async () => {
+      mockFetchEsqlQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        params: { ...defaultProps, searchType: 'esqlQuery' },
+      });
+      expect(mockFetchEsqlQuery).toHaveBeenCalledWith({
+        ruleId: 'test-rule-id',
+        alertLimit: 1000,
+        params: { ...defaultProps, searchType: 'esqlQuery' },
+        services: {
+          scopedClusterClient: scopedClusterClientMock,
+          logger,
+          share: undefined,
+        },
+        spacePrefix: '',
+        publicBaseUrl: 'https://localhost:5601',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+      expect(mockFetchEsQuery).not.toHaveBeenCalled();
+      expect(mockFetchSearchSourceQuery).not.toHaveBeenCalled();
     });
 
     it('should not create alert if compare function returns false for ungrouped alert', async () => {
@@ -200,8 +246,6 @@ describe('es_query executor', () => {
           ],
           truncated: false,
         },
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
       });
       await executor(coreMock, {
         ...defaultExecutorOptions,
@@ -226,8 +270,6 @@ describe('es_query executor', () => {
           ],
           truncated: false,
         },
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
       await executor(coreMock, {
@@ -260,22 +302,18 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          kibana: {
-            alert: {
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents is greater than or equal to 200',
+          'kibana.alert.evaluation.value': '491',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 491
 - Conditions Met: Number of matching documents is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query",
-              evaluation: {
-                conditions: 'Number of matching documents is greater than or equal to 200',
-                value: 491,
-              },
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' matched query",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -304,8 +342,6 @@ describe('es_query executor', () => {
           ],
           truncated: false,
         },
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
       await executor(coreMock, {
@@ -346,23 +382,18 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          kibana: {
-            alert: {
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-1" is greater than or equal to 200',
+          'kibana.alert.evaluation.value': '291',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 291
 - Conditions Met: Number of matching documents for group "host-1" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query for group host-1",
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-1" is greater than or equal to 200',
-                value: 291,
-              },
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(2, {
@@ -389,23 +420,18 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          kibana: {
-            alert: {
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-2" is greater than or equal to 200',
+          'kibana.alert.evaluation.value': '477',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 477
 - Conditions Met: Number of matching documents for group "host-2" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query for group host-2",
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-2" is greater than or equal to 200',
-                value: 477,
-              },
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' matched query for group host-2",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(3, {
@@ -432,23 +458,83 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          kibana: {
-            alert: {
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-3" is greater than or equal to 200',
+          'kibana.alert.evaluation.value': '999',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 999
-- Conditions Met: Number of matching documents for group \"host-3\" is greater than or equal to 200 over 5m
+- Conditions Met: Number of matching documents for group "host-3" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query for group host-3",
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-3" is greater than or equal to 200',
-                value: 999,
-              },
+          'kibana.alert.title': "rule 'test-rule-name' matched query for group host-3",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+        },
+      });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should create alert if there are hits for ESQL alert', async () => {
+      mockFetchEsqlQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 198,
+              hits: [],
             },
-          },
+          ],
+          truncated: false,
+        },
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        params: {
+          ...defaultProps,
+          searchType: 'esqlQuery',
+          threshold: [0],
+          thresholdComparator: '>=' as Comparator,
+        },
+      });
+
+      expect(mockReport).toHaveBeenCalledTimes(1);
+      expect(mockReport).toHaveBeenNthCalledWith(1, {
+        actionGroup: 'query matched',
+        context: {
+          conditions: 'Query matched documents',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is active:
+
+- Value: 198
+- Conditions Met: Query matched documents over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+          title: "rule 'test-rule-name' matched query",
+          value: 198,
+        },
+        id: 'query matched',
+        payload: {
+          'kibana.alert.evaluation.conditions': 'Query matched documents',
+          'kibana.alert.evaluation.value': '198',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
+
+- Value: 198
+- Conditions Met: Query matched documents over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+          'kibana.alert.title': "rule 'test-rule-name' matched query",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+        },
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -477,8 +563,6 @@ describe('es_query executor', () => {
           ],
           truncated: true,
         },
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
       });
       await executor(coreMock, {
         ...defaultExecutorOptions,
@@ -520,8 +604,6 @@ describe('es_query executor', () => {
           ],
           truncated: false,
         },
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
       await executor(coreMock, {
@@ -549,22 +631,18 @@ describe('es_query executor', () => {
           value: 0,
         },
         payload: {
-          kibana: {
-            alert: {
-              evaluation: {
-                conditions: 'Number of matching documents is NOT greater than or equal to 500',
-                value: 0,
-              },
-              reason: `rule 'test-rule-name' is recovered:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents is NOT greater than or equal to 500',
+          'kibana.alert.evaluation.value': '0',
+          'kibana.alert.reason': `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents is NOT greater than or equal to 500 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' recovered",
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' recovered",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -586,8 +664,6 @@ describe('es_query executor', () => {
       ]);
       mockFetchEsQuery.mockResolvedValueOnce({
         parsedResults: { results: [], truncated: false },
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
       await executor(coreMock, {
@@ -622,23 +698,18 @@ describe('es_query executor', () => {
           value: 0,
         },
         payload: {
-          kibana: {
-            alert: {
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-1" is NOT greater than or equal to 200',
-                value: 0,
-              },
-              reason: `rule 'test-rule-name' is recovered:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-1" is NOT greater than or equal to 200',
+          'kibana.alert.evaluation.value': '0',
+          'kibana.alert.reason': `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents for group \"host-1\" is NOT greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' recovered",
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' recovered",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetAlertData).toHaveBeenNthCalledWith(2, {
@@ -658,23 +729,79 @@ describe('es_query executor', () => {
           value: 0,
         },
         payload: {
-          kibana: {
-            alert: {
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-2" is NOT greater than or equal to 200',
-                value: 0,
-              },
-              reason: `rule 'test-rule-name' is recovered:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-2" is NOT greater than or equal to 200',
+          'kibana.alert.evaluation.value': '0',
+          'kibana.alert.reason': `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents for group \"host-2\" is NOT greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' recovered",
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-            },
+          'kibana.alert.title': "rule 'test-rule-name' recovered",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+        },
+      });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should correctly handle recovered alerts for ESQL alert', async () => {
+      mockGetRecoveredAlerts.mockReturnValueOnce([
+        {
+          alert: {
+            getId: () => 'query matched',
           },
+        },
+      ]);
+      mockFetchEsqlQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [],
+          truncated: false,
+        },
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        params: {
+          ...defaultProps,
+          searchType: 'esqlQuery',
+          threshold: [0],
+          thresholdComparator: '>=' as Comparator,
+        },
+      });
+
+      expect(mockReport).not.toHaveBeenCalled();
+      expect(mockSetAlertData).toHaveBeenCalledTimes(1);
+      expect(mockSetAlertData).toHaveBeenNthCalledWith(1, {
+        id: 'query matched',
+        context: {
+          conditions: 'Query did NOT match documents',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is recovered:
+
+- Value: 0
+- Conditions Met: Query did NOT match documents over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+          title: "rule 'test-rule-name' recovered",
+          value: 0,
+        },
+        payload: {
+          'kibana.alert.evaluation.conditions': 'Query did NOT match documents',
+          'kibana.alert.evaluation.value': '0',
+          'kibana.alert.reason': `rule 'test-rule-name' is recovered:
+
+- Value: 0
+- Conditions Met: Query did NOT match documents over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+          'kibana.alert.title': "rule 'test-rule-name' recovered",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -706,38 +833,6 @@ describe('es_query executor', () => {
         1546282800000,
       ]);
       expect(result).toEqual('2018-12-31T19:00:00.000Z');
-    });
-  });
-
-  describe('getSearchParams', () => {
-    it('should return search params correctly', () => {
-      const result = getSearchParams(defaultProps as OnlyEsQueryRuleParams);
-      expect(result.parsedQuery.query).toBe('test-query');
-    });
-
-    it('should throw invalid query error', () => {
-      expect(() =>
-        getSearchParams({ ...defaultProps, esQuery: '' } as OnlyEsQueryRuleParams)
-      ).toThrow('invalid query specified: "" - query must be JSON');
-    });
-
-    it('should throw invalid query error due to missing query property', () => {
-      expect(() =>
-        getSearchParams({
-          ...defaultProps,
-          esQuery: '{ "someProperty": "test-query" }',
-        } as OnlyEsQueryRuleParams)
-      ).toThrow('invalid query specified: "{ "someProperty": "test-query" }" - query must be JSON');
-    });
-
-    it('should throw invalid window size error', () => {
-      expect(() =>
-        getSearchParams({
-          ...defaultProps,
-          timeWindowSize: 5,
-          timeWindowUnit: 'r',
-        } as OnlyEsQueryRuleParams)
-      ).toThrow('invalid format for windowSize: "5r"');
     });
   });
 });

@@ -235,6 +235,7 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
+    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
   if (!canReadActionsLogManagement) {

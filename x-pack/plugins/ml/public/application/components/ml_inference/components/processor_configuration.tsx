@@ -156,7 +156,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
     };
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup
+        direction="column"
+        data-test-subj="mlTrainedModelsInferencePipelineProcessorConfigStep"
+      >
         {/* INFERENCE CONFIG */}
         <EuiFlexItem>
           <EuiFlexGroup>
@@ -193,6 +196,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
+                        data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditButton"
                         iconType="pencil"
                         size="xs"
                         onClick={() => {
@@ -228,6 +232,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                 }
                 error={inferenceConfigError ?? inferenceConfigError}
                 isInvalid={inferenceConfigError !== undefined || inferenceConfigError !== undefined}
+                data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditor"
               >
                 {editInferenceConfig ? (
                   <CodeEditor
@@ -242,7 +247,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
                     onChange={handleInferenceConfigChange}
                   />
                 ) : (
-                  <EuiCodeBlock isCopyable={true}>
+                  <EuiCodeBlock
+                    isCopyable={true}
+                    data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigBlock"
+                  >
                     {JSON.stringify(inferenceConfig, null, 2)}
                   </EuiCodeBlock>
                 )}
@@ -311,6 +319,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                   <EuiFlexGroup gutterSize="xs" justifyContent="flexStart">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
+                        data-test-subj="mlTrainedModelsInferencePipelineFieldMapEditButton"
                         iconType="pencil"
                         size="xs"
                         onClick={() => {
@@ -349,10 +358,15 @@ export const ProcessorConfiguration: FC<Props> = memo(
                 }
                 error={fieldMapError}
                 isInvalid={fieldMapError !== undefined}
+                data-test-subj="mlTrainedModelsInferencePipelineFieldMapEdit"
               >
                 <>
                   {!editFieldMapping ? (
-                    <EuiCodeBlock isCopyable={true} overflowHeight={350}>
+                    <EuiCodeBlock
+                      isCopyable={true}
+                      overflowHeight={350}
+                      data-test-subj="mlTrainedModelsInferencePipelineFieldMapBlock"
+                    >
                       {JSON.stringify(fieldMap ?? {}, null, 2)}
                     </EuiCodeBlock>
                   ) : null}

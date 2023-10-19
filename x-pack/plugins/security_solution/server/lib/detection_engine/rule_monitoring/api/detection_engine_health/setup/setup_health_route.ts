@@ -18,32 +18,36 @@ import { buildSiemResponse } from '../../../../routes/utils';
  * and can do any other setup work.
  */
 export const setupHealthRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: SETUP_HEALTH_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution'],
-        access: 'public', // must be public to enable "system" users to collect data
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<SetupHealthResponse>> => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {},
+      },
+      async (context, request, response): Promise<IKibanaResponse<SetupHealthResponse>> => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const ctx = await context.resolve(['securitySolution']);
-        const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+        try {
+          const ctx = await context.resolve(['securitySolution']);
+          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
 
-        await healthClient.installAssetsForMonitoringHealth();
+          await healthClient.installAssetsForMonitoringHealth();
 
-        return response.ok({ body: {} });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return response.ok({ body: {} });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

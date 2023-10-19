@@ -52,9 +52,6 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
     kubernetes: {
       downloadCommand: '',
     },
-    googleCloudShell: {
-      downloadCommand: '',
-    },
   };
 
   return artifactMap[platform];

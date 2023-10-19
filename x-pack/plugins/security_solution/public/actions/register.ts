@@ -37,6 +37,7 @@ import type {
   SecurityCellActions,
 } from './types';
 import { enhanceActionWithTelemetry } from './telemetry';
+import { registerDiscoverHistogramActions } from './discover_in_timeline/vis_apply_filter';
 
 export const registerUIActions = (
   store: SecurityAppStore,
@@ -46,6 +47,7 @@ export const registerUIActions = (
   registerLensEmbeddableActions(store, services);
   registerDiscoverCellActions(store, services);
   registerCellActions(store, history, services);
+  registerDiscoverHistogramActions(store, history, services);
 };
 
 const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {
@@ -105,7 +107,7 @@ const registerCellActions = (
     investigateInNewTimeline: createInvestigateInNewTimelineCellActionFactory({ store, services }),
     showTopN: createShowTopNCellActionFactory({ services }),
     copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
-    toggleColumn: createToggleColumnCellActionFactory({ store }),
+    toggleColumn: createToggleColumnCellActionFactory({ store, services }),
   };
 
   const registerCellActionsTrigger = (

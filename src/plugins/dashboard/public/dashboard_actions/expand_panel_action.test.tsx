@@ -31,11 +31,13 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
 
 beforeEach(async () => {
   container = buildMockDashboard({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: '123' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
 

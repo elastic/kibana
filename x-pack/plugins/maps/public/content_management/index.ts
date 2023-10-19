@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { mapsClient } from './maps_client';
+export { getMapClient } from './maps_client';
 
 export { checkForDuplicateTitle } from './duplicate_title_check';

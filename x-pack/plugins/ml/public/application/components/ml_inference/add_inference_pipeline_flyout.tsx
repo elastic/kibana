@@ -33,7 +33,7 @@ import { ReviewAndCreatePipeline } from './components/review_and_create_pipeline
 import { useMlApiContext } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from './validation';
-import type { MlInferenceState, InferenceModelTypes } from './types';
+import { type MlInferenceState, type InferenceModelTypes, TEST_PIPELINE_MODE } from './types';
 import { useFetchPipelines } from './hooks/use_fetch_pipelines';
 
 export interface AddInferencePipelineFlyoutProps {
@@ -103,7 +103,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
   );
 
   return (
-    <EuiFlyout onClose={onClose} className="mlTrainedModelsInferencePipelineFlyout" size="l">
+    <EuiFlyout onClose={onClose} size="l" data-test-subj="mlTrainedModelsInferencePipelineFlyout">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h3>
@@ -157,7 +157,11 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
-          <TestPipeline sourceIndex={sourceIndex} state={formState} />
+          <TestPipeline
+            sourceIndex={sourceIndex}
+            state={formState}
+            mode={TEST_PIPELINE_MODE.STEP}
+          />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
           <ReviewAndCreatePipeline
@@ -166,6 +170,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
             pipelineName={formState.pipelineName}
             pipelineCreated={formState.pipelineCreated}
             pipelineError={formState.pipelineError}
+            sourceIndex={sourceIndex}
           />
         )}
       </EuiFlyoutBody>

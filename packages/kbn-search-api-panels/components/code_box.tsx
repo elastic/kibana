@@ -22,7 +22,6 @@ import {
   EuiThemeProvider,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -37,31 +36,29 @@ interface CodeBoxProps {
   languageType?: string;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
-  http: HttpStart;
-  pluginId: string;
+  assetBasePath: string;
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
-  showTryInConsole: boolean;
+  consoleRequest?: string;
 }
 
 export const CodeBox: React.FC<CodeBoxProps> = ({
   application,
   codeSnippet,
-  http,
   languageType,
   languages,
-  pluginId,
+  assetBasePath,
   selectedLanguage,
   setSelectedLanguage,
   sharePlugin,
-  showTryInConsole,
+  consoleRequest,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const items = languages.map((language) => (
     <EuiContextMenuItem
       key={language.id}
-      icon={http.basePath.prepend(`/plugins/${pluginId}/assets/${language.iconType}`)}
+      icon={`${assetBasePath}/${language.iconType}`}
       onClick={() => {
         setSelectedLanguage(language);
         setIsPopoverOpen(false);
@@ -89,8 +86,8 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
 
   return (
     <EuiThemeProvider colorMode="dark">
-      <EuiPanel paddingSize="xs" className="serverlessSearchCodeBlockControlsPanel">
-        <EuiFlexGroup alignItems="center">
+      <EuiPanel paddingSize="xs" className="codeBoxPanel" data-test-subj="codeBlockControlsPanel">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiThemeProvider colorMode="light">
               <EuiPopover
@@ -107,7 +104,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={codeSnippet}>
               {(copy) => (
-                <EuiButtonEmpty color="text" iconType="copy" size="s" onClick={copy}>
+                <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
                   {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
                     defaultMessage: 'Copy',
                   })}
@@ -115,10 +112,10 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               )}
             </EuiCopy>
           </EuiFlexItem>
-          {showTryInConsole && (
+          {consoleRequest !== undefined && (
             <EuiFlexItem grow={false}>
               <TryInConsoleButton
-                request={codeSnippet}
+                request={consoleRequest}
                 application={application}
                 sharePlugin={sharePlugin}
               />
@@ -130,6 +127,8 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           transparentBackground
           fontSize="m"
           language={languageType || selectedLanguage.languageStyling || selectedLanguage.id}
+          overflowHeight={500}
+          className="codeBoxCodeBlock"
         >
           {codeSnippet}
         </EuiCodeBlock>

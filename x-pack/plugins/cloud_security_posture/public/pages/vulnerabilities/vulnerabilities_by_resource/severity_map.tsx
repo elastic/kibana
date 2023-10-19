@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { ColorStop } from '@elastic/eui/src/components/color_picker/color_stops';
+import { PaletteColorStop } from '@elastic/eui/src/components/color_picker/color_palette_picker';
 import { i18n } from '@kbn/i18n';
 import { getSeverityStatusColor } from '../../../common/utils/get_vulnerability_colors';
 import { VulnSeverity } from '../../../../common/types';
@@ -53,7 +53,7 @@ const formatPercentage = (percentage: number) => {
 export const SeverityMap = ({ severityMap, total }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const severityMapPallet: ColorStop[] = [];
+  const severityMapPallet: PaletteColorStop[] = [];
   const severityMapTooltip: SeverityMapTooltip[] = [];
 
   if (total > 0) {

@@ -28,16 +28,10 @@ export const defaultNavigation: MlNodeDefinition = {
   icon: 'machineLearningApp',
   children: [
     {
-      title: '',
-      id: 'root',
-      children: [
-        {
-          link: 'ml:overview',
-        },
-        {
-          link: 'ml:notifications',
-        },
-      ],
+      link: 'ml:overview',
+    },
+    {
+      link: 'ml:notifications',
     },
     {
       title: i18n.translate('defaultNavigation.ml.anomalyDetection', {
@@ -111,6 +105,12 @@ export const defaultNavigation: MlNodeDefinition = {
             defaultMessage: 'Data view',
           }),
           link: 'ml:indexDataVisualizer',
+        },
+        {
+          title: i18n.translate('defaultNavigation.ml.dataComparison', {
+            defaultMessage: 'Data drift',
+          }),
+          link: 'ml:dataDrift',
         },
       ],
     },

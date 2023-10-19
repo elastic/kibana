@@ -42,6 +42,10 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
   "url": {
     "dynamic": false,
     "properties": {
@@ -616,6 +620,10 @@
       }
     }
   },
+  "apm-indices": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "name": {
@@ -1054,6 +1062,21 @@
       }
     }
   },
+  "links": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "links": {
+        "dynamic": false,
+        "properties": {}
+      }
+    }
+  },
   "lens": {
     "properties": {
       "title": {
@@ -1344,6 +1367,41 @@
       },
       "category": {
         "type": "keyword"
+      },
+      "customFields": {
+        "type": "nested",
+        "properties": {
+          "key": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword",
+            "fields": {
+              "number": {
+                "type": "long",
+                "ignore_malformed": true
+              },
+              "boolean": {
+                "type": "boolean",
+                "ignore_malformed": true
+              },
+              "string": {
+                "type": "text"
+              },
+              "date": {
+                "type": "date",
+                "ignore_malformed": true
+              },
+              "ip": {
+                "type": "ip",
+                "ignore_malformed": true
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -1587,6 +1645,9 @@
       "overrides": {
         "type": "flattened",
         "index": false
+      },
+      "keep_monitoring_alive": {
+        "type": "boolean"
       }
     }
   },
@@ -2536,6 +2597,106 @@
     "dynamic": false,
     "properties": {}
   },
+  "infrastructure-ui-source": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "inventory-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "metrics-explorer-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "upgrade-assistant-reindex-operation": {
+    "dynamic": false,
+    "properties": {
+      "indexName": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "integer"
+      }
+    }
+  },
+  "upgrade-assistant-ml-upgrade-operation": {
+    "dynamic": false,
+    "properties": {
+      "snapshotId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  },
+  "monitoring-telemetry": {
+    "properties": {
+      "reportedClusterUuids": {
+        "type": "keyword"
+      }
+    }
+  },
+  "apm-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "apm-server-schema": {
+    "properties": {
+      "schemaJson": {
+        "type": "text",
+        "index": false
+      }
+    }
+  },
+  "apm-service-group": {
+    "properties": {
+      "groupName": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
+      }
+    }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
   "siem-ui-timeline-note": {
     "properties": {
       "eventId": {
@@ -2925,6 +3086,9 @@
       },
       "updatedBy": {
         "type": "text"
+      },
+      "savedSearchId": {
+        "type": "text"
       }
     }
   },
@@ -2956,97 +3120,43 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
-      "enabled": {
-        "type": "boolean"
-      }
-    }
-  },
-  "infrastructure-ui-source": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "inventory-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "metrics-explorer-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "upgrade-assistant-reindex-operation": {
-    "dynamic": false,
-    "properties": {
-      "indexName": {
+      "dataViewId": {
         "type": "keyword"
       },
-      "status": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "filter": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "identifierType": {
+        "type": "keyword"
+      },
+      "interval": {
+        "type": "keyword"
+      },
+      "pageSize": {
         "type": "integer"
-      }
-    }
-  },
-  "upgrade-assistant-ml-upgrade-operation": {
-    "dynamic": false,
-    "properties": {
-      "snapshotId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
+      },
+      "range": {
+        "properties": {
+          "start": {
+            "type": "keyword"
+          },
+          "end": {
+            "type": "keyword"
           }
         }
       }
     }
   },
-  "monitoring-telemetry": {
+  "policy-settings-protection-updates-note": {
     "properties": {
-      "reportedClusterUuids": {
-        "type": "keyword"
-      }
-    }
-  },
-  "apm-indices": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-server-schema": {
-    "properties": {
-      "schemaJson": {
+      "note": {
         "type": "text",
         "index": false
       }
     }
-  },
-  "apm-service-group": {
-    "properties": {
-      "groupName": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
   }
 }

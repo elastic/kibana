@@ -17,10 +17,11 @@ import {
   addLifecyclePolicyActionExtension,
   ilmBannerExtension,
   ilmFilterExtension,
-  ilmSummaryExtension,
 } from '../public/extend_index_management';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
+import { IndexLifecycleSummary } from '../public/extend_index_management/components/index_lifecycle_summary';
+import React from 'react';
 
 const { httpSetup } = init();
 
@@ -243,20 +244,26 @@ describe('extend index management', () => {
 
   describe('ilm summary extension', () => {
     test('should render null when index has no index lifecycle policy', () => {
-      const extension = ilmSummaryExtension(indexWithoutLifecyclePolicy, getUrlForApp);
+      const extension = (
+        <IndexLifecycleSummary index={indexWithoutLifecyclePolicy} getUrlForApp={getUrlForApp} />
+      );
       const rendered = mountWithIntl(extension);
       expect(rendered.isEmptyRender()).toBeTruthy();
     });
 
     test('should return extension when index has lifecycle policy', () => {
-      const extension = ilmSummaryExtension(indexWithLifecyclePolicy, getUrlForApp);
+      const extension = (
+        <IndexLifecycleSummary index={indexWithLifecyclePolicy} getUrlForApp={getUrlForApp} />
+      );
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
       expect(rendered.render()).toMatchSnapshot();
     });
 
     test('should return extension when index has lifecycle error', () => {
-      const extension = ilmSummaryExtension(indexWithLifecycleError, getUrlForApp);
+      const extension = (
+        <IndexLifecycleSummary index={indexWithLifecycleError} getUrlForApp={getUrlForApp} />
+      );
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
       expect(rendered.render()).toMatchSnapshot();

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import type { AssetXYChartProps } from '../../../../../../common/visualizations';
 import { LensChart } from '../../../../../../components/lens';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -15,20 +15,27 @@ import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build'
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
-import { XYChartLayerParams } from '../../../../../../common/visualizations/types';
 
-export interface ChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides' | 'title'> {
-  layers: XYChartLayerParams[];
+export interface ChartProps extends AssetXYChartProps {
   visualOptions?: XYVisualOptions;
 }
 
 export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProps) => {
-  const { searchCriteria } = useUnifiedSearchContext();
+  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
 
   const shouldUseSearchCriteria = currentPage.length === 0;
+
+  // prevents requestTs and searchCriteria state from reloading the chart
+  // we want it to reload only once the table has finished loading.
+  // attributes passed to useAfterLoadedState don't need to be memoized
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    lastReloadRequestTime: requestTs,
+    dateRange: parsedDateRange,
+    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
+  });
 
   const filters = useMemo(() => {
     return shouldUseSearchCriteria
@@ -41,14 +48,6 @@ export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProp
           }),
         ];
   }, [searchCriteria.filters, currentPage, dataView, shouldUseSearchCriteria]);
-
-  // prevents requestTs and searchCriteria state from reloading the chart
-  // we want it to reload only once the table has finished loading
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    lastReloadRequestTime: requestTs,
-    dateRange: searchCriteria.dateRange,
-    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
-  });
 
   return (
     <LensChart

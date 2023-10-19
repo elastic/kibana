@@ -942,12 +942,13 @@ export interface PolicyConfig {
   meta: {
     license: string;
     cloud: boolean;
-    license_uid: string;
+    license_uuid: string;
     cluster_uuid: string;
     cluster_name: string;
     serverless: boolean;
     heartbeatinterval?: number;
   };
+  global_manifest_version: 'latest' | string;
   windows: {
     advanced?: {
       [key: string]: unknown;

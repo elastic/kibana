@@ -12,7 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
-import { convertRulesFilterToKQL } from '../../../../../../common/utils/kql';
+import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 import {

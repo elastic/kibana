@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
-  router.get(
-    {
+export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
+  router.versioned
+    .get({
+      access: 'internal',
       path: RISK_ENGINE_STATUS_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
-    },
-    async (context, request, response) => {
+    })
+    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
       const securitySolution = await context.securitySolution;
@@ -47,6 +46,5 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logg
           body: { message: error.message, full_error: JSON.stringify(e) },
         });
       }
-    }
-  );
+    });
 };

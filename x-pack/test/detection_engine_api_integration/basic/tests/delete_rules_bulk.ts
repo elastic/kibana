@@ -46,6 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([{ rule_id: 'rule-1' }])
           .expect(200);
 
@@ -59,8 +60,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete that rule by its rule_id
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -73,8 +75,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete that rule by its id
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: bodyWithCreatedRule.id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: bodyWithCreatedRule.id }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -84,8 +87,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ rule_id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ rule_id: 'fake_id' }])
           .expect(200);
 
         expect(body).to.eql([
@@ -102,8 +106,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the id does not exist when trying to delete an id', async () => {
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .expect(200);
 
         expect(body).to.eql([
@@ -122,8 +127,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -158,6 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([{ rule_id: 'rule-1' }])
           .expect(200);
 
@@ -171,8 +178,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete that rule by its rule_id
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -185,8 +193,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete that rule by its id
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: bodyWithCreatedRule.id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: bodyWithCreatedRule.id }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -196,8 +205,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ rule_id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ rule_id: 'fake_id' }])
           .expect(200);
 
         expect(body).to.eql([
@@ -214,8 +224,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the id does not exist when trying to delete an id', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .expect(200);
 
         expect(body).to.eql([
@@ -234,8 +245,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);

@@ -4,31 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable max-classes-per-file*/
+import { Validator, type Schema, type OutputUnit } from '@cfworker/json-schema';
 
+import { HttpResponse } from '@kbn/core/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
 import { cloneDeep, pick } from 'lodash';
 import {
   BehaviorSubject,
-  map,
-  filter as rxJsFilter,
-  scan,
   catchError,
-  of,
   concatMap,
-  shareReplay,
-  finalize,
   delay,
+  filter as rxJsFilter,
+  finalize,
+  map,
+  of,
+  scan,
+  shareReplay,
   tap,
+  timestamp,
 } from 'rxjs';
-import { HttpResponse } from '@kbn/core/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import {
-  type RegisterContextDefinition,
-  type RegisterFunctionDefinition,
-  Message,
-  MessageRole,
   ContextRegistry,
   FunctionRegistry,
+  FunctionVisibility,
+  Message,
+  MessageRole,
+  type RegisterContextDefinition,
+  type RegisterFunctionDefinition,
 } from '../../common/types';
 import { ObservabilityAIAssistantAPIClient } from '../api';
 import type {
@@ -45,6 +49,14 @@ class TokenLimitReachedError extends Error {
   }
 }
 
+class ServerError extends Error {}
+
+export class FunctionArgsValidationError extends Error {
+  constructor(public readonly errors: OutputUnit[]) {
+    super('Function arguments are invalid');
+  }
+}
+
 export async function createChatService({
   signal: setupAbortSignal,
   registrations,
@@ -57,11 +69,14 @@ export async function createChatService({
   const contextRegistry: ContextRegistry = new Map();
   const functionRegistry: FunctionRegistry = new Map();
 
+  const validators = new Map<string, Validator>();
+
   const registerContext: RegisterContextDefinition = (context) => {
     contextRegistry.set(context.name, context);
   };
 
   const registerFunction: RegisterFunctionDefinition = (def, respond, render) => {
+    validators.set(def.name, new Validator(def.parameters as Schema, '2020-12', true));
     functionRegistry.set(def.name, { options: def, respond, render });
   };
 
@@ -90,8 +105,16 @@ export async function createChatService({
     registrations.map((fn) => fn({ signal: setupAbortSignal, registerContext, registerFunction }))
   );
 
+  function validate(name: string, parameters: unknown) {
+    const validator = validators.get(name)!;
+    const result = validator.validate(parameters);
+    if (!result.valid) {
+      throw new FunctionArgsValidationError(result.errors);
+    }
+  }
+
   return {
-    executeFunction: async (name, args, signal) => {
+    executeFunction: async ({ name, args, signal, messages, connectorId }) => {
       const fn = functionRegistry.get(name);
 
       if (!fn) {
@@ -100,9 +123,9 @@ export async function createChatService({
 
       const parsedArguments = args ? JSON.parse(args) : {};
 
-      // validate
+      validate(name, parsedArguments);
 
-      return await fn.respond({ arguments: parsedArguments }, signal);
+      return await fn.respond({ arguments: parsedArguments, messages, connectorId }, signal);
     },
     renderFunction: (name, args, response) => {
       const fn = functionRegistry.get(name);
@@ -118,16 +141,25 @@ export async function createChatService({
         data: JSON.parse(response.data ?? '{}'),
       };
 
-      // validate
-
       return fn.render?.({ response: parsedResponse, arguments: parsedArguments });
     },
     getContexts,
     getFunctions,
+    hasFunction: (name: string) => {
+      return !!getFunctions().find((fn) => fn.options.name === name);
+    },
     hasRenderFunction: (name: string) => {
       return !!getFunctions().find((fn) => fn.options.name === name)?.render;
     },
-    chat({ connectorId, messages }: { connectorId: string; messages: Message[] }) {
+    chat({
+      connectorId,
+      messages,
+      function: callFunctions = 'auto',
+    }: {
+      connectorId: string;
+      messages: Message[];
+      function?: 'none' | 'auto';
+    }) {
       const subject = new BehaviorSubject<PendingMessage>({
         message: {
           role: MessageRole.Assistant,
@@ -145,7 +177,12 @@ export async function createChatService({
           body: {
             messages,
             connectorId,
-            functions: functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
+            functions:
+              callFunctions === 'none'
+                ? []
+                : functions
+                    .filter((fn) => fn.options.visibility !== FunctionVisibility.User)
+                    .map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
           },
         },
         signal: controller.signal,
@@ -169,15 +206,38 @@ export async function createChatService({
 
           const subscription = readableStreamReaderIntoObservable(reader)
             .pipe(
+              // lines start with 'data: '
               map((line) => line.substring(6)),
+              // a message completes with the line '[DONE]'
               rxJsFilter((line) => !!line && line !== '[DONE]'),
-              map((line) => JSON.parse(line) as CreateChatCompletionResponseChunk),
-              rxJsFilter((line) => line.object === 'chat.completion.chunk'),
-              tap((choice) => {
-                if (choice.choices[0].finish_reason === 'length') {
+              // parse the JSON, add the type
+              map(
+                (line) =>
+                  JSON.parse(line) as
+                    | CreateChatCompletionResponseChunk
+                    | { error: { message: string } }
+              ),
+              // validate the message. in some cases OpenAI
+              // will throw halfway through the message
+              tap((line) => {
+                if ('error' in line) {
+                  throw new ServerError(line.error.message);
+                }
+              }),
+              // there also might be some metadata that we need
+              // to exclude
+              rxJsFilter(
+                (line): line is CreateChatCompletionResponseChunk =>
+                  'object' in line && line.object === 'chat.completion.chunk'
+              ),
+              // this is how OpenAI signals that the context window
+              // limit has been exceeded
+              tap((line) => {
+                if (line.choices[0].finish_reason === 'length') {
                   throw new TokenLimitReachedError();
                 }
               }),
+              // merge the messages
               scan(
                 (acc, { choices }) => {
                   acc.message.content += choices[0].delta.content ?? '';
@@ -198,6 +258,7 @@ export async function createChatService({
                   },
                 }
               ),
+              // convert an error into state
               catchError((error) =>
                 of({
                   ...subject.value,
@@ -208,6 +269,7 @@ export async function createChatService({
             )
             .subscribe(subject);
 
+          // if the request is aborted, convert that into state as well
           controller.signal.addEventListener('abort', () => {
             subscription.unsubscribe();
             subject.next({
@@ -216,6 +278,16 @@ export async function createChatService({
             });
             subject.complete();
           });
+        })
+        .catch(async (err) => {
+          if ('response' in err) {
+            const body = await (err.response as HttpResponse['response'])?.json();
+            err.body = body;
+            if (body.message) {
+              err.message = body.message;
+            }
+          }
+          throw err;
         })
         .catch((err) => {
           subject.next({
@@ -226,13 +298,46 @@ export async function createChatService({
           subject.complete();
         });
 
-      return subject.pipe(
-        concatMap((value) => of(value).pipe(delay(50))),
+      const MIN_DELAY = 35;
+
+      const pendingMessages$ = subject.pipe(
+        // make sure the request is only triggered once,
+        // even with multiple subscribers
         shareReplay(1),
+        // if the Observable is no longer subscribed,
+        // abort the running request
         finalize(() => {
           controller.abort();
+        }),
+        // append a timestamp of when each value was emitted
+        timestamp(),
+        // use the previous timestamp to calculate a target
+        // timestamp for emitting the next value
+        scan((acc, value) => {
+          const lastTimestamp = acc.timestamp || 0;
+          const emitAt = Math.max(lastTimestamp + MIN_DELAY, value.timestamp);
+          return {
+            timestamp: emitAt,
+            value: value.value,
+          };
+        }),
+        // add the delay based on the elapsed time
+        // using concatMap(of(value).pipe(delay(50))
+        // leads to browser issues because timers
+        // are throttled when the tab is not active
+        concatMap((value) => {
+          const now = Date.now();
+          const delayFor = value.timestamp - now;
+
+          if (delayFor <= 0) {
+            return of(value.value);
+          }
+
+          return of(value.value).pipe(delay(delayFor));
         })
       );
+
+      return pendingMessages$;
     },
   };
 }

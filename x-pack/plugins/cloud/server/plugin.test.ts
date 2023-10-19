@@ -124,6 +124,16 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectId).toBe('my-awesome-project');
       });
+
+      it('exposes `serverless.projectName`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+            project_name: 'My Awesome Project',
+          },
+        });
+        expect(setup.serverless.projectName).toBe('My Awesome Project');
+      });
     });
   });
 

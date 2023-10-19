@@ -35,6 +35,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       endDate: endDate.toISOString(),
       timezone: ['UTC'],
       recurring: false,
+      categoryIds: [],
     });
   });
 
@@ -63,6 +64,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: Frequency.DAILY,
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -95,6 +97,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: Frequency.DAILY,
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -125,6 +128,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: Frequency.DAILY,
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -153,6 +157,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -181,6 +186,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         bymonth: 'weekday',
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -209,6 +215,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: Frequency.YEARLY,
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -236,6 +243,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: 'CUSTOM',
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -265,6 +273,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: 'CUSTOM',
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -294,6 +303,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: 'CUSTOM',
         interval: 1,
       },
+      categoryIds: [],
     });
   });
 
@@ -323,6 +333,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: 'CUSTOM',
         interval: 3,
       },
+      categoryIds: [],
     });
   });
 });

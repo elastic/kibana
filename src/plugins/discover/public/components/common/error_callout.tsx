@@ -41,7 +41,7 @@ export const ErrorCallout = ({
   const { euiTheme } = useEuiTheme();
 
   const showErrorMessage = i18n.translate('discover.errorCalloutShowErrorMessage', {
-    defaultMessage: 'Show details',
+    defaultMessage: 'View details',
   });
 
   const overrideDisplay = getSearchErrorOverrideDisplay({

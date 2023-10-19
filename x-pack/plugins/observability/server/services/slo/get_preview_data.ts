@@ -15,13 +15,16 @@ import {
   HistogramIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
+  TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
+import { assertNever } from '@kbn/std';
 import { APMTransactionDurationIndicator } from '../../domain/models';
 import { computeSLI } from '../../domain/services';
 import { InvalidQueryError } from '../../errors';
 import {
-  GetHistogramIndicatorAggregation,
   GetCustomMetricIndicatorAggregation,
+  GetHistogramIndicatorAggregation,
+  GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
 
 export class GetPreviewData {
@@ -54,6 +57,7 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [
@@ -129,6 +133,7 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [
@@ -185,6 +190,7 @@ export class GetPreviewData {
     const timestampField = indicator.params.timestampField;
     const options = {
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
@@ -227,6 +233,7 @@ export class GetPreviewData {
     const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(indicator);
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
@@ -260,6 +267,42 @@ export class GetPreviewData {
     }));
   }
 
+  private async getTimesliceMetricPreviewData(
+    indicator: TimesliceMetricIndicator
+  ): Promise<GetPreviewDataResponse> {
+    const timestampField = indicator.params.timestampField;
+    const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
+    const getCustomMetricIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(
+      indicator
+    );
+    const result = await this.esClient.search({
+      index: indicator.params.index,
+      size: 0,
+      query: {
+        bool: {
+          filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
+        },
+      },
+      aggs: {
+        perMinute: {
+          date_histogram: {
+            field: timestampField,
+            fixed_interval: '1m',
+          },
+          aggs: {
+            ...getCustomMetricIndicatorAggregation.execute('metric'),
+          },
+        },
+      },
+    });
+
+    // @ts-ignore buckets is not improperly typed
+    return result.aggregations?.perMinute.buckets.map((bucket) => ({
+      date: bucket.key_as_string,
+      sliValue: !!bucket.metric ? bucket.metric.value : null,
+    }));
+  }
+
   private async getCustomKQLPreviewData(
     indicator: KQLCustomIndicator
   ): Promise<GetPreviewDataResponse> {
@@ -269,6 +312,7 @@ export class GetPreviewData {
     const timestampField = indicator.params.timestampField;
     const result = await this.esClient.search({
       index: indicator.params.index,
+      size: 0,
       query: {
         bool: {
           filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
@@ -299,24 +343,31 @@ export class GetPreviewData {
   }
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
-    switch (params.indicator.type) {
-      case 'sli.apm.transactionDuration':
-        return this.getAPMTransactionDurationPreviewData(params.indicator);
-      case 'sli.apm.transactionErrorRate':
-        return this.getAPMTransactionErrorPreviewData(params.indicator);
-      case 'sli.kql.custom':
-        return this.getCustomKQLPreviewData(params.indicator);
-      case 'sli.histogram.custom':
-        return this.getHistogramPreviewData(params.indicator);
-      case 'sli.metric.custom':
-        return this.getCustomMetricPreviewData(params.indicator);
-      default:
-        return [];
+    try {
+      const type = params.indicator.type;
+      switch (type) {
+        case 'sli.apm.transactionDuration':
+          return this.getAPMTransactionDurationPreviewData(params.indicator);
+        case 'sli.apm.transactionErrorRate':
+          return this.getAPMTransactionErrorPreviewData(params.indicator);
+        case 'sli.kql.custom':
+          return this.getCustomKQLPreviewData(params.indicator);
+        case 'sli.histogram.custom':
+          return this.getHistogramPreviewData(params.indicator);
+        case 'sli.metric.custom':
+          return this.getCustomMetricPreviewData(params.indicator);
+        case 'sli.metric.timeslice':
+          return this.getTimesliceMetricPreviewData(params.indicator);
+        default:
+          assertNever(type);
+      }
+    } catch (err) {
+      return [];
     }
   }
 }
 
-function getElastichsearchQueryOrThrow(kuery: string) {
+function getElastichsearchQueryOrThrow(kuery: string | undefined = '') {
   try {
     return toElasticsearchQuery(fromKueryExpression(kuery));
   } catch (err) {

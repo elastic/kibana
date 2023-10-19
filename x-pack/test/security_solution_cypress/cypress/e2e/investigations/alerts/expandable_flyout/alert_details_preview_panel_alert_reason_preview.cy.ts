@@ -9,16 +9,16 @@ import { DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER } from '../../..
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { clickAlertReasonButton } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { tag } from '../../../../tags';
 
 describe(
   'Alert details expandable flyout rule preview panel',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     const rule = getNewRule();
 

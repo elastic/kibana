@@ -99,6 +99,7 @@ export function DiscoveryRule({
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    data-test-subj="apmDiscoveryRuleButton"
                     iconType="pencil"
                     color="primary"
                     onClick={() => {
@@ -108,6 +109,7 @@ export function DiscoveryRule({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    data-test-subj="apmDiscoveryRuleButton"
                     iconType="trash"
                     color="danger"
                     onClick={() => {

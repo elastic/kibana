@@ -15,30 +15,37 @@ import { createExceptionListHandler } from '../handlers/create_exception_list_ha
 import { buildRouteValidation, buildSiemResponse } from './utils';
 
 export const createExceptionListRoute = (router: ListsPluginRouter): void => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_URL,
-      validate: {
-        body: buildRouteValidation<
-          typeof createExceptionListRequest,
-          CreateExceptionListRequestDecoded
-        >(createExceptionListRequest),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            body: buildRouteValidation<
+              typeof createExceptionListRequest,
+              CreateExceptionListRequestDecoded
+            >(createExceptionListRequest),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        return await createExceptionListHandler(context, request, response, siemResponse);
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          return await createExceptionListHandler(context, request, response, siemResponse);
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

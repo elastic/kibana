@@ -74,7 +74,6 @@ export const HostRiskScoreQueryTabBody = ({
     isModuleEnabled,
     loading,
     refetch,
-    isAuthorized,
     totalCount,
   } = useRiskScore({
     filterQuery,
@@ -95,14 +94,6 @@ export const HostRiskScoreQueryTabBody = ({
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
-
-  if (!isAuthorized) {
-    return <>{'TODO: Add RiskScore Upsell'}</>;
-  }
-
-  if (riskScoreEngineStatus?.isUpdateAvailable) {
-    return <RiskScoreUpdatePanel />;
-  }
 
   if (status.isDisabled || status.isDeprecated) {
     return (
@@ -128,21 +119,24 @@ export const HostRiskScoreQueryTabBody = ({
   }
 
   return (
-    <HostRiskScoreTableManage
-      deleteQuery={deleteQuery}
-      data={data ?? []}
-      id={HostRiskScoreQueryId.HOSTS_BY_RISK}
-      inspect={inspect}
-      isInspect={isInspected}
-      loading={loading || isKpiLoading}
-      loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
-      refetch={refetch}
-      setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
-      severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-      totalCount={totalCount}
-      type={type}
-    />
+    <>
+      {riskScoreEngineStatus?.isUpdateAvailable && <RiskScoreUpdatePanel />}
+      <HostRiskScoreTableManage
+        deleteQuery={deleteQuery}
+        data={data ?? []}
+        id={HostRiskScoreQueryId.HOSTS_BY_RISK}
+        inspect={inspect}
+        isInspect={isInspected}
+        loading={loading || isKpiLoading}
+        loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
+        refetch={refetch}
+        setQuery={setQuery}
+        setQuerySkip={setQuerySkip}
+        severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
+        totalCount={totalCount}
+        type={type}
+      />
+    </>
   );
 };
 

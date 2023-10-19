@@ -48,7 +48,6 @@ const getBaseRuleParams = (): BaseRuleParams => {
     timelineTitle: 'some-timeline-title',
     timestampOverride: undefined,
     timestampOverrideFallbackDisabled: undefined,
-    investigationFields: [],
     meta: {
       someMeta: 'someField',
     },
@@ -58,6 +57,7 @@ const getBaseRuleParams = (): BaseRuleParams => {
     relatedIntegrations: [],
     requiredFields: [],
     setup: '',
+    investigationFields: undefined,
   };
 };
 

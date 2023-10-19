@@ -52,6 +52,7 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
     layerType: LayerTypes.DATA,
     table: normalizedTable,
     showLines: args.showLines,
+    colorMapping: args.colorMapping,
     ...accessors,
   };
 };

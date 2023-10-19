@@ -54,7 +54,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
@@ -62,7 +61,10 @@
     "@kbn/content-management-tabbed-table-list-view",
     "@kbn/content-management-table-list-view",
     "@kbn/content-management-utils",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/no-data-page-plugin",
+    "@kbn/search-response-warnings",
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*",

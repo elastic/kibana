@@ -1,0 +1,69 @@
+{
+  "_meta": {
+    "ecs_version": "8.0.0"
+  },
+  "template": {
+    "mappings": {
+      "properties": {
+        "system": {
+          "properties": {
+            "cpu": {
+              "properties": {
+                "cores": {
+                  "type": "integer"
+                },
+                "system": {
+                  "properties": {
+                    "pct": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "total": {
+                  "properties": {
+                    "norm": {
+                      "properties": {
+                        "pct": {
+                          "type": "float"
+                        }
+                      }
+                    }
+                  }
+                },
+                "user": {
+                  "properties": {
+                    "pct": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "network": {
+              "properties": {
+                "in": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "out": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

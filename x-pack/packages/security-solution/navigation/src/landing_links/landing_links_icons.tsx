@@ -81,9 +81,7 @@ export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(functi
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={styles.description}>
-        <EuiText size="s" color="text">
-          {description}
-        </EuiText>
+        <EuiText size="s">{description}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>

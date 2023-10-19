@@ -17,14 +17,6 @@ export const USER_RISK_SCORE = i18n.translate(
   }
 );
 
-export const USER_RISK_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.usersRiskTable.userRiskToolTip',
-  {
-    defaultMessage:
-      'User risk classification is determined by user risk score. Users classified as Critical or High are indicated as risky.',
-  }
-);
-
 export const VIEW_USERS_BY_SEVERITY = (severity: string) =>
   i18n.translate('xpack.securitySolution.usersRiskTable.filteredUsersTitle', {
     values: { severity },

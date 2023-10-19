@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -27,9 +26,10 @@ import {
   TIMELINES_FAVORITE,
 } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/common';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   addDescriptionToTimeline,
@@ -49,11 +49,8 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/ti
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline Templates', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+// FLAKY: https://github.com/elastic/kibana/issues/165661
+describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
@@ -61,7 +58,7 @@ describe('Timeline Templates', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   it.skip('Creates a timeline template', () => {
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();
     populateTimeline();
@@ -109,7 +106,7 @@ describe('Timeline Templates', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   it('Create template from timeline', () => {
     createTimeline(getTimeline());
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
     expandEventAction();
     clickingOnCreateTemplateFromTimelineBtn();

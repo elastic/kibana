@@ -103,7 +103,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
-  const { telemetryEvents } = useDataQualityContext();
+  const { telemetryEvents, isILMAvailable } = useDataQualityContext();
 
   const requestItems = useMemo(
     () =>
@@ -227,6 +227,11 @@ const IndexPropertiesComponent: React.FC<Props> = ({
           ? partitionedFieldMetadata.incompatible.length
           : undefined;
 
+      const indexSameFamily: number | undefined =
+        error == null && partitionedFieldMetadata != null
+          ? partitionedFieldMetadata.sameFamily.length
+          : undefined;
+
       if (patternRollup != null) {
         const markdownComments =
           partitionedFieldMetadata != null
@@ -236,6 +241,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
                 formatNumber,
                 ilmPhase,
                 indexName,
+                isILMAvailable,
                 partitionedFieldMetadata,
                 patternDocsCount: patternRollup.docsCount ?? 0,
                 sizeInBytes: patternRollup.sizeInBytes,
@@ -254,6 +260,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               indexName,
               markdownComments,
               pattern,
+              sameFamily: indexSameFamily,
             },
           },
         });
@@ -290,6 +297,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     ilmPhase,
     indexId,
     indexName,
+    isILMAvailable,
     loadingMappings,
     loadingUnallowedValues,
     mappingsError,

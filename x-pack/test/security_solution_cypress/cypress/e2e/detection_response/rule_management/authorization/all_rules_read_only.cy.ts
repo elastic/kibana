@@ -6,7 +6,6 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../../tags';
 
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -23,9 +22,12 @@ import {
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
-import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
-describe('All rules - read only', { tags: tag.ESS }, () => {
+// TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: '1', enabled: false }));
@@ -33,7 +35,7 @@ describe('All rules - read only', { tags: tag.ESS }, () => {
 
   beforeEach(() => {
     login(ROLES.reader);
-    visitSecurityDetectionRulesPage(ROLES.reader);
+    visitRulesManagementTable(ROLES.reader);
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 

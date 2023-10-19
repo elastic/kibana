@@ -14,7 +14,7 @@ class ESDocLinks {
   public integrations: string = '';
   public kibanaFeedback: string = '';
   public kibanaRunApiInConsole: string = '';
-  public logStash: string = '';
+  public logstash: string = '';
   public metadata: string = '';
   public roleDescriptors: string = '';
   public securityApis: string = '';
@@ -51,17 +51,17 @@ class ESDocLinks {
   setDocLinks(newDocLinks: DocLinks) {
     this.apiIntro = newDocLinks.serverlessClients.httpApis;
     this.integrations = newDocLinks.serverlessSearch.integrations;
-    this.logStash = newDocLinks.serverlessSearch.integrationsLogstash;
+    this.logstash = newDocLinks.serverlessSearch.integrationsLogstash;
     this.beats = newDocLinks.serverlessSearch.integrationsBeats;
     this.connectors = newDocLinks.serverlessSearch.integrationsConnectorClient;
     this.kibanaFeedback = newDocLinks.kibana.feedback;
     this.kibanaRunApiInConsole = newDocLinks.console.serverlessGuide;
     this.metadata = newDocLinks.security.mappingRoles;
-    this.roleDescriptors = newDocLinks.security.mappingRoles;
+    this.roleDescriptors = newDocLinks.serverlessSecurity.apiKeyPrivileges;
     this.securityApis = newDocLinks.apis.securityApis;
 
     // Client links
-    this.elasticsearchClients = newDocLinks.serverlessClients.httpApis;
+    this.elasticsearchClients = newDocLinks.serverlessClients.clientLib;
     // Go
     this.goApiReference = newDocLinks.serverlessClients.goApiReference;
     this.goBasicConfig = newDocLinks.serverlessClients.goGettingStarted;
@@ -76,7 +76,7 @@ class ESDocLinks {
     this.phpClient = newDocLinks.serverlessClients.phpGettingStarted;
     // Python
     this.pythonApiReference = newDocLinks.serverlessClients.pythonGettingStarted;
-    this.pythonBasicConfig = newDocLinks.clients.pythonConnecting;
+    this.pythonBasicConfig = newDocLinks.serverlessClients.pythonGettingStarted;
     this.pythonClient = newDocLinks.serverlessClients.pythonGettingStarted;
     // Python
     this.rubyBasicConfig = newDocLinks.serverlessClients.rubyGettingStarted;

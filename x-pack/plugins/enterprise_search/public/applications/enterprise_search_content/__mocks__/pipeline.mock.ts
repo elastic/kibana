@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestPipelineParams } from '../../../../common/types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
 
 export const mockPipelineState: IngestPipelineParams = {
   extract_binary_content: true,

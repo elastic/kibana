@@ -991,7 +991,7 @@
         "label": "NavigateTo",
         "description": [],
         "signature": [
-          "(param: { url?: string | undefined; appId?: string | undefined; } & ",
+          "(param: { url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -1014,7 +1014,7 @@
             "label": "param",
             "description": [],
             "signature": [
-              "{ url?: string | undefined; appId?: string | undefined; } & ",
+              "{ url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
               {
                 "pluginId": "@kbn/core-application-browser",
                 "scope": "common",

@@ -6,21 +6,28 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
 import { MissingPrivilegesCallOut } from '../../detections/components/callouts/missing_privileges_callout';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
+import { BETA } from '../../common/translations';
 
 export const EntityAnalyticsManagementPage = () => {
   return (
     <>
       <MissingPrivilegesCallOut />
-      <EuiPageHeader
-        data-test-subj="entityAnalyticsManagmentPageTitle"
-        pageTitle={ENTITY_ANALYTICS_RISK_SCORE}
-      />
+      <EuiFlexGroup gutterSize="s" alignItems="baseline">
+        <EuiFlexItem grow={false}>
+          <EuiPageHeader
+            data-test-subj="entityAnalyticsManagementPageTitle"
+            pageTitle={ENTITY_ANALYTICS_RISK_SCORE}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} />
+        <EuiBetaBadge label={BETA} size="s" />
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={2}>

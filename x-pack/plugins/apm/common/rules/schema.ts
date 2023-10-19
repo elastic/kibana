@@ -9,6 +9,16 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { AggregationType, ApmRuleType } from './apm_rule_types';
 
+export const searchConfigurationSchema = schema.object({
+  query: schema.object({
+    query: schema.oneOf([
+      schema.string(),
+      schema.recordOf(schema.string(), schema.any()),
+    ]),
+    language: schema.string(),
+  }),
+});
+
 export const errorCountParamsSchema = schema.object({
   windowSize: schema.number(),
   windowUnit: schema.string(),
@@ -18,7 +28,7 @@ export const errorCountParamsSchema = schema.object({
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
   errorGroupingKey: schema.maybe(schema.string()),
   useKqlFilter: schema.maybe(schema.boolean()),
-  kqlFilter: schema.maybe(schema.string()),
+  searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
 
 export const transactionDurationParamsSchema = schema.object({
@@ -36,7 +46,7 @@ export const transactionDurationParamsSchema = schema.object({
   environment: schema.string(),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
   useKqlFilter: schema.maybe(schema.boolean()),
-  kqlFilter: schema.maybe(schema.string()),
+  searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
 
 export const anomalyParamsSchema = schema.object({
@@ -63,7 +73,7 @@ export const transactionErrorRateParamsSchema = schema.object({
   environment: schema.string(),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
   useKqlFilter: schema.maybe(schema.boolean()),
-  kqlFilter: schema.maybe(schema.string()),
+  searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
 
 type ErrorCountParamsType = TypeOf<typeof errorCountParamsSchema>;
@@ -74,6 +84,8 @@ type AnomalyParamsType = TypeOf<typeof anomalyParamsSchema>;
 type TransactionErrorRateParamsType = TypeOf<
   typeof transactionErrorRateParamsSchema
 >;
+
+export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
 
 export interface ApmRuleParamsType {
   [ApmRuleType.TransactionDuration]: TransactionDurationParamsType;

@@ -45,7 +45,7 @@ export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj=
 export const EVENT_DETAILS_ALERT_STATUS_POPOVER =
   '[data-test-subj="event-details-alertStatusPopover"]';
 
-const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
+export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
 export const TABLE_CELL = '.euiTableRowCell';
 

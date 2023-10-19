@@ -1167,6 +1167,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'FATAL',
           reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
         };
+      } else if (isTypeof(left, 'operation_not_supported')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `Action failed due to unsupported operation: ${left.operationName}`,
+        };
       } else {
         throwBadResponse(stateP, left);
       }

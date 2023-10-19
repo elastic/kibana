@@ -15,12 +15,15 @@ import {
   tableDefaults,
   dataTableActions,
 } from '@kbn/securitysolution-data-table';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../common/constants';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
 import type { FlyoutUrlState } from './types';
 import { useShallowEqualSelector } from '../use_selector';
+import { useUiSetting$ } from '../../lib/kibana';
 
 export const useInitFlyoutFromUrlParam = () => {
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
   const [urlDetails, setUrlDetails] = useState<FlyoutUrlState | null>(null);
   const [hasLoadedUrlDetails, updateHasLoadedUrlDetails] = useState(false);
   const dispatch = useDispatch();
@@ -32,16 +35,19 @@ export const useInitFlyoutFromUrlParam = () => {
     (state) => getDataTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults
   );
 
-  const onInitialize = useCallback((initialState: FlyoutUrlState | null) => {
-    if (initialState != null && initialState.panelView) {
-      setUrlDetails(initialState);
-    }
-  }, []);
+  const onInitialize = useCallback(
+    (initialState: FlyoutUrlState | null) => {
+      if (!isSecurityFlyoutEnabled && initialState != null && initialState.panelView) {
+        setUrlDetails(initialState);
+      }
+    },
+    [isSecurityFlyoutEnabled]
+  );
 
   const loadExpandedDetailFromUrl = useCallback(() => {
     const { initialized, isLoading, totalCount, additionalFilters } = dataTableCurrent;
     const isTableLoaded = initialized && !isLoading && totalCount > 0;
-    if (urlDetails) {
+    if (!isSecurityFlyoutEnabled && urlDetails) {
       if (!additionalFilters || !additionalFilters.showBuildingBlockAlerts) {
         // We want to show building block alerts when loading the flyout in case the alert is a building block alert
         dispatch(
@@ -62,7 +68,7 @@ export const useInitFlyoutFromUrlParam = () => {
         );
       }
     }
-  }, [dataTableCurrent, dispatch, urlDetails]);
+  }, [dataTableCurrent, dispatch, isSecurityFlyoutEnabled, urlDetails]);
 
   // The alert page creates a default dataTable slice in redux initially that is later overriden when data is retrieved
   // We use the below to store the urlDetails on app load, and then set it when the table is done loading and has data
@@ -72,5 +78,11 @@ export const useInitFlyoutFromUrlParam = () => {
     }
   }, [hasLoadedUrlDetails, loadExpandedDetailFromUrl]);
 
-  useInitializeUrlParam(URL_PARAM_KEY.eventFlyout, onInitialize);
+  /**
+   * The URL_PARAM_KEY.eventFlyout is used for the old flyout as well as the new expandable flyout here:
+   * x-pack/plugins/security_solution/public/common/hooks/flyout/use_sync_flyout_url_param.ts
+   * We only want this to run for the old flyout.
+   */
+  const initializeKey = isSecurityFlyoutEnabled ? '' : URL_PARAM_KEY.eventFlyout;
+  useInitializeUrlParam(initializeKey, onInitialize);
 };

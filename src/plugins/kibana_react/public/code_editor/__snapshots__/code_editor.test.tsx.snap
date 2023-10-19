@@ -126,6 +126,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
 >
   <div
     className="kibanaCodeEditor"
+    data-test-subj="kibanaCodeEditor"
     onKeyDown={[Function]}
   >
     <EuiToolTip

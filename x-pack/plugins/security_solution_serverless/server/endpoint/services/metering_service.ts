@@ -6,20 +6,19 @@
  */
 
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
 
-import { ProductLine, type ProductTier } from '../../../common/product';
+import { ProductLine, ProductTier } from '../../../common/product';
 
 import type { UsageRecord, MeteringCallbackInput } from '../../types';
 import type { ServerlessSecurityConfig } from '../../config';
 
-// 1 hour
-const SAMPLE_PERIOD_SECONDS = 3600;
-const THRESHOLD_MINUTES = 30;
+import { METERING_TASK } from '../constants/metering';
 
 export class EndpointMeteringService {
+  private type: ProductLine.endpoint | `${ProductLine.cloud}_${ProductLine.endpoint}` | undefined;
   private tier: ProductTier | undefined;
 
   public getUsageRecords = async ({
@@ -29,7 +28,13 @@ export class EndpointMeteringService {
     abortController,
     lastSuccessfulReport,
     config,
+    logger,
   }: MeteringCallbackInput): Promise<UsageRecord[]> => {
+    this.setType(config);
+    if (!this.type) {
+      return [];
+    }
+
     this.setTier(config);
 
     const heartbeatsResponse = await this.getHeartbeatsSince(
@@ -42,14 +47,6 @@ export class EndpointMeteringService {
       return [];
     }
 
-    if (!this.tier) {
-      throw new Error(
-        `no product tier information found for heartbeats: ${JSON.stringify(
-          heartbeatsResponse.hits.hits
-        )}`
-      );
-    }
-
     return heartbeatsResponse.hits.hits.reduce((acc, { _source }) => {
       if (!_source) {
         return acc;
@@ -57,6 +54,7 @@ export class EndpointMeteringService {
 
       const { agent, event } = _source;
       const record = this.buildMeteringRecord({
+        logger,
         agentId: agent.id,
         timestampStr: event.ingested,
         taskId,
@@ -72,7 +70,7 @@ export class EndpointMeteringService {
     abortController: AbortController,
     since?: Date
   ): Promise<SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>> {
-    const thresholdDate = new Date(Date.now() - THRESHOLD_MINUTES * 60 * 1000);
+    const thresholdDate = new Date(Date.now() - METERING_TASK.THRESHOLD_MINUTES * 60 * 1000);
     const searchFrom = since && since > thresholdDate ? since : thresholdDate;
 
     return esClient.search<EndpointHeartbeat>(
@@ -92,11 +90,13 @@ export class EndpointMeteringService {
   }
 
   private buildMeteringRecord({
+    logger,
     agentId,
     timestampStr,
     taskId,
-    projectId = '',
+    projectId,
   }: {
+    logger: Logger;
     agentId: string;
     timestampStr: string;
     taskId: string;
@@ -107,23 +107,57 @@ export class EndpointMeteringService {
     timestamp.setSeconds(0);
     timestamp.setMilliseconds(0);
 
-    return {
-      id: `endpoint-${agentId}-${timestamp}`,
+    const usageRecord = {
+      // keep endpoint instead of this.type as id prefix so
+      // we don't double count in the event of add-on changes
+      id: `endpoint-${agentId}-${timestamp.toISOString()}`,
       usage_timestamp: timestampStr,
       creation_timestamp: timestampStr,
       usage: {
-        type: 'security_solution_endpoint',
-        period_seconds: SAMPLE_PERIOD_SECONDS,
+        // type postfix is used to determine the PLI to bill
+        type: `${METERING_TASK.USAGE_TYPE_PREFIX}${this.type}`,
+        period_seconds: METERING_TASK.SAMPLE_PERIOD_SECONDS,
         quantity: 1,
       },
       source: {
         id: taskId,
-        instance_group_id: projectId,
+        instance_group_id: projectId || METERING_TASK.MISSING_PROJECT_ID,
         metadata: {
           tier: this.tier,
         },
       },
     };
+
+    if (!projectId) {
+      logger.error(`project id missing for record: ${JSON.stringify(usageRecord)}`);
+    }
+
+    return usageRecord;
+  }
+
+  private setType(config: ServerlessSecurityConfig) {
+    if (this.type) {
+      return;
+    }
+
+    let hasCloudAddOn = false;
+    let hasEndpointAddOn = false;
+    config.productTypes.forEach((productType) => {
+      if (productType.product_line === ProductLine.cloud) {
+        hasCloudAddOn = true;
+      }
+      if (productType.product_line === ProductLine.endpoint) {
+        hasEndpointAddOn = true;
+      }
+    });
+
+    if (hasEndpointAddOn) {
+      this.type = ProductLine.endpoint;
+      return;
+    }
+    if (hasCloudAddOn) {
+      this.type = `${ProductLine.cloud}_${ProductLine.endpoint}`;
+    }
   }
 
   private setTier(config: ServerlessSecurityConfig) {
@@ -131,10 +165,14 @@ export class EndpointMeteringService {
       return;
     }
 
-    const endpoint = config.productTypes.find(
-      (productType) => productType.product_line === ProductLine.endpoint
+    const product = config.productTypes.find(
+      (productType) =>
+        // tiers are always matching so either is fine
+        productType.product_line === ProductLine.endpoint ||
+        productType.product_line === ProductLine.cloud
     );
-    this.tier = endpoint?.product_tier;
+    // default essentials is safe since we only reach tier if add-on exists
+    this.tier = product?.product_tier || ProductTier.essentials;
   }
 }
 

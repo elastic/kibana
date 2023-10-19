@@ -8,9 +8,8 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiCallOut, EuiText, EuiPanelProps } from '@elastic/eui';
+import { EuiSpacer, EuiPanelProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
@@ -20,11 +19,10 @@ import { GithubLink } from './github_link';
 
 interface InstallClientProps {
   codeSnippet: string;
-  showTryInConsole: boolean;
+  consoleRequest?: string;
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
-  http: HttpStart;
-  pluginId: string;
+  assetBasePath: string;
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
   isPanelLeft?: boolean;
@@ -32,18 +30,16 @@ interface InstallClientProps {
   overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
-const Link: React.FC<{ language: LanguageDefinition; http: HttpStart; pluginId: string }> = ({
+const Link: React.FC<{ language: LanguageDefinition; assetBasePath: string }> = ({
   language,
-  http,
-  pluginId,
+  assetBasePath,
 }) => {
   if (language.github) {
     return (
       <GithubLink
         href={language.github.link}
         label={language.github.label}
-        http={http}
-        pluginId={pluginId}
+        assetBasePath={assetBasePath}
       />
     );
   }
@@ -52,12 +48,11 @@ const Link: React.FC<{ language: LanguageDefinition; http: HttpStart; pluginId: 
 
 export const InstallClientPanel: React.FC<InstallClientProps> = ({
   codeSnippet,
-  showTryInConsole,
+  consoleRequest,
   language,
   languages,
   setSelectedLanguage,
-  http,
-  pluginId,
+  assetBasePath,
   application,
   sharePlugin,
   isPanelLeft = true,
@@ -66,51 +61,38 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   const panelContent = (
     <>
       <CodeBox
-        showTryInConsole={showTryInConsole}
+        consoleRequest={consoleRequest}
         codeSnippet={codeSnippet}
         languageType="shell"
         languages={languages}
         selectedLanguage={language}
         setSelectedLanguage={setSelectedLanguage}
-        http={http}
-        pluginId={pluginId}
+        assetBasePath={assetBasePath}
         application={application}
         sharePlugin={sharePlugin}
       />
       <EuiSpacer />
-      <Link language={language} http={http} pluginId={pluginId} />
-      <EuiSpacer />
-      <EuiCallOut
-        iconType="iInCircle"
-        title={i18n.translate('searchApiPanels.welcomeBanner.apiCallOut.title', {
-          defaultMessage: 'Call the API with Console',
-        })}
-        color="primary"
-      >
-        <EuiText size="s">
-          {i18n.translate('searchApiPanels.welcomeBanner.apiCallout.content', {
-            defaultMessage:
-              'Console enables you to call Elasticsearch and Kibana REST APIs directly, without needing to install a language client.',
-          })}
-        </EuiText>
-      </EuiCallOut>
+      <Link language={language} assetBasePath={assetBasePath} />
     </>
   );
   return (
     <OverviewPanel
       description={i18n.translate('searchApiPanels.welcomeBanner.installClient.description', {
-        defaultMessage:
-          'Elastic builds and maintains clients in several popular languages and our community has contributed many more. Install your favorite language client to get started.',
+        defaultMessage: 'First you need to install your programming language client of choice.',
       })}
-      links={[
-        {
-          href: language.docLink,
-          label: i18n.translate('searchApiPanels.welcomeBanner.installClient.clientDocLink', {
-            defaultMessage: '{languageName} client documentation',
-            values: { languageName: language.name },
-          }),
-        },
-      ]}
+      links={
+        language.docLink
+          ? [
+              {
+                href: language.docLink,
+                label: i18n.translate('searchApiPanels.welcomeBanner.installClient.clientDocLink', {
+                  defaultMessage: '{languageName} client documentation',
+                  values: { languageName: language.name },
+                }),
+              },
+            ]
+          : []
+      }
       title={i18n.translate('searchApiPanels.welcomeBanner.installClient.title', {
         defaultMessage: 'Install a client',
       })}

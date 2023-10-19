@@ -49,7 +49,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           timestamp,
           children: (_) => {
             _.service({
-              repeat: 10,
+              repeat: 80,
               serviceInstance: synthNode,
               transactionName: 'GET /nodejs/products',
               latency: 100,
@@ -60,7 +60,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                   transactionName: 'GET /go',
                   children: (_) => {
                     _.service({
-                      repeat: 20,
+                      repeat: 50,
                       serviceInstance: synthJava,
                       transactionName: 'GET /java',
                       children: (_) => {
@@ -83,7 +83,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
               serviceInstance: synthNode,
               transactionName: 'GET /nodejs/users',
               latency: 100,
-              repeat: 10,
+              repeat: 40,
               children: (_) => {
                 _.service({
                   serviceInstance: synthGo,
@@ -91,7 +91,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                   latency: 50,
                   children: (_) => {
                     _.service({
-                      repeat: 10,
+                      repeat: 40,
                       serviceInstance: synthDotnet,
                       transactionName: 'GET /dotnet/cases/4',
                       latency: 50,

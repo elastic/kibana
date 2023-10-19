@@ -13,12 +13,17 @@ import type {
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentsResponse,
+  GetPackagePoliciesRequest,
+  GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
   agentPolicyRouteService,
   agentRouteService,
   AGENTS_INDEX,
+  API_VERSIONS,
+  APP_API_ROUTES,
+  PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -26,16 +31,24 @@ import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types
 import {
   enrollmentAPIKeyRouteService,
   fleetServerHostsRoutesService,
+  outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
 import type {
   EnrollmentAPIKey,
   GetAgentsRequest,
   GetEnrollmentAPIKeysResponse,
   PostAgentUnenrollResponse,
+  GenerateServiceTokenResponse,
+  GetOutputsResponse,
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
+import {
+  RETRYABLE_TRANSIENT_ERRORS,
+  retryOnError,
+} from '../../../common/endpoint/data_loaders/utils';
+import { fetchKibanaStatus } from './stack_services';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -106,6 +119,9 @@ export const fetchFleetAgents = async (
     .request<GetAgentsResponse>({
       method: 'GET',
       path: AGENT_API_ROUTES.LIST_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: options,
     })
     .catch(catchAxiosErrorFormatAndThrow)
@@ -132,11 +148,15 @@ export const waitForHostToEnroll = async (
   let found: Agent | undefined;
 
   while (!found && !hasTimedOut()) {
-    found = await fetchFleetAgents(kbnClient, {
-      perPage: 1,
-      kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
-      showInactive: false,
-    }).then((response) => response.items[0]);
+    found = await retryOnError(
+      async () =>
+        fetchFleetAgents(kbnClient, {
+          perPage: 1,
+          kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
+          showInactive: false,
+        }).then((response) => response.items[0]),
+      RETRYABLE_TRANSIENT_ERRORS
+    );
 
     if (!found) {
       // sleep and check again
@@ -151,23 +171,29 @@ export const waitForHostToEnroll = async (
   return found;
 };
 
+export const fetchFleetServerHostList = async (
+  kbnClient: KbnClient
+): Promise<GetFleetServerHostsResponse> => {
+  return kbnClient
+    .request<GetFleetServerHostsResponse>({
+      method: 'GET',
+      path: fleetServerHostsRoutesService.getListPath(),
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
+    })
+    .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
 /**
  * Returns the URL for the default Fleet Server connected to the stack
  * @param kbnClient
  */
 export const fetchFleetServerUrl = async (kbnClient: KbnClient): Promise<string | undefined> => {
-  const fleetServerListResponse = await kbnClient
-    .request<GetFleetServerHostsResponse>({
-      method: 'GET',
-      path: fleetServerHostsRoutesService.getListPath(),
-      query: {
-        perPage: 100,
-      },
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .then((response) => response.data);
+  const fleetServerListResponse = await fetchFleetServerHostList(kbnClient);
 
-  // TODO:PT need to also pull in the Proxies and use that instead if defiend for url
+  // TODO:PT need to also pull in the Proxies and use that instead if defined for url?
 
   let url: string | undefined;
 
@@ -197,6 +223,9 @@ export const fetchAgentPolicyEnrollmentKey = async (
     .request<GetEnrollmentAPIKeysResponse>({
       method: 'GET',
       path: enrollmentAPIKeyRouteService.getListPath(),
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: { kuery: `policy_id: "${agentPolicyId}"` },
     })
     .catch(catchAxiosErrorFormatAndThrow)
@@ -222,10 +251,35 @@ export const fetchAgentPolicyList = async (
     .request<GetAgentPoliciesResponse>({
       method: 'GET',
       path: agentPolicyRouteService.getListPath(),
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: options,
     })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .then((response) => response.data);
+    .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+/**
+ * Retrieves a list of Fleet Integration policies
+ * @param kbnClient
+ * @param options
+ */
+export const fetchIntegrationPolicyList = async (
+  kbnClient: KbnClient,
+  options: GetPackagePoliciesRequest['query'] = {}
+): Promise<GetPackagePoliciesResponse> => {
+  return kbnClient
+    .request<GetPackagePoliciesResponse>({
+      method: 'GET',
+      path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
+      query: options,
+    })
+    .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**
@@ -236,7 +290,7 @@ export const fetchAgentPolicyList = async (
 export const getAgentVersionMatchingCurrentStack = async (
   kbnClient: KbnClient
 ): Promise<string> => {
-  const kbnStatus = await kbnClient.status.get();
+  const kbnStatus = await fetchKibanaStatus(kbnClient);
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
     .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
@@ -323,6 +377,7 @@ export const getAgentDownloadUrl = async (
  * Given a stack version number, function will return the closest Agent download version available
  * for download. THis could be the actual version passed in or lower.
  * @param version
+ * @param log
  */
 export const getLatestAgentDownloadVersion = async (
   version: string,
@@ -386,8 +441,60 @@ export const unEnrollFleetAgent = async (
       method: 'POST',
       path: agentRouteService.getUnenrollPath(agentId),
       body: { revoke: force },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow);
 
   return data;
+};
+
+export const generateFleetServiceToken = async (
+  kbnClient: KbnClient,
+  logger: ToolingLog
+): Promise<string> => {
+  logger.info(`Generating new Fleet Service Token`);
+
+  const serviceToken: string = await kbnClient
+    .request<GenerateServiceTokenResponse>({
+      method: 'POST',
+      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
+      headers: { 'elastic-api-version': '2023-10-31' },
+      body: {},
+    })
+    .then((response) => response.data.value)
+    .catch(catchAxiosErrorFormatAndThrow);
+
+  logger.verbose(`New service token created: ${serviceToken}`);
+
+  return serviceToken;
+};
+
+export const fetchFleetOutputs = async (kbnClient: KbnClient): Promise<GetOutputsResponse> => {
+  return kbnClient
+    .request<GetOutputsResponse>({
+      method: 'GET',
+      path: outputRoutesService.getListPath(),
+      headers: { 'elastic-api-version': '2023-10-31' },
+    })
+    .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+export const getFleetElasticsearchOutputHost = async (kbnClient: KbnClient): Promise<string> => {
+  const outputs = await fetchFleetOutputs(kbnClient);
+  let host: string = '';
+
+  for (const output of outputs.items) {
+    if (output.type === 'elasticsearch') {
+      host = output?.hosts?.[0] ?? '';
+    }
+  }
+
+  if (!host) {
+    throw new Error(`An output for Elasticsearch was not found in Fleet settings`);
+  }
+
+  return host;
 };

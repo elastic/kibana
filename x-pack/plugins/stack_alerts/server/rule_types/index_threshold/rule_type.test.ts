@@ -20,6 +20,11 @@ import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_set
 
 let fakeTimer: sinon.SinonFakeTimers;
 
+function getTimeRange() {
+  const date = new Date(Date.now()).toISOString();
+  return { dateStart: date, dateEnd: date };
+}
+
 describe('ruleType', () => {
   const logger = loggingSystemMock.create().get();
   const data = {
@@ -183,6 +188,7 @@ describe('ruleType', () => {
       threshold: [1],
     };
 
+    const ruleName = uuidv4();
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
@@ -200,7 +206,7 @@ describe('ruleType', () => {
       spaceId: uuidv4(),
       rule: {
         id: uuidv4(),
-        name: uuidv4(),
+        name: ruleName,
         tags: [],
         consumer: '',
         producer: '',
@@ -223,9 +229,36 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
-    expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
+    expect(alertServices.alertsClient.report).toHaveBeenCalledWith({
+      actionGroup: 'threshold met',
+      context: {
+        conditions: 'foo is less than 1',
+        date: '1970-01-01T00:00:00.000Z',
+        group: 'all documents',
+        message: `alert '${ruleName}' is active for group 'all documents':
+
+- Value: 0
+- Conditions Met: foo is less than 1 over 5m
+- Timestamp: 1970-01-01T00:00:00.000Z`,
+        title: `alert ${ruleName} group all documents met threshold`,
+        value: 0,
+      },
+      id: 'all documents',
+      payload: {
+        'kibana.alert.evaluation.conditions': 'foo is less than 1',
+        'kibana.alert.evaluation.value': '0',
+        'kibana.alert.reason': `alert '${ruleName}' is active for group 'all documents':
+
+- Value: 0
+- Conditions Met: foo is less than 1 over 5m
+- Timestamp: 1970-01-01T00:00:00.000Z`,
+        'kibana.alert.title': `alert ${ruleName} group all documents met threshold`,
+      },
+      state: {},
+    });
   });
 
   it('should ensure a null result does not fire actions', async () => {
@@ -291,6 +324,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -359,6 +393,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -426,6 +461,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

@@ -55,6 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { header } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule()])
           .expect(200);
 
@@ -86,6 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule()])
           .expect(200);
 
@@ -120,6 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([rule])
           .expect(200);
 
@@ -130,6 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRuleWithoutRuleId()])
           .expect(200);
 
@@ -141,6 +145,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule(), getSimpleRule()])
           .expect(200);
 
@@ -159,12 +164,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule()])
           .expect(200);
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'foo')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule()])
           .expect(200);
 
@@ -179,10 +186,11 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
-      it('should return a 200 ok but have a 409 conflict if we attempt to create the rule, which use existing attached rule defult list', async () => {
+      it('should return a 200 ok but have a 409 conflict if we attempt to create the rule, which use existing attached rule default list', async () => {
         const { body: ruleWithException } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             ...getSimpleRuleWithoutRuleId(),
             exceptions_list: [
@@ -199,6 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([
             {
               ...getSimpleRule(),
@@ -229,6 +238,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([
             {
               ...getSimpleRule(),
@@ -296,6 +306,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_BULK_CREATE)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send([rule])
             .expect(200);
 

@@ -7,19 +7,34 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common';
+import { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { RuleStatus } from '../../../types';
 
-export const rewriteBodyRes: RewriteRequestCase<RuleAggregationFormattedResult> = ({
+export interface AggregateRulesResponse {
+  ruleExecutionStatus: Record<string, number>;
+  ruleLastRunOutcome: Record<string, number>;
+  ruleEnabledStatus: {
+    enabled: number;
+    disabled: number;
+  };
+  ruleMutedStatus: {
+    muted: number;
+    unmuted: number;
+  };
+  ruleSnoozedStatus: {
+    snoozed: number;
+  };
+  ruleTags: string[];
+}
+
+export const rewriteBodyRes = ({
   rule_execution_status: ruleExecutionStatus,
   rule_last_run_outcome: ruleLastRunOutcome,
   rule_enabled_status: ruleEnabledStatus,
   rule_muted_status: ruleMutedStatus,
   rule_snoozed_status: ruleSnoozedStatus,
   rule_tags: ruleTags,
-  ...rest
-}: any) => ({
-  ...rest,
+}: AggregateRulesResponseBody): AggregateRulesResponse => ({
   ruleExecutionStatus,
   ruleEnabledStatus,
   ruleMutedStatus,
@@ -52,6 +67,7 @@ export interface LoadRuleAggregationsProps {
   ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   tagsFilter?: string[];
+  filterConsumers?: string[];
 }
 
 export interface LoadRuleTagsProps {

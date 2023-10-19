@@ -31,7 +31,7 @@ describe('GetStartedComponent', () => {
   it('should render page title, subtitle, and description', () => {
     const { getByText } = render(<GetStartedComponent productTypes={productTypes} />);
 
-    const pageTitle = getByText('Welcome');
+    const pageTitle = getByText('Welcome!');
     const subtitle = getByText(`Let's get started`);
     const description = getByText(
       `Set up your Elastic Security workspace. Use the toggles below to curate a list of tasks that best fits your environment`

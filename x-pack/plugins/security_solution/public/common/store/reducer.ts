@@ -33,6 +33,7 @@ import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import { analyzerReducer } from '../../resolver/store/reducer';
+import { securitySolutionDiscoverReducer } from './discover/reducer';
 import type { AnalyzerState } from '../../resolver/types';
 
 enableMapSet();
@@ -119,6 +120,11 @@ export const createInitialState = (
     dataTable: dataTableState.dataTable,
     groups: groupsState.groups,
     analyzer: analyzerState.analyzer,
+    discover: {
+      app: undefined,
+      internal: undefined,
+      savedSearch: undefined,
+    },
   };
 
   return preloadedState;
@@ -139,5 +145,6 @@ export const createReducer: (
     dataTable: dataTableReducer,
     groups: groupsReducer,
     analyzer: analyzerReducer,
+    discover: securitySolutionDiscoverReducer,
     ...pluginsReducer,
   });

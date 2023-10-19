@@ -60,7 +60,7 @@ const CheckAllComponent: React.FC<Props> = ({
   setCheckAllTotalIndiciesToCheck,
   setIndexToCheck,
 }) => {
-  const { httpFetch } = useDataQualityContext();
+  const { httpFetch, isILMAvailable } = useDataQualityContext();
   const abortController = useRef(new AbortController());
   const [isRunning, setIsRunning] = useState<boolean>(false);
 
@@ -157,7 +157,7 @@ const CheckAllComponent: React.FC<Props> = ({
     };
   }, [abortController]);
 
-  const disabled = ilmPhases.length === 0;
+  const disabled = isILMAvailable && ilmPhases.length === 0;
 
   return (
     <CheckAllButton

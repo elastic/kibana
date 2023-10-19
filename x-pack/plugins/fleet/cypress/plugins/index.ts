@@ -12,6 +12,8 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import { createEsClientForTesting } from '@kbn/test';
 
+import { API_VERSIONS } from '../../common/constants';
+
 const plugin: Cypress.PluginConfig = (on, config) => {
   const client = createEsClientForTesting({
     esUrl: config.env.ELASTICSEARCH_URL,
@@ -22,8 +24,9 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     path: string;
     body?: any;
     contentType?: string;
+    version?: string;
   }) {
-    const { method, path, body, contentType } = opts;
+    const { method, path, body, contentType, version } = opts;
     const Authorization = `Basic ${Buffer.from(
       `elastic:${config.env.ELASTICSEARCH_PASSWORD}`
     ).toString('base64')}`;
@@ -35,6 +38,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
         'kbn-xsrf': 'cypress',
         'Content-Type': contentType || 'application/json',
         Authorization,
+        ...(version ? { 'Elastic-Api-Version': version } : {}),
       },
       ...(body ? { body } : {}),
     });
@@ -63,6 +67,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
         index,
         query,
         ignore_unavailable: ignoreUnavailable,
+        allow_no_indices: true,
         refresh: true,
         conflicts: 'proceed',
       });
@@ -75,6 +80,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
         path: '/api/fleet/epm/packages',
         body: Buffer.from(zipContent, 'base64'),
         contentType: 'application/zip',
+        version: API_VERSIONS.public.v1,
       });
     },
 
@@ -82,6 +88,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
       return kibanaFetch({
         method: 'DELETE',
         path: `/api/fleet/epm/packages/${packageName}`,
+        version: API_VERSIONS.public.v1,
       });
     },
   });

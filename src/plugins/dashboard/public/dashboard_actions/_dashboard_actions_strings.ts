@@ -29,10 +29,6 @@ export const dashboardCopyToDashboardActionStrings = {
     i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
       defaultMessage: 'Existing dashboard',
     }),
-  getDescription: () =>
-    i18n.translate('dashboard.panel.copyToDashboard.description', {
-      defaultMessage: 'Choose the destination dashboard.',
-    }),
 };
 
 export const dashboardAddToLibraryActionStrings = {

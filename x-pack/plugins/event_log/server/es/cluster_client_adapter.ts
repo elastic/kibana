@@ -181,9 +181,8 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const legacyResult = await esClient.indices.existsTemplate({ name });
       const indexTemplateResult = await esClient.indices.existsIndexTemplate({ name });
-      return (legacyResult as boolean) || (indexTemplateResult as boolean);
+      return indexTemplateResult as boolean;
     } catch (err) {
       throw new Error(`error checking existence of index template: ${err.message}`);
     }

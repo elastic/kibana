@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -25,7 +24,8 @@ import {
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
-import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
 import {
@@ -43,7 +43,7 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-describe.skip('Create a timeline from a template', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -52,12 +52,12 @@ describe.skip('Create a timeline from a template', { tags: [tag.ESS, tag.SERVERL
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    visit(TIMELINE_TEMPLATES_URL);
   });
 
   it(
     'Should have the same query and open the timeline modal',
-    { tags: tag.BROKEN_IN_SERVERLESS },
+    { tags: '@brokenInServerless' },
     () => {
       selectCustomTemplates();
       expandEventAction();
@@ -77,10 +77,10 @@ describe('Timelines', (): void => {
   });
 
   describe('Toggle create timeline from plus icon', () => {
-    context('Privileges: CRUD', { tags: tag.ESS }, () => {
+    context('Privileges: CRUD', { tags: '@ess' }, () => {
       beforeEach(() => {
         login();
-        visit(OVERVIEW_URL);
+        visitWithTimeRange(OVERVIEW_URL);
       });
 
       it('toggle create timeline ', () => {
@@ -90,10 +90,10 @@ describe('Timelines', (): void => {
       });
     });
 
-    context('Privileges: READ', { tags: tag.ESS }, () => {
+    context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.reader);
-        visit(OVERVIEW_URL, undefined, ROLES.reader);
+        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.reader });
       });
 
       it('should not be able to create/update timeline ', () => {
@@ -110,20 +110,20 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe.skip(
+  describe(
     'Creates a timeline by clicking untitled timeline from bottom bar',
-    { tags: tag.BROKEN_IN_SERVERLESS },
+    { tags: ['@ess', '@brokenInServerless'] },
     () => {
       beforeEach(() => {
         login();
-        visit(OVERVIEW_URL);
+        visitWithTimeRange(OVERVIEW_URL);
         openTimelineUsingToggle();
         addNameAndDescriptionToTimeline(getTimeline());
         populateTimeline();
         goToQueryTab();
       });
 
-      it('can be added filter', () => {
+      it.skip('can be added filter', () => {
         addFilter(getTimeline().filter);
         cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
       });
@@ -139,7 +139,8 @@ describe('Timelines', (): void => {
         cy.get(LOCKED_ICON).should('be.visible');
       });
 
-      it('can be added notes', () => {
+      // TO-DO: Issue 163398
+      it.skip('can be added notes', () => {
         addNotesToTimeline(getTimeline().notes);
         cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
           .find(NOTES_TEXT)

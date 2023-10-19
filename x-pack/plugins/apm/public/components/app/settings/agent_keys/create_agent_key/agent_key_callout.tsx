@@ -58,6 +58,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
             <EuiCopy textToCopy={token}>
               {(copy) => (
                 <EuiButtonIcon
+                  data-test-subj="apmAgentKeyCallOutButton"
                   iconType="copyClipboard"
                   onClick={copy}
                   color="success"

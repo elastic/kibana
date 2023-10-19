@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   FIELDS_BROWSER_CHECKBOX,
@@ -23,7 +22,8 @@ import {
   closeFieldsBrowser,
   filterFieldsBrowser,
 } from '../../../tasks/fields_browser';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openEvents } from '../../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
@@ -33,7 +33,7 @@ import {
 } from '../../../tasks/hosts/events';
 import { kqlSearch } from '../../../tasks/security_header';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { resetFields } from '../../../tasks/timeline';
 
 const defaultHeadersInDefaultEcsCategory = [
@@ -46,9 +46,9 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Events Viewer', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'auditbeat_big');
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
   });
 
   after(() => {
@@ -58,7 +58,7 @@ describe('Events Viewer', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   context('Fields rendering', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -83,7 +83,7 @@ describe('Events Viewer', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   context('Events viewer fields behaviour', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -111,7 +111,7 @@ describe('Events Viewer', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   context('Events behavior', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
     });

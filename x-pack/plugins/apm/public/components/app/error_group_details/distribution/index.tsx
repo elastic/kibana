@@ -106,6 +106,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
                 ? EUI_CHARTS_THEME_DARK.theme
                 : EUI_CHARTS_THEME_LIGHT.theme
             }
+            locale={i18n.getLocale()}
           />
           <Axis
             id="x-axis"

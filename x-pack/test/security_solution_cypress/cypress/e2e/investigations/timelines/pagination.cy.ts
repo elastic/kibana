@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   TIMELINE_EVENT,
@@ -17,22 +16,24 @@ import {
 } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { populateTimeline } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
+// Flaky on serverless
 const defaultPageSize = 25;
-describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'timeline');
+    cy.task('esArchiverLoad', { archiveName: 'timeline' });
   });
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
   });
@@ -49,7 +50,7 @@ describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', defaultPageSize);
   });
 
-  it('should be able to go to next / previous page', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+  it('should be able to go to next / previous page', { tags: '@brokenInServerless' }, () => {
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
   });

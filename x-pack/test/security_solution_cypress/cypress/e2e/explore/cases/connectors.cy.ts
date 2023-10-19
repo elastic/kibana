@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../../objects/case';
 
 import { SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../../tasks/all_cases';
-import { cleanKibana, deleteCases, deleteConnectors } from '../../../tasks/common';
+import { cleanKibana, deleteAllCasesItems, deleteConnectors } from '../../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
   verifyNewConnectorSelected,
 } from '../../../tasks/configure_cases';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { CASES_URL } from '../../../urls/navigation';
 
-describe('Cases connectors', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
   const configureResult = {
     connector: {
       id: 'e271c3b8-f702-4fbc-98e0-db942b573bbd',
@@ -35,6 +35,7 @@ describe('Cases connectors', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     error: null,
     updated_at: null,
     updated_by: null,
+    customFields: [],
     mappings: [
       { source: 'title', target: 'short_description', action_type: 'overwrite' },
       { source: 'description', target: 'description', action_type: 'overwrite' },
@@ -53,7 +54,7 @@ describe('Cases connectors', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   beforeEach(() => {
     login();
-    deleteCases();
+    deleteAllCasesItems();
     cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
       statusCode: 200,
       body: getServiceNowITSMHealthResponse(),
@@ -93,7 +94,7 @@ describe('Cases connectors', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   it('Configures a new connector', () => {
-    visitWithoutDateRange(CASES_URL);
+    visit(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
     addServiceNowConnector(snConnector);

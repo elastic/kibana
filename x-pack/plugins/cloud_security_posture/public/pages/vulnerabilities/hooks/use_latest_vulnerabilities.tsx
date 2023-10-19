@@ -17,7 +17,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
-import { getSafeVulnerabilitiesQueryFilter } from '../../../../common/utils/get_safe_vulnerabilities_query_filter';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { FindingsBaseEsQuery } from '../../../common/types';
@@ -37,7 +36,7 @@ interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
 
 export const getFindingsQuery = ({ query, sort, pageIndex, pageSize }: VulnerabilitiesQuery) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query: getSafeVulnerabilitiesQueryFilter(query),
+  query,
   from: pageIndex * pageSize,
   size: pageSize,
   sort,

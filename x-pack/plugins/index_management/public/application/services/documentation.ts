@@ -14,6 +14,9 @@ class DocumentationService {
 
   private dataStreams: string = '';
   private esDocsBase: string = '';
+  private enrichPolicies: string = '';
+  private createEnrichPolicies: string = '';
+  private matchAllQuery: string = '';
   private indexManagement: string = '';
   private indexSettings: string = '';
   private indexTemplates: string = '';
@@ -59,6 +62,9 @@ class DocumentationService {
   private runtimeFields: string = '';
   private indicesComponentTemplate: string = '';
   private bulkIndexAlias: string = '';
+  private indexStats: string = '';
+  private bulkApi: string = '';
+  private updateExistingDS: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -66,6 +72,9 @@ class DocumentationService {
 
     this.dataStreams = links.elasticsearch.dataStreams;
     this.esDocsBase = links.elasticsearch.docsBase;
+    this.enrichPolicies = links.elasticsearch.enrichPolicies;
+    this.createEnrichPolicies = links.elasticsearch.createEnrichPolicy;
+    this.matchAllQuery = links.elasticsearch.matchAllQuery;
     this.indexManagement = links.management.indexManagement;
     this.indexSettings = links.elasticsearch.indexSettings;
     this.indexTemplates = links.elasticsearch.indexTemplates;
@@ -111,6 +120,9 @@ class DocumentationService {
     this.runtimeFields = links.runtimeFields.overview;
     this.indicesComponentTemplate = links.apis.putComponentTemplate;
     this.bulkIndexAlias = links.apis.bulkIndexAlias;
+    this.indexStats = links.apis.indexStats;
+    this.bulkApi = links.enterpriseSearch.bulkApi;
+    this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
   }
 
   public getEsDocsBase() {
@@ -169,6 +181,18 @@ class DocumentationService {
 
   public getRankFeatureQueryLink() {
     return this.mappingRankFeatureFields;
+  }
+
+  public getEnrichApisLink() {
+    return this.enrichPolicies;
+  }
+
+  public getCreateEnrichPolicyLink() {
+    return this.createEnrichPolicies;
+  }
+
+  public getMatchAllQueryLink() {
+    return this.matchAllQuery;
   }
 
   public getMetaFieldLink() {
@@ -309,6 +333,18 @@ class DocumentationService {
 
   public getBulkIndexAlias() {
     return this.bulkIndexAlias;
+  }
+
+  public getIndexStats() {
+    return this.indexStats;
+  }
+
+  public getBulkApi() {
+    return this.bulkApi;
+  }
+
+  public getUpdateExistingDS() {
+    return this.updateExistingDS;
   }
 
   public getWellKnownTextLink() {

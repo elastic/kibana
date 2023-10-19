@@ -18,10 +18,14 @@ import {
   SectionSubtitle,
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
-import { ProfilingLocators } from '@kbn/profiling-plugin/public';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
+import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -125,13 +129,13 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const {
-    core,
-    uiActions,
-    infra: { locators },
-  } = useApmPluginContext();
+  const { core, uiActions, infra, share } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
+
+  const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
+    ALL_DATASETS_LOCATOR_ID
+  )!;
 
   const infraLinksAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.InfraUiAvailable
@@ -151,12 +155,13 @@ function ActionMenuSections({
     basePath: core.http.basePath,
     location,
     apmRouter,
-    infraLocators: locators,
+    infraLocators: infra?.locators,
     infraLinksAvailable,
     profilingLocators,
     rangeFrom,
     rangeTo,
     environment,
+    allDatasetsLocator,
   });
 
   const externalMenuItems = useAsync(() => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import {
   SecurityCellActions,
   SecurityCellActionsTrigger,
@@ -16,12 +16,12 @@ import { escapeDataProviderId } from '../../../../common/components/drag_and_dro
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { UserRiskScoreColumns } from '.';
 import * as i18n from './translations';
-import { RiskScore } from '../../../components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UsersTableType } from '../../store/model';
-import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
+import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
 import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
 
 export const getUserRiskScoreColumns = ({
@@ -79,21 +79,14 @@ export const getUserRiskScoreColumns = ({
   },
   {
     field: RiskScoreFields.userRisk,
-    name: (
-      <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
-        <>
-          {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.user)}{' '}
-          <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-        </>
-      </EuiToolTip>
-    ),
+    name: ENTITY_RISK_LEVEL(RiskScoreEntity.user),
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
     render: (risk) => {
       if (risk != null) {
         return (
-          <RiskScore
+          <RiskScoreLevel
             toolTipContent={
               <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
                 <EuiText size="xs">{i18n.VIEW_USERS_BY_SEVERITY(risk.toLowerCase())}</EuiText>

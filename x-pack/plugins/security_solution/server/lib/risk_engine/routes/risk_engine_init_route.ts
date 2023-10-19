@@ -5,35 +5,46 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../common/constants';
-import type { SetupPlugins } from '../../../plugin';
+import type { StartPlugins } from '../../../plugin';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const riskEngineInitRoute = (
   router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  security: SetupPlugins['security']
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: RISK_ENGINE_INIT_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
-    },
-    async (context, request, response) => {
+    })
+    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const securitySolution = await context.securitySolution;
-      const riskEngineClient = securitySolution.getRiskEngineDataClient();
+      const [_, { taskManager }] = await getStartServices();
+      const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
       const spaceId = securitySolution.getSpaceId();
 
       try {
-        const initResult = await riskEngineClient.init({
+        if (!taskManager) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: {
+              message:
+                'Task Manager is unavailable, but is required to initialize the risk engine. Please enable the taskManager plugin and try again.',
+            },
+          });
+        }
+
+        const initResult = await riskEngineDataClient.init({
+          taskManager,
           namespace: spaceId,
         });
 
@@ -67,6 +78,5 @@ export const riskEngineInitRoute = (
           body: { message: error.message, full_error: JSON.stringify(e) },
         });
       }
-    }
-  );
+    });
 };

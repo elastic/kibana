@@ -18,9 +18,11 @@ import {
   EuiFormErrorText,
   EuiFormRow,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,6 +33,8 @@ import { i18n } from '@kbn/i18n';
 import styled, { useTheme } from 'styled-components';
 
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+
+import { useStartServices } from '../../../../../../hooks';
 
 import type { KafkaTopicWhenType, ValueOf } from '../../../../../../../common/types';
 
@@ -49,6 +53,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
   } = inputs.kafkaTopicsInput;
   const theme = useTheme() as EuiTheme;
   const [autoFocus, setAutoFocus] = useState(false);
+  const { docLinks } = useStartServices();
 
   const indexedErrors = useMemo(() => {
     if (!errors) {
@@ -94,17 +99,29 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
 
   const handleTopicProcessorChange = useCallback(
     (index: number, field: 'topic' | 'condition' | 'type', value: string) => {
-      const updatedPairs = [...topics];
-      if (field === 'topic') {
-        updatedPairs[index].topic = value;
-      } else {
-        updatedPairs[index].when = {
-          ...(updatedPairs[index].when || {}),
-          ...((field === 'condition' ? { condition: value } : {}) as { condition?: string }),
-          ...((field === 'type' ? { type: value } : {}) as { type?: ValueOf<KafkaTopicWhenType> }),
-        };
-      }
-      onChange(updatedPairs);
+      const updatedTopics = topics.map((topic, i) => {
+        if (i === index) {
+          if (field === 'topic') {
+            return {
+              ...topic,
+              topic: value,
+            };
+          } else {
+            return {
+              ...topic,
+              when: {
+                ...(topic.when || {}),
+                ...((field === 'condition' ? { condition: value } : {}) as { condition?: string }),
+                ...((field === 'type' ? { type: value } : {}) as {
+                  type?: ValueOf<KafkaTopicWhenType>;
+                }),
+              },
+            };
+          }
+        }
+        return topic;
+      });
+      onChange(updatedTopics);
     },
     [topics, onChange]
   );
@@ -202,10 +219,27 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
         <EuiFormRow
           fullWidth
           label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.kafkaTopicsProcessorsLabel"
-              defaultMessage="Processors"
-            />
+            <>
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.kafkaTopicsProcessorsLabel"
+                defaultMessage="Processors"
+              />
+              <EuiText color="subdued" size="xs">
+                <i>
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.kafkaTopicsProcessorsHelpText"
+                    defaultMessage="For more information read the {link}."
+                    values={{
+                      link: (
+                        <EuiLink href={docLinks.links.fleet.kafkaSettings} target={'_blank'}>
+                          documentation
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </i>
+              </EuiText>
+            </>
           }
         >
           {topics.length > 1 ? (
@@ -220,7 +254,6 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                         spacing="m"
                         index={index}
                         draggableId={`${id}${index}Draggable`}
-                        // isDragDisabled={disabled}
                         customDragHandle={true}
                         style={{
                           paddingLeft: 0,
@@ -336,7 +369,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                 const topicConditionErrors = indexedConditionErrors[index];
                 return (
                   <>
-                    <EuiSpacer size="m" />
+                    <EuiSpacer size="s" />
 
                     <EuiFlexGroup gutterSize="none" wrap>
                       <EuiFlexItem style={{ flex: '30%', paddingRight: 10 }}>

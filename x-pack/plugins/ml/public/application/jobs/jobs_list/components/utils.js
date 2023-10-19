@@ -24,6 +24,7 @@ import { mlCalendarService } from '../../../services/calendar_service';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
+import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -240,7 +241,12 @@ export async function cloneJob(jobId) {
       return;
     }
 
-    if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
+    const createdBy = originalJob?.custom_settings?.created_by;
+    if (
+      cloneableJob !== undefined &&
+      createdBy !== undefined &&
+      createdBy !== CREATED_BY_LABEL.ADVANCED
+    ) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
       mlJobService.tempJobCloningObjects.createdBy = originalJob?.custom_settings?.created_by;

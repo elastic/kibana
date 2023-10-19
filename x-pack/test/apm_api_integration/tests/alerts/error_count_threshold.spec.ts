@@ -32,6 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const supertest = getService('supertest');
   const es = getService('es');
+  const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -123,7 +124,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count without kql query',
           params: {
-            kqlFilter: '',
             ...ruleParams,
           },
           actions: [indexAction],
@@ -134,9 +134,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteActionConnector({ supertest, es, actionId });
-        await deleteRuleById({ supertest, ruleId });
-        await deleteAlertsByRuleId({ es, ruleId });
+        try {
+          await deleteActionConnector({ supertest, es, actionId });
+          await deleteRuleById({ supertest, ruleId });
+          await deleteAlertsByRuleId({ es, ruleId });
+        } catch (e) {
+          logger.info('Could not delete rule or action connector', e);
+        }
       });
 
       it('checks if rule is active', async () => {
@@ -271,7 +275,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count with kql query',
           params: {
-            kqlFilter: 'service.name: opbeans-php',
+            searchConfiguration: {
+              query: {
+                query: 'service.name: opbeans-php',
+                language: 'kuery',
+              },
+            },
             ...ruleParams,
           },
           actions: [],
@@ -280,8 +289,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteRuleById({ supertest, ruleId });
-        await deleteAlertsByRuleId({ es, ruleId });
+        try {
+          await deleteRuleById({ supertest, ruleId });
+          await deleteAlertsByRuleId({ es, ruleId });
+        } catch (e) {
+          logger.info('Could not delete rule', e);
+        }
       });
 
       it('produces one alert for the opbeans-php service', async () => {

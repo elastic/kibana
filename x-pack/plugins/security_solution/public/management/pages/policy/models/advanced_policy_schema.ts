@@ -190,6 +190,26 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -389,6 +409,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.harden.self_protect',
       {
         defaultMessage: 'Enables self-protection on macOS. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
       }
     ),
   },
@@ -1271,7 +1301,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
       {
         defaultMessage:
-          'Controls whether API events are enabled. Set to false to disable API event collection. Default: true',
+          'Controls whether ETW API events are enabled. Set to false to disable ETW event collection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api_disabled',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_disabled',
+      {
+        defaultMessage: 'A comma separated list of API names to selectively disable.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api_verbose',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_verbose',
+      {
+        defaultMessage:
+          'Controls whether high volume API events are forwarded. Event filtering is recommended if enabled. Default: false',
       }
     ),
   },
@@ -1327,6 +1378,83 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Controls whether malware protection is applied to network drives. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.check_debug_registers',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.check_debug_registers',
+      {
+        defaultMessage:
+          'Check debug registers inline to detect the use of hardware breakpoints. Malware may use hardware breakpoints to forge benign-looking call stacks. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.kernel.fileaccess',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'A value of false overrides other config settings that would enable kernel fileaccess events. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.image_load',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
+      {
+        defaultMessage:
+          'A value of false overrides other config settings that would enable kernel image load events. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.image_load.capture',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.image_load.collect',
+      {
+        defaultMessage:
+          'Collect and send image load events to Elasticsearch. Take caution, this can be a very high data volume. Adding an event filter to drop unwanted events is strongly recommended. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
       }
     ),
   },

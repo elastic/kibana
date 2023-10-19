@@ -5,7 +5,7 @@
  * 2.0.
  */
 import createContainer from 'constate';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { buildEsQuery, fromKueryExpression, type Query } from '@kbn/es-query';
 import { map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
@@ -99,7 +99,7 @@ export const useUnifiedSearch = () => {
     [queryStringService, setSearch, validateQuery]
   );
 
-  const getParsedDateRange = useCallback(() => {
+  const parsedDateRange = useMemo(() => {
     const defaults = getDefaultTimestamps();
 
     const { from = defaults.from, to = defaults.to } = parseDateRange(searchCriteria.dateRange);
@@ -108,13 +108,11 @@ export const useUnifiedSearch = () => {
   }, [searchCriteria.dateRange]);
 
   const getDateRangeAsTimestamp = useCallback(() => {
-    const parsedDate = getParsedDateRange();
-
-    const from = new Date(parsedDate.from).getTime();
-    const to = new Date(parsedDate.to).getTime();
+    const from = new Date(parsedDateRange.from).getTime();
+    const to = new Date(parsedDateRange.to).getTime();
 
     return { from, to };
-  }, [getParsedDateRange]);
+  }, [parsedDateRange]);
 
   const buildQuery = useCallback(() => {
     return buildEsQuery(
@@ -176,9 +174,9 @@ export const useUnifiedSearch = () => {
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
-    const parsedDateRange = getDateRangeAsTimestamp();
+    const dateRangeInTimestamp = getDateRangeAsTimestamp();
     telemetry.reportHostsViewQuerySubmitted(
-      buildQuerySubmittedPayload({ ...searchCriteria, parsedDateRange })
+      buildQuerySubmittedPayload({ ...searchCriteria, parsedDateRange: dateRangeInTimestamp })
     );
   }, [getDateRangeAsTimestamp, searchCriteria, telemetry]);
 
@@ -186,7 +184,7 @@ export const useUnifiedSearch = () => {
     error,
     buildQuery,
     onSubmit,
-    getParsedDateRange,
+    parsedDateRange,
     getDateRangeAsTimestamp,
     searchCriteria,
   };

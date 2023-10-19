@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { isArray } from 'lodash';
-import { tag } from '../../../tags';
 
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getMachineLearningRule } from '../../../objects/rule';
@@ -41,7 +40,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { getDetails } from '../../../tasks/rule_details';
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -50,11 +49,13 @@ import {
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
-
-describe('Detection rules, machine learning', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Machine Learning rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');
@@ -67,7 +68,7 @@ describe('Detection rules, machine learning', { tags: [tag.ESS, tag.BROKEN_IN_SE
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(RULE_CREATION);
+    visit(CREATE_RULE_URL);
   });
 
   it('Creates and enables a new ml rule', () => {
@@ -77,6 +78,7 @@ describe('Detection rules, machine learning', { tags: [tag.ESS, tag.BROKEN_IN_SE
     fillAboutRuleAndContinue(mlRule);
     fillScheduleRuleAndContinue(mlRule);
     createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -87,7 +89,7 @@ describe('Detection rules, machine learning', { tags: [tag.ESS, tag.BROKEN_IN_SE
     cy.get(SEVERITY).should('have.text', 'Critical');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    goToRuleDetails();
+    goToRuleDetailsOf(mlRule.name);
 
     cy.get(RULE_NAME_HEADER).should('contain', `${mlRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', mlRule.description);

@@ -36,7 +36,8 @@ const MANAGED_TAG_COLOR = '#0077CC';
 const PACKAGE_TAG_COLOR = '#4DD2CA';
 const MANAGED_TAG_NAME = 'Managed';
 const LEGACY_MANAGED_TAG_ID = 'managed';
-const SECURITY_SOLUTION_TAG_ID = 'SecuritySolution';
+const SECURITY_SOLUTION_TAG_NAME = 'Security Solution';
+const SECURITY_SOLUTION_TAG_ID = 'security-solution-default';
 
 // the tag service only accepts 6-digits hex colors
 const TAG_COLORS = [
@@ -61,10 +62,10 @@ const getLegacyPackageTagId = (pkgName: string) => pkgName;
 /*
   This function is exported via fleet/plugin.ts to make it available to other plugins
   The `SecuritySolution` tag is a special case that needs to be handled separately
-  In that case simply return `SecuritySolution`
+  In that case return id `security-solution-default`
 */
 export const getPackageSpecTagId = (spaceId: string, pkgName: string, tagName: string) => {
-  if (tagName.toLowerCase() === SECURITY_SOLUTION_TAG_ID.toLowerCase())
+  if (tagName.toLowerCase() === SECURITY_SOLUTION_TAG_NAME.toLowerCase())
     return SECURITY_SOLUTION_TAG_ID;
   // UUID v5 needs a namespace (uuid.DNS) to generate a predictable uuid
   const uniqueId = uuidv5(`${tagName.toLowerCase()}`, uuidv5.DNS);

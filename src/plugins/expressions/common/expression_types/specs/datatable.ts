@@ -131,6 +131,7 @@ export interface Datatable {
   columns: DatatableColumn[];
   meta?: DatatableMeta;
   rows: DatatableRow[];
+  warning?: string;
 }
 
 export interface SerializedDatatable extends Datatable {

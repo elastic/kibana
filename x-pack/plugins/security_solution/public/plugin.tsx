@@ -16,8 +16,9 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
@@ -56,6 +57,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -83,6 +85,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  readonly configSettings: ConfigSettings;
   private queryService: QueryService = new QueryService();
   private nowProvider: NowProvider = new NowProvider();
 
@@ -91,10 +94,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.experimentalFeatures = parseExperimentalConfigValue(
       this.config.enableExperimental || []
     ).features;
+    this.configSettings = parseConfigSettings(this.config.offeringSettings ?? {}).settings;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-    this.contract = new PluginContract();
+    this.contract = new PluginContract(this.experimentalFeatures);
     this.telemetry = new TelemetryService();
     this.storage = new Storage(window.localStorage);
   }
@@ -169,23 +173,25 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         http: core.http,
       });
 
-      const filterManager = new FilterManager(core.uiSettings);
-
       // used for creating a custom stateful KQL Query Bar
       const customDataService: DataPublicPluginStart = {
         ...startPlugins.data,
-        query: {
-          ...query,
-          filterManager,
-        },
+        query,
+        // @ts-expect-error
+        _name: 'custom',
       };
+
+      // @ts-expect-error
+      customDataService.query.filterManager._name = 'customFilterManager';
 
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
         ...this.contract.getStartServices(),
+        configSettings: this.configSettings,
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+        setHeaderActionMenu: params.setHeaderActionMenu,
         storage: this.storage,
         sessionStorage: this.sessionStorage,
         security: startPluginsDeps.security,
@@ -193,9 +199,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         securityLayout: {
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
-        savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
+        contentManagement: startPluginsDeps.contentManagement,
         telemetry: this.telemetry.start(),
-        discoverFilterManager: filterManager,
         customDataService,
         topValuesPopover: new TopValuesPopoverService(),
       };
@@ -225,6 +230,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const services = await startServices(params);
         await this.registerActions(store, params.history, services);
 
+        const subscriptionTrackingServices = {
+          analyticsClient: coreStart.analytics,
+          navigateToApp: coreStart.application.navigateToApp,
+        };
+
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
 
@@ -238,6 +248,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             coreStart.application.capabilities,
             services
           ),
+          subscriptionTrackingServices,
         });
       },
     });
@@ -511,9 +522,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
-    const { upsellingService, appLinksSwitcher } = this.contract;
+    const { upsellingService, appLinksSwitcher, deepLinksFormatter } = this.contract;
 
-    registerDeepLinksUpdater(this.appUpdater$);
+    registerDeepLinksUpdater(this.appUpdater$, deepLinksFormatter);
 
     const baseLinksPermissions: LinksPermissions = {
       experimentalFeatures: this.experimentalFeatures,

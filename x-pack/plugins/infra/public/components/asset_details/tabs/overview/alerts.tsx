@@ -6,12 +6,11 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
-import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
@@ -22,7 +21,8 @@ import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
-import { Popover } from '../common/popover';
+import { AlertsSectionTitle } from '../../components/section_titles';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -33,7 +33,9 @@ export const AlertsSummaryContent = ({
   assetType: InventoryItemType;
   dateRange: TimeRange;
 }) => {
+  const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
+  const { overrides } = useAssetDetailsRenderPropsContext();
 
   const alertsEsQueryByStatus = useMemo(
     () =>
@@ -51,9 +53,11 @@ export const AlertsSummaryContent = ({
         <EuiFlexItem>
           <AlertsSectionTitle />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LinkToAlertsRule onClick={toggleAlertFlyout} />
-        </EuiFlexItem>
+        {featureFlags.inventoryThresholdAlertRuleEnabled && (
+          <EuiFlexItem grow={false}>
+            <LinkToAlertsRule onClick={toggleAlertFlyout} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <LinkToAlertsPage
             assetName={assetName}
@@ -64,12 +68,16 @@ export const AlertsSummaryContent = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
-      <AlertFlyout
-        filter={`${findInventoryFields(assetType).name}: "${assetName}"`}
-        nodeType={assetType}
-        setVisible={toggleAlertFlyout}
-        visible={isAlertFlyoutVisible}
-      />
+
+      {featureFlags.inventoryThresholdAlertRuleEnabled && (
+        <AlertFlyout
+          filter={`${findInventoryFields(assetType).name}: "${assetName}"`}
+          nodeType={assetType}
+          setVisible={toggleAlertFlyout}
+          visible={isAlertFlyoutVisible}
+          options={overrides?.alertRule?.options}
+        />
+      )}
     </>
   );
 };
@@ -105,25 +113,3 @@ const MemoAlertSummaryWidget = React.memo(
     );
   }
 );
-
-const AlertsSectionTitle = () => {
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiTitle data-test-subj="infraAssetDetailsAlertsTitle" size="xxs">
-          <span>
-            <FormattedMessage
-              id="xpack.infra.assetDetails.overview.alertsSectionTitle"
-              defaultMessage="Alerts"
-            />
-          </span>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Popover icon="iInCircle" data-test-subj="infraAssetDetailsAlertsPopoverButton">
-          <AlertsTooltipContent />
-        </Popover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};

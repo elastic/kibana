@@ -26,3 +26,11 @@ export const ThreatIntelligencePaywallLazy = withSuspenseUpsell(
 export const OsqueryResponseActionsUpsellingSectionLazy = withSuspenseUpsell(
   lazy(() => import('./pages/osquery_automated_response_actions'))
 );
+
+export const EndpointExceptionsDetailsUpsellingLazy = withSuspenseUpsell(
+  lazy(() => import('./pages/endpoint_management/endpoint_exceptions_details'))
+);
+
+export const EntityAnalyticsUpsellingLazy = withSuspenseUpsell(
+  lazy(() => import('@kbn/security-solution-upselling/pages/entity_analytics'))
+);

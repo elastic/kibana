@@ -62,6 +62,8 @@ export function Example({
       documentId={hasDocumentId ? 'abc' : undefined}
       isAddToLibrarySelected={isAddToLibrarySelected}
       setAddToLibrary={setAddToLibrary}
+      hasAttemptedSubmit={false}
+      hasSelectedDashboard={false}
     />
   );
 }

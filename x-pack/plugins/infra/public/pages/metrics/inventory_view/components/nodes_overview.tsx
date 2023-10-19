@@ -19,6 +19,8 @@ import { TableView } from './table_view';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { Legend } from './waffle/legend';
+import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
+import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -57,6 +59,12 @@ export const NodesOverview = ({
   showLoading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
+  const [{ detailsItemId }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+
+  const closeFlyout = useCallback(
+    () => setFlyoutUrlState({ detailsItemId: null }),
+    [setFlyoutUrlState]
+  );
 
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -123,6 +131,7 @@ export const NodesOverview = ({
       <Map
         nodeType={nodeType}
         nodes={nodes}
+        detailsItemId={detailsItemId}
         options={options}
         formatter={formatter}
         currentTime={currentTime}
@@ -132,6 +141,15 @@ export const NodesOverview = ({
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
+      {nodeType === 'host' && detailsItemId && (
+        <AssetDetailsFlyout
+          closeFlyout={closeFlyout}
+          assetName={detailsItemId}
+          assetType={nodeType}
+          currentTime={currentTime}
+          options={options}
+        />
+      )}
       <Legend
         formatter={formatter}
         bounds={bounds}

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
 
 describe(
   'App Features for Enpoint Complete PLI',
   {
-    tags: [tag.SERVERLESS],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [

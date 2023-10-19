@@ -59,30 +59,29 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   buildDataTableRecord,
 } from '@kbn/discover-utils';
-import { VIEW_MODE, DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
+import type { UnifiedDataTableProps, UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import { columnActions, getTextBasedColumnTypes } from '@kbn/unified-data-table';
+import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
-import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
-import type { DiscoverGridProps } from '../components/discover_grid/discover_grid';
-import type { DiscoverGridSettings } from '../components/discover_grid/types';
 import type { DocTableProps } from '../components/doc_table/doc_table_wrapper';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
+import { fetchTextBased } from '../application/main/utils/fetch_text_based';
 import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
-import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
-export type SearchProps = Partial<DiscoverGridProps> &
+export type SearchProps = Partial<UnifiedDataTableProps> &
   Partial<DocTableProps> & {
     savedSearchId?: string;
     filters?: Filter[];
-    settings?: DiscoverGridSettings;
+    settings?: UnifiedDataTableSettings;
     description?: string;
     sharedItemTitle?: string;
     inspectorAdapters?: Adapters;
@@ -321,17 +320,18 @@ export class SavedSearchEmbeddable
 
     const query = savedSearch.searchSource.getField('query');
     const dataView = savedSearch.searchSource.getField('index')!;
-    const useSql = this.isTextBasedSearch(savedSearch);
+    const useTextBased = this.isTextBasedSearch(savedSearch);
 
     try {
-      // Request SQL data
-      if (useSql && query) {
-        const result = await fetchSql(
+      // Request text based data
+      if (useTextBased && query) {
+        const result = await fetchTextBased(
           savedSearch.searchSource.getField('query')!,
           dataView,
           this.services.data,
           this.services.expressions,
           this.services.inspector,
+          this.abortController.signal,
           this.input.filters,
           this.input.query
         );
@@ -341,6 +341,9 @@ export class SavedSearchEmbeddable
           loading: false,
         });
 
+        searchProps.columnTypes = result.textBasedQueryColumns
+          ? getTextBasedColumnTypes(result.textBasedQueryColumns)
+          : undefined;
         searchProps.rows = result.records;
         searchProps.totalHitCount = result.records.length;
         searchProps.isLoading = false;
@@ -367,7 +370,7 @@ export class SavedSearchEmbeddable
             }),
           },
           executionContext,
-          disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+          disableWarningToasts: true,
         })
       );
 
@@ -375,9 +378,6 @@ export class SavedSearchEmbeddable
         searchProps.interceptedWarnings = getSearchResponseInterceptedWarnings({
           services: this.services,
           adapter: this.inspectorAdapters.requests,
-          options: {
-            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
-          },
         });
       }
 
@@ -585,7 +585,10 @@ export class SavedSearchEmbeddable
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.searchTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || savedSearch.rowHeight;
-    searchProps.rowsPerPageState = this.input.rowsPerPage || savedSearch.rowsPerPage;
+    searchProps.rowsPerPageState =
+      this.input.rowsPerPage ||
+      savedSearch.rowsPerPage ||
+      getDefaultRowsPerPage(this.services.uiSettings);
     searchProps.filters = savedSearch.searchSource.getField('filter') as Filter[];
     searchProps.savedSearchId = savedSearch.id;
 

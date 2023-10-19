@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { Frequency } from '@kbn/es-ui-shared-plugin/public/components/cron_editor/types';
 
-import { ConnectorScheduling } from '../../../../common/types/connectors';
+import { ConnectorScheduling } from '@kbn/search-connectors';
 
 import { CronEditor } from './cron_editor';
 

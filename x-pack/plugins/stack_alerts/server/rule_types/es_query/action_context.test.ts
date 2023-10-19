@@ -167,6 +167,7 @@ describe('getContextConditionsDescription', () => {
       comparator: Comparator.GT,
       threshold: [10],
       aggType: 'count',
+      searchType: 'esQuery',
     });
     expect(result).toBe(`Number of matching documents is greater than 10`);
   });
@@ -177,6 +178,7 @@ describe('getContextConditionsDescription', () => {
       threshold: [10],
       aggType: 'count',
       isRecovered: true,
+      searchType: 'esQuery',
     });
     expect(result).toBe(`Number of matching documents is NOT greater than 10`);
   });
@@ -187,6 +189,7 @@ describe('getContextConditionsDescription', () => {
       threshold: [10, 20],
       aggType: 'count',
       isRecovered: true,
+      searchType: 'esQuery',
     });
     expect(result).toBe(`Number of matching documents is NOT between 10 and 20`);
   });
@@ -197,6 +200,7 @@ describe('getContextConditionsDescription', () => {
       threshold: [10],
       aggType: 'count',
       group: 'host-1',
+      searchType: 'esQuery',
     });
     expect(result).toBe(`Number of matching documents for group "host-1" is greater than 10`);
   });
@@ -208,6 +212,7 @@ describe('getContextConditionsDescription', () => {
       aggType: 'count',
       isRecovered: true,
       group: 'host-1',
+      searchType: 'esQuery',
     });
     expect(result).toBe(`Number of matching documents for group "host-1" is NOT greater than 10`);
   });
@@ -218,6 +223,7 @@ describe('getContextConditionsDescription', () => {
       threshold: [10],
       aggType: 'min',
       aggField: 'numericField',
+      searchType: 'esQuery',
     });
     expect(result).toBe(
       `Number of matching documents where min of numericField is greater than 10`
@@ -231,6 +237,7 @@ describe('getContextConditionsDescription', () => {
       aggType: 'min',
       aggField: 'numericField',
       isRecovered: true,
+      searchType: 'esQuery',
     });
     expect(result).toBe(
       `Number of matching documents where min of numericField is NOT greater than 10`
@@ -244,6 +251,7 @@ describe('getContextConditionsDescription', () => {
       group: 'host-1',
       aggType: 'max',
       aggField: 'numericField',
+      searchType: 'esQuery',
     });
     expect(result).toBe(
       `Number of matching documents for group "host-1" where max of numericField is greater than 10`
@@ -258,9 +266,31 @@ describe('getContextConditionsDescription', () => {
       group: 'host-1',
       aggType: 'max',
       aggField: 'numericField',
+      searchType: 'esQuery',
     });
     expect(result).toBe(
       `Number of matching documents for group "host-1" where max of numericField is NOT greater than 10`
     );
+  });
+
+  it('should return conditions correctly for ESQL search type', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [0],
+      aggType: 'count',
+      searchType: 'esqlQuery',
+    });
+    expect(result).toBe(`Query matched documents`);
+  });
+
+  it('should return conditions correctly ESQL search type when isRecovered is true', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [0],
+      aggType: 'count',
+      isRecovered: true,
+      searchType: 'esqlQuery',
+    });
+    expect(result).toBe(`Query did NOT match documents`);
   });
 });

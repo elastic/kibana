@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -18,14 +15,17 @@ import {
   EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
-import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { createOptionsFromFields } from '../../helpers/create_options';
 
 interface HistogramIndicatorProps {
   type: 'good' | 'total';
-  indexFields: Field[] | undefined;
+  histogramFields: Field[];
   isLoadingIndex: boolean;
 }
 
@@ -46,61 +46,69 @@ const AGGREGATIONS = {
 
 const AGGREGATION_OPTIONS = Object.values(AGGREGATIONS);
 
-export function HistogramIndicator({ type, indexFields, isLoadingIndex }: HistogramIndicatorProps) {
-  const { control, watch } = useFormContext<CreateSLOForm>();
+const aggregationTooltip = (
+  <EuiIconTip
+    content={i18n.translate(
+      'xpack.observability.slo.sloEdit.sliType.histogram.aggregationTooltip',
+      {
+        defaultMessage:
+          'The "value count" aggreation will return the total count for the histogram field. Range will return the count from the histogram field that is within the range defined below.',
+      }
+    )}
+    position="top"
+  />
+);
 
-  const histogramFields = (indexFields ?? []).filter((field) => field.type === 'histogram');
+const fromTooltip = (
+  <EuiIconTip
+    content={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.fromTooltip', {
+      defaultMessage: 'The "from" value is inclusive.',
+    })}
+    position="top"
+  />
+);
+
+const toTooltip = (
+  <EuiIconTip
+    content={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.toTooltip', {
+      defaultMessage: 'The "to" value is NOT inclusive.',
+    })}
+    position="top"
+  />
+);
+
+const aggregationLabel = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.histogram.aggregationLabel',
+  { defaultMessage: 'Aggregation' }
+);
+
+const metricLabel = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.histogram.metricLabel',
+  { defaultMessage: 'Field' }
+);
+
+const toLabel = i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.toLabel', {
+  defaultMessage: 'To',
+});
+
+const fromLabel = i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.fromLabel', {
+  defaultMessage: 'From',
+});
+
+export function HistogramIndicator({
+  type,
+  histogramFields,
+  isLoadingIndex,
+}: HistogramIndicatorProps) {
+  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
+  const [options, setOptions] = useState<Option[]>(createOptionsFromFields(histogramFields));
+
+  useEffect(() => {
+    setOptions(createOptionsFromFields(histogramFields));
+  }, [histogramFields]);
+
   const indexPattern = watch('indicator.params.index');
   const aggregation = watch(`indicator.params.${type}.aggregation`);
-
-  const aggregationTooltip = (
-    <EuiIconTip
-      content={i18n.translate(
-        'xpack.observability.slo.sloEdit.sliType.histogram.aggregationTooltip',
-        {
-          defaultMessage:
-            'The "value count" aggreation will return the total count for the histogram field. Range will return the count from the histogram field that is within the range defined below.',
-        }
-      )}
-      position="top"
-    />
-  );
-
-  const fromTooltip = (
-    <EuiIconTip
-      content={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.fromTooltip', {
-        defaultMessage: 'The "from" value is inclusive.',
-      })}
-      position="top"
-    />
-  );
-
-  const toTooltip = (
-    <EuiIconTip
-      content={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.toTooltip', {
-        defaultMessage: 'The "to" value is NOT inclusive.',
-      })}
-      position="top"
-    />
-  );
-
-  const aggregationLabel = i18n.translate(
-    'xpack.observability.slo.sloEdit.sliType.histogram.aggregationLabel',
-    { defaultMessage: 'Aggregation' }
-  );
-
-  const metricLabel = i18n.translate(
-    'xpack.observability.slo.sloEdit.sliType.histogram.metricLabel',
-    { defaultMessage: 'Field' }
-  );
-
-  const toLabel = i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.toLabel', {
-    defaultMessage: 'To',
-  });
-
-  const fromLabel = i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.fromLabel', {
-    defaultMessage: 'From',
-  });
 
   return (
     <Fragment>
@@ -149,7 +157,11 @@ export function HistogramIndicator({ type, indexFields, isLoadingIndex }: Histog
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow fullWidth label={<span>{metricLabel}</span>}>
+          <EuiFormRow
+            fullWidth
+            isInvalid={getFieldState(`indicator.params.${type}.field`).invalid}
+            label={<span>{metricLabel}</span>}
+          >
             <Controller
               name={`indicator.params.${type}.field`}
               defaultValue=""
@@ -170,7 +182,7 @@ export function HistogramIndicator({ type, indexFields, isLoadingIndex }: Histog
                     { defaultMessage: 'Select a histogram field' }
                   )}
                   isInvalid={fieldState.invalid}
-                  isDisabled={!indexPattern}
+                  isDisabled={isLoadingIndex || !indexPattern}
                   isLoading={!!indexPattern && isLoadingIndex}
                   onChange={(selected: EuiComboBoxOptionOption[]) => {
                     if (selected.length) {
@@ -190,7 +202,14 @@ export function HistogramIndicator({ type, indexFields, isLoadingIndex }: Histog
                         ]
                       : []
                   }
-                  options={createOptionsFromFields(histogramFields)}
+                  onSearchChange={(searchValue: string) => {
+                    setOptions(
+                      createOptionsFromFields(histogramFields, ({ value }) =>
+                        value.includes(searchValue)
+                      )
+                    );
+                  }}
+                  options={options}
                 />
               )}
             />

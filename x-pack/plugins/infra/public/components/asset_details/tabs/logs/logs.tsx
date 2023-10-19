@@ -13,36 +13,35 @@ import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elas
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
-
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
-  const { asset, assetType, overrides, onTabsStateChange, dateRangeTs } =
-    useAssetDetailsStateContext();
+  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { asset, assetType } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsProviderContext();
 
-  const { query: overrideQuery } = overrides?.logs ?? {};
   const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
-  const [textQuery, setTextQuery] = useState(overrideQuery ?? '');
-  const [textQueryDebounced, setTextQueryDebounced] = useState(overrideQuery ?? '');
+  const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
+  const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
-  const currentTimestamp = dateRangeTs.to;
+  const currentTimestamp = getDateRangeInTimestamp().to;
   const startTimestamp = currentTimestamp - 60 * 60 * 1000; // 60 minutes
 
   useDebounce(
     () => {
-      if (onTabsStateChange) {
-        onTabsStateChange({ logs: { query: textQuery } });
-      }
+      setUrlState({ logsSearch: textQuery });
       setTextQueryDebounced(textQuery);
     },
     TEXT_QUERY_THROTTLE_INTERVAL_MS,

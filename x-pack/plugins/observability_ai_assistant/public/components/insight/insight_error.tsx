@@ -24,7 +24,11 @@ export function InsightError() {
 
       <EuiSpacer size="m" />
 
-      <EuiButton fill color="danger">
+      <EuiButton
+        data-test-subj="observabilityAiAssistantInsightErrorRegenerateButton"
+        fill
+        color="danger"
+      >
         {i18n.translate('xpack.observabilityAiAssistant.insight.error.buttonLabel', {
           defaultMessage: 'Regenerate',
         })}

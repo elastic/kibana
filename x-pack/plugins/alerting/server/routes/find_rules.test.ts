@@ -79,6 +79,7 @@ describe('findRulesRoute', () => {
           "includeSnoozeData": true,
           "options": Object {
             "defaultSearchOperator": "OR",
+            "filterConsumers": undefined,
             "page": 1,
             "perPage": 1,
           },

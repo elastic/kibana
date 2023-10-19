@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SyncStatus, TriggerMethod } from '../../../../../../common/types/connectors';
+import { SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 
 import { SyncJobCallouts } from './sync_callouts';
 

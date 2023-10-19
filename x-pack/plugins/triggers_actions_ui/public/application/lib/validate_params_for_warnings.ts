@@ -43,10 +43,10 @@ export function validateParamsForWarnings(
         return publicUrlWarning;
       }
     } catch (e) {
-      /*
-       * do nothing, we don't care if the mustache is invalid
-       */
+      // Better to set the warning msg if you do not know if the mustache template is invalid
+      return publicUrlWarning;
     }
   }
+
   return null;
 }

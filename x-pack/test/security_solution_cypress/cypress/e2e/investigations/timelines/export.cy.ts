@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   exportTimeline,
@@ -12,7 +11,8 @@ import {
   selectAllTimelines,
   exportSelectedTimelines,
 } from '../../../tasks/timelines';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
@@ -21,7 +21,8 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../../objects/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-describe('Export timelines', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165744
+describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -37,12 +38,12 @@ describe('Export timelines', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       cy.wrap(response).as('timelineResponse2');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId2');
     });
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
   });
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
   });
 
   it('Exports custom timeline(s)', function () {

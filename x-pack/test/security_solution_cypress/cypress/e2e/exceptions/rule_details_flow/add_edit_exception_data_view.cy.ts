@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
@@ -19,17 +17,17 @@ import {
   editExceptionFlyoutItemName,
   submitEditedExceptionItem,
 } from '../../../tasks/exceptions';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
   goToAlertsTab,
   goToExceptionsTab,
   openEditException,
   removeException,
+  visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -42,16 +40,17 @@ import {
 } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Add exception using data views from rule details',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
-    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
+    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
     const ITEM_NAME = 'Sample Exception List Item';
 
     before(() => {
       cy.task('esArchiverResetKibana');
-      cy.task('esArchiverLoad', 'exceptions');
+      cy.task('esArchiverLoad', { archiveName: 'exceptions' });
       login();
       postDataView('exceptions-*');
     });
@@ -61,6 +60,7 @@ describe(
     });
 
     beforeEach(() => {
+      login();
       deleteAlertsAndRules();
       createRule(
         getNewRule({
@@ -69,10 +69,7 @@ describe(
           interval: '10s',
           rule_id: 'rule_testing',
         })
-      );
-      login();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
+      ).then((rule) => visitRuleDetailsPage(rule.body.id));
       waitForAlertsToPopulate();
     });
 
@@ -90,8 +87,8 @@ describe(
       addFirstExceptionFromRuleDetails(
         {
           field: 'agent.name',
-          operator: 'is',
-          values: ['foo'],
+          operator: 'is one of',
+          values: ['foo', 'FOO', 'bar'],
         },
         ITEM_NAME
       );
@@ -118,7 +115,7 @@ describe(
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
       // load more docs
-      cy.task('esArchiverLoad', 'exceptions_2');
+      cy.task('esArchiverLoad', { archiveName: 'exceptions_2' });
 
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();

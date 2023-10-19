@@ -20,6 +20,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-application-browser",
     "@kbn/share-plugin",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/security-plugin"
   ]
 }

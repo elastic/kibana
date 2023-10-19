@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { TOP_N_CONTAINER } from '../../../screens/network/flows';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../screens/search_bar';
 import { DATA_PROVIDERS } from '../../../screens/timeline';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { NETWORK_URL } from '../../../urls/navigation';
 import {
   clickOnAddToTimeline,
@@ -26,14 +26,14 @@ import { openTimelineUsingToggle } from '../../../tasks/security_main';
 const testDomain = 'myTest';
 
 // tracked by https://github.com/elastic/kibana/issues/161874
-describe.skip('Hover actions', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
     // avoid cypress being held by windows prompt and timeout
     cy.stub(win, 'prompt').returns(true);
   };
 
   before(() => {
-    cy.task('esArchiverLoad', 'network');
+    cy.task('esArchiverLoad', { archiveName: 'network' });
   });
 
   after(() => {
@@ -42,7 +42,7 @@ describe.skip('Hover actions', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   beforeEach(() => {
     login();
-    visit(NETWORK_URL, { onBeforeLoad: onBeforeLoadCallback });
+    visit(NETWORK_URL, { visitOptions: { onBeforeLoad: onBeforeLoadCallback } });
     openHoverActions();
     mouseoverOnToOverflowItem();
   });

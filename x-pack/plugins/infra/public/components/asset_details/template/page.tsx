@@ -8,24 +8,66 @@
 import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
+import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
-import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
+import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
-import type { ContentTemplateProps } from '../types';
+import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
+import { ContentTemplateProps } from '../types';
+import { getIntegrationsAvailable } from '../utils';
 
 export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps) => {
-  const { asset, loading } = useAssetDetailsStateContext();
-  const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
-  const { headerHeight } = useKibanaHeader();
+  const { loading } = useAssetDetailsRenderPropsContext();
+  const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
+  const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
+  const { asset, assetType } = useAssetDetailsRenderPropsContext();
+  const { actionMenuHeight } = useKibanaHeader();
+  const trackOnlyOnce = React.useRef(false);
+
+  const { activeTabId } = useTabSwitcherContext();
+  const {
+    services: { telemetry },
+  } = useKibanaContextForPlugin();
+
+  useEffect(() => {
+    if (trackOnlyOnce.current) {
+      return;
+    }
+    if (!metadataLoading && metadata) {
+      const integrations = getIntegrationsAvailable(metadata);
+      const telemetryParams = {
+        componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
+        assetType,
+        tabId: activeTabId,
+      };
+
+      telemetry.reportAssetDetailsPageViewed(
+        integrations.length > 0
+          ? {
+              ...telemetryParams,
+              integrations,
+            }
+          : telemetryParams
+      );
+      trackOnlyOnce.current = true;
+    }
+  }, [activeTabId, assetType, metadata, metadataLoading, telemetry]);
+
+  const heightWithOffset = useMemo(
+    () => `calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px)`,
+    [actionMenuHeight]
+  );
 
   return loading ? (
     <EuiFlexGroup
       direction="column"
       css={css`
-        height: calc(100vh - ${headerHeight}px);
+        height: ${heightWithOffset};
       `}
     >
       <InfraLoadingPanel
@@ -42,13 +84,18 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       contentBorder={false}
       offset={0}
       restrictWidth={false}
-      style={{ minBlockSize: `calc(100vh - ${headerHeight}px)` }}
+      style={{
+        minBlockSize: heightWithOffset,
+      }}
+      data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
+      data-asset-type={assetType}
     >
       <EuiPageTemplate.Section paddingSize="none">
         <EuiPageTemplate.Header
           pageTitle={asset.name}
           tabs={tabEntries}
           rightSideItems={rightSideItems}
+          breadcrumbs={breadcrumbs}
         />
         <EuiPageTemplate.Section grow>
           <Content />

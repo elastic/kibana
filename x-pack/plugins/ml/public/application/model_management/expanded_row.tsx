@@ -33,6 +33,7 @@ import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
 import type { AllocatedModel, TrainedModelStat } from '../../../common/types/trained_models';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
+import { useEnabledFeatures } from '../contexts/ml';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -113,6 +114,7 @@ export function useListItemsFormatter() {
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const formatToListItems = useListItemsFormatter();
+  const { showLicenseInfo, showNodeInfo } = useEnabledFeatures();
 
   const {
     inference_config: inferenceConfig,
@@ -149,16 +151,17 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       estimated_operations,
       estimated_heap_memory_usage_bytes,
       default_field_map,
-      license_level,
+      ...(showLicenseInfo ? { license_level } : {}),
     };
   }, [
-    default_field_map,
     description,
-    estimated_heap_memory_usage_bytes,
-    estimated_operations,
-    license_level,
     tags,
     version,
+    estimated_operations,
+    estimated_heap_memory_usage_bytes,
+    default_field_map,
+    showLicenseInfo,
+    license_level,
   ]);
 
   const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
@@ -195,6 +198,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
 
     return items;
   }, [stats]);
+
+  const hideColumns = useMemo(() => {
+    return showNodeInfo ? ['model_id'] : ['model_id', 'node_name'];
+  }, [showNodeInfo]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(() => {
     return [
@@ -341,7 +348,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                           </h5>
                         </EuiTitle>
                         <EuiSpacer size={'m'} />
-                        <AllocatedModels models={deploymentStatItems} hideColumns={['model_id']} />
+                        <AllocatedModels models={deploymentStatItems} hideColumns={hideColumns} />
                       </EuiPanel>
                       <EuiSpacer size={'s'} />
                     </>
@@ -422,7 +429,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         : []),
       {
         id: 'models_map',
-        'data-test-subj': 'mlTrainedModelsMap',
+        'data-test-subj': 'mlTrainedModelMap',
         name: (
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.expandedRow.modelsMapLabel"
@@ -430,7 +437,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           />
         ),
         content: (
-          <div data-test-subj={'mlTrainedModelDetailsContent'}>
+          <div data-test-subj={'mlTrainedModelMapContent'}>
             <EuiSpacer size={'s'} />
             <EuiFlexItem css={{ height: 300 }}>
               <JobMap
@@ -455,6 +462,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     restMetaData,
     stats,
     item.model_id,
+    hideColumns,
   ]);
 
   const initialSelectedTab =

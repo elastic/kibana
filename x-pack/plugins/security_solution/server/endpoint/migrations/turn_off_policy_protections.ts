@@ -8,20 +8,20 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyData } from '../../../common/endpoint/types';
-import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
-import type { AppFeatures } from '../../lib/app_features';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
+import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
 
 export const turnOffPolicyProtectionsIfNotSupported = async (
   esClient: ElasticsearchClient,
   fleetServices: EndpointInternalFleetServicesInterface,
-  appFeaturesService: AppFeatures,
+  appFeaturesService: AppFeaturesService,
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('endpoint', 'policyProtections');

@@ -37,11 +37,11 @@ export function useMonitorsSortedByStatus() {
 
     const { downConfigs, pendingConfigs } = status;
     const downMonitorMap: Record<string, string[]> = {};
-    Object.values(downConfigs).forEach(({ location, configId }) => {
+    Object.values(downConfigs).forEach(({ locationId, configId }) => {
       if (downMonitorMap[configId]) {
-        downMonitorMap[configId].push(location);
+        downMonitorMap[configId].push(locationId);
       } else {
-        downMonitorMap[configId] = [location];
+        downMonitorMap[configId] = [locationId];
       }
     });
 

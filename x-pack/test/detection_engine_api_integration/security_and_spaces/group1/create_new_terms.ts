@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
 
       expect(response.status).to.equal(400);
@@ -50,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
 
       expect(response.status).to.equal(400);

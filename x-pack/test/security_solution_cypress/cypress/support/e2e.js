@@ -25,6 +25,10 @@ import './commands';
 import 'cypress-real-events/support';
 import registerCypressGrep from '@cypress/grep';
 
+before(() => {
+  cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
+});
+
 registerCypressGrep();
 
 Cypress.on('uncaught:exception', () => {

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getIndexPatterns, getNewThresholdRule } from '../../../objects/rule';
 
@@ -45,8 +43,8 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { getDetails } from '../../../tasks/rule_details';
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -55,13 +53,13 @@ import {
   fillScheduleRuleAndContinue,
   selectThresholdRuleType,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
-
-describe('Detection rules, threshold', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewThresholdRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
@@ -76,7 +74,7 @@ describe('Detection rules, threshold', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    visitWithoutDateRange(RULE_CREATION);
+    visit(CREATE_RULE_URL);
   });
 
   it('Creates and enables a new threshold rule', () => {
@@ -85,6 +83,7 @@ describe('Detection rules, threshold', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     fillAboutRuleAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
     createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -95,7 +94,7 @@ describe('Detection rules, threshold', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    goToRuleDetails();
+    goToRuleDetailsOf(rule.name);
 
     cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);

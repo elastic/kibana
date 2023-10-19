@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, omit } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
@@ -19,7 +19,13 @@ import {
   getComponentTemplateName,
   getIndexTemplateAndPattern,
 } from './resource_installer_utils';
-import { AlertInstanceContext, AlertInstanceState, IRuleTypeAlerts, RuleAlertData } from '../types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  IRuleTypeAlerts,
+  RuleAlertData,
+  DataStreamAdapter,
+} from '../types';
 import {
   createResourceInstallationHelper,
   errorResult,
@@ -38,6 +44,7 @@ import {
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
+import { setAlertsToUntracked, SetAlertsToUntrackedOpts } from './lib/set_alerts_to_untracked';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -49,6 +56,7 @@ interface AlertsServiceParams {
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   timeoutMs?: number;
+  dataStreamAdapter: DataStreamAdapter;
 }
 
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
@@ -114,9 +122,12 @@ export class AlertsService implements IAlertsService {
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
   private commonInitPromise: Promise<InitializationPromise>;
+  private dataStreamAdapter: DataStreamAdapter;
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
+
+    this.dataStreamAdapter = options.dataStreamAdapter;
 
     // Kick off initialization of common assets and save the promise
     this.commonInitPromise = this.initializeCommon(this.options.timeoutMs);
@@ -221,6 +232,7 @@ export class AlertsService implements IAlertsService {
       namespace: opts.namespace,
       rule: opts.rule,
       kibanaVersion: this.options.kibanaVersion,
+      dataStreamAdapter: this.dataStreamAdapter,
     });
   }
 
@@ -263,7 +275,7 @@ export class AlertsService implements IAlertsService {
     // check whether this context has been registered before
     if (this.registeredContexts.has(context)) {
       const registeredOptions = this.registeredContexts.get(context);
-      if (!isEqual(opts, registeredOptions)) {
+      if (!isEqual(omit(opts, 'shouldWrite'), omit(registeredOptions, 'shouldWrite'))) {
         throw new Error(`${context} has already been registered with different options`);
       }
       this.options.logger.debug(`Resources for context "${context}" have already been registered.`);
@@ -296,6 +308,7 @@ export class AlertsService implements IAlertsService {
             esClient,
             name: DEFAULT_ALERTS_ILM_POLICY_NAME,
             policy: DEFAULT_ALERTS_ILM_POLICY,
+            dataStreamAdapter: this.dataStreamAdapter,
           }),
         () =>
           createOrUpdateComponentTemplate({
@@ -421,6 +434,7 @@ export class AlertsService implements IAlertsService {
             kibanaVersion: this.options.kibanaVersion,
             namespace,
             totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            dataStreamAdapter: this.dataStreamAdapter,
           }),
         }),
       async () =>
@@ -429,6 +443,7 @@ export class AlertsService implements IAlertsService {
           esClient,
           totalFieldsLimit: TOTAL_FIELDS_LIMIT,
           indexPatterns: indexTemplateAndPattern,
+          dataStreamAdapter: this.dataStreamAdapter,
         }),
     ]);
 
@@ -443,5 +458,13 @@ export class AlertsService implements IAlertsService {
         timeoutMs,
       });
     }
+  }
+
+  public async setAlertsToUntracked(opts: SetAlertsToUntrackedOpts) {
+    return setAlertsToUntracked({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...opts,
+    });
   }
 }

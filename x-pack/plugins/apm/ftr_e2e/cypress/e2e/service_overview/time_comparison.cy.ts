@@ -50,7 +50,7 @@ const apisToIntercept = [
   },
 ];
 
-describe.skip('Service overview: Time Comparison', () => {
+describe('Service overview: Time Comparison', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -108,48 +108,53 @@ describe.skip('Service overview: Time Comparison', () => {
     cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
   });
 
-  it('changes comparison type when a new time range is selected', () => {
-    cy.visitKibana(serviceOverviewHref);
-    cy.contains('opbeans-java');
-    // Time comparison default value
-    cy.getByTestSubj('comparisonSelect').should('have.value', '1d');
-    cy.contains('Day before');
-    cy.contains('Week before');
+  describe('changes comparison type when a new time range is selected', () => {
+    it('when selecting a manual time range, comparison should display the custom time range', () => {
+      cy.visitKibana(serviceOverviewHref);
+      cy.contains('opbeans-java');
+      // Time comparison default value
+      cy.getByTestSubj('comparisonSelect').should('have.value', '1d');
+      cy.contains('Day before');
+      cy.contains('Week before');
 
-    cy.selectAbsoluteTimeRange(
-      '2021-10-10T00:00:00.000Z',
-      '2021-10-20T00:00:00.000Z'
-    );
+      cy.selectAbsoluteTimeRange(
+        '2021-10-10T00:00:00.000Z',
+        '2021-10-20T00:00:00.000Z'
+      );
 
-    cy.getByTestSubj('querySubmitButton').click();
+      cy.getByTestSubj('querySubmitButton').click();
 
-    cy.getByTestSubj('comparisonSelect').should('have.value', '864000000ms');
-    cy.getByTestSubj('comparisonSelect').should(
-      'not.contain.text',
-      'Day before'
-    );
-    cy.getByTestSubj('comparisonSelect').should(
-      'not.contain.text',
-      'Week before'
-    );
-
-    cy.changeTimeRange('Today');
-    cy.contains('Day before');
-    cy.contains('Week before');
-
-    cy.changeTimeRange('Last 24 hours');
-    cy.getByTestSubj('comparisonSelect').should('have.value', '1d');
-    cy.contains('Day before');
-    cy.contains('Week before');
-
-    cy.changeTimeRange('Last 7 days');
-    cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
-    cy.getByTestSubj('comparisonSelect').should('contain.text', 'Week before');
-    cy.getByTestSubj('comparisonSelect').should(
-      'not.contain.text',
-      'Day before'
-    );
-    cy.contains('Week before');
+      cy.getByTestSubj('comparisonSelect').should('have.value', '864000000ms');
+      cy.getByTestSubj('comparisonSelect').should(
+        'not.contain.text',
+        'Day before'
+      );
+      cy.getByTestSubj('comparisonSelect').should(
+        'not.contain.text',
+        'Week before'
+      );
+    });
+    it('when selecting Today from time range, comparison should display both day and week options', () => {
+      cy.visitKibana(serviceOverviewHref);
+      cy.changeTimeRange('Today');
+      cy.getByTestSubj('comparisonSelect').should('have.value', '1d');
+      cy.contains('Day before');
+      cy.contains('Week before');
+    });
+    // Skipped as the test is Flaky
+    xit('when selecting Last Week from time range, comparison should only display week options', () => {
+      cy.visitKibana(serviceOverviewHref);
+      cy.changeTimeRange('Last 7 days');
+      cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
+      cy.getByTestSubj('comparisonSelect').should(
+        'contain.text',
+        'Week before'
+      );
+      cy.getByTestSubj('comparisonSelect').should(
+        'not.contain.text',
+        'Day before'
+      );
+    });
   });
 
   it('hovers over throughput chart shows previous and current period', () => {

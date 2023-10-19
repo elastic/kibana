@@ -18,6 +18,17 @@ import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public/de
 import { internalAlertingSnoozeRule } from '../../urls/routes';
 import { rootRequest } from '../common';
 
+export const findAllRules = () => {
+  return rootRequest<FetchRulesResponse>({
+    url: DETECTION_ENGINE_RULES_URL_FIND,
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '2023-10-31',
+    },
+  });
+};
+
 export const createRule = (
   rule: RuleCreateProps
 ): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
@@ -25,7 +36,11 @@ export const createRule = (
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
     body: rule,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '2023-10-31',
+    },
     failOnStatusCode: false,
   });
 };
@@ -54,7 +69,11 @@ export const deleteCustomRule = (ruleId = '1') => {
   rootRequest({
     method: 'DELETE',
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '2023-10-31',
+    },
     failOnStatusCode: false,
   });
 };
@@ -73,6 +92,7 @@ export const importRule = (ndjsonPath: string) => {
           'kbn-xsrf': 'cypress-creds',
           'content-type': 'multipart/form-data',
           'x-elastic-internal-origin': 'security-solution',
+          'elastic-api-version': '2023-10-31',
         },
         body: formdata,
       })
@@ -91,6 +111,7 @@ export const waitForRulesToFinishExecution = (ruleIds: string[], afterDate?: Dat
           'kbn-xsrf': 'cypress-creds',
           'content-type': 'multipart/form-data',
           'x-elastic-internal-origin': 'security-solution',
+          'elastic-api-version': '2023-10-31',
         },
       }).then((response) => {
         const areAllRulesFinished = ruleIds.every((ruleId) =>

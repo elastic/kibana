@@ -139,6 +139,48 @@ describe('CheckAll', () => {
     expect(screen.getByTestId('checkAll')).toHaveTextContent(CHECK_ALL);
   });
 
+  test('it renders a disabled button when ILM available and ilmPhases is an empty array', () => {
+    render(
+      <TestProviders>
+        <CheckAll
+          formatBytes={mockFormatBytes}
+          formatNumber={mockFormatNumber}
+          ilmPhases={[]}
+          incrementCheckAllIndiciesChecked={jest.fn()}
+          onCheckCompleted={jest.fn()}
+          patternIndexNames={patternIndexNames}
+          patterns={[]}
+          setCheckAllIndiciesChecked={jest.fn()}
+          setCheckAllTotalIndiciesToCheck={jest.fn()}
+          setIndexToCheck={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('checkAll').hasAttribute('disabled')).toBeTruthy();
+  });
+
+  test('it renders the expected button when ILM is NOT available', () => {
+    render(
+      <TestProviders isILMAvailable={false}>
+        <CheckAll
+          formatBytes={mockFormatBytes}
+          formatNumber={mockFormatNumber}
+          ilmPhases={[]}
+          incrementCheckAllIndiciesChecked={jest.fn()}
+          onCheckCompleted={jest.fn()}
+          patternIndexNames={patternIndexNames}
+          patterns={[]}
+          setCheckAllIndiciesChecked={jest.fn()}
+          setCheckAllTotalIndiciesToCheck={jest.fn()}
+          setIndexToCheck={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('checkAll').hasAttribute('disabled')).toBeFalsy();
+  });
+
   test('it renders the expected button text when a check is running', () => {
     render(
       <TestProviders>

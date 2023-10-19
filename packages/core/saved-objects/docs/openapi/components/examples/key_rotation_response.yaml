@@ -1,0 +1,7 @@
+summary: Encryption key rotation using default parameters.
+value:
+  {
+  "total": 1000,
+  "successful": 300,
+  "failed": 0
+  }

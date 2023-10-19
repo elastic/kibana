@@ -40,6 +40,7 @@ export class DataViewsPublicPlugin
     >
 {
   private readonly hasData = new HasData();
+  private rollupsEnabled: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -59,7 +60,9 @@ export class DataViewsPublicPlugin
       }),
     });
 
-    return {};
+    return {
+      enableRollups: () => (this.rollupsEnabled = true),
+    };
   }
 
   public start(
@@ -85,6 +88,7 @@ export class DataViewsPublicPlugin
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
+      http,
       onNotification: (toastInputFields, key) => {
         onNotifDebounced(key)(toastInputFields);
       },
@@ -96,6 +100,7 @@ export class DataViewsPublicPlugin
       getCanSaveAdvancedSettings: () =>
         Promise.resolve(application.capabilities.advancedSettings.save === true),
       getIndices: (props) => getIndices({ ...props, http: core.http }),
+      getRollupsEnabled: () => this.rollupsEnabled,
       scriptedFieldsEnabled: config.scriptedFieldsEnabled === false ? false : true, // accounting for null value
     });
   }

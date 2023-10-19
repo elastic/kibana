@@ -33,6 +33,7 @@ const createStartContract = (): Start => {
     actions: {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
       createFiltersFromRangeSelectAction: jest.fn(),
+      createFiltersFromMultiValueClickAction: jest.fn(),
     },
     datatableUtilities: createDatatableUtilitiesMock(),
     search: searchServiceMock.createStartContract(),

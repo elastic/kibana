@@ -17,11 +17,13 @@
       "cloud",
       "cloudDefend",
       "cloudSecurityPosture",
+      "contentManagement",
       "dashboard",
       "data",
       "dataViews",
       "discover",
       "ecsDataQualityDashboard",
+      "elasticAssistant",
       "embeddable",
       "eventLog",
       "features",
@@ -46,9 +48,13 @@
       "controls",
       "dataViewEditor",
       "savedObjectsManagement",
+      "expressions",
       "stackConnectors",
       "discover",
-      "notifications"
+      "notifications",
+      "savedObjects",
+      "savedSearch",
+      "unifiedDocViewer",
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -73,8 +79,7 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch",
-      "cloudChat"
+      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"

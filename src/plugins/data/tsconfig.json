@@ -38,7 +38,6 @@
     "@kbn/management-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/core-http-browser",
@@ -49,7 +48,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/data-service",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*",

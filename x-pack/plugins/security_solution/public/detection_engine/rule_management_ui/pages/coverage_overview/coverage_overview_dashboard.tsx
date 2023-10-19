@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
 import { HeaderPage } from '../../../../common/components/header_page';
 
 import * as i18n from './translations';
@@ -14,13 +15,27 @@ import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_po
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 
+const CoverageOverviewHeaderComponent = () => (
+  <HeaderPage
+    title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE}
+    subtitle={
+      <EuiText color="subdued" size="s">
+        <span>{i18n.CoverageOverviewDashboardInformation}</span> <CoverageOverviewLink />
+      </EuiText>
+    }
+  />
+);
+
+const CoverageOverviewHeader = React.memo(CoverageOverviewHeaderComponent);
+
 const CoverageOverviewDashboardComponent = () => {
   const {
     state: { data },
   } = useCoverageOverviewDashboardContext();
+
   return (
     <>
-      <HeaderPage title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE} />
+      <CoverageOverviewHeader />
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="m" className="eui-xScroll">

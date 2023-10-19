@@ -22,6 +22,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       // Create a new index to test against
+      const indexExists = await es.indices.exists({ index: indexName });
+
+      // Index should not exist, but in the case that it already does, we bypass the create request
+      if (indexExists) {
+        return;
+      }
+
+      log.debug(`Creating index: '${indexName}'`);
       try {
         await es.indices.create({ index: indexName });
       } catch (err) {
@@ -77,6 +85,53 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('x-elastic-internal-origin', 'xxx')
           .expect(404);
+      });
+    });
+
+    describe('create index', () => {
+      const createIndexName = 'a-test-index';
+      after(async () => {
+        // Cleanup index created for testing purposes
+        try {
+          await es.indices.delete({
+            index: createIndexName,
+          });
+        } catch (err) {
+          log.debug('[Cleanup error] Error deleting "a-test-index" index');
+          throw err;
+        }
+      });
+
+      it('can create a new index', async () => {
+        await supertest
+          .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .send({
+            indexName: createIndexName,
+          })
+          .expect(200);
+
+        const { body: index } = await supertest
+          .get(`${INTERNAL_API_BASE_PATH}/indices/${createIndexName}`)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(200);
+
+        expect(index).toBeTruthy();
+
+        expect(Object.keys(index).sort()).toEqual(expectedKeys);
+      });
+
+      it('fails to re-create the same index', async () => {
+        await supertest
+          .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .send({
+            indexName: createIndexName,
+          })
+          .expect(400);
       });
     });
   });

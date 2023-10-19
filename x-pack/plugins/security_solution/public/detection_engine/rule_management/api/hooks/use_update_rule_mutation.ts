@@ -13,7 +13,7 @@ import { updateRule } from '../api';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 import { useUpdateRuleByIdCache } from './use_fetch_rule_by_id_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
-import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview';
+import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
 import type { Rule } from '../../logic/types';
 
 export const UPDATE_RULE_MUTATION_KEY = ['PUT', DETECTION_ENGINE_RULES_URL];

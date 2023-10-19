@@ -49,6 +49,7 @@ jest.mock('../../common/lib/kibana', () => {
             useCasesAddToNewCaseFlyout: jest.fn(),
           },
         },
+        configSettings: { ILMEnabled: true },
       },
     }),
     useUiSetting$: () => ['0,0.[000]'],
@@ -79,7 +80,7 @@ describe('DataQuality', () => {
   const defaultIlmPhases = `${HOT}${WARM}${UNMANAGED}`;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);

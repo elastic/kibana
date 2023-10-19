@@ -10,12 +10,14 @@ import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ArtifactLicense } from '@kbn/es';
 import type { Config } from '../../functional_test_runner';
-import { createTestEsCluster } from '../../es';
+import { createTestEsCluster, esTestConfig } from '../../es';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom?: string;
+  esServerlessImage?: string;
   config: Config;
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
@@ -31,9 +33,10 @@ type EsConfig = ReturnType<typeof getEsConfig>;
 function getEsConfig({
   config,
   esFrom = config.get('esTestCluster.from'),
+  esServerlessImage,
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
-  const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
+  const license: ArtifactLicense = config.get('esTestCluster.license');
   const esArgs: string[] = config.get('esTestCluster.serverArgs');
   const esJavaOpts: string | undefined = config.get('esTestCluster.esJavaOpts');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
@@ -46,6 +49,10 @@ function getEsConfig({
     : config.get('servers.elasticsearch.password');
 
   const dataArchive: string | undefined = config.get('esTestCluster.dataArchive');
+  const serverless: boolean = config.get('serverless');
+  const files: string[] | undefined = config.get('esTestCluster.files');
+
+  const esServerlessOptions = getESServerlessOptions(esServerlessImage, config);
 
   return {
     ssl,
@@ -54,10 +61,13 @@ function getEsConfig({
     esJavaOpts,
     isSecurityEnabled,
     esFrom,
+    esServerlessOptions,
     port,
     password,
     dataArchive,
     ccsConfig,
+    serverless,
+    files,
   };
 }
 
@@ -124,6 +134,7 @@ async function startEsNode({
     clusterName: `cluster-${name}`,
     esArgs: config.esArgs,
     esFrom: config.esFrom,
+    esServerlessOptions: config.esServerlessOptions,
     esJavaOpts: config.esJavaOpts,
     license: config.license,
     password: config.password,
@@ -140,9 +151,45 @@ async function startEsNode({
     ],
     transportPort: config.transportPort,
     onEarlyExit,
+    serverless: config.serverless,
+    files: config.files,
   });
 
   await cluster.start();
 
   return cluster;
+}
+
+function getESServerlessOptions(esServerlessImageFromArg: string | undefined, config: Config) {
+  const esServerlessImageUrlOrTag =
+    esServerlessImageFromArg ||
+    esTestConfig.getESServerlessImage() ||
+    (config.has('esTestCluster.esServerlessImage') &&
+      config.get('esTestCluster.esServerlessImage'));
+  const serverlessResources: string[] =
+    (config.has('esServerlessOptions.resources') && config.get('esServerlessOptions.resources')) ||
+    [];
+  const serverlessHost: string | undefined =
+    config.has('esServerlessOptions.host') && config.get('esServerlessOptions.host');
+
+  if (esServerlessImageUrlOrTag) {
+    if (esServerlessImageUrlOrTag.includes(':')) {
+      return {
+        resources: serverlessResources,
+        image: esServerlessImageUrlOrTag,
+        host: serverlessHost,
+      };
+    } else {
+      return {
+        resources: serverlessResources,
+        tag: esServerlessImageUrlOrTag,
+        host: serverlessHost,
+      };
+    }
+  }
+
+  return {
+    resources: serverlessResources,
+    host: serverlessHost,
+  };
 }

@@ -156,7 +156,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Handles presence of tags inside integration package', async () => {
       const testPackage = 'assets_with_tags';
-      const testPackageVersion = '0.1.0';
+      const testPackageVersion = '0.1.1';
       // tag corresponding to `OnlySomeAssets`
       const ONLY_SOME_ASSETS_TAG = `fleet-shared-tag-${testPackage}-ef823f10-b5af-5fcb-95da-2340a5257599-default`;
       // tag corresponding to `MixedTypesTag`
@@ -167,7 +167,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const testPkgArchiveZip = path.join(
           path.dirname(__filename),
-          '../fixtures/direct_upload_packages/assets_with_tags-0.1.0.zip'
+          '../fixtures/direct_upload_packages/assets_with_tags-0.1.1.zip'
         );
         const buf = fs.readFileSync(testPkgArchiveZip);
         await supertest
@@ -187,7 +187,7 @@ export default function (providerContext: FtrProviderContext) {
         const managedTag = await getTag('fleet-managed-default');
         expect(managedTag).not.equal(undefined);
 
-        const securitySolutionTag = await getTag('SecuritySolution');
+        const securitySolutionTag = await getTag('security-solution-default');
         expect(securitySolutionTag).not.equal(undefined);
 
         const pkgTag1 = await getTag(ONLY_SOME_ASSETS_TAG);

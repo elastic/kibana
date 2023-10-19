@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,
@@ -23,8 +21,9 @@ import {
   createAndInstallMockedPrebuiltRules,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 const RULE_1 = createRuleAssetSavedObject({
   name: 'Test rule 1',
@@ -35,7 +34,7 @@ const RULE_2 = createRuleAssetSavedObject({
   rule_id: 'rule_2',
 });
 
-describe('Rules table: selection', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Rules table: selection', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -43,8 +42,8 @@ describe('Rules table: selection', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
     login();
     /* Create and install two mock rules */
-    createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
+    visit(RULES_MANAGEMENT_URL);
     waitForPrebuiltDetectionRulesToBeLoaded();
   });
 

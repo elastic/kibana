@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 
 import {
   ALERTS_URL,
@@ -16,65 +15,66 @@ import {
   EVENT_FILTERS_URL,
   TIMELINES_URL,
   EXCEPTIONS_URL,
-  DETECTIONS_RULE_MANAGEMENT_URL,
-  RULE_CREATION,
-  ruleEditUrl,
-  ruleDetailsUrl,
+  CREATE_RULE_URL,
 } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 
 import { NOT_FOUND } from '../../screens/common/page';
+import { ruleDetailsUrl } from '../../urls/rule_details';
+import { editRuleUrl } from '../../urls/edit_rule';
 
 const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
-describe('Display not found page', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165710
+describe('Display not found page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
-    visit(TIMELINES_URL);
+    visitWithTimeRange(TIMELINES_URL);
   });
 
   // TODO: We need to determine what we want the behavior to be here
   it.skip('navigates to the alerts page with incorrect link', () => {
-    visit(`${ALERTS_URL}/randomUrl`);
+    visitWithTimeRange(`${ALERTS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the exceptions page with incorrect link', () => {
-    visit(`${EXCEPTIONS_URL}/randomUrl`);
+    visitWithTimeRange(`${EXCEPTIONS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the rules page with incorrect link', () => {
-    visit(`${DETECTIONS_RULE_MANAGEMENT_URL}/randomUrl`);
+    visitWithTimeRange(`${RULES_MANAGEMENT_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the rules creation page with incorrect link', () => {
-    visit(`${RULE_CREATION}/randomUrl`);
+    visitWithTimeRange(`${CREATE_RULE_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the rules details page with incorrect link', () => {
-    visit(`${ruleDetailsUrl(mockRuleId)}/randomUrl`);
+    visitWithTimeRange(`${ruleDetailsUrl(mockRuleId)}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the edit rules page with incorrect link', () => {
-    visit(`${ruleEditUrl(mockRuleId)}/randomUrl`);
+    visitWithTimeRange(`${editRuleUrl(mockRuleId)}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the endpoints page with incorrect link', () => {
-    visit(`${ENDPOINTS_URL}/randomUrl`);
+    visitWithTimeRange(`${ENDPOINTS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the trusted applications page with incorrect link', () => {
-    visit(`${TRUSTED_APPS_URL}/randomUrl`);
+    visitWithTimeRange(`${TRUSTED_APPS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the event filters page with incorrect link', () => {
-    visit(`${EVENT_FILTERS_URL}/randomUrl`);
+    visitWithTimeRange(`${EVENT_FILTERS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 });

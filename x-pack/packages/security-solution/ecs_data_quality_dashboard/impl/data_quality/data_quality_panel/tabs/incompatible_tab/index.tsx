@@ -42,6 +42,7 @@ import {
 } from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '../summary_tab/callout_summary/translations';
+import { useDataQualityContext } from '../../data_quality_context';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -72,6 +73,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
   patternDocsCount,
   sizeInBytes,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
   const body = useMemo(() => <EmptyPromptBody body={i18n.INCOMPATIBLE_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.INCOMPATIBLE_EMPTY_TITLE} />, []);
   const incompatibleMappings = useMemo(
@@ -90,6 +92,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
         formatNumber,
         ilmPhase,
         indexName,
+        isILMAvailable,
         partitionedFieldMetadata,
         patternDocsCount,
         sizeInBytes,
@@ -100,6 +103,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
       formatNumber,
       ilmPhase,
       indexName,
+      isILMAvailable,
       partitionedFieldMetadata,
       patternDocsCount,
       sizeInBytes,

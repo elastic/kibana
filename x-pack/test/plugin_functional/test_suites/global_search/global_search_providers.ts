@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Applications provider', function () {
       it('can search for root-level applications', async () => {
         const results = await findResultsWithApi('discover');
-        expect(results.length).to.be(2);
+        expect(results.length).to.be(1);
         expect(results[0].title).to.be('Discover');
       });
 

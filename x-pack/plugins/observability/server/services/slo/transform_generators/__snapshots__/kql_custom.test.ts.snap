@@ -88,11 +88,24 @@ Object {
 exports[`KQL Custom Transform Generator filters the source using the kql query 1`] = `
 Object {
   "bool": Object {
-    "minimum_should_match": 1,
-    "should": Array [
+    "filter": Array [
       Object {
-        "match": Object {
-          "labels.groupId": "group-4",
+        "range": Object {
+          "log_timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "match": Object {
+                "labels.groupId": "group-4",
+              },
+            },
+          ],
         },
       },
     ],
@@ -222,16 +235,33 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
-    "index": "my-index*",
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
     "query": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "labels.groupId": "group-3",
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
             },
           },
         ],
@@ -436,16 +466,33 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
-    "index": "my-index*",
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
     "query": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "labels.groupId": "group-3",
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
             },
           },
         ],

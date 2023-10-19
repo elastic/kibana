@@ -6,14 +6,18 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
+import { Search } from 'history';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
+import type { InfraWaffleMapOptions } from '../../lib/lib';
+
+export type { AssetDetailsUrlState } from './hooks/use_asset_details_url_state';
 
 export interface Asset {
   id: string;
   name?: string;
 }
 
-export enum FlyoutTabIds {
+export enum ContentTabIds {
   OVERVIEW = 'overview',
   METADATA = 'metadata',
   PROCESSES = 'processes',
@@ -21,30 +25,27 @@ export enum FlyoutTabIds {
   OSQUERY = 'osquery',
   LOGS = 'logs',
   LINK_TO_APM = 'linkToApm',
-  LINK_TO_UPTIME = 'linkToUptime',
 }
 
-export type TabIds = `${FlyoutTabIds}`;
+export type TabIds = `${ContentTabIds}`;
 
-export interface TabState {
+export interface OverridableTabState {
   metadata?: {
-    query?: string;
     showActionsColumn?: boolean;
-  };
-  processes?: {
-    query?: string;
   };
   anomalies?: {
     onClose?: () => void;
   };
   alertRule?: {
     onCreateRuleClick?: () => void;
-  };
-  logs?: {
-    query?: string;
+    options?: Partial<InfraWaffleMapOptions>;
   };
 }
 
+export interface TabState extends OverridableTabState {
+  activeTabId?: TabIds;
+  dateRange?: TimeRange;
+}
 export interface FlyoutProps {
   closeFlyout: () => void;
   mode: 'flyout';
@@ -57,29 +58,39 @@ export interface FullPageProps {
 export type RenderMode = FlyoutProps | FullPageProps;
 
 export interface Tab {
-  id: FlyoutTabIds;
+  id: ContentTabIds;
   name: string;
 }
 
-export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
 
 export interface AssetDetailsProps {
   asset: Asset;
   assetType: InventoryItemType;
-  dateRange: TimeRange;
+  dateRange?: TimeRange;
   tabs: Tab[];
-  activeTabId?: TabIds;
-  overrides?: TabState;
+  overrides?: OverridableTabState;
   renderMode: RenderMode;
-  onTabsStateChange?: TabsStateChangeFn;
   links?: LinkOptions[];
   // This is temporary. Once we start using the asset details in other plugins,
   // It will have to retrieve the metricAlias internally rather than receive it via props
   metricAlias: string;
 }
 
-export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;
+export type TabsStateChangeFn = (state: TabState) => void;
 
 export interface ContentTemplateProps {
   header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
+}
+
+export interface RouteState {
+  originAppId: string;
+  originPathname: string;
+  originSearch?: Search;
+}
+
+export type DataViewOrigin = 'logs' | 'metrics';
+
+export enum INTEGRATION_NAME {
+  kubernetes = 'kubernetes',
 }

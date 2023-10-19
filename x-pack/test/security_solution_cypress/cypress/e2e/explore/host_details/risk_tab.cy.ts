@@ -4,48 +4,96 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
-import { login, visitHostDetailsPage } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitHostDetailsPage } from '../../../tasks/navigation';
 
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
+import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
+import { openRiskInformationFlyout, enableRiskEngine } from '../../../tasks/entity_analytics';
+import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
+import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytics';
+import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 
-describe('risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169033
+  // FLAKY: https://github.com/elastic/kibana/issues/169034
+  describe.skip('with legacy risk score', () => {
+    before(() => {
+      cleanKibana();
+      // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
+    });
+
+    beforeEach(() => {
+      login();
+      deleteRiskEngineConfiguration();
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', 'risk_hosts');
+    });
+
+    it('renders risk tab', () => {
+      visitHostDetailsPage('siem-kibana');
+      navigateToHostRiskDetailTab();
+      waitForTableToLoad();
+
+      cy.get('[data-test-subj="topRiskScoreContributors"]')
+        .find(TABLE_ROWS)
+        .within(() => {
+          cy.get(TABLE_CELL).contains('Unusual Linux Username');
+        });
+    });
+
+    it('shows risk information overlay when button is clicked', () => {
+      visitHostDetailsPage('siem-kibana');
+      navigateToHostRiskDetailTab();
+      waitForTableToLoad();
+
+      openRiskInformationFlyout();
+
+      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
+    });
   });
 
-  beforeEach(() => {
-    login();
-  });
+  describe('with new risk score', () => {
+    before(() => {
+      cleanKibana();
+      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
+      login();
+      enableRiskEngine();
+    });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'risk_hosts');
-  });
+    beforeEach(() => {
+      login();
+    });
 
-  it('renders risk tab', () => {
-    visitHostDetailsPage('siem-kibana');
-    cy.get('[data-test-subj="navigation-hostRisk"]').click();
-    waitForTableToLoad();
+    after(() => {
+      cy.task('esArchiverUnload', 'risk_scores_new');
+      cy.task('esArchiverUnload', 'query_alert');
+      deleteRiskEngineConfiguration();
+    });
 
-    cy.get('[data-test-subj="topRiskScoreContributors"]')
-      .find(TABLE_ROWS)
-      .within(() => {
-        cy.get(TABLE_CELL).contains('Unusual Linux Username');
-      });
-  });
+    it('renders risk tab', () => {
+      visitHostDetailsPage('Host-fwarau82er');
+      navigateToHostRiskDetailTab();
+      waitForTableToLoad();
 
-  it('shows risk information overlay when button is clicked', () => {
-    visitHostDetailsPage('siem-kibana');
-    cy.get('[data-test-subj="navigation-hostRisk"]').click();
-    waitForTableToLoad();
+      cy.get(ALERTS_COUNT).should('have.text', '1 alert');
+      cy.get(ALERT_GRID_CELL).contains('Endpoint Security');
+    });
 
-    cy.get('[data-test-subj="open-risk-information-flyout-trigger"]').click();
+    it('shows risk information overlay when button is clicked', () => {
+      visitHostDetailsPage('siem-kibana');
+      navigateToHostRiskDetailTab();
+      waitForTableToLoad();
 
-    cy.get('[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader').contains(
-      'How is host risk calculated?'
-    );
+      openRiskInformationFlyout();
+
+      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
+    });
   });
 });

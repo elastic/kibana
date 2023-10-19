@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens']);
+  const PageObjects = getPageObjects(['canvas', 'header', 'lens']);
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -25,7 +25,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(archives.kbn);
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-lens' });
-      await PageObjects.common.navigateToApp('canvas');
+      await PageObjects.canvas.goToListingPage();
       await PageObjects.canvas.createNewWorkpad();
     });
 
@@ -49,9 +49,8 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
       it('renders lens visualization using savedLens expression', async () => {
         // load test workpad
-        await PageObjects.common.navigateToApp('canvas', {
-          hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-        });
+        await PageObjects.canvas.goToListingPage();
+        await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '16,788');
@@ -83,7 +82,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         const panelHeader = await testSubjects.find('embeddablePanelHeading-');
         await dashboardPanelActions.openContextMenu(panelHeader);
         await dashboardPanelActions.clickEdit();
-        await await PageObjects.lens.saveAndReturn();
+        await PageObjects.lens.saveAndReturn();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.exists('xyVisChart');
       });

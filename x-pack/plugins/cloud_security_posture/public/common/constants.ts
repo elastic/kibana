@@ -38,6 +38,8 @@ export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
 export const MAX_FINDINGS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
+export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';
+export const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = 'cloudPosture:dataTable:columns';
 export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
@@ -61,6 +63,7 @@ export interface CloudPostureIntegrationProps {
     icon?: string;
     tooltip?: string;
     isBeta?: boolean;
+    testId?: string;
   }>;
 }
 
@@ -83,6 +86,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS AWS',
         }),
         icon: 'logoAWS',
+        testId: 'cisAwsTestId',
       },
       {
         type: CLOUDBEAT_GCP,
@@ -93,8 +97,9 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS GCP',
         }),
         icon: googleCloudLogo,
-        isBeta: true,
+        testId: 'cisGcpTestId',
       },
+      // needs to be a function that disables/enabled based on integration version
       {
         type: CLOUDBEAT_AZURE,
         name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
@@ -103,11 +108,10 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
         }),
-        disabled: true,
+        disabled: false,
+        isBeta: true,
         icon: 'logoAzure',
-        tooltip: i18n.translate('xpack.csp.cspmIntegration.azureOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
+        testId: 'cisAzureTestId',
       },
     ],
   },
@@ -214,7 +218,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
   },
 };
 export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
-export const MIN_VERSION_GCP_CIS = '1.5.0';
+export const MIN_VERSION_GCP_CIS = '1.5.2';
 
 export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
 

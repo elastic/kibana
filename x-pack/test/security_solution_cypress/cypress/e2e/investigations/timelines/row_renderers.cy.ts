@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { elementsOverlap } from '../../../helpers/rules';
 import {
@@ -19,13 +18,14 @@ import {
 import { cleanKibana, deleteTimelines, waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { populateTimeline } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
-describe('Row renderers', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -33,10 +33,12 @@ describe('Row renderers', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
     deleteTimelines();
     login();
-    visit(HOSTS_URL, {
-      onLoad: () => {
-        waitForWelcomePanelToBeLoaded();
-        waitForAllHostsToBeLoaded();
+    visitWithTimeRange(hostsUrl('allHosts'), {
+      visitOptions: {
+        onLoad: () => {
+          waitForWelcomePanelToBeLoaded();
+          waitForAllHostsToBeLoaded();
+        },
       },
     });
     openTimelineUsingToggle();

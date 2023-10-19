@@ -6,7 +6,7 @@ This document gives an overview of the features of the Observability AI Assistan
 
 #### **1.1. Configuration**
 
-Users can connect to an LLM using [connectors](https://www.elastic.co/guide/en/kibana/current/action-types.html) - specifically the [Generative AI connector](https://www.elastic.co/guide/en/kibana/current/gen-ai-action-type.html), which currently supports both OpenAI and Azure OpenAI as providers. The connector is Enterprise-only. Users can also leverage [preconfigured connectors](https://www.elastic.co/guide/en/kibana/current/pre-configured-connectors.html), in which case the following should be added to `kibana.yml`:
+Users can connect to an LLM using [connectors](https://www.elastic.co/guide/en/kibana/current/action-types.html) - specifically the [OpenAI connector](https://www.elastic.co/guide/en/kibana/current/openai-action-type.html), which currently supports both OpenAI and Azure OpenAI as providers. The connector is Enterprise-only. Users can also leverage [preconfigured connectors](https://www.elastic.co/guide/en/kibana/current/pre-configured-connectors.html), in which case the following should be added to `kibana.yml`:
 
 ```yaml
 xpack.actions.preconfigured:
@@ -66,8 +66,8 @@ The knowledge base is an Elasticsearch index, with an inference processor powere
 
 Both the user and the LLM are able to suggest functions, that are executed on behalf (and with the privileges of) the user. Functions allow both the user and the LLM to include relevant context into the conversation. This context can be text, data, or a visual component, like a timeseries graph. Some of the functions that are available are:
 
-- `recall` and `summarise`: these functions query (with a semantic search) or write to (with a summarisation) the knowledge database. This allows the LLM to create a (partly) user-specific working memory, and access predefined embeddings that help improve its understanding of the Elastic platform.
-- `lens`: a function that can be used to create Lens visualisations using Formulas.
+- `recall` and `summarize`: these functions query (with a semantic search) or write to (with a summarisation) the knowledge database. This allows the LLM to create a (partly) user-specific working memory, and access predefined embeddings that help improve its understanding of the Elastic platform.
+- `lens`: a function that can be used to create Lens vizualisations using Formulas.
 - `get_apm_timeseries`, `get_apm_service_summary`, `get_apm_downstream_dependencies` and `get_apm_error_document`: a set of APM functions, some with visual components, that are helpful in performing root cause analysis.
 
-Function calling is completely transparent to the user - they can edit function suggestions from the LLM, or inspect a function response (but not edit it), or they can request a function themselves. 
+Function calling is completely transparent to the user - they can edit function suggestions from the LLM, or inspect a function response (but not edit it), or they can request a function themselves.

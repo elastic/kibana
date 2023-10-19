@@ -106,8 +106,8 @@ function IndexSizeItem({
           borderBottom: `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.border.color}`,
         }}
       >
-        <EuiFlexItem style={{ paddingLeft: 8 }}>
-          {docCount ? (
+        <EuiFlexItem style={{ paddingLeft: 8 }} data-test-subj={`${indexName}_docSize`}>
+          {docCount !== undefined ? (
             asInteger(docCount)
           ) : (
             <EuiText color="subdued" size="s">
@@ -115,7 +115,7 @@ function IndexSizeItem({
             </EuiText>
           )}
         </EuiFlexItem>
-        <EuiFlexItem style={{ paddingLeft: 8 }}>
+        <EuiFlexItem style={{ paddingLeft: 8 }} data-test-subj={`${indexName}_size`}>
           {sizeInBytes ? (
             asDynamicBytes(sizeInBytes)
           ) : (

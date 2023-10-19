@@ -7,7 +7,6 @@
 
 import { find } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { tag } from '../../tags';
 import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
@@ -34,18 +33,21 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';
 
   describe(
     'Validate that agent policy is getting removed from pack if we remove agent policy',
-    { tags: [tag.ESS] },
+    { tags: ['@ess'] },
     () => {
+      let AGENT_POLICY_NAME: string;
+      let REMOVING_PACK: string;
+
       beforeEach(() => {
         cy.login('elastic');
+        AGENT_POLICY_NAME = `PackTest` + generateRandomStringName(1)[0];
+        REMOVING_PACK = 'removing-pack' + generateRandomStringName(1)[0];
       });
-      const AGENT_POLICY_NAME = `PackTest` + generateRandomStringName(1)[0];
-      const REMOVING_PACK = 'removing-pack' + generateRandomStringName(1)[0];
 
       it('add integration', () => {
         cy.visit(FLEET_AGENT_POLICIES);
@@ -56,6 +58,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         cy.visit(FLEET_AGENT_POLICIES);
         cy.contains(AGENT_POLICY_NAME).click();
         cy.contains('Add integration').click();
+        cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
         addIntegration(AGENT_POLICY_NAME);
         cy.contains('Add Elastic Agent later').click();
@@ -93,88 +96,88 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     }
   );
 
-  describe('Load prebuilt packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-    beforeEach(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
-      navigateTo('/app/osquery/packs');
-    });
-
-    after(() => {
+  describe('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
+    afterEach(() => {
       cleanupAllPrebuiltPacks();
     });
 
     const PREBUILD_PACK_NAME = 'it-compliance';
 
-    it('should load prebuilt packs', () => {
-      cy.contains('Load Elastic prebuilt packs').click();
-      cy.contains('Load Elastic prebuilt packs').should('not.exist');
-      cy.wait(1000);
-      cy.react('EuiTableRow').should('have.length.above', 5);
-    });
-
-    it('should be able to activate pack', () => {
-      activatePack(PREBUILD_PACK_NAME);
-      deactivatePack(PREBUILD_PACK_NAME);
-    });
-
-    it('should be able to add policy to it', () => {
-      cy.contains(PREBUILD_PACK_NAME).click();
-      cy.contains('Edit').click();
-      findFormFieldByRowsLabelAndType(
-        'Scheduled agent policies (optional)',
-        `${DEFAULT_POLICY} {downArrow}{enter}`
-      );
-      cy.contains('Update pack').click();
-      cy.getBySel('confirmModalConfirmButton').click();
-      cy.contains(`Successfully updated "${PREBUILD_PACK_NAME}" pack`);
-    });
-
-    it('should be able to activate pack with agent inside', () => {
-      activatePack(PREBUILD_PACK_NAME);
-      deactivatePack(PREBUILD_PACK_NAME);
-    });
-    it('should not be able to update prebuilt pack', () => {
-      cy.contains(PREBUILD_PACK_NAME).click();
-      cy.contains('Edit').click();
-      cy.react('EuiFieldText', { props: { name: 'name', isDisabled: true } });
-      cy.react('EuiFieldText', { props: { name: 'description', isDisabled: true } });
-      cy.contains('Add Query').should('not.exist');
-      cy.react('ExpandedItemActions', { options: { timeout: 1000 } });
-      cy.get('.euiTableRowCell--hasActions').should('not.exist');
-    });
-    it('should be able to delete prebuilt pack and add it again', () => {
-      cy.contains(PREBUILD_PACK_NAME).click();
-      cy.contains('Edit').click();
-      deleteAndConfirm('pack');
-      cy.contains(PREBUILD_PACK_NAME).should('not.exist');
-      cy.contains('Update Elastic prebuilt packs').click();
-      cy.contains('Successfully updated prebuilt packs');
-      cy.contains(PREBUILD_PACK_NAME).should('exist');
-    });
-
-    it('should be able to run live prebuilt pack', () => {
-      navigateTo('/app/osquery/live_queries');
-      cy.contains('New live query').click();
-      cy.contains('Run a set of queries in a pack.').click();
-      cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-      cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
-      selectAllAgents();
-      submitQuery();
-      cy.getBySel('live-query-loading').should('exist');
-      cy.getBySel('toggleIcon-events').click();
-      checkResults();
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: true,
-        timeline: false,
+    describe('', () => {
+      beforeEach(() => {
+        cy.login(ServerlessRoleName.SOC_MANAGER);
+        navigateTo('/app/osquery/packs');
       });
-      navigateTo('/app/osquery');
-      cy.contains('osquery-monitoring');
+      it('should load prebuilt packs', () => {
+        cy.contains('Load Elastic prebuilt packs').click();
+        cy.contains('Load Elastic prebuilt packs').should('not.exist');
+        cy.wait(1000);
+        cy.react('EuiTableRow').should('have.length.above', 5);
+      });
+
+      it('should be able to activate pack', () => {
+        activatePack(PREBUILD_PACK_NAME);
+        deactivatePack(PREBUILD_PACK_NAME);
+      });
+
+      it('should be able to add policy to it', () => {
+        cy.contains(PREBUILD_PACK_NAME).click();
+        cy.contains('Edit').click();
+        findFormFieldByRowsLabelAndType(
+          'Scheduled agent policies (optional)',
+          `${DEFAULT_POLICY} {downArrow}{enter}`
+        );
+        cy.contains('Update pack').click();
+        cy.getBySel('confirmModalConfirmButton').click();
+        cy.contains(`Successfully updated "${PREBUILD_PACK_NAME}" pack`);
+      });
+
+      it('should be able to activate pack with agent inside', () => {
+        activatePack(PREBUILD_PACK_NAME);
+        deactivatePack(PREBUILD_PACK_NAME);
+      });
+      it('should not be able to update prebuilt pack', () => {
+        cy.contains(PREBUILD_PACK_NAME).click();
+        cy.contains('Edit').click();
+        cy.react('EuiFieldText', { props: { name: 'name', isDisabled: true } });
+        cy.react('EuiFieldText', { props: { name: 'description', isDisabled: true } });
+        cy.contains('Add Query').should('not.exist');
+        cy.react('ExpandedItemActions', { options: { timeout: 1000 } });
+        cy.get('.euiTableRowCell--hasActions').should('not.exist');
+      });
+      it('should be able to delete prebuilt pack and add it again', () => {
+        cy.contains(PREBUILD_PACK_NAME).click();
+        cy.contains('Edit').click();
+        deleteAndConfirm('pack');
+        cy.contains(PREBUILD_PACK_NAME).should('not.exist');
+        cy.contains('Update Elastic prebuilt packs').click();
+        cy.contains('Successfully updated prebuilt packs');
+        cy.contains(PREBUILD_PACK_NAME).should('exist');
+      });
+
+      it('should be able to run live prebuilt pack', () => {
+        navigateTo('/app/osquery/live_queries');
+        cy.contains('New live query').click();
+        cy.contains('Run a set of queries in a pack.').click();
+        cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+        cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
+        selectAllAgents();
+        submitQuery();
+        cy.getBySel('toggleIcon-events').click();
+        checkResults();
+        checkActionItemsInResults({
+          lens: true,
+          discover: true,
+          cases: true,
+          timeline: false,
+        });
+        navigateTo('/app/osquery');
+        cy.contains('osquery-monitoring');
+      });
     });
   });
 
-  describe('Global packs', { tags: [tag.ESS] }, () => {
+  describe('Global packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.login('elastic');
       navigateTo('/app/osquery/packs');
@@ -186,7 +189,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       let globalPackId: string;
       let agentPolicyId: string;
 
-      before(() => {
+      beforeEach(() => {
         interceptPackId((pack) => {
           globalPackId = pack;
         });
@@ -195,7 +198,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         });
       });
 
-      after(() => {
+      afterEach(() => {
         cleanupPack(globalPackId);
         cleanupAgentPolicy(agentPolicyId);
       });
@@ -222,6 +225,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         cy.contains(`Agent policy '${agentPolicy}' created`).click();
         cy.contains(agentPolicy).click();
         cy.contains('Add integration').click();
+        cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
         addIntegration(agentPolicy);
         cy.contains('Add Elastic Agent later').click();
@@ -251,13 +255,13 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     describe('add proper shard to policies packs config', () => {
       let shardPackId: string;
 
-      before(() => {
+      beforeEach(() => {
         interceptPackId((pack) => {
           shardPackId = pack;
         });
       });
 
-      after(() => {
+      afterEach(() => {
         cleanupPack(shardPackId);
       });
 

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expect as expectExpect } from 'expect';
 import { omit, padStart } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
@@ -19,7 +20,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   AlertUtils,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   TaskManagerUtils,
   getEventLog,
 } from '../../../../common/lib';
@@ -129,7 +130,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -253,7 +254,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -499,7 +500,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -600,7 +601,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.authorization',
                   'alertsFixture'
@@ -718,7 +719,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -814,7 +815,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -872,7 +873,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -952,7 +953,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1017,7 +1018,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1073,7 +1074,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1132,7 +1133,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1191,7 +1192,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1235,7 +1236,7 @@ instanceStateValue: true
 
         it('should schedule actions for summary of alerts per rule run', async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringSummaryAction({
+          const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
               schedule: { interval: '1s' },
@@ -1255,7 +1256,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
@@ -1297,7 +1298,7 @@ instanceStateValue: true
 
         it('should filter alerts by kql', async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringSummaryAction({
+          const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
               schedule: { interval: '1s' },
@@ -1317,7 +1318,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
@@ -1367,7 +1368,7 @@ instanceStateValue: true
           const end = `${hour}:${minutes}`;
 
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringSummaryAction({
+          const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
               schedule: { interval: '1s' },
@@ -1391,7 +1392,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
@@ -1428,7 +1429,7 @@ instanceStateValue: true
 
         it('should schedule actions for summary of alerts on a custom interval', async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringSummaryAction({
+          const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
               schedule: { interval: '1s' },
@@ -1436,6 +1437,7 @@ instanceStateValue: true
             notifyWhen: 'onThrottleInterval',
             throttle: '10s',
             summary: true,
+            messageTemplate: `{{alerts}}`,
           });
 
           switch (scenario.id) {
@@ -1445,7 +1447,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
@@ -1474,16 +1476,389 @@ instanceStateValue: true
               );
               // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.eql(2);
-              // Summary action is executed on first rule run then skipped 4 times (throttle is 5s and schedule.interval is 1s)
-              // @ts-expect-error _source: unknown
-              expect(searchResult.body.hits.hits[0]._source.params.message).to.eql(
-                'Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]'
+              expectExpect(
+                // Summary action is executed on first rule run then skipped 4 times (throttle is 5s and schedule.interval is 1s)
+                // @ts-expect-error _source: unknown
+                JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
+              ).toEqual(
+                expectExpect.objectContaining({
+                  new: {
+                    count: 2,
+                    data: [
+                      {
+                        _id: expectExpect.any(String),
+                        _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
+                        kibana: {
+                          alert: {
+                            rule: {
+                              parameters: {
+                                index: '.kibana-alerting-test-data',
+                                reference,
+                              },
+                              category: 'Test: Always Firing Alert As Data',
+                              consumer: 'alertsFixture',
+                              execution: { uuid: expectExpect.any(String) },
+                              name: 'abc',
+                              producer: 'alertsFixture',
+                              revision: 0,
+                              rule_type_id: 'test.always-firing-alert-as-data',
+                              uuid: expectExpect.any(String),
+                              tags: ['tag-A', 'tag-B'],
+                            },
+                            duration: { us: 0 },
+                            time_range: { gte: expectExpect.any(String) },
+                            instance: { id: '1' },
+                            start: expectExpect.any(String),
+                            uuid: expectExpect.any(String),
+                            status: 'active',
+                            workflow_status: 'open',
+                            flapping: false,
+                          },
+                          space_ids: ['space1'],
+                          version: expectExpect.any(String),
+                        },
+                        '@timestamp': expectExpect.any(String),
+                        event: { kind: 'signal', action: 'open' },
+                        tags: ['tag-A', 'tag-B'],
+                      },
+                      {
+                        _id: expectExpect.any(String),
+                        _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
+                        kibana: {
+                          alert: {
+                            rule: {
+                              parameters: {
+                                index: '.kibana-alerting-test-data',
+                                reference,
+                              },
+                              category: 'Test: Always Firing Alert As Data',
+                              consumer: 'alertsFixture',
+                              execution: { uuid: expectExpect.any(String) },
+                              name: 'abc',
+                              producer: 'alertsFixture',
+                              revision: 0,
+                              rule_type_id: 'test.always-firing-alert-as-data',
+                              uuid: expectExpect.any(String),
+                              tags: ['tag-A', 'tag-B'],
+                            },
+                            duration: { us: 0 },
+                            time_range: { gte: expectExpect.any(String) },
+                            instance: { id: '2' },
+                            start: expectExpect.any(String),
+                            uuid: expectExpect.any(String),
+                            status: 'active',
+                            workflow_status: 'open',
+                            flapping: false,
+                          },
+                          space_ids: ['space1'],
+                          version: expectExpect.any(String),
+                        },
+                        '@timestamp': expectExpect.any(String),
+                        event: { kind: 'signal', action: 'open' },
+                        tags: ['tag-A', 'tag-B'],
+                      },
+                    ],
+                  },
+                  ongoing: { count: 0, data: [] },
+                  recovered: { count: 0, data: [] },
+                })
               );
-              // @ts-expect-error _source: unknown
-              // Summary action is executed on the fifth rule run. The new alerts in the first execution become ongoing
-              expect(searchResult.body.hits.hits[1]._source.params.message).to.eql(
-                'Alerts, all:2, new:0 IDs:[], ongoing:2 IDs:[1,2,], recovered:0 IDs:[]'
+              expectExpect(
+                // @ts-expect-error _source: unknown
+                //  Summary action is executed on the fifth rule run. The new alerts in the first execution become ongoing
+                JSON.parse(searchResult.body.hits.hits[1]._source.params.message)
+              ).toEqual(
+                expectExpect.objectContaining({
+                  new: { count: 0, data: [] },
+                  ongoing: {
+                    count: 2,
+                    data: [
+                      {
+                        _id: expectExpect.any(String),
+                        _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
+                        kibana: {
+                          alert: {
+                            rule: {
+                              parameters: {
+                                index: '.kibana-alerting-test-data',
+                                reference,
+                              },
+                              category: 'Test: Always Firing Alert As Data',
+                              consumer: 'alertsFixture',
+                              execution: { uuid: expectExpect.any(String) },
+                              name: 'abc',
+                              producer: 'alertsFixture',
+                              revision: 0,
+                              rule_type_id: 'test.always-firing-alert-as-data',
+                              uuid: expectExpect.any(String),
+                              tags: ['tag-A', 'tag-B'],
+                            },
+                            duration: { us: expectExpect.any(Number) },
+                            time_range: { gte: expectExpect.any(String) },
+                            instance: { id: '1' },
+                            start: expectExpect.any(String),
+                            uuid: expectExpect.any(String),
+                            status: 'active',
+                            workflow_status: 'open',
+                            flapping: false,
+                          },
+                          space_ids: ['space1'],
+                          version: expectExpect.any(String),
+                        },
+                        '@timestamp': expectExpect.any(String),
+                        event: { kind: 'signal', action: 'active' },
+                        tags: ['tag-A', 'tag-B'],
+                      },
+                      {
+                        _id: expectExpect.any(String),
+                        _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
+                        kibana: {
+                          alert: {
+                            rule: {
+                              parameters: {
+                                index: '.kibana-alerting-test-data',
+                                reference,
+                              },
+                              category: 'Test: Always Firing Alert As Data',
+                              consumer: 'alertsFixture',
+                              execution: { uuid: expectExpect.any(String) },
+                              name: 'abc',
+                              producer: 'alertsFixture',
+                              revision: 0,
+                              rule_type_id: 'test.always-firing-alert-as-data',
+                              uuid: expectExpect.any(String),
+                              tags: ['tag-A', 'tag-B'],
+                            },
+                            duration: { us: expectExpect.any(Number) },
+                            time_range: { gte: expectExpect.any(String) },
+                            instance: { id: '2' },
+                            start: expectExpect.any(String),
+                            uuid: expectExpect.any(String),
+                            status: 'active',
+                            workflow_status: 'open',
+                            flapping: false,
+                          },
+                          space_ids: ['space1'],
+                          version: expectExpect.any(String),
+                        },
+                        '@timestamp': expectExpect.any(String),
+                        event: { kind: 'signal', action: 'active' },
+                        tags: ['tag-A', 'tag-B'],
+                      },
+                    ],
+                  },
+                  recovered: { count: 0, data: [] },
+                })
               );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should pass summarized alerts to actions', async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
+            reference,
+            overwrites: {
+              schedule: { interval: '1s' },
+            },
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+            summary: true,
+            messageTemplate: `[{{alerts.all.data}}]`,
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing-alert-as-data',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+
+              await esTestIndexTool.waitForDocs('rule:test.always-firing-alert-as-data', reference);
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              // @ts-expect-error doesnt handle total: number
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              expectExpect(
+                // @ts-expect-error _source: unknown
+                JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
+              ).toEqual([
+                expectExpect.objectContaining({
+                  _id: expectExpect.any(String),
+                  _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
+                  kibana: {
+                    alert: {
+                      rule: {
+                        parameters: {
+                          index: '.kibana-alerting-test-data',
+                          reference,
+                        },
+                        category: 'Test: Always Firing Alert As Data',
+                        consumer: 'alertsFixture',
+                        execution: { uuid: expectExpect.any(String) },
+                        name: 'abc',
+                        producer: 'alertsFixture',
+                        revision: 0,
+                        rule_type_id: 'test.always-firing-alert-as-data',
+                        uuid: expectExpect.any(String),
+                        tags: ['tag-A', 'tag-B'],
+                      },
+                      duration: { us: 0 },
+                      time_range: { gte: expectExpect.any(String) },
+                      instance: { id: '1' },
+                      start: expectExpect.any(String),
+                      uuid: expectExpect.any(String),
+                      status: 'active',
+                      workflow_status: 'open',
+                      flapping: false,
+                    },
+                    space_ids: ['space1'],
+                    version: expectExpect.any(String),
+                  },
+                  '@timestamp': expectExpect.any(String),
+                  event: { kind: 'signal', action: 'open' },
+                  tags: ['tag-A', 'tag-B'],
+                }),
+                expectExpect.objectContaining({
+                  _id: expectExpect.any(String),
+                  _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
+                  kibana: {
+                    alert: {
+                      rule: {
+                        parameters: {
+                          index: '.kibana-alerting-test-data',
+                          reference,
+                        },
+                        category: 'Test: Always Firing Alert As Data',
+                        consumer: 'alertsFixture',
+                        execution: { uuid: expectExpect.any(String) },
+                        name: 'abc',
+                        producer: 'alertsFixture',
+                        revision: 0,
+                        rule_type_id: 'test.always-firing-alert-as-data',
+                        uuid: expectExpect.any(String),
+                        tags: ['tag-A', 'tag-B'],
+                      },
+                      duration: { us: 0 },
+                      time_range: { gte: expectExpect.any(String) },
+                      instance: { id: '2' },
+                      start: expectExpect.any(String),
+                      uuid: expectExpect.any(String),
+                      status: 'active',
+                      workflow_status: 'open',
+                      flapping: false,
+                    },
+                    space_ids: ['space1'],
+                    version: expectExpect.any(String),
+                  },
+                  '@timestamp': expectExpect.any(String),
+                  event: { kind: 'signal', action: 'open' },
+                  tags: ['tag-A', 'tag-B'],
+                }),
+              ]);
+
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should create new, ongoing and recovered alerts', async () => {
+          const reference = alertUtils.generateReference();
+          const createdRule = await alertUtils.createPatternFiringRuleWithSummaryAction({
+            reference,
+            overwrites: {
+              // set the schedule long so we can use "runSoon" to specify rule runs
+              schedule: { interval: '1d' },
+            },
+            pattern: { alertA: [true, true, false, false, false, false] },
+          });
+
+          const ruleId = createdRule.body.id;
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(createdRule.statusCode).to.eql(403);
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              break;
+            case 'superuser at space1':
+              expect(createdRule.statusCode).to.eql(200);
+
+              // #####################################
+              // first run (new alerts)
+              // #####################################
+              const searchResult = await esTestIndexTool.waitForDocs(
+                'action:test.index-record',
+                reference,
+                1
+              ); // action execution
+
+              expect(searchResult[0]._source.params.message).to.be(
+                'Alerts, all:1, new:1 IDs:[alertA,], ongoing:0 IDs:[], recovered:0 IDs:[]'
+              );
+
+              // #####################################
+              // second run (ongoing alerts)
+              // #####################################
+              await alertUtils.runSoon(ruleId);
+
+              const secondSearchResult = await esTestIndexTool.waitForDocs(
+                'action:test.index-record',
+                reference,
+                2
+              );
+
+              expect(secondSearchResult[1]._source.params.message).to.be(
+                'Alerts, all:1, new:0 IDs:[], ongoing:1 IDs:[alertA,], recovered:0 IDs:[]'
+              );
+
+              // #####################################
+              // third run (recovered alerts)
+              // #####################################
+              await alertUtils.runSoon(ruleId);
+
+              const thirdSearchResult = await esTestIndexTool.waitForDocs(
+                'action:test.index-record',
+                reference,
+                3
+              );
+
+              expect(thirdSearchResult[2]._source.params.message).to.be(
+                'Alerts, all:1, new:0 IDs:[], ongoing:0 IDs:[], recovered:1 IDs:[alertA,]'
+              );
+
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

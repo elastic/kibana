@@ -246,6 +246,7 @@ export const SavedObjectTimelineRuntimeType = runtimeTypes.partial({
   createdBy: unionWithNullType(runtimeTypes.string),
   updated: unionWithNullType(runtimeTypes.number),
   updatedBy: unionWithNullType(runtimeTypes.string),
+  savedSearchId: unionWithNullType(runtimeTypes.string),
 });
 type SavedObjectTimeline = runtimeTypes.TypeOf<typeof SavedObjectTimelineRuntimeType>;
 

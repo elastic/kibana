@@ -29,7 +29,7 @@ import {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -51,7 +51,6 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 
 export interface Props {
   conversationId?: string;
-  isAssistantEnabled: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
@@ -64,7 +63,6 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   conversationId,
-  isAssistantEnabled,
   promptContextId = '',
   shouldRefocusPrompt = false,
   showTitle = true,
@@ -73,6 +71,7 @@ const AssistantComponent: React.FC<Props> = ({
   const {
     assistantTelemetry,
     augmentMessageCodeBlocks,
+    assistantAvailability: { isAssistantEnabled },
     conversations,
     defaultAllow,
     defaultAllowReplacement,
@@ -172,13 +171,8 @@ const AssistantComponent: React.FC<Props> = ({
     },
   });
 
-  const currentTitle: { title: string | JSX.Element; titleIcon: string } =
-    isWelcomeSetup && blockBotConversation.theme?.title && blockBotConversation.theme?.titleIcon
-      ? {
-          title: blockBotConversation.theme?.title,
-          titleIcon: blockBotConversation.theme?.titleIcon,
-        }
-      : { title, titleIcon: 'logoSecurity' };
+  const currentTitle: string | JSX.Element =
+    isWelcomeSetup && blockBotConversation.theme?.title ? blockBotConversation.theme?.title : title;
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
@@ -426,7 +420,6 @@ const AssistantComponent: React.FC<Props> = ({
         {showTitle && (
           <AssistantHeader
             currentConversation={currentConversation}
-            currentTitle={currentTitle}
             defaultConnectorId={defaultConnectorId}
             defaultProvider={defaultProvider}
             docLinks={docLinks}
@@ -438,6 +431,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             setSelectedConversationId={setSelectedConversationId}
             showAnonymizedValues={showAnonymizedValues}
+            title={currentTitle}
           />
         )}
 

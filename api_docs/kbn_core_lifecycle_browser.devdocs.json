@@ -574,10 +574,6 @@
                 "path": "src/plugins/unified_search/public/types.ts"
               },
               {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/plugin.ts"
               },
@@ -612,10 +608,6 @@
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/hooks/slo/use_fetch_slo_definitions.ts"
               },
               {
                 "plugin": "dataVisualizer",

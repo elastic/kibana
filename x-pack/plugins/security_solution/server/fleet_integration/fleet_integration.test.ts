@@ -25,11 +25,12 @@ import {
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
   getPackagePolicyCreateCallback,
-  getPackagePolicyPostCreateCallback,
   getPackagePolicyDeleteCallback,
+  getPackagePolicyPostCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import type { KibanaRequest } from '@kbn/core/server';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
@@ -54,9 +55,9 @@ import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
-import type { AppFeatures } from '../lib/app_features';
-import { createAppFeaturesMock } from '../lib/app_features/mocks';
-import { ALL_APP_FEATURE_KEYS } from '../../common';
+import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
+import { createAppFeaturesServiceMock } from '../lib/app_features_service/mocks';
+import * as moment from 'moment';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -75,9 +76,12 @@ describe('ingest_integration tests ', () => {
   const Gold = licenseMock.createLicense({
     license: { type: 'gold', mode: 'gold', uid: 'updated-uid' },
   });
+  const Enterprise = licenseMock.createLicense({
+    license: { type: 'enterprise', uid: 'updated-uid' },
+  });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
-  let appFeatures: AppFeatures;
+  let appFeaturesService: AppFeaturesService;
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -86,7 +90,7 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
-    appFeatures = endpointAppContextMock.appFeatures;
+    appFeaturesService = endpointAppContextMock.appFeaturesService;
 
     jest
       .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
@@ -143,7 +147,7 @@ describe('ingest_integration tests ', () => {
         licenseService,
         exceptionListClient,
         cloudService,
-        appFeatures
+        appFeaturesService
       );
 
       return callback(
@@ -395,13 +399,13 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       await expect(() =>
         callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
-      ).rejects.toThrow('Requires Platinum license');
+      ).rejects.toThrow('Gold license does not support this action. Please upgrade your license.');
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactoryWithoutPaidFeatures();
@@ -414,7 +418,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -429,6 +433,78 @@ describe('ingest_integration tests ', () => {
     });
   });
 
+  describe('package policy update callback (when the license is at least enterprise)', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    beforeEach(() => {
+      licenseEmitter.next(Enterprise); // set license level to enterprise
+    });
+
+    it.each([
+      {
+        date: 'invalid',
+        message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
+      },
+      {
+        date: '2023-10-1',
+        message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
+      },
+      {
+        date: '2020-10-31',
+        message:
+          'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.',
+      },
+      {
+        date: '2100-10-01',
+        message: 'Global manifest version cannot be in the future. UTC time.',
+      },
+      {
+        date: 'latest',
+      },
+      {
+        date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
+      },
+    ])(
+      'should return bad request for invalid endpoint package policy global manifest values',
+      async ({ date, message }) => {
+        const mockPolicy = policyFactory(); // defaults with paid features on
+        const logger = loggingSystemMock.create().get('ingest_integration.test');
+        const callback = getPackagePolicyUpdateCallback(
+          logger,
+          licenseService,
+          endpointAppContextMock.featureUsageService,
+          endpointAppContextMock.endpointMetadataService,
+          cloudService,
+          esClient,
+          appFeaturesService
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = {
+          ...mockPolicy,
+          global_manifest_version: date,
+        };
+        if (!message) {
+          const updatedPolicyConfig = await callback(
+            policyConfig,
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+          expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual({
+            ...mockPolicy,
+            global_manifest_version: date,
+          });
+        } else {
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(message);
+        }
+      }
+    );
+  });
+
   describe('package policy update callback (when the license is at least platinum)', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -436,6 +512,57 @@ describe('ingest_integration tests ', () => {
     beforeEach(() => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
+
+    it.each([
+      {
+        date: '2100-10-01',
+        message: 'Platinum license does not support this action. Please upgrade your license.',
+      },
+      {
+        date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
+        message: 'Platinum license does not support this action. Please upgrade your license.',
+      },
+      {
+        date: 'latest',
+      },
+    ])(
+      'should return bad request for invalid endpoint package policy global manifest values',
+      async ({ date, message }) => {
+        const mockPolicy = policyFactory(); // defaults with paid features on
+        const logger = loggingSystemMock.create().get('ingest_integration.test');
+        const callback = getPackagePolicyUpdateCallback(
+          logger,
+          licenseService,
+          endpointAppContextMock.featureUsageService,
+          endpointAppContextMock.endpointMetadataService,
+          cloudService,
+          esClient,
+          appFeaturesService
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = {
+          ...mockPolicy,
+          global_manifest_version: date,
+        };
+        if (!message) {
+          const updatedPolicyConfig = await callback(
+            policyConfig,
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+          expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual({
+            ...mockPolicy,
+            global_manifest_version: date,
+          });
+        } else {
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(message);
+        }
+      }
+    );
 
     it('updates successfully when paid features are turned on', async () => {
       const mockPolicy = policyFactory();
@@ -448,7 +575,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -463,7 +590,7 @@ describe('ingest_integration tests ', () => {
     });
 
     it('should turn off protections if endpointPolicyProtections appFeature is disabled', async () => {
-      appFeatures = createAppFeaturesMock(
+      appFeaturesService = createAppFeaturesServiceMock(
         ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
       );
       const callback = getPackagePolicyUpdateCallback(
@@ -473,7 +600,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
 
       const updatedPolicy = await callback(
@@ -514,7 +641,7 @@ describe('ingest_integration tests ', () => {
     const infoResponse = {
       cluster_name: 'updated-name',
       cluster_uuid: 'updated-uuid',
-      license_uid: 'updated-uid',
+      license_uuid: 'updated-uuid',
       name: 'name',
       tagline: 'tagline',
       version: {
@@ -542,7 +669,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
-      mockPolicy.meta.license_uid = 'updated-uid';
+      mockPolicy.meta.license_uuid = 'updated-uid';
       mockPolicy.meta.serverless = false;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
@@ -552,7 +679,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -561,7 +688,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.license = 'gold';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'original-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'original-uuid';
-      policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'original-uid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.license_uuid = 'original-uid';
       policyConfig.inputs[0]!.config!.policy.value.meta.serverless = true;
       const updatedPolicyConfig = await callback(
         policyConfig,
@@ -579,7 +706,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
-      mockPolicy.meta.license_uid = 'updated-uid';
+      mockPolicy.meta.license_uuid = 'updated-uid';
       mockPolicy.meta.serverless = false;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
@@ -589,7 +716,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       // values should be updated
@@ -597,7 +724,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.license = 'platinum';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'updated-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'updated-uuid';
-      policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'updated-uid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.license_uuid = 'updated-uid';
       policyConfig.inputs[0]!.config!.policy.value.meta.serverless = false;
       const updatedPolicyConfig = await callback(
         policyConfig,
@@ -615,7 +742,7 @@ describe('ingest_integration tests ', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const invokeDeleteCallback = async (): Promise<void> => {
-      const callback = getPackagePolicyDeleteCallback(exceptionListClient);
+      const callback = getPackagePolicyDeleteCallback(exceptionListClient, soClient);
       await callback(deletePackagePolicyMock(), soClient, esClient);
     };
 
@@ -640,6 +767,27 @@ describe('ingest_integration tests ', () => {
     });
 
     it('removes policy from artifact', async () => {
+      soClient.find.mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [
+          {
+            id: 'id',
+            type: 'type',
+            references: [
+              {
+                id: 'id_package_policy',
+                name: 'package_policy',
+                type: 'ingest-package-policies',
+              },
+            ],
+            attributes: { note: 'note' },
+            score: 1,
+          },
+        ],
+        page: 1,
+        per_page: 10,
+      });
+
       await invokeDeleteCallback();
 
       expect(exceptionListClient.findExceptionListsItem).toHaveBeenCalledWith({
@@ -660,6 +808,8 @@ describe('ingest_integration tests ', () => {
         osTypes: fakeArtifact.os_types,
         tags: [],
       });
+
+      expect(soClient.delete).toBeCalledWith('policy-settings-protection-updates-note', 'id');
     });
   });
 });

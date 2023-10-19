@@ -16,10 +16,14 @@ jest.mock('./version_check/ensure_es_version', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
-import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_service.test.mocks';
+import {
+  MockClusterClient,
+  isScriptingEnabledMock,
+  getClusterInfoMock,
+} from './elasticsearch_service.test.mocks';
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import { first, concatMap } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
@@ -81,6 +85,8 @@ beforeEach(() => {
 
   isScriptingEnabledMock.mockResolvedValue(true);
 
+  getClusterInfoMock.mockReturnValue(of({}));
+
   // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
   pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
 });
@@ -89,6 +95,7 @@ afterEach(async () => {
   jest.clearAllMocks();
   MockClusterClient.mockClear();
   isScriptingEnabledMock.mockReset();
+  getClusterInfoMock.mockReset();
   await elasticsearchService?.stop();
 });
 

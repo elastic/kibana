@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { StackFrameMetadata } from '../../common/profiling';
+import type { StackFrameMetadata } from '@kbn/profiling-utils';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
@@ -135,7 +135,7 @@ export function SubChart({
           </EuiFlexGroup>
 
           {hasMoreFrames && !!onShowMoreClick && (
-            <EuiButton onClick={onShowMoreClick}>
+            <EuiButton data-test-subj="profilingSubChartShowMoreButton" onClick={onShowMoreClick}>
               {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
                 defaultMessage: 'Show more',
               })}
@@ -185,13 +185,13 @@ export function SubChart({
           </EuiFlexItem>
           <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
             {showFrames ? (
-              <EuiLink onClick={() => onShowMoreClick?.()}>
+              <EuiLink data-test-subj="profilingSubChartLink" onClick={() => onShowMoreClick?.()}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             ) : category === OTHER_BUCKET_LABEL ? (
               <EuiText size="s">{label}</EuiText>
             ) : (
-              <EuiLink href={href}>
+              <EuiLink data-test-subj="profilingSubChartLink" href={href}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             )}
@@ -220,7 +220,12 @@ export function SubChart({
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <Chart size={{ height, width }}>
           <Tooltip showNullValues={false} />
-          <Settings showLegend={false} baseTheme={chartsBaseTheme} theme={chartsTheme} />
+          <Settings
+            showLegend={false}
+            baseTheme={chartsBaseTheme}
+            theme={chartsTheme}
+            locale={i18n.getLocale()}
+          />
           <AreaSeries
             id={category}
             name={category}

@@ -77,6 +77,8 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",

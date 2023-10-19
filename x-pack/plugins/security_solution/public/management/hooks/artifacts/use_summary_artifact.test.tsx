@@ -62,6 +62,7 @@ describe('Summary artifact hook', () => {
     expect(result.data).toBe(apiResponse);
     expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
     expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/summary', {
+      version: '2023-10-31',
       query: {
         filter:
           '((exception-list-agnostic.attributes.tags:"policy:policy-1" OR exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.field-1:(*test*) OR exception-list-agnostic.attributes.field-1.field-2:(*test*) OR exception-list-agnostic.attributes.field-2:(*test*)))',

@@ -9,10 +9,19 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlObltOnboardingPage = getPageObject('svlObltOnboardingPage');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
   const SvlObltOnboardingStreamLogFilePage = getPageObject('SvlObltOnboardingStreamLogFilePage');
 
   describe('landing page', function () {
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
     it('has quickstart badge', async () => {
       await svlObltNavigation.navigateToLandingPage();
       await svlObltOnboardingPage.assertQuickstartBadgeExists();

@@ -77,8 +77,9 @@ export const SchemaErrorsAccordion: React.FC<Props> = ({
         <EuiAccordion
           key={fieldName}
           id={`schemaErrorAccordion-${fieldName}`}
-          className="schemaErrorsAccordion euiAccordionForm"
-          buttonClassName="euiAccordionForm__button"
+          className="schemaErrorsAccordion"
+          borders="horizontal"
+          buttonProps={{ paddingSize: 'm' }}
           buttonContent={accordionHeader}
         >
           <EuiTable tableLayout="auto">

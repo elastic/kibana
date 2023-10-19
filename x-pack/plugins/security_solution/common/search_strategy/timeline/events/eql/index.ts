@@ -6,7 +6,6 @@
  */
 
 export type {
-  TimelineEqlRequestOptions,
   TimelineEqlResponse,
   EqlOptionsData,
   EqlOptionsSelected,

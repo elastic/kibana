@@ -255,7 +255,7 @@ export const FleetAppContext: React.FC<{
     theme$,
     fleetStatus,
   }) => {
-    const darkModeObservable = useObservable(startServices.theme.theme$);
+    const darkModeObservable = useObservable(theme$);
     const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     return (

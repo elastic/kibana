@@ -11,6 +11,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import type { RunTimeMappings } from '../../../../common/api/search_strategy';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useGetFieldsData } from '../../../common/hooks/use_get_fields_data';
@@ -42,7 +43,7 @@ export const AlertDetailsPage = memo(() => {
   const [loading, detailsData, searchHit, dataAsNestedObject] = useTimelineEventsDetails({
     indexName,
     eventId,
-    runtimeMappings: sourcererDataView.runtimeMappings,
+    runtimeMappings: sourcererDataView.runtimeMappings as RunTimeMappings,
     skip: !eventID,
   });
   const dataNotFound = !loading && !detailsData;

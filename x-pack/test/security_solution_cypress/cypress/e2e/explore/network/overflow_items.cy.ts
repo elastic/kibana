@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   ADD_TO_TIMELINE,
@@ -15,7 +14,8 @@ import {
   SHOW_TOP_FIELD,
 } from '../../../screens/network/flows';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { mouseoverOnToOverflowItem, openHoverActions } from '../../../tasks/network/flows';
 
 import { NETWORK_URL } from '../../../urls/navigation';
@@ -23,15 +23,17 @@ import { NETWORK_URL } from '../../../urls/navigation';
 const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';
 
-describe('Overflow items', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165692
+// Tracked by https://github.com/elastic/security-team/issues/7696
+describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   context('Network stats and tables', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'network');
+      cy.task('esArchiverLoad', { archiveName: 'network' });
     });
 
     beforeEach(() => {
       login();
-      visit(NETWORK_URL);
+      visitWithTimeRange(NETWORK_URL);
       cy.get(DESTINATION_DOMAIN).should('not.exist');
       cy.get(FILTER_IN).should('not.exist');
       cy.get(FILTER_OUT).should('not.exist');

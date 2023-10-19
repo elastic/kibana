@@ -72,6 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -94,6 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -117,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -141,6 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -190,6 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -245,6 +250,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -285,6 +291,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -306,6 +313,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -329,6 +337,7 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(ruleUpdate)
           .expect(200);
 
@@ -339,6 +348,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(ruleUpdate2)
           .expect(200);
 
@@ -358,6 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(simpleRule)
           .expect(404);
 
@@ -375,6 +386,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(simpleRule)
           .expect(404);
 
@@ -412,6 +424,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(ruleUpdate)
           .expect(200);
 
@@ -444,6 +457,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(ruleUpdate)
           .expect(500);
 
@@ -470,6 +484,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             ...getSimpleRule('rule-2'),
             exceptions_list: [
@@ -511,6 +526,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             ...updatedRule,
             exceptions_list: [
@@ -539,6 +555,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
@@ -563,6 +580,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
@@ -586,6 +604,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
@@ -615,6 +634,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
@@ -634,6 +654,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: outputRule } = await supertest
             .put(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(savedQueryRule)
             .expect(200);
 
@@ -649,6 +670,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: outputRule } = await supertest
             .put(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(savedQueryRule)
             .expect(200);
 
@@ -664,6 +686,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: outputRule } = await supertest
             .put(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(queryRule)
             .expect(200);
 
@@ -688,6 +711,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: updatedRule } = await supertest
             .put(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(ruleToUpdate)
             .expect(200);
 
@@ -846,12 +870,33 @@ export default ({ getService }: FtrProviderContext) => {
         it('should overwrite investigation_fields value on update - non additive', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            investigation_fields: ['blob', 'boop'],
+            investigation_fields: { field_names: ['blob', 'boop'] },
           });
 
           const ruleUpdate = {
             ...getSimpleRuleUpdate('rule-1'),
-            investigation_fields: ['foo', 'bar'],
+            investigation_fields: { field_names: ['foo', 'bar'] },
+          };
+
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send(ruleUpdate)
+            .expect(200);
+
+          expect(body.investigation_fields.field_names).to.eql(['foo', 'bar']);
+        });
+
+        it('should unset investigation_fields', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            investigation_fields: { field_names: ['blob', 'boop'] },
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            investigation_fields: undefined,
           };
 
           const { body } = await supertest
@@ -860,7 +905,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(ruleUpdate)
             .expect(200);
 
-          expect(body.investigation_fields).to.eql(['foo', 'bar']);
+          expect(body.investigation_fields).to.eql(undefined);
         });
       });
     });

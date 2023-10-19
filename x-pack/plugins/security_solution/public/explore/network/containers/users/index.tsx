@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import type { NetworkUsersRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
@@ -18,7 +19,6 @@ import { generateTablePaginationOptions } from '../../../components/paginated_ta
 import { networkSelectors } from '../../store';
 import type {
   FlowTargetSourceDest,
-  NetworkUsersRequestOptions,
   NetworkUsersStrategyResponse,
 } from '../../../../../common/search_strategy/security_solution/network';
 import { NetworkQueries } from '../../../../../common/search_strategy/security_solution/network';
@@ -65,9 +65,8 @@ export const useNetworkUsers = ({
   const { uiSettings } = useKibana().services;
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
-  const [networkUsersRequest, setNetworkUsersRequest] = useState<NetworkUsersRequestOptions | null>(
-    null
-  );
+  const [networkUsersRequest, setNetworkUsersRequest] =
+    useState<NetworkUsersRequestOptionsInput | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -134,7 +133,7 @@ export const useNetworkUsers = ({
 
   useEffect(() => {
     setNetworkUsersRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkUsersRequestOptionsInput = {
         ...(prevRequest ?? {}),
         ip,
         defaultIndex,

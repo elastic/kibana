@@ -70,6 +70,35 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-common.ElasticsearchCapabilities",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchCapabilities",
+        "description": [
+          "\nRepresent the capabilities supported by a given ES cluster.\n"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.ElasticsearchCapabilities.serverless",
+            "type": "boolean",
+            "tags": [],
+            "label": "serverless",
+            "description": [
+              "\nIndicates whether we're connected to a serverless version of elasticsearch.\nRequired because some options aren't working for serverless and code needs to have the info to react accordingly."
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
         "id": "def-common.ElasticsearchClientConfig",
         "type": "Interface",
         "tags": [],
@@ -855,6 +884,31 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.ElasticsearchServiceStart.getCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "getCapabilities",
+            "description": [
+              "\nReturns the capabilities for the default cluster."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchCapabilities",
+                "text": "ElasticsearchCapabilities"
+              }
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

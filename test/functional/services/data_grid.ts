@@ -93,6 +93,47 @@ export class DataGridService extends FtrService {
     return await this.find.byCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
+  private async getCellActionButton(
+    rowIndex: number = 0,
+    columnIndex: number = 0,
+    selector: string
+  ): Promise<WebElementWrapper> {
+    let actionButton: WebElementWrapper | undefined;
+    await this.retry.try(async () => {
+      const cell = await this.getCellElement(rowIndex, columnIndex);
+      await cell.click();
+      actionButton = await cell.findByTestSubject(selector);
+      if (!actionButton) {
+        throw new Error(`Unable to find cell action button ${selector}`);
+      }
+    });
+    return actionButton!;
+  }
+
+  /**
+   * Clicks grid cell 'expand' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellExpandButton(rowIndex: number = 0, columnIndex: number = 0) {
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      columnIndex,
+      'euiDataGridCellExpandButton'
+    );
+    await actionButton.click();
+  }
+
+  /**
+   * Clicks grid cell 'filter for' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellFilterForButton(rowIndex: number = 0, columnIndex: number = 0) {
+    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterForButton');
+    await actionButton.click();
+  }
+
   /**
    * The same as getCellElement, but useful when multiple data grids are on the page.
    */
@@ -227,8 +268,8 @@ export class DataGridService extends FtrService {
 
     const textArr = [];
     for (const cell of result) {
-      const textContent = await cell.getAttribute('textContent');
-      textArr.push(textContent.trim());
+      const cellText = await cell.getVisibleText();
+      textArr.push(cellText.trim());
     }
     return Promise.resolve(textArr);
   }
@@ -302,6 +343,27 @@ export class DataGridService extends FtrService {
   public async clickEditField(field: string) {
     await this.openColMenuByField(field);
     await this.testSubjects.click('gridEditFieldButton');
+  }
+
+  public async clickGridSettings() {
+    await this.testSubjects.click('dataGridDisplaySelectorButton');
+  }
+
+  public async getCurrentRowHeightValue() {
+    const buttonGroup = await this.testSubjects.find('rowHeightButtonGroup');
+    return (
+      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
+    ).getVisibleText();
+  }
+
+  public async changeRowHeightValue(newValue: string) {
+    const buttonGroup = await this.testSubjects.find('rowHeightButtonGroup');
+    const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
+    await option.click();
+  }
+
+  public async resetRowHeightValue() {
+    await this.testSubjects.click('resetDisplaySelector');
   }
 
   public async getDetailsRow(): Promise<WebElementWrapper> {

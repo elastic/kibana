@@ -6,6 +6,7 @@
  */
 
 import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EcsFlat } from '@kbn/ecs';
 import { omit } from 'lodash/fp';
 
@@ -25,10 +26,12 @@ import {
   getMissingTimestampFieldMetadata,
   getPartitionedFieldMetadata,
   getPartitionedFieldMetadataStats,
+  getSameFamilyStatColor,
   getSizeInBytes,
   getTotalDocsCount,
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
+  getTotalPatternSameFamily,
   getTotalSizeInBytes,
   hasValidTimestampMapping,
   isMappingCompatible,
@@ -78,7 +81,111 @@ import {
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 
 describe('helpers', () => {
+  describe('getTotalPatternSameFamily', () => {
+    const baseResult: DataQualityCheckResult = {
+      docsCount: 4,
+      error: null,
+      ilmPhase: 'unmanaged',
+      incompatible: 3,
+      indexName: 'auditbeat-custom-index-1',
+      markdownComments: [
+        '### auditbeat-custom-index-1\n',
+        '| Result | Index | Docs | Incompatible fields | ILM Phase |\n|--------|-------|------|---------------------|-----------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | `unmanaged` |\n\n',
+        '### **Incompatible fields** `3` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+        "#### 3 incompatible fields, 0 fields with mappings in the same family\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version 8.6.1.\n\nIncompatible fields with mappings in the same family have exactly the same search behavior but may have different space usage or performance characteristics.\n\nWhen an incompatible field is not in the same family:\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n",
+        '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2),\n`theory` (1) |\n\n',
+      ],
+      pattern: 'auditbeat-*',
+      sameFamily: 0,
+    };
+
+    it('returns undefined when results is undefined', () => {
+      expect(getTotalPatternSameFamily(undefined)).toBeUndefined();
+    });
+
+    it('returns 0 when results is an empty object', () => {
+      expect(getTotalPatternSameFamily({})).toBe(0);
+    });
+
+    it('should sum sameFamily values and return the total', () => {
+      const results: Record<string, DataQualityCheckResult> = {
+        a: {
+          ...baseResult,
+          indexName: 'a',
+          markdownComments: [],
+          pattern: 'pattern',
+          sameFamily: 2,
+        },
+        b: {
+          ...baseResult,
+          indexName: 'b',
+          markdownComments: [],
+          pattern: 'pattern',
+          sameFamily: 3,
+        },
+        c: { ...baseResult, indexName: 'c', markdownComments: [], pattern: 'pattern' },
+      };
+
+      expect(getTotalPatternSameFamily(results)).toBe(5);
+    });
+
+    it('handles a mix of defined and undefined sameFamily values', () => {
+      const results: Record<string, DataQualityCheckResult> = {
+        a: {
+          ...baseResult,
+          indexName: 'a',
+          markdownComments: [],
+          pattern: 'pattern',
+          sameFamily: 1,
+        },
+        b: {
+          ...baseResult,
+          indexName: 'b',
+          markdownComments: [],
+          pattern: 'pattern',
+          sameFamily: undefined,
+        },
+        c: {
+          ...baseResult,
+          indexName: 'c',
+          markdownComments: [],
+          pattern: 'pattern',
+          sameFamily: 2,
+        },
+      };
+
+      expect(getTotalPatternSameFamily(results)).toBe(3);
+    });
+  });
+
+  describe('getSameFamilyStatColor', () => {
+    it('returns the expected color when sameFamily is greater than zero', () => {
+      const result = getSameFamilyStatColor(1);
+
+      expect(result).toEqual(euiThemeVars.euiColorLightShade);
+    });
+
+    it('returns undefined when sameFamily is 0', () => {
+      const result = getSameFamilyStatColor(0);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined when sameFamily is negative', () => {
+      const result = getSameFamilyStatColor(-1);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined when sameFamily is undefined', () => {
+      const result = getSameFamilyStatColor(undefined);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('getIndexNames', () => {
+    const isILMAvailable = true;
     const ilmPhases = ['hot', 'warm', 'unmanaged'];
 
     test('returns the expected index names when they have an ILM phase included in the ilmPhases list', () => {
@@ -86,6 +193,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: mockIlmExplain, // <-- the mock indexes have 'hot' ILM phases
           ilmPhases,
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual([
@@ -100,6 +208,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: mockIlmExplain, // <-- the mock indexes have 'hot' and 'unmanaged' ILM phases...
           ilmPhases: ['warm', 'unmanaged'], // <-- ...but we don't ask for 'hot'
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual(['auditbeat-custom-index-1']); // <-- the 'unmanaged' index
@@ -116,6 +225,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: ilmExplainWithMissingIndex, // <-- the mock indexes have 'hot' ILM phases...
           ilmPhases: ['hot', 'warm', 'unmanaged'],
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual(['.ds-packetbeat-8.5.3-2023.02.04-000001', 'auditbeat-custom-index-1']); // <-- only includes two of the three indices, because the other one is missing an ILM explain record
@@ -126,6 +236,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: mockIlmExplain,
           ilmPhases: [],
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual([]);
@@ -136,6 +247,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: null,
           ilmPhases,
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual([]);
@@ -146,6 +258,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: mockIlmExplain,
           ilmPhases,
+          isILMAvailable,
           stats: null,
         })
       ).toEqual([]);
@@ -156,6 +269,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: null,
           ilmPhases,
+          isILMAvailable,
           stats: null,
         })
       ).toEqual([]);
@@ -469,7 +583,7 @@ describe('helpers', () => {
       indexInvalidValues: [], // empty array, because the index does not contain any invalid values
       hasEcsMetadata: true,
       isEcsCompliant: true, // because the index has the expected mapping type, and no unallowed values
-      isInSameFamily: true, // `keyword` and `keyword` are in the same family
+      isInSameFamily: false,
     };
 
     test('it returns the happy path result when the index has no mapping conflicts, and no unallowed values', () => {
@@ -662,6 +776,7 @@ describe('helpers', () => {
           hostNameWithTextMapping,
           sourceIpWithTextMapping,
         ],
+        sameFamily: [],
       };
 
       expect(getPartitionedFieldMetadata(enrichedFieldMetadata)).toEqual(expected);
@@ -689,6 +804,7 @@ describe('helpers', () => {
           hostNameWithTextMapping,
           sourceIpWithTextMapping,
         ],
+        sameFamily: [],
       };
 
       expect(getPartitionedFieldMetadataStats(partitionedFieldMetadata)).toEqual({
@@ -696,6 +812,7 @@ describe('helpers', () => {
         custom: 4,
         ecsCompliant: 2,
         incompatible: 3,
+        sameFamily: 0,
       });
     });
   });
@@ -1070,6 +1187,7 @@ describe('helpers', () => {
           indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'packetbeat-*',
+          sameFamily: 0,
         },
         '.ds-packetbeat-8.6.1-2023.02.04-000001': {
           docsCount: 1628343,
@@ -1079,6 +1197,7 @@ describe('helpers', () => {
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'packetbeat-*',
+          sameFamily: 0,
         },
       };
 
@@ -1095,6 +1214,7 @@ describe('helpers', () => {
           indexName: '.ds-auditbeat-8.6.1-2023.02.07-000001',
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
+          sameFamily: 0,
         },
         'auditbeat-custom-index-1': {
           docsCount: 4,
@@ -1104,6 +1224,7 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-index-1',
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
+          sameFamily: 0,
         },
         'auditbeat-custom-empty-index-1': {
           docsCount: 0,
@@ -1113,6 +1234,7 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-empty-index-1',
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
+          sameFamily: 0,
         },
       };
 
@@ -1129,6 +1251,7 @@ describe('helpers', () => {
           indexName: '.ds-auditbeat-8.6.1-2023.02.07-000001',
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
+          sameFamily: 0,
         },
         'auditbeat-custom-index-1': {
           docsCount: 4,
@@ -1138,6 +1261,7 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-index-1',
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
+          sameFamily: 0,
         },
         'auditbeat-custom-empty-index-1': {
           docsCount: 0,
@@ -1147,6 +1271,7 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-empty-index-1',
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
+          sameFamily: 0,
         },
       };
 
@@ -1211,6 +1336,7 @@ describe('helpers', () => {
         indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
         markdownComments: ['foo', 'bar', 'baz'],
         pattern: 'packetbeat-*',
+        sameFamily: 0,
       };
 
       expect(getErrorSummary(resultWithError)).toEqual({
