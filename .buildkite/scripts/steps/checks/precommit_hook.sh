@@ -21,7 +21,7 @@ If you want, you can still manually install the pre-commit hook locally by runni
 if [[ "${BUILDKITE_PULL_REQUEST}" == "false" ]]; then
   START_REF="HEAD~1"
 else
-  START_REF="$BUILDKITE_BRANCH"
+  START_REF="$BUILDKITE_PULL_REQUEST_BASE_BRANCH"
 fi
 
 node scripts/precommit_hook.js \
@@ -32,6 +32,3 @@ node scripts/precommit_hook.js \
   --no-stage # we have to disable staging or check_for_changed_files won't see the changes
 
 check_for_changed_files 'node scripts/precommit_hook.js --ref HEAD~1..HEAD --fix' true
-
-
-# test
