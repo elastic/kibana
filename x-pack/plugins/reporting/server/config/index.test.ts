@@ -36,8 +36,11 @@ const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
 };
 
 describe('deprecations', () => {
-  it('logs a warning if roles.enabled: true is set', () => {
-    const { messages } = applyReportingDeprecations({ roles: { enabled: true } });
+  it('logs a warning if roles.enabled: true is set and not serverless', () => {
+    const { messages } = applyReportingDeprecations({
+      roles: { enabled: true },
+      statefulSettings: { enabled: true },
+    });
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
