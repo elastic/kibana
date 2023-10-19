@@ -98,12 +98,27 @@ export const createMultipassHostVmClient = (name: string, log: ToolingLog): Host
     `;
   };
 
+  const unmount = async (hostVmDir: string) => {
+    await execa.command(`multipass unmount ${name}:${hostVmDir}`);
+  };
+
+  const mount = async (localDir: string, hostVmDir: string) => {
+    await execa.command(`multipass mount ${localDir} ${name}:${hostVmDir}`);
+
+    return {
+      hostDir: hostVmDir,
+      unmount: () => unmount(hostVmDir),
+    };
+  };
+
   return {
     type: 'multipass',
     name,
     exec,
     destroy,
     info,
+    mount,
+    unmount,
   };
 };
 

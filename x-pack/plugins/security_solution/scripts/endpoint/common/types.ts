@@ -9,6 +9,8 @@ export interface HostVm {
   type: 'multipass'; // future: support vagrant
   name: string;
   exec: (command: string) => Promise<HostVmExecResponse>;
+  mount: (localDir: string, hostVmDir: string) => Promise<HostVmMountResponse>;
+  unmount: (hostVmDir: string) => Promise<void>;
   destroy: () => Promise<void>;
   info: () => string;
 }
@@ -17,4 +19,8 @@ export interface HostVmExecResponse {
   stdout: string;
   stderr: string;
   exitCode: number;
+}
+export interface HostVmMountResponse {
+  hostDir: string;
+  unmount: () => Promise<void>;
 }
