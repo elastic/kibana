@@ -341,6 +341,7 @@ const enrollHostWithFleet = async ({
     env: {
       VAGRANT_CWD,
     },
+    stdio: ['inherit', 'inherit', 'inherit'],
   }).catch((e) => {
     log.info(`Failed to get agent status`);
     log.info(e);
