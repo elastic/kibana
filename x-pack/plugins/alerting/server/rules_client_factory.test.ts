@@ -119,6 +119,7 @@ test('creates a rules client with proper constructor arguments when security is 
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
     connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+    isSystemAction: expect.any(Function),
   });
 });
 
@@ -164,6 +165,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
     connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+    isSystemAction: expect.any(Function),
   });
 });
 

@@ -82,13 +82,13 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
-export interface RuleActionFrequency extends SavedObjectAttributes {
+export interface RuleActionFrequency {
   summary: boolean;
   notifyWhen: RuleNotifyWhenType;
   throttle: string | null;
 }
 
-export interface AlertsFilterTimeframe extends SavedObjectAttributes {
+export interface AlertsFilterTimeframe {
   days: IsoWeekday[];
   timezone: string;
   hours: {
@@ -97,7 +97,7 @@ export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   };
 }
 
-export interface AlertsFilter extends SavedObjectAttributes {
+export interface AlertsFilter {
   query?: {
     kql: string;
     filters: Filter[];
@@ -121,7 +121,7 @@ export const RuleActionTypes = {
 
 export type RuleActionTypes = typeof RuleActionTypes[keyof typeof RuleActionTypes];
 
-export interface RuleAction {
+export interface RuleDefaultAction {
   uuid?: string;
   group: string;
   id: string;
@@ -129,8 +129,18 @@ export interface RuleAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
-  type?: typeof RuleActionTypes.DEFAULT;
+  type: typeof RuleActionTypes.DEFAULT;
 }
+
+export interface RuleSystemAction {
+  uuid?: string;
+  id: string;
+  actionTypeId: string;
+  params: RuleActionParams;
+  type: typeof RuleActionTypes.SYSTEM;
+}
+
+export type RuleAction = RuleDefaultAction | RuleSystemAction;
 
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
@@ -195,9 +205,11 @@ export interface SanitizedAlertsFilter extends AlertsFilter {
   timeframe?: AlertsFilterTimeframe;
 }
 
-export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
+export type SanitizedDefaultRuleAction = Omit<RuleDefaultAction, 'alertsFilter'> & {
   alertsFilter?: SanitizedAlertsFilter;
 };
+
+export type SanitizedRuleAction = SanitizedDefaultRuleAction | RuleSystemAction;
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   Rule<Params>,

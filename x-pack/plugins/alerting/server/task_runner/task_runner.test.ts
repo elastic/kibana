@@ -17,6 +17,7 @@ import {
   Rule,
   RuleAction,
   RuleAlertData,
+  RuleActionTypes,
 } from '../types';
 import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -1525,6 +1526,7 @@ describe('Task Runner', () => {
               foo: true,
             },
             uuid: '111-111',
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: recoveryActionGroup.id,
@@ -1534,6 +1536,7 @@ describe('Task Runner', () => {
               isResolved: true,
             },
             uuid: '222-222',
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -1622,6 +1625,7 @@ describe('Task Runner', () => {
               foo: true,
             },
             uuid: '111-111',
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -1685,6 +1689,7 @@ describe('Task Runner', () => {
               foo: true,
             },
             uuid: '111-111',
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       });

@@ -70,6 +70,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:

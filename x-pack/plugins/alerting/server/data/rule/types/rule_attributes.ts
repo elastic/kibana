@@ -125,7 +125,7 @@ interface AlertsFilterAttributes {
 
 export interface RuleActionAttributes {
   uuid: string;
-  group: string;
+  group?: string;
   actionRef: string;
   actionTypeId: string;
   params: SavedObjectAttributes;
