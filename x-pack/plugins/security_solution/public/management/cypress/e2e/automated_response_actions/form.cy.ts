@@ -38,7 +38,7 @@ describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =>
     beforeEach(() => {
       login(ROLE.endpoint_response_actions_access);
     });
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 
@@ -87,16 +87,14 @@ describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =>
     const testedCommand = 'isolate';
     const newDescription = 'Example isolate host description';
 
-    before(() => {
+    beforeEach(() => {
+      login(ROLE.endpoint_response_actions_access);
       loadRule().then((res) => {
         ruleId = res.id;
         ruleName = res.name;
       });
     });
-    beforeEach(() => {
-      login(ROLE.endpoint_response_actions_access);
-    });
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 
@@ -162,16 +160,14 @@ describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =>
   describe('User without access can not edit, add nor delete an endpoint response action', () => {
     let ruleId: string;
 
-    before(() => {
+    beforeEach(() => {
+      login(ROLE.endpoint_response_actions_no_access);
       loadRule().then((res) => {
         ruleId = res.id;
       });
     });
-    beforeEach(() => {
-      login(ROLE.endpoint_response_actions_no_access);
-    });
 
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 
