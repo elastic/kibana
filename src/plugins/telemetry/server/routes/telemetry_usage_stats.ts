@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import type {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
@@ -23,59 +23,65 @@ export function registerTelemetryUsageStatsRoutes(
   router: IRouter,
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
   isDev: boolean,
-  getSecurity: SecurityGetter
+  getSecurity: SecurityGetter,
+  logger: Logger
 ) {
   const v2Handler: RequestHandler<undefined, undefined, UsageStatsBody> = async (
     context,
     req,
     res
   ) => {
-    const { unencrypted, refreshCache } = req.body;
-
-    if (!(await telemetryCollectionManager.shouldGetTelemetry())) {
-      // We probably won't reach here because there is a license check in the auth phase of the HTTP requests.
-      // But let's keep it here should that changes at any point.
-      return res.customError({
-        statusCode: 503,
-        body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,
-      });
-    }
-
-    const security = getSecurity();
-    // We need to check useRbacForRequest to figure out if ES has security enabled before making the privileges check
-    if (security && unencrypted && security.authz.mode.useRbacForRequest(req)) {
-      // Normally we would use `options: { tags: ['access:decryptedTelemetry'] }` in the route definition to check authorization for an
-      // API action, however, we want to check this conditionally based on the `unencrypted` parameter. In this case we need to use the
-      // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only
-      // granted to users that have "Global All" or "Global Read" privileges in Kibana.
-      const { checkPrivilegesWithRequest, actions } = security.authz;
-      const privileges = { kibana: actions.api.get('decryptedTelemetry') };
-      const { hasAllRequested } = await checkPrivilegesWithRequest(req).globally(privileges);
-      if (!hasAllRequested) {
-        return res.forbidden();
-      }
-    }
-
     try {
-      const statsConfig: StatsGetterConfig = {
-        unencrypted,
-        refreshCache: unencrypted || refreshCache,
-      };
+      const { unencrypted, refreshCache } = req.body;
 
-      const body: v2.UnencryptedTelemetryPayload = await telemetryCollectionManager.getStats(
-        statsConfig
-      );
-      return res.ok({ body });
+      if (!(await telemetryCollectionManager.shouldGetTelemetry())) {
+        // We probably won't reach here because there is a license check in the auth phase of the HTTP requests.
+        // But let's keep it here should that changes at any point.
+        return res.customError({
+          statusCode: 503,
+          body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,
+        });
+      }
+
+      const security = getSecurity();
+      // We need to check useRbacForRequest to figure out if ES has security enabled before making the privileges check
+      if (security && unencrypted && security.authz.mode.useRbacForRequest(req)) {
+        // Normally we would use `options: { tags: ['access:decryptedTelemetry'] }` in the route definition to check authorization for an
+        // API action, however, we want to check this conditionally based on the `unencrypted` parameter. In this case we need to use the
+        // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only
+        // granted to users that have "Global All" or "Global Read" privileges in Kibana.
+        const { checkPrivilegesWithRequest, actions } = security.authz;
+        const privileges = { kibana: actions.api.get('decryptedTelemetry') };
+        const { hasAllRequested } = await checkPrivilegesWithRequest(req).globally(privileges);
+        if (!hasAllRequested) {
+          return res.forbidden();
+        }
+      }
+
+      try {
+        const statsConfig: StatsGetterConfig = {
+          unencrypted,
+          refreshCache: unencrypted || refreshCache,
+        };
+
+        const body: v2.UnencryptedTelemetryPayload = await telemetryCollectionManager.getStats(
+          statsConfig
+        );
+        return res.ok({ body });
+      } catch (err) {
+        if (isDev) {
+          // don't ignore errors when running in dev mode
+          throw err;
+        }
+        if (unencrypted && err.status === 403) {
+          return res.forbidden();
+        }
+        // ignore errors and return empty set
+        return res.ok({ body: [] });
+      }
     } catch (err) {
-      if (isDev) {
-        // don't ignore errors when running in dev mode
-        throw err;
-      }
-      if (unencrypted && err.status === 403) {
-        return res.forbidden();
-      }
-      // ignore errors and return empty set
-      return res.ok({ body: [] });
+      logger.error(err);
+      throw err;
     }
   };
 

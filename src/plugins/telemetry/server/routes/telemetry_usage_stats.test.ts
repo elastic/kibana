@@ -11,6 +11,7 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext, IRouter } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 async function runRequest(
   mockRouter: IRouter<RequestHandlerContext>,
@@ -27,6 +28,7 @@ async function runRequest(
 }
 
 describe('registerTelemetryUsageStatsRoutes', () => {
+  const logger = loggerMock.create();
   const router = {
     handler: undefined,
     config: undefined,
@@ -49,7 +51,13 @@ describe('registerTelemetryUsageStatsRoutes', () => {
 
   describe('clusters/_stats POST route', () => {
     it('registers _stats POST route and accepts body configs', () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurity,
+        logger
+      );
       expect(mockRouter.versioned.post).toBeCalledTimes(1);
       const [routeConfig, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value
         .addVersion.mock.calls[0];
@@ -58,7 +66,13 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('responds with encrypted stats with no cache refresh by default', async () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurity,
+        logger
+      );
 
       const { mockResponse } = await runRequest(mockRouter);
       expect(telemetryCollectionManager.getStats).toBeCalledWith({
@@ -70,7 +84,13 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('when unencrypted is set getStats is called with unencrypted and refreshCache', async () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurity,
+        logger
+      );
 
       await runRequest(mockRouter, { unencrypted: true });
       expect(telemetryCollectionManager.getStats).toBeCalledWith({
@@ -80,7 +100,13 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('calls getStats with refreshCache when set in body', async () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurity,
+        logger
+      );
       await runRequest(mockRouter, { refreshCache: true });
       expect(telemetryCollectionManager.getStats).toBeCalledWith({
         unencrypted: undefined,
@@ -89,7 +115,13 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('calls getStats with refreshCache:true even if set to false in body when unencrypted is set to true', async () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurity,
+        logger
+      );
       await runRequest(mockRouter, {
         refreshCache: false,
         unencrypted: true,
@@ -106,7 +138,13 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         securityStartMock.authz.mode.useRbacForRequest.mockReturnValue(false);
         return securityStartMock;
       });
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurity,
+        logger
+      );
       await runRequest(mockRouter, {
         refreshCache: false,
         unencrypted: true,
@@ -131,7 +169,8 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         mockRouter,
         telemetryCollectionManager,
         true,
-        getSecurityMock
+        getSecurityMock,
+        logger
       );
       const { mockResponse } = await runRequest(mockRouter, {
         refreshCache: false,
@@ -143,7 +182,13 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     it('returns 503 when Kibana is not healthy enough to generate the Telemetry report', async () => {
       telemetryCollectionManager.shouldGetTelemetry.mockResolvedValueOnce(false);
 
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, () => void 0);
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        () => void 0,
+        logger
+      );
       const { mockResponse } = await runRequest(mockRouter, {
         refreshCache: false,
         unencrypted: true,
@@ -167,7 +212,8 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         mockRouter,
         telemetryCollectionManager,
         true,
-        getSecurityMock
+        getSecurityMock,
+        logger
       );
       const { mockResponse } = await runRequest(mockRouter, {
         refreshCache: false,
@@ -188,7 +234,8 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         mockRouter,
         telemetryCollectionManager,
         true,
-        getSecurityMock
+        getSecurityMock,
+        logger
       );
       const { mockResponse } = await runRequest(mockRouter, {
         refreshCache: false,

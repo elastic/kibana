@@ -33,7 +33,13 @@ export function registerRoutes(options: RegisterRoutesParams) {
     options;
   registerTelemetryOptInRoutes(options);
   registerTelemetryConfigRoutes(options);
-  registerTelemetryUsageStatsRoutes(router, telemetryCollectionManager, isDev, getSecurity);
+  registerTelemetryUsageStatsRoutes(
+    router,
+    telemetryCollectionManager,
+    isDev,
+    getSecurity,
+    options.logger
+  );
   registerTelemetryOptInStatsRoutes(router, telemetryCollectionManager);
   registerTelemetryUserHasSeenNotice(router, options.currentKibanaVersion);
   registerTelemetryLastReported(router, savedObjectsInternalClient$);
