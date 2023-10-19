@@ -57,7 +57,7 @@ export const MIN_I18N = (metric: string) =>
 
 export const CARDINALITY_I18N = (metric: string) =>
   i18n.translate('xpack.observability.customThreshold.rule.aggregators.documentCount', {
-    defaultMessage: 'Cardinality of {metric}',
+    defaultMessage: 'Cardinality of the {metric}',
     values: {
       metric,
     },
@@ -65,7 +65,7 @@ export const CARDINALITY_I18N = (metric: string) =>
 
 export const SUM_I18N = (metric: string) =>
   i18n.translate('xpack.observability.customThreshold.rule.aggregators.documentCount', {
-    defaultMessage: 'Sum of {metric}',
+    defaultMessage: 'Sum of the {metric}',
     values: {
       metric,
     },
