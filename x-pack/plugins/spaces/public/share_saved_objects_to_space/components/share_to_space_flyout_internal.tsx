@@ -134,10 +134,10 @@ function createDefaultChangeSpacesHandler(
           description: `Object noun can be plural or singular, examples: "Failed to update objects", "Failed to update job"`,
         }),
         toastMessage: i18n.translate('xpack.spaces.shareToSpace.shareErrorText', {
-          defaultMessage: `Unable to update '{object}' {relativesCount, plural, =0 {} =1 { or {relativesCount} related object} other { or one or more of {relativesCount} related objects}}.`,
+          defaultMessage: `Unable to update '{object} '{relativesCount, plural, =0 {} =1 {or {relativesCount} related object} other {or one or more of {relativesCount} related objects}}.`,
           values: {
             object: title,
-            relativesCount,
+            relativesCount: spacesToAdd.length > 0 ? relativesCount : 0,
           },
           description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget...' inputs. Example strings: "'Finance dashboard' was added to 1 space. 'Finance dashboard' was removed from 2 spaces.", "'Finance dashboard' and 2 related objects were added to 3 spaces. 'Finance dashboard' was removed from all spaces."`,
         }),
