@@ -269,22 +269,12 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           countInProgressCases={data.countInProgressCases}
           onFilterChanged={onFilterChangedCallback}
           availableSolutions={hasOwner ? [] : availableSolutionsLabels}
-          initial={{
-            search: filterOptions.search,
-            searchFields: filterOptions.searchFields,
-            assignees: filterOptions.assignees,
-            reporters: filterOptions.reporters,
-            tags: filterOptions.tags,
-            status: filterOptions.status,
-            owner: filterOptions.owner,
-            severity: filterOptions.severity,
-            category: filterOptions.category,
-          }}
           hiddenStatuses={hiddenStatuses}
           onCreateCasePressed={onCreateCasePressed}
           isSelectorView={isSelectorView}
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
+          filterOptions={filterOptions}
         />
         <CasesTable
           columns={columns}
