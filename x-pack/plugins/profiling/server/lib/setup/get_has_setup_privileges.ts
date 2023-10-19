@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID as FLEET_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { ProfilingPluginStartDeps } from '../../types';
 
 export async function getHasSetupPrivileges({
@@ -24,6 +25,10 @@ export async function getHasSetupPrivileges({
           'profiling-*': ['read'],
         },
       },
+      kibana: [
+        securityPluginStart.authz.actions.api.get(`${FLEET_PLUGIN_ID}-all`),
+        securityPluginStart.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-all`),
+      ],
     });
   return hasAllRequested;
 }
