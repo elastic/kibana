@@ -46,7 +46,7 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
                 color: ${euiTheme.colors.primaryText};
                 padding-left: ${euiTheme.size.m};
               `}
-              href={getCloudUrl('projects', cloud)}
+              href={getCloudUrl('project', cloud)}
               target="_blank"
               external={false}
             >

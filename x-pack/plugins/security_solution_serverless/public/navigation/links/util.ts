@@ -6,6 +6,8 @@
  */
 
 import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+
 import type { GetCloudUrl, ProjectPageName } from './types';
 
 export const getNavLinkIdFromProjectPageName = (projectNavLinkId: ProjectPageName): string => {
@@ -22,6 +24,8 @@ export const getProjectPageNameFromNavLinkId = (navLinkId: string): ProjectPageN
 
 export const isCloudLink = (linkId: string): boolean => linkId.startsWith('cloud:');
 export const getCloudLinkKey = (linkId: string): string => linkId.replace('cloud:', '');
+export const getProjectDetails = (cloud: CloudStart) => cloud.serverless;
+
 export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
   switch (cloudUrlKey) {
     case 'billing':
@@ -38,6 +42,9 @@ export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
       return cloud.usersAndRolesUrl;
     case 'projects':
       return cloud.projectsUrl;
+    case 'project':
+      const projectId = getProjectDetails(cloud)?.projectId;
+      return projectId ? `${cloud.projectsUrl}/security/${projectId}` : undefined;
     default:
       return undefined;
   }
