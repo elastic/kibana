@@ -31,7 +31,7 @@ const COMMONLY_USED_RANGES: DurationRange[] = [
     }),
   },
   {
-    start: 'now-1h',
+    start: 'now-3h',
     end: 'now',
     label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last3Hours', {
       defaultMessage: 'Last 3 hours',
