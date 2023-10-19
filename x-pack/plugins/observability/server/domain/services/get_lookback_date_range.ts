@@ -15,10 +15,9 @@ export function getLookbackDateRange(
   const unit = toMomentUnitOfTime(duration.unit);
   const now = moment(startedAt).subtract(delayInSeconds, 'seconds').startOf('minute');
   const from = now.clone().subtract(duration.value, unit).startOf('minute');
-  const to = now.clone();
 
   return {
     from: from.toDate(),
-    to: to.toDate(),
+    to: now.toDate(),
   };
 }
