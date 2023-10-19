@@ -177,8 +177,6 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     [object]
   );
 
-  console.log(`***** NOUN...default: ${DEFAULT_OBJECT_NOUN}, obj: ${object.noun}, target: ${savedObjectTarget.noun}`);
-
   const {
     flyoutIcon,
     flyoutTitle = i18n.translate('xpack.spaces.shareToSpace.flyoutTitle', {
