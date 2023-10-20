@@ -34,7 +34,7 @@ export interface ErrorCalloutProps {
   reloadWindow: () => void;
 }
 
-const CodePanel = (props: ErrorCalloutProps & { onClose: () => void }) => {
+const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props) => {
   const { error, errorInfo, name: errorComponentName, onClose } = props;
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
@@ -80,7 +80,7 @@ const CodePanel = (props: ErrorCalloutProps & { onClose: () => void }) => {
   );
 };
 
-export const FatalPrompt = (props: ErrorCalloutProps) => {
+export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
   const { reloadWindow } = props;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
