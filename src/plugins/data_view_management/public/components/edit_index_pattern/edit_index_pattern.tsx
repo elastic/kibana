@@ -31,11 +31,10 @@ import {
 import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { Tabs } from './tabs';
+import { Tabs, type TabsApi } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
-import { TabsApi } from './tabs/tabs';
 import { APP_STATE_STORAGE_KEY } from './edit_index_pattern_state_container';
 
 const codeStyle = {
