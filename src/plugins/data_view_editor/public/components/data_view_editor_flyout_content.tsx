@@ -295,6 +295,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             onAllowHiddenChange={() => {
               form.getFields().title.validate();
             }}
+            defaultVisible={editData?.getAllowHidden()}
           />
         </Form>
         <Footer

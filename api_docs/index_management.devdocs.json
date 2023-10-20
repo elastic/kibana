@@ -848,7 +848,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; }>; readonly enableIndexStats: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; }>; readonly enableIndexStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; }"
         ],
         "path": "x-pack/plugins/index_management/server/config.ts",
         "deprecated": false,
@@ -1526,13 +1526,14 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.DataStream.lifecycle",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "lifecycle",
             "description": [],
             "signature": [
+              "(",
               "IndicesDataLifecycleWithRollover",
-              " | undefined"
+              " & { enabled?: boolean | undefined; }) | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,

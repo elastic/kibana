@@ -13,6 +13,7 @@ import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { Histogram } from '@kbn/ml-chi2test';
 
+import { i18n } from '@kbn/i18n';
 import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
 import { DATA_COMPARISON_TYPE } from '../constants';
 import type { DataDriftField, Feature } from '../types';
@@ -43,7 +44,7 @@ export const SingleDistributionChart = ({
     <Chart>
       <Tooltip body={DataComparisonChartTooltipBody} />
 
-      <Settings />
+      <Settings locale={i18n.getLocale()} />
       <Axis
         id="vertical"
         position={Position.Left}

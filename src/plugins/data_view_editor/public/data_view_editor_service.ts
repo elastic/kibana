@@ -342,6 +342,7 @@ export class DataViewEditorService {
 
     const getFieldsOptions: GetFieldsOptions = {
       pattern: this.indexPattern,
+      allowHidden: this.allowHidden,
     };
     if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;

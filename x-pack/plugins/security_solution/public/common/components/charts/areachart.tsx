@@ -12,6 +12,7 @@ import { Axis, AreaSeries, Chart, Position, ScaleType, Settings } from '@elastic
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
 
 import { EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useThrottledResizeObserver } from '../utils';
 import { ChartPlaceHolder } from './chart_place_holder';
 import { useTimeZone } from '../../lib/kibana';
@@ -88,6 +89,7 @@ export const AreaChartBaseComponent = ({
   const xAxisId = `group-${data[0].key}-x`;
   const yAxisId = `group-${data[0].key}-y`;
   const settings: SettingsProps = {
+    locale: i18n.getLocale(),
     ...chartDefaultSettings,
     ...themes,
     ...get('configs.settings', chartConfigs),
