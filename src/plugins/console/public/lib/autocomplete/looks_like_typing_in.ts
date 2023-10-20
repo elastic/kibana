@@ -67,7 +67,7 @@ export const looksLikeTypingIn = (
   currentToken: Token,
   coreEditor: CoreEditor
 ): boolean => {
-  // if the column position moves to the right in the same line and the  current
+  // if the column position moves to the right in the same line and the current
   // token length is 1, then the user is possibly typing in a character.
   if (
     lastEvaluatedToken.position.column < currentToken.position.column &&
