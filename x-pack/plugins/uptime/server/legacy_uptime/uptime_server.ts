@@ -86,6 +86,9 @@ export const initUptimeServer = (
           .get({
             access: 'public',
             path: routeDefinition.path,
+            options: {
+              tags: options?.tags,
+            },
           })
           .addVersion(
             {
@@ -109,6 +112,9 @@ export const initUptimeServer = (
           .put({
             access: 'public',
             path: routeDefinition.path,
+            options: {
+              tags: options?.tags,
+            },
           })
           .addVersion(
             {
