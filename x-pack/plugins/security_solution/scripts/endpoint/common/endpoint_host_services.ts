@@ -391,7 +391,7 @@ const enrollHostWithFleet = async ({
     if (process.env.CI) {
       const { stdout: vagrantSTDOUT } = await execa(
         'vagrant',
-        ['ssh', '--', 'sudo sh -c \'tail /opt/Elastic/Agent/elastic-agent-*\''],
+        ['ssh', '--', 'sudo sh -c \'cat /opt/Elastic/Agent/elastic-agent-*\''],
         {
           env: {
             VAGRANT_CWD,
