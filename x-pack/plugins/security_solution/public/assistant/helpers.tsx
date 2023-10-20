@@ -49,7 +49,12 @@ export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetails
   return getFieldsAsCsv(allFields);
 };
 
-const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = ['kql', 'dsl', 'eql'];
+const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = [
+  'kql',
+  'dsl',
+  'eql',
+  'esql',
+];
 
 /**
  * Returns message contents with replacements applied.

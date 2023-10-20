@@ -29,6 +29,8 @@ import {
   updateDataView,
   updateEqlOptions,
 } from '../../timelines/store/timeline/actions';
+import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { getSavedSearchForQuery } from './helpers';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -49,6 +51,8 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   ...rest
 }) => {
   const dispatch = useDispatch();
+
+  const { restoreDiscoverAppStateFromSavedSearch } = useDiscoverInTimelineContext();
 
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
@@ -103,6 +107,49 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
                 activeTab: TimelineTabs.eql,
               })
             );
+            break;
+          case 'esql':
+            // is ESQL
+            // const savedSearch = getSavedSearchForQuery(dataProviders[0].kqlQuery);
+            // restoreDiscoverAppStateFromSavedSearch(savedSearch);
+            // discoverStateContainer.current?.appState.update({
+            //   query: {
+            //     query: dataProviders[0].kqlQuery,
+            //     language: 'esql',
+            //   },
+            // });
+            // discoverStateContainer.current?.globalState.set({
+            //   query: {
+            //     query: dataProviders[0].kqlQuery,
+            //     language: 'esql',
+            //   },
+            // });
+            // discoverStateContainer.current?.stateStorage.set(
+            //   'query.esql',
+            //   dataProviders[0].kqlQuery,
+            //   { replace: true }
+            // );
+            // discoverStateContainer.current?.actions.initializeAndSync();
+
+            // setDiscoverStateContainer({
+            //   ...discoverStateContainer.current,
+            //   appState: {
+            //     ...discoverStateContainer.current?.appState,
+            //     query: { query: dataProviders[0].kqlQuery, language: 'esql' },
+            //   },
+            // });
+
+            restoreDiscoverAppStateFromSavedSearch(
+              getSavedSearchForQuery(dataProviders[0].kqlQuery)
+            );
+
+            dispatch(
+              setActiveTabTimeline({
+                id: TimelineId.active,
+                activeTab: TimelineTabs.esql,
+              })
+            );
+
             break;
           case 'kql':
             // is KQL
@@ -172,13 +219,14 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     }
   }, [
     dataProviders,
-    clearTimeline,
-    dispatch,
-    defaultDataView.id,
-    signalIndexName,
     filters,
     timeRange,
     keepDataView,
+    dispatch,
+    clearTimeline,
+    restoreDiscoverAppStateFromSavedSearch,
+    defaultDataView.id,
+    signalIndexName,
   ]);
 
   return asEmptyButton ? (
