@@ -55,7 +55,6 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
             rulesClient,
             ruleId,
           });
-
           if (rule != null) {
             const transformed = transform(rule);
             if (transformed == null) {
