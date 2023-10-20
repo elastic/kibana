@@ -386,6 +386,46 @@ const enrollHostWithFleet = async ({
     log.info(e);
   }
 
+  try {
+    let stdout: string;
+    if (process.env.CI) {
+      const { stdout: vagrantSTDOUT } = await execa(
+        'vagrant',
+        ['ssh', '--', 'sudo su', 'cd /opt/Elastic/Agent', 'tail elastic-agent-*'],
+        {
+          env: {
+            VAGRANT_CWD,
+          },
+        }
+      );
+      stdout = vagrantSTDOUT;
+    } else {
+      stdout = '';
+    }
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      log.info(e);
+    });
+    const { stdout: pwdA } = await execa('pwd');
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      log.info(e);
+    });
+
+    log.info(`pwd: ${pwdA}`);
+    fs.writeFileSync(
+      '../../../../../../target/kibana-security-solution/cypress/results/agent-logs.txt',
+      stdout
+    );
+    log.info(stdout);
+  } catch (e) {
+    log.info(e);
+  }
+
   // log.info(`Agent status: ${result?.stdout}`);
 
   log.info(`Agent enrolled with Fleet`, agent.status);
