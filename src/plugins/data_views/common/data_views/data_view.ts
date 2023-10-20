@@ -160,6 +160,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       fieldAttrs,
       allowNoIndex: this.allowNoIndex,
       name: this.name,
+      allowHidden: this.getAllowHidden(),
     };
 
     // Filter undefined values from the spec
