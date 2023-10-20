@@ -9,6 +9,7 @@ import { fireEvent, waitFor } from '@testing-library/dom';
 import { cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import Router from 'react-router-dom';
 
 import { paths } from '../../../common/locators/paths';
