@@ -82,7 +82,7 @@ const appDependencies = {
     enableLegacyTemplates: true,
     enableIndexActions: true,
     enableIndexStats: true,
-    enableIndexDetailsPage: false,
+    editableIndexSettings: 'all',
   },
 } as any;
 
