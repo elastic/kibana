@@ -6,13 +6,13 @@
  */
 
 import { partition } from 'lodash';
-import type { BulkGetRecordsResponse, OracleRecord, OracleRecordError } from './types';
+import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
 
 export const isRecordError = (so: OracleRecord | OracleRecordError): so is OracleRecordError =>
   (so as OracleRecordError).error != null;
 
 export const partitionRecords = (
-  res: BulkGetRecordsResponse
+  res: BulkGetOracleRecordsResponse
 ): [OracleRecord[], OracleRecordError[]] => {
   const [errors, validRecords] = partition(res, isRecordError) as [
     OracleRecordError[],

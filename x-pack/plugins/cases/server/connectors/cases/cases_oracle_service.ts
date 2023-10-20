@@ -11,18 +11,14 @@ import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
 import { isSOError } from '../../common/utils';
 import { CryptoService } from './crypto_service';
 import type {
-  BulkGetRecordsResponse,
+  BulkCreateOracleRecordRequest,
+  BulkGetOracleRecordsResponse,
   OracleKey,
   OracleRecord,
   OracleRecordCreateRequest,
 } from './types';
-import { partitionRecords } from './utils';
 
 type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
-type BulkCreateRequest = Array<{
-  recordId: string;
-  payload: OracleRecordCreateRequest;
-}>;
 
 export class CasesOracleService {
   private readonly log: Logger;
@@ -73,7 +69,7 @@ export class CasesOracleService {
     return this.getRecordResponse(oracleRecord);
   }
 
-  public async bulkGetRecords(ids: string[]): Promise<BulkGetRecordsResponse> {
+  public async bulkGetRecords(ids: string[]): Promise<BulkGetOracleRecordsResponse> {
     this.log.debug(`Getting oracle records with IDs: ${ids}`);
 
     const oracleRecords = (await this.unsecuredSavedObjectsClient.bulkGet<OracleRecordAttributes>(
@@ -107,7 +103,9 @@ export class CasesOracleService {
     return this.getRecordResponse(oracleRecord);
   }
 
-  public async bulkCreateRecord(records: BulkCreateRequest): Promise<BulkGetRecordsResponse> {
+  public async bulkCreateRecord(
+    records: BulkCreateOracleRecordRequest
+  ): Promise<BulkGetOracleRecordsResponse> {
     const recordIds = records.map((record) => record.recordId);
 
     this.log.debug(`Creating oracle record with ID: ${recordIds}`);
@@ -131,40 +129,6 @@ export class CasesOracleService {
       )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
 
     return this.getBulkRecordsResponse(oracleRecords);
-  }
-
-  public async bulkGetOrCreateRecords(records: BulkCreateRequest): Promise<OracleRecord[]> {
-    const recordsMap = new Map<string, OracleRecordCreateRequest>(
-      records.map(({ recordId, payload }) => [recordId, payload])
-    );
-    const bulkCreateReq: BulkCreateRequest = [];
-
-    const ids = records.map(({ recordId }) => recordId);
-
-    const bulkGetRes = await this.bulkGetRecords(ids);
-    const [bulkGetValidRecords, bulkGetRecordsErrors] = partitionRecords(bulkGetRes);
-
-    for (const error of bulkGetRecordsErrors) {
-      if (error.id && recordsMap.has(error.id)) {
-        bulkCreateReq.push({
-          recordId: error.id,
-          payload: recordsMap.get(error.id) ?? { cases: [], rules: [], grouping: {} },
-        });
-      }
-    }
-
-    /**
-     * TODO: Create records with only 404 errors
-     * All others should throw an error and retry again
-     */
-    const bulkCreateRes = await this.bulkCreateRecord(bulkCreateReq);
-
-    /**
-     * TODO: Retry on errors
-     */
-    const [bulkCreateValidRecords, _] = partitionRecords(bulkCreateRes);
-
-    return [...bulkGetValidRecords, ...bulkCreateValidRecords];
   }
 
   public async increaseCounter(recordId: string): Promise<OracleRecord> {
@@ -204,7 +168,7 @@ export class CasesOracleService {
 
   private getBulkRecordsResponse(
     oracleRecords: SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>
-  ): BulkGetRecordsResponse {
+  ): BulkGetOracleRecordsResponse {
     return oracleRecords.saved_objects.map((oracleRecord) => {
       if (isSOError(oracleRecord)) {
         return { ...oracleRecord.error, id: oracleRecord.id };

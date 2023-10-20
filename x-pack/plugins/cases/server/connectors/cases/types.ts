@@ -51,4 +51,9 @@ export interface OracleRecordCreateRequest {
   grouping: Record<string, unknown>;
 }
 
-export type BulkGetRecordsResponse = Array<OracleRecord | SavedObjectError>;
+export type BulkGetOracleRecordsResponse = Array<OracleRecord | SavedObjectError>;
+
+export type BulkCreateOracleRecordRequest = Array<{
+  recordId: string;
+  payload: OracleRecordCreateRequest;
+}>;

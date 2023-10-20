@@ -10,14 +10,24 @@ import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { pick } from 'lodash';
 import { CASES_CONNECTOR_SUB_ACTION } from './constants';
-import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
+import type {
+  BulkCreateOracleRecordRequest,
+  CasesConnectorConfig,
+  CasesConnectorRunParams,
+  CasesConnectorSecrets,
+  OracleRecord,
+  OracleRecordCreateRequest,
+} from './types';
 import { CasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
+import { partitionRecords } from './utils';
 
-interface GroupingMapValue {
+interface GroupedAlerts {
   alerts: CasesConnectorRunParams['alerts'];
   grouping: Record<string, unknown>;
 }
+
+type GroupedAlertsWithOracleKey = GroupedAlerts & { oracleKey: string };
 
 export class CasesConnector extends SubActionConnector<
   CasesConnectorConfig,
@@ -59,9 +69,9 @@ export class CasesConnector extends SubActionConnector<
   private groupAlerts({
     alerts,
     groupingBy,
-  }: Pick<CasesConnectorRunParams, 'alerts' | 'groupingBy'>): Map<string, GroupingMapValue> {
+  }: Pick<CasesConnectorRunParams, 'alerts' | 'groupingBy'>): GroupedAlerts[] {
     const uniqueGroupingByFields = Array.from(new Set<string>(groupingBy));
-    const groupingMap = new Map<string, GroupingMapValue>();
+    const groupingMap = new Map<string, GroupedAlerts>();
 
     const filteredAlerts = alerts.filter((alert) =>
       uniqueGroupingByFields.every((groupingByField) => Object.hasOwn(alert, groupingByField))
@@ -78,22 +88,22 @@ export class CasesConnector extends SubActionConnector<
       }
     }
 
-    return groupingMap;
+    return Array.from(groupingMap.values());
   }
 
   private generateOracleKeys(
     params: CasesConnectorRunParams,
-    groupingMap: Map<string, GroupingMapValue>
-  ): Map<string, GroupingMapValue> {
+    groupedAlerts: GroupedAlerts[]
+  ): GroupedAlertsWithOracleKey[] {
     const { rule, owner } = params;
     /**
      * TODO: Take spaceId from the actions framework
      */
     const spaceId = 'default';
 
-    const oracleMap = new Map<string, GroupingMapValue>();
+    const oracleMap = new Map<string, GroupedAlertsWithOracleKey>();
 
-    for (const { grouping, alerts } of groupingMap.values()) {
+    for (const { grouping, alerts } of groupedAlerts) {
       const oracleKey = this.casesOracleService.getRecordId({
         ruleId: rule.id,
         grouping,
@@ -101,25 +111,73 @@ export class CasesConnector extends SubActionConnector<
         spaceId,
       });
 
-      oracleMap.set(oracleKey, { grouping, alerts });
+      oracleMap.set(oracleKey, { oracleKey, grouping, alerts });
     }
 
-    return oracleMap;
+    return Array.from(oracleMap.values());
   }
 
-  private getOracleRecord(groupingMap: Map<string, GroupingMapValue>): Promise<OracleRecord> {}
+  private async bulkGetOrCreateOracleRecords(
+    groupedAlertsWithOracleKey: GroupedAlertsWithOracleKey[]
+  ): Promise<OracleRecord[]> {
+    const bulkCreateReq: BulkCreateOracleRecordRequest = [];
+
+    const ids = groupedAlertsWithOracleKey.map(({ oracleKey }) => oracleKey);
+
+    const bulkGetRes = await this.casesOracleService.bulkGetRecords(ids);
+    const [bulkGetValidRecords, bulkGetRecordsErrors] = partitionRecords(bulkGetRes);
+
+    if (bulkGetRecordsErrors.length === 0) {
+      return bulkGetValidRecords;
+    }
+
+    const recordsMap = new Map<string, OracleRecordCreateRequest>(
+      groupedAlertsWithOracleKey.map(({ oracleKey, grouping }) => [
+        oracleKey,
+        // TODO: Add the rule info
+        { cases: [], rules: [], grouping },
+      ])
+    );
+
+    for (const error of bulkGetRecordsErrors) {
+      if (error.id && recordsMap.has(error.id)) {
+        bulkCreateReq.push({
+          recordId: error.id,
+          payload: recordsMap.get(error.id) ?? { cases: [], rules: [], grouping: {} },
+        });
+      }
+    }
+
+    /**
+     * TODO: Create records with only 404 errors
+     * All others should throw an error and retry again
+     */
+    const bulkCreateRes = await this.casesOracleService.bulkCreateRecord(bulkCreateReq);
+
+    /**
+     * TODO: Retry on errors
+     */
+    const [bulkCreateValidRecords, _] = partitionRecords(bulkCreateRes);
+
+    return [...bulkGetValidRecords, ...bulkCreateValidRecords];
+  }
 
   public async run(params: CasesConnectorRunParams) {
     const { alerts, groupingBy } = params;
+
     /**
      * TODO: Handle when grouping is not defined
      * One case should be created per rule
      */
-    const groupingMap = this.groupAlerts({ alerts, groupingBy });
-    const oracleMap = this.generateOracleKeys(params, groupingMap);
-
-    const oracleKeys = oracleMap.keys();
-
-    const oracleBulkGetRes = this.casesOracleService.bulkGetOrCreateRecords(Array.from(oracleKeys));
+    const groupedAlerts = this.groupAlerts({ alerts, groupingBy });
+    const groupedAlertsWithOracleKey = this.generateOracleKeys(params, groupedAlerts);
+    console.log(
+      '🚀 ~ file: cases_connector.ts:175 ~ run ~ groupedAlertsWithOracleKey:',
+      groupedAlertsWithOracleKey
+    );
+    /**
+     * Add circuit breakers to the number of oracles they can be created or retrieved
+     */
+    const oracleRecords = this.bulkGetOrCreateOracleRecords(groupedAlertsWithOracleKey);
   }
 }
