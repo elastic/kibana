@@ -36,7 +36,7 @@ describe('<KibanaErrorBoundary>', () => {
   });
 
   it('renders a "soft" callout when an unknown error is caught', async () => {
-    const reloadSpy = jest.spyOn(services, 'reloadWindow');
+    const reloadSpy = jest.spyOn(services, 'onClickRefresh');
 
     const { findByTestId, findByText } = render(
       <Template>
@@ -54,7 +54,7 @@ describe('<KibanaErrorBoundary>', () => {
   });
 
   it('renders a fatal callout when an unknown error is caught', async () => {
-    const reloadSpy = jest.spyOn(services, 'reloadWindow');
+    const reloadSpy = jest.spyOn(services, 'onClickRefresh');
 
     const { findByTestId, findByText } = render(
       <Template>
