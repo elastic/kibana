@@ -32,6 +32,8 @@ type OracleKeyWithOptionalGrouping = Optional<OracleKeyAllRequired, 'grouping'>;
 
 export type OracleKey = ExclusiveUnion<OracleKeyWithOptionalKey, OracleKeyWithOptionalGrouping>;
 
+export type CaseIdPayload = OracleKey & { counter: number };
+
 export interface OracleRecord {
   id: string;
   counter: number;

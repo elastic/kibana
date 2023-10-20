@@ -21,6 +21,7 @@ import type {
 import { CasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { partitionRecords } from './utils';
+import { CasesService } from './cases_service';
 
 interface GroupedAlerts {
   alerts: CasesConnectorRunParams['alerts'];
@@ -28,15 +29,18 @@ interface GroupedAlerts {
 }
 
 type GroupedAlertsWithOracleKey = GroupedAlerts & { oracleKey: string };
+type GroupedAlertsWithCaseId = GroupedAlertsWithOracleKey & { caseId: string };
 
 export class CasesConnector extends SubActionConnector<
   CasesConnectorConfig,
   CasesConnectorSecrets
 > {
-  private readonly casesOracleService;
+  private readonly casesOracleService: CasesOracleService;
+  private readonly casesService: CasesService;
 
   constructor(params: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>) {
     super(params);
+
     this.casesOracleService = new CasesOracleService({
       log: this.logger,
       /**
@@ -46,6 +50,9 @@ export class CasesConnector extends SubActionConnector<
        */
       unsecuredSavedObjectsClient: this.savedObjectsClient,
     });
+
+    this.casesService = new CasesService();
+
     this.registerSubActions();
   }
 
@@ -64,6 +71,30 @@ export class CasesConnector extends SubActionConnector<
    */
   protected getResponseErrorMessage(): string {
     throw new Error('Method not implemented.');
+  }
+
+  public async run(params: CasesConnectorRunParams) {
+    const { alerts, groupingBy } = params;
+
+    /**
+     * TODO: Handle when grouping is not defined
+     * One case should be created per rule
+     */
+    const groupedAlerts = this.groupAlerts({ alerts, groupingBy });
+    const groupedAlertsWithOracleKey = this.generateOracleKeys(params, groupedAlerts);
+
+    /**
+     * Add circuit breakers to the number of oracles they can be created or retrieved
+     */
+    const oracleRecords = await this.bulkGetOrCreateOracleRecords(
+      Array.from(groupedAlertsWithOracleKey.values())
+    );
+
+    const groupedAlertsWithCaseId = this.generateCaseIds(
+      params,
+      groupedAlertsWithOracleKey,
+      oracleRecords
+    );
   }
 
   private groupAlerts({
@@ -94,7 +125,7 @@ export class CasesConnector extends SubActionConnector<
   private generateOracleKeys(
     params: CasesConnectorRunParams,
     groupedAlerts: GroupedAlerts[]
-  ): GroupedAlertsWithOracleKey[] {
+  ): Map<string, GroupedAlertsWithOracleKey> {
     const { rule, owner } = params;
     /**
      * TODO: Take spaceId from the actions framework
@@ -114,7 +145,7 @@ export class CasesConnector extends SubActionConnector<
       oracleMap.set(oracleKey, { oracleKey, grouping, alerts });
     }
 
-    return Array.from(oracleMap.values());
+    return oracleMap;
   }
 
   private async bulkGetOrCreateOracleRecords(
@@ -162,22 +193,37 @@ export class CasesConnector extends SubActionConnector<
     return [...bulkGetValidRecords, ...bulkCreateValidRecords];
   }
 
-  public async run(params: CasesConnectorRunParams) {
-    const { alerts, groupingBy } = params;
+  private generateCaseIds(
+    params: CasesConnectorRunParams,
+    groupedAlertsWithOracleKey: Map<string, GroupedAlertsWithOracleKey>,
+    oracleRecords: OracleRecord[]
+  ): Map<string, GroupedAlertsWithCaseId> {
+    const { rule, owner } = params;
 
     /**
-     * TODO: Handle when grouping is not defined
-     * One case should be created per rule
+     * TODO: Take spaceId from the actions framework
      */
-    const groupedAlerts = this.groupAlerts({ alerts, groupingBy });
-    const groupedAlertsWithOracleKey = this.generateOracleKeys(params, groupedAlerts);
-    console.log(
-      '🚀 ~ file: cases_connector.ts:175 ~ run ~ groupedAlertsWithOracleKey:',
-      groupedAlertsWithOracleKey
-    );
-    /**
-     * Add circuit breakers to the number of oracles they can be created or retrieved
-     */
-    const oracleRecords = this.bulkGetOrCreateOracleRecords(groupedAlertsWithOracleKey);
+    const spaceId = 'default';
+
+    const casesMap = new Map<string, GroupedAlertsWithCaseId>();
+
+    for (const oracleRecord of oracleRecords) {
+      const { alerts, grouping } = groupedAlertsWithOracleKey.get(oracleRecord.id) ?? {
+        alerts: [],
+        grouping: {},
+      };
+
+      const caseId = this.casesService.getCaseId({
+        ruleId: rule.id,
+        grouping,
+        owner,
+        spaceId,
+        counter: oracleRecord.counter,
+      });
+
+      casesMap.set(caseId, { caseId, alerts, grouping, oracleKey: oracleRecord.id });
+    }
+
+    return casesMap;
   }
 }
