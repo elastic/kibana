@@ -58,7 +58,7 @@ class ErrorBoundaryInternal extends React.Component<
             error={error}
             errorInfo={errorInfo}
             name={componentName}
-            reloadWindow={this.props.services.reloadWindow}
+            onClickRefresh={this.props.services.onClickRefresh}
           />
         );
       } else {
@@ -67,7 +67,7 @@ class ErrorBoundaryInternal extends React.Component<
             error={error}
             errorInfo={errorInfo}
             name={componentName}
-            reloadWindow={this.props.services.reloadWindow}
+            onClickRefresh={this.props.services.onClickRefresh}
           />
         );
       }

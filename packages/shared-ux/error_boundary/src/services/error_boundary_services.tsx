@@ -18,10 +18,10 @@ const Context = React.createContext<KibanaErrorBoundaryServices | null>(null);
  */
 export const KibanaErrorBoundaryDepsProvider: FC<KibanaErrorBoundaryServices> = ({
   children,
-  reloadWindow,
+  onClickRefresh,
   errorService,
 }) => {
-  return <Context.Provider value={{ reloadWindow, errorService }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ onClickRefresh, errorService }}>{children}</Context.Provider>;
 };
 
 /**
@@ -30,7 +30,7 @@ export const KibanaErrorBoundaryDepsProvider: FC<KibanaErrorBoundaryServices> = 
 export const KibanaErrorBoundaryProvider: FC = ({ children }) => {
   const value: KibanaErrorBoundaryServices = useMemo(
     () => ({
-      reloadWindow: () => window.location.reload(),
+      onClickRefresh: () => window.location.reload(),
       errorService: new KibanaErrorService(),
     }),
     []

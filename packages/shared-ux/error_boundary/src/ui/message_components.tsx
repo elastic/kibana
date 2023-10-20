@@ -31,7 +31,7 @@ export interface ErrorCalloutProps {
   error: Error;
   errorInfo: Partial<React.ErrorInfo> | null;
   name: string | null;
-  reloadWindow: () => void;
+  onClickRefresh: () => void;
 }
 
 const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props) => {
@@ -81,7 +81,7 @@ const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props)
 };
 
 export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
-  const { reloadWindow } = props;
+  const { onClickRefresh } = props;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   return (
@@ -97,7 +97,7 @@ export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
               color="danger"
               iconType="refresh"
               fill={true}
-              onClick={reloadWindow}
+              onClick={onClickRefresh}
               data-test-subj="fatalPromptReloadBtn"
             >
               {strings.fatal.callout.pageReloadButton()}
@@ -118,7 +118,7 @@ export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
 };
 
 export const RecoverablePrompt = (props: ErrorCalloutProps) => {
-  const { reloadWindow } = props;
+  const { onClickRefresh } = props;
   return (
     <EuiEmptyPrompt
       iconType="warning"
@@ -130,7 +130,7 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
           color="warning"
           iconType="refresh"
           fill={true}
-          onClick={reloadWindow}
+          onClick={onClickRefresh}
           data-test-subj="recoverablePromptReloadBtn"
         >
           {strings.recoverable.callout.pageReloadButton()}

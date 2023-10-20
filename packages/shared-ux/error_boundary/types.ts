@@ -13,6 +13,6 @@ import { KibanaErrorService } from './src/services/error_service';
  * @internal
  */
 export interface KibanaErrorBoundaryServices {
-  reloadWindow: () => void;
+  onClickRefresh: () => void;
   errorService: KibanaErrorService;
 }

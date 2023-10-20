@@ -26,13 +26,13 @@ export class KibanaErrorBoundaryStorybookMock extends AbstractStorybookMock<
 
   getServices(params: Params = {}): KibanaErrorBoundaryServices {
     const reloadWindowAction = action('Reload window');
-    const reloadWindow = () => {
+    const onClickRefresh = () => {
       reloadWindowAction();
     };
 
     return {
       ...params,
-      reloadWindow,
+      onClickRefresh,
       errorService: new KibanaErrorService(),
     };
   }

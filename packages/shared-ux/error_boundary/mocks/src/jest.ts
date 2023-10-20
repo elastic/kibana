@@ -10,9 +10,8 @@ import { KibanaErrorService } from '../../src/services/error_service';
 import { KibanaErrorBoundaryServices } from '../../types';
 
 export const getServicesMock = (): KibanaErrorBoundaryServices => {
-  const reloadWindow = jest.fn().mockResolvedValue(undefined);
   return {
-    reloadWindow,
+    onClickRefresh: jest.fn().mockResolvedValue(undefined),
     errorService: new KibanaErrorService(),
   };
 };
