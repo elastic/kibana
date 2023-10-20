@@ -119,6 +119,10 @@ describe('FieldEditor', () => {
       fields,
       getFormatterForField: () => ({ params: () => ({}) }),
       getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
+      upsertScriptedField: () => undefined,
+      setFieldCustomLabel: (name: string, label: string) => {
+        indexPattern.fields.getByName(name)!.customLabel = label;
+      },
     } as unknown as DataView;
   });
 

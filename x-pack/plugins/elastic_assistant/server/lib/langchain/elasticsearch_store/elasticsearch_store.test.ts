@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   IndicesCreateResponse,
-  MlGetTrainedModelsResponse,
+  MlGetTrainedModelsStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { Document } from 'langchain/document';
 
@@ -142,17 +142,69 @@ describe('ElasticsearchStore', () => {
     });
   });
 
-  describe('Model Management', () => {
-    it('Checks if a model is installed', async () => {
-      mockEsClient.ml.getTrainedModels.mockResolvedValue({
-        trained_model_configs: [{ fully_defined: true }],
-      } as MlGetTrainedModelsResponse);
+  describe('isModelInstalled', () => {
+    it('returns true if model is started and fully allocated', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              allocation_status: {
+                state: 'fully_allocated',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
 
       const isInstalled = await esStore.isModelInstalled('.elser_model_2');
 
       expect(isInstalled).toBe(true);
-      expect(mockEsClient.ml.getTrainedModels).toHaveBeenCalledWith({
-        include: 'definition_status',
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+        model_id: '.elser_model_2',
+      });
+    });
+
+    it('returns false if model is not started', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'starting',
+              allocation_status: {
+                state: 'fully_allocated',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
+
+      const isInstalled = await esStore.isModelInstalled('.elser_model_2');
+
+      expect(isInstalled).toBe(false);
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+        model_id: '.elser_model_2',
+      });
+    });
+
+    it('returns false if model is not fully allocated', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              allocation_status: {
+                state: 'starting',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
+
+      const isInstalled = await esStore.isModelInstalled('.elser_model_2');
+
+      expect(isInstalled).toBe(false);
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
         model_id: '.elser_model_2',
       });
     });

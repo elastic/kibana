@@ -18,7 +18,6 @@ import type { PackSavedObject, PackItem } from '../../public/packs/types';
 import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
 import { request } from './common';
-import { ServerlessRoleName } from '../support/roles';
 
 export const savedQueryFixture = {
   id: generateRandomStringName(1)[0],
@@ -137,14 +136,8 @@ export const loadLiveQuery = (
     },
   }).then((response) => response.body.data);
 
-export const loadRule = (includeResponseActions = false) => {
-  cy.login('elastic');
-  cy.visit('/app/security/rules');
-  cy.getBySel('globalLoadingIndicator').should('exist');
-  cy.getBySel('globalLoadingIndicator').should('not.exist');
-  cy.login(ServerlessRoleName.SOC_MANAGER);
-
-  return request<RuleResponse>({
+export const loadRule = (includeResponseActions = false) =>
+  request<RuleResponse>({
     method: 'POST',
     body: {
       type: 'query',
@@ -234,7 +227,6 @@ export const loadRule = (includeResponseActions = false) => {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
   }).then((response) => response.body);
-};
 
 export const cleanupRule = (id: string) => {
   request({
