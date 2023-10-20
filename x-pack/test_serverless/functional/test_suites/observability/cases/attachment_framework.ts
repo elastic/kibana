@@ -26,6 +26,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.login();
+        await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
@@ -47,6 +48,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
+        await kibanaServer.savedObjects.cleanStandardList();
         await svlCommonPage.forceLogout();
       });
 
