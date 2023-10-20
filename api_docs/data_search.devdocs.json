@@ -32129,9 +32129,7 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<",
-          "TransportResult",
-          "<T, unknown>>"
+          "<T>"
         ],
         "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
         "deprecated": false,
