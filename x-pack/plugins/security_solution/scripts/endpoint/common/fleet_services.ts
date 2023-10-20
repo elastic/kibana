@@ -7,6 +7,8 @@
 
 import { map, pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
+import execa from 'execa';
+import fs from 'fs';
 import type {
   Agent,
   AgentStatus,
@@ -53,6 +55,7 @@ import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
+export const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -171,7 +174,56 @@ export const waitForHostToEnroll = async (
     }
   }
 
+  try {
+    let stdout: string;
+    if (process.env.CI) {
+      const { stdout: vagrantSTDOUT } = await execa(
+        'vagrant',
+        ['ssh', '--', 'sudo elastic-agent status'],
+        {
+          env: {
+            VAGRANT_CWD,
+          },
+        }
+      );
+      stdout = vagrantSTDOUT;
+    } else {
+      const { stdout: mpSTDOUT } = await execa('multipass', [
+        'exec',
+        hostname,
+        '--',
+        'sudo',
+        'elastic-agent',
+        'status',
+      ]);
+      stdout = mpSTDOUT;
+    }
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      logger?.info(e);
+    });
+    const { stdout: pwdA } = await execa('pwd');
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      logger?.info(e);
+    });
+
+    logger?.info(`pwd: ${pwdA}`);
+    fs.writeFileSync(
+      '../../../../../../target/kibana-security-solution/cypress/results/agent-status.txt',
+      stdout
+    );
+    logger?.info(stdout);
+  } catch (e) {
+    logger?.info(e);
+  }
+
   if (!found) {
+
     throw new Error(
       `Timed out waiting for host [${hostname}] to show up in Fleet in ${
         timeoutMs / 60
