@@ -183,7 +183,7 @@ describe('CspConfig', () => {
     test(`adds, for example, CDN host name to directives along with 'self'`, () => {
       const config = new CspConfig(defaultConfig, { default_src: ['foo.bar'] });
       expect(config.header).toEqual(
-        "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; default-src 'self' foo.bar"
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; default-src 'self' foo.bar"
       );
     });
 
@@ -192,7 +192,7 @@ describe('CspConfig', () => {
         /* empty */
       });
       expect(config.header).toEqual(
-        "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"
       );
     });
     test('Passing an empty array in additional config does not affect existing config', () => {
@@ -201,7 +201,7 @@ describe('CspConfig', () => {
         worker_src: ['foo.bar'],
       });
       expect(config.header).toEqual(
-        "script-src 'self'; worker-src blob: 'self' foo.bar; style-src 'unsafe-inline' 'self'"
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob: foo.bar; style-src 'report-sample' 'self' 'unsafe-inline'"
       );
     });
   });
