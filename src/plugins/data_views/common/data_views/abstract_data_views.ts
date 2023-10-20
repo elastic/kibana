@@ -180,7 +180,6 @@ export abstract class AbstractDataView {
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
-    this.allowNoIndex = spec.allowNoIndex || false;
     this.allowHidden = spec.allowHidden || false;
   }
 

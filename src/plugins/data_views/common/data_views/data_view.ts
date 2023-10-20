@@ -75,46 +75,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     // set values
     this.fields.replaceAll(Object.values(spec.fields || {}));
-    this.type = spec.type;
-    this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
-    this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
-    this.namespaces = spec.namespaces || [];
-    this.name = spec.name || '';
   }
-
-  /**
-   * Get name of Data View
-   */
-  getName = () => (this.name ? this.name : this.title);
-
-  /**
-   * Get index pattern
-   * @returns index pattern string
-   */
-
-  getIndexPattern = () => this.title;
-
-  /**
-   * Set index pattern
-   * @param string index pattern string
-   */
-
-  setIndexPattern = (indexPattern: string) => {
-    this.title = indexPattern;
-  };
-
-  /**
-   * Get last saved saved object fields
-   */
-  getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
-
-  /**
-   * Reset last saved saved object fields. Used after saving.
-   */
-  resetOriginalSavedObjectBody = () => {
-    this.originalSavedObjectBody = this.getAsSavedObjectBody();
-  };
 
   /**
    * Returns scripted fields
@@ -299,14 +260,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
   getFieldByName(name: string): DataViewField | undefined {
     if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
-  }
-
-  /**
-   * Get aggregation restrictions. Rollup fields can only perform a subset of aggregations.
-   */
-
-  getAggregationRestrictions() {
-    return this.typeMeta?.aggs;
   }
 
   /**
