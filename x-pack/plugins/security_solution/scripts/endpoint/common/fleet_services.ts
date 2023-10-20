@@ -175,56 +175,55 @@ export const waitForHostToEnroll = async (
   }
 
   try {
-      let stdout: string;
-      if (process.env.CI) {
-        const { stdout: vagrantSTDOUT } = await execa(
-          'vagrant',
-          ['ssh', '--', 'sudo sh -c \'cat /opt/Elastic/Agent/elastic-agent-*\''],
-          {
-            env: {
-              VAGRANT_CWD,
-            },
-          }
-        );
-        stdout = vagrantSTDOUT;
-      } else {
-        stdout = '';
-      }
-      await execa('mkdir', [
-        '-p',
-        '../../../../../../target/kibana-security-solution/cypress/results/',
-      ]).catch((e) => {
-        logger?.info(e);
-      });
-      const { stdout: pwdA } = await execa('pwd');
-      await execa('mkdir', [
-        '-p',
-        '../../../../../../target/kibana-security-solution/cypress/results/',
-      ]).catch((e) => {
-        logger?.info(e);
-      });
-
-      logger?.info(`pwd: ${pwdA}`);
-      fs.writeFileSync(
-        '../../../../../../target/kibana-security-solution/cypress/results/agent-logs.txt',
-        stdout
+    let stdout: string;
+    if (process.env.CI) {
+      const { stdout: vagrantSTDOUT } = await execa(
+        'vagrant',
+        ['ssh', '--', "sudo sh -c 'cat /opt/Elastic/Agent/elastic-agent-*'"],
+        {
+          env: {
+            VAGRANT_CWD,
+          },
+        }
       );
-      logger?.info(stdout);
-    } catch (e) {
+      stdout = vagrantSTDOUT;
+    } else {
+      stdout = '';
+    }
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
       logger?.info(e);
-    }
+    });
+    const { stdout: pwdA } = await execa('pwd');
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      logger?.info(e);
+    });
 
-    if (!found) {
+    logger?.info(`pwd: ${pwdA}`);
+    fs.writeFileSync(
+      '../../../../../../target/kibana-security-solution/cypress/results/agent-logs.txt',
+      stdout
+    );
+    logger?.info(stdout);
+  } catch (e) {
+    logger?.info(e);
+  }
 
-      throw new Error(
-        `Timed out waiting for host [${hostname}] to show up in Fleet in ${
-          timeoutMs / 60
-        } second timeout after ${(Date.now() - started.getTime()) / 60} ms`
-      );
-    }
+  if (!found) {
+    throw new Error(
+      `Timed out waiting for host [${hostname}] to show up in Fleet in ${
+        timeoutMs / 60
+      } second timeout after ${(Date.now() - started.getTime()) / 60} ms`
+    );
+  }
 
-    return found;
-  };
+  return found;
+};
 
 export const fetchFleetServerHostList = async (
   kbnClient: KbnClient
