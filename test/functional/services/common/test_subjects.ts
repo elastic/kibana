@@ -31,8 +31,6 @@ export class TestSubjects extends FtrService {
   public readonly TRY_TIME = this.config.get('timeouts.try');
   public readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
 
-  public readonly browser = this.ctx.getService('browser');
-
   /**
    * Get a promise that resolves with `true` when an element exists, if the element doesn't exist
    * yet it will wait until the element does exist. If we wait until the timeout and the element
@@ -170,7 +168,7 @@ export class TestSubjects extends FtrService {
     this.log.debug(`TestSubjects.pressEnter(${selector})`);
     const element = await this.find(selector, timeout);
     await element.focus();
-    await element.pressKeys(this.browser.keys.ENTER);
+    await element.pressKeys(this.ctx.getService('browser').keys.ENTER);
   }
 
   public async doubleClick(selector: string, timeout: number = this.FIND_TIME): Promise<void> {
