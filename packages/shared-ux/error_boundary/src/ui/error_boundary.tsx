@@ -23,11 +23,15 @@ interface ErrorBoundaryProps {
   children?: React.ReactNode;
 }
 
+interface ServiceContext {
+  services: KibanaErrorBoundaryServices;
+}
+
 class ErrorBoundaryInternal extends React.Component<
-  ErrorBoundaryProps & KibanaErrorBoundaryServices,
+  ErrorBoundaryProps & ServiceContext,
   ErrorBoundaryState
 > {
-  constructor(props: ErrorBoundaryProps & KibanaErrorBoundaryServices) {
+  constructor(props: ErrorBoundaryProps & ServiceContext) {
     super(props);
     this.state = {
       error: null,
@@ -38,7 +42,7 @@ class ErrorBoundaryInternal extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: Partial<React.ErrorInfo>) {
-    const { name, isFatal } = this.props.errorService.registerError(error, errorInfo);
+    const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
     this.setState(() => {
       return { error, errorInfo, componentName: name, isFatal };
     });
@@ -54,7 +58,7 @@ class ErrorBoundaryInternal extends React.Component<
             error={error}
             errorInfo={errorInfo}
             name={componentName}
-            reloadWindow={this.props.reloadWindow}
+            reloadWindow={this.props.services.reloadWindow}
           />
         );
       } else {
@@ -63,7 +67,7 @@ class ErrorBoundaryInternal extends React.Component<
             error={error}
             errorInfo={errorInfo}
             name={componentName}
-            reloadWindow={this.props.reloadWindow}
+            reloadWindow={this.props.services.reloadWindow}
           />
         );
       }
@@ -81,5 +85,5 @@ class ErrorBoundaryInternal extends React.Component<
  */
 export const KibanaErrorBoundary = (props: ErrorBoundaryProps) => {
   const services = useErrorBoundary();
-  return <ErrorBoundaryInternal {...props} {...services} />;
+  return <ErrorBoundaryInternal {...props} services={services} />;
 };
