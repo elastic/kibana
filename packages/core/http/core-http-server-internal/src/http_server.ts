@@ -614,7 +614,7 @@ export class HttpServer {
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
     const { authRequired, tags, body = {}, timeout } = route.options;
-    const { accepts: allow, maxBytes, output, parse } = body;
+    const { accepts: allow, override, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
@@ -641,9 +641,12 @@ export class HttpServer {
         // (All NP routes are already required to specify their own validation in order to access the payload)
         validate,
         // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
-        payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
+        payload: [allow, override, maxBytes, output, parse, timeout?.payload].some(
+          (x) => x !== undefined
+        )
           ? {
               allow,
+              override,
               maxBytes,
               output,
               parse,
