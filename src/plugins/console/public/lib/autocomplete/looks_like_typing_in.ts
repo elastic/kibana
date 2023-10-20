@@ -13,7 +13,7 @@ enum Move {
   ForwardOneToken, // the column position may jump to the next token by autocomplete
 }
 
-const knownTypingInPairsMap = new Map<Move, Map<string, Set<string>>>([
+const knownTypingInTokenTypes = new Map<Move, Map<string, Set<string>>>([
   [
     Move.ForwardOneCharacter,
     new Map<string, Set<string>>([
@@ -67,10 +67,9 @@ export const looksLikeTypingIn = (
   currentToken: Token,
   coreEditor: CoreEditor
 ): boolean => {
+  // if the column position moves to the right in the same line and the  current
+  // token length is 1, then the user is possibly typing in a character.
   if (
-    // if the column position moves to the right in the same line and the
-    // current token length is 1, then the user is possibly typing in a
-    // character.
     lastEvaluatedToken.position.column < currentToken.position.column &&
     lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
     currentToken.value.length === 1 &&
@@ -80,18 +79,23 @@ export const looksLikeTypingIn = (
       lastEvaluatedToken.position.column + 1 === currentToken.position.column
         ? Move.ForwardOneCharacter
         : Move.ForwardOneToken;
-    const knownTypingInPairs = knownTypingInPairsMap.get(move) ?? new Map<string, Set<string>>();
-    const currentTokenTypes = knownTypingInPairs.get(lastEvaluatedToken.type) ?? new Set<string>();
-    return currentTokenTypes.has(currentToken.type);
-  } else if (
-    // if the column or the line number have changed for the last token or
-    // user did not provided a new value, then we should not show autocomplete
-    // this guards against triggering autocomplete when clicking around the editor
+    const tokenTypesPairs = knownTypingInTokenTypes.get(move) ?? new Map<string, Set<string>>();
+    const currentTokenTypes = tokenTypesPairs.get(lastEvaluatedToken.type) ?? new Set<string>();
+    if (currentTokenTypes.has(currentToken.type)) {
+      return true;
+    }
+  }
+
+  // if the column or the line number have changed for the last token or
+  // user did not provided a new value, then we should not show autocomplete
+  // this guards against triggering autocomplete when clicking around the editor
+  if (
     lastEvaluatedToken.position.column !== currentToken.position.column ||
     lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
     lastEvaluatedToken.value === currentToken.value
   ) {
     return false;
   }
+
   return true;
 };
