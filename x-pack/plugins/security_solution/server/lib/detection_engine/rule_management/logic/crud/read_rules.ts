@@ -15,6 +15,7 @@ import type {
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleParams } from '../../../rule_schema';
 import { isAlertType } from '../../../rule_schema';
+import { migrateRuleLegacyInvestigationFields } from '../../utils/utils';
 import { findRules } from '../search/find_rules';
 
 export interface ReadRuleOptions {
@@ -47,7 +48,7 @@ export const readRules = async ({
             const { outcome, ...restOfRule } = rule;
             return restOfRule;
           }
-          return rule;
+          return migrateRuleLegacyInvestigationFields(rule);
         } else {
           return null;
         }
@@ -72,7 +73,7 @@ export const readRules = async ({
       if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
         return null;
       } else {
-        return ruleFromFind.data[0];
+        return migrateRuleLegacyInvestigationFields(ruleFromFind.data[0]);
       }
     } else {
       // should never get here, and yet here we are.

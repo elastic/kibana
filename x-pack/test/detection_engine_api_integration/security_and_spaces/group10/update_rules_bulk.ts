@@ -45,6 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('update_rules_bulk', () => {
     describe('deprecations', () => {
@@ -801,6 +802,91 @@ export default ({ getService }: FtrProviderContext) => {
             expect(updatedRule).to.eql(expectedRule);
           });
         });
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      before(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      it('errors if trying to update investigation fields using legacy format', async () => {
+        // update rule
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            {
+              ...getSimpleRule(),
+              name: 'New name',
+              rule_id: '2297be91-894c-4831-830f-b424a0ec84f0',
+              investigation_fields: ['client.foo'],
+            },
+          ])
+          .expect(400);
+
+        expect(body.message).to.eql(
+          '[request body]: Invalid value "["client.foo"]" supplied to "investigation_fields"'
+        );
+      });
+
+      it('updates a rule with legacy investigation fields', async () => {
+        // update rule
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            {
+              ...getSimpleRule(),
+              name: 'New name - used to have legacy investigation fields',
+              rule_id: '2297be91-894c-4831-830f-b424a0ec84f0',
+            },
+            {
+              ...getSimpleRule(),
+              name: 'New name - used to have legacy investigation fields, empty array',
+              rule_id: '2297be91-894c-4831-830f-b424a0ec5678',
+              investigation_fields: {
+                field_names: ['foo'],
+              },
+            },
+            {
+              ...getSimpleRule(),
+              name: 'New name - never had legacy investigation fields',
+              rule_id: '2297be91-894c-4831-830f-b424a0ec9102',
+              investigation_fields: {
+                field_names: ['bar'],
+              },
+            },
+          ])
+          .expect(200);
+
+        expect(body[0].investigation_fields).to.eql(undefined);
+        expect(body[0].name).to.eql('New name - used to have legacy investigation fields');
+
+        expect(body[1].investigation_fields).to.eql({
+          field_names: ['foo'],
+        });
+        expect(body[1].name).to.eql(
+          'New name - used to have legacy investigation fields, empty array'
+        );
+
+        expect(body[2].investigation_fields).to.eql({
+          field_names: ['bar'],
+        });
+        expect(body[2].name).to.eql('New name - never had legacy investigation fields');
       });
     });
   });

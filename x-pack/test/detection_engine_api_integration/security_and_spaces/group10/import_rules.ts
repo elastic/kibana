@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  QueryRuleCreateProps,
+  RuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -34,6 +37,7 @@ import {
   createLegacyRuleAction,
   getLegacyActionSO,
   createRule,
+  getRule,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
@@ -175,6 +179,18 @@ const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
   const connectorString = JSON.stringify(connector);
   const buffer = Buffer.from(`${rule1String}\n${connectorString}`);
   return buffer;
+};
+
+export const getSimpleRuleAsNdjsonWithLegacyInvestigationField = (
+  ruleIds: string[],
+  enabled = false,
+  overwrites: Partial<QueryRuleCreateProps>
+): Buffer => {
+  const stringOfRules = ruleIds.map((ruleId) => {
+    const simpleRule = { ...getSimpleRule(ruleId, enabled), ...overwrites };
+    return JSON.stringify(simpleRule);
+  });
+  return Buffer.from(stringOfRules.join('\n'));
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -1883,6 +1899,78 @@ export default ({ getService }: FtrProviderContext): void => {
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      beforeEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+      });
+
+      it('imports rule with investigation fields as array', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjsonWithLegacyInvestigationField(['rule-1'], false, {
+              investigation_fields: ['foo', 'bar'],
+            }),
+            'rules.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        const rule = await getRule(supertest, log, 'rule-1');
+        expect(rule.investigation_fields).to.eql({ field_names: ['foo', 'bar'] });
+      });
+
+      it('imports rule with investigation fields as empty array', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjsonWithLegacyInvestigationField(['rule-1'], false, {
+              investigation_fields: [],
+            }),
+            'rules.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        const rule = await getRule(supertest, log, 'rule-1');
+        expect(rule.investigation_fields).to.eql(undefined);
+      });
+
+      it('imports rule with investigation fields as intended object type', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjsonWithLegacyInvestigationField(['rule-1'], false, {
+              investigation_fields: {
+                field_names: ['foo'],
+              },
+            }),
+            'rules.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        const rule = await getRule(supertest, log, 'rule-1');
+        expect(rule.investigation_fields).to.eql({ field_names: ['foo'] });
       });
     });
   });

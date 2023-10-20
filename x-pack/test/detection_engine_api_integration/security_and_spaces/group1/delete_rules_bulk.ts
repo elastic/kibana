@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -32,6 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('delete_rules_bulk', () => {
     describe('deprecations', () => {
@@ -442,6 +444,60 @@ export default ({ getService }: FtrProviderContext): void => {
         // legacy sidecar action should be gone
         const sidecarActionsPostResults = await getLegacyActionSO(es);
         expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      beforeEach(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      it('DELETE - should delete a single rule with investigation field', async () => {
+        // delete the rule in bulk
+        const { body } = await supertest
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            { rule_id: '2297be91-894c-4831-830f-b424a0ec9102' },
+            { rule_id: '2297be91-894c-4831-830f-b424a0ec5678' },
+            { rule_id: '2297be91-894c-4831-830f-b424a0ec84f0' },
+          ])
+          .expect(200);
+        const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
+        expect(investigationFields).to.eql([
+          { field_names: ['host.name'] },
+          undefined,
+          { field_names: ['client.address', 'agent.name'] },
+        ]);
+      });
+
+      it('POST - should delete a single rule with investigation field', async () => {
+        // delete the rule in bulk
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            { rule_id: '2297be91-894c-4831-830f-b424a0ec9102' },
+            { rule_id: '2297be91-894c-4831-830f-b424a0ec5678' },
+            { rule_id: '2297be91-894c-4831-830f-b424a0ec84f0' },
+          ])
+          .expect(200);
+        const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
+        expect(investigationFields).to.eql([
+          { field_names: ['host.name'] },
+          undefined,
+          { field_names: ['client.address', 'agent.name'] },
+        ]);
       });
     });
   });

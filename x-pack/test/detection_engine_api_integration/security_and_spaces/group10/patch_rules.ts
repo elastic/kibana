@@ -689,6 +689,23 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
+      it('errors if trying to patch investigation fields using legacy format', async () => {
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: '2297be91-894c-4831-830f-b424a0ec84f0',
+            name: 'some other name',
+            investigation_fields: ['client.foo'],
+          })
+          .expect(400);
+
+        expect(body.message).to.eql(
+          '[request body]: Invalid value "["client.foo"]" supplied to "investigation_fields"'
+        );
+      });
+
       it('migrates investigation fields when array exists', async () => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)

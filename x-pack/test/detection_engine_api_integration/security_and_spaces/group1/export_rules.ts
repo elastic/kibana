@@ -33,6 +33,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('export_rules', () => {
+    const esArchiver = getService('esArchiver');
+
     describe('exporting rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
@@ -717,6 +719,75 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(firstRule).toEqual(outputRule2);
           expect(secondRule).toEqual(outputRule1);
+        });
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+        await createSignalsIndex(supertest, log);
+      });
+
+      after(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      it('exports rule with investigation fields as array and migrates to object', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            objects: [{ rule_id: '2297be91-894c-4831-830f-b424a0ec84f0' }],
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule.investigation_fields).toEqual({
+          field_names: ['client.address', 'agent.name'],
+        });
+      });
+
+      it('exports rule with investigation fields as empty array and unsets field', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            objects: [{ rule_id: '2297be91-894c-4831-830f-b424a0ec5678' }],
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule.investigation_fields).toEqual(undefined);
+      });
+
+      it('exports rule with investigation fields as intended object type', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            objects: [{ rule_id: '2297be91-894c-4831-830f-b424a0ec9102' }],
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule.investigation_fields).toEqual({
+          field_names: ['host.name'],
         });
       });
     });

@@ -20,7 +20,7 @@ import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../../../../routes/utils';
-import { getIdBulkError, migrateRuleLegacyInvestigationFields } from '../../../utils/utils';
+import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { patchRules } from '../../../logic/crud/patch_rules';
 import { readRules } from '../../../logic/crud/read_rules';
@@ -103,10 +103,8 @@ export const bulkPatchRulesRoute = (
                 ruleId: payloadRule.id,
               });
 
-              const migratedRule = migrateRuleLegacyInvestigationFields(existingRule);
-
               const rule = await patchRules({
-                existingRule: migratedRule,
+                existingRule,
                 rulesClient,
                 nextParams: payloadRule,
               });

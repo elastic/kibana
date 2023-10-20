@@ -19,7 +19,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import { migrateRuleLegacyInvestigationFields, transformFindAlerts } from '../../../utils/utils';
+import { transformFindAlerts } from '../../../utils/utils';
 
 export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
@@ -61,10 +61,8 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
             filter: query.filter,
             fields: query.fields,
           });
-          const migratedRules = rules.data.map((rule) => {
-            return migrateRuleLegacyInvestigationFields(rule);
-          });
-          const transformed = transformFindAlerts({ ...rules, data: migratedRules });
+
+          const transformed = transformFindAlerts(rules);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

@@ -56,7 +56,6 @@ import {
   validateBulkDuplicateRule,
   dryRunValidateBulkEditRule,
 } from '../../../logic/bulk_actions/validations';
-import { migrateRuleLegacyInvestigationFields } from '../../../utils/utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -361,14 +360,12 @@ export const performBulkActionRoute = (
                     return rule;
                   }
 
-                  const migratedRule = migrateRuleLegacyInvestigationFields(rule);
-
-                  if (migratedRule && !migratedRule.enabled) {
-                    await rulesClient.enable({ id: migratedRule.id });
+                  if (!rule.enabled) {
+                    await rulesClient.enable({ id: rule.id });
                   }
 
                   return {
-                    ...migratedRule,
+                    ...rule,
                     enabled: true,
                   };
                 },
@@ -390,14 +387,12 @@ export const performBulkActionRoute = (
                     return rule;
                   }
 
-                  const migratedRule = migrateRuleLegacyInvestigationFields(rule);
-
-                  if (migratedRule && migratedRule.enabled) {
-                    await rulesClient.disable({ id: migratedRule.id });
+                  if (rule.enabled) {
+                    await rulesClient.disable({ id: rule.id });
                   }
 
                   return {
-                    ...migratedRule,
+                    ...rule,
                     enabled: false,
                   };
                 },
@@ -418,14 +413,10 @@ export const performBulkActionRoute = (
                     return null;
                   }
 
-                  const migratedRule = migrateRuleLegacyInvestigationFields(rule);
-
-                  if (migratedRule != null) {
-                    await deleteRules({
-                      ruleId: migratedRule.id,
-                      rulesClient,
-                    });
-                  }
+                  await deleteRules({
+                    ruleId: rule.id,
+                    rulesClient,
+                  });
 
                   return null;
                 },
@@ -455,10 +446,8 @@ export const performBulkActionRoute = (
                     shouldDuplicateExpiredExceptions = body.duplicate.include_expired_exceptions;
                   }
 
-                  const migratedRule = migrateRuleLegacyInvestigationFields(rule);
-
                   const duplicateRuleToCreate = await duplicateRule({
-                    rule: migratedRule ?? rule,
+                    rule,
                   });
 
                   const createdRule = await rulesClient.create({

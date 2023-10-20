@@ -20,7 +20,7 @@ import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
-import { getIdBulkError, migrateRuleLegacyInvestigationFields } from '../../../utils/utils';
+import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import {
   transformBulkError,
@@ -108,14 +108,11 @@ export const bulkUpdateRulesRoute = (
                 ruleId: payloadRule.id,
               });
 
-              const migratedRule = migrateRuleLegacyInvestigationFields(existingRule);
-
               const rule = await updateRules({
                 rulesClient,
-                existingRule: migratedRule,
+                existingRule,
                 ruleUpdate: payloadRule,
               });
-
               if (rule != null) {
                 return transformValidateBulkError(rule.id, rule);
               } else {

@@ -946,6 +946,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('unsets legacy investigation fields when field not specified for update', async () => {
+        // rule_id of a rule with legacy investigation fields set
         const updatedRule = getSimpleRuleUpdate('2297be91-894c-4831-830f-b424a0ec5678');
 
         const { body } = await supertest
@@ -957,6 +958,28 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql(undefined);
+      });
+
+      it('updates a rule with legacy investigation fields', async () => {
+        // rule_id of a rule with legacy investigation fields set
+        const updatedRule = {
+          ...getSimpleRuleUpdate('2297be91-894c-4831-830f-b424a0ec5678'),
+          investigation_fields: {
+            field_names: ['foo'],
+          },
+        };
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(updatedRule)
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare.investigation_fields).to.eql({
+          field_names: ['foo'],
+        });
       });
     });
   });

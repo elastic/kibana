@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -27,212 +28,97 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
 
   describe('find_rules', () => {
-    beforeEach(async () => {
-      await deleteAllRules(supertest, log);
-    });
-
-    it('should return an empty find body correctly if no rules are loaded', async () => {
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .send()
-        .expect(200);
-
-      expect(body).to.eql({
-        data: [],
-        page: 1,
-        perPage: 20,
-        total: 0,
+    describe('find_rules', () => {
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
       });
-    });
 
-    it('should return a single rule when a single rule is loaded from a find with defaults added', async () => {
-      await createRule(supertest, log, getSimpleRule());
+      it('should return an empty find body correctly if no rules are loaded', async () => {
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send()
+          .expect(200);
 
-      // query the single rule from _find
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .send()
-        .expect(200);
-
-      body.data = [removeServerGeneratedProperties(body.data[0])];
-      expect(body).to.eql({
-        data: [getSimpleRuleOutput()],
-        page: 1,
-        perPage: 20,
-        total: 1,
+        expect(body).to.eql({
+          data: [],
+          page: 1,
+          perPage: 20,
+          total: 0,
+        });
       });
-    });
 
-    it('should return a single rule when a single rule is loaded from a find with everything for the rule added', async () => {
-      // add a single rule
-      await supertest
-        .post(DETECTION_ENGINE_RULES_URL)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .send(getComplexRule())
-        .expect(200);
+      it('should return a single rule when a single rule is loaded from a find with defaults added', async () => {
+        await createRule(supertest, log, getSimpleRule());
 
-      // query and expect that we get back one record in the find
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .send()
-        .expect(200);
+        // query the single rule from _find
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send()
+          .expect(200);
 
-      body.data = [removeServerGeneratedProperties(body.data[0])];
-      expect(body).to.eql({
-        data: [getComplexRuleOutput()],
-        page: 1,
-        perPage: 20,
-        total: 1,
+        body.data = [removeServerGeneratedProperties(body.data[0])];
+        expect(body).to.eql({
+          data: [getSimpleRuleOutput()],
+          page: 1,
+          perPage: 20,
+          total: 1,
+        });
       });
-    });
 
-    it('should find a single rule with a execute immediately action correctly', async () => {
-      // create connector/action
-      const { body: hookAction } = await supertest
-        .post('/api/actions/action')
-        .set('kbn-xsrf', 'true')
-        .send(getWebHookAction())
-        .expect(200);
+      it('should return a single rule when a single rule is loaded from a find with everything for the rule added', async () => {
+        // add a single rule
+        await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(getComplexRule())
+          .expect(200);
 
-      const action = {
-        group: 'default',
-        id: hookAction.id,
-        action_type_id: hookAction.actionTypeId,
-        params: {},
-      };
+        // query and expect that we get back one record in the find
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send()
+          .expect(200);
 
-      // create rule with connector/action
-      const rule: ReturnType<typeof getSimpleRule> = {
-        ...getSimpleRule('rule-1'),
-        actions: [action],
-      };
-      await createRule(supertest, log, rule);
-
-      // query the single rule from _find
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .send()
-        .expect(200);
-
-      const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
-        ...getSimpleRuleOutput(),
-        actions: [
-          {
-            ...action,
-            uuid: body.data[0].actions[0].uuid,
-            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
-          },
-        ],
-      };
-
-      body.data = [removeServerGeneratedProperties(body.data[0])];
-      expect(body).to.eql({
-        data: [ruleWithActions],
-        page: 1,
-        perPage: 20,
-        total: 1,
+        body.data = [removeServerGeneratedProperties(body.data[0])];
+        expect(body).to.eql({
+          data: [getComplexRuleOutput()],
+          page: 1,
+          perPage: 20,
+          total: 1,
+        });
       });
-    });
 
-    it('should be able to find a scheduled action correctly', async () => {
-      // create connector/action
-      const { body: hookAction } = await supertest
-        .post('/api/actions/action')
-        .set('kbn-xsrf', 'true')
-        .send(getWebHookAction())
-        .expect(200);
-
-      const action = {
-        group: 'default',
-        id: hookAction.id,
-        action_type_id: hookAction.actionTypeId,
-        params: {},
-      };
-
-      // create rule with connector/action
-      const rule: ReturnType<typeof getSimpleRule> = {
-        ...getSimpleRule('rule-1'),
-        throttle: '1h', // <-- throttle makes this a scheduled action
-        actions: [action],
-      };
-      await createRule(supertest, log, rule);
-
-      // query the single rule from _find
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .send()
-        .expect(200);
-
-      const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
-        ...getSimpleRuleOutput(),
-        actions: [
-          {
-            ...action,
-            uuid: body.data[0].actions[0].uuid,
-            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
-          },
-        ],
-      };
-
-      body.data = [removeServerGeneratedProperties(body.data[0])];
-      expect(body).to.eql({
-        data: [ruleWithActions],
-        page: 1,
-        perPage: 20,
-        total: 1,
-      });
-    });
-
-    /**
-     * Tests the legacy actions to ensure we can export legacy notifications
-     * @deprecated Once the legacy notification system is removed, remove this test too.
-     */
-    describe('legacy_notification_system', async () => {
-      it('should be able to a read a scheduled action correctly', async () => {
-        // create an connector/action
+      it('should find a single rule with a execute immediately action correctly', async () => {
+        // create connector/action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
           .send(getWebHookAction())
           .expect(200);
 
-        // create a rule without actions
-        const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
+        const action = {
+          group: 'default',
+          id: hookAction.id,
+          action_type_id: hookAction.actionTypeId,
+          params: {},
+        };
 
-        // attach the legacy notification
-        await supertest
-          .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${createRuleBody.id}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
-          .send({
-            name: 'Legacy notification with one action',
-            interval: '1h',
-            actions: [
-              {
-                id: hookAction.id,
-                group: 'default',
-                params: {
-                  message:
-                    'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
-                },
-                actionTypeId: hookAction.actionTypeId,
-              },
-            ],
-          })
-          .expect(200);
+        // create rule with connector/action
+        const rule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action],
+        };
+        await createRule(supertest, log, rule);
 
         // query the single rule from _find
         const { body } = await supertest
@@ -246,13 +132,59 @@ export default ({ getService }: FtrProviderContext): void => {
           ...getSimpleRuleOutput(),
           actions: [
             {
-              id: hookAction.id,
-              group: 'default',
-              params: {
-                message:
-                  'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
-              },
-              action_type_id: hookAction.actionTypeId,
+              ...action,
+              uuid: body.data[0].actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+          ],
+        };
+
+        body.data = [removeServerGeneratedProperties(body.data[0])];
+        expect(body).to.eql({
+          data: [ruleWithActions],
+          page: 1,
+          perPage: 20,
+          total: 1,
+        });
+      });
+
+      it('should be able to find a scheduled action correctly', async () => {
+        // create connector/action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const action = {
+          group: 'default',
+          id: hookAction.id,
+          action_type_id: hookAction.actionTypeId,
+          params: {},
+        };
+
+        // create rule with connector/action
+        const rule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          throttle: '1h', // <-- throttle makes this a scheduled action
+          actions: [action],
+        };
+        await createRule(supertest, log, rule);
+
+        // query the single rule from _find
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send()
+          .expect(200);
+
+        const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
+          ...getSimpleRuleOutput(),
+          actions: [
+            {
+              ...action,
+              uuid: body.data[0].actions[0].uuid,
               frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
             },
           ],
@@ -264,6 +196,122 @@ export default ({ getService }: FtrProviderContext): void => {
           page: 1,
           perPage: 20,
           total: 1,
+        });
+      });
+
+      /**
+       * Tests the legacy actions to ensure we can export legacy notifications
+       * @deprecated Once the legacy notification system is removed, remove this test too.
+       */
+      describe('legacy_notification_system', async () => {
+        it('should be able to a read a scheduled action correctly', async () => {
+          // create an connector/action
+          const { body: hookAction } = await supertest
+            .post('/api/actions/action')
+            .set('kbn-xsrf', 'true')
+            .send(getWebHookAction())
+            .expect(200);
+
+          // create a rule without actions
+          const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          // attach the legacy notification
+          await supertest
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${createRuleBody.id}`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
+            .send({
+              name: 'Legacy notification with one action',
+              interval: '1h',
+              actions: [
+                {
+                  id: hookAction.id,
+                  group: 'default',
+                  params: {
+                    message:
+                      'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                  },
+                  actionTypeId: hookAction.actionTypeId,
+                },
+              ],
+            })
+            .expect(200);
+
+          // query the single rule from _find
+          const { body } = await supertest
+            .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send()
+            .expect(200);
+
+          const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
+            ...getSimpleRuleOutput(),
+            actions: [
+              {
+                id: hookAction.id,
+                group: 'default',
+                params: {
+                  message:
+                    'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+                action_type_id: hookAction.actionTypeId,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+              },
+            ],
+          };
+
+          body.data = [removeServerGeneratedProperties(body.data[0])];
+          expect(body).to.eql({
+            data: [ruleWithActions],
+            page: 1,
+            perPage: 20,
+            total: 1,
+          });
+        });
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      after(async () => {
+        await deleteAllRules(supertest, log);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      it('should return a rule with the migrated investigation fields', async () => {
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send()
+          .expect(200);
+
+        const [ruleWithFieldAsArray] = body.data.filter(
+          (rule: RuleResponse) => rule.rule_id === '2297be91-894c-4831-830f-b424a0ec84f0'
+        );
+
+        const [ruleWithFieldAsEmptyArray] = body.data.filter(
+          (rule: RuleResponse) => rule.rule_id === '2297be91-894c-4831-830f-b424a0ec5678'
+        );
+
+        const [ruleWithExpectedTyping] = body.data.filter(
+          (rule: RuleResponse) => rule.rule_id === '2297be91-894c-4831-830f-b424a0ec9102'
+        );
+
+        expect(ruleWithFieldAsArray.investigation_fields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+        expect(ruleWithFieldAsEmptyArray.investigation_fields).to.eql(undefined);
+        expect(ruleWithExpectedTyping.investigation_fields).to.eql({
+          field_names: ['host.name'],
         });
       });
     });

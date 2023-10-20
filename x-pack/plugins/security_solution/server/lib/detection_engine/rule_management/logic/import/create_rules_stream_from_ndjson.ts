@@ -29,6 +29,7 @@ import {
   RuleToImport,
   validateRuleToImport,
 } from '../../../../../../common/api/detection_engine/rule_management';
+import type { RulesObjectsExportResultDetails } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 import {
   parseNdjsonStrings,
   createRulesLimitStream,
@@ -103,6 +104,25 @@ export const sortImports = (): Transform => {
   );
 };
 
+export const migrateRules = (): Transform => {
+  return createMapStream<RuleToImport | RulesObjectsExportResultDetails>((obj) => {
+    if (obj != null && 'investigation_fields' in obj && Array.isArray(obj.investigation_fields)) {
+      if (obj.investigation_fields.length) {
+        return {
+          ...obj,
+          investigation_fields: {
+            field_names: obj.investigation_fields,
+          },
+        };
+      } else {
+        const { investigation_fields: _, ...rest } = obj;
+        return rest;
+      }
+    }
+    return obj;
+  });
+};
+
 // TODO: Capture both the line number and the rule_id if you have that information for the error message
 // eventually and then pass it down so we can give error messages on the line number
 
@@ -111,6 +131,7 @@ export const createRulesAndExceptionsStreamFromNdJson = (ruleLimit: number) => {
     createSplitStream('\n'),
     parseNdjsonStrings(),
     filterExportedCounts(),
+    migrateRules(),
     sortImports(),
     validateRulesStream(),
     createRulesLimitStream(ruleLimit),

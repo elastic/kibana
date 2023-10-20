@@ -26,7 +26,7 @@ import {
 } from '../../../../routes/utils';
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { readRules } from '../../../logic/crud/read_rules';
-import { getIdBulkError, migrateRuleLegacyInvestigationFields } from '../../../utils/utils';
+import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 
@@ -70,18 +70,16 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
 
         try {
           const rule = await readRules({ rulesClient, id, ruleId });
-          const migratedRule = migrateRuleLegacyInvestigationFields(rule);
-
-          if (!migratedRule) {
+          if (!rule) {
             return getIdBulkError({ id, ruleId });
           }
 
           await deleteRules({
-            ruleId: migratedRule.id,
+            ruleId: rule.id,
             rulesClient,
           });
 
-          return transformValidateBulkError(idOrRuleIdOrUnknown, migratedRule);
+          return transformValidateBulkError(idOrRuleIdOrUnknown, rule);
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }

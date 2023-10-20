@@ -382,9 +382,7 @@ export const convertAlertSuppressionToSnake = (
       }
     : undefined;
 
-export const migrateRuleLegacyInvestigationFields = (
-  rule: RuleAlertType | null | undefined
-): RuleAlertType | null | undefined => {
+export const migrateRuleLegacyInvestigationFields = (rule: RuleAlertType): RuleAlertType => {
   if (!rule) return rule;
 
   const ruleParams = rule.params;

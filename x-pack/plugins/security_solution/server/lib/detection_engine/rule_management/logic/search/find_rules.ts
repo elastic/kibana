@@ -10,6 +10,7 @@ import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/api
 
 import type {
   FieldsOrUndefined,
+  HasReferencesOrUndefined,
   PageOrUndefined,
   PerPageOrUndefined,
   QueryFilterOrUndefined,
@@ -28,6 +29,7 @@ export interface FindRuleOptions {
   sortOrder: SortOrderOrUndefined;
   page: PageOrUndefined;
   perPage: PerPageOrUndefined;
+  hasReference?: HasReferencesOrUndefined;
 }
 
 export const findRules = ({
@@ -38,6 +40,7 @@ export const findRules = ({
   filter,
   sortField,
   sortOrder,
+  hasReference,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
@@ -47,6 +50,7 @@ export const findRules = ({
       filter: enrichFilterWithRuleTypeMapping(filter),
       sortOrder,
       sortField: transformSortField(sortField),
+      hasReference,
     },
   });
 };
