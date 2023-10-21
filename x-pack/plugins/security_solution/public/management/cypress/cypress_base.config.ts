@@ -9,6 +9,7 @@ import { merge } from 'lodash';
 import registerDataSession from 'cypress-data-session/src/plugin';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
+import { agentActions } from './support/agent_actions';
 
 export const getCypressBaseConfig = (
   overrides: Cypress.ConfigOptions = {}
@@ -67,6 +68,8 @@ export const getCypressBaseConfig = (
           dataLoaders(on, config);
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
+
+          agentActions(on);
 
           responseActionTasks(on, config);
 

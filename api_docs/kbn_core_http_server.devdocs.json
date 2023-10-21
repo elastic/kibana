@@ -3373,6 +3373,14 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/enabled.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/get.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/anonymous_access/get_capabilities.ts"
               },
               {
@@ -3454,14 +3462,6 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/views/login.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/enabled.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/get.ts"
               },
               {
                 "plugin": "monitoringCollection",
@@ -3598,6 +3598,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -5304,6 +5308,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.test.ts"
+              },
+              {
                 "plugin": "monitoringCollection",
                 "path": "x-pack/plugins/monitoring_collection/server/routes/api/v1/dynamic_route/get_metrics_by_type.test.ts"
               },
@@ -5839,6 +5847,14 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/create.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/invalidate.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/analytics/authentication_type.ts"
               },
               {
@@ -5903,11 +5919,7 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/create.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/invalidate.ts"
+                "path": "x-pack/plugins/security/server/routes/analytics/record_violations.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -6084,6 +6096,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_alerts.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -7538,6 +7554,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_alert/mute_alert.test.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.test.ts"
+              },
+              {
                 "plugin": "home",
                 "path": "src/plugins/home/server/plugin.test.ts"
               },
@@ -7604,6 +7624,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/analytics/authentication_type.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/analytics/record_violations.test.ts"
               },
               {
                 "plugin": "security",
@@ -7873,11 +7897,11 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.ts"
+                "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.ts"
               },
               {
                 "plugin": "actions",
@@ -11832,6 +11856,22 @@
                 "text": "RouteContentType"
               },
               "[] | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteConfigOptionsBody.override",
+            "type": "string",
+            "tags": [],
+            "label": "override",
+            "description": [
+              "\nA mime type string overriding the 'Content-Type' header value received."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
