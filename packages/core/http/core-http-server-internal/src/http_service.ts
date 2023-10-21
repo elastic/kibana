@@ -113,6 +113,7 @@ export class HttpService
     this.internalPreboot = {
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       csp: prebootSetup.csp,
+      staticAssets: prebootSetup.staticAssets,
       basePath: prebootSetup.basePath,
       registerStaticDir: prebootSetup.registerStaticDir.bind(prebootSetup),
       auth: prebootSetup.auth,
