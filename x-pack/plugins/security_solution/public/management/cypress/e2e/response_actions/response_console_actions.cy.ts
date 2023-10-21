@@ -36,25 +36,33 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
   describe('User journey for Isolate command: isolate and release an endpoint', () => {
     it('should isolate host from response console', () => {
       const command = 'isolate';
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       checkEndpointListForOnlyUnIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks(command);
       submitCommand();
       waitForCommandToBeExecuted(command);
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       checkEndpointListForOnlyIsolatedHosts();
     });
 
     it('should release host from response console', () => {
       const command = 'release';
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       checkEndpointListForOnlyIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks(command);
       submitCommand();
       waitForCommandToBeExecuted(command);
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       checkEndpointListForOnlyUnIsolatedHosts();
     });
   });
@@ -64,7 +72,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     let newCronPID: string;
 
     it('"processes" - should obtain a list of processes', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('processes');
       submitCommand();
@@ -89,7 +99,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('"kill-process --pid" - should kill a process', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`kill-process --pid ${cronPID}`);
       submitCommand();
@@ -113,7 +125,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('"suspend-process --pid" - should suspend a process', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`suspend-process --pid ${newCronPID}`);
       submitCommand();
@@ -128,7 +142,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     const filePath = `${homeFilePath}/test_file.txt`;
 
     it('"get-file --path" - should retrieve a file', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       cy.getCreatedHostData().then((hostData) => {
         cy.task('createFileOnEndpoint', {
           hostname: hostData.createdHost.hostname,
@@ -168,7 +184,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('"execute --command" - should execute a command', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
       submitCommand();
@@ -176,7 +194,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('"upload --file" - should upload a file', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`upload --file`);
       cy.getByTestSubj('console-arg-file-picker').selectFile(
@@ -195,7 +215,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
   // FLAKY: https://github.com/elastic/kibana/issues/168296
   describe.skip('document signing', () => {
     it('should fail if data tampered', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       checkEndpointListForOnlyUnIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('isolate');

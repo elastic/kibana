@@ -57,7 +57,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('should open responder from alert details flyout', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       toggleRuleOffAndOn(ruleName);
       visitRuleAlerts(ruleName);
       closeAllToasts();
@@ -69,7 +71,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('should open responder from timeline view alert details flyout', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       toggleRuleOffAndOn(ruleName);
       visitRuleAlerts(ruleName);
       closeAllToasts();

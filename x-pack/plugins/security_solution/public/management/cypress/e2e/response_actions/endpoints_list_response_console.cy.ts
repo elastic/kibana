@@ -28,7 +28,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
   describe('From endpoint list', () => {
     it('should open responder', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       openResponseConsoleFromEndpointList();
       ensureOnResponder();
     });

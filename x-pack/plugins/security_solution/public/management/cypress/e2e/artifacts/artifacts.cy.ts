@@ -11,7 +11,7 @@ import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constan
 import type { MetadataListResponse } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
-import { removeAllArtifactsPromise } from '../../tasks/artifacts';
+import { removeAllArtifacts, removeAllArtifactsPromise } from '../../tasks/artifacts';
 import { login } from '../../tasks/login';
 import { request, loadPage } from '../../tasks/common';
 import { yieldEndpointPolicyRevision } from '../../tasks/fleet';
@@ -34,6 +34,7 @@ describe.skip('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServer
   });
 
   after(() => {
+    removeAllArtifacts();
     cy.removeEndpointHost();
   });
 

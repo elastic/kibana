@@ -67,7 +67,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('should open responder', () => {
-      waitForEndpointListPageToBeLoaded();
+      cy.getCreatedHostData().then((hostData) => {
+        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      });
       toggleRuleOffAndOn(ruleName);
       visitRuleAlerts(ruleName);
       closeAllToasts();
