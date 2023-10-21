@@ -19,6 +19,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiFlexGroup,
@@ -28,11 +29,14 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import type { StackFrameMetadata } from '@kbn/profiling-utils';
+import { groupBy } from 'lodash';
+import React, { Fragment } from 'react';
+import { css } from '@emotion/react';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
@@ -40,8 +44,8 @@ import { useProfilingParams } from '../hooks/use_profiling_params';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { asNumber } from '../utils/formatters/as_number';
 import { asPercentage } from '../utils/formatters/as_percentage';
-import { StackFrameSummary } from './stack_frame_summary';
 import { getTracesViewRouteParams } from '../views/stack_traces_view/utils';
+import { StackFrameSummary } from './stack_frame_summary';
 
 export interface SubChartProps {
   index: number;
@@ -62,6 +66,19 @@ export interface SubChartProps {
 }
 
 const NUM_DISPLAYED_FRAMES = 5;
+
+function renderFrameItem(frame: StackFrameMetadata, parentIndex: number | string) {
+  return (
+    <EuiFlexItem grow={false} key={frame.FrameID}>
+      <EuiFlexGroup direction="row" alignItems="center">
+        <EuiFlexItem grow={false}>{parentIndex}</EuiFlexItem>
+        <EuiFlexItem grow>
+          <StackFrameSummary frame={frame} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+}
 
 export function SubChart({
   index,
@@ -97,9 +114,14 @@ export function SubChart({
 
   const compact = !!onShowMoreClick;
 
+  const groupedMetadata = groupBy(metadata, 'AddressOrLine');
+  const parentsMetadata = Object.values(groupedMetadata)
+    .map((items) => items.shift())
+    .filter((_) => _) as StackFrameMetadata[];
+
   const displayedFrames = compact
-    ? metadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
-    : metadata.concat().reverse();
+    ? parentsMetadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
+    : parentsMetadata.concat().reverse();
 
   const hasMoreFrames = displayedFrames.length < metadata.length;
 
@@ -115,23 +137,68 @@ export function SubChart({
           }}
         >
           <EuiFlexGroup direction="column" gutterSize="none">
-            {displayedFrames.map((frame, frameIndex) => (
-              <>
-                <EuiFlexItem grow={false} key={frame.FrameID}>
-                  <EuiFlexGroup direction="row" alignItems="center">
-                    <EuiFlexItem grow={false}>{metadata.indexOf(frame) + 1}</EuiFlexItem>
-                    <EuiFlexItem grow>
-                      <StackFrameSummary frame={frame} />
+            {displayedFrames.map((frame, frameIndex) => {
+              const parentIndex = parentsMetadata.indexOf(frame) + 1;
+              const children = groupedMetadata[frame.AddressOrLine].concat().reverse();
+
+              return (
+                <>
+                  {children.length > 0 ? (
+                    <EuiAccordion
+                      css={css`
+                        display: flex;
+                        flex-direction: column-reverse;
+
+                        .css-bknxw4-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isOpen {
+                          transform: rotate(-90deg) !important;
+                        }
+                      `}
+                      id={`accordion_${frame.AddressOrLine}`}
+                      buttonContent={renderFrameItem(frame, parentIndex)}
+                      paddingSize="s"
+                      extraAction={
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'xpack.profiling.traces.subChart.inlineDescription',
+                            {
+                              defaultMessage:
+                                'This frame has {numberOfChildren} inline {numberOfChildren, plural, one {frame} other {frames}} inside, this allows for optimised processes.',
+                              values: { numberOfChildren: children.length },
+                            }
+                          )}
+                        >
+                          <EuiBadge color="primary">{`-> ${children.length}`}</EuiBadge>
+                        </EuiToolTip>
+                      }
+                    >
+                      <EuiFlexGroup
+                        direction="column"
+                        gutterSize="s"
+                        style={{ marginLeft: '12px' }}
+                      >
+                        {children.map((child, childIndex) => {
+                          return (
+                            <Fragment key={child.FrameID}>
+                              {renderFrameItem(
+                                child,
+                                `${parentIndex}.${children.length - childIndex} ->`
+                              )}
+                            </Fragment>
+                          );
+                        })}
+                      </EuiFlexGroup>
+                    </EuiAccordion>
+                  ) : (
+                    renderFrameItem(frame, parentIndex)
+                  )}
+                  {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiHorizontalRule size="full" margin="s" />
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiHorizontalRule size="full" margin="s" />
-                  </EuiFlexItem>
-                ) : null}
-              </>
-            ))}
+                  ) : null}
+                </>
+              );
+            })}
           </EuiFlexGroup>
 
           {hasMoreFrames && !!onShowMoreClick && (
