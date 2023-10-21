@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import {
+  InvestigationFields,
   QueryRuleCreateProps,
   RuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -1922,7 +1923,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .attach(
             'file',
             getSimpleRuleAsNdjsonWithLegacyInvestigationField(['rule-1'], false, {
-              investigation_fields: ['foo', 'bar'],
+              // mimicking what an 8.10 rule would look like
+              investigation_fields: ['foo', 'bar'] as unknown as InvestigationFields,
             }),
             'rules.ndjson'
           )
@@ -1941,7 +1943,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .attach(
             'file',
             getSimpleRuleAsNdjsonWithLegacyInvestigationField(['rule-1'], false, {
-              investigation_fields: [],
+              // mimicking what an 8.10 rule would look like
+              investigation_fields: [] as unknown as InvestigationFields,
             }),
             'rules.ndjson'
           )
