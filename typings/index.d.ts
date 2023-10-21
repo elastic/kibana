@@ -23,3 +23,4 @@ declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
 
 declare module 'find-cypress-specs';
 declare module '@cypress/grep/src/plugin';
+declare module 'cypress-data-session/src/plugin';
