@@ -6,11 +6,19 @@
  */
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CasesClient } from '../client';
 import { getCasesConnectorType } from './cases';
 
 export * from './types';
 export { casesConnectors } from './factory';
 
-export function registerConnectorTypes({ actions }: { actions: ActionsPluginSetupContract }) {
-  actions.registerSubActionConnectorType(getCasesConnectorType());
+export function registerConnectorTypes({
+  actions,
+  getCasesClient,
+}: {
+  actions: ActionsPluginSetupContract;
+  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+}) {
+  actions.registerSubActionConnectorType(getCasesConnectorType({ getCasesClient }));
 }

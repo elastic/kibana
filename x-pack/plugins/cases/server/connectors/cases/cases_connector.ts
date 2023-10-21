@@ -9,6 +9,7 @@ import stringify from 'json-stable-stringify';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { pick } from 'lodash';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { CASES_CONNECTOR_SUB_ACTION } from './constants';
 import type {
   BulkCreateOracleRecordRequest,
@@ -22,6 +23,12 @@ import { CasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { partitionRecords } from './utils';
 import { CasesService } from './cases_service';
+import type { CasesClient } from '../../client';
+
+interface CasesConnectorParams {
+  connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
+  casesParams: { getCasesClient: (request: KibanaRequest) => Promise<CasesClient> };
+}
 
 interface GroupedAlerts {
   alerts: CasesConnectorRunParams['alerts'];
@@ -38,8 +45,8 @@ export class CasesConnector extends SubActionConnector<
   private readonly casesOracleService: CasesOracleService;
   private readonly casesService: CasesService;
 
-  constructor(params: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>) {
-    super(params);
+  constructor({ connectorParams, casesParams }: CasesConnectorParams) {
+    super(connectorParams);
 
     this.casesOracleService = new CasesOracleService({
       log: this.logger,
