@@ -174,12 +174,52 @@ export const waitForHostToEnroll = async (
     }
   }
 
-  try {
+  // try {
+  //     let stdout: string;
+  //     if (process.env.CI) {
+  //       const { stdout: vagrantSTDOUT } = await execa(
+  //         'vagrant',
+  //         ['ssh', '--', 'sudo sh -c \'cat /opt/Elastic/Agent/elastic-agent-*\''],
+  //         {
+  //           env: {
+  //             VAGRANT_CWD,
+  //           },
+  //         }
+  //       );
+  //       stdout = vagrantSTDOUT;
+  //     } else {
+  //       stdout = '';
+  //     }
+  //     await execa('mkdir', [
+  //       '-p',
+  //       '../../../../../../target/kibana-security-solution/cypress/results/',
+  //     ]).catch((e) => {
+  //       logger?.info(e);
+  //     });
+  //     const { stdout: pwdA } = await execa('pwd');
+  //     await execa('mkdir', [
+  //       '-p',
+  //       '../../../../../../target/kibana-security-solution/cypress/results/',
+  //     ]).catch((e) => {
+  //       logger?.info(e);
+  //     });
+
+  //     logger?.info(`pwd: ${pwdA}`);
+  //     fs.writeFileSync(
+  //       '../../../../../../target/kibana-security-solution/cypress/results/agent-logs.txt',
+  //       stdout
+  //     );
+  //     logger?.info(stdout);
+  //   } catch (e) {
+  //     logger?.info(e);
+  //   }
+
+    try {
       let stdout: string;
       if (process.env.CI) {
         const { stdout: vagrantSTDOUT } = await execa(
           'vagrant',
-          ['ssh', '--', 'sudo sh -c \'cat /opt/Elastic/Agent/elastic-agent-*\''],
+          ['ssh', '--', 'sudo sh -c \'/opt/Elastic/Agent/elastic-agent logs\''],
           {
             env: {
               VAGRANT_CWD,
