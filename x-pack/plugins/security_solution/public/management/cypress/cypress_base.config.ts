@@ -39,9 +39,6 @@ export const getCypressBaseConfig = (
       experimentalStudio: true,
 
       env: {
-        'cypress-react-selector': {
-          root: '#security-solution-app',
-        },
         KIBANA_URL: 'http://localhost:5601',
         ELASTICSEARCH_URL: 'http://localhost:9200',
         FLEET_SERVER_URL: 'https://localhost:8220',
