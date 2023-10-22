@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
@@ -319,6 +319,25 @@ describe('request', () => {
     expect(axiosMock.mock.calls.length).toBe(2);
     expect(axiosMock.mock.calls[0][1].timeout).toBe(360000);
     expect(axiosMock.mock.calls[1][1].timeout).toBe(360001);
+  });
+
+  test('throw an error if you use  baseUrl in your axios instance', async () => {
+    await expect(async () => {
+      await request({
+        axios: {
+          ...axios,
+          defaults: {
+            ...axios.defaults,
+            baseURL: 'https://here-we-go.com',
+          },
+        } as unknown as AxiosInstance,
+        url: '/test',
+        logger,
+        configurationUtilities,
+      });
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Do not use \\"baseURL\\" in the creation of your axios instance because you will mostly break proxy"`
+    );
   });
 });
 

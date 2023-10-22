@@ -163,7 +163,7 @@ export const getEqlFn = ({
 
         return {
           type: 'eql_raw_response',
-          body: response.rawResponse.body,
+          body: response.rawResponse,
         };
       } catch (e) {
         request.error({ json: 'attributes' in e ? e.attributes : { message: e.message } });
