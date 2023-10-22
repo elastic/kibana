@@ -45,7 +45,7 @@ describe('extract search response warnings', () => {
       expect(extractWarnings(response, mockInspectorService, mockRequestAdapter)).toEqual([
         {
           type: 'incomplete',
-          message: 'The data might be incomplete or wrong.',
+          message: 'Results are partial and may be incomplete.',
           clusters: {
             '(local)': {
               status: 'partial',
@@ -71,7 +71,7 @@ describe('extract search response warnings', () => {
       expect(extractWarnings(response, mockInspectorService, mockRequestAdapter)).toEqual([
         {
           type: 'incomplete',
-          message: 'The data might be incomplete or wrong.',
+          message: 'Results are partial and may be incomplete.',
           clusters: {
             '(local)': {
               status: 'partial',
@@ -191,7 +191,7 @@ describe('extract search response warnings', () => {
       expect(extractWarnings(response, mockInspectorService, mockRequestAdapter)).toEqual([
         {
           type: 'incomplete',
-          message: 'The data might be incomplete or wrong.',
+          message: 'Results are partial and may be incomplete.',
           clusters: response._clusters.details,
           openInInspector: expect.any(Function),
         },
@@ -245,7 +245,7 @@ describe('extract search response warnings', () => {
       expect(extractWarnings(response, mockInspectorService, mockRequestAdapter)).toEqual([
         {
           type: 'incomplete',
-          message: 'The data might be incomplete or wrong.',
+          message: 'Results are partial and may be incomplete.',
           clusters: response._clusters.details,
           openInInspector: expect.any(Function),
         },

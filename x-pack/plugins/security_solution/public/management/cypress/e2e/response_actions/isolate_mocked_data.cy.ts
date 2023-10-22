@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { openAlertDetailsView } from '../../screens/alerts';
 import { getEndpointListPath } from '../../../common/routing';
 import {
   checkEndpointIsIsolated,
@@ -12,7 +13,6 @@ import {
   filterOutIsolatedHosts,
   interceptActionRequests,
   isolateHostWithComment,
-  openAlertDetails,
   openCaseAlertDetails,
   releaseHostWithComment,
   sendActionResponse,
@@ -148,7 +148,7 @@ describe('Isolate command', { tags: ['@ess', '@serverless'] }, () => {
           });
       });
 
-      openAlertDetails();
+      openAlertDetailsView();
 
       isolateHostWithComment(isolateComment, hostname);
 
@@ -167,7 +167,7 @@ describe('Isolate command', { tags: ['@ess', '@serverless'] }, () => {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(1000);
-      openAlertDetails();
+      openAlertDetailsView();
 
       checkFlyoutEndpointIsolation();
 
@@ -185,7 +185,7 @@ describe('Isolate command', { tags: ['@ess', '@serverless'] }, () => {
 
       cy.contains(`Release on host ${hostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
-      openAlertDetails();
+      openAlertDetailsView();
       cy.getByTestSubj('event-field-agent.status').within(() => {
         cy.get('[title="Isolated"]').should('not.exist');
       });

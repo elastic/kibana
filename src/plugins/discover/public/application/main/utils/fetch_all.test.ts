@@ -378,5 +378,33 @@ describe('test fetchAll', () => {
         },
       ]);
     });
+
+    test('should swallow abort errors', async () => {
+      const collect = subjectCollector(subjects.documents$);
+      mockfetchTextBased.mockRejectedValue({ msg: 'The query was aborted' });
+      const query = { esql: 'from foo' };
+      deps = {
+        abortController: new AbortController(),
+        inspectorAdapters: { requests: new RequestAdapter() },
+        searchSessionId: '123',
+        initialFetchStatus: FetchStatus.UNINITIALIZED,
+        useNewFieldsApi: true,
+        savedSearch: savedSearchMock,
+        services: discoverServiceMock,
+        getAppState: () => ({ query }),
+        getInternalState: () => ({
+          dataView: undefined,
+          savedDataViews: [],
+          adHocDataViews: [],
+          expandedDoc: undefined,
+          customFilters: [],
+        }),
+      };
+      fetchAll(subjects, false, deps);
+      deps.abortController.abort();
+      await waitForNextTick();
+
+      expect((await collect()).find(({ error }) => error)).toBeUndefined();
+    });
   });
 });

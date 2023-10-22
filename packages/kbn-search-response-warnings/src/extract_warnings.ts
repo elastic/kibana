@@ -36,7 +36,7 @@ export function extractWarnings(
     warnings.push({
       type: 'incomplete',
       message: i18n.translate('searchResponseWarnings.incompleteResultsMessage', {
-        defaultMessage: 'The data might be incomplete or wrong.',
+        defaultMessage: 'Results are partial and may be incomplete.',
       }),
       clusters: rawResponse._clusters
         ? (
