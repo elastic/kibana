@@ -45,23 +45,26 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
       data-test-subj={dataTestSubj}
     >
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="xs"
-          responsive={false}
-          wrap={true}
-        >
-          {Boolean(prepend) && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
 
-          {!!totalHitCount && (
-            <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
-              <TotalDocuments totalHitCount={totalHitCount} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {Boolean(prepend || totalHitCount) && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="xs"
+            responsive={false}
+            wrap={true}
+          >
+            {Boolean(prepend) && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
+
+            {!!totalHitCount && (
+              <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
+                <TotalDocuments totalHitCount={totalHitCount} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem style={{ minHeight: 0 }}>{children}</EuiFlexItem>
 
