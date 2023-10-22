@@ -268,7 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.settings.createIndexPattern(
           pattern,
-          undefined,
+          '@timestamp',
           undefined,
           undefined,
           undefined,
