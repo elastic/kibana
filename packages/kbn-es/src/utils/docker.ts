@@ -56,6 +56,8 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
+  /** Publish ES docker container on additional host IP */
+  host?: string;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
@@ -66,6 +68,11 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
+  /**
+   * Resource file(s) to overwrite
+   * (see list of files that can be overwritten under `packages/kbn-es/src/serverless_resources/users`)
+   */
+  resources?: string | string[];
 }
 
 interface ServerlessEsNodeArgs {
@@ -213,7 +220,7 @@ const DOCKER_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 ];
 
-const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
+export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es01',
     params: [
@@ -301,19 +308,21 @@ export function resolveDockerImage({
 }
 
 /**
- * Determine the port to bind the Serverless index node or Docker node to
+ * Determine the port and optionally an additional host to bind the Serverless index node or Docker node to
  */
 export function resolvePort(options: ServerlessOptions | DockerOptions) {
-  if (options.port) {
-    return [
-      '-p',
-      `127.0.0.1:${options.port}:${options.port}`,
-      '--env',
-      `http.port=${options.port}`,
-    ];
+  const port = options.port || DEFAULT_PORT;
+  const value = ['-p', `127.0.0.1:${port}:${port}`];
+
+  if ((options as ServerlessOptions).host) {
+    value.push('-p', `${(options as ServerlessOptions).host}:${port}:${port}`);
   }
 
-  return ['-p', `127.0.0.1:${DEFAULT_PORT}:${DEFAULT_PORT}`];
+  if (options.port) {
+    value.push('--env', `http.port=${options.port}`);
+  }
+
+  return value;
 }
 
 /**
@@ -470,7 +479,7 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, files } = options;
+  const { basePath, clean, ssl, files, resources } = options;
   const objectStorePath = resolve(basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
@@ -509,11 +518,37 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     volumeCmds.push(...fileCmds);
   }
 
+  const resourceFileOverrides: Record<string, string> = resources
+    ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
+        acc[basename(filePath)] = resolve(process.cwd(), filePath);
+        return acc;
+      }, {} as Record<string, string>)
+    : {};
+
   const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
-    acc.push('--volume', `${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
+    const fileName = basename(path);
+    let localFilePath = path;
+
+    if (resourceFileOverrides[fileName]) {
+      localFilePath = resourceFileOverrides[fileName];
+      log.info(`'${fileName}' resource overridden with: ${localFilePath}`);
+      delete resourceFileOverrides[fileName];
+    }
+
+    acc.push('--volume', `${localFilePath}:${SERVERLESS_CONFIG_PATH}${fileName}`);
 
     return acc;
   }, []);
+
+  if (Object.keys(resourceFileOverrides).length > 0) {
+    throw new Error(
+      `Unsupported ES serverless --resources value(s):\n  ${Object.values(
+        resourceFileOverrides
+      ).join('  \n')}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
+        basename(filePath)
+      ).join(' | ')}`
+    );
+  }
 
   volumeCmds.push(
     ...getESp12Volume(),

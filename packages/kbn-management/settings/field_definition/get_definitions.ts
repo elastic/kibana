@@ -7,7 +7,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { FieldDefinition, SettingType, UiSettingMetadata } from '@kbn/management-settings-types';
+import { FieldDefinition, UiSettingMetadata } from '@kbn/management-settings-types';
 import { getFieldDefinition } from './get_definition';
 
 type SettingsClient = Pick<IUiSettingsClient, 'isCustom' | 'isOverridden'>;
@@ -21,9 +21,9 @@ type SettingsClient = Pick<IUiSettingsClient, 'isCustom' | 'isOverridden'>;
  * @returns An array of {@link FieldDefinition} objects.
  */
 export const getFieldDefinitions = (
-  settings: Record<string, UiSettingMetadata<SettingType>>,
+  settings: Record<string, UiSettingMetadata>,
   client: SettingsClient
-): Array<FieldDefinition<SettingType>> =>
+): FieldDefinition[] =>
   Object.entries(settings).map(([id, setting]) =>
     getFieldDefinition({
       id,

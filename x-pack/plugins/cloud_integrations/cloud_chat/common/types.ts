@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+export type ChatVariant = 'header' | 'bubble';
+
 export interface GetChatUserDataResponseBody {
   token: string;
   email: string;
   id: string;
+  chatVariant: ChatVariant;
 }

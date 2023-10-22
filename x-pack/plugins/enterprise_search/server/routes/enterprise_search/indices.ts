@@ -394,7 +394,7 @@ export function registerIndexRoutes({
         savedObjects: { client: savedObjectsClient },
       } = await context.core;
       const trainedModelsProvider = ml
-        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        ? ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
       const mlInferencePipelineProcessorConfigs = await fetchMlInferencePipelineProcessors(

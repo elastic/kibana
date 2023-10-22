@@ -170,14 +170,15 @@ export const UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_2 = i18n.translate(
 export const UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_1 = i18n.translate(
   'xpack.securitySolution.riskScore.updateRiskEngineModal.existingData_1',
   {
-    defaultMessage: 'None of your risk score data will be deleted',
+    defaultMessage: 'Legacy risk score data will not be deleted',
   }
 );
 
 export const UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_2 = i18n.translate(
   'xpack.securitySolution.riskScore.updateRiskEngineModal.existingData_2',
   {
-    defaultMessage: ', you will need to remove any old risk score data manually.',
+    defaultMessage:
+      ', it will still exist in the index but will no longer be available in the user interface. You will need to remove legacy risk score data manually.',
   }
 );
 
@@ -198,14 +199,14 @@ export const UPDATE_RISK_ENGINE_MODAL_BUTTON_YES = i18n.translate(
 export const ERROR_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.title',
   {
-    defaultMessage: 'Sorry, there was an error',
+    defaultMessage: 'There was an error',
   }
 );
 
 export const ERROR_PANEL_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.message',
   {
-    defaultMessage: 'Something went wrong. Try again later.',
+    defaultMessage: 'The risk engine status could not be changed. Fix the following and try again:',
   }
 );
 
@@ -248,7 +249,7 @@ export const UPDATE_PANEL_GO_TO_DISMISS = i18n.translate(
 export const getMaxSpaceTitle = (maxSpaces: number) =>
   i18n.translate('xpack.securitySolution.riskScore.maxSpacePanel.title', {
     defaultMessage:
-      'Entity Risk Scoring in the current version can run in {maxSpaces} Kibana spaces.',
+      'Entity Risk Scoring in the current version can run in {maxSpaces, plural, =1 {# Kibana space} other {# Kibana spaces}}',
     values: { maxSpaces },
   });
 
@@ -256,5 +257,19 @@ export const MAX_SPACE_PANEL_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.maxSpacePanel.message',
   {
     defaultMessage: 'Please disable a currently running engine before enabling it here.',
+  }
+);
+
+export const CHECK_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.riskScore.errors.privileges.check',
+  {
+    defaultMessage: 'Check privileges',
+  }
+);
+
+export const NEED_TO_HAVE = i18n.translate(
+  'xpack.securitySolution.riskScore.errors.privileges.needToHave',
+  {
+    defaultMessage: 'You need to have:',
   }
 );

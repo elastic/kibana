@@ -8,6 +8,7 @@
 import { significantTermGroups } from '../../../common/__mocks__/farequote/significant_term_groups';
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
 import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
+import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
@@ -33,6 +34,7 @@ describe('getFieldValuePairCounts', () => {
       filteredFrequentItemSets,
       true,
       false,
+      significantTerms,
       fields
     );
     const leaves = getSimpleHierarchicalTreeLeaves(simpleHierarchicalTree.root, []);

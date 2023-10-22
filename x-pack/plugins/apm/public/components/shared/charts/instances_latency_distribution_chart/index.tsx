@@ -131,6 +131,7 @@ export function InstancesLatencyDistributionChart({
             showLegend
             theme={chartTheme}
             xDomain={xDomain}
+            locale={i18n.getLocale()}
           />
           <BubbleSeries
             color={theme.eui.euiColorVis0}

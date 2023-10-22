@@ -12,15 +12,15 @@ import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: RISK_ENGINE_STATUS_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
-    },
-    async (context, request, response) => {
+    })
+    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
       const securitySolution = await context.securitySolution;
@@ -46,6 +46,5 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
           body: { message: error.message, full_error: JSON.stringify(e) },
         });
       }
-    }
-  );
+    });
 };

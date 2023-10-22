@@ -193,6 +193,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
                   iconType="cross"
                   aria-label={i18n.DELETE_SYSTEM_PROMPT}
                   color="danger"
+                  data-test-subj="delete-prompt"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     onDelete(label);

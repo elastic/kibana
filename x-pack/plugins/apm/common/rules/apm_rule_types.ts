@@ -245,7 +245,7 @@ export const RULE_TYPES_CONFIG: Record<
   },
   [ApmRuleType.Anomaly]: {
     name: i18n.translate('xpack.apm.anomalyAlert.name', {
-      defaultMessage: 'Anomaly',
+      defaultMessage: 'APM Anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,

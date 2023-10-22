@@ -59,44 +59,6 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:hard-typecheck')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/type_check.yml'));
-    } else {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/type_check_selective.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^src\/plugins\/controls/,
-        /^packages\/kbn-securitysolution-.*/,
-        /^x-pack\/plugins\/lists/,
-        /^x-pack\/plugins\/security_solution/,
-        /^x-pack\/plugins\/timelines/,
-        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
-        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/alerts_table/,
-        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
-        /^x-pack\/test\/defend_workflows_cypress/,
-        /^x-pack\/test\/security_solution_cypress/,
-        /^fleet_packages\.json/, // It contains reference to prebuilt detection rules, we want to run security solution tests if it changes
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/plugins\/threat_intelligence/,
-        /^x-pack\/test\/threat_intelligence_cypress/,
-        /^x-pack\/plugins\/security_solution\/public\/threat_intelligence/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/threat_intelligence.yml'));
-    }
-
     if (
       (await doAnyChangesMatch([
         /^src\/plugins\/data/,
@@ -146,16 +108,6 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
-    }
-
-    if (
-      ((await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
-        GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
-      !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/exploratory_view/])) {

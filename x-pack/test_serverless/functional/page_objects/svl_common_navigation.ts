@@ -19,10 +19,13 @@ type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
 import type { FtrProviderContext } from '../ftr_provider_context';
 import type { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
+const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId} `;
+
 export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   const testSubjects = ctx.getService('testSubjects');
   const browser = ctx.getService('browser');
   const retry = ctx.getService('retry');
+  const log = ctx.getService('log');
 
   async function getByVisibleText(
     selector: string | (() => Promise<WebElementWrapper[]>),
@@ -93,16 +96,20 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         }
       },
       async expectSectionExists(sectionId: NavigationId) {
-        await testSubjects.existOrFail(`~nav-bucket-${sectionId}`);
+        log.debug('ServerlessCommonNavigation.sidenav.expectSectionExists', sectionId);
+        await testSubjects.existOrFail(getSectionIdTestSubj(sectionId));
       },
       async isSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
-        const section = await testSubjects.find(`~nav-bucket-${sectionId}`);
-        const collapseBtn = await section.findByCssSelector(`[aria-controls="${sectionId}"]`);
+        const section = await testSubjects.find(getSectionIdTestSubj(sectionId));
+        const collapseBtn = await section.findByCssSelector(
+          `[aria-controls="${sectionId}"][aria-expanded]`
+        );
         const isExpanded = await collapseBtn.getAttribute('aria-expanded');
         return isExpanded === 'true';
       },
       async expectSectionOpen(sectionId: NavigationId) {
+        log.debug('ServerlessCommonNavigation.sidenav.expectSectionOpen', sectionId);
         await this.expectSectionExists(sectionId);
         await retry.waitFor(`section ${sectionId} to be open`, async () => {
           const isOpen = await this.isSectionOpen(sectionId);
@@ -117,11 +124,14 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         });
       },
       async openSection(sectionId: NavigationId) {
+        log.debug('ServerlessCommonNavigation.sidenav.openSection', sectionId);
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (isOpen) return;
-        const section = await testSubjects.find(`~nav-bucket-${sectionId}`);
-        const collapseBtn = await section.findByCssSelector(`[aria-controls="${sectionId}"]`);
+        const section = await testSubjects.find(getSectionIdTestSubj(sectionId));
+        const collapseBtn = await section.findByCssSelector(
+          `[aria-controls="${sectionId}"][aria-expanded]`
+        );
         await collapseBtn.click();
         await this.expectSectionOpen(sectionId);
       },
@@ -129,8 +139,10 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (!isOpen) return;
-        const section = await testSubjects.find(`~nav-bucket-${sectionId}`);
-        const collapseBtn = await section.findByCssSelector(`[aria-controls="${sectionId}"]`);
+        const section = await testSubjects.find(getSectionIdTestSubj(sectionId));
+        const collapseBtn = await section.findByCssSelector(
+          `[aria-controls="${sectionId}"][aria-expanded]`
+        );
         await collapseBtn.click();
         await this.expectSectionClosed(sectionId);
       },
@@ -143,6 +155,10 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await testSubjects.click('~breadcrumb-home');
       },
       async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        log.debug(
+          'ServerlessCommonNavigation.breadcrumbs.expectBreadcrumbExists',
+          JSON.stringify(by)
+        );
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
         } else {
@@ -161,6 +177,10 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         }
       },
       async expectBreadcrumbTexts(expectedBreadcrumbTexts: string[]) {
+        log.debug(
+          'ServerlessCommonNavigation.breadcrumbs.expectBreadcrumbTexts',
+          JSON.stringify(expectedBreadcrumbTexts)
+        );
         await retry.try(async () => {
           const breadcrumbsContainer = await testSubjects.find('breadcrumbs');
           const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');
@@ -174,10 +194,10 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
     search: new SvlNavigationSearchPageObject(ctx),
     recent: {
       async expectExists() {
-        await testSubjects.existOrFail('nav-bucket-recentlyAccessed');
+        await testSubjects.existOrFail('nav-item-recentlyAccessed');
       },
       async expectHidden() {
-        await testSubjects.missingOrFail('nav-bucket-recentlyAccessed', { timeout: 1000 });
+        await testSubjects.missingOrFail('nav-item-recentlyAccessed', { timeout: 1000 });
       },
       async expectLinkExists(text: string) {
         await this.expectExists();
@@ -185,7 +205,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await retry.try(async () => {
           foundLink = await getByVisibleText(
             async () =>
-              (await testSubjects.find('nav-bucket-recentlyAccessed')).findAllByTagName('a'),
+              (await testSubjects.find('nav-item-recentlyAccessed')).findAllByTagName('a'),
             text
           );
           expect(!!foundLink).to.be(true);

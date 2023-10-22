@@ -18,9 +18,10 @@ import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api
 import { RESPONSE_ACTION_TYPES } from '../../../../../common/api/detection_engine';
 import { login, ROLE } from '../../tasks/login';
 
-describe('Form', { tags: '@ess' }, () => {
-  describe('User with no access can not create an endpoint response action', () => {
-    before(() => {
+describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169334
+  describe.skip('User with no access can not create an endpoint response action', () => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_no_access);
     });
 
@@ -35,10 +36,10 @@ describe('Form', { tags: '@ess' }, () => {
     let ruleId: string;
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
-    before(() => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_access);
     });
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 
@@ -87,16 +88,14 @@ describe('Form', { tags: '@ess' }, () => {
     const testedCommand = 'isolate';
     const newDescription = 'Example isolate host description';
 
-    before(() => {
+    beforeEach(() => {
+      login(ROLE.endpoint_response_actions_access);
       loadRule().then((res) => {
         ruleId = res.id;
         ruleName = res.name;
       });
     });
-    beforeEach(() => {
-      login(ROLE.endpoint_response_actions_access);
-    });
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 
@@ -145,7 +144,7 @@ describe('Form', { tags: '@ess' }, () => {
   describe('User should not see endpoint action when no rbac', () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
-    before(() => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_no_access);
     });
 
@@ -162,13 +161,14 @@ describe('Form', { tags: '@ess' }, () => {
   describe('User without access can not edit, add nor delete an endpoint response action', () => {
     let ruleId: string;
 
-    before(() => {
+    beforeEach(() => {
+      login(ROLE.endpoint_response_actions_no_access);
       loadRule().then((res) => {
         ruleId = res.id;
       });
-      login(ROLE.endpoint_response_actions_no_access);
     });
-    after(() => {
+
+    afterEach(() => {
       cleanupRule(ruleId);
     });
 

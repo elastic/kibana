@@ -17,6 +17,7 @@ import {
 import { GroupName } from './group_name';
 import { Node } from './node';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { useAssetDetailsFlyoutState } from '../../hooks/use_asset_details_flyout_url_state';
 
 interface Props {
   onDrilldown: (filter: string) => void;
@@ -27,6 +28,7 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InventoryItemType;
   currentTime: number;
+  detailsItemId: string | null;
 }
 
 // custom comparison function for rendering the nodes to prevent unncessary rerendering
@@ -42,8 +44,20 @@ const isEqualGroupOfNodes = (prevProps: Props, nextProps: Props) => {
 };
 
 export const GroupOfNodes = React.memo<Props>(
-  ({ group, options, formatter, onDrilldown, isChild = false, bounds, nodeType, currentTime }) => {
+  ({
+    group,
+    options,
+    formatter,
+    onDrilldown,
+    isChild = false,
+    bounds,
+    nodeType,
+    currentTime,
+    detailsItemId,
+  }) => {
     const width = group.width > 200 ? group.width : 200;
+    const [_, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+
     return (
       <GroupOfNodesContainer style={{ width }}>
         <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
@@ -59,6 +73,8 @@ export const GroupOfNodes = React.memo<Props>(
                 bounds={bounds}
                 nodeType={nodeType}
                 currentTime={currentTime}
+                detailsItemId={detailsItemId}
+                setFlyoutUrlState={setFlyoutUrlState}
               />
             ))
           ) : (

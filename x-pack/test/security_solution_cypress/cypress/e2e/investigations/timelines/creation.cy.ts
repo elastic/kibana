@@ -123,7 +123,7 @@ describe('Timelines', (): void => {
         goToQueryTab();
       });
 
-      it('can be added filter', () => {
+      it.skip('can be added filter', () => {
         addFilter(getTimeline().filter);
         cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
       });

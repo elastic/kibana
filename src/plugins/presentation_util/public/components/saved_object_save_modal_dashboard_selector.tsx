@@ -33,6 +33,8 @@ export interface SaveModalDashboardSelectorProps {
   isAddToLibrarySelected: boolean;
   dashboardOption: 'new' | 'existing' | null;
   onChange: (dashboardOption: 'new' | 'existing' | null) => void;
+  hasAttemptedSubmit: boolean;
+  hasSelectedDashboard: boolean;
 }
 
 export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProps) {
@@ -45,6 +47,8 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
     dashboardOption,
     onChange,
     copyOnSave,
+    hasAttemptedSubmit,
+    hasSelectedDashboard,
   } = props;
   const isDisabled = !copyOnSave && !!documentId;
 
@@ -81,6 +85,16 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                     isDisabled={dashboardOption !== 'existing'}
                     onChange={onSelectDashboard}
                   />
+                  {hasAttemptedSubmit && dashboardOption === 'existing' && !hasSelectedDashboard ? (
+                    <div className="euiFormErrorText euiFormRow__text">
+                      {i18n.translate(
+                        'presentationUtil.saveModalDashboard.existingDashboardRequiredMessage',
+                        {
+                          defaultMessage: 'Dashboard is required',
+                        }
+                      )}
+                    </div>
+                  ) : null}
                 </div>
                 <EuiSpacer size="s" />
               </>

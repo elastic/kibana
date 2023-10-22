@@ -122,6 +122,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.dimension.splitrow', {
       defaultMessage: 'Row split',
     }),
+  getColorMappingHelp: () =>
+    i18n.translate('expressionPartitionVis.layer.colorMapping.help', {
+      defaultMessage: 'JSON key-value pairs of the color mapping model',
+    }),
 };
 
 export const errors = {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { openAlertDetailsView } from '../../screens/alerts';
 import { getEndpointListPath } from '../../../common/routing';
 import {
   checkEndpointIsIsolated,
@@ -12,7 +13,6 @@ import {
   filterOutIsolatedHosts,
   interceptActionRequests,
   isolateHostWithComment,
-  openAlertDetails,
   openCaseAlertDetails,
   releaseHostWithComment,
   sendActionResponse,
@@ -29,7 +29,7 @@ import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-describe('Isolate command', { tags: '@ess' }, () => {
+describe('Isolate command', { tags: ['@ess', '@serverless'] }, () => {
   describe('from Manage', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
@@ -148,7 +148,7 @@ describe('Isolate command', { tags: '@ess' }, () => {
           });
       });
 
-      openAlertDetails();
+      openAlertDetailsView();
 
       isolateHostWithComment(isolateComment, hostname);
 
@@ -167,7 +167,7 @@ describe('Isolate command', { tags: '@ess' }, () => {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(1000);
-      openAlertDetails();
+      openAlertDetailsView();
 
       checkFlyoutEndpointIsolation();
 
@@ -185,14 +185,14 @@ describe('Isolate command', { tags: '@ess' }, () => {
 
       cy.contains(`Release on host ${hostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
-      openAlertDetails();
+      openAlertDetailsView();
       cy.getByTestSubj('event-field-agent.status').within(() => {
         cy.get('[title="Isolated"]').should('not.exist');
       });
     });
   });
 
-  describe('from Cases', () => {
+  describe('from Cases', { tags: ['@brokenInServerless'] }, () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;

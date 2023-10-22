@@ -15,7 +15,7 @@ import {
   getStoredRowHeight,
   updateStoredRowHeight,
 } from '../utils/row_heights';
-import { ROWS_HEIGHT_OPTIONS } from '../constants';
+import { defaultRowLineHeight, ROWS_HEIGHT_OPTIONS } from '../constants';
 
 interface UseRowHeightProps {
   rowHeightState?: number;
@@ -23,6 +23,7 @@ interface UseRowHeightProps {
   storage: Storage;
   configRowHeight?: number;
   consumer: string;
+  rowLineHeight?: string;
 }
 
 /**
@@ -57,6 +58,7 @@ export const useRowHeightsOptions = ({
   storage,
   configRowHeight = ROWS_HEIGHT_OPTIONS.default,
   consumer,
+  rowLineHeight = defaultRowLineHeight,
 }: UseRowHeightProps) => {
   return useMemo((): EuiDataGridRowHeightsOptions => {
     const rowHeightFromLS = getStoredRowHeight(storage, consumer);
@@ -79,7 +81,7 @@ export const useRowHeightsOptions = ({
 
     return {
       defaultHeight,
-      lineHeight: '1.6em',
+      lineHeight: rowLineHeight,
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
         const newSerializedRowHeight = serializeRowHeight(
           // pressing "Reset to default" triggers onChange with the same value
@@ -89,5 +91,5 @@ export const useRowHeightsOptions = ({
         onUpdateRowHeight?.(newSerializedRowHeight);
       },
     };
-  }, [storage, consumer, rowHeightState, configRowHeight, onUpdateRowHeight]);
+  }, [storage, consumer, rowHeightState, rowLineHeight, configRowHeight, onUpdateRowHeight]);
 };

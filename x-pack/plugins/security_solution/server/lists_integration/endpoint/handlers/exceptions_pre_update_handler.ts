@@ -12,10 +12,11 @@ import type {
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { ExceptionItemLikeOptions } from '../types';
 import {
-  EventFilterValidator,
-  TrustedAppValidator,
-  HostIsolationExceptionsValidator,
   BlocklistValidator,
+  EndpointExceptionsValidator,
+  EventFilterValidator,
+  HostIsolationExceptionsValidator,
+  TrustedAppValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreUpdateItemServerExtension['callback'];
@@ -94,6 +95,20 @@ export const getExceptionsPreUpdateItemHandler = (
       blocklistValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'BLOCKLIST_BY_POLICY'
+      );
+      return validatedItem;
+    }
+
+    // Validate Endpoint Exceptions
+    if (EndpointExceptionsValidator.isEndpointException({ listId })) {
+      const endpointExceptionValidator = new EndpointExceptionsValidator(
+        endpointAppContextService,
+        request
+      );
+      const validatedItem = await endpointExceptionValidator.validatePreUpdateItem(data);
+      endpointExceptionValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'ENDPOINT_EXCEPTIONS'
       );
       return validatedItem;
     }

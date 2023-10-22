@@ -869,6 +869,14 @@
             "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
           },
           {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
@@ -899,14 +907,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
           {
             "plugin": "securitySolution",

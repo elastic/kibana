@@ -11,6 +11,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -18,6 +19,8 @@ import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
+import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
+
 import type {
   Datasource,
   DatasourceMap,
@@ -27,6 +30,7 @@ import type {
   InitializationOptions,
   VisualizationMap,
   VisualizeEditorContext,
+  SuggestionRequest,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
@@ -35,6 +39,19 @@ import type { DatasourceStates, VisualizationState } from '../../state_managemen
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
+
+// there are 2 ways of coloring, the color mapping where the user can map specific colors to
+// specific terms, and the palette assignment where the colors are assinged automatically
+// by a palette with rotating the colors
+const COLORING_METHOD: SuggestionRequest['mainPalette'] = COLOR_MAPPING_OFF_BY_DEFAULT
+  ? {
+      type: 'legacyPalette',
+      value: {
+        name: 'default',
+        type: 'palette',
+      },
+    }
+  : { type: 'colorMapping', value: { ...DEFAULT_COLOR_MAPPING_CONFIG } };
 
 function getIndexPatterns(
   annotationGroupDataviewIds: string[],
@@ -289,7 +306,8 @@ export function initializeVisualization({
       visualizationMap[visualizationState.activeId]?.initialize(
         () => '',
         visualizationState.state,
-        undefined,
+        // initialize a new visualization with the color mapping off
+        COLORING_METHOD,
         annotationGroups,
         references
       ) ?? visualizationState.state

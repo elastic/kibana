@@ -28,7 +28,6 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   currentValue: number | null;
   timestamp: string;
   shouldFire: boolean;
-  shouldWarn: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
   context?: AdditionalContext;
@@ -42,8 +41,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   logger: Logger,
+  timeframe: { start: string; end: string },
   lastPeriodEnd?: number,
-  timeframe?: { start?: number; end: number },
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, searchConfiguration } = params;
@@ -91,7 +90,6 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           currentValues[missingGroup.key] = {
             value: null,
             trigger: false,
-            warn: false,
             bucketKey: missingGroup.bucketKey,
           };
         }
@@ -100,7 +98,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const evaluations: Record<string, Evaluation> = {};
       for (const key of Object.keys(currentValues)) {
         const result = currentValues[key];
-        if (result.trigger || result.warn || result.value === null) {
+        if (result.trigger || result.value === null) {
           evaluations[key] = {
             ...criterion,
             metric:
@@ -114,7 +112,6 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,
-            shouldWarn: result.warn,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
             context: {

@@ -86,7 +86,6 @@ export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
-  private ilmPolicyManager?: IlmPolicyManager;
   config: ReportingCore['config'];
 
   constructor(private reportingCore: ReportingCore, private logger: Logger) {
@@ -107,7 +106,7 @@ export class ReportingStore {
 
   private async getIlmPolicyManager() {
     const client = await this.getClient();
-    return (this.ilmPolicyManager = IlmPolicyManager.create({ client }));
+    return IlmPolicyManager.create({ client });
   }
 
   private async createIndex(indexName: string) {

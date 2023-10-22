@@ -17,7 +17,8 @@ import {
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
 import {
-  testIndexEditableSettings,
+  testIndexEditableSettingsAll,
+  testIndexEditableSettingsLimited,
   testIndexMappings,
   testIndexMock,
   testIndexName,
@@ -42,6 +43,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const requestOptions = {
+  asSystemRequest: undefined,
+  body: undefined,
+  query: undefined,
+  version: undefined,
+};
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -120,12 +127,10 @@ describe('<IndexDetailsPage />', () => {
 
     it('loads index stats from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/stats/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/stats/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('renders index stats', async () => {
@@ -208,7 +213,7 @@ describe('<IndexDetailsPage />', () => {
   it('loads index details from the API', async () => {
     expect(httpSetup.get).toHaveBeenLastCalledWith(
       `${INTERNAL_API_BASE_PATH}/indices/${testIndexName}`,
-      { asSystemRequest: undefined, body: undefined, query: undefined, version: undefined }
+      requestOptions
     );
   });
 
@@ -310,12 +315,10 @@ describe('<IndexDetailsPage />', () => {
     });
     it('loads mappings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/mapping/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('displays the mappings in the code block', async () => {
@@ -372,12 +375,10 @@ describe('<IndexDetailsPage />', () => {
 
     it('loads settings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/settings/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('displays the settings in the code block', async () => {
@@ -429,13 +430,30 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.settings.clickEditModeSwitch();
       });
 
-      it('displays the editable settings (flattened and filtered)', () => {
+      it('displays all editable settings (flattened and filtered)', () => {
         const editorContent = testBed.actions.settings.getCodeEditorContent();
-        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
+      });
+
+      it('displays limited editable settings (flattened and filtered)', async () => {
+        await act(async () => {
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              config: { editableIndexSettings: 'limited' },
+            },
+          });
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+        await testBed.actions.settings.clickEditModeSwitch();
+        const editorContent = testBed.actions.settings.getCodeEditorContent();
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsLimited, null, 2));
       });
 
       it('updates the settings', async () => {
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.saveSettings();
         expect(httpSetup.put).toHaveBeenLastCalledWith(
@@ -452,27 +470,22 @@ describe('<IndexDetailsPage />', () => {
       it('reloads the settings after an update', async () => {
         const numberOfRequests = 2;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.saveSettings();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
         expect(httpSetup.get).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/settings/${testIndexName}`,
-          {
-            asSystemRequest: undefined,
-            body: undefined,
-            query: undefined,
-            version: undefined,
-          }
+          requestOptions
         );
       });
 
       it('resets the changes in the editor', async () => {
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.resetChanges();
         const editorContent = testBed.actions.settings.getCodeEditorContent();
-        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
       });
     });
   });
@@ -623,6 +636,71 @@ describe('<IndexDetailsPage />', () => {
         body: JSON.stringify({ indices: [testIndexName] }),
       });
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+  });
+
+  describe('index name with a percent sign', () => {
+    const percentSignName = 'test%';
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(encodeURIComponent(percentSignName), {
+        ...testIndexMock,
+        name: percentSignName,
+      });
+      httpRequestsMockHelpers.setLoadIndexSettingsResponse(
+        encodeURIComponent(percentSignName),
+        testIndexSettings
+      );
+
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          initialEntry: `/indices/index_details?indexName=${encodeURIComponent(percentSignName)}`,
+        });
+      });
+      testBed.component.update();
+    });
+    it('loads the index details with the encoded index name', () => {
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('loads mappings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/mapping/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('loads settings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('updates settings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      await testBed.actions.settings.clickEditModeSwitch();
+      const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
+      await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
+      await testBed.actions.settings.saveSettings();
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${encodeURIComponent(percentSignName)}`,
+        {
+          asSystemRequest: undefined,
+          body: JSON.stringify({ 'index.priority': '2' }),
+          query: undefined,
+          version: undefined,
+        }
+      );
+    });
+    it('loads stats with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/stats/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
     });
   });
 });

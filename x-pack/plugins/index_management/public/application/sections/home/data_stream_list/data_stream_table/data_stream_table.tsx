@@ -19,6 +19,7 @@ import {
 import { ScopedHistory } from '@kbn/core/public';
 
 import { DataStream } from '../../../../../../common/types';
+import { getLifecycleValue } from '../../../../lib/data_streams';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
@@ -33,6 +34,8 @@ interface Props {
   includeStats: boolean;
   filters?: string;
 }
+
+const INFINITE_AS_ICON = true;
 
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
@@ -131,7 +134,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       <EuiToolTip
         content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
           defaultMessage:
-            'Data will be be kept at least this long before it is automatically deleted. Only applies to data streams managed by a data stream lifecycle. This value might not apply to all data if the data stream also has an index lifecycle policy.',
+            '[Technical preview] Data will be kept at least this long before it is automatically deleted. Only applies to data streams managed by a data stream lifecycle. This value might not apply to all data if the data stream also has an index lifecycle policy.',
         })}
       >
         <span>
@@ -144,7 +147,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle']) => lifecycle?.data_retention,
+    render: (lifecycle: DataStream['lifecycle']) => getLifecycleValue(lifecycle, INFINITE_AS_ICON),
   });
 
   columns.push({

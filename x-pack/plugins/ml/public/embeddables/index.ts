@@ -15,24 +15,16 @@ export * from './types';
 
 export { getEmbeddableComponent } from './get_embeddable_component';
 
-export function registerEmbeddables(
-  embeddable: EmbeddableSetup,
-  core: MlCoreSetup,
-  isServerless: boolean
-) {
+export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
   const anomalySwimlaneEmbeddableFactory = new AnomalySwimlaneEmbeddableFactory(
-    core.getStartServices,
-    isServerless
+    core.getStartServices
   );
   embeddable.registerEmbeddableFactory(
     anomalySwimlaneEmbeddableFactory.type,
     anomalySwimlaneEmbeddableFactory
   );
 
-  const anomalyChartsFactory = new AnomalyChartsEmbeddableFactory(
-    core.getStartServices,
-    isServerless
-  );
+  const anomalyChartsFactory = new AnomalyChartsEmbeddableFactory(core.getStartServices);
 
   embeddable.registerEmbeddableFactory(anomalyChartsFactory.type, anomalyChartsFactory);
 }

@@ -6,8 +6,8 @@
  */
 import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
-import { SerializableRecord } from '@kbn/utility-types';
-import { Filter, TimeRange } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';

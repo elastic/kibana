@@ -21,14 +21,16 @@ import type { PropsWithChildren } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
+import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
+import { RuleAboutSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_about_section';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
 } from '../../../pages/detection_engine/rules/types';
+import { castRuleAsRuleResponse } from '../../../../detection_engine/rule_details_ui/pages/rule_details/cast_rule_as_rule_response';
 import * as i18n from './translations';
-import { StepAboutRuleReadOnly } from '../step_about_rule';
 import { fullHeight } from './styles';
 
 const detailsOption: EuiButtonGroupOptionProps = {
@@ -51,12 +53,14 @@ interface StepPanelProps {
   stepData: AboutStepRule | null;
   stepDataDetails: AboutStepRuleDetails | null;
   loading: boolean;
+  rule: Rule;
 }
 
 const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   stepData,
   stepDataDetails,
   loading,
+  rule,
 }) => {
   const [selectedToggleOption, setToggleOption] = useState('details');
   const [aboutPanelHeight, setAboutPanelHeight] = useState(0);
@@ -124,10 +128,10 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
-                    <StepAboutRuleReadOnly
-                      addPadding={false}
-                      descriptionColumns="singleSplit"
-                      defaultValues={stepData}
+                    <RuleAboutSection
+                      rule={castRuleAsRuleResponse(rule)}
+                      hideName
+                      hideDescription
                     />
                   </div>
                 )}

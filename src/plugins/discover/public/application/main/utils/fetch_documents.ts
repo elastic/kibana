@@ -8,11 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
-import { SAMPLE_SIZE_SETTING, buildDataTableRecordList } from '@kbn/discover-utils';
+import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
+import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -21,9 +22,10 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, services, getAppState }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
-  searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
+  const sampleSize = getAppState().sampleSize;
+  searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);
@@ -62,7 +64,7 @@ export const fetchDocuments = (
       disableWarningToasts: true,
     })
     .pipe(
-      filter((res) => isCompleteResponse(res)),
+      filter((res) => !isRunningResponse(res)),
       map((res) => {
         return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView);
       })

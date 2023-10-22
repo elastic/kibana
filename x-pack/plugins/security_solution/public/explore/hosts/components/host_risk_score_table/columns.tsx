@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -17,11 +17,12 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import type { HostRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields, RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskScore } from '../../../components/risk_score/severity/common';
-import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
+import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
+import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
 import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -34,6 +35,7 @@ export const getHostRiskScoreColumns = ({
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
+    width: '35%',
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
         return (
@@ -58,6 +60,19 @@ export const getHostRiskScoreColumns = ({
     },
   },
   {
+    field: RiskScoreFields.timestamp,
+    name: i18n.LAST_UPDATED,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: true,
+    render: (lastSeen: Maybe<string>) => {
+      if (lastSeen != null) {
+        return <FormattedRelativePreferenceDate value={lastSeen} />;
+      }
+      return getEmptyTagValue();
+    },
+  },
+  {
     field: RiskScoreFields.hostRiskScore,
     name: i18n.HOST_RISK_SCORE,
     truncateText: true,
@@ -76,21 +91,14 @@ export const getHostRiskScoreColumns = ({
   },
   {
     field: RiskScoreFields.hostRisk,
-    name: (
-      <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
-        <>
-          {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
-          <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-        </>
-      </EuiToolTip>
-    ),
+    name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
     render: (risk) => {
       if (risk != null) {
         return (
-          <RiskScore
+          <RiskScoreLevel
             toolTipContent={
               <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
                 <EuiText size="xs">{i18n.VIEW_HOSTS_BY_SEVERITY(risk.toLowerCase())}</EuiText>

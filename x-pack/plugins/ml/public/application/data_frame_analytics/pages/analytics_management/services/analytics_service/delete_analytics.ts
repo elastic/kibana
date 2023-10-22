@@ -51,9 +51,7 @@ export const deleteAnalyticsAndDestIndex = async (
   deleteDestIndexPattern: boolean,
   toastNotificationService: ToastNotificationService
 ) => {
-  const destinationIndex = Array.isArray(analyticsConfig.dest.index)
-    ? analyticsConfig.dest.index[0]
-    : analyticsConfig.dest.index;
+  const destinationIndex = analyticsConfig.dest.index;
   try {
     if (isDataFrameAnalyticsFailed(analyticsStats.state)) {
       await ml.dataFrameAnalytics.stopDataFrameAnalytics(analyticsConfig.id, true);

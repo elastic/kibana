@@ -45,7 +45,7 @@ export class ServerlessSearchPlugin
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       appRoute: '/app/elasticsearch',
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
@@ -58,7 +58,7 @@ export class ServerlessSearchPlugin
           user = undefined;
         }
 
-        return await renderApp(element, coreStart, { user, ...services });
+        return await renderApp(element, coreStart, { history, user, ...services });
       },
     });
 
@@ -71,12 +71,12 @@ export class ServerlessSearchPlugin
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       searchable: false,
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
 
         docLinks.setDocLinks(coreStart.docLinks.links);
-        return await renderApp(element, coreStart, { ...services });
+        return await renderApp(element, coreStart, { history, ...services });
       },
     });
 

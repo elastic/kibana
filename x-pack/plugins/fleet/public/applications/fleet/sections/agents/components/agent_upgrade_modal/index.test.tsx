@@ -21,13 +21,14 @@ jest.mock('../../../../hooks', () => {
     ...jest.requireActual('../../../../hooks'),
     sendGetAgentsAvailableVersions: jest.fn().mockResolvedValue({
       data: {
-        items: ['8.7.0'],
+        items: ['8.10.2', '8.7.0'],
       },
     }),
     sendGetAgentStatus: jest.fn().mockResolvedValue({
       data: { results: { updating: 2 } },
     }),
     sendPostBulkAgentUpgrade: jest.fn(),
+    useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
   };
 });
 
@@ -83,6 +84,18 @@ describe('AgentUpgradeAgentModal', () => {
     const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
     await waitFor(() => {
       expect(el.classList.contains('euiComboBox-isDisabled')).toBe(false);
+    });
+  });
+
+  it('should default the version combo to latest agent version', async () => {
+    const { utils } = renderAgentUpgradeAgentModal({
+      agents: [{ id: 'agent1', local_metadata: { host: 'abc' } }] as any,
+      agentCount: 1,
+    });
+
+    const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+    await waitFor(() => {
+      expect(el.textContent).toEqual('8.10.2');
     });
   });
 

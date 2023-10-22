@@ -29,8 +29,9 @@ import {
   policyContainsIntegration,
 } from '../../tasks/integrations';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
@@ -40,39 +41,43 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
   });
 
   after(() => {
     cleanupSavedQuery(savedQueryId);
   });
 
-  it('validate osquery is not available and nav search links to integration', () => {
-    cy.visit(OSQUERY);
-    cy.intercept('GET', '**/internal/osquery/status', (req) => {
-      req.continue((res) => res.send({ ...res.body, install_status: undefined }));
-    });
-    cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
-    cy.contains('Add Osquery Manager');
-    cy.getBySel('osquery-add-integration-button');
-    cy.getBySel('nav-search-input').type('Osquery');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
-  });
+  it(
+    'validate osquery is not available and nav search links to integration',
+    { tags: ['@ess', '@brokenInServerless'] },
+    () => {
+      cy.visit(OSQUERY);
+      cy.intercept('GET', '**/internal/osquery/status', (req) => {
+        req.continue((res) => res.send({ ...res.body, install_status: undefined }));
+      });
+      cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
+      cy.contains('Add Osquery Manager');
+      cy.getBySel('osquery-add-integration-button');
+      cy.getBySel('nav-search-input').type('Osquery');
+      cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
+      cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
+      cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
+    }
+  );
 
-  describe('Add and upgrade integration', { tags: ['@ess'] }, () => {
+  describe('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
 
-    before(() => {
+    beforeEach(() => {
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupAgentPolicy(policyId);
     });
 
@@ -94,13 +99,13 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
 
-    before(() => {
+    beforeEach(() => {
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupAgentPolicy(policyId);
     });
 
@@ -134,7 +139,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
     let policyId: string;
     let packId: string;
 
-    before(() => {
+    beforeEach(() => {
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
@@ -143,7 +148,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
       cleanupAgentPolicy(policyId);
     });
@@ -198,7 +203,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
 
       // test list of prebuilt queries
       navigateTo('/app/osquery/saved_queries');
-      cy.waitForReact();
       cy.react('EuiTableRow').should('have.length.above', 5);
     });
   });

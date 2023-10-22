@@ -138,7 +138,7 @@ describe('QueryBarDefineRule', () => {
     getByTestId('open-timeline-modal').click();
 
     await act(async () => {
-      fireEvent.click(getByTestId('title-10849df0-7b44-11e9-a608-ab3d811609'));
+      fireEvent.click(getByTestId('timeline-title-10849df0-7b44-11e9-a608-ab3d811609'));
     });
     expect(onOpenTimeline).toHaveBeenCalled();
   });

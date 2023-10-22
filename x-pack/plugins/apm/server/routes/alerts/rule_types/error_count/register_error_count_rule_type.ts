@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
@@ -94,6 +95,7 @@ export function registerErrorCountRuleType({
       actionVariables: {
         context: errorCountActionVariables,
       },
+      category: DEFAULT_APP_CATEGORIES.observability.id,
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -102,6 +104,7 @@ export function registerErrorCountRuleType({
         services,
         spaceId,
         startedAt,
+        getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.ErrorCount,
@@ -129,6 +132,10 @@ export function registerErrorCountRuleType({
             ]
           : [];
 
+        const { dateStart } = getTimeRange(
+          `${ruleParams.windowSize}${ruleParams.windowUnit}`
+        );
+
         const searchParams = {
           index: indices.error,
           body: {
@@ -140,7 +147,7 @@ export function registerErrorCountRuleType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: dateStart,
                       },
                     },
                   },

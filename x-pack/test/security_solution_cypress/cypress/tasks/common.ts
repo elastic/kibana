@@ -93,8 +93,9 @@ export const resetRulesTableState = () => {
 
 export const cleanKibana = () => {
   resetRulesTableState();
+  deletePrebuiltRulesAssets();
   deleteAlertsAndRules();
-  deleteCases();
+  deleteAllCasesItems();
   deleteTimelines();
 };
 
@@ -169,8 +170,8 @@ export const deleteAlertsIndex = () => {
   });
 };
 
-export const deleteCases = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+export const deleteAllCasesItems = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
@@ -179,8 +180,34 @@ export const deleteCases = () => {
         bool: {
           filter: [
             {
-              match: {
-                type: 'cases',
+              bool: {
+                should: [
+                  {
+                    term: {
+                      type: 'cases',
+                    },
+                  },
+                  {
+                    term: {
+                      type: 'cases-configure',
+                    },
+                  },
+                  {
+                    term: {
+                      type: 'cases-comments',
+                    },
+                  },
+                  {
+                    term: {
+                      type: 'cases-user-action',
+                    },
+                  },
+                  {
+                    term: {
+                      type: 'cases-connector-mappings',
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -191,7 +218,7 @@ export const deleteCases = () => {
 };
 
 export const deleteConnectors = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,

@@ -11,11 +11,12 @@ import { UpdateMaintenanceWindowParams } from '../../../../../../application/mai
 export const transformUpdateBody = (
   updateBody: UpdateMaintenanceWindowRequestBodyV1
 ): UpdateMaintenanceWindowParams['data'] => {
-  const { title, enabled, duration, r_rule: rRule } = updateBody;
+  const { title, enabled, duration, r_rule: rRule, category_ids: categoryIds } = updateBody;
   return {
     ...(title !== undefined ? { title } : {}),
     ...(enabled !== undefined ? { enabled } : {}),
     ...(duration !== undefined ? { duration } : {}),
     ...(rRule !== undefined ? { rRule } : {}),
+    ...(categoryIds !== undefined ? { categoryIds } : {}),
   };
 };

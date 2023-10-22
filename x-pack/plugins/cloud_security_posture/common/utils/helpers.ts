@@ -20,6 +20,7 @@ import {
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
+  AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
 import type {
   BenchmarkId,
@@ -27,6 +28,7 @@ import type {
   BaseCspSetupStatus,
   AwsCredentialsType,
   GcpCredentialsType,
+  AzureCredentialsType,
   RuleSection,
 } from '../types';
 
@@ -119,6 +121,8 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
     enabledInput?.streams?.[0].vars?.['aws.credentials.type']?.value;
   const gcpCredentialType: GcpCredentialsType | undefined =
     enabledInput?.streams?.[0].vars?.['gcp.credentials.type']?.value;
+  const azureCredentialType: AzureCredentialsType | undefined =
+    enabledInput?.streams?.[0].vars?.['azure.credentials.type']?.value;
 
   if (awsCredentialType || gcpCredentialType) {
     let credsToKeep: string[] = [' '];
@@ -129,6 +133,9 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
     } else if (gcpCredentialType) {
       credsToKeep = GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP[gcpCredentialType];
       credFields = Object.values(GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+    } else if (azureCredentialType) {
+      credsToKeep = AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP[azureCredentialType];
+      credFields = Object.values(AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
     }
 
     if (credsToKeep) {
