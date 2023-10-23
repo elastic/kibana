@@ -413,6 +413,7 @@ const AlertsTableStateWithQueryProvider = ({
       toolbarVisibility,
       shouldHighlightRow,
       dynamicRowHeight,
+      featureIds,
     }),
     [
       alertsTableConfiguration,
@@ -441,6 +442,7 @@ const AlertsTableStateWithQueryProvider = ({
       toolbarVisibility,
       shouldHighlightRow,
       dynamicRowHeight,
+      featureIds,
     ]
   );
 

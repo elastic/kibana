@@ -116,6 +116,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
     refresh: alertsRefresh,
+    featureIds: props.featureIds,
   });
 
   const refreshData = useCallback(() => {
