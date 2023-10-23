@@ -5,26 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ErrorCause } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
-import type { FailedShard, Reason } from './types';
 
-export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
-  const errorInfo = err.attributes;
-  const failedShards = errorInfo?.failed_shards || errorInfo?.caused_by?.failed_shards;
-  return failedShards ? failedShards[0] : undefined;
+import { estypes } from '@elastic/elasticsearch';
+
+function getFailedShardCause(error: estypes.ErrorCause): estypes.ErrorCause | undefined {
+  const failedShards = error.failed_shards || error.caused_by?.failed_shards;
+  return failedShards ? failedShards[0]?.reason : undefined;
 }
 
-function getNestedCause(err: KibanaServerError | ErrorCause): Reason {
-  const attr = ((err as KibanaServerError).attributes || err) as ErrorCause;
-  const { type, reason, caused_by: causedBy } = attr;
-  if (causedBy) {
-    return getNestedCause(causedBy);
-  }
-  return { type, reason };
+function getNestedCause(error: estypes.ErrorCause): estypes.ErrorCause {
+  return error.caused_by ? getNestedCause(error.caused_by) : error;
 }
 
-export function getRootCause(err: KibanaServerError) {
-  // Give shard failures priority, then try to get the error navigating nested objects
-  return getFailedShards(err)?.reason || getNestedCause(err);
+export function getRootCause(error?: estypes.ErrorCause): estypes.ErrorCause | undefined {
+  return error
+    ? // Give shard failures priority, then try to get the error navigating nested objects
+      getFailedShardCause(error) || getNestedCause(error)
+    : undefined;
 }
