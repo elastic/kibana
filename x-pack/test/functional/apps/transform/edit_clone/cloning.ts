@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   // Failing: See https://github.com/elastic/kibana/issues/165883
-  describe.skip('cloning', function () {
+  describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
     const transformConfigWithBoolFilterAgg = getTransformConfigWithBoolFilterAgg();
