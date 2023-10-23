@@ -8,50 +8,32 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiCollapsibleNavSubItemProps, IconType } from '@elastic/eui';
 import { EuiCollapsibleNavItem } from '@elastic/eui';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { ExternalPageName } from '../links/constants';
+import {
+  isAccordionLinkCategory,
+  isSeparatorLinkCategory,
+  type LinkCategory,
+} from '@kbn/security-solution-navigation';
 import { getNavLinkIdFromProjectPageName } from '../links/util';
 import type { ProjectSideNavItem } from './types';
-
-interface FooterCategory {
-  type: 'standalone' | 'collapsible';
-  title?: string;
-  icon?: IconType;
-  linkIds: string[];
-}
-
-const categories: FooterCategory[] = [
-  { type: 'standalone', linkIds: [SecurityPageName.landing, ExternalPageName.devTools] },
-  {
-    type: 'collapsible',
-    title: 'Project Settings',
-    icon: 'gear',
-    linkIds: [
-      ExternalPageName.management,
-      ExternalPageName.integrationsSecurity,
-      ExternalPageName.cloudUsersAndRoles,
-      ExternalPageName.cloudPerformance,
-      ExternalPageName.cloudBilling,
-    ],
-  },
-];
 
 export const SideNavigationFooter: React.FC<{
   activeNodeId: string;
   items: ProjectSideNavItem[];
-}> = ({ activeNodeId, items }) => {
+  categories: LinkCategory[];
+}> = ({ activeNodeId, items, categories }) => {
   return (
     <>
       {categories.map((category, index) => {
-        const categoryItems = category.linkIds.reduce<ProjectSideNavItem[]>((acc, linkId) => {
-          const item = items.find(({ id }) => id === linkId);
-          if (item) {
-            acc.push(item);
-          }
-          return acc;
-        }, []);
+        const categoryItems =
+          category.linkIds?.reduce<ProjectSideNavItem[]>((acc, linkId) => {
+            const item = items.find(({ id }) => id === linkId);
+            if (item) {
+              acc.push(item);
+            }
+            return acc;
+          }, []) ?? [];
 
-        if (category.type === 'standalone') {
+        if (isSeparatorLinkCategory(category)) {
           return (
             <SideNavigationFooterStandalone
               key={index}
@@ -60,14 +42,14 @@ export const SideNavigationFooter: React.FC<{
             />
           );
         }
-        if (category.type === 'collapsible') {
+        if (isAccordionLinkCategory(category)) {
           return (
             <SideNavigationFooterCollapsible
               key={index}
-              title={category.title ?? ''}
+              title={category.label ?? ''}
               items={categoryItems}
               activeNodeId={activeNodeId}
-              icon={category.icon}
+              icon={category.iconType}
             />
           );
         }
