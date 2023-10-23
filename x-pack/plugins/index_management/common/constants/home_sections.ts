@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ReactNode } from 'react';
+import { Index } from '../types';
+
 export enum Section {
   Indices = 'indices',
   DataStreams = 'data_streams',
@@ -18,4 +21,12 @@ export enum IndexDetailsSection {
   Mappings = 'mappings',
   Settings = 'settings',
   Stats = 'stats',
+}
+
+export type IndexDetailsTabIds = IndexDetailsSection | 'string';
+
+export interface IndexDetailsTab {
+  id: IndexDetailsTabIds;
+  name: ReactNode;
+  renderTabContent: (indexName: string, index: Index) => ReactNode;
 }

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { IndexDetailsTab } from '../../common/constants';
 
 export interface ExtensionsSetup {
   addSummary(summary: any): void;
@@ -14,9 +15,11 @@ export interface ExtensionsSetup {
   addFilter(filter: any): void;
   addBadge(badge: any): void;
   addToggle(toggle: any): void;
+  addIndexDetailsTab(tab: IndexDetailsTab): void;
 }
 
 export class ExtensionsService {
+  private _indexDetailsTabs: IndexDetailsTab[] = [];
   private _summaries: any[] = [];
   private _actions: any[] = [];
   private _banners: any[] = [];
@@ -44,6 +47,7 @@ export class ExtensionsService {
       addFilter: this.addFilter.bind(this),
       addSummary: this.addSummary.bind(this),
       addToggle: this.addToggle.bind(this),
+      addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
     };
 
     return this.service;
@@ -73,6 +77,10 @@ export class ExtensionsService {
     this._toggles.push(toggle);
   }
 
+  private addIndexDetailsTab(tab: IndexDetailsTab) {
+    this._indexDetailsTabs.push(tab);
+  }
+
   public get summaries() {
     return this._summaries;
   }
@@ -95,5 +103,9 @@ export class ExtensionsService {
 
   public get toggles() {
     return this._toggles;
+  }
+
+  public get indexDetailsTabs() {
+    return this._indexDetailsTabs;
   }
 }

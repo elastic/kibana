@@ -21,7 +21,12 @@ import {
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
-import { Section, IndexDetailsSection } from '../../../../../../common/constants';
+import {
+  Section,
+  IndexDetailsSection,
+  IndexDetailsTab,
+  IndexDetailsTabIds,
+} from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { Index } from '../../../../../../common';
 import { INDEX_OPEN } from '../../../../../../common/constants';
@@ -36,11 +41,14 @@ import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageOverview } from './details_page_overview';
 import { DetailsPageSettings } from './details_page_settings';
 
-const defaultTabs = [
+const defaultTabs: IndexDetailsTab[] = [
   {
     id: IndexDetailsSection.Overview,
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.overviewTitle" defaultMessage="Overview" />
+    ),
+    renderTabContent: (indexName: string, index: Index) => (
+      <DetailsPageOverview indexDetails={index} />
     ),
   },
   {
@@ -48,26 +56,37 @@ const defaultTabs = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.mappingsTitle" defaultMessage="Mappings" />
     ),
+    renderTabContent: (indexName: string, index: Index) => (
+      <DetailsPageMappings indexName={indexName} />
+    ),
   },
   {
     id: IndexDetailsSection.Settings,
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.settingsTitle" defaultMessage="Settings" />
     ),
+    renderTabContent: (indexName: string, index: Index) => (
+      <DetailsPageSettings indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
+    ),
   },
 ];
 
-const statsTab = {
+const statsTab: IndexDetailsTab = {
   id: IndexDetailsSection.Stats,
   name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Statistics" />,
+  renderTabContent: (indexName: string, index: Index) => (
+    <DetailsPageStats indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
+  ),
 };
 
 const getSelectedTabContent = ({
-  tab,
+  tabs,
+  indexDetailsSection,
   index,
   indexName,
 }: {
-  tab: IndexDetailsSection;
+  tabs: IndexDetailsTab[];
+  indexDetailsSection: IndexDetailsTabIds;
   index?: Index | null;
   indexName: string;
 }) => {
@@ -75,39 +94,43 @@ const getSelectedTabContent = ({
   if (!index) {
     return null;
   }
-  switch (tab) {
-    case IndexDetailsSection.Overview:
-      return <DetailsPageOverview indexDetails={index} />;
-    case IndexDetailsSection.Mappings:
-      return <DetailsPageMappings indexName={indexName} />;
-    case IndexDetailsSection.Settings:
-      return (
-        <DetailsPageSettings indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
-      );
-    case IndexDetailsSection.Stats:
-      return <DetailsPageStats indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />;
-    default:
-      return <DetailsPageOverview indexDetails={index} />;
-  }
+  const selectedTab = tabs.find((tab) => tab.id === indexDetailsSection);
+  return selectedTab ? (
+    selectedTab.renderTabContent(indexName, index)
+  ) : (
+    <DetailsPageOverview indexDetails={index} />
+  );
 };
 export const DetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
 > = ({ location: { search }, history }) => {
-  const { config } = useAppContext();
+  const {
+    config,
+    services: { extensionsService },
+  } = useAppContext();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
-  const tab = queryParams.get('tab') ?? IndexDetailsSection.Overview;
+
+  const tabs = defaultTabs;
+  if (config.enableIndexStats) {
+    tabs.push(statsTab);
+  }
+  tabs.push(...extensionsService.indexDetailsTabs);
+
+  const tabQueryParam = queryParams.get('tab') ?? IndexDetailsSection.Overview;
   let indexDetailsSection = IndexDetailsSection.Overview;
-  if (Object.values(IndexDetailsSection).includes(tab as IndexDetailsSection)) {
-    indexDetailsSection = tab as IndexDetailsSection;
+  if (tabs.map((tab) => tab.id).includes(tabQueryParam as IndexDetailsTabIds)) {
+    indexDetailsSection = tabQueryParam as IndexDetailsSection;
   }
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
+
   const selectedTabContent = useMemo(() => {
-    return getSelectedTabContent({ tab: indexDetailsSection, index, indexName });
-  }, [index, indexDetailsSection, indexName]);
+    return getSelectedTabContent({ tabs, indexDetailsSection, index, indexName });
+  }, [index, indexDetailsSection, indexName, tabs]);
+
   const fetchIndexDetails = useCallback(async () => {
     if (indexName) {
       setIsLoading(true);
@@ -128,7 +151,7 @@ export const DetailsPage: FunctionComponent<
   }, [fetchIndexDetails]);
 
   const onSectionChange = useCallback(
-    (newSection: IndexDetailsSection) => {
+    (newSection: IndexDetailsTabIds) => {
       return history.push(getIndexDetailsLink(indexName, newSection));
     },
     [history, indexName]
@@ -139,16 +162,14 @@ export const DetailsPage: FunctionComponent<
   }, [history]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
-    const visibleTabs = config.enableIndexStats ? [...defaultTabs, statsTab] : defaultTabs;
-
-    return visibleTabs.map((visibleTab) => ({
-      onClick: () => onSectionChange(visibleTab.id),
-      isSelected: visibleTab.id === indexDetailsSection,
-      key: visibleTab.id,
-      'data-test-subj': `indexDetailsTab-${visibleTab.id}`,
-      label: visibleTab.name,
+    return tabs.map((tab) => ({
+      onClick: () => onSectionChange(tab.id),
+      isSelected: tab.id === indexDetailsSection,
+      key: tab.id,
+      'data-test-subj': `indexDetailsTab-${tab.id}`,
+      label: tab.name,
     }));
-  }, [indexDetailsSection, onSectionChange, config]);
+  }, [tabs, indexDetailsSection, onSectionChange]);
 
   if (!indexName) {
     return (
