@@ -11,7 +11,7 @@ import { TimeRange } from '@kbn/es-query';
 import { LensChart, TooltipContent } from '../../../../lens';
 import { AVERAGE_SUBTITLE, type KPIChartProps } from '../../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { useLoadingStateContext } from '../../../hooks/use_loading_observable';
+import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export const Kpi = ({
   id,

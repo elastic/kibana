@@ -23,10 +23,10 @@ import { waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from './use_date_picker';
 
-type RequestState = 'running' | 'done';
+export type RequestState = 'running' | 'done';
 const DEBOUNCE_TS = 1000;
 
-const useLoadingObservable = () => {
+export const useLoadingState = () => {
   const { autoRefreshTick$, autoRefreshConfig$ } = useDatePickerContext();
   const { services } = useKibanaContextForPlugin();
   const {
@@ -73,6 +73,8 @@ const useLoadingObservable = () => {
         map((status) => (status === 'done' ? -1 : 1)),
         tap((value) => {
           // Update the number of running requests
+          // http.getLoadingCount$ will count all http requests on the page
+          // here we're limiting the scope to the http requests that happen in the Asset Details context.
           requestsCount$.current.next(requestsCount$.current.getValue() + value);
         }),
         // Concatenate with loadingCounter$ observable
@@ -80,6 +82,8 @@ const useLoadingObservable = () => {
           requestsCount$.current.pipe(
             skipUntil(isAutoRefreshEnabled$()),
             distinctUntilChanged(),
+            // Small window for requests to be considered in the auto-refresh cycle
+            debounceTime(DEBOUNCE_TS),
             tap((runningRequestsCount) => {
               if (runningRequestsCount > 0) {
                 // isAutoRefreshRequestPending$.current.next is only set to false in the autoRefreshTick$ subscription
@@ -108,7 +112,7 @@ const useLoadingObservable = () => {
         skipUntil(isAutoRefreshEnabled$()),
         concatMap(() =>
           // Wait until queries using data.search complete before processing the next tick
-          // data.search in the context of the asset details is used by Lens
+          // data.search in the context of the Asset Details is used by Lens
           waitUntilNextSessionCompletes$(search.session, {
             waitForIdle: DEBOUNCE_TS,
           }).pipe(tap(() => updateSearchSessionId()))
@@ -137,4 +141,4 @@ const useLoadingObservable = () => {
   };
 };
 
-export const [LoadingStateProvider, useLoadingStateContext] = createContainer(useLoadingObservable);
+export const [LoadingStateProvider, useLoadingStateContext] = createContainer(useLoadingState);

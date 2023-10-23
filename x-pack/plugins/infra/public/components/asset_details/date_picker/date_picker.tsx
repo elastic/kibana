@@ -14,7 +14,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useDatePickerContext } from '../hooks/use_date_picker';
-import { useLoadingStateContext } from '../hooks/use_loading_observable';
+import { useLoadingStateContext } from '../hooks/use_loading_state';
 
 const COMMONLY_USED_RANGES: DurationRange[] = [
   {

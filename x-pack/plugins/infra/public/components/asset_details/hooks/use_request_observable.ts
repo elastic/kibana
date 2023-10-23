@@ -6,10 +6,9 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { map, mergeMap, filter } from 'rxjs/operators';
 import { catchError, of, from, Subject, withLatestFrom } from 'rxjs';
-import { useLoadingStateContext } from './use_loading_observable';
+import { useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext } from './use_date_picker';
 
 export const useRequestObservable = <T>() => {
@@ -18,7 +17,6 @@ export const useRequestObservable = <T>() => {
   const request$ = useRef(new Subject<() => Promise<T>>());
 
   useEffect(() => {
-    const uuid = uuidv4();
     // Subscribe to updates in the request$
     const subscription = request$.current
       .pipe(

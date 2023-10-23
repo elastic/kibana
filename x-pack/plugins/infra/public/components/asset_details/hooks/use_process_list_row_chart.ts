@@ -16,8 +16,10 @@ import {
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useProcessListContext } from './use_process_list';
+import { useRequestObservable } from './use_request_observable';
 
 export function useProcessListRowChart(command: string) {
+  const { request$ } = useRequestObservable();
   const [inErrorState, setInErrorState] = useState(false);
   const decodeResponse = (response: any) => {
     return pipe(
@@ -46,8 +48,8 @@ export function useProcessListRowChart(command: string) {
   useEffect(() => setInErrorState(false), [loading]);
 
   useEffect(() => {
-    makeRequest();
-  }, [makeRequest]);
+    request$.next(makeRequest);
+  }, [makeRequest, request$]);
 
   return {
     error: inErrorState,

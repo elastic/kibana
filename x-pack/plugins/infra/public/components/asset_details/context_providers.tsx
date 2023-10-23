@@ -8,7 +8,7 @@
 import React from 'react';
 import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
 import { DatePickerProvider } from './hooks/use_date_picker';
-import { LoadingStateProvider } from './hooks/use_loading_observable';
+import { LoadingStateProvider } from './hooks/use_loading_state';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
 import { AssetDetailsProps } from './types';
 

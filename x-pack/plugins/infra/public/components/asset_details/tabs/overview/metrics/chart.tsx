@@ -14,7 +14,7 @@ import { METRIC_CHART_HEIGHT } from '../../../constants';
 import { useDatePickerContext } from '../../../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
 import type { XYConfig } from '../../../../../common/visualizations';
-import { useLoadingStateContext } from '../../../hooks/use_loading_observable';
+import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export interface ChartProps extends XYConfig {
   visualOptions?: XYVisualOptions;
