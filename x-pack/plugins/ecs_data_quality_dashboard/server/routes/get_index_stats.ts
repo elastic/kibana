@@ -13,6 +13,7 @@ import { buildResponse } from '../lib/build_response';
 import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetIndexStatsParams, GetIndexStatsQuery } from '../schemas/get_index_stats';
+import { API_DEFAULT_ERROR_MESSAGE } from '../translations';
 
 export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -89,11 +90,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
           logger.error(JSON.stringify(err));
 
           return resp.error({
-            body:
-              err.message ??
-              i18n.translate('xpack.ecsDataQualityDashboard.getIndexStats.defaultErrorMessage', {
-                defaultMessage: 'Internal Server Error',
-              }),
+            body: err.message ?? API_DEFAULT_ERROR_MESSAGE,
             statusCode: err.statusCode ?? 500,
           });
         }
