@@ -79,9 +79,11 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'aiops',
           title: 'AIOps',
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
+          spaceBefore: null,
           children: [
             {
               title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
@@ -116,14 +118,11 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          id: 'groups-spacer-1',
-          isGroupTitle: true,
-        },
-        {
           id: 'apm',
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
@@ -154,6 +153,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
@@ -172,10 +172,6 @@ const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
-        {
-          id: 'groups-spacer-2',
-          isGroupTitle: true,
-        },
       ],
     },
   ],
@@ -186,7 +182,6 @@ const navigationTree: NavigationTreeDefinition = {
         defaultMessage: 'Get Started',
       }),
       link: 'observabilityOnboarding',
-      isGroupTitle: true,
       icon: 'launch',
     },
     {

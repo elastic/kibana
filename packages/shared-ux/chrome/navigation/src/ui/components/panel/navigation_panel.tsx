@@ -22,7 +22,7 @@ import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
 
 export const NavigationPanel: FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { isOpen, close, getContent } = usePanel();
+  const { isOpen, close, getContent, selectedNode } = usePanel();
 
   // ESC key closes PanelNav
   const onKeyDown = useCallback(
@@ -34,9 +34,15 @@ export const NavigationPanel: FC = () => {
     [close]
   );
 
-  const onOutsideClick = useCallback(() => {
-    close();
-  }, [close]);
+  const onOutsideClick = useCallback(
+    ({ target }: Event) => {
+      // Only close if we are not clicking on the currently selected nav node
+      if ((target as HTMLButtonElement).dataset.testSubj !== `panelOpener-${selectedNode?.id}`) {
+        close();
+      }
+    },
+    [close, selectedNode]
+  );
 
   const panelWrapperClasses = getPanelWrapperStyles();
   const sideNavPanelStyles = getNavPanelStyles(euiTheme);
