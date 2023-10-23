@@ -55,12 +55,7 @@ export const checkResults = () => {
 };
 
 export const typeInECSFieldInput = (text: string, index = 0) =>
-  cy
-    .getBySel('ECS-field-input')
-    .eq(index)
-    .within(() => {
-      cy.getBySel('comboBoxInput').click().type(text);
-    });
+  cy.getBySel('ECS-field-input').eq(index).type(text);
 
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
   cy

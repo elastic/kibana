@@ -86,7 +86,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       inputQuery('select * from uptime');
       cy.contains('Query is a required field').should('not.exist');
       cy.contains('Advanced').click();
-      typeInECSFieldInput('message{downArrow}{enter}');
+      typeInECSFieldInput('{downArrow}{enter}');
       cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
       cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
     });
@@ -103,7 +103,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
       cy.contains('select * from uptime');
-      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
       cy.contains('Days of uptime');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
@@ -121,7 +121,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
-      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
       cy.contains('Days of uptime');
     });
 
@@ -152,11 +152,11 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
-      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
       cy.contains('Days of uptime');
     });
     // leave some time to make sure the data from the form get populated to the rules form
-    cy.wait(3000);
+    cy.wait(4000);
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
     cy.contains('Save changes').click();
     cy.wait('@saveRuleMultiQuery').should(({ request }) => {
