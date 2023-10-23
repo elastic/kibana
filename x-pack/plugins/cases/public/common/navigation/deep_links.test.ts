@@ -100,9 +100,9 @@ describe('getCasesDeepLinks', () => {
           id: 'cases_create_override',
           path: 'cases_create_path_override',
         },
-        cases_settings: {
-          id: 'cases_settings_override',
-          path: 'cases_settings_path_override',
+        cases_configure: {
+          id: 'cases_configure_override',
+          path: 'cases_configure_path_override',
         },
       },
     });
