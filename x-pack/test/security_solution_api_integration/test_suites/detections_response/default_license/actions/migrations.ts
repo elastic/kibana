@@ -364,7 +364,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@brokenInServerless 7.16.0', () => {
+    describe('7.16.0', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/migrations');
       });
