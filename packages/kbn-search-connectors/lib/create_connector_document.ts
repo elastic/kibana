@@ -114,7 +114,7 @@ export function createConnectorDocument({
       incremental: { enabled: false, interval: '0 0 0 * * ?' },
     },
     service_type: serviceType || null,
-    status: ConnectorStatus.CREATED,
+    status: isNative ? ConnectorStatus.NEEDS_CONFIGURATION : ConnectorStatus.CREATED,
     sync_now: false,
   };
 }

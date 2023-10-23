@@ -2158,76 +2158,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.MountPointPortal",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "MountPointPortal",
-        "description": [],
-        "signature": [
-          "React.FunctionComponent<",
-          {
-            "pluginId": "@kbn/react-kibana-mount",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaMountPluginApi",
-            "section": "def-common.MountPointPortalProps",
-            "text": "MountPointPortalProps"
-          },
-          ">"
-        ],
-        "path": "src/plugins/kibana_react/public/util/index.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx"
-          }
-        ],
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.MountPointPortal.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.MountPointPortal.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.NoDataCard",
         "type": "Function",
         "tags": [],
@@ -2749,18 +2679,6 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
           },
           {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
@@ -2976,14 +2894,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
           },
           {
             "plugin": "data",
@@ -3299,11 +3209,43 @@
           },
           {
             "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_add.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_add.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_edit.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_edit.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rules_list.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rules_list.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
           },
           {
             "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_dropdown.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_dropdown.tsx"
           },
           {
             "plugin": "cases",

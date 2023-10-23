@@ -12,6 +12,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
@@ -116,12 +117,12 @@ export const ElasticsearchOverview = () => {
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.apiKey.description', {
             defaultMessage:
-              "You'll need a private API key to securely connect to your project. Use an existing key, or create a new one and copy it somewhere safe.",
+              "An API key is a private, unique identifier for authentication and authorization. You'll need an API key to securely connect to your project.",
           })}
           leftPanelContent={<ApiKeyPanel setClientApiKey={setClientApiKey} />}
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.apiKey.title', {
-            defaultMessage: 'Prepare an API Key',
+            defaultMessage: 'API Key',
           })}
         />
       </EuiPageTemplate.Section>
@@ -342,41 +343,22 @@ const OverviewFooter = () => {
             title={i18n.translate('xpack.serverlessSearch.overview.footer.discover.title', {
               defaultMessage: 'Discover',
             })}
-            description={i18n.translate(
-              'xpack.serverlessSearch.overview.footer.discover.description',
-              {
-                defaultMessage:
-                  'Search and filter your data, learn how your fields are structured, and create visualizations.',
-              }
-            )}
-            onClick={() => navigateToApp('discover')}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            layout="horizontal"
-            icon={
-              <EuiAvatar
-                size="xl"
-                color="subdued"
-                type="space"
-                iconType="pipelineApp"
-                iconSize="original"
-                name="pipelines"
-              />
+            description={
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem>
+                  <p>
+                    {i18n.translate('xpack.serverlessSearch.overview.footer.discover.description', {
+                      defaultMessage:
+                        'Search and filter your data, learn how your fields are structured, and create visualizations.',
+                    })}
+                  </p>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="arrowRight" color="subdued" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             }
-            titleSize="xs"
-            title={i18n.translate('xpack.serverlessSearch.overview.footer.pipelines.title', {
-              defaultMessage: 'Pipelines',
-            })}
-            description={i18n.translate(
-              'xpack.serverlessSearch.overview.footer.pipelines.description',
-              {
-                defaultMessage:
-                  'Transform your data before indexing. Remove or rename fields, run custom scripts, and much more.',
-              }
-            )}
-            onClick={() => navigateToApp('management', { path: '/ingest/ingest_pipelines' })}
+            onClick={() => navigateToApp('discover')}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -396,12 +378,24 @@ const OverviewFooter = () => {
             title={i18n.translate('xpack.serverlessSearch.overview.footer.documentation.title', {
               defaultMessage: 'Documentation',
             })}
-            description={i18n.translate(
-              'xpack.serverlessSearch.overview.footer.documentation.description',
-              {
-                defaultMessage: 'Learn more with our references, how-to guides, and tutorials.',
-              }
-            )}
+            description={
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem>
+                  <p>
+                    {i18n.translate(
+                      'xpack.serverlessSearch.overview.footer.documentation.description',
+                      {
+                        defaultMessage:
+                          'Learn more with our references, how-to guides, and tutorials.',
+                      }
+                    )}
+                  </p>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="arrowRight" color="subdued" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             href={docLinks.gettingStartedSearch}
           />
         </EuiFlexItem>

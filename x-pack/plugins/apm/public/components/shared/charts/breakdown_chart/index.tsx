@@ -124,6 +124,7 @@ export function BreakdownChart({
               visible: true,
             },
           }}
+          locale={i18n.getLocale()}
         />
         <Axis
           id="x-axis"

@@ -10,28 +10,30 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { parse } from '@kbn/datemath';
 import { useNodeDetailsRedirect } from '../../../pages/link_to';
-import { Asset } from '../types';
+
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
 export interface LinkToNodeDetailsProps {
-  asset: Asset;
+  assetId: string;
+  assetName?: string;
   assetType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ asset, assetType }: LinkToNodeDetailsProps) => {
+export const LinkToNodeDetails = ({ assetId, assetName, assetType }: LinkToNodeDetailsProps) => {
   const [state] = useAssetDetailsUrlState();
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
 
-  const { dateRange, ...assetDetails } = state ?? {};
+  // don't propagate the autoRefresh to the details page
+  const { dateRange, autoRefresh: _, ...assetDetails } = state ?? {};
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
       assetType,
-      assetId: asset.id,
+      assetId,
       search: {
-        name: asset.name,
         ...assetDetails,
+        name: assetName,
         from: parse(dateRange?.from ?? '')?.valueOf(),
         to: parse(dateRange?.to ?? '')?.valueOf(),
       },

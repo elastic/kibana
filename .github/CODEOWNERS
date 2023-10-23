@@ -360,6 +360,7 @@ src/plugins/es_ui_shared @elastic/platform-deployment-management
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
+packages/kbn-eslint-plugin-i18n @elastic/actionable-observability
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/actionable-observability
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
@@ -540,6 +541,7 @@ x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/packages/observability/alert_details @elastic/actionable-observability
+x-pack/packages/observability/alerting_test_data @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_log_explorer @elastic/infra-monitoring-ui
 x-pack/plugins/observability_onboarding @elastic/apm-ui
@@ -679,6 +681,7 @@ packages/shared-ux/card/no_data/impl @elastic/appex-sharedux
 packages/shared-ux/card/no_data/mocks @elastic/appex-sharedux
 packages/shared-ux/card/no_data/types @elastic/appex-sharedux
 packages/shared-ux/chrome/navigation @elastic/appex-sharedux
+packages/shared-ux/error_boundary @elastic/appex-sharedux
 packages/shared-ux/file/context @elastic/appex-sharedux
 packages/shared-ux/file/image/impl @elastic/appex-sharedux
 packages/shared-ux/file/image/mocks @elastic/appex-sharedux
@@ -1095,6 +1098,10 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
 /test/plugin_functional/test_suites/core_plugins/rendering.ts @elastic/kibana-security
+/x-pack/test/accessibility/apps/login_page.ts @elastic/kibana-security
+/x-pack/test/accessibility/apps/roles.ts @elastic/kibana-security
+/x-pack/test/accessibility/apps/spaces.ts @elastic/kibana-security
+/x-pack/test/accessibility/apps/users.ts @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 /x-pack/test/api_integration/apis/spaces/ @elastic/kibana-security
 /x-pack/test/ui_capabilities/ @elastic/kibana-security
@@ -1155,6 +1162,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/types/timeline @elastic/security-threat-hunting-investigations
 
 /x-pack/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
+/x-pack/test/security_solution_cypress/cypress/e2e/sourcerer/sourcerer_timeline.cy.ts @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
@@ -1293,8 +1301,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-detection-engine
 
-/x-pack/test/security_solution_cypress/cypress/e2e/data_sources @elastic/security-detection-engine
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_alerts @elastic/security-detection-engine
+/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/sourcerer @elastic/security-detection-engine
+/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_alerts @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_actions @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_creation @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_edit @elastic/security-detection-engine
