@@ -124,10 +124,11 @@ export const DiscoverTopNav = ({
     () =>
       getTopNavBadges({
         stateContainer,
+        services,
         hasUnsavedChanges,
         topNavCustomization,
       }),
-    [stateContainer, hasUnsavedChanges, topNavCustomization]
+    [stateContainer, services, hasUnsavedChanges, topNavCustomization]
   );
 
   const topNavMenu = useMemo(

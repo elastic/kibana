@@ -10,6 +10,8 @@ import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
+import { onSaveSearch } from './on_save_search';
+import { DiscoverServices } from '../../../../build_services';
 
 /**
  * Helper function to build the top nav badges
@@ -17,19 +19,37 @@ import type { TopNavCustomization } from '../../../../customizations';
 export const getTopNavBadges = ({
   hasUnsavedChanges,
   stateContainer,
+  services,
   topNavCustomization,
 }: {
   hasUnsavedChanges: boolean | undefined;
   stateContainer: DiscoverStateContainer;
+  services: DiscoverServices;
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuBadgeProps[] => {
+  const saveSearch = (initialCopyOnSave?: boolean) =>
+    onSaveSearch({
+      initialCopyOnSave,
+      savedSearch: stateContainer.savedSearchState.getState(),
+      services,
+      state: stateContainer,
+    });
+
   const badges: TopNavMenuBadgeProps[] = [];
 
   // TODO: make it customizable
 
   if (hasUnsavedChanges) {
     badges.push(
-      getTopNavUnsavedChangesBadge({ onReset: stateContainer.actions.undoSavedSearchChanges })
+      getTopNavUnsavedChangesBadge({
+        onReset: stateContainer.actions.undoSavedSearchChanges,
+        onSave: async () => {
+          await saveSearch();
+        },
+        onSaveAs: async () => {
+          await saveSearch(true);
+        },
+      })
     );
   }
 
