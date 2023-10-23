@@ -8,17 +8,16 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   getLegacyActionSOById,
   getLegacyActionNotificationSOById,
   getRuleSOById,
-} from '../../utils';
+} from '../../../../../detection_engine_api_integration/utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
  * @deprecated Once the legacy notification system is removed, remove this test too.
  */
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -31,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
   // For new routes that do any updates on a rule, please ensure that you are including the legacy
   // action migration code. We are monitoring legacy action telemetry to clean up once we see their
   // existence being near 0.
-  describe('migrate_legacy_actions', () => {
+  describe('@serverless @ess migrate_legacy_actions', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/legacy_actions');
     });
