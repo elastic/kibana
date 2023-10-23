@@ -6,8 +6,14 @@
  */
 
 import type React from 'react';
+import type { EuiTableComputedColumnType } from '@elastic/eui';
+
 import type { CustomFieldTypes } from '../../../common/types/domain';
-import type { CasesConfigurationUICustomField, CaseUICustomField } from '../../containers/types';
+import type {
+  CasesConfigurationUICustomField,
+  CaseUICustomField,
+  CaseUI,
+} from '../../containers/types';
 
 export interface CustomFieldType<T extends CaseUICustomField> {
   Configure: React.FC;
@@ -30,6 +36,7 @@ export interface CustomFieldType<T extends CaseUICustomField> {
 export type CustomFieldFactory<T extends CaseUICustomField> = () => {
   id: string;
   label: string;
+  getColumn: (params: { key: string; label: string }) => EuiTableComputedColumnType<CaseUI>;
   build: () => CustomFieldType<T>;
 };
 

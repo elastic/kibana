@@ -11,6 +11,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 export type CasesColumnsConfiguration = Record<
   string,
@@ -23,6 +24,9 @@ export type CasesColumnsConfiguration = Record<
 
 export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
+  const {
+    data: { customFields },
+  } = useGetCaseConfiguration();
 
   const { owner, permissions } = useCasesContext();
   const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
@@ -31,7 +35,7 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
   const canDisplayActions = permissions.update || permissions.delete;
   const canDisplayOwner = !!owner.length && availableSolutions.length > 1;
 
-  return {
+  const result: CasesColumnsConfiguration = {
     title: {
       field: 'title',
       name: i18n.NAME,
@@ -108,4 +112,15 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
       canDisplay: canDisplayActions,
     },
   };
+
+  // we need to extend the configuration with the customFields
+  customFields.forEach(({ key, label }) => {
+    result[key] = {
+      field: key,
+      name: label,
+      canDisplay: canDisplayDefault,
+    };
+  });
+
+  return result;
 };

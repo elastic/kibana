@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -26,7 +26,7 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import type { ActionConnector, CustomFieldTypes } from '../../../common/types/domain';
+import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { CasesColumnSelection, CaseUI } from '../../../common/ui/types';
 import { OWNER_INFO, SELECTOR_VIEW_CASES_TABLE_COLUMNS } from '../../../common/constants';
@@ -42,7 +42,8 @@ import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
-import { builderMap } from '../custom_fields/builder';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
@@ -95,6 +96,10 @@ export const useCasesColumns = ({
   const casesColumnsConfig = useCasesColumnsConfiguration();
   const { actions } = useActions({ disableActions });
 
+  const {
+    data: { customFields },
+  } = useGetCaseConfiguration();
+
   const assignCaseAction = useCallback(
     async (theCase: CaseUI) => {
       if (onRowClick) {
@@ -104,244 +109,255 @@ export const useCasesColumns = ({
     [onRowClick]
   );
 
-  const columnsDict: Record<string, CasesColumns> = {
-    title: {
-      field: casesColumnsConfig.title.field,
-      name: casesColumnsConfig.title.name,
-      sortable: true,
-      render: (title: string, theCase: CaseUI) => {
-        if (theCase.id != null && theCase.title != null) {
-          const caseDetailsLinkComponent = isSelectorView ? (
-            theCase.title
+  const columnsDict: Record<string, CasesColumns> = useMemo(
+    () => ({
+      title: {
+        field: casesColumnsConfig.title.field,
+        name: casesColumnsConfig.title.name,
+        sortable: true,
+        render: (title: string, theCase: CaseUI) => {
+          if (theCase.id != null && theCase.title != null) {
+            const caseDetailsLinkComponent = isSelectorView ? (
+              theCase.title
+            ) : (
+              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                <TruncatedText text={theCase.title} />
+              </CaseDetailsLink>
+            );
+
+            return caseDetailsLinkComponent;
+          }
+          return getEmptyTagValue();
+        },
+        width: !isSelectorView ? '20%' : '55%',
+      },
+      assignees: {
+        field: casesColumnsConfig.assignees.field,
+        name: casesColumnsConfig.assignees.name,
+        render: (assignees: CaseUI['assignees']) => (
+          <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
+        ),
+        width: '180px',
+      },
+      tags: {
+        field: casesColumnsConfig.tags.field,
+        name: casesColumnsConfig.tags.name,
+        render: (tags: CaseUI['tags']) => {
+          if (tags != null && tags.length > 0) {
+            const clampedBadges = (
+              <LineClampedEuiBadgeGroup data-test-subj="case-table-column-tags">
+                {tags.map((tag: string, i: number) => (
+                  <StyledEuiBadge
+                    color="hollow"
+                    key={`${tag}-${i}`}
+                    data-test-subj={`case-table-column-tags-${tag}`}
+                  >
+                    {tag}
+                  </StyledEuiBadge>
+                ))}
+              </LineClampedEuiBadgeGroup>
+            );
+
+            const unclampedBadges = (
+              <EuiBadgeGroup data-test-subj="case-table-column-tags">
+                {tags.map((tag: string, i: number) => (
+                  <EuiBadge
+                    color="hollow"
+                    key={`${tag}-${i}`}
+                    data-test-subj={`case-table-column-tags-${tag}`}
+                  >
+                    {tag}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            );
+
+            return (
+              <EuiToolTip
+                data-test-subj="case-table-column-tags-tooltip"
+                position="left"
+                content={unclampedBadges}
+              >
+                {clampedBadges}
+              </EuiToolTip>
+            );
+          }
+          return getEmptyTagValue();
+        },
+        width: '15%',
+      },
+      totalAlerts: {
+        field: casesColumnsConfig.totalAlerts.field,
+        name: casesColumnsConfig.totalAlerts.name,
+        align: RIGHT_ALIGNMENT,
+        render: (totalAlerts: CaseUI['totalAlerts']) =>
+          totalAlerts != null
+            ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+            : getEmptyTagValue(),
+        width: !isSelectorView ? '80px' : '55px',
+      },
+      owner: {
+        field: casesColumnsConfig.owner.field,
+        name: casesColumnsConfig.owner.name,
+        align: RIGHT_ALIGNMENT,
+        render: (caseOwner: CasesOwners) => {
+          const ownerInfo = OWNER_INFO[caseOwner];
+          return ownerInfo ? (
+            <EuiIcon
+              size="m"
+              type={ownerInfo.iconType}
+              title={ownerInfo.label}
+              data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
+            />
           ) : (
-            <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-              <TruncatedText text={theCase.title} />
-            </CaseDetailsLink>
+            getEmptyTagValue()
           );
+        },
+      },
+      totalComment: {
+        field: casesColumnsConfig.totalComment.field,
+        name: casesColumnsConfig.totalComment.name,
+        align: RIGHT_ALIGNMENT,
+        render: (totalComment: CaseUI['totalComment']) =>
+          totalComment != null
+            ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+            : getEmptyTagValue(),
+      },
+      category: {
+        field: casesColumnsConfig.category.field,
+        name: casesColumnsConfig.category.name,
+        sortable: true,
+        render: (category: CaseUI['category']) => {
+          if (category != null) {
+            return (
+              <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>
+            );
+          }
+          return getEmptyTagValue();
+        },
+        width: '100px',
+      },
+      closedAt: {
+        field: casesColumnsConfig.closedAt.field,
+        name: casesColumnsConfig.closedAt.name,
+        sortable: true,
+        render: (closedAt: CaseUI['closedAt']) => {
+          if (closedAt != null) {
+            return (
+              <span data-test-subj={`case-table-column-closedAt`}>
+                <FormattedRelativePreferenceDate value={closedAt} />
+              </span>
+            );
+          }
+          return getEmptyTagValue();
+        },
+      },
+      createdAt: {
+        field: casesColumnsConfig.createdAt.field,
+        name: casesColumnsConfig.createdAt.name,
+        sortable: true,
+        render: (createdAt: CaseUI['createdAt']) => {
+          if (createdAt != null) {
+            return (
+              <span data-test-subj={`case-table-column-createdAt`}>
+                <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
+              </span>
+            );
+          }
+          return getEmptyTagValue();
+        },
+      },
+      updatedAt: {
+        field: casesColumnsConfig.updatedAt.field,
+        name: casesColumnsConfig.updatedAt.name,
+        sortable: true,
+        render: (updatedAt: CaseUI['updatedAt']) => {
+          if (updatedAt != null) {
+            return (
+              <span data-test-subj="case-table-column-updatedAt">
+                <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
+              </span>
+            );
+          }
+          return getEmptyTagValue();
+        },
+      },
+      externalIncident: {
+        // no field
+        name: casesColumnsConfig.externalIncident.name,
+        render: (theCase: CaseUI) => {
+          if (theCase.id != null) {
+            return <ExternalServiceColumn theCase={theCase} connectors={connectors} />;
+          }
+          return getEmptyTagValue();
+        },
+        width: isSelectorView ? '80px' : undefined,
+      },
+      status: {
+        field: casesColumnsConfig.status.field,
+        name: casesColumnsConfig.status.name,
+        sortable: true,
+        render: (status: CaseUI['status']) => {
+          if (status != null) {
+            return <Status status={status} />;
+          }
 
-          return caseDetailsLinkComponent;
-        }
-        return getEmptyTagValue();
+          return getEmptyTagValue();
+        },
       },
-      width: !isSelectorView ? '20%' : '55%',
-    },
-    assignees: {
-      field: casesColumnsConfig.assignees.field,
-      name: casesColumnsConfig.assignees.name,
-      render: (assignees: CaseUI['assignees']) => (
-        <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
-      ),
-      width: '180px',
-    },
-    tags: {
-      field: casesColumnsConfig.tags.field,
-      name: casesColumnsConfig.tags.name,
-      render: (tags: CaseUI['tags']) => {
-        if (tags != null && tags.length > 0) {
-          const clampedBadges = (
-            <LineClampedEuiBadgeGroup data-test-subj="case-table-column-tags">
-              {tags.map((tag: string, i: number) => (
-                <StyledEuiBadge
-                  color="hollow"
-                  key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${tag}`}
-                >
-                  {tag}
-                </StyledEuiBadge>
-              ))}
-            </LineClampedEuiBadgeGroup>
-          );
+      severity: {
+        field: casesColumnsConfig.severity.field,
+        name: casesColumnsConfig.severity.name,
+        sortable: true,
+        render: (severity: CaseUI['severity']) => {
+          if (severity != null) {
+            const severityData = severities[severity ?? CaseSeverity.LOW];
+            return (
+              <EuiHealth
+                data-test-subj={`case-table-column-severity-${severity}`}
+                color={severityData.color}
+              >
+                {severityData.label}
+              </EuiHealth>
+            );
+          }
+          return getEmptyTagValue();
+        },
+        width: '90px',
+      },
+      assignCaseAction: {
+        // no field
+        align: RIGHT_ALIGNMENT,
+        render: (theCase: CaseUI) => {
+          if (theCase.id != null) {
+            return (
+              <EuiButton
+                data-test-subj={`cases-table-row-select-${theCase.id}`}
+                onClick={() => {
+                  assignCaseAction(theCase);
+                }}
+                size="s"
+              >
+                {i18n.SELECT}
+              </EuiButton>
+            );
+          }
+          return getEmptyTagValue();
+        },
+      },
+      actions: {
+        // no field
+        ...actions,
+      },
+    }),
+    [actions, assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
+  );
 
-          const unclampedBadges = (
-            <EuiBadgeGroup data-test-subj="case-table-column-tags">
-              {tags.map((tag: string, i: number) => (
-                <EuiBadge
-                  color="hollow"
-                  key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${tag}`}
-                >
-                  {tag}
-                </EuiBadge>
-              ))}
-            </EuiBadgeGroup>
-          );
-
-          return (
-            <EuiToolTip
-              data-test-subj="case-table-column-tags-tooltip"
-              position="left"
-              content={unclampedBadges}
-            >
-              {clampedBadges}
-            </EuiToolTip>
-          );
-        }
-        return getEmptyTagValue();
-      },
-      width: '15%',
-    },
-    totalAlerts: {
-      field: casesColumnsConfig.totalAlerts.field,
-      name: casesColumnsConfig.totalAlerts.name,
-      align: RIGHT_ALIGNMENT,
-      render: (totalAlerts: CaseUI['totalAlerts']) =>
-        totalAlerts != null
-          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-          : getEmptyTagValue(),
-      width: !isSelectorView ? '80px' : '55px',
-    },
-    owner: {
-      field: casesColumnsConfig.owner.field,
-      name: casesColumnsConfig.owner.name,
-      align: RIGHT_ALIGNMENT,
-      render: (caseOwner: CasesOwners) => {
-        const ownerInfo = OWNER_INFO[caseOwner];
-        return ownerInfo ? (
-          <EuiIcon
-            size="m"
-            type={ownerInfo.iconType}
-            title={ownerInfo.label}
-            data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
-          />
-        ) : (
-          getEmptyTagValue()
-        );
-      },
-    },
-    totalComment: {
-      field: casesColumnsConfig.totalComment.field,
-      name: casesColumnsConfig.totalComment.name,
-      align: RIGHT_ALIGNMENT,
-      render: (totalComment: CaseUI['totalComment']) =>
-        totalComment != null
-          ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
-          : getEmptyTagValue(),
-    },
-    category: {
-      field: casesColumnsConfig.category.field,
-      name: casesColumnsConfig.category.name,
-      sortable: true,
-      render: (category: CaseUI['category']) => {
-        if (category != null) {
-          return <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>;
-        }
-        return getEmptyTagValue();
-      },
-      width: '100px',
-    },
-    closedAt: {
-      field: casesColumnsConfig.closedAt.field,
-      name: casesColumnsConfig.closedAt.name,
-      sortable: true,
-      render: (closedAt: CaseUI['closedAt']) => {
-        if (closedAt != null) {
-          return (
-            <span data-test-subj={`case-table-column-closedAt`}>
-              <FormattedRelativePreferenceDate value={closedAt} />
-            </span>
-          );
-        }
-        return getEmptyTagValue();
-      },
-    },
-    createdAt: {
-      field: casesColumnsConfig.createdAt.field,
-      name: casesColumnsConfig.createdAt.name,
-      sortable: true,
-      render: (createdAt: CaseUI['createdAt']) => {
-        if (createdAt != null) {
-          return (
-            <span data-test-subj={`case-table-column-createdAt`}>
-              <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
-            </span>
-          );
-        }
-        return getEmptyTagValue();
-      },
-    },
-    updatedAt: {
-      field: casesColumnsConfig.updatedAt.field,
-      name: casesColumnsConfig.updatedAt.name,
-      sortable: true,
-      render: (updatedAt: CaseUI['updatedAt']) => {
-        if (updatedAt != null) {
-          return (
-            <span data-test-subj="case-table-column-updatedAt">
-              <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
-            </span>
-          );
-        }
-        return getEmptyTagValue();
-      },
-    },
-    externalIncident: {
-      // no field
-      name: casesColumnsConfig.externalIncident.name,
-      render: (theCase: CaseUI) => {
-        if (theCase.id != null) {
-          return <ExternalServiceColumn theCase={theCase} connectors={connectors} />;
-        }
-        return getEmptyTagValue();
-      },
-      width: isSelectorView ? '80px' : undefined,
-    },
-    status: {
-      field: casesColumnsConfig.status.field,
-      name: casesColumnsConfig.status.name,
-      sortable: true,
-      render: (status: CaseUI['status']) => {
-        if (status != null) {
-          return <Status status={status} />;
-        }
-
-        return getEmptyTagValue();
-      },
-    },
-    severity: {
-      field: casesColumnsConfig.severity.field,
-      name: casesColumnsConfig.severity.name,
-      sortable: true,
-      render: (severity: CaseUI['severity']) => {
-        if (severity != null) {
-          const severityData = severities[severity ?? CaseSeverity.LOW];
-          return (
-            <EuiHealth
-              data-test-subj={`case-table-column-severity-${severity}`}
-              color={severityData.color}
-            >
-              {severityData.label}
-            </EuiHealth>
-          );
-        }
-        return getEmptyTagValue();
-      },
-      width: '90px',
-    },
-    assignCaseAction: {
-      // no field
-      align: RIGHT_ALIGNMENT,
-      render: (theCase: CaseUI) => {
-        if (theCase.id != null) {
-          return (
-            <EuiButton
-              data-test-subj={`cases-table-row-select-${theCase.id}`}
-              onClick={() => {
-                assignCaseAction(theCase);
-              }}
-              size="s"
-            >
-              {i18n.SELECT}
-            </EuiButton>
-          );
-        }
-        return getEmptyTagValue();
-      },
-    },
-    actions: {
-      // no field
-      ...actions,
-    },
-  };
+  // we need to extend the columnsDict with the columns of
+  // the customFields
+  customFields.forEach(({ key, type, label }) => {
+    columnsDict[key] = customFieldsBuilderMap[type]().getColumn({ key, label });
+  });
 
   const columns: CasesColumns[] = [];
 
@@ -354,10 +370,6 @@ export const useCasesColumns = ({
       if (field in columnsDict && isChecked) {
         columns.push(columnsDict[field]);
       }
-      // else if (field in casesColumnsConfig && casesColumnsConfig[field].isCustomField) {
-      //   columns.push(renderTypeColumn(casesColumnsConfig[field].type));
-      //   probably a custom field
-      // }
     });
   }
 

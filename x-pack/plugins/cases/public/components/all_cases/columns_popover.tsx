@@ -103,6 +103,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                           label={name}
                           checked={isChecked}
                           onChange={(e) => toggleColumn({ field, isChecked: e.target.checked })}
+                          compressed
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>

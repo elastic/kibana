@@ -48,12 +48,21 @@ const mergeSelectedColumnsWithConfiguration = ({
     return accumulator;
   }, [] as Array<{ field: string; name: string; isChecked: boolean }>);
 
-  // in case the configuration was updated we need to append these to the end of the list
-  // can also apply to custom fields
+  // This will include any new customFields and/or changes to the case attributes
   const missingColumns = difference(
     Object.keys(casesColumnsConfig),
     selectedColumns.map(({ field }) => field)
   );
+
+  missingColumns.forEach((field) => {
+    // can be an empty string
+    if (casesColumnsConfig[field].field) {
+      result.push({
+        ...casesColumnsConfig[field],
+        isChecked: false,
+      });
+    }
+  });
 
   return result;
 };
