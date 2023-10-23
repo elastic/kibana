@@ -7,7 +7,7 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 import type { Conversation, Message } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiMarkdownFormat, EuiText, tint } from '@elastic/eui';
+import { EuiAvatar, tint } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
@@ -26,25 +26,19 @@ export const getComments = ({
 }: {
   amendMessage: ({
     conversationId,
-    message,
+    content,
   }: {
     conversationId: string;
-    message: Message;
+    content: string;
   }) => Message[];
   currentConversation: Conversation;
   lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
   showAnonymizedValues: boolean;
 }): EuiCommentProps[] => {
-  const amendMessageOfConversation = (content: string, index: number) => {
-    const replacementMessage = currentConversation.messages[index];
-    console.log('replacementMessage', { replacementMessage, content });
+  const amendMessageOfConversation = (content: string) => {
     amendMessage({
       conversationId: currentConversation.id,
-      message: {
-        content,
-        role: replacementMessage.role,
-        timestamp: replacementMessage.timestamp,
-      },
+      content,
     });
   };
 
@@ -77,40 +71,7 @@ export const getComments = ({
       ...(message.isError ? errorStyles : {}),
     };
 
-    if (message.content && message.content.length) {
-      const messageContentWithReplacements =
-        replacements != null
-          ? Object.keys(replacements).reduce(
-              (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
-              message.content
-            )
-          : message.content;
-      const transformedMessage = {
-        ...message,
-        content: messageContentWithReplacements,
-      };
-
-      return {
-        ...messageProps,
-        actions: <CommentActions message={transformedMessage} />,
-        children:
-          index !== currentConversation.messages.length - 1 ? (
-            <EuiText>
-              <EuiMarkdownFormat className={`message-${index}`}>
-                {showAnonymizedValues ? message.content : transformedMessage.content}
-              </EuiMarkdownFormat>
-            </EuiText>
-          ) : (
-            <EuiText>
-              <EuiMarkdownFormat className={`message-${index}`}>
-                {showAnonymizedValues ? message.content : transformedMessage.content}
-              </EuiMarkdownFormat>
-              <span ref={lastCommentRef} />
-            </EuiText>
-          ),
-      };
-    }
-    if (message.reader) {
+    if (!(message.content && message.content.length)) {
       return {
         ...messageProps,
         children: (
@@ -124,10 +85,40 @@ export const getComments = ({
         ),
       };
     }
+
+    const messageContentWithReplacements =
+      replacements != null
+        ? Object.keys(replacements).reduce(
+            (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
+            message.content
+          )
+        : message.content;
+    const transformedMessage = {
+      ...message,
+      content: messageContentWithReplacements,
+    };
+
     return {
       ...messageProps,
-      children: <EuiText>{'oh no an error happened'}</EuiText>,
-      ...errorStyles,
+      actions: <CommentActions message={transformedMessage} />,
+      children: (
+        <>
+          <StreamComment
+            amendMessage={amendMessageOfConversation}
+            content={showAnonymizedValues ? message.content : transformedMessage.content}
+            reader={message.reader}
+            lastCommentRef={lastCommentRef}
+            isLastComment={index === currentConversation.messages.length - 1}
+          />
+          {index !== currentConversation.messages.length - 1 ? null : <span ref={lastCommentRef} />}
+        </>
+      ),
     };
+
+    // return {
+    //   ...messageProps,
+    //   children: <EuiText>{'oh no an error happened'}</EuiText>,
+    //   ...errorStyles,
+    // };
   });
 };

@@ -35,6 +35,10 @@ export interface AppendMessageProps {
   conversationId: string;
   message: Message;
 }
+interface AmendMessageProps {
+  conversationId: string;
+  content: string;
+}
 
 interface AppendReplacementsProps {
   conversationId: string;
@@ -57,8 +61,8 @@ interface SetConversationProps {
 
 interface UseConversation {
   appendStreamMessage: ({ conversationId, message }: AppendMessageProps) => void;
-  appendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
-  amendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
+  appendMessage: ({ conversationId, message }: AppendMessageProps) => Message[];
+  amendMessage: ({ conversationId, content }: AmendMessageProps) => Message[];
   appendReplacements: ({
     conversationId,
     replacements,
@@ -77,14 +81,14 @@ export const useConversation = (): UseConversation => {
    * Replaces the last message of conversation[] for a given conversationId
    */
   const amendMessage = useCallback(
-    ({ conversationId, message }) => {
+    ({ conversationId, content }) => {
       let messages: Message[] = [];
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
 
         if (prevConversation != null) {
-          prevConversation.messages.pop();
-          messages = [...prevConversation.messages, message];
+          const message = prevConversation.messages.pop();
+          messages = [...prevConversation.messages, { ...message, content }];
           const newConversation = {
             ...prevConversation,
             messages,

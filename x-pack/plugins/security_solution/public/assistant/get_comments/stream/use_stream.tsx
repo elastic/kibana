@@ -8,20 +8,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { concatMap, delay, Observable, of, share } from 'rxjs';
-interface UseStreamProps {
-  amendMessage: (message: string, index: number) => void;
-  index: number;
-  reader: ReadableStreamDefaultReader<Uint8Array>;
-}
-
-interface UseStream {
-  error: string | undefined;
-  isLoading: boolean;
-  isStreaming: boolean;
-  pendingMessage: string;
-  setComplete: (complete: boolean) => void;
-  subscription: Subscription | undefined;
-}
 
 export interface PromptObservableState {
   chunks: Chunk[];
@@ -44,72 +30,91 @@ interface Chunk {
   choices: ChunkChoice[];
 }
 
-export const useStream = ({ amendMessage, index, reader }: UseStreamProps): UseStream => {
+interface UseStreamProps {
+  amendMessage: (message: string) => void;
+  content?: string;
+  reader?: ReadableStreamDefaultReader<Uint8Array>;
+}
+
+interface UseStream {
+  error: string | undefined;
+  isLoading: boolean;
+  isStreaming: boolean;
+  pendingMessage: string;
+  setComplete: (complete: boolean) => void;
+  subscription: Subscription | undefined;
+}
+
+export const useStream = ({ amendMessage, content, reader }: UseStreamProps): UseStream => {
   const observer$ = useMemo(
     () =>
-      new Observable<PromptObservableState>((observer) => {
-        observer.next({ chunks: [], loading: true });
+      content == null && reader != null
+        ? new Observable<PromptObservableState>((observer) => {
+            observer.next({ chunks: [], loading: true });
 
-        const decoder = new TextDecoder();
+            const decoder = new TextDecoder();
 
-        const chunks: Chunk[] = [];
+            const chunks: Chunk[] = [];
 
-        let prev: string = '';
+            let prev: string = '';
 
-        function read() {
-          reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-            try {
-              if (done) {
-                observer.next({
-                  chunks,
-                  message: getMessageFromChunks(chunks),
-                  loading: false,
-                });
-                observer.complete();
-                return;
-              }
+            function read() {
+              reader?.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+                try {
+                  if (done) {
+                    observer.next({
+                      chunks,
+                      message: getMessageFromChunks(chunks),
+                      loading: false,
+                    });
+                    observer.complete();
+                    return;
+                  }
 
-              let lines: string[] = (prev + decoder.decode(value)).split('\n');
+                  let lines: string[] = (prev + decoder.decode(value)).split('\n');
 
-              const lastLine: string = lines[lines.length - 1];
+                  const lastLine: string = lines[lines.length - 1];
 
-              const isPartialChunk: boolean = !!lastLine && lastLine !== 'data: [DONE]';
+                  const isPartialChunk: boolean = !!lastLine && lastLine !== 'data: [DONE]';
 
-              if (isPartialChunk) {
-                prev = lastLine;
-                lines.pop();
-              } else {
-                prev = '';
-              }
+                  if (isPartialChunk) {
+                    prev = lastLine;
+                    lines.pop();
+                  } else {
+                    prev = '';
+                  }
 
-              lines = lines.map((str) => str.substr(6)).filter((str) => !!str && str !== '[DONE]');
+                  lines = lines
+                    .map((str) => str.substr(6))
+                    .filter((str) => !!str && str !== '[DONE]');
 
-              const nextChunks: Chunk[] = lines.map((line) => JSON.parse(line));
+                  const nextChunks: Chunk[] = lines.map((line) => JSON.parse(line));
 
-              nextChunks.forEach((chunk) => {
-                chunks.push(chunk);
-                observer.next({
-                  chunks,
-                  message: getMessageFromChunks(chunks),
-                  loading: true,
-                });
+                  nextChunks.forEach((chunk) => {
+                    chunks.push(chunk);
+                    observer.next({
+                      chunks,
+                      message: getMessageFromChunks(chunks),
+                      loading: true,
+                    });
+                  });
+                } catch (err) {
+                  observer.error(err);
+                  return;
+                }
+                read();
               });
-            } catch (err) {
-              observer.error(err);
-              return;
             }
+
             read();
-          });
-        }
 
-        read();
+            return () => {
+              reader.cancel();
+            };
+          }).pipe(concatMap((value) => of(value).pipe(delay(50))))
+        : new Observable<PromptObservableState>(),
 
-        return () => {
-          reader.cancel();
-        };
-      }).pipe(concatMap((value) => of(value).pipe(delay(50)))),
-
-    [reader]
+    [content, reader]
   );
 
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
@@ -118,8 +123,8 @@ export const useStream = ({ amendMessage, index, reader }: UseStreamProps): UseS
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 
   const onCompleteStream = useCallback(() => {
-    amendMessage(pendingMessage ?? '', index);
-  }, [amendMessage, index, pendingMessage]);
+    amendMessage(pendingMessage ?? '');
+  }, [amendMessage, pendingMessage]);
 
   const [complete, setComplete] = useState(false);
 
@@ -147,18 +152,10 @@ export const useStream = ({ amendMessage, index, reader }: UseStreamProps): UseS
     setSubscription(newSubscription);
   }, [observer$]);
 
-  let state: 'init' | 'loading' | 'streaming' | 'error' | 'complete' = 'init';
+  const { isLoading, isStreaming } = useMemo(() => {
+    return { isLoading: loading, isStreaming: loading && pendingMessage != null };
+  }, [loading, pendingMessage]);
 
-  if (loading) {
-    state = pendingMessage ? 'streaming' : 'loading';
-  } else if (error) {
-    state = 'error';
-  } else if (pendingMessage) {
-    state = 'complete';
-  }
-
-  const isLoading = state === 'init' || state === 'loading';
-  const isStreaming = state === 'streaming';
   return {
     error,
     isLoading,
