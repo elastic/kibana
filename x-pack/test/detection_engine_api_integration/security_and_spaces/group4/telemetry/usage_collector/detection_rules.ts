@@ -260,14 +260,16 @@ export default ({ getService }: FtrProviderContext) => {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
               query: {
                 ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                alerts: 4,
-                enabled: 1,
+                alerts: 0,
+                enabled: 0,
+                disabled: 3,
                 legacy_investigation_fields: 2,
               },
               custom_total: {
                 ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                alerts: 4,
-                enabled: 1,
+                alerts: 0,
+                enabled: 0,
+                disabled: 3,
                 legacy_investigation_fields: 2,
               },
             };
