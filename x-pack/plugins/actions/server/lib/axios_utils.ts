@@ -39,6 +39,11 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   sslOverrides?: SSLSettings;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
+  if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
+    throw new Error(
+      `Do not use "baseURL" in the creation of your axios instance because you will mostly break proxy`
+    );
+  }
   const { httpAgent, httpsAgent } = getCustomAgents(
     configurationUtilities,
     logger,
