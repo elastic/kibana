@@ -95,6 +95,7 @@ const RulesSettingsModalWithProviders: React.FunctionComponent<RulesSettingsModa
 );
 
 // FLAKY: https://github.com/elastic/kibana/issues/169406
+// FLAKY: https://github.com/elastic/kibana/issues/169349
 describe.skip('rules_settings_modal', () => {
   beforeEach(async () => {
     const [
