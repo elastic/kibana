@@ -272,7 +272,7 @@ export class IndexTable extends Component {
           onSort={() => this.onSort(fieldName)}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
-          className={`indTable__header--${fieldName} ${widthClassName}`}
+          className={widthClassName}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
         >
           {label}
