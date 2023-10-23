@@ -353,12 +353,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
+
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput', '1');
       await testSubjects.click('saveEditedRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      clickViewInApp(RULE_NAME);
+      await clickViewInApp(RULE_NAME);
 
       const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
       expect(selectedDataView).to.be.equal(SOURCE_DATA_VIEW);
