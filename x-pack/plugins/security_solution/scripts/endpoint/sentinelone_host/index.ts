@@ -9,6 +9,7 @@ import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { userInfo } from 'os';
 import { ok } from 'assert';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import {
   isFleetServerRunning,
   startFleetServer,
@@ -85,7 +86,15 @@ const runCli: RunFn = async ({ log, flags }) => {
   const policy = flags.policy as string;
   const force = flags.force as boolean;
 
-  // FIXME:PT set default logging level for tooling based on log level from cli script
+  createToolingLogger.defaultLogLevel = flags.verbose
+    ? 'verbose'
+    : flags.debug
+    ? 'debug'
+    : flags.silent
+    ? 'silent'
+    : flags.quiet
+    ? 'error'
+    : 'info';
 
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
 

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type {
   S1SitesListApiResponse,
   S1AgentPackage,
@@ -35,8 +36,7 @@ export class S1Client {
   }>;
 
   constructor(private readonly options: S1ClientOptions) {
-    // FIXME:PT use `createToolingLogger()` when that is available
-    this.log = options.log ?? new ToolingLog({ level: 'info', writeTo: process.stdout });
+    this.log = options.log ?? createToolingLogger();
 
     this.setup = this.request<S1SitesListApiResponse>({
       url: this.API_SITES_PATH,
@@ -177,8 +177,7 @@ interface InstallSentinelOneAgentResponse {
 export const installSentinelOneAgent = async ({
   hostVm,
   s1Client,
-  // FIXME:PT use `createToolingLogger()` when that is available
-  log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
+  log = createToolingLogger(),
 }: InstallSentinelOneAgentOptions): Promise<InstallSentinelOneAgentResponse> => {
   log.info(`Installing SentinelOne agent to VM [${hostVm.name}]`);
 

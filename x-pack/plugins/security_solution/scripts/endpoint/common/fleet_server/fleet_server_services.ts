@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import execa from 'execa';
 import chalk from 'chalk';
@@ -43,6 +43,7 @@ import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } fro
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../../common/endpoint/data_loaders/utils';
@@ -609,10 +610,8 @@ const updateFleetElasticsearchOutputHostNames = async (
  */
 export const isFleetServerRunning = async (
   kbnClient: KbnClient,
-  log: ToolingLog = new ToolingLog({ level: 'info', writeTo: process.stdout })
+  log: ToolingLog = createToolingLogger()
 ): Promise<boolean> => {
-  // FIXME:PT use `createToolingLogger()` once that is merged
-
   const fleetServerUrl = await fetchFleetServerUrl(kbnClient);
 
   if (!fleetServerUrl) {

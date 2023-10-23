@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import chalk from 'chalk';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
 
 interface BaseVmCreateOptions {
@@ -47,8 +48,7 @@ const createMultipassVm = async ({
   disk = '8G',
   cpus = 1,
   memory = '1G',
-  // FIXME:PT use `createToolingLogger()` when that is available
-  log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
+  log = createToolingLogger(),
 }: CreateMultipassVmOptions): Promise<HostVm> => {
   log.info(`Creating VM [${name}] using multipass`);
 
@@ -68,10 +68,8 @@ const createMultipassVm = async ({
  */
 export const createMultipassHostVmClient = (
   name: string,
-  log: ToolingLog = new ToolingLog({ level: 'info', writeTo: process.stdout })
+  log: ToolingLog = createToolingLogger()
 ): HostVm => {
-  // FIXME:PT use new createToolingLogger() once PR is merged
-
   const exec = async (command: string): Promise<HostVmExecResponse> => {
     const execResponse = await execa.command(`multipass exec ${name} -- ${command}`);
 
