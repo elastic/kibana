@@ -54,6 +54,7 @@ const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = [
   'dsl',
   'eql',
   'esql',
+  'sql', // Models often put the code block language as sql, for esql, so adding this as a fallback
 ];
 
 /**
