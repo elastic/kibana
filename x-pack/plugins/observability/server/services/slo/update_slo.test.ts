@@ -7,6 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { UpdateSLOParams } from '@kbn/slo-schema';
+import { cloneDeep } from 'lodash';
 
 import {
   getSLOTransformId,
@@ -36,6 +38,32 @@ describe('UpdateSLO', () => {
     mockTransformManager = createTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     updateSLO = new UpdateSLO(mockRepository, mockTransformManager, mockEsClient);
+  });
+
+  it('does nothing when no changes are provided', async () => {
+    const slo = createSLO();
+    mockRepository.findById.mockResolvedValueOnce(slo);
+
+    const exactSameSlo: UpdateSLOParams = cloneDeep(slo);
+    // @ts-ignore
+    delete exactSameSlo.id;
+    // @ts-ignore
+    delete exactSameSlo.revision;
+    // @ts-ignore
+    delete exactSameSlo.createdAt;
+    // @ts-ignore
+    delete exactSameSlo.updatedAt;
+    // @ts-ignore
+    delete exactSameSlo.enabled;
+
+    await updateSLO.execute(slo.id, exactSameSlo);
+
+    expect(mockTransformManager.stop).not.toBeCalled();
+    expect(mockTransformManager.uninstall).not.toBeCalled();
+    expect(mockTransformManager.install).not.toBeCalled();
+    expect(mockTransformManager.preview).not.toBeCalled();
+    expect(mockTransformManager.start).not.toBeCalled();
+    expect(mockEsClient.deleteByQuery).not.toBeCalled();
   });
 
   it('updates the settings correctly', async () => {
