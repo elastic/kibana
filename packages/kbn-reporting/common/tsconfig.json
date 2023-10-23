@@ -15,7 +15,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/es-errors",
     "@kbn/i18n",
     "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
@@ -25,16 +24,9 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/data-plugin",
-    "@kbn/core/server",
-    "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
     "@kbn/logging",
-    "@kbn/core-lifecycle-server",
-    "@kbn/core-plugins-server",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-server",
-    "@kbn/core-ui-settings-server",
-    "@kbn/core-http-router-server-internal",
     "@kbn/core-http-request-handler-context-server",
+    "@kbn/core",
   ]
 }
