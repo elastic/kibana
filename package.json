@@ -102,7 +102,7 @@
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.9.1-canary.1",
     "@elastic/ems-client": "8.5.0",
-    "@elastic/eui": "89.0.0",
+    "@elastic/eui": "89.1.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.1",
@@ -1617,6 +1617,7 @@
     "webpack-sources": "^1.4.1",
     "xml-crypto": "^3.0.1",
     "xmlbuilder": "13.0.2",
-    "yargs": "^15.4.1"
+    "yargs": "^15.4.1",
+    "yarn-deduplicate": "^6.0.2"
   }
 }
