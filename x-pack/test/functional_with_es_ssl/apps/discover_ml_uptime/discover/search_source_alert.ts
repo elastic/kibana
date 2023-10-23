@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ACTION_TYPE_ID = '.index';
   const RULE_NAME = 'test-search-source-alert';
   const ADHOC_RULE_NAME = 'test-adhoc-alert';
+  let sourceDataViewId: string;
   let outputDataViewId: string;
   let connectorId: string;
 
@@ -207,6 +208,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const clickViewInApp = async (ruleName: string) => {
+    // navigate to discover using view in app link
+    await openAlertRuleInManagement(ruleName);
+    await testSubjects.click('ruleDetails-viewInApp');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   const checkInitialRuleParamsState = async (dataView: string, isViewInApp = false) => {
     if (isViewInApp) {
       expect(await toasts.getToastCount()).to.be(0);
@@ -223,6 +231,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(valid).to.equal(true);
     expect(selectedDataView).to.be.equal(dataView);
     expect(await dataGrid.getDocCount()).to.be(5);
+  };
+
+  const checkUpdatedRuleParamsState = async () => {
+    expect(await toasts.getToastCount()).to.be(0);
+    const queryString = await queryBar.getQueryString();
+    const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
+    expect(queryString).to.be.equal('message:msg-1');
+    expect(hasFilter).to.be.equal(true);
+    expect(await dataGrid.getDocCount()).to.be(1);
+  };
+
+  const checkUpdatedDataViewState = async (dataView: string) => {
+    // validate updated field filter
+    await testSubjects.missingOrFail(`field-message-showDetails`);
+
+    // validate updated title
+    await PageObjects.discover.clickIndexPatternActions();
+    await testSubjects.click('indexPattern-manage-field');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    const titleElem = await testSubjects.find('createIndexPatternTitleInput');
+    expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
   describe('Search source Alert', () => {
@@ -260,8 +290,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
 
       log.debug('create data views');
+      const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
       const outputDataViewResponse = await createDataView(OUTPUT_DATA_VIEW);
 
+      sourceDataViewId = sourceDataViewResponse.body.data_view.id;
       outputDataViewId = outputDataViewResponse.body.data_view.id;
     });
 
@@ -309,11 +341,98 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await openAlertRuleInManagement(RULE_NAME);
-      await testSubjects.click('ruleDetails-viewInApp');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      clickViewInApp(RULE_NAME);
 
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
+    });
+
+    it('should display actual state after rule params update on clicking viewInApp link', async () => {
+      await openAlertRuleInManagement(RULE_NAME);
+
+      // change rule configuration
+      await testSubjects.click('openEditRuleFlyoutButton');
+      await queryBar.setQuery('message:msg-1');
+      await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
+      await testSubjects.click('thresholdPopover');
+      await testSubjects.setValue('alertThresholdInput', '1');
+      await testSubjects.click('saveEditedRuleButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      clickViewInApp(RULE_NAME);
+
+      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+      expect(selectedDataView).to.be.equal(SOURCE_DATA_VIEW);
+
+      await checkUpdatedRuleParamsState();
+    });
+
+    it('should display actual data view state after update on clicking viewInApp link', async () => {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        `/kibana/dataViews/dataView/${sourceDataViewId}`,
+        undefined
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // add source filter
+      await testSubjects.click('tab-sourceFilters');
+      await testSubjects.click('fieldFilterInput');
+      const filtersInput = await find.activeElement();
+      await filtersInput.type('message');
+      await testSubjects.click('addFieldFilterButton');
+
+      // change title
+      await testSubjects.click('editIndexPatternButton');
+      await testSubjects.setValue('createIndexPatternTitleInput', 'search-s', {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+      await testSubjects.click('saveIndexPatternButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await clickViewInApp(RULE_NAME);
+      await checkUpdatedRuleParamsState();
+      await checkUpdatedDataViewState('search-s*');
+    });
+
+    it('should navigate to alert results via view in app link using adhoc data view', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.createAdHocDataView('search-source-', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
+      await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
+
+      // create an alert
+      await openDiscoverAlertFlyout();
+      await defineSearchSourceAlert('test-adhoc-alert');
+      await testSubjects.click('saveRuleButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // navigate to discover using view in app link
+      await clickViewInApp(ADHOC_RULE_NAME);
+
+      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+      expect(selectedDataView).to.be.equal('search-source-*');
+
+      const documentCell = await dataGrid.getCellElement(0, 3);
+      const firstRowContent = await documentCell.getVisibleText();
+      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
+    });
+
+    it('should not display results after data view removal on clicking viewInApp link', async () => {
+      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+      await deleteDataView(sourceDataViewId);
+
+      await clickViewInApp(RULE_NAME);
+
+      expect(await toasts.getToastCount()).to.be.equal(1);
+      const content = await toasts.getToastContent(1);
+      expect(content).to.equal(
+        `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
+      );
     });
 
     it('should check that there are no errors detected after an alert is created', async () => {
