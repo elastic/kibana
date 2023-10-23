@@ -47,6 +47,14 @@ export const callAgentExecutor = async ({
     elserId,
     kbResource
   );
+
+  const modelExists = await esStore.isModelInstalled();
+  if (!modelExists) {
+    throw new Error(
+      'Please ensure ELSER is configured to use the Knowledge Base, otherwise disable the Knowledge Base in Advanced Settings to continue.'
+    );
+  }
+
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
 
   const tools: Tool[] = [
