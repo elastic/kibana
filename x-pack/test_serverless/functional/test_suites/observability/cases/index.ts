@@ -8,8 +8,11 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('observability cases', function () {
+  describe('Serverless Observability Cases', function () {
+    loadTestFile(require.resolve('./attachment_framework'));
+    loadTestFile(require.resolve('./view_case'));
+    loadTestFile(require.resolve('./configure'));
+    loadTestFile(require.resolve('./create_case_form'));
     loadTestFile(require.resolve('./list_view'));
-    loadTestFile(require.resolve('./custom_fields'));
   });
 }
