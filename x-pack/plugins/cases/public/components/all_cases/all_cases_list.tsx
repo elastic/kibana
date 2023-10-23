@@ -16,14 +16,13 @@ import type {
   CaseStatusWithAllStatus,
   FilterOptions,
   CasesUI,
-  CasesColumnSelection,
 } from '../../../common/ui/types';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import type { EuiBasicTableOnChange, Solution } from './types';
 
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
-import { DEFAULT_CASES_TABLE_COLUMNS, OWNER_INFO } from '../../../common/constants';
+import { OWNER_INFO } from '../../../common/constants';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
@@ -38,6 +37,7 @@ import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
 import { useAllCasesState } from './use_all_cases_state';
+import { useCasesColumnsSelection } from './use_cases_columns_selection';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -210,9 +210,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       ]
     );
 
-    const [selectedColumns, setSelectedColumns] = useState<CasesColumnSelection[]>(
-      DEFAULT_CASES_TABLE_COLUMNS
-    );
+    const { selectedColumns, setSelectedColumns } = useCasesColumnsSelection();
 
     const { columns } = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,

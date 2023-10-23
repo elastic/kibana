@@ -167,29 +167,32 @@ export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 /**
  * Cases UI Constants
  */
+
+// The name comes from the cases columns configuration
 export const DEFAULT_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
-  { field: 'title', isChecked: true },
-  { field: 'assignees', isChecked: true },
-  { field: 'tags', isChecked: true },
-  { field: 'totalAlerts', isChecked: true },
-  { field: 'totalComment', isChecked: true },
-  { field: 'category', isChecked: true },
-  { field: 'owner', isChecked: false },
-  { field: 'createdAt', isChecked: true },
-  { field: 'updatedAt', isChecked: true },
-  { field: 'closedAt', isChecked: false },
-  { field: 'externalIncident', isChecked: true },
-  { field: 'status', isChecked: true },
-  { field: 'severity', isChecked: true },
-  { field: 'actions', isChecked: true },
+  { field: 'title', name: '', isChecked: true },
+  { field: 'assignees', name: '', isChecked: true },
+  { field: 'tags', name: '', isChecked: true },
+  { field: 'totalAlerts', name: '', isChecked: true },
+  { field: 'totalComment', name: '', isChecked: true },
+  { field: 'category', name: '', isChecked: true },
+  { field: 'owner', name: '', isChecked: false },
+  { field: 'createdAt', name: '', isChecked: true },
+  { field: 'updatedAt', name: '', isChecked: true },
+  { field: 'closedAt', name: '', isChecked: false },
+  { field: 'externalIncident', name: '', isChecked: true },
+  { field: 'status', name: '', isChecked: true },
+  { field: 'severity', name: '', isChecked: true },
+  { field: 'actions', name: '', isChecked: true },
 ];
 
+// The name comes from the cases columns configuration
 export const SELECTOR_VIEW_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
-  { field: 'title', isChecked: true },
-  { field: 'category', isChecked: true },
-  { field: 'createdAt', isChecked: true },
-  { field: 'severity', isChecked: true },
-  { field: 'assignCaseAction', isChecked: true },
+  { field: 'title', name: '', isChecked: true },
+  { field: 'category', name: '', isChecked: true },
+  { field: 'createdAt', name: '', isChecked: true },
+  { field: 'severity', name: '', isChecked: true },
+  { field: 'assignCaseAction', name: '', isChecked: true },
 ];
 
 /**
@@ -230,6 +233,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
+  casesTableColumns: 'cases.list.tableColumns',
 };
 
 /**

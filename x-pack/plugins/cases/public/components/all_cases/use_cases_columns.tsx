@@ -26,7 +26,7 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import type { ActionConnector } from '../../../common/types/domain';
+import type { ActionConnector, CustomFieldTypes } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { CasesColumnSelection, CaseUI } from '../../../common/ui/types';
 import { OWNER_INFO, SELECTOR_VIEW_CASES_TABLE_COLUMNS } from '../../../common/constants';
@@ -42,6 +42,7 @@ import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
+import { builderMap } from '../custom_fields/builder';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
@@ -103,9 +104,6 @@ export const useCasesColumns = ({
     [onRowClick]
   );
 
-  // Some elements do not have a field on purpose.
-  // They are supposed to be EuiTableComputedColumnType
-  // and don't match specific Case attributes.
   const columnsDict: Record<string, CasesColumns> = {
     title: {
       field: casesColumnsConfig.title.field,
@@ -353,14 +351,13 @@ export const useCasesColumns = ({
     });
   } else {
     selectedColumns.forEach(({ field, isChecked }) => {
-      if (
-        field in columnsDict &&
-        field in casesColumnsConfig &&
-        casesColumnsConfig[field].canDisplay &&
-        isChecked
-      ) {
+      if (field in columnsDict && isChecked) {
         columns.push(columnsDict[field]);
       }
+      // else if (field in casesColumnsConfig && casesColumnsConfig[field].isCustomField) {
+      //   columns.push(renderTypeColumn(casesColumnsConfig[field].type));
+      //   probably a custom field
+      // }
     });
   }
 
