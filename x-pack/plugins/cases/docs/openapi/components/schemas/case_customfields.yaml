@@ -1,0 +1,25 @@
+key:
+  description: >
+    The unique identifier for the custom field.
+    The key value must exist in the case configuration settings.
+  type: string
+type:
+  description: >
+    The custom field type.
+    It must match the type specified in the case configuration settings.
+  type: string
+  enum:
+    - text
+    - toggle
+value:
+  description: >
+    The custom field value.
+    If the custom field is required, it cannot be explicitly set to null.
+    However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`.
+    The value returned in the API and user interface in this case is `null`.
+  oneOf:
+    - type: string
+      minLength: 1
+      maxLength: 160
+      nullable: true
+    - type: boolean
