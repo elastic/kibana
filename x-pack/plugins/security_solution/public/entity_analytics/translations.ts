@@ -249,14 +249,15 @@ export const UPDATE_PANEL_GO_TO_DISMISS = i18n.translate(
 export const getMaxSpaceTitle = (maxSpaces: number) =>
   i18n.translate('xpack.securitySolution.riskScore.maxSpacePanel.title', {
     defaultMessage:
-      'Entity Risk Scoring in the current version can run in {maxSpaces, plural, =1 {# Kibana space} other {# Kibana spaces}}',
+      'You cannot enable entity risk scoring in more than {maxSpaces, plural, =1 {# Kibana space} other {# Kibana spaces}}.',
     values: { maxSpaces },
   });
 
 export const MAX_SPACE_PANEL_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.maxSpacePanel.message',
   {
-    defaultMessage: 'Please disable a currently running engine before enabling it here.',
+    defaultMessage:
+      'You can disable entity risk scoring in the space it is currently enabled before enabling it in this space',
   }
 );
 
