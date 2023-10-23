@@ -13,7 +13,7 @@ import { Semaphore } from '@kbn/std';
 import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
-import { lastValueFrom, defer } from 'rxjs';
+import { lastValueFrom, defer, firstValueFrom } from 'rxjs';
 import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { memoize } from 'lodash';
 import { FilesPlugin } from '../../../plugin';
@@ -188,8 +188,8 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     return lastValueFrom(defer(processUpload).pipe(this.uploadSemaphore.acquire()));
   }
 
-  private getReadableContentStream(id: string, size?: number): () => ReadableContentStream {
-    return getReadableContentStream.bind(this, {
+  private getReadableContentStream(id: string, size?: number): ReadableContentStream {
+    return getReadableContentStream({
       id,
       client: this.esClient,
       index: this.index,
@@ -206,8 +206,10 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     // right after uploading it, we refresh the index before downloading the file.
     await this.esClient.indices.refresh({ index: this.index });
 
-    return lastValueFrom(
-      defer(this.getReadableContentStream(id, size)).pipe(this.downloadSemaphore.acquire())
+    return firstValueFrom(
+      defer(() => Promise.resolve(this.getReadableContentStream(id, size))).pipe(
+        this.downloadSemaphore.acquire()
+      )
     );
   }
 
