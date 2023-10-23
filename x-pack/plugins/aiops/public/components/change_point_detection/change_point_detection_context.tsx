@@ -90,6 +90,7 @@ export interface ChangePointAnnotation {
   };
   type: ChangePointType;
   p_value: number;
+  metricField?: string;
 }
 
 export type SelectedChangePoint = FieldConfig & ChangePointAnnotation;
