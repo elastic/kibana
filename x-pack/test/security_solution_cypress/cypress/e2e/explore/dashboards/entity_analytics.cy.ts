@@ -544,8 +544,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
     });
   });
 
-  // Skipping to unblock: https://github.com/elastic/kibana/pull/168389
-  describe.skip('With anomalies data', () => {
+  describe('With anomalies data', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'network' });
       login();
