@@ -27,119 +27,121 @@ import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/c
 const getReleaseComment = (hostname: string) => `Releasing ${hostname}`;
 const getIsolateComment = (hostname: string) => `Isolating ${hostname}`;
 
-describe.skip('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cy.createEndpointHost();
-  });
+describe.skip(
+  'Isolate command',
+  {
+    tags: [
+      '@ess',
+      '@serverless',
 
-  after(() => {
-    cy.removeEndpointHost();
-  });
-
-  beforeEach(() => {
-    login();
-    disableExpandableFlyoutAdvancedSettings();
-  });
-
-  describe('From manage', () => {
-    it('should allow filtering endpoint by Isolated status', () => {
-      loadPage(APP_ENDPOINTS_PATH);
-      closeAllToasts();
-      cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
-      checkEndpointListForOnlyUnIsolatedHosts();
-
-      filterOutIsolatedHosts();
-      cy.contains('No items found');
-      cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
-      cy.getByTestSubj('querySubmitButton').click();
-      cy.getByTestSubj('endpointTableRowActions').click();
-      cy.getByTestSubj('isolateLink').click();
-
-      cy.getCreatedHostData().then((hostData) => {
-        cy.contains(`Isolate host ${hostData.createdHost.hostname} from network.`);
-        cy.getByTestSubj('endpointHostIsolationForm');
-        cy.getByTestSubj('host_isolation_comment').type(
-          getIsolateComment(hostData.createdHost.hostname)
-        );
-        cy.getByTestSubj('hostIsolateConfirmButton').click();
-        cy.contains(`Isolation on host ${hostData.createdHost.hostname} successfully submitted`);
-      });
-      cy.getByTestSubj('euiFlyoutCloseButton').click();
-      cy.getByTestSubj('rowHostStatus-actionStatuses').should('contain.text', 'Isolated');
-      filterOutIsolatedHosts();
-
-      checkEndpointListForOnlyIsolatedHosts();
-
-      cy.getByTestSubj('endpointTableRowActions').click();
-      cy.getByTestSubj('unIsolateLink').click();
-      cy.getCreatedHostData().then((hostData) =>
-        releaseHostWithComment(
-          getReleaseComment(hostData.createdHost.hostname),
-          hostData.createdHost.hostname
-        )
-      );
-
-      cy.contains('Confirm').click();
-      cy.getByTestSubj('euiFlyoutCloseButton').click();
-      cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
-      cy.getByTestSubj('querySubmitButton').click();
-      checkEndpointListForOnlyUnIsolatedHosts();
-    });
-  });
-
-  describe('From alerts', () => {
-    let ruleId: string;
-    let ruleName: string;
-
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      '@brokenInServerless',
+    ],
+  },
+  () => {
     before(() => {
-      cy.getCreatedHostData()
-        .then((hostData) =>
-          loadRule(
-            { query: `agent.name: ${hostData.createdHost.hostname} and agent.type: endpoint` },
-            false
-          )
-        )
-        .then((data) => {
-          ruleId = data.id;
-          ruleName = data.name;
-        });
+      cy.createEndpointHost();
     });
 
     after(() => {
-      if (ruleId) {
-        cleanupRule(ruleId);
-      }
+      cy.removeEndpointHost();
     });
 
-    it('should isolate and release host', () => {
-      loadPage(APP_ENDPOINTS_PATH);
-      cy.getCreatedHostData().then((hostData) => {
-        const createdHost = hostData.createdHost;
-        const isolateComment = getIsolateComment(createdHost.hostname);
-        const releaseComment = getReleaseComment(createdHost.hostname);
+    beforeEach(() => {
+      login();
+      disableExpandableFlyoutAdvancedSettings();
+    });
 
-        cy.contains(createdHost.hostname).should('exist');
-
-        toggleRuleOffAndOn(ruleName);
-        visitRuleAlerts(ruleName);
-
+    describe('From manage', () => {
+      it('should allow filtering endpoint by Isolated status', () => {
+        loadPage(APP_ENDPOINTS_PATH);
         closeAllToasts();
-        openAlertDetailsView();
+        cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
+        checkEndpointListForOnlyUnIsolatedHosts();
 
-        isolateHostWithComment(isolateComment, createdHost.hostname);
+        filterOutIsolatedHosts();
+        cy.contains('No items found');
+        cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
+        cy.getByTestSubj('querySubmitButton').click();
+        cy.getByTestSubj('endpointTableRowActions').click();
+        cy.getByTestSubj('isolateLink').click();
 
-        cy.getByTestSubj('hostIsolateConfirmButton').click();
-        cy.contains(`Isolation on host ${createdHost.hostname} successfully submitted`);
+        cy.getCreatedHostData().then(({ createdHost }) => {
+          cy.contains(`Isolate host ${createdHost.hostname} from network.`);
+          cy.getByTestSubj('endpointHostIsolationForm');
+          cy.getByTestSubj('host_isolation_comment').type(getIsolateComment(createdHost.hostname));
+          cy.getByTestSubj('hostIsolateConfirmButton').click();
+          cy.contains(`Isolation on host ${createdHost.hostname} successfully submitted`);
+          cy.getByTestSubj('euiFlyoutCloseButton').click();
+          cy.getByTestSubj('rowHostStatus-actionStatuses').should('contain.text', 'Isolated');
+          filterOutIsolatedHosts();
 
-        cy.getByTestSubj('euiFlyoutCloseButton').click();
-        openAlertDetailsView();
+          checkEndpointListForOnlyIsolatedHosts();
 
-        checkFlyoutEndpointIsolation();
-
-        releaseHostWithComment(releaseComment, createdHost.hostname);
+          cy.getByTestSubj('endpointTableRowActions').click();
+          cy.getByTestSubj('unIsolateLink').click();
+          releaseHostWithComment(getReleaseComment(createdHost.hostname), createdHost.hostname);
+        });
         cy.contains('Confirm').click();
+        cy.getByTestSubj('euiFlyoutCloseButton').click();
+        cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
+        cy.getByTestSubj('querySubmitButton').click();
+        checkEndpointListForOnlyUnIsolatedHosts();
+      });
+    });
 
-        cy.contains(`Release on host ${createdHost.hostname} successfully submitted`);
+    describe('From alerts', () => {
+      let ruleId: string;
+      let ruleName: string;
+
+      before(() => {
+        cy.getCreatedHostData()
+          .then(({ createdHost }) =>
+            loadRule(
+              { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+              false
+            )
+          )
+          .then((data) => {
+            ruleId = data.id;
+            ruleName = data.name;
+          });
+      });
+
+      after(() => {
+        if (ruleId) {
+          cleanupRule(ruleId);
+        }
+      });
+
+      it('should isolate and release host', () => {
+        loadPage(APP_ENDPOINTS_PATH);
+        cy.getCreatedHostData().then(({ createdHost }) => {
+          cy.contains(createdHost.hostname).should('exist');
+
+          toggleRuleOffAndOn(ruleName);
+          visitRuleAlerts(ruleName);
+
+          closeAllToasts();
+          openAlertDetailsView();
+
+          isolateHostWithComment(getIsolateComment(createdHost.hostname), createdHost.hostname);
+
+          cy.getByTestSubj('hostIsolateConfirmButton').click();
+          cy.contains(`Isolation on host ${createdHost.hostname} successfully submitted`);
+
+          cy.getByTestSubj('euiFlyoutCloseButton').click();
+          openAlertDetailsView();
+
+          checkFlyoutEndpointIsolation();
+
+          releaseHostWithComment(getReleaseComment(createdHost.hostname), createdHost.hostname);
+          cy.contains('Confirm').click();
+
+          cy.contains(`Release on host ${createdHost.hostname} successfully submitted`);
+        });
         cy.getByTestSubj('euiFlyoutCloseButton').click();
         openAlertDetailsView();
         cy.getByTestSubj('event-field-agent.status').within(() => {
@@ -147,111 +149,107 @@ describe.skip('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServe
         });
       });
     });
-  });
 
-  describe('From cases', () => {
-    let ruleId: string;
-    let ruleName: string;
-    let caseId: string;
+    describe('From cases', () => {
+      let ruleId: string;
+      let ruleName: string;
+      let caseId: string;
 
-    const caseOwner = 'securitySolution';
+      const caseOwner = 'securitySolution';
 
-    before(() => {
-      cy.getCreatedHostData()
-        .then((hostData) =>
-          loadRule(
-            { query: `agent.name: ${hostData.createdHost.hostname} and agent.type: endpoint` },
-            false
+      before(() => {
+        cy.getCreatedHostData()
+          .then(({ createdHost }) =>
+            loadRule(
+              { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+              false
+            )
           )
-        )
-        .then((data) => {
-          ruleId = data.id;
-          ruleName = data.name;
+          .then((data) => {
+            ruleId = data.id;
+            ruleName = data.name;
+          });
+        loadCase(caseOwner).then((data) => {
+          caseId = data.id;
         });
-      loadCase(caseOwner).then((data) => {
-        caseId = data.id;
       });
-    });
 
-    beforeEach(() => {
-      login();
-    });
+      beforeEach(() => {
+        login();
+      });
 
-    after(() => {
-      if (ruleId) {
-        cleanupRule(ruleId);
-      }
-      if (caseId) {
-        cleanupCase(caseId);
-      }
-    });
+      after(() => {
+        if (ruleId) {
+          cleanupRule(ruleId);
+        }
+        if (caseId) {
+          cleanupCase(caseId);
+        }
+      });
 
-    it('should isolate and release host', () => {
-      loadPage(APP_ENDPOINTS_PATH);
-      cy.getCreatedHostData().then((hostData) => {
-        const createdHost = hostData.createdHost;
-        const isolateComment = getIsolateComment(createdHost.hostname);
-        const releaseComment = getReleaseComment(createdHost.hostname);
+      it('should isolate and release host', () => {
+        loadPage(APP_ENDPOINTS_PATH);
+        cy.getCreatedHostData().then(({ createdHost }) => {
+          cy.contains(createdHost.hostname).should('exist');
 
-        cy.contains(createdHost.hostname).should('exist');
+          toggleRuleOffAndOn(ruleName);
 
-        toggleRuleOffAndOn(ruleName);
-
-        visitRuleAlerts(ruleName);
-        closeAllToasts();
-
-        openAlertDetailsView();
-
-        cy.getByTestSubj('add-to-existing-case-action').click();
-        cy.getByTestSubj(`cases-table-row-select-${caseId}`).click();
-        cy.contains(`An alert was added to \"Test ${caseOwner} case`);
-
-        cy.intercept('GET', `/api/cases/${caseId}/user_actions/_find*`).as('case');
-        loadPage(`${APP_CASES_PATH}/${caseId}`);
-        cy.wait('@case', { timeout: 30000 }).then(({ response: res }) => {
-          const caseAlertId = res?.body.userActions[1].id;
-
+          visitRuleAlerts(ruleName);
           closeAllToasts();
-          openCaseAlertDetails(caseAlertId);
-          isolateHostWithComment(isolateComment, createdHost.hostname);
-          cy.getByTestSubj('hostIsolateConfirmButton').click();
 
-          cy.getByTestSubj('euiFlyoutCloseButton').click();
+          openAlertDetailsView();
 
-          cy.getByTestSubj('user-actions-list').within(() => {
-            cy.contains(isolateComment);
-            cy.get('[aria-label="lock"]').should('exist');
-            cy.get('[aria-label="lockOpen"]').should('not.exist');
-          });
+          cy.getByTestSubj('add-to-existing-case-action').click();
+          cy.getByTestSubj(`cases-table-row-select-${caseId}`).click();
+          cy.contains(`An alert was added to \"Test ${caseOwner} case`);
 
-          waitForReleaseOption(caseAlertId);
+          cy.intercept('GET', `/api/cases/${caseId}/user_actions/_find*`).as('case');
+          loadPage(`${APP_CASES_PATH}/${caseId}`);
+          cy.wait('@case', { timeout: 30000 }).then(({ response: res }) => {
+            const caseAlertId = res?.body.userActions[1].id;
 
-          releaseHostWithComment(releaseComment, createdHost.hostname);
+            closeAllToasts();
+            openCaseAlertDetails(caseAlertId);
+            isolateHostWithComment(getIsolateComment(createdHost.hostname), createdHost.hostname);
+            cy.getByTestSubj('hostIsolateConfirmButton').click();
 
-          cy.contains('Confirm').click();
+            cy.getByTestSubj('euiFlyoutCloseButton').click();
 
-          cy.contains(`Release on host ${createdHost.hostname} successfully submitted`);
-          cy.getByTestSubj('euiFlyoutCloseButton').click();
+            cy.getByTestSubj('user-actions-list').within(() => {
+              cy.contains(getIsolateComment(createdHost.hostname));
+              cy.get('[aria-label="lock"]').should('exist');
+              cy.get('[aria-label="lockOpen"]').should('not.exist');
+            });
 
-          cy.getByTestSubj('user-actions-list').within(() => {
-            cy.contains(releaseComment);
-            cy.contains(isolateComment);
-            cy.get('[aria-label="lock"]').should('exist');
-            cy.get('[aria-label="lockOpen"]').should('exist');
-          });
+            waitForReleaseOption(caseAlertId);
 
-          openCaseAlertDetails(caseAlertId);
+            releaseHostWithComment(getReleaseComment(createdHost.hostname), createdHost.hostname);
 
-          cy.getByTestSubj('event-field-agent.status').then(($status) => {
-            if ($status.find('[title="Isolated"]').length > 0) {
-              cy.getByTestSubj('euiFlyoutCloseButton').click();
-              cy.getByTestSubj(`comment-action-show-alert-${caseAlertId}`).click();
-              cy.getByTestSubj('take-action-dropdown-btn').click();
-            }
-            cy.get('[title="Isolated"]').should('not.exist');
+            cy.contains('Confirm').click();
+
+            cy.contains(`Release on host ${createdHost.hostname} successfully submitted`);
+            cy.getByTestSubj('euiFlyoutCloseButton').click();
+
+            cy.getByTestSubj('user-actions-list').within(() => {
+              cy.contains(getReleaseComment(createdHost.hostname));
+              cy.contains(getIsolateComment(createdHost.hostname));
+              cy.get('[aria-label="lock"]').should('exist');
+              cy.get('[aria-label="lockOpen"]').should('exist');
+            });
+
+            openCaseAlertDetails(caseAlertId);
+
+            cy.getByTestSubj('event-field-agent.status').then(($status) => {
+              if ($status.find('[title="Isolated"]').length > 0) {
+                cy.getByTestSubj('euiFlyoutCloseButton').click();
+                cy.getByTestSubj(`comment-action-show-alert-${caseAlertId}`).click();
+                cy.getByTestSubj('take-action-dropdown-btn').click();
+              }
+              cy.get('[title="Isolated"]').should('not.exist');
+            });
           });
         });
       });
     });
-  });
-});
+  }
+);

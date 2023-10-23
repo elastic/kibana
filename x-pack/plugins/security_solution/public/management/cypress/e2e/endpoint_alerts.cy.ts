@@ -14,56 +14,52 @@ import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
 // FIXME: Flaky. Needs fixing (security team issue #7763)
-describe.skip(
-  'Endpoint generated alerts',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
-  () => {
-    before(() => {
-      cy.createEndpointHost();
-    });
+describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    cy.createEndpointHost();
+  });
 
-    after(() => {
-      cy.removeEndpointHost();
-    });
+  after(() => {
+    cy.removeEndpointHost();
+  });
 
-    beforeEach(() => {
-      login();
-    });
+  beforeEach(() => {
+    login();
+  });
 
-    it('should create a Detection Engine alert from an endpoint alert', () => {
-      // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
-      const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
-        .toString(16)
-        .substring(2)}`;
+  it('should create a Detection Engine alert from an endpoint alert', () => {
+    // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
+    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
+      .toString(16)
+      .substring(2)}`;
 
-      cy.getCreatedHostData().then((hostData) => {
-        // Send `execute` command that triggers malicious behaviour using the `execute` response action
-        return request<ResponseActionApiResponse>({
-          method: 'POST',
-          url: EXECUTE_ROUTE,
-          body: {
-            endpoint_ids: [hostData.createdHost.agentId],
-            parameters: {
-              command: executeMaliciousCommand,
-            },
+    cy.getCreatedHostData().then(({ createdHost }) => {
+      // Send `execute` command that triggers malicious behaviour using the `execute` response action
+      request<ResponseActionApiResponse>({
+        method: 'POST',
+        url: EXECUTE_ROUTE,
+        body: {
+          endpoint_ids: [createdHost.agentId],
+          parameters: {
+            command: executeMaliciousCommand,
           },
+        },
+      })
+        .then((response) => waitForActionToComplete(response.body.data.id))
+        .then(() => {
+          return waitForEndpointAlerts(createdHost.agentId, [
+            {
+              term: { 'process.group_leader.args': executeMaliciousCommand },
+            },
+          ]);
         })
-          .then((response) => waitForActionToComplete(response.body.data.id))
-          .then(() => {
-            return waitForEndpointAlerts(hostData.createdHost.agentId, [
-              {
-                term: { 'process.group_leader.args': executeMaliciousCommand },
-              },
-            ]);
-          })
-          .then(() => {
-            return navigateToAlertsList(
-              `query=(language:kuery,query:'agent.id: "${hostData.createdHost.agentId}" ')`
-            );
-          });
-      });
-
-      getAlertsTableRows().should('have.length.greaterThan', 0);
+        .then(() => {
+          return navigateToAlertsList(
+            `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
+          );
+        });
     });
-  }
-);
+
+    getAlertsTableRows().should('have.length.greaterThan', 0);
+  });
+});

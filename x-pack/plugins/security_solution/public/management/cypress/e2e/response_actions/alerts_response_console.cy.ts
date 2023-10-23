@@ -38,11 +38,8 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
     before(() => {
       cy.getCreatedHostData()
-        .then((hostData) =>
-          loadRule(
-            { query: `agent.name: ${hostData.createdHost.hostname} and agent.type: endpoint` },
-            false
-          )
+        .then(({ createdHost }) =>
+          loadRule({ query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` }, false)
         )
         .then((data) => {
           ruleId = data.id;
@@ -57,8 +54,8 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('should open responder from alert details flyout', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      cy.getCreatedHostData().then(({ createdHost }) => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
       });
       toggleRuleOffAndOn(ruleName);
       visitRuleAlerts(ruleName);
@@ -71,8 +68,8 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('should open responder from timeline view alert details flyout', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      cy.getCreatedHostData().then(({ createdHost }) => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
       });
       toggleRuleOffAndOn(ruleName);
       visitRuleAlerts(ruleName);

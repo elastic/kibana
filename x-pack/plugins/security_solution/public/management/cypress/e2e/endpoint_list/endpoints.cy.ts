@@ -28,7 +28,7 @@ import {
 } from '../../screens/fleet/agent_details';
 
 // FLAKY: https://github.com/elastic/kibana/issues/168284
-describe.skip('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe.skip('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.createEndpointHost();
   });
@@ -44,11 +44,11 @@ describe.skip('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServer
   it('Shows endpoint on the list', () => {
     loadPage(APP_ENDPOINTS_PATH);
     cy.contains('Hosts running Elastic Defend').should('exist');
-    cy.getCreatedHostData().then((hostData) =>
+    cy.getCreatedHostData().then(({ createdHost }) =>
       cy
         .getByTestSubj(AGENT_HOSTNAME_CELL)
-        .contains(hostData.createdHost.hostname)
-        .should('have.text', hostData.createdHost.hostname)
+        .contains(createdHost.hostname)
+        .should('have.text', createdHost.hostname)
     );
   });
 
@@ -57,8 +57,8 @@ describe.skip('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServer
     let initialAgentData: Agent;
 
     before(() => {
-      cy.getCreatedHostData().then((hostData) =>
-        getAgentByHostName(hostData.createdHost.hostname).then((agentData) => {
+      cy.getCreatedHostData().then(({ createdHost }) =>
+        getAgentByHostName(createdHost.hostname).then((agentData) => {
           initialAgentData = agentData;
         })
       );
@@ -84,10 +84,10 @@ describe.skip('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServer
 
     it('User can reassign a single endpoint to a different Agent Configuration', () => {
       loadPage(APP_ENDPOINTS_PATH);
-      cy.getCreatedHostData().then((hostData) =>
+      cy.getCreatedHostData().then(({ createdHost }) =>
         cy
           .getByTestSubj(AGENT_HOSTNAME_CELL)
-          .filter(`:contains("${hostData.createdHost.hostname}")`)
+          .filter(`:contains("${createdHost.hostname}")`)
           .then((hostname) => {
             const tableRow = hostname.parents('tr');
 
@@ -98,10 +98,10 @@ describe.skip('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServer
               .select(response.agentPolicies[0].name);
             cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON).click();
             cy.getByTestSubj(AGENT_HOSTNAME_CELL)
-              .filter(`:contains("${hostData.createdHost.hostname}")`)
+              .filter(`:contains("${createdHost.hostname}")`)
               .should('exist');
             cy.getByTestSubj(AGENT_HOSTNAME_CELL)
-              .filter(`:contains("${hostData.createdHost.hostname}")`)
+              .filter(`:contains("${createdHost.hostname}")`)
               .parents('tr')
               .findByTestSubj(AGENT_POLICY_CELL)
               .should('have.text', response.agentPolicies[0].name);

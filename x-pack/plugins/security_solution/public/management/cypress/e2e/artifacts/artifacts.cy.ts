@@ -28,14 +28,9 @@ const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
 const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
 // FLAKY: https://github.com/elastic/kibana/issues/168342
-describe.skip('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe.skip('Artifact pages', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.createEndpointHost();
-  });
-
-  after(() => {
-    removeAllArtifacts();
-    cy.removeEndpointHost();
   });
 
   beforeEach(() => {
@@ -54,43 +49,46 @@ describe.skip('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServer
     });
   });
 
+  after(() => {
+    removeAllArtifacts();
+    cy.removeEndpointHost();
+  });
+
   for (const testData of getArtifactsListTestsData()) {
     describe(`${testData.title}`, () => {
       it(`should update Endpoint Policy on Endpoint when adding ${testData.artifactName}`, () => {
         loadPage(APP_ENDPOINTS_PATH);
 
-        cy.getCreatedHostData().then((hostData) =>
-          cy.get(`[data-endpoint-id="${hostData.createdHost.agentId}"]`).within(() => {
+        cy.getCreatedHostData().then(({ createdHost }) => {
+          cy.get(`[data-endpoint-id="${createdHost.agentId}"]`).within(() => {
             cy.getByTestSubj('policyListRevNo')
               .invoke('text')
               .then((text) => {
                 cy.wrap(parseRevNumber(text)).as('initialRevisionNumber');
               });
-          })
-        );
+          });
 
-        loadPage(`/app/security/administration/${testData.urlPath}`);
+          loadPage(`/app/security/administration/${testData.urlPath}`);
 
-        cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).click();
-        performUserActions(testData.create.formActions);
-        cy.getByTestSubj(`${testData.pagePrefix}-flyout-submitButton`).click();
+          cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).click();
+          performUserActions(testData.create.formActions);
+          cy.getByTestSubj(`${testData.pagePrefix}-flyout-submitButton`).click();
 
-        for (const checkResult of testData.create.checkResults) {
-          cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
-        }
+          for (const checkResult of testData.create.checkResults) {
+            cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
+          }
 
-        loadPage(APP_ENDPOINTS_PATH);
-        (cy.get('@initialRevisionNumber') as unknown as Promise<number>).then(
-          (initialRevisionNumber) => {
-            cy.getCreatedHostData().then((hostData) =>
-              cy.get(`[data-endpoint-id="${hostData.createdHost.agentId}"]`).within(() => {
+          loadPage(APP_ENDPOINTS_PATH);
+          (cy.get('@initialRevisionNumber') as unknown as Promise<number>).then(
+            (initialRevisionNumber) => {
+              cy.get(`[data-endpoint-id="${createdHost.agentId}"]`).within(() => {
                 cy.getByTestSubj('policyListRevNo')
                   .invoke('text')
                   .should('include', initialRevisionNumber + 1);
-              })
-            );
-          }
-        );
+              });
+            }
+          );
+        });
       });
     });
   }

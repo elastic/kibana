@@ -45,10 +45,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import {
-  getSearchResponseInterceptedWarnings,
-  type SearchResponseInterceptedWarning,
-} from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -89,7 +86,7 @@ export type SearchProps = Partial<UnifiedDataTableProps> &
     filter?: (field: DataViewField, value: string[], operator: string) => void;
     hits?: DataTableRecord[];
     totalHitCount?: number;
-    interceptedWarnings?: SearchResponseInterceptedWarning[];
+    interceptedWarnings?: SearchResponseWarning[];
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
@@ -381,10 +378,12 @@ export class SavedSearchEmbeddable
       );
 
       if (this.inspectorAdapters.requests) {
-        searchProps.interceptedWarnings = getSearchResponseInterceptedWarnings({
-          services: this.services,
-          adapter: this.inspectorAdapters.requests,
+        const interceptedWarnings: SearchResponseWarning[] = [];
+        this.services.data.search.showWarnings(this.inspectorAdapters.requests, (warning) => {
+          interceptedWarnings.push(warning);
+          return true; // suppress the default behaviour
         });
+        searchProps.interceptedWarnings = interceptedWarnings;
       }
 
       this.updateOutput({

@@ -28,8 +28,8 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
   describe('From endpoint list', () => {
     it('should open responder', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      cy.getCreatedHostData().then(({ createdHost }) => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
       });
       openResponseConsoleFromEndpointList();
       ensureOnResponder();

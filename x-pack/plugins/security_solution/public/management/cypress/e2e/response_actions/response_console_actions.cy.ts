@@ -20,7 +20,7 @@ import {
 
 import { login } from '../../tasks/login';
 
-describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.createEndpointHost();
   });
@@ -36,32 +36,28 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
   describe('User journey for Isolate command: isolate and release an endpoint', () => {
     it('should isolate host from response console', () => {
       const command = 'isolate';
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
-      checkEndpointListForOnlyUnIsolatedHosts();
-      openResponseConsoleFromEndpointList();
-      performCommandInputChecks(command);
-      submitCommand();
-      waitForCommandToBeExecuted(command);
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      cy.getCreatedHostData().then(({ createdHost }) => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        checkEndpointListForOnlyUnIsolatedHosts();
+        openResponseConsoleFromEndpointList();
+        performCommandInputChecks(command);
+        submitCommand();
+        waitForCommandToBeExecuted(command);
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
       });
       checkEndpointListForOnlyIsolatedHosts();
     });
 
     it('should release host from response console', () => {
       const command = 'release';
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
-      checkEndpointListForOnlyIsolatedHosts();
-      openResponseConsoleFromEndpointList();
-      performCommandInputChecks(command);
-      submitCommand();
-      waitForCommandToBeExecuted(command);
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
+      cy.getCreatedHostData().then(({ createdHost }) => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        checkEndpointListForOnlyIsolatedHosts();
+        openResponseConsoleFromEndpointList();
+        performCommandInputChecks(command);
+        submitCommand();
+        waitForCommandToBeExecuted(command);
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
       });
       checkEndpointListForOnlyUnIsolatedHosts();
     });
@@ -72,9 +68,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     let newCronPID: string;
 
     it('"processes" - should obtain a list of processes', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
+      cy.getCreatedHostData().then(({ createdHost }) =>
+        waitForEndpointListPageToBeLoaded(createdHost.hostname)
+      );
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('processes');
       submitCommand();
@@ -99,9 +95,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('"kill-process --pid" - should kill a process', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
+      cy.getCreatedHostData().then(({ createdHost }) =>
+        waitForEndpointListPageToBeLoaded(createdHost.hostname)
+      );
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`kill-process --pid ${cronPID}`);
       submitCommand();
@@ -125,9 +121,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('"suspend-process --pid" - should suspend a process', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
+      cy.getCreatedHostData().then(({ createdHost }) =>
+        waitForEndpointListPageToBeLoaded(createdHost.hostname)
+      );
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`suspend-process --pid ${newCronPID}`);
       submitCommand();
@@ -142,38 +138,34 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     const filePath = `${homeFilePath}/test_file.txt`;
 
     it('"get-file --path" - should retrieve a file', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
-      cy.getCreatedHostData().then((hostData) => {
+      cy.getCreatedHostData().then(({ createdHost }) => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
         cy.task('createFileOnEndpoint', {
-          hostname: hostData.createdHost.hostname,
+          hostname: createdHost.hostname,
           path: filePath,
           content: fileContent,
         });
-      });
-      openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`get-file --path ${filePath}`);
-      submitCommand();
-      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
-        cy.contains('File retrieved from the host.');
-        cy.contains('(ZIP file passcode: elastic)');
-        cy.contains(
-          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
-        );
-        cy.contains('Click here to download').click();
-        const downloadsFolder = Cypress.config('downloadsFolder');
-        cy.readFile(`${downloadsFolder}/upload.zip`);
+        openResponseConsoleFromEndpointList();
+        inputConsoleCommand(`get-file --path ${filePath}`);
+        submitCommand();
+        cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
+          cy.contains('File retrieved from the host.');
+          cy.contains('(ZIP file passcode: elastic)');
+          cy.contains(
+            'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+          );
+          cy.contains('Click here to download').click();
+          const downloadsFolder = Cypress.config('downloadsFolder');
+          cy.readFile(`${downloadsFolder}/upload.zip`);
 
-        cy.getCreatedHostData().then((hostData) => {
           cy.task('uploadFileToEndpoint', {
-            hostname: hostData.createdHost.hostname,
+            hostname: createdHost.hostname,
             srcPath: `${downloadsFolder}/upload.zip`,
             destPath: `${homeFilePath}/upload.zip`,
           });
 
           cy.task('readZippedFileContentOnEndpoint', {
-            hostname: hostData.createdHost.hostname,
+            hostname: createdHost.hostname,
             path: `${homeFilePath}/upload.zip`,
             password: 'elastic',
           }).then((unzippedFileContent) => {
@@ -184,9 +176,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('"execute --command" - should execute a command', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
+      cy.getCreatedHostData().then(({ createdHost }) =>
+        waitForEndpointListPageToBeLoaded(createdHost.hostname)
+      );
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
       submitCommand();
@@ -194,9 +186,9 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
 
     it('"upload --file" - should upload a file', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
+      cy.getCreatedHostData().then(({ createdHost }) =>
+        waitForEndpointListPageToBeLoaded(createdHost.hostname)
+      );
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`upload --file`);
       cy.getByTestSubj('console-arg-file-picker').selectFile(
@@ -215,22 +207,20 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
   // FLAKY: https://github.com/elastic/kibana/issues/168296
   describe.skip('document signing', () => {
     it('should fail if data tampered', () => {
-      cy.getCreatedHostData().then((hostData) => {
-        waitForEndpointListPageToBeLoaded(hostData.createdHost.hostname);
-      });
-      checkEndpointListForOnlyUnIsolatedHosts();
-      openResponseConsoleFromEndpointList();
-      performCommandInputChecks('isolate');
+      cy.getCreatedHostData().then(({ createdHost }) => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        checkEndpointListForOnlyUnIsolatedHosts();
+        openResponseConsoleFromEndpointList();
+        performCommandInputChecks('isolate');
 
-      cy.getCreatedHostData().then((hostData) => {
         // stop host so that we ensure tamper happens before endpoint processes the action
-        cy.task('stopEndpointHost', hostData.createdHost.hostname);
+        cy.task('stopEndpointHost', createdHost.hostname);
         // get action doc before we submit command so we know when the new action doc is indexed
         cy.task('getLatestActionDoc').then((previousActionDoc) => {
           submitCommand();
           cy.task('tamperActionDoc', previousActionDoc);
         });
-        cy.task('startEndpointHost', hostData.createdHost.hostname);
+        cy.task('startEndpointHost', createdHost.hostname);
       });
 
       const actionValidationErrorMsg =

@@ -16,7 +16,16 @@ import { changeAlertsFilter } from '../../tasks/alerts';
 // FLAKY: https://github.com/elastic/kibana/issues/168340
 describe.skip(
   'Automated Response Actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  {
+    tags: [
+      '@ess',
+      '@serverless',
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      '@brokenInServerless',
+    ],
+  },
   () => {
     before(() => {
       cy.createEndpointHost();
@@ -54,8 +63,8 @@ describe.skip(
 
       it('should have generated endpoint and rule', () => {
         loadPage(APP_ENDPOINTS_PATH);
-        cy.getCreatedHostData().then((hostData) =>
-          cy.contains(hostData.createdHost.hostname).should('exist')
+        cy.getCreatedHostData().then(({ createdHost }) =>
+          cy.contains(createdHost.hostname).should('exist')
         );
 
         toggleRuleOffAndOn(ruleName);
@@ -68,11 +77,11 @@ describe.skip(
         cy.getByTestSubj('responseActionsViewTab').click();
         cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
 
-        cy.getCreatedHostData().then((hostData) =>
+        cy.getCreatedHostData().then(({ createdHost }) =>
           cy
-            .getByTestSubj(`response-results-${hostData.createdHost.hostname}-details-tray`)
+            .getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
             .should('contain', 'isolate completed successfully')
-            .and('contain', hostData.createdHost.hostname)
+            .and('contain', createdHost.hostname)
         );
 
         cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
