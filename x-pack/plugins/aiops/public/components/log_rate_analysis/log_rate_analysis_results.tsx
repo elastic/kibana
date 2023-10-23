@@ -203,9 +203,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       sampleProbability,
     },
     { reducer: streamReducer, initialState },
-    {
-      [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
-    }
+    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
   const { significantTerms } = data;
