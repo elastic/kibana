@@ -12,7 +12,7 @@ import {
   DynamicSettingsSaveCodec,
 } from '../../../../common/runtime_types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../../common/constants';
+import { API_URLS, INITIAL_REST_VERSION } from '../../../../common/constants';
 
 interface SaveApiRequest {
   settings: DynamicSettings;
@@ -21,7 +21,7 @@ interface SaveApiRequest {
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
   return await apiService.get(
     API_URLS.DYNAMIC_SETTINGS,
-    { version: '2023-10-31' },
+    { version: INITIAL_REST_VERSION },
     DynamicSettingsCodec
   );
 };
@@ -30,6 +30,6 @@ export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
   return await apiService.put(API_URLS.DYNAMIC_SETTINGS, settings, DynamicSettingsSaveCodec, {
-    version: '2023-10-31',
+    version: INITIAL_REST_VERSION,
   });
 };

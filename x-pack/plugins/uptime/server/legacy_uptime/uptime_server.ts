@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { INITIAL_REST_VERSION } from '../../common/constants';
 import { DynamicSettingsSchema } from './routes/dynamic_settings';
 import { UptimeRouter } from '../types';
 import { uptimeRequests } from './lib/requests';
@@ -92,7 +93,7 @@ export const initUptimeServer = (
           })
           .addVersion(
             {
-              version: '2023-10-31',
+              version: INITIAL_REST_VERSION,
               validate: {
                 request: {
                   body: validate ? validate?.body : undefined,
@@ -118,7 +119,7 @@ export const initUptimeServer = (
           })
           .addVersion(
             {
-              version: '2023-10-31',
+              version: INITIAL_REST_VERSION,
               validate: {
                 request: {
                   body: validate ? validate?.body : undefined,
