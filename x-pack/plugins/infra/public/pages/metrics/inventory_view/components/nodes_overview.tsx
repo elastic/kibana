@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
-
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
@@ -41,6 +40,8 @@ interface Props {
   formatter: InfraFormatter;
   bottomMargin: number;
   showLoading: boolean;
+  isAutoReloading?: boolean;
+  refreshInterval?: number;
 }
 
 export const NodesOverview = ({
@@ -57,6 +58,8 @@ export const NodesOverview = ({
   onDrilldown,
   bottomMargin,
   showLoading,
+  refreshInterval,
+  isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const [{ detailsItemId }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
@@ -137,17 +140,18 @@ export const NodesOverview = ({
         currentTime={currentTime}
         onFilter={handleDrilldown}
         bounds={bounds}
-        dataBounds={dataBounds}
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
       {nodeType === 'host' && detailsItemId && (
         <AssetDetailsFlyout
-          closeFlyout={closeFlyout}
           assetName={detailsItemId}
           assetType={nodeType}
+          closeFlyout={closeFlyout}
           currentTime={currentTime}
+          isAutoReloading={isAutoReloading}
           options={options}
+          refreshInterval={refreshInterval}
         />
       )}
       <Legend

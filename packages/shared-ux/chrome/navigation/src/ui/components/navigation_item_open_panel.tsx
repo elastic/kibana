@@ -19,6 +19,7 @@ import {
   type EuiThemeComputed,
   useEuiTheme,
   transparentize,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { NavigateToUrlFn } from '../../../types/internal';
@@ -53,6 +54,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
   const { title, deepLink, isActive, children } = item;
   const id = nodePathToString(item);
   const href = deepLink?.url ?? item.href;
+  const isNotMobile = useIsWithinMinBreakpoint('s');
+  const isIconVisible = isNotMobile && !!children && children.length > 0;
 
   const itemClassNames = classNames(
     'sideNavItem',
@@ -73,12 +76,16 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
   );
 
   const onIconClick = useCallback(() => {
-    openPanel(item);
-  }, [openPanel, item]);
+    if (selectedNode?.id === item.id) {
+      closePanel();
+    } else {
+      openPanel(item);
+    }
+  }, [openPanel, closePanel, item, selectedNode]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem>
+      <EuiFlexItem style={{ flexBasis: isIconVisible ? '80%' : '100%' }}>
         <EuiListGroup gutterSize="none">
           <EuiListGroupItem
             label={title}
@@ -92,8 +99,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
           />
         </EuiListGroup>
       </EuiFlexItem>
-      {!!children && children.length > 0 && (
-        <EuiFlexItem grow={0}>
+      {isIconVisible && (
+        <EuiFlexItem grow={0} style={{ flexBasis: '15%' }}>
           <EuiButtonIcon
             display={nodePathToString(selectedNode) === id ? 'base' : 'empty'}
             size="s"
@@ -104,7 +111,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle panel navigation',
             })}
-            data-test-subj={`solutionSideNavItemButton-${id}`}
+            data-test-subj={`panelOpener-${id}`}
           />
         </EuiFlexItem>
       )}

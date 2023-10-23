@@ -23,7 +23,16 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 // FLAKY: https://github.com/elastic/kibana/issues/168340
 describe.skip(
   'Automated Response Actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  {
+    tags: [
+      '@ess',
+      '@serverless',
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      '@brokenInServerless',
+    ],
+  },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;

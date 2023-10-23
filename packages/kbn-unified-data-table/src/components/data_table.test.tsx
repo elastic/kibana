@@ -313,7 +313,7 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": <React.Fragment />,
+          "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
@@ -339,7 +339,7 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": <React.Fragment />,
+          "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "allowDensity": false,
@@ -360,7 +360,7 @@ describe('UnifiedDataTable', () => {
 
       expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
-          "additionalControls": <React.Fragment />,
+          "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": undefined,
           "showFullScreenSelector": true,
@@ -508,6 +508,52 @@ describe('UnifiedDataTable', () => {
       const gridExpandBtn = findTestSubject(component, 'docTableExpandToggleColumn').first();
       const tourStep = gridExpandBtn.getDOMNode().getAttribute('id');
       expect(tourStep).toEqual('test-expand');
+    });
+  });
+
+  describe('renderCustomToolbar', () => {
+    it('should render a custom toolbar', async () => {
+      let toolbarParams: Record<string, unknown> = {};
+      let gridParams: Record<string, unknown> = {};
+      const renderCustomToolbarMock = jest.fn((props) => {
+        toolbarParams = props.toolbarProps;
+        gridParams = props.gridProps;
+        return <div data-test-subj="custom-toolbar">Custom layout</div>;
+      });
+      const component = await getComponent({
+        ...getProps(),
+        renderCustomToolbar: renderCustomToolbarMock,
+      });
+
+      // custom toolbar should be rendered
+      expect(findTestSubject(component, 'custom-toolbar').exists()).toBe(true);
+
+      expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          toolbarProps: expect.objectContaining({
+            hasRoomForGridControls: true,
+          }),
+          gridProps: expect.objectContaining({
+            additionalControls: null,
+          }),
+        })
+      );
+
+      // the default eui controls should be available for custom rendering
+      expect(toolbarParams?.columnSortingControl).toBeTruthy();
+      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+      expect(gridParams?.additionalControls).toBe(null);
+
+      // additional controls become available after selecting a document
+      act(() => {
+        component
+          .find('[data-gridcell-column-id="select"] .euiCheckbox__input')
+          .first()
+          .simulate('change');
+      });
+
+      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+      expect(gridParams?.additionalControls).toBeTruthy();
     });
   });
 

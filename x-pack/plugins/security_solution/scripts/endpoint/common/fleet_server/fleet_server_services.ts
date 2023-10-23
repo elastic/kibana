@@ -124,7 +124,7 @@ export const startFleetServer = async ({
 
     // Only fetch/create a fleet-server policy
     const policyId =
-      policy ?? !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
+      policy || !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
     const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
@@ -233,6 +233,7 @@ const startFleetServerWithDocker = async ({
     const containerName = `dev-fleet-server.${port}`;
     const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
     let containerId = '';
+    let fleetServerVersionInfo = '';
 
     if (isLocalhost(esURL.hostname)) {
       esURL.hostname = localhostRealIp;
@@ -276,9 +277,10 @@ const startFleetServerWithDocker = async ({
           );
         })
         .catch((error) => {
-          log.verbose(`Attempt to kill currently running fleet-server container (if any) with name [${containerName}] was unsuccessful:
-    ${error}
-  (This is ok if one was not running already)`);
+          if (!/no such container/i.test(error.message)) {
+            log.verbose(`Attempt to kill currently running fleet-server container with name [${containerName}] was unsuccessful:
+      ${error}`);
+          }
         });
 
       log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
@@ -304,6 +306,19 @@ const startFleetServerWithDocker = async ({
 
         log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
       }
+
+      fleetServerVersionInfo = (
+        await execa('docker', [
+          'exec',
+          containerName,
+          '/bin/bash',
+          '-c',
+          './elastic-agent version',
+        ]).catch((err) => {
+          log.verbose(`Failed to retrieve agent version information from running instance.`, err);
+          return { stdout: 'Unable to retrieve version information' };
+        })
+      ).stdout;
     } catch (error) {
       log.error(dump(error));
       throw error;
@@ -311,6 +326,8 @@ const startFleetServerWithDocker = async ({
 
     const info = `Container Name: ${containerName}
 Container Id:   ${containerId}
+Fleet-server version:
+    ${fleetServerVersionInfo.replace(/\n/g, '\n    ')}
 
 View running output:  ${chalk.cyan(`docker attach ---sig-proxy=false ${containerName}`)}
 Shell access:         ${chalk.cyan(`docker exec -it ${containerName} /bin/bash`)}
