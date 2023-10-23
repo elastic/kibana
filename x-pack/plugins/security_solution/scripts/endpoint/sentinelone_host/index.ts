@@ -16,7 +16,6 @@ import {
 import {
   addSentinelOneIntegrationToAgentPolicy,
   enrollHostVmWithFleet,
-  fetchFleetServerUrl,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
 import { installSentinelOneAgent } from './common';
@@ -96,6 +95,8 @@ const runCli: RunFn = async ({ log, flags }) => {
   ok(s1ApiToken, getRequiredArgMessage('s1ApiToken'));
   ok(s1SiteToken, getRequiredArgMessage('s1SiteToken'));
 
+  // FIXME:PT validate API token valid
+
   const vmName =
     (flags.vmName as string) ||
     `${userInfo().username.toLowerCase().replaceAll('.', '-')}-sentinelone-${Math.random()
@@ -136,20 +137,15 @@ const runCli: RunFn = async ({ log, flags }) => {
     siteToken: s1SiteToken,
   });
 
-  if (force) {
+  if (force || !(await isFleetServerRunning(kbnClient))) {
     await startFleetServer({ kbnClient, logger: log, version, force });
-  } else {
-    const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
-
-    if (!currentFleetServerUrl || !(await isFleetServerRunning(currentFleetServerUrl))) {
-      await startFleetServer({ kbnClient, logger: log, version });
-    }
   }
 
   const agentPolicyId = policy || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
 
   await addSentinelOneIntegrationToAgentPolicy({
     kbnClient,
+    log,
     agentPolicyId,
     consoleUrl: s1ManagementConsoleUri.toString(),
     apiToken: s1ApiToken,
@@ -164,6 +160,7 @@ const runCli: RunFn = async ({ log, flags }) => {
   });
 
   log.info(`Done!
+
 ${hostVm.info()}
 
 SentinelOne Agent Status:

@@ -22,6 +22,7 @@ import type {
   CreatePackagePolicyRequest,
   PackagePolicy,
   GetInfoResponse,
+  GetOneAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
@@ -273,6 +274,25 @@ export const fetchAgentPolicyList = async (
       query: options,
     })
     .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+/**
+ * Fetch a single Fleet Agent Policy
+ * @param kbnClient
+ * @param agentPolicyId
+ */
+export const fetchAgentPolicy = async (
+  kbnClient: KbnClient,
+  agentPolicyId: string
+): Promise<AgentPolicy> => {
+  return kbnClient
+    .request<GetOneAgentPolicyResponse>({
+      method: 'GET',
+      path: agentPolicyRouteService.getInfoPath(agentPolicyId),
+      headers: { 'elastic-api-version': '2023-10-31' },
+    })
+    .then((response) => response.data.item)
     .catch(catchAxiosErrorFormatAndThrow);
 };
 
@@ -727,31 +747,63 @@ export const fetchPackageInfo = async (
     .catch(wrapErrorAndRejectPromise);
 };
 
-interface AddIntegrationToAgentPolicyOptions {
+interface AddSentinelOneIntegrationToAgentPolicyOptions {
   kbnClient: KbnClient;
+  log: ToolingLog;
   agentPolicyId: string;
   /** The URL to the SentinelOne Management console */
   consoleUrl: string;
   /** The SentinelOne API token */
   apiToken: string;
   integrationPolicyName?: string;
+  /** Set to `true` if wanting to add the integration to the agent policy even if that agent policy already has one  */
+  force?: boolean;
 }
 
 /**
- * Creates a Fleet Integration Policy and adds it to the provided Fleet Agent Policy
+ * Creates a Fleet SentinelOne Integration Policy and adds it to the provided Fleet Agent Policy.
+ *
+ * NOTE: by default, a new SentinelOne integration policy will only be created if one is not already
+ * part of the provided Agent policy. Use `force` if wanting to still add it.
+ *
  * @param kbnClient
  * @param log
  * @param agentPolicyId
+ * @param consoleUrl
+ * @param apiToken
  * @param integrationPolicyName
+ * @param force
  */
 export const addSentinelOneIntegrationToAgentPolicy = async ({
   kbnClient,
+  log,
   agentPolicyId,
   consoleUrl,
   apiToken,
   integrationPolicyName = `SentinelOne policy (${Math.random().toString().substring(3)})`,
-}: AddIntegrationToAgentPolicyOptions): Promise<PackagePolicy> => {
-  // FIXME:PT Check if agent policy already has integrations and if so, don't add it again (maybe introduce a `force` option?)
+  force = false,
+}: AddSentinelOneIntegrationToAgentPolicyOptions): Promise<PackagePolicy> => {
+  // If `force` is `false and agent policy already has a SentinelOne integration, exit here
+  if (!force) {
+    log.debug(
+      `Checking to see if agent policy [] already includes a SentinelOne integration policy`
+    );
+
+    const agentPolicy = await fetchAgentPolicy(kbnClient, agentPolicyId);
+
+    log.verbose(agentPolicy);
+
+    const integrationPolicies = agentPolicy.package_policies ?? [];
+
+    for (const integrationPolicy of integrationPolicies) {
+      if (integrationPolicy.package?.name === 'sentinel_one') {
+        log.debug(
+          `Returning existing SentinelOne Integration Policy included in agent policy [${agentPolicyId}]`
+        );
+        return integrationPolicy;
+      }
+    }
+  }
 
   const {
     version: packageVersion,
@@ -759,9 +811,13 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
     title: packageTitle,
   } = await fetchPackageInfo(kbnClient, 'sentinel_one');
 
+  log.debug(
+    `Creating new SentinelOne integration policy [package v${packageVersion}] and adding it to agent policy [${agentPolicyId}]`
+  );
+
   return createIntegrationPolicy(kbnClient, {
     name: integrationPolicyName,
-    description: `Created by ${__filename}`,
+    description: `Created by script: ${__filename}`,
     namespace: 'default',
     policy_id: agentPolicyId,
     enabled: true,
@@ -943,7 +999,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
   });
 };
 
-// TODO:PT implemnet (if needed)
+// TODO:PT implement (if needed)
 // export const addEndpointIntegrationToAgentPolicy = async () => {
 //   const {
 //     version: packageVersion,

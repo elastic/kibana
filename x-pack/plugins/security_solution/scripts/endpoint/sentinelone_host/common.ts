@@ -6,6 +6,8 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import axios from 'axios';
+import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
 import type { HostVm } from '../common/types';
 
 interface InstallSentinelOneAgentOptions {
@@ -21,6 +23,12 @@ interface InstallSentinelOneAgentResponse {
   status: string;
 }
 
+export const ensureValidApiToken = async (s1BaseUrl: string, apiToken: string): Promise<void> => {
+  await axios
+    .get(s1BaseUrl.concat(`/web/api/v2.1/system/info?APIToken=${apiToken}`))
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
 export const installSentinelOneAgent = async ({
   hostVm,
   agentUrl,
@@ -34,6 +42,8 @@ export const installSentinelOneAgent = async ({
   const installPath = '/opt/sentinelone/bin/sentinelctl';
 
   return log.indent(4, async () => {
+    log.debug(`Agent URL: [${agentUrl}]\nApi Token: [${apiToken}]\nSite Token: [${siteToken}]`);
+
     log.info(`Downloading SentinelOne agent`);
     await hostVm.exec(`curl ${agentUrl}?APIToken=${apiToken} -o sentinel.deb`);
 
@@ -45,6 +55,7 @@ export const installSentinelOneAgent = async ({
     const status = (await hostVm.exec(`sudo ${installPath} control status`)).stdout;
 
     log.info('done');
+
     return {
       path: installPath,
       status,

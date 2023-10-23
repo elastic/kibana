@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+/**
+ * Generic common interface for a Host Virtual Machine.
+ */
 export interface HostVm {
-  type: 'multipass'; // future: support vagrant
+  type: SupportedVmManager;
   name: string;
   exec: (command: string) => Promise<HostVmExecResponse>;
   mount: (localDir: string, hostVmDir: string) => Promise<HostVmMountResponse>;
@@ -15,6 +18,7 @@ export interface HostVm {
   info: () => string;
 }
 
+export type SupportedVmManager = 'multipass' | 'vagrant';
 export interface HostVmExecResponse {
   stdout: string;
   stderr: string;

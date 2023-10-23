@@ -8,8 +8,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import chalk from 'chalk';
-import type { HostVm, HostVmExecResponse } from './types';
-import type { DownloadedAgentInfo } from './agent_downloads_service';
+import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
 
 interface BaseVmCreateOptions {
   name: string;
@@ -23,16 +22,16 @@ interface BaseVmCreateOptions {
 
 interface CreateVmOptions extends BaseVmCreateOptions {
   /** The type of VM manager to use when creating the VM host */
-  type: 'multipass' | 'vagrant';
+  type: SupportedVmManager;
   log?: ToolingLog;
 }
 
 /**
  * Creates a new VM
  */
-export const createVm = async ({ type, log, ...options }: CreateVmOptions): Promise<HostVm> => {
+export const createVm = async ({ type, ...options }: CreateVmOptions): Promise<HostVm> => {
   if (type === 'multipass') {
-    return createMultipassVm({ ...options, log });
+    return createMultipassVm(options);
   }
 
   throw new Error(`VM type ${type} not yet supported`);
@@ -53,8 +52,6 @@ const createMultipassVm = async ({
 }: CreateMultipassVmOptions): Promise<HostVm> => {
   log.info(`Creating VM [${name}] using multipass`);
 
-  // TODO:PT validate multipass is installed
-
   const createResponse = await execa.command(
     `multipass launch --name ${name} --disk ${disk} --cpus ${cpus} --memory ${memory}`
   );
@@ -69,8 +66,11 @@ const createMultipassVm = async ({
  * @param name
  * @param log
  */
-export const createMultipassHostVmClient = (name: string, log: ToolingLog): HostVm => {
-  // FIXME:PT make log optional adn use new createToolingLogger()
+export const createMultipassHostVmClient = (
+  name: string,
+  log: ToolingLog = new ToolingLog({ level: 'info', writeTo: process.stdout })
+): HostVm => {
+  // FIXME:PT use new createToolingLogger() once PR is merged
 
   const exec = async (command: string): Promise<HostVmExecResponse> => {
     const execResponse = await execa.command(`multipass exec ${name} -- ${command}`);
@@ -95,7 +95,7 @@ export const createMultipassHostVmClient = (name: string, log: ToolingLog): Host
 
   Shell access: ${chalk.cyan(`multipass shell ${name}`)}
   Delete VM:    ${chalk.cyan(`multipass delete -p ${name}`)}
-    `;
+`;
   };
 
   const unmount = async (hostVmDir: string) => {
@@ -124,7 +124,6 @@ export const createMultipassHostVmClient = (name: string, log: ToolingLog): Host
 
 interface CreateVagrantVmOptions {
   name: string;
-  cachedAgentDownload: DownloadedAgentInfo;
   log?: ToolingLog;
 }
 
