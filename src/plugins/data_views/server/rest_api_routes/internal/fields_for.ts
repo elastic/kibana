@@ -167,7 +167,10 @@ const handler: (
 
       if (cacheHeader) {
         // revalidates if 5 minutes passed, otherwise caches for a year
-        headers['cache-control'] = 'private, max-age=31536000, stale-while-revalidate=86400';
+        // headers['cache-control'] = 'public, max-age=30, stale-while-revalidate=2592000';
+        // headers['cache-control'] = 'max-age=300';
+        // headers['cache-control'] = 'no-cache';
+        // headers.etag = new Date().getTime().toString();
       }
 
       return response.ok({
