@@ -30,7 +30,7 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 
-describe('Guided onboarding tour', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
   before(() => {
     cleanKibana();
     login();
