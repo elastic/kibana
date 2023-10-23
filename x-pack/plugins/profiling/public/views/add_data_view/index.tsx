@@ -187,12 +187,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
                 }),
                 content: (
                   <EuiCodeBlock paddingSize="s" isCopyable>
-                    {i18n.translate('xpack.profiling.tabs.binaryEnsurePermissions', {
-                      defaultMessage: 'chmod +x pf-host-agent-{stackVersion}-linux-{arch}/pf-host-agent',
-                    }, values: {
-                    stackVersion, 
-                    arch
-                    })}
+                    {`chmod +x pf-host-agent-${stackVersion}-linux-${arch}/pf-host-agent`}
                   </EuiCodeBlock>
                 ),
               },
@@ -224,9 +219,9 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
             content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
                 {`wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-sudo apt-get install apt-transport-https
-echo "deb https://artifacts.elastic.co/packages/${majorVersion}.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-${majorVersion}.x.list
-`}
+      sudo apt-get install apt-transport-https
+      echo "deb https://artifacts.elastic.co/packages/${majorVersion}.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-${majorVersion}.x.list
+      `}
               </EuiCodeBlock>
             ),
           },
@@ -276,16 +271,16 @@ echo "deb https://artifacts.elastic.co/packages/${majorVersion}.x/apt stable mai
             content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
                 {`sudo rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
-cat <<EOF > /etc/yum.repos.d/elastic.repo
-[elastic-${majorVersion}.x]
-name=Elastic repository for ${majorVersion}.x packages
-baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
-gpgcheck=1
-gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-enabled=1
-autorefresh=1
-type=rpm-md
-EOF`}
+      cat <<EOF > /etc/yum.repos.d/elastic.repo
+      [elastic-${majorVersion}.x]
+      name=Elastic repository for ${majorVersion}.x packages
+      baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
+      gpgcheck=1
+      gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      enabled=1
+      autorefresh=1
+      type=rpm-md
+      EOF`}
               </EuiCodeBlock>
             ),
           },
@@ -408,7 +403,7 @@ EOF`}
                 ),
               },
               {
-                title: i18n.translate(`xpack.profiling.tabs.symbols.step2`, {
+                title: i18n.translate('xpack.profiling.tabs.symbols.step2', {
                   defaultMessage: 'Generate an Elasticsearch token',
                 }),
                 content: (
@@ -418,7 +413,7 @@ EOF`}
                       target="_blank"
                       href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
                     >
-                      {i18n.translate(`xpack.profiling.tabs.symbols.step2.instructions`, {
+                      {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
                         defaultMessage: 'Instructions here',
                       })}
                     </EuiLink>
@@ -426,7 +421,7 @@ EOF`}
                 ),
               },
               {
-                title: i18n.translate(`xpack.profiling.tabs.symbols.step3`, {
+                title: i18n.translate('xpack.profiling.tabs.symbols.step3', {
                   defaultMessage: 'Upload symbols',
                 }),
                 content: (
