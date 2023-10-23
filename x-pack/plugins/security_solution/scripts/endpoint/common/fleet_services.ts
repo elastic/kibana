@@ -36,7 +36,7 @@ import {
   epmRouteService,
   PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import {
@@ -60,6 +60,7 @@ import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
 import { downloadAndStoreAgent } from './agent_downloads_service';
 import type { HostVm } from './types';
 import {
+  createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
   wrapErrorAndRejectPromise,
@@ -76,7 +77,7 @@ export const checkInFleetAgent = async (
   agentId: string,
   {
     agentStatus = 'online',
-    log = new ToolingLog(),
+    log = createToolingLogger(),
   }: Partial<{
     /** The agent status to be sent. If set to `random`, then one will be randomly generated */
     agentStatus: AgentStatus | 'random';
