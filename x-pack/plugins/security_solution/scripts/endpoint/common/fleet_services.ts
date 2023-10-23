@@ -7,6 +7,8 @@
 
 import { map, pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
+import execa from 'execa';
+import fs from 'fs';
 import type {
   Agent,
   AgentStatus,
@@ -53,6 +55,7 @@ import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
+export const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -138,7 +141,8 @@ export const fetchFleetAgents = async (
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   hostname: string,
-  timeoutMs: number = 30000
+  timeoutMs: number = 30000,
+  logger?: ToolingLog
 ): Promise<Agent> => {
   const started = new Date();
   const hasTimedOut = (): boolean => {
@@ -152,10 +156,16 @@ export const waitForHostToEnroll = async (
       async () =>
         fetchFleetAgents(kbnClient, {
           perPage: 1,
-          kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
+          kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
           showInactive: false,
-        }).then((response) => response.items[0]),
-      RETRYABLE_TRANSIENT_ERRORS
+        }).then((response) => {
+          if (logger) {
+            logger.info(JSON.stringify(response, null, 2));
+          }
+          return response.items.filter((agent) => agent.status === 'online')[0];
+        }),
+      RETRYABLE_TRANSIENT_ERRORS,
+      logger
     );
 
     if (!found) {
@@ -164,8 +174,52 @@ export const waitForHostToEnroll = async (
     }
   }
 
+  try {
+    let stdout: string;
+    if (process.env.CI) {
+      const { stdout: vagrantSTDOUT } = await execa(
+        'vagrant',
+        ['ssh', '--', "sudo sh -c 'cat /opt/Elastic/Agent/elastic-agent-*'"],
+        {
+          env: {
+            VAGRANT_CWD,
+          },
+        }
+      );
+      stdout = vagrantSTDOUT;
+    } else {
+      stdout = '';
+    }
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      logger?.info(e);
+    });
+    const { stdout: pwdA } = await execa('pwd');
+    await execa('mkdir', [
+      '-p',
+      '../../../../../../target/kibana-security-solution/cypress/results/',
+    ]).catch((e) => {
+      logger?.info(e);
+    });
+
+    logger?.info(`pwd: ${pwdA}`);
+    fs.writeFileSync(
+      '../../../../../../target/kibana-security-solution/cypress/results/agent-logs.txt',
+      stdout
+    );
+    logger?.info(stdout);
+  } catch (e) {
+    logger?.info(e);
+  }
+
   if (!found) {
-    throw new Error(`Timed out waiting for host [${hostname}] to show up in Fleet`);
+    throw new Error(
+      `Timed out waiting for host [${hostname}] to show up in Fleet in ${
+        timeoutMs / 60
+      } second timeout after ${(Date.now() - started.getTime()) / 60} ms`
+    );
   }
 
   return found;

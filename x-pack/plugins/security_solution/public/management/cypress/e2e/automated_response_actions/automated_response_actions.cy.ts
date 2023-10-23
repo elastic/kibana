@@ -20,8 +20,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// FLAKY: https://github.com/elastic/kibana/issues/168340
-describe.skip(
+describe(
   'Automated Response Actions',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
@@ -67,8 +66,7 @@ describe.skip(
       disableExpandableFlyoutAdvancedSettings();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168427
-    describe.skip('From alerts', () => {
+    describe('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
