@@ -59,7 +59,7 @@ export const ViewDetailsPopover = (props: Props) => {
         <EuiLink
           color="primary"
           size="s"
-          onClick={() => setIsPopoverOpen(true)}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         >
           <>
             {viewDetailsLabel}
