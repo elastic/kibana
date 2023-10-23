@@ -358,7 +358,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Host details page navigation', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/166344
+      describe.skip('Host details page navigation', () => {
         after(async () => {
           await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
           await pageObjects.header.waitUntilLoadingHasFinished();

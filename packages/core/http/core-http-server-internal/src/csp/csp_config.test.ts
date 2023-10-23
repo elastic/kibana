@@ -178,4 +178,31 @@ describe('CspConfig', () => {
       });
     });
   });
+
+  describe('with additional config', () => {
+    test(`adds, for example, CDN host name to directives along with 'self'`, () => {
+      const config = new CspConfig(defaultConfig, { default_src: ['foo.bar'] });
+      expect(config.header).toEqual(
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; default-src 'self' foo.bar"
+      );
+    });
+
+    test('Empty additional config does not affect existing config', () => {
+      const config = new CspConfig(defaultConfig, {
+        /* empty */
+      });
+      expect(config.header).toEqual(
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"
+      );
+    });
+    test('Passing an empty array in additional config does not affect existing config', () => {
+      const config = new CspConfig(defaultConfig, {
+        default_src: [],
+        worker_src: ['foo.bar'],
+      });
+      expect(config.header).toEqual(
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob: foo.bar; style-src 'report-sample' 'self' 'unsafe-inline'"
+      );
+    });
+  });
 });
