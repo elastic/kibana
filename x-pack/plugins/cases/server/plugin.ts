@@ -43,6 +43,7 @@ import {
   createCaseSavedObjectType,
   createCaseUserActionSavedObjectType,
   casesTelemetrySavedObjectType,
+  casesOracleSavedObjectType,
 } from './saved_object_types';
 
 import type { CasesClient } from './client';
@@ -60,6 +61,7 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
+import { registerConnectorTypes } from './connectors';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -116,6 +118,7 @@ export class CasePlugin {
       this.externalReferenceAttachmentTypeRegistry,
       this.persistableStateAttachmentTypeRegistry
     );
+
     registerCaseFileKinds(this.caseConfig.files, plugins.files);
 
     this.securityPluginSetup = plugins.security;
@@ -133,6 +136,7 @@ export class CasePlugin {
         },
       })
     );
+
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
     core.savedObjects.registerType(createCaseSavedObjectType(core, this.logger));
@@ -141,7 +145,9 @@ export class CasePlugin {
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       })
     );
+
     core.savedObjects.registerType(casesTelemetrySavedObjectType);
+    core.savedObjects.registerType(casesOracleSavedObjectType);
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
@@ -172,6 +178,8 @@ export class CasePlugin {
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
+
+    registerConnectorTypes({ actions: plugins.actions });
 
     return {
       attachmentFramework: {
