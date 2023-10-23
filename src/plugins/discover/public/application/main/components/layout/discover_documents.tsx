@@ -20,7 +20,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { SearchResponseWarnings } from '@kbn/search-response-warnings';
+import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import {
   DataLoadingState,
   useColumns,
@@ -277,13 +277,12 @@ function DiscoverDocumentsComponent({
           textBasedQueryColumns={documents?.textBasedQueryColumns}
           selectedColumns={currentColumns}
         />
-        {!!documentState.interceptedWarnings?.length && (
-          <SearchResponseWarnings
-            variant="callout"
-            interceptedWarnings={documentState.interceptedWarnings}
-            data-test-subj="dscInterceptedWarningsCallout"
-          />
-        )}
+        <SearchResponseWarningsCallout
+          visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
+            defaultMessage: 'table',
+          })}
+          warnings={documentState.interceptedWarnings}
+        />
       </>
     ),
     [

@@ -1,0 +1,136 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { getWarningsTitle, getWarningsDescription } from './i18n_utils';
+
+describe('getWarningsTitle', () => {
+  test('Should show title for single non-successful cluster', () => {
+    const warnings = [
+      {
+        type: 'incomplete',
+        clusters: {
+          'remote1': {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: () => {},
+      },
+    ];
+    expect(getWarningsTitle(warnings)).toEqual('Problem with 1 cluster');
+  });
+
+  test('Should show title for multiple non-successful cluster', () => {
+    const warnings = [
+      {
+        type: 'incomplete',
+        clusters: {
+          'remote1': {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+          'remote2': {
+            status: 'skipped',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: () => {},
+      },
+    ];
+    expect(getWarningsTitle(warnings)).toEqual('Problem with 2 clusters');
+  });
+
+  test('Should show title for multiple requests', () => {
+    const warnings = [
+      {
+        type: 'incomplete',
+        clusters: {
+          'remote1': {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: () => {},
+      },
+      {
+        type: 'incomplete',
+        clusters: {
+          'remote1': {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: () => {},
+      },
+    ];
+    expect(getWarningsTitle(warnings)).toEqual('Problem with 1 cluster in 2 requests');
+  });
+});
+
+describe('getWarningsDescription', () => {
+  test('Should show description for single non-successful cluster', () => {
+    const warnings = [
+      {
+        type: 'incomplete',
+        clusters: {
+          'remote1': {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: () => {},
+      },
+    ];
+    expect(getWarningsDescription(warnings)).toEqual('This cluster had issues returning results. This might result in an incomplete visualization.');
+  });
+
+  test('Should show description for multiple non-successful cluster', () => {
+    const warnings = [
+      {
+        type: 'incomplete',
+        clusters: {
+          'remote1': {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+          'remote2': {
+            status: 'skipped',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: () => {},
+      },
+    ];
+    expect(getWarningsDescription(warnings)).toEqual('These clusters had issues returning results. This might result in an incomplete visualization.');
+  });
+
+  test('Should show custom visualization label', () => {
+    const warnings = [
+      {
+        type: 'incomplete',
+        clusters: {
+          'remote1': {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: () => {},
+      },
+    ];
+    expect(getWarningsDescription(warnings, 'table')).toEqual('This cluster had issues returning results. This might result in an incomplete table.');
+  });
+});

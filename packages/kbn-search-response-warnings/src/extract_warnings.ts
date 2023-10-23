@@ -35,6 +35,7 @@ export function extractWarnings(
   if (isPartial) {
     warnings.push({
       type: 'incomplete',
+      requestName: 'my request',
       message: i18n.translate('searchResponseWarnings.incompleteResultsMessage', {
         defaultMessage: 'Results are partial and may be incomplete.',
       }),

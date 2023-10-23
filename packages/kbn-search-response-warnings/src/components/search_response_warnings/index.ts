@@ -10,3 +10,5 @@ export {
   SearchResponseWarnings,
   type SearchResponseWarningsProps,
 } from './search_response_warnings';
+
+export { SearchResponseWarningsCallout } from './search_response_warnings_callout';

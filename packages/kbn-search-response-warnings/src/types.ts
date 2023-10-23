@@ -29,6 +29,10 @@ export interface SearchResponseIncompleteWarning {
    */
   message: string;
   /**
+   * requestName: human-friendly request name
+   */
+  requestName: string;
+  /**
    * clusters: cluster details.
    */
   clusters: Record<string, ClusterDetails>;

@@ -11,6 +11,7 @@ export type { SearchResponseWarning, WarningHandlerCallback } from './src/types'
 export {
   SearchResponseWarnings,
   type SearchResponseWarningsProps,
+  SearchResponseWarningsCallout,
 } from './src/components/search_response_warnings';
 export { ViewWarningButton } from './src/components/view_warning_button';
 
