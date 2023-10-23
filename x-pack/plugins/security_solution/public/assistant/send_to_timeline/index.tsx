@@ -73,7 +73,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   const configureAndOpenTimeline = useCallback(() => {
     if (dataProviders || filters) {
       // If esql, don't reset filters or mess with dataview & time range
-      if (dataProviders?.[0]?.queryType === 'esql') {
+      if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
         discoverStateContainer.current?.appState.update({
           query: {
             query: dataProviders[0].kqlQuery,
