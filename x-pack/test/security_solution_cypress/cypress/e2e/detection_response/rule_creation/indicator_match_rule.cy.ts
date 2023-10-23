@@ -115,7 +115,8 @@ import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_manag
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
-describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = getNewThreatIndicatorRule().references?.join('');
     const expectedFalsePositives = getNewThreatIndicatorRule().false_positives?.join('');
