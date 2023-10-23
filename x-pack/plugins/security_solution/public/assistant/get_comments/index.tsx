@@ -23,8 +23,8 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
-import { esqlLanguagePlugin } from './esql/esql_markdown_plugin';
-import { EsqlCodeBlock } from './esql/esql_code_block';
+import { customCodeBlockLanguagePlugin } from './custom_codeblock/custom_codeblock_markdown_plugin';
+import { CustomCodeBlock } from './custom_codeblock/custom_code_block';
 
 export const getComments = ({
   currentConversation,
@@ -42,10 +42,10 @@ export const getComments = ({
 
   processingPlugins[1][1].components = {
     ...components,
-    esql: (props) => {
+    customCodeBlock: (props) => {
       return (
         <>
-          <EsqlCodeBlock value={props.value} />
+          <CustomCodeBlock value={props.value} />
           <EuiSpacer size="m" />
         </>
       );
@@ -53,7 +53,7 @@ export const getComments = ({
   };
 
   // Fun fact: must spread existing parsingPlugins last
-  const parsingPluginList = [esqlLanguagePlugin, ...parsingPlugins];
+  const parsingPluginList = [customCodeBlockLanguagePlugin, ...parsingPlugins];
   const processingPluginList = processingPlugins;
 
   return currentConversation.messages.map((message, index) => {

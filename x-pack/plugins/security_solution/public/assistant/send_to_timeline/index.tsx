@@ -26,6 +26,7 @@ import {
   applyKqlFilterQuery,
   setActiveTabTimeline,
   setFilters,
+  showTimeline,
   updateDataView,
   updateEqlOptions,
 } from '../../timelines/store/timeline/actions';
@@ -84,6 +85,12 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
           setActiveTabTimeline({
             id: TimelineId.active,
             activeTab: TimelineTabs.esql,
+          })
+        );
+        dispatch(
+          showTimeline({
+            id: TimelineId.active,
+            show: true,
           })
         );
         return;

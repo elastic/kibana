@@ -8,7 +8,7 @@
 import type { Node } from 'unist';
 import type { Parent } from 'mdast';
 
-export const esqlLanguagePlugin = () => {
+export const customCodeBlockLanguagePlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
     if ('children' in node) {
       const nodeAsParent = node as Parent;
@@ -17,8 +17,15 @@ export const esqlLanguagePlugin = () => {
       });
     }
 
-    if (node.type === 'code' && node.lang === 'esql') {
-      node.type = 'esql';
+    if (
+      node.type === 'code' &&
+      (node.lang === 'eql' ||
+        node.lang === 'esql' ||
+        node.lang === 'kql' ||
+        node.lang === 'dsl' ||
+        node.lang === 'json')
+    ) {
+      node.type = 'customCodeBlock';
     }
   };
 

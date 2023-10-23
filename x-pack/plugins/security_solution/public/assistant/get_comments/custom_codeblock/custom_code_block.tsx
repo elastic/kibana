@@ -8,7 +8,7 @@ import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '
 import { css } from '@emotion/css';
 import React from 'react';
 
-export const EsqlCodeBlock = ({ value }: { value: string }) => {
+export const CustomCodeBlock = ({ value }: { value: string }) => {
   const theme = useEuiTheme();
 
   return (
