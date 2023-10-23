@@ -77,7 +77,7 @@ export function streamFactory<T = unknown>(
   const flushPayload = flushFix
     ? crypto.randomBytes(FLUSH_PAYLOAD_SIZE).toString('hex')
     : undefined;
-  let chunkSizeSinceKeepAlive = 0;
+  let responseSizeSinceLastKeepAlive = 0;
 
   const stream = isCompressed ? zlib.createGzip() : new UncompressedResponseStream();
 
@@ -135,14 +135,18 @@ export function streamFactory<T = unknown>(
     if (streamType === undefined) {
       streamType = typeof d === 'string' ? 'string' : 'ndjson';
 
-      // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
+      // This is a fix for ndjson streaming with proxy configurations
+      // that buffer responses up to 4KB in size. We keep track of the
+      // size of the response sent so far and if it's still smaller than
+      // FLUSH_PAYLOAD_SIZE then we'll push an additional keep-alive object
+      // that contains the flush fix payload.
       if (flushFix && streamType === 'ndjson') {
         setTimeout(function repeat() {
           if (!tryToEnd) {
-            if (chunkSizeSinceKeepAlive < FLUSH_PAYLOAD_SIZE) {
+            if (responseSizeSinceLastKeepAlive < FLUSH_PAYLOAD_SIZE) {
               push({ flushPayload } as unknown as T);
             }
-            chunkSizeSinceKeepAlive = 0;
+            responseSizeSinceLastKeepAlive = 0;
             setTimeout(repeat, FLUSH_KEEP_ALIVE_INTERVAL_MS);
           }
         }, 0);
@@ -166,7 +170,7 @@ export function streamFactory<T = unknown>(
         streamType === 'ndjson' ? `${JSON.stringify(d)}${DELIMITER}` : (d as unknown as string);
 
       if (streamType === 'ndjson') {
-        chunkSizeSinceKeepAlive += new Blob([line]).size;
+        responseSizeSinceLastKeepAlive += new Blob([line]).size;
       }
 
       waitForCallbacks.push(1);
