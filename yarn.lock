@@ -6160,6 +6160,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unsaved-changes-badge@link:packages/kbn-unsaved-changes-badge":
+  version "0.0.0"
+  uid ""
+
 "@kbn/upgrade-assistant-plugin@link:x-pack/plugins/upgrade_assistant":
   version "0.0.0"
   uid ""

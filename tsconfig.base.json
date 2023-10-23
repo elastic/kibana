@@ -1568,6 +1568,8 @@
       "@kbn/unified-histogram-plugin/*": ["src/plugins/unified_histogram/*"],
       "@kbn/unified-search-plugin": ["src/plugins/unified_search"],
       "@kbn/unified-search-plugin/*": ["src/plugins/unified_search/*"],
+      "@kbn/unsaved-changes-badge": ["packages/kbn-unsaved-changes-badge"],
+      "@kbn/unsaved-changes-badge/*": ["packages/kbn-unsaved-changes-badge/*"],
       "@kbn/upgrade-assistant-plugin": ["x-pack/plugins/upgrade_assistant"],
       "@kbn/upgrade-assistant-plugin/*": ["x-pack/plugins/upgrade_assistant/*"],
       "@kbn/uptime-plugin": ["x-pack/plugins/uptime"],

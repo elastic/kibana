@@ -14,6 +14,7 @@ import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getTopNavLinks } from './get_top_nav_links';
+import { getTopNavBadges } from './get_top_nav_badges';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
@@ -114,6 +115,19 @@ export const DiscoverTopNav = ({
   }, [dataViewEditor, stateContainer]);
 
   const topNavCustomization = useDiscoverCustomization('top_nav');
+
+  const topNavBadges = useMemo(
+    () =>
+      getTopNavBadges({
+        dataView,
+        services,
+        state: stateContainer,
+        isPlainRecord,
+        adHocDataViews,
+        topNavCustomization,
+      }),
+    [adHocDataViews, dataView, isPlainRecord, services, stateContainer, topNavCustomization]
+  );
 
   const topNavMenu = useMemo(
     () =>
@@ -216,6 +230,7 @@ export const DiscoverTopNav = ({
   return (
     <SearchBar
       appName="discover"
+      badges={topNavBadges}
       config={topNavMenu}
       indexPatterns={[dataView]}
       onQuerySubmit={updateQuery}
