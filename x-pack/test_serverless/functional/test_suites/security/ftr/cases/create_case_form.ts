@@ -16,9 +16,9 @@ const owner = SECURITY_SOLUTION_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Create Case', function () {
-    this.tags(['failsOnMKI']);
     const find = getService('find');
     const cases = getService('cases');
+    const svlCases = getService('svlCases');
     const testSubjects = getService('testSubjects');
     const config = getService('config');
     const svlCommonPage = getPageObject('svlCommonPage');
@@ -34,7 +34,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await svlCommonPage.forceLogout();
     });
 

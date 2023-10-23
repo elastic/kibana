@@ -12,7 +12,6 @@ import { BurnRateRuleParams } from '../types';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../assets/constants';
 import {
   buildQuery,
-  BurnRateWindowWithDuration,
   EvaluationAfterKey,
   generateAboveThresholdKey,
   generateBurnRateKey,
@@ -66,13 +65,12 @@ export interface EvalutionAggResults {
 async function queryAllResults(
   esClient: ElasticsearchClient,
   slo: SLO,
-  dateStart: string,
-  dateEnd: string,
-  burnRateWindows: BurnRateWindowWithDuration[],
+  params: BurnRateRuleParams,
+  startedAt: Date,
   buckets: EvaluationBucket[] = [],
   lastAfterKey?: { instanceId: string }
 ): Promise<EvaluationBucket[]> {
-  const queryAndAggs = buildQuery(slo, dateStart, dateEnd, burnRateWindows, lastAfterKey);
+  const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
   const results = await esClient.search<undefined, EvalutionAggResults>({
     index: SLO_DESTINATION_INDEX_PATTERN,
     ...queryAndAggs,
@@ -86,9 +84,8 @@ async function queryAllResults(
   return queryAllResults(
     esClient,
     slo,
-    dateStart,
-    dateEnd,
-    burnRateWindows,
+    params,
+    startedAt,
     [...buckets, ...results.aggregations.instances.buckets],
     results.aggregations.instances.after_key
   );
@@ -98,11 +95,9 @@ export async function evaluate(
   esClient: ElasticsearchClient,
   slo: SLO,
   params: BurnRateRuleParams,
-  dateStart: string,
-  dateEnd: string,
-  burnRateWindows: BurnRateWindowWithDuration[]
+  startedAt: Date
 ) {
-  const buckets = await queryAllResults(esClient, slo, dateStart, dateEnd, burnRateWindows);
+  const buckets = await queryAllResults(esClient, slo, params, startedAt);
   return transformBucketToResults(buckets, params);
 }
 
