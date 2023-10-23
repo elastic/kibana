@@ -42,6 +42,7 @@ export const AlertsPanel: FC = () => {
     featureIds: [AlertConsumers.ML],
     query: alertsQuery,
     showExpandToDetails: true,
+    showAlertStatusWithFlapping: true,
   };
   const alertsStateTable = triggersActionsUi!.getAlertsStateTable(alertStateProps);
 
