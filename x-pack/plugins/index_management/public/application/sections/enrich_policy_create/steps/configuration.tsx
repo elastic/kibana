@@ -41,6 +41,8 @@ interface Props {
   onNext: () => void;
 }
 
+const NOT_ALLOWED_CHARS = ['"', ' ', '\\', '/', ',', '|', '>', '?', '*', '<'];
+
 export const configurationFormSchema: FormSchema = {
   name: {
     type: FIELD_TYPES.TEXT,
@@ -57,6 +59,20 @@ export const configurationFormSchema: FormSchema = {
             }
           )
         ),
+      },
+      {
+        validator: fieldValidators.containsCharsField({
+          message: i18n.translate(
+            'xpack.idxMgmt.enrichPolicyCreate.configurationStep.invalidCharactersInNameError',
+            {
+              defaultMessage: `Should not contain any of the following characters: {notAllowedChars}`,
+              values: {
+                notAllowedChars: NOT_ALLOWED_CHARS.join(', '),
+              },
+            }
+          ),
+          chars: NOT_ALLOWED_CHARS,
+        }),
       },
     ],
   },
