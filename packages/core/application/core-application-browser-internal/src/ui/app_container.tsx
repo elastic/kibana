@@ -22,7 +22,11 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
-import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import {
+  KibanaErrorBoundary,
+  KibanaErrorBoundaryProvider,
+  KibanaRecallError,
+} from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -39,13 +43,6 @@ interface Props {
   setIsMounting: (isMounting: boolean) => void;
   showPlainSpinner?: boolean;
 }
-
-const RecallError = ({ error }: { error: Error | null }) => {
-  if (error) {
-    throw error;
-  }
-  return null;
-};
 
 export const AppContainer: FC<Props> = ({
   mounter,
@@ -125,7 +122,7 @@ export const AppContainer: FC<Props> = ({
   return (
     <KibanaErrorBoundaryProvider>
       <KibanaErrorBoundary>
-        <RecallError error={error} />
+        <KibanaRecallError error={error} />
         {appNotFound && <AppNotFound />}
         {showSpinner && !appNotFound && (
           <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />

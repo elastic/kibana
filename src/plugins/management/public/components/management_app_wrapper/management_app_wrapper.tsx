@@ -10,18 +10,14 @@ import React, { createRef, Component } from 'react';
 
 import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import classNames from 'classnames';
-import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import {
+  KibanaErrorBoundary,
+  KibanaErrorBoundaryProvider,
+  KibanaRecallError,
+} from '@kbn/shared-ux-error-boundary';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
-
-/** @internal **/
-const RecallError = ({ error }: { error?: Error }) => {
-  if (error) {
-    throw error;
-  }
-  return null;
-};
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;
@@ -32,7 +28,7 @@ interface ManagementSectionWrapperProps {
 }
 
 interface ManagementSectionWrapperState {
-  error?: Error;
+  error: Error | null;
 }
 
 export class ManagementAppWrapper extends Component<
@@ -44,7 +40,7 @@ export class ManagementAppWrapper extends Component<
 
   constructor(props: ManagementSectionWrapperProps) {
     super(props);
-    this.state = {};
+    this.state = { error: null };
   }
 
   componentDidMount() {
@@ -87,7 +83,7 @@ export class ManagementAppWrapper extends Component<
     return (
       <KibanaErrorBoundaryProvider>
         <KibanaErrorBoundary>
-          <RecallError error={this.state.error} />
+          <KibanaRecallError error={this.state.error} />
           <div
             // The following classes are a stop-gap for this element that wraps children of KibanaPageTemplate
             className={classNames('euiPageContentBody', APP_WRAPPER_CLASS)}

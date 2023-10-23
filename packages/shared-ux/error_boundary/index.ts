@@ -8,3 +8,4 @@
 
 export { KibanaErrorBoundary } from './src/ui/error_boundary';
 export { KibanaErrorBoundaryProvider } from './src/services/error_boundary_services';
+export { KibanaRecallError } from './src/ui/recall_error';
