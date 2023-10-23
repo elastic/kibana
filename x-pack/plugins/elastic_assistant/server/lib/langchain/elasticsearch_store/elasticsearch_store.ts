@@ -222,13 +222,6 @@ export class ElasticsearchStore extends VectorStore {
         return getFlattenedHits(maybeEsqlMsearchResponse);
       });
 
-      this.logger.debug(`Similarity search results:\n
-        ${JSON.stringify(
-          results.map((r) => r.metadata.source),
-          null,
-          2
-        )}`);
-
       return results;
     } catch (e) {
       this.logger.error(e);
