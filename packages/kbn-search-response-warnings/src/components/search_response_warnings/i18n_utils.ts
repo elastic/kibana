@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 
 export const viewDetailsLabel = i18n.translate('searchResponseWarnings.viewDetailsButtonLabel', {
   defaultMessage: 'View details',
-  description: "View warning details button label"
+  description: 'View warning details button label',
 });
 
 function getNonSuccessfulClusters(warnings: SearchResponseWarning[]) {
   const nonSuccessfulClusters = new Set<string>();
-  warnings.forEach(warning => {
-    Object.keys(warning.clusters).forEach(clusterName => {
+  warnings.forEach((warning) => {
+    Object.keys(warning.clusters).forEach((clusterName) => {
       if (warning.clusters[clusterName].status !== 'successful') {
         nonSuccessfulClusters.add(clusterName);
       }
@@ -28,8 +28,9 @@ function getNonSuccessfulClusters(warnings: SearchResponseWarning[]) {
 export function getWarningsTitle(warnings: SearchResponseWarning[]) {
   const nonSuccessfulClusters = getNonSuccessfulClusters(warnings);
   const clustersClause = i18n.translate('searchResponseWarnings.title.clustersClause', {
-    defaultMessage: 'Problem with {nonSuccessfulClustersCount} {nonSuccessfulClustersCount, plural, one {cluster} other {clusters}}',
-    values: { nonSuccessfulClustersCount: nonSuccessfulClusters.size }
+    defaultMessage:
+      'Problem with {nonSuccessfulClustersCount} {nonSuccessfulClustersCount, plural, one {cluster} other {clusters}}',
+    values: { nonSuccessfulClustersCount: nonSuccessfulClusters.size },
   });
 
   return warnings.length <= 1
@@ -39,21 +40,25 @@ export function getWarningsTitle(warnings: SearchResponseWarning[]) {
         values: {
           clustersClause,
           requestsCount: warnings.length,
-        }
-      })
+        },
+      });
 }
 
-export function getWarningsDescription(warnings: SearchResponseWarning[], visualizationLabel?: string) {
+export function getWarningsDescription(
+  warnings: SearchResponseWarning[],
+  visualizationLabel?: string
+) {
   const nonSuccessfulClusters = getNonSuccessfulClusters(warnings);
   return i18n.translate('searchResponseWarnings.description', {
-    defaultMessage: '{nonSuccessfulClustersCount, plural, one {This cluster} other {These clusters}} had issues returning data. This might result in an incomplete {visualizationLabel}.',
-    values: { 
+    defaultMessage:
+      '{nonSuccessfulClustersCount, plural, one {This cluster} other {These clusters}} had issues returning data. This might result in an incomplete {visualizationLabel}.',
+    values: {
       nonSuccessfulClustersCount: nonSuccessfulClusters.size,
       visualizationLabel: visualizationLabel
         ? visualizationLabel
         : i18n.translate('searchResponseWarnings.description.defaultVisualizationLabel', {
             defaultMessage: 'visualization',
           }),
-    }
+    },
   });
 }

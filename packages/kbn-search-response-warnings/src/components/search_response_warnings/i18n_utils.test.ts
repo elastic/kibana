@@ -14,7 +14,7 @@ describe('getWarningsTitle', () => {
       {
         type: 'incomplete',
         clusters: {
-          'remote1': {
+          remote1: {
             status: 'partial',
             indices: '',
             timed_out: false,
@@ -31,12 +31,12 @@ describe('getWarningsTitle', () => {
       {
         type: 'incomplete',
         clusters: {
-          'remote1': {
+          remote1: {
             status: 'partial',
             indices: '',
             timed_out: false,
           },
-          'remote2': {
+          remote2: {
             status: 'skipped',
             indices: '',
             timed_out: false,
@@ -53,7 +53,7 @@ describe('getWarningsTitle', () => {
       {
         type: 'incomplete',
         clusters: {
-          'remote1': {
+          remote1: {
             status: 'partial',
             indices: '',
             timed_out: false,
@@ -64,7 +64,7 @@ describe('getWarningsTitle', () => {
       {
         type: 'incomplete',
         clusters: {
-          'remote1': {
+          remote1: {
             status: 'partial',
             indices: '',
             timed_out: false,
@@ -83,7 +83,7 @@ describe('getWarningsDescription', () => {
       {
         type: 'incomplete',
         clusters: {
-          'remote1': {
+          remote1: {
             status: 'partial',
             indices: '',
             timed_out: false,
@@ -92,7 +92,9 @@ describe('getWarningsDescription', () => {
         openInInspector: () => {},
       },
     ];
-    expect(getWarningsDescription(warnings)).toEqual('This cluster had issues returning data. This might result in an incomplete visualization.');
+    expect(getWarningsDescription(warnings)).toEqual(
+      'This cluster had issues returning data. This might result in an incomplete visualization.'
+    );
   });
 
   test('Should show description for multiple non-successful cluster', () => {
@@ -100,12 +102,12 @@ describe('getWarningsDescription', () => {
       {
         type: 'incomplete',
         clusters: {
-          'remote1': {
+          remote1: {
             status: 'partial',
             indices: '',
             timed_out: false,
           },
-          'remote2': {
+          remote2: {
             status: 'skipped',
             indices: '',
             timed_out: false,
@@ -114,7 +116,9 @@ describe('getWarningsDescription', () => {
         openInInspector: () => {},
       },
     ];
-    expect(getWarningsDescription(warnings)).toEqual('These clusters had issues returning data. This might result in an incomplete visualization.');
+    expect(getWarningsDescription(warnings)).toEqual(
+      'These clusters had issues returning data. This might result in an incomplete visualization.'
+    );
   });
 
   test('Should show custom visualization label', () => {
@@ -122,7 +126,7 @@ describe('getWarningsDescription', () => {
       {
         type: 'incomplete',
         clusters: {
-          'remote1': {
+          remote1: {
             status: 'partial',
             indices: '',
             timed_out: false,
@@ -131,6 +135,8 @@ describe('getWarningsDescription', () => {
         openInInspector: () => {},
       },
     ];
-    expect(getWarningsDescription(warnings, 'table')).toEqual('This cluster had issues returning data. This might result in an incomplete table.');
+    expect(getWarningsDescription(warnings, 'table')).toEqual(
+      'This cluster had issues returning data. This might result in an incomplete table.'
+    );
   });
 });

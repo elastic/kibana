@@ -7,19 +7,14 @@
  */
 
 import React from 'react';
-import {
-  EuiCallOut,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ViewDetailsPopover } from './view_details_popover';
 import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
-  visualizationLabel?; string;
+  visualizationLabel?;
+  string;
   warnings: SearchResponseWarning[];
 }
 
@@ -41,9 +36,7 @@ export const SearchResponseWarningsCallout = (props: Props) => {
           {getWarningsDescription(props.warnings, props.visualizationLabel)}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ViewDetailsPopover
-            warnings={props.warnings}
-          />
+          <ViewDetailsPopover warnings={props.warnings} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>
