@@ -10,7 +10,11 @@ import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 
 import React from 'react';
-import { IndexDetailsSection } from '../../../common/constants';
+import {
+  IndexDetailsSection,
+  IndexDetailsTab,
+  IndexDetailsTabIds,
+} from '../../../common/constants';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import {
   breadcrumbService,
@@ -701,6 +705,35 @@ describe('<IndexDetailsPage />', () => {
         `${API_BASE_PATH}/stats/${encodeURIComponent(percentSignName)}`,
         requestOptions
       );
+    });
+  });
+  describe('extension service tabs', () => {
+    it('renders an additional tab', async () => {
+      const testTabId = 'testTab' as IndexDetailsTabIds;
+      const testContent = 'Test content';
+      const additionalTab: IndexDetailsTab = {
+        id: testTabId,
+        name: 'Test tab',
+        renderTabContent: () => {
+          return <span>{testContent}</span>;
+        },
+      };
+      const extensionsServiceMock = {
+        indexDetailsTabs: [additionalTab],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toEqual(testContent);
     });
   });
 });

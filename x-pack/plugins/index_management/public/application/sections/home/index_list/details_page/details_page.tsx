@@ -111,7 +111,7 @@ export const DetailsPage: FunctionComponent<
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
 
-  const tabs = defaultTabs;
+  const tabs = [...defaultTabs];
   if (config.enableIndexStats) {
     tabs.push(statsTab);
   }
