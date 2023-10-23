@@ -76,6 +76,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
     ...(onSave
       ? [
           <EuiContextMenuItem
+            data-test-subj="saveUnsavedChangesMenuItem"
             key="save"
             icon="save"
             disabled={disabled}
@@ -96,6 +97,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
     ...(onSaveAs
       ? [
           <EuiContextMenuItem
+            data-test-subj="saveUnsavedChangesAsMenuItem"
             key="saveAs"
             icon="save"
             disabled={disabled}
@@ -114,6 +116,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
         ]
       : []),
     <EuiContextMenuItem
+      data-test-subj="resetUnsavedChangesMenuItem"
       key="reset"
       icon="returnKey"
       disabled={disabled}

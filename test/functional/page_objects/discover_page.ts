@@ -169,8 +169,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickResetSavedSearchButton() {
-    await this.testSubjects.moveMouseTo('resetSavedSearch');
-    await this.testSubjects.click('resetSavedSearch');
+    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
+    await this.testSubjects.click('unsavedChangesBadge');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.find.byCssSelector('[data-popover-open="true"]'));
+    });
+    await this.testSubjects.click('resetUnsavedChangesMenuItem');
     await this.header.waitUntilLoadingHasFinished();
   }
 
