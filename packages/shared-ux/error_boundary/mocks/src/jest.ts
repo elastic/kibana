@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { handleWarnings } from './handle_warnings';
-export { ViewWarningButton } from './view_warning_button';
+import { KibanaErrorService } from '../../src/services/error_service';
+import { KibanaErrorBoundaryServices } from '../../types';
+
+export const getServicesMock = (): KibanaErrorBoundaryServices => {
+  return {
+    onClickRefresh: jest.fn().mockResolvedValue(undefined),
+    errorService: new KibanaErrorService(),
+  };
+};
