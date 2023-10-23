@@ -63,6 +63,15 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           link: 'observability-overview:cases',
+          renderAs: 'item',
+          children: [
+            {
+              link: 'observability-overview:cases_configure',
+            },
+            {
+              link: 'observability-overview:cases_create',
+            },
+          ],
         },
         {
           link: 'observability-overview:slos',
