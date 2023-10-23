@@ -323,7 +323,9 @@ export async function installKibanaSavedObjects({
       success,
     } = await retryImportOnConflictError(async () => {
       // Create index pattern saved objects with `overwrite: false` as we can't blow
-      // away users' scripted fields or runtime fields.
+      // away users' scripted fields or runtime fields. This will cause this import to throw
+      // a saved object conflict error if the index pattern has already been created, but we
+      // swallow that error below.
       const indexPatternResults = await savedObjectsImporter.import({
         overwrite: false,
         readStream: createListStream(indexPatternSavedObjects),
@@ -343,6 +345,9 @@ export async function installKibanaSavedObjects({
         managed: true,
       });
 
+      // We still want to report index pattern imports in the case they do succeeed, though this will
+      // only be the case on the very first integration installation in the cluster. Why don't we install
+      // these data views separately as part of Fleet setup?
       const successResults = [
         ...(indexPatternResults.successResults ?? []),
         ...(nonIndexPatternResults.successResults ?? []),
