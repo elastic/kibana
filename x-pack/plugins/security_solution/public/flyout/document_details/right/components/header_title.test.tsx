@@ -24,6 +24,7 @@ import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useAssistant } from '../hooks/use_assistant';
 import { TestProvidersComponent } from '../../../../common/mock';
+import { TimelineId } from '../../../../../common/types';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 
@@ -55,7 +56,11 @@ const renderHeader = (contextValue: RightPanelContext) =>
     <TestProvidersComponent>
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <RightPanelContext.Provider value={contextValue}>
-          <HeaderTitle flyoutIsExpandable={true} />
+          <HeaderTitle
+            flyoutIsExpandable={true}
+            scopeId={TimelineId.test}
+            refetchFlyoutData={jest.fn()}
+          />
         </RightPanelContext.Provider>
       </ExpandableFlyoutContext.Provider>
     </TestProvidersComponent>

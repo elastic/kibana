@@ -30,6 +30,18 @@ jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
+jest.mock('../../../detections/containers/detection_engine/alerts/use_get_user_profiles', () => {
+  return {
+    useGetUserProfiles: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
+  };
+});
+
+jest.mock('../../../detections/containers/detection_engine/alerts/use_suggest_users', () => {
+  return {
+    useSuggestUsers: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
+  };
+});
+
 jest.mock('../../../assistant/use_assistant_availability');
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
 jest.mock('react-router-dom', () => {

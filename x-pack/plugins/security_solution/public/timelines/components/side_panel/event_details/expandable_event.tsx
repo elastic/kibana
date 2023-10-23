@@ -19,9 +19,12 @@ import {
   EuiSpacer,
   EuiCopy,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { Assignees } from '../../../../flyout/document_details/right/components/assignees';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
@@ -41,6 +44,7 @@ import {
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
+import { useRefetchByScope } from './flyout/use_refetch_by_scope';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -68,6 +72,9 @@ interface ExpandableEventTitleProps {
   ruleName?: string;
   timestamp: string;
   handleOnEventClosed?: HandleOnEventClosed;
+  scopeId: string;
+  refetchFlyoutData: () => Promise<void>;
+  getFieldsData: GetFieldsData;
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -96,6 +103,9 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
     promptContextId,
     ruleName,
     timestamp,
+    scopeId,
+    refetchFlyoutData,
+    getFieldsData,
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
@@ -109,6 +119,16 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
       _index: eventIndex,
       timestamp,
     });
+
+    const { refetch } = useRefetchByScope({ scopeId });
+    const alertAssignees = useMemo(
+      () => (getFieldsData(ALERT_WORKFLOW_ASSIGNEE_IDS) as string[]) ?? [],
+      [getFieldsData]
+    );
+    const onAssigneesUpdated = useCallback(() => {
+      refetch();
+      refetchFlyoutData();
+    }, [refetch, refetchFlyoutData]);
 
     return (
       <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
@@ -141,7 +161,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" alignItems="flexEnd">
+          <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="none">
             {handleOnEventClosed && (
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
@@ -179,6 +199,13 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <Assignees
+                eventId={eventId}
+                alertAssignees={alertAssignees}
+                onAssigneesUpdated={onAssigneesUpdated}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
