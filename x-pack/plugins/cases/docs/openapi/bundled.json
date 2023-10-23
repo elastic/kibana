@@ -403,7 +403,7 @@
                               "maxLength": 50
                             },
                             "required": {
-                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
                               "type": "boolean"
                             },
                             "type": {
@@ -626,7 +626,7 @@
                             "maxLength": 50
                           },
                           "required": {
-                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
                             "type": "boolean"
                           },
                           "type": {
@@ -853,7 +853,7 @@
                             "maxLength": 50
                           },
                           "required": {
-                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
                             "type": "boolean"
                           },
                           "type": {
@@ -2177,7 +2177,7 @@
                               "maxLength": 50
                             },
                             "required": {
-                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
                               "type": "boolean"
                             },
                             "type": {
@@ -2403,7 +2403,7 @@
                             "maxLength": 50
                           },
                           "required": {
-                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
                             "type": "boolean"
                           },
                           "type": {
@@ -2633,7 +2633,7 @@
                             "maxLength": 50
                           },
                           "required": {
-                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
                             "type": "boolean"
                           },
                           "type": {
@@ -5428,7 +5428,7 @@
                   "maxLength": 50
                 },
                 "required": {
-                  "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                  "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
                   "type": "boolean"
                 },
                 "type": {
@@ -5514,7 +5514,7 @@
                   "maxLength": 50
                 },
                 "required": {
-                  "description": "Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.\n",
+                  "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
                   "type": "boolean"
                 },
                 "type": {

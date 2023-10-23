@@ -248,7 +248,7 @@ paths:
                             maxLength: 50
                           required:
                             description: |
-                              Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.
+                              Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
                             type: boolean
                           type:
                             description: The type of the custom field.
@@ -409,7 +409,7 @@ paths:
                           maxLength: 50
                         required:
                           description: |
-                            Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.
+                            Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
                           type: boolean
                         type:
                           description: The type of the custom field.
@@ -572,7 +572,7 @@ paths:
                           maxLength: 50
                         required:
                           description: |
-                            Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.
+                            Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
                           type: boolean
                         type:
                           description: The type of the custom field.
@@ -1397,7 +1397,7 @@ paths:
                             maxLength: 50
                           required:
                             description: |
-                              Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.
+                              Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
                             type: boolean
                           type:
                             description: The type of the custom field.
@@ -1559,7 +1559,7 @@ paths:
                           maxLength: 50
                         required:
                           description: |
-                            Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.
+                            Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
                           type: boolean
                         type:
                           description: The type of the custom field.
@@ -1723,7 +1723,7 @@ paths:
                           maxLength: 50
                         required:
                           description: |
-                            Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.
+                            Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
                           type: boolean
                         type:
                           description: The type of the custom field.
@@ -3668,7 +3668,7 @@ components:
                 maxLength: 50
               required:
                 description: |
-                  Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.
+                  Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
                 type: boolean
               type:
                 description: The type of the custom field.
@@ -3735,7 +3735,7 @@ components:
                 maxLength: 50
               required:
                 description: |
-                  Indicates whether the field is required. If `false`, the custom field can be set to null when a case is created or updated.
+                  Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
                 type: boolean
               type:
                 description: The type of the custom field.

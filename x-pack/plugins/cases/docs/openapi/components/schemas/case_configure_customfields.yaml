@@ -14,7 +14,7 @@ label:
 required:
   description: >
     Indicates whether the field is required.
-    If `false`, the custom field can be set to null when a case is created or updated.
+    If `false`, the custom field can be set to null or omitted when a case is created or updated.
   type: boolean
 type:
   description: The type of the custom field.
