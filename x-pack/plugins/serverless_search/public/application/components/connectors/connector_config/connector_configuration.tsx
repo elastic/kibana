@@ -15,6 +15,7 @@ import {
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiStepsHorizontal,
   EuiStepsHorizontalProps,
   EuiTabbedContent,
@@ -100,23 +101,31 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
   const tabs: EuiTabbedContentTab[] = [
     {
       content: (
-        <SyncJobsTable
-          isLoading={syncJobsLoading}
-          onPaginate={({ page }) => setPagination({ pageIndex: page.index, pageSize: page.size })}
-          pagination={
-            syncJobsData
-              ? pageToPagination(syncJobsData?._meta.page)
-              : { pageIndex: 0, pageSize: 20, totalItemCount: 0 }
-          }
-          syncJobs={syncJobsData?.data || []}
-          type="content"
-        />
+        <>
+          <EuiSpacer />
+          <SyncJobsTable
+            isLoading={syncJobsLoading}
+            onPaginate={({ page }) => setPagination({ pageIndex: page.index, pageSize: page.size })}
+            pagination={
+              syncJobsData
+                ? pageToPagination(syncJobsData?._meta.page)
+                : { pageIndex: 0, pageSize: 20, totalItemCount: 0 }
+            }
+            syncJobs={syncJobsData?.data || []}
+            type="content"
+          />
+        </>
       ),
       id: 'overview',
       name: OVERVIEW_LABEL,
     },
     {
-      content: <ConnectorConfigurationPanels connector={connector} />,
+      content: (
+        <>
+          <EuiSpacer />
+          <ConnectorConfigurationPanels connector={connector} />
+        </>
+      ),
       id: 'configuration',
       name: CONFIGURATION_LABEL,
     },

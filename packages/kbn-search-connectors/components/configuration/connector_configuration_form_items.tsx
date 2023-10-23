@@ -21,8 +21,7 @@ interface ConnectorConfigurationFormItemsProps {
   hasDocumentLevelSecurityEnabled: boolean;
   isLoading: boolean;
   items: ConfigEntryView[];
-  setConfigEntry: (key: string, value: string | number | boolean) => void;
-  values: Record<string, string | number | boolean | null>;
+  setConfigEntry: (key: string, value: string | number | boolean | null) => void;
 }
 
 export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFormItemsProps> = ({
@@ -30,7 +29,6 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
   items,
   hasDocumentLevelSecurityEnabled,
   setConfigEntry,
-  values,
 }) => {
   return (
     <EuiFlexGroup direction="column">
@@ -40,11 +38,11 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
           depends_on: dependencies,
           key,
           display,
-          is_valid: isValid,
+          isValid,
           label,
           sensitive,
           tooltip,
-          validation_errors: validationErrors,
+          validationErrors,
         } = configEntry;
 
         if (key === 'use_document_level_security' && !hasDocumentLevelSecurityEnabled) {
@@ -87,7 +85,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                     data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
                   >
                     <ConnectorConfigurationField
-                      configEntry={{ ...configEntry, value: values[key] }}
+                      configEntry={configEntry}
                       isLoading={isLoading}
                       setConfigValue={(value) => {
                         setConfigEntry(configEntry.key, value);
@@ -110,7 +108,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                 data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
               >
                 <ConnectorConfigurationField
-                  configEntry={{ ...configEntry, value: values[key] }}
+                  configEntry={configEntry}
                   isLoading={isLoading}
                   setConfigValue={(value) => {
                     setConfigEntry(configEntry.key, value);

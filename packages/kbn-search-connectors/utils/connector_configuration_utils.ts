@@ -130,8 +130,8 @@ export const filterSortValidateEntries = (
 
       return {
         ...configEntry,
-        is_valid: validationErrors.length <= 0,
-        validation_errors: validationErrors,
+        isValid: validationErrors.length <= 0,
+        validationErrors,
       };
     });
 };

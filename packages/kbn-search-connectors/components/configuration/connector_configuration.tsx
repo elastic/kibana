@@ -46,8 +46,8 @@ interface ConfigEntry extends ConnectorConfigProperties {
 }
 
 export interface ConfigEntryView extends ConfigEntry {
-  is_valid: boolean;
-  validation_errors: string[];
+  isValid: boolean;
+  validationErrors: string[];
 }
 
 export interface CategoryEntry {
@@ -129,9 +129,10 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
           {isEditing ? (
             <ConnectorConfigurationForm
               cancelEditing={() => setIsEditing(false)}
-              configView={editingConfig}
+              configuration={configuration}
               hasDocumentLevelSecurity={hasDocumentLevelSecurity}
               isLoading={isLoading}
+              isNative={isNative}
               saveConfig={(config) => {
                 saveConfig(config);
                 setIsEditing(false);

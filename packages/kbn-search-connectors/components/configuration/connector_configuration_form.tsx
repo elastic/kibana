@@ -22,15 +22,19 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { isCategoryEntry } from '../../utils';
+import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
+import { ConnectorConfiguration } from '../../types';
 import { ConfigView } from './connector_configuration';
 import { ConnectorConfigurationFormItems } from './connector_configuration_form_items';
 
 interface ConnectorConfigurationForm {
   cancelEditing: () => void;
-  configView: ConfigView;
+  configuration: ConnectorConfiguration;
   hasDocumentLevelSecurity: boolean;
   isLoading: boolean;
-  saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
+  isNative: boolean;
+  saveConfig: (config: Record<string, string | number | boolean | null>) => void;
   stackManagementHref?: string;
   subscriptionLink?: string;
 }
@@ -50,23 +54,30 @@ function configViewToConfigValues(
 
 export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = ({
   cancelEditing,
-  configView,
+  configuration,
   hasDocumentLevelSecurity,
   isLoading,
+  isNative,
   saveConfig,
 }) => {
-  const [configValues, setConfigValues] = useState<
-    Record<string, string | number | boolean | null>
-  >({});
+  const [localConfig, setLocalConfig] = useState<ConnectorConfiguration>(configuration);
+  const [configView, setConfigView] = useState<ConfigView>(
+    sortAndFilterConnectorConfiguration(configuration, isNative)
+  );
+
   useEffect(() => {
-    setConfigValues(configViewToConfigValues(configView));
-  }, [configView]);
+    setConfigView(sortAndFilterConnectorConfiguration(localConfig, isNative));
+  }, [localConfig, isNative]);
+
+  useEffect(() => {
+    setLocalConfig(configuration);
+  }, [configuration]);
 
   return (
     <EuiForm
       onSubmit={(event) => {
         event.preventDefault();
-        saveConfig(configValues);
+        saveConfig(configViewToConfigValues(configView));
       }}
       component="form"
     >
@@ -75,9 +86,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
         items={configView.unCategorizedItems}
         hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
         setConfigEntry={(key, value) => {
-          setConfigValues({ ...configValues, [key]: value });
+          const entry = localConfig[key];
+          if (entry && !isCategoryEntry(entry)) {
+            const newConfiguration: ConnectorConfiguration = {
+              ...localConfig,
+              [key]: { ...entry, value },
+            };
+            setLocalConfig(newConfiguration);
+          }
         }}
-        values={configValues}
       />
       {configView.categories.map((category, index) => (
         <React.Fragment key={index}>
@@ -91,9 +108,13 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
             items={category.configEntries}
             hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
             setConfigEntry={(key, value) => {
-              setConfigValues({ ...configValues, [key]: value });
+              const categories = configView.categories;
+              categories[index] = { ...categories[index], [key]: value };
+              setConfigView({
+                ...configView,
+                categories,
+              });
             }}
-            values={configValues}
           />
         </React.Fragment>
       ))}
@@ -114,9 +135,11 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               items={configView.advancedConfigurations}
               hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
               setConfigEntry={(key, value) => {
-                setConfigValues({ ...configValues, [key]: value });
+                setConfigView({
+                  ...configView,
+                  advancedConfigurations: { ...configView.advancedConfigurations, [key]: value },
+                });
               }}
-              values={configValues}
             />
           </EuiPanel>
         </React.Fragment>

@@ -30,7 +30,6 @@ export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = (
           body: JSON.stringify(body),
         });
       }
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
       return inputName;
     },
   });

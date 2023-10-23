@@ -28,13 +28,17 @@ import { DisplayType } from '../..';
 
 import { ConfigEntryView, LicenseContext } from './connector_configuration';
 import { DocumentLevelSecurityPanel } from './document_level_security_panel';
-import { ensureBooleanType, ensureStringType } from '../../utils/connector_configuration_utils';
+import {
+  ensureBooleanType,
+  ensureCorrectTyping,
+  ensureStringType,
+} from '../../utils/connector_configuration_utils';
 import { PlatinumLicensePopover } from './platinum_license_popover';
 
 interface ConnectorConfigurationFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
-  setConfigValue: (value: number | string | boolean) => void;
+  setConfigValue: (value: number | string | boolean | null) => void;
 }
 
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
@@ -45,10 +49,14 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
   const { hasPlatinumLicense, stackManagementLink, subscriptionLink } = useContext(LicenseContext);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const validateAndSetConfigValue = (value: number | string | boolean) => {
+    setConfigValue(ensureCorrectTyping(configEntry.type, value));
+  };
+
   const {
     key,
     display,
-    is_valid: isValid,
+    isValid,
     label,
     options,
     required,
@@ -67,7 +75,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {
-            setConfigValue(event.target.value);
+            validateAndSetConfigValue(event.target.value);
           }}
         />
       ) : (
@@ -77,7 +85,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           name="radio group"
           options={options.map((option) => ({ id: option.value, label: option.label }))}
           onChange={(id) => {
-            setConfigValue(id);
+            validateAndSetConfigValue(id);
           }}
         />
       );
@@ -90,7 +98,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           value={ensureStringType(value)}
           isInvalid={!isValid}
           onChange={(event) => {
-            setConfigValue(event.target.value);
+            validateAndSetConfigValue(event.target.value);
           }}
           placeholder={placeholder}
         />
@@ -104,7 +112,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           required={required}
           value={ensureStringType(value) || undefined} // ensures placeholder shows up when value is empty string
           onChange={(event) => {
-            setConfigValue(event.target.value);
+            validateAndSetConfigValue(event.target.value);
           }}
         />
       );
@@ -145,7 +153,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                     disabled={isLoading || !hasPlatinumLicense}
                     label={<p>{label}</p>}
                     onChange={(event) => {
-                      setConfigValue(event.target.checked);
+                      validateAndSetConfigValue(event.target.checked);
                     }}
                   />
                 </EuiFlexItem>
@@ -195,7 +203,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
             )
           }
           onChange={(event) => {
-            setConfigValue(event.target.checked);
+            validateAndSetConfigValue(event.target.checked);
           }}
         />
       );
@@ -208,7 +216,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           type="dual"
           value={ensureStringType(value)}
           onChange={(event) => {
-            setConfigValue(event.target.value);
+            validateAndSetConfigValue(event.target.value);
           }}
         />
       ) : (
@@ -218,7 +226,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {
-            setConfigValue(event.target.value);
+            validateAndSetConfigValue(event.target.value);
           }}
         />
       );

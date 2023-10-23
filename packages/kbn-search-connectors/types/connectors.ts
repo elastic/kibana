@@ -122,6 +122,16 @@ export type FilteringRuleRule =
   | 'regex'
   | 'starts_with';
 
+export const FilteringRuleRuleValues: FilteringRuleRule[] = [
+  'contains',
+  'ends_with',
+  'equals',
+  '>',
+  '<',
+  'regex',
+  'starts_with',
+];
+
 export interface FilteringRule {
   created_at: string;
   field: string;
