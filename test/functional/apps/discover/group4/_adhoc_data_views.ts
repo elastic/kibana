@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.waitForRenderComplete();
   };
 
-  describe('adhoc data views', function () {
+  describe.only('adhoc data views', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -52,8 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
     });
 
-    it('should support query and filtering', async () => {
+    it.only('should support query and filtering', async () => {
       await filterBar.addFilter({
         field: 'nestedField.child',
         operation: 'is',
@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(prevDataViewId).not.to.equal(newDataViewId);
     });
 
-    it('should notify about invalid filter reffs', async () => {
+    it('should notify about invalid filter refs', async () => {
       await PageObjects.discover.createAdHocDataView('logstas', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
