@@ -35,7 +35,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // check side nav links
       await svlCommonNavigation.sidenav.expectSectionOpen('observability_project_nav');
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'observabilityOnboarding' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
@@ -52,7 +51,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
 
       // check the aiops subsection
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'aiops' }); // open ai ops subsection
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'observability_project_nav.aiops' }); // open ai ops subsection
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AIOps' });
@@ -68,7 +67,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // navigate back to serverless oblt overview
       await svlCommonNavigation.breadcrumbs.clickHome();
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'observabilityOnboarding' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
@@ -77,7 +75,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expectNoPageReload();
     });
 
-    it('active sidenav section is auto opened on load', async () => {
+    // Skipping this test as it is not supported in the new navigation for now.
+    // Will be fixed in https://github.com/elastic/kibana/issues/167328
+    it.skip('active sidenav section is auto opened on load', async () => {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
       await browser.refresh();

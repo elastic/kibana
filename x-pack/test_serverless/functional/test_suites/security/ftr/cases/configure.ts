@@ -15,29 +15,36 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlSecNavigation = getService('svlSecNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const toasts = getService('toasts');
   const retry = getService('retry');
   const find = getService('find');
 
   describe('Configure Case', function () {
-    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlSecNavigation.navigateToLandingPage();
       await testSubjects.click('solutionSideNavItemLink-cases');
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('configure-case-button exist', async () => {
+        return await testSubjects.exists('configure-case-button');
+      });
+
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
       await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('case-configure-title exist', async () => {
+        return await testSubjects.exists('case-configure-title');
+      });
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await svlCommonPage.forceLogout();
     });
 
     describe('Closure options', function () {
-      // Error: Expected the radio group value to equal "close-by-pushing" (got "close-by-user")
-      this.tags(['failsOnMKI']);
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });

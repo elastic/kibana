@@ -28,42 +28,9 @@ List of user-facing connector configurations. This should align with the fields 
 Property1:: A short description of this property.
 Property2:: A short description of this property with format hints. This can be specified in `this specific format`.
 
-[float]
-[[preconfigured-<ACTION-TYPE>-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
 ////
-Example preconfigured format for this connector type
+Add preconfigured settings for this connector type in alert-action-settings.asciidoc and an example in pre-configured-connectors.asciidoc.
 ////
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-<ACTION-TYPE>:
-    name: preconfigured-<ACTION-TYPE>-connector-type
-    actionTypeId: .<ACTION-TYPE>
-    config:
-      property1: value1
-      property2: value2
-    secrets:
-      property3: value3
---
-
-////
-List of properties from the ConfigSchema and SecretsSchema for this action type.
-////
-Config defines information for the connector type.
-
-`property1`:: A short description of this property.
-`property2`:: A short descriptionn of this property.
-
-Secrets defines sensitive information for the connector type.
-
-`property3`:: A short descriptionn of this property.
 
 [float]
 [[<ACTION-TYPE>-action-configuration]]
