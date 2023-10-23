@@ -115,8 +115,11 @@ export KIBANA_DOCKER_PASSWORD
 EC_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-cloud-deploy)"
 export EC_API_KEY
 
-SERVERLESS_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-serverless-deploy)"
-export SERVERLESS_API_KEY
+PROJECT_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-project-deploy)"
+export PROJECT_API_KEY
+
+PROJECT_API_DOMAIN="$(retry 5 5 vault read -field=pr_deploy_domain secret/kibana-issues/dev/kibana-ci-project-deploy)"
+export PROJECT_API_DOMAIN
 
 SYNTHETICS_SERVICE_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
 export SYNTHETICS_SERVICE_USERNAME
