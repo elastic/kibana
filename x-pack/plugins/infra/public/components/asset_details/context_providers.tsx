@@ -12,22 +12,30 @@ import { MetadataStateProvider } from './hooks/use_metadata_state';
 import { AssetDetailsProps } from './types';
 
 export const ContextProviders = ({
-  props,
   children,
-}: { props: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> } & {
+  ...props
+}: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> & {
   children: React.ReactNode;
 }) => {
-  const { asset, dateRange, overrides, assetType = 'host', renderMode } = props;
+  const {
+    assetId,
+    assetName,
+    autoRefresh,
+    dateRange,
+    overrides,
+    assetType = 'host',
+    renderMode,
+  } = props;
+
   return (
-    <DateRangeProvider initialDateRange={dateRange}>
-      <MetadataStateProvider asset={asset} assetType={assetType}>
+    <DateRangeProvider dateRange={dateRange} autoRefresh={autoRefresh}>
+      <MetadataStateProvider assetId={assetId} assetType={assetType}>
         <AssetDetailsRenderPropsProvider
-          props={{
-            asset,
-            assetType,
-            overrides,
-            renderMode,
-          }}
+          assetId={assetId}
+          assetName={assetName}
+          assetType={assetType}
+          overrides={overrides}
+          renderMode={renderMode}
         >
           {children}
         </AssetDetailsRenderPropsProvider>
