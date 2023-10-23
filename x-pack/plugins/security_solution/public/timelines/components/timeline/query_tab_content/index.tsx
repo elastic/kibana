@@ -62,6 +62,7 @@ import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
+import { TimelineKpi } from '../kpi';
 const TimelineHeaderContainer = styled.div`
   /* margin-top: 6px; */
   width: 100%;
@@ -369,6 +370,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               />
             </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
+          <TimelineKpi />
 
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
