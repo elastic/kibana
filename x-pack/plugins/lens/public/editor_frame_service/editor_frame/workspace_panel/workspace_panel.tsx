@@ -52,6 +52,7 @@ import {
   UserMessagesGetter,
   AddUserMessages,
   isMessageRemovable,
+  VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
@@ -419,6 +420,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [expressionExists, localState.expressionToRender]);
 
+  const [dimensionDisplayOptions, setDimensionOptions] = useState<
+    VisualizationDisplayOptions | undefined
+  >();
+
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
       if (!plugins.uiActions) {
@@ -448,6 +453,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             event,
           })
         );
+      }
+
+      if (event.name === 'setDimensions') {
+        setDimensionOptions(event.data);
       }
     },
     [plugins.data.datatableUtilities, plugins.uiActions, activeVisualization, dispatchLens]
@@ -642,11 +651,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
-  const displayOptions =
-    localState.expressionToRender !== null
-      ? activeVisualization?.getDisplayOptions?.(visualization.state, datasourceLayers)
-      : undefined;
-
   return (
     <WorkspacePanelWrapper
       framePublicAPI={framePublicAPI}
@@ -657,7 +661,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       isFullscreen={isFullscreen}
       lensInspector={lensInspector}
       getUserMessages={getUserMessages}
-      displayOptions={displayOptions}
+      displayOptions={dimensionDisplayOptions}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>
