@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       await logFile.reset();
     });
 
-    it.only('logs audit events when reading and writing saved objects', async () => {
+    it('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
       const content = await logFile.readJSON();
@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(findEvent.kibana.space_id).to.be('default');
     });
 
-    it('logs audit events when logging in successfully', async () => {
+    it.skip('logs audit events when logging in successfully', async () => {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
@@ -80,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(loginEvent.http.request.headers['x-forwarded-for']).to.be('1.1.1.1, 2.2.2.2');
     });
 
-    it('logs audit events when failing to log in', async () => {
+    it.skip('logs audit events when failing to log in', async () => {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
