@@ -6,7 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { IRouter, Logger } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { fetchStats, fetchAvailableIndices } from '../lib';
@@ -87,12 +86,15 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
             });
           }
         } catch (err) {
-          const error = transformError(err);
-          logger.error(error.message);
+          logger.error(JSON.stringify(err));
 
           return resp.error({
-            body: error.message,
-            statusCode: error.statusCode,
+            body:
+              err.message ??
+              i18n.translate('xpack.ecsDataQualityDashboard.getIndexStats.defaultErrorMessage', {
+                defaultMessage: 'Internal Server Error',
+              }),
+            statusCode: err.statusCode ?? 500,
           });
         }
       }
