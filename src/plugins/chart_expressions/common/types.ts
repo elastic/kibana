@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import React from 'react';
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
@@ -26,3 +27,26 @@ export type MakeOverridesSerializable<T> = {
     ? MakeOverridesSerializable<T[KeyType]>
     : NonNullable<T[KeyType]>;
 };
+
+export interface DimensionsEvent extends ExpressionRendererEvent {
+  name: 'dimensions';
+  data: ChartDimensionOptions;
+}
+
+export type ChartDimensionOptions =
+  | {
+      // if maxDimensions are provided, the aspect ratio will be computed from them
+      maxDimensionsPX?: {
+        x: number;
+        y: number;
+      };
+      aspectRatio?: never;
+    }
+  | {
+      aspectRatio?: { x: number; y: number };
+      maxDimensionsPX?: never;
+    };
+
+export function isDimensionsEvent(event: ExpressionRendererEvent): event is DimensionsEvent {
+  return event.name === 'dimensions';
+}

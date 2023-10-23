@@ -975,23 +975,10 @@ export interface VisualizationType {
   showExperimentalBadge?: boolean;
 }
 
-export type VisualizationDisplayOptions = {
+export interface VisualizationDisplayOptions {
   noPanelTitle?: boolean;
   noPadding?: boolean;
-} & (
-  | {
-      // if maxDimensions are provided, the aspect ratio will be computed from them
-      maxDimensionsPX?: {
-        x: number;
-        y: number;
-      };
-      aspectRatio?: never;
-    }
-  | {
-      aspectRatio?: { x: number; y: number };
-      maxDimensionsPX?: never;
-    }
-);
+}
 
 interface VisualizationStateFromContextChangeProps {
   suggestions: Suggestion[];

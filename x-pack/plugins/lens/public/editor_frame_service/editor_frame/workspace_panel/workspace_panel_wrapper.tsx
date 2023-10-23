@@ -11,13 +11,13 @@ import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartDimensionOptions } from '@kbn/chart-expressions-common';
 import {
   DatasourceMap,
   FramePublicAPI,
   UserMessagesGetter,
   VisualizationMap,
   Visualization,
-  VisualizationDisplayOptions,
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { ChartSwitch } from './chart_switch';
@@ -47,7 +47,7 @@ export interface WorkspacePanelWrapperProps {
   isFullscreen: boolean;
   lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
-  displayOptions: VisualizationDisplayOptions | undefined;
+  displayOptions: ChartDimensionOptions | undefined;
 }
 
 export function VisualizationToolbar(props: {

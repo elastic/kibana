@@ -36,6 +36,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { ChartDimensionOptions, isDimensionsEvent } from '@kbn/chart-expressions-common';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -52,7 +53,6 @@ import {
   UserMessagesGetter,
   AddUserMessages,
   isMessageRemovable,
-  VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
@@ -421,7 +421,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   }, [expressionExists, localState.expressionToRender]);
 
   const [dimensionDisplayOptions, setDimensionOptions] = useState<
-    VisualizationDisplayOptions | undefined
+    ChartDimensionOptions | undefined
   >();
 
   const onEvent = useCallback(
@@ -455,7 +455,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         );
       }
 
-      if (event.name === 'setDimensions') {
+      if (isDimensionsEvent(event)) {
         setDimensionOptions(event.data);
       }
     },

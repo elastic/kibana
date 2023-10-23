@@ -12,5 +12,11 @@ export {
   getOverridesFor,
   isOnAggBasedEditor,
 } from './utils';
-export type { Simplify, MakeOverridesSerializable } from './types';
+export type {
+  Simplify,
+  MakeOverridesSerializable,
+  ChartDimensionOptions,
+  DimensionsEvent,
+} from './types';
+export { isDimensionsEvent } from './types';
 export { getColorCategories } from './color_categories';
