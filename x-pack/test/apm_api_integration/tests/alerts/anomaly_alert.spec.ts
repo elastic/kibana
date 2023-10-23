@@ -82,7 +82,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         }
       }
 
-      describe('with ml jobs', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/169495
+      describe.skip('with ml jobs', () => {
         it('checks if alert is active', async () => {
           const createdRule = await createApmRule({
             supertest,
