@@ -31,7 +31,6 @@ import {
   buildFiredAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
-  formatAlertResult,
 } from './messages';
 import {
   createScopedLogger,
@@ -44,6 +43,7 @@ import {
   getFormattedGroupBy,
 } from './utils';
 
+import { formatAlertResult } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';

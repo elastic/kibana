@@ -32,7 +32,7 @@ export const DOCUMENT_COUNT_I18N = i18n.translate(
 );
 
 export const AVERAGE_I18N = (metric: string) =>
-  i18n.translate('xpack.observability.customThreshold.rule.aggregators.documentCount', {
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.average', {
     defaultMessage: 'Average {metric}',
     values: {
       metric,
@@ -40,7 +40,7 @@ export const AVERAGE_I18N = (metric: string) =>
   });
 
 export const MAX_I18N = (metric: string) =>
-  i18n.translate('xpack.observability.customThreshold.rule.aggregators.documentCount', {
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.max', {
     defaultMessage: 'Max {metric}',
     values: {
       metric,
@@ -48,7 +48,7 @@ export const MAX_I18N = (metric: string) =>
   });
 
 export const MIN_I18N = (metric: string) =>
-  i18n.translate('xpack.observability.customThreshold.rule.aggregators.documentCount', {
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.min', {
     defaultMessage: 'Min {metric}',
     values: {
       metric,
@@ -56,7 +56,7 @@ export const MIN_I18N = (metric: string) =>
   });
 
 export const CARDINALITY_I18N = (metric: string) =>
-  i18n.translate('xpack.observability.customThreshold.rule.aggregators.documentCount', {
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.cardinality', {
     defaultMessage: 'Cardinality of the {metric}',
     values: {
       metric,
@@ -64,7 +64,7 @@ export const CARDINALITY_I18N = (metric: string) =>
   });
 
 export const SUM_I18N = (metric: string) =>
-  i18n.translate('xpack.observability.customThreshold.rule.aggregators.documentCount', {
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.sum', {
     defaultMessage: 'Sum of the {metric}',
     values: {
       metric,
