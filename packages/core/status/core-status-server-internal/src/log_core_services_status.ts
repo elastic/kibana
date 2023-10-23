@@ -8,38 +8,37 @@
 
 import { uniq } from 'lodash';
 import { merge, type Observable, Subject, type Subscription } from 'rxjs';
-import { pairwise, takeUntil, map, startWith, bufferTime, filter, concatAll } from 'rxjs/operators';
-import { Logger } from '@kbn/logging';
-import type { PluginName } from '@kbn/core-base-common';
-import { ServiceStatusLevels } from '@kbn/core-status-common';
-import type { LoggablePluginStatus, PluginStatus } from './types';
+import { pairwise, takeUntil, map, startWith, bufferTime, concatAll, filter } from 'rxjs/operators';
+import type { Logger } from '@kbn/logging';
+import { type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import type { LoggableServiceStatus } from './types';
 
-// let plugins log up to 3 status changes every 30s (extra messages will be throttled / aggregated)
-const MAX_MESSAGES_PER_PLUGIN_PER_INTERVAL = 3;
+// let services log up to 3 status changes every 30s (extra messages will be throttled / aggregated)
+const MAX_MESSAGES_PER_SERVICE_PER_INTERVAL = 3;
 const THROTTLE_INTERVAL_MILLIS = 30000;
 const MAX_THROTTLED_MESSAGES = 10;
 
-interface LogPluginsStatusChangesParams {
+interface LogCoreStatusChangesParams {
   logger: Logger;
-  plugins$: Observable<Record<PluginName, PluginStatus>>;
+  core$: Observable<CoreStatus>;
   stop$: Observable<void>;
-  maxMessagesPerPluginPerInterval?: number;
+  maxMessagesPerServicePerInterval?: number;
   throttleIntervalMillis?: number;
   maxThrottledMessages?: number;
 }
 
-export const logPluginsStatusChanges = ({
+export const logCoreStatusChanges = ({
   logger,
-  plugins$,
+  core$,
   stop$,
-  maxMessagesPerPluginPerInterval = MAX_MESSAGES_PER_PLUGIN_PER_INTERVAL,
+  maxMessagesPerServicePerInterval = MAX_MESSAGES_PER_SERVICE_PER_INTERVAL,
   throttleIntervalMillis = THROTTLE_INTERVAL_MILLIS,
   maxThrottledMessages = MAX_THROTTLED_MESSAGES,
-}: LogPluginsStatusChangesParams): Subscription => {
-  const buffer = new Subject<LoggablePluginStatus>();
-  const throttled$: Observable<LoggablePluginStatus | string> = buffer.asObservable().pipe(
+}: LogCoreStatusChangesParams): Subscription => {
+  const buffer = new Subject<LoggableServiceStatus>();
+  const throttled$: Observable<LoggableServiceStatus | string> = buffer.asObservable().pipe(
     takeUntil(stop$),
-    bufferTime(maxMessagesPerPluginPerInterval),
+    bufferTime(maxMessagesPerServicePerInterval),
     map((statuses) => {
       const aggregated = // aggregate repeated messages, and count nbr. of repetitions
         statuses.filter((candidateStatus, index) => {
@@ -79,25 +78,25 @@ export const logPluginsStatusChanges = ({
 
   const lastMessagesTimestamps: Record<string, number[]> = {};
 
-  const direct$: Observable<LoggablePluginStatus> = plugins$.pipe(
-    startWith({}), // consider all plugins unavailable by default
+  const direct$: Observable<LoggableServiceStatus> = core$.pipe(
+    startWith(undefined), // consider all services unavailable by default
     takeUntil(stop$),
     pairwise(),
-    map(([oldStatus, newStatus]) => getPluginUpdates(oldStatus, newStatus)),
+    map(([previous, current]) => getServiceUpdates({ previous, current: current! })),
     concatAll(),
-    filter((pluginStatus: LoggablePluginStatus) => {
+    filter((serviceStatus: LoggableServiceStatus) => {
       const now = Date.now();
-      const pluginQuota = lastMessagesTimestamps[pluginStatus.name] || [];
-      lastMessagesTimestamps[pluginStatus.name] = pluginQuota;
+      const pluginQuota = lastMessagesTimestamps[serviceStatus.name] || [];
+      lastMessagesTimestamps[serviceStatus.name] = pluginQuota;
 
       // remove timestamps of messages older than the threshold
       while (pluginQuota.length > 0 && pluginQuota[0] < now - throttleIntervalMillis) {
         pluginQuota.shift();
       }
 
-      if (pluginQuota.length >= maxMessagesPerPluginPerInterval) {
+      if (pluginQuota.length >= maxMessagesPerServicePerInterval) {
         // we're still over quota, throttle the message
-        buffer.next(pluginStatus);
+        buffer.next(serviceStatus);
         return false;
       } else {
         // let the message pass through
@@ -111,44 +110,55 @@ export const logPluginsStatusChanges = ({
     if (typeof event === 'string') {
       logger.warn(event);
     } else {
-      const pluginStatus: LoggablePluginStatus = event;
-      const { name } = pluginStatus;
-      const pluginLogger = logger.get(name);
-      const message = getPluginStatusMessage(pluginStatus);
+      const serviceStatus: LoggableServiceStatus = event;
+      const { name } = serviceStatus;
+      const serviceLogger = logger.get(name);
+      const message = getServiceStatusMessage(serviceStatus);
 
-      switch (pluginStatus.level) {
+      switch (serviceStatus.level) {
         case ServiceStatusLevels.available:
-          pluginLogger.info(message);
+          serviceLogger.info(message);
           break;
         case ServiceStatusLevels.degraded:
-          pluginLogger.warn(message);
+          serviceLogger.warn(message);
           break;
         default:
-          pluginLogger.error(message);
+          serviceLogger.error(message);
       }
     }
   });
 };
 
-const getPluginUpdates = (
-  previous: Record<PluginName, PluginStatus>,
-  next: Record<PluginName, PluginStatus>
-): LoggablePluginStatus[] =>
-  Object.entries(next)
-    .filter(([name, pluginStatus]) => {
-      const currentLevel = pluginStatus.level;
-      const previousLevel = previous[name]?.level ?? ServiceStatusLevels.unavailable;
-      return pluginStatus.reported && currentLevel !== previousLevel;
-    })
-    .map(([name, pluginStatus]) => ({ ...pluginStatus, name }));
+const getServiceUpdates = ({
+  current,
+  previous,
+}: {
+  current: CoreStatus;
+  previous?: CoreStatus;
+}): LoggableServiceStatus[] => {
+  let name: keyof CoreStatus;
+  const updated: LoggableServiceStatus[] = [];
 
-const getPluginStatusMessage = ({
+  for (name in current) {
+    if (Object.hasOwn(current, name)) {
+      const currentLevel = current[name].level;
+      const previousLevel = previous?.[name].level ?? ServiceStatusLevels.unavailable;
+
+      if (currentLevel !== previousLevel) {
+        updated.push({ ...current[name], name });
+      }
+    }
+  }
+  return updated;
+};
+
+const getServiceStatusMessage = ({
   name,
   level,
   summary,
   detail,
   repeats = 0,
-}: LoggablePluginStatus): string =>
-  `${name} plugin is now ${level?.toString()}: ${summary}${detail ? ` | ${detail}` : ''}${
+}: LoggableServiceStatus): string =>
+  `${name} service is now ${level?.toString()}: ${summary}${detail ? ` | ${detail}` : ''}${
     repeats > 1 ? ` (repeated ${repeats} times)` : ''
   }`;

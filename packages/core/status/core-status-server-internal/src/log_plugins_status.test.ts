@@ -6,578 +6,207 @@
  * Side Public License, v 1.
  */
 
-import { TestScheduler } from 'rxjs/testing';
+import { Subject } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
+import { logPluginsStatusChanges } from './log_plugins_status';
+import type { PluginStatus } from './types';
 
-import type { PluginName } from '@kbn/core-base-common';
-import {
-  type ServiceStatus,
-  type ServiceStatusLevel,
-  ServiceStatusLevels,
-} from '@kbn/core-status-common';
+const delay = async (millis: number = 10) =>
+  await new Promise((resolve) => setTimeout(resolve, millis));
 
-import { getPluginsStatusChanges, getPluginStatusChangesMessages } from './log_plugins_status';
+describe('logPluginsStatusChanges', () => {
+  const reportedUnavailable: PluginStatus = {
+    reported: true,
+    level: ServiceStatusLevels.unavailable,
+    summary: 'Unavail!',
+  };
+  const reportedAvailable: PluginStatus = {
+    reported: true,
+    level: ServiceStatusLevels.available,
+    summary: 'Avail!',
+  };
+  const inferredUnavailable: PluginStatus = {
+    reported: false,
+    level: ServiceStatusLevels.unavailable,
+    summary: 'Unavail!',
+  };
+  const inferredAvailable: PluginStatus = {
+    reported: false,
+    level: ServiceStatusLevels.available,
+    summary: 'Avail!',
+  };
 
-type ObsInputType = Record<PluginName, ServiceStatus>;
+  let plugins$: Subject<Record<string, PluginStatus>>;
+  let stop$: Subject<void>;
+  let loggerFactory: jest.Mocked<ILoggingSystem>;
+  let l: Logger; // using short name for clarity
 
-const getTestScheduler = () =>
-  new TestScheduler((actual, expected) => {
-    expect(actual).toEqual(expected);
+  beforeEach(() => {
+    plugins$ = new Subject<Record<string, PluginStatus>>();
+    stop$ = new Subject<void>();
+    loggerFactory = loggingSystemMock.create();
+    l = loggerFactory.get('status', 'plugins');
   });
 
-const createServiceStatus = (level: ServiceStatusLevel): ServiceStatus => ({
-  level,
-  summary: 'summary',
-});
+  afterEach(() => {
+    stop$.next();
+    stop$.complete();
+    loggingSystemMock.clear(loggerFactory);
+  });
 
-const createPluginsStatuses = (
-  input: Record<PluginName, ServiceStatusLevel>
-): Record<PluginName, ServiceStatus> => {
-  return Object.entries(input).reduce((output, [name, level]) => {
-    output[name] = createServiceStatus(level);
-    return output;
-  }, {} as Record<PluginName, ServiceStatus>);
-};
-
-describe('getPluginsStatusChanges', () => {
-  it('emits on first plugins$ emission', () => {
-    getTestScheduler().run(({ expectObservable, hot }) => {
-      const statuses = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.available,
-        pluginB: ServiceStatusLevels.degraded,
-      });
-
-      const overall$ = hot<ObsInputType>('-a', {
-        a: statuses,
-      });
-      const stop$ = hot<void>('');
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe('-x', {
-        x: {
-          status: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-          total: 2,
-          updated: 2,
-          updates: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-        },
-      });
+  it("logs plugins' status changes", async () => {
+    logPluginsStatusChanges({
+      logger: l,
+      plugins$,
+      stop$,
     });
+
+    plugins$.next({ A: reportedAvailable, B: reportedUnavailable, C: inferredUnavailable });
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable, C: inferredAvailable });
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable, C: inferredAvailable });
+
+    await delay();
+
+    expect(l.get).toBeCalledTimes(2);
+    expect(l.get).nthCalledWith(1, 'A');
+    expect(l.get).nthCalledWith(2, 'B');
+    expect(l.error).not.toBeCalled();
+    expect(l.warn).not.toBeCalled();
+    expect(l.info).toBeCalledTimes(2);
+    expect(l.info).nthCalledWith(1, 'A plugin is now available: Avail!');
+    expect(l.info).nthCalledWith(2, 'B plugin is now available: Avail!');
   });
 
-  it('does not emit if statuses do not change', () => {
-    getTestScheduler().run(({ expectObservable, hot }) => {
-      const statuses = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.available,
-        pluginB: ServiceStatusLevels.degraded,
-      });
-
-      const overall$ = hot<ObsInputType>('-a-b-c', {
-        a: statuses,
-        b: statuses,
-        c: statuses,
-      });
-      const stop$ = hot<void>('');
-
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe('-x', {
-        x: {
-          status: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-          total: 2,
-          updated: 2,
-          updates: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-        },
-      });
+  it('stops logging when the stop$ observable has emitted', async () => {
+    logPluginsStatusChanges({
+      logger: l,
+      plugins$,
+      stop$,
     });
+
+    plugins$.next({ A: reportedAvailable, B: reportedUnavailable, C: inferredUnavailable });
+    stop$.next();
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable, C: inferredAvailable });
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable, C: inferredAvailable });
+
+    await delay();
+
+    expect(l.get).toBeCalledTimes(1);
+    expect(l.get).nthCalledWith(1, 'A');
+    expect(l.error).not.toBeCalled();
+    expect(l.warn).not.toBeCalled();
+    expect(l.info).toBeCalledTimes(1);
+    expect(l.info).nthCalledWith(1, 'A plugin is now available: Avail!');
   });
 
-  it('emits if any plugin status changes', () => {
-    getTestScheduler().run(({ expectObservable, hot }) => {
-      const statusesA = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.available,
-        pluginB: ServiceStatusLevels.degraded,
-      });
-      const statusesB = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.available,
-        pluginB: ServiceStatusLevels.available,
-      });
-
-      const overall$ = hot<ObsInputType>('-a-b', {
-        a: statusesA,
-        b: statusesB,
-      });
-      const stop$ = hot<void>('');
-      const expected = '-x-y';
-
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe(expected, {
-        x: {
-          status: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-          total: 2,
-          updated: 2,
-          updates: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-        },
-        y: {
-          status: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [],
-            unavailable: [],
-          },
-          total: 2,
-          updated: 1,
-          updates: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [],
-            unavailable: [],
-          },
-        },
-      });
+  it('throttles and aggregates messages of plugins that emit too often', async () => {
+    logPluginsStatusChanges({
+      logger: l,
+      plugins$,
+      stop$,
+      throttleIntervalMillis: 10,
     });
+
+    // A remains unavailable, B is switching repeatedly
+    plugins$.next({ A: reportedUnavailable, B: reportedAvailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedAvailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedAvailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedAvailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedAvailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedAvailable });
+    plugins$.next({ A: reportedUnavailable, B: reportedUnavailable });
+
+    // A becomes available, B keeps switching
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable });
+    plugins$.next({ A: reportedAvailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable });
+    plugins$.next({ A: reportedAvailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable });
+    plugins$.next({ A: reportedAvailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable });
+    plugins$.next({ A: reportedAvailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable });
+    plugins$.next({ A: reportedAvailable, B: reportedUnavailable });
+    plugins$.next({ A: reportedAvailable, B: reportedAvailable });
+
+    // give the 'bufferTime' operator enough time to emit and log
+    await delay(20);
+
+    expect(l.get).toBeCalledWith('A');
+    expect(l.get).toBeCalledWith('B');
+    expect(l.get).not.toBeCalledWith('C');
+    expect(l.warn).not.toHaveBeenCalled();
+    expect(l.info).toHaveBeenCalledTimes(4);
+    expect(l.error).toHaveBeenCalledTimes(2);
+    expect(l.info).nthCalledWith(1, 'B plugin is now available: Avail!');
+    expect(l.error).nthCalledWith(1, 'B plugin is now unavailable: Unavail!');
+    expect(l.info).nthCalledWith(2, 'B plugin is now available: Avail!');
+    expect(l.info).nthCalledWith(3, 'A plugin is now available: Avail!');
+    expect(l.error).nthCalledWith(2, 'B plugin is now unavailable: Unavail! (repeated 10 times)');
+    expect(l.info).nthCalledWith(4, 'B plugin is now available: Avail! (repeated 10 times)');
   });
 
-  it('emits everytime any plugin status changes', () => {
-    getTestScheduler().run(({ expectObservable, hot }) => {
-      const availableStatus = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.available,
-      });
-      const degradedStatus = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.degraded,
-      });
-
-      const overall$ = hot<ObsInputType>('-a-b-c-d', {
-        a: availableStatus,
-        b: degradedStatus,
-        c: degradedStatus,
-        d: availableStatus,
-      });
-      const stop$ = hot<void>('');
-      const expected = '-x-y---x';
-
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe(expected, {
-        x: {
-          status: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [],
-            unavailable: [],
-          },
-          total: 1,
-          updated: 1,
-          updates: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [],
-            unavailable: [],
-          },
-        },
-        y: {
-          status: {
-            available: [],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-          total: 1,
-          updated: 1,
-          updates: {
-            available: [],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-        },
-      });
+  it('discards messages when a plugin emits too many different ones', async () => {
+    logPluginsStatusChanges({
+      logger: l,
+      plugins$,
+      stop$,
+      throttleIntervalMillis: 10,
+      maxThrottledMessages: 4,
     });
-  });
 
-  it('stops emitting once `stop$` emits', () => {
-    getTestScheduler().run(({ expectObservable, hot }) => {
-      const statusesA = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.available,
-        pluginB: ServiceStatusLevels.degraded,
-      });
-      const statusesB = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.available,
-        pluginB: ServiceStatusLevels.available,
-      });
-      const statusesC = createPluginsStatuses({
-        pluginA: ServiceStatusLevels.degraded,
-        pluginB: ServiceStatusLevels.available,
-      });
+    // A plugin keeps changing status, with different messages each time
+    let attempt = 0;
+    plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedUnavailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedUnavailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedUnavailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedUnavailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedUnavailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedUnavailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
+    plugins$.next({ A: { ...reportedUnavailable, summary: `attempt #${++attempt}` } });
 
-      const overall$ = hot<ObsInputType>('-a-b-c', {
-        a: statusesA,
-        b: statusesB,
-        c: statusesC,
-      });
-      const stop$ = hot<void>('----(s|)');
-      const expected = '-x-y|';
+    // give the 'bufferTime' operator enough time to emit and log
+    await delay(20);
 
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe(expected, {
-        x: {
-          status: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-          total: 2,
-          updated: 2,
-          updates: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [
-              {
-                level: ServiceStatusLevels.degraded,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            unavailable: [],
-          },
-        },
-        y: {
-          status: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginA',
-                summary: 'summary',
-              },
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [],
-            unavailable: [],
-          },
-          total: 2,
-          updated: 1,
-          updates: {
-            available: [
-              {
-                level: ServiceStatusLevels.available,
-                pluginName: 'pluginB',
-                summary: 'summary',
-              },
-            ],
-            critical: [],
-            degraded: [],
-            unavailable: [],
-          },
-        },
-      });
-    });
-  });
-});
+    // emit a last message (some time after)
+    plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
 
-describe('getPluginStatusChangesMessages', () => {
-  it('returns a list of human readable messages describing the changes', () => {
-    expect(
-      getPluginStatusChangesMessages({
-        status: {
-          available: [
-            {
-              level: ServiceStatusLevels.available,
-              pluginName: 'newlyAvailablePlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.available,
-              pluginName: 'newlyAvailablePluginDependantPlugin1',
-              summary: 'summary',
-            },
-            {
-              level: ServiceStatusLevels.available,
-              pluginName: 'newlyAvailablePluginDependantPlugin1',
-              summary: 'summary',
-            },
-            {
-              level: ServiceStatusLevels.available,
-              pluginName: 'alreadyAvailablePlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.available,
-              pluginName: 'alreadyAvailablePluginDependantPlugin1',
-              summary: 'summary',
-            },
-          ],
+    expect(l.get).toBeCalledWith('A');
+    expect(l.get).not.toBeCalledWith('B');
+    expect(l.info).toHaveBeenCalledTimes(5);
+    expect(l.error).toHaveBeenCalledTimes(3);
+    expect(l.warn).toHaveBeenCalledTimes(1);
+    // the first 3 messages are the max allowed per interval
+    expect(l.info).nthCalledWith(1, 'A plugin is now available: attempt #1');
+    expect(l.error).nthCalledWith(1, 'A plugin is now unavailable: attempt #2');
+    expect(l.info).nthCalledWith(2, 'A plugin is now available: attempt #3');
+    // the next 4 messages are throttled (emitted after 10ms)
+    expect(l.error).nthCalledWith(2, 'A plugin is now unavailable: attempt #4');
+    expect(l.info).nthCalledWith(3, 'A plugin is now available: attempt #5');
+    expect(l.error).nthCalledWith(3, 'A plugin is now unavailable: attempt #6');
+    expect(l.info).nthCalledWith(4, 'A plugin is now available: attempt #7');
 
-          critical: [
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'alreadyCriticalPlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'alreadyCriticalPluginDependantPlugin1',
-              summary: 'summary',
-            },
-          ],
-
-          degraded: [
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'newlyDegradedPlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'newlyDegradedPluginDependantPlugin1',
-              summary: 'summary',
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'anotherNewlyDegradedPlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'anotherNewlyDegradedPluginDependantPlugin1',
-              summary: 'summary',
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'alreadyDegradedPlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'alreadyDegradedPluginDependantPlugin1',
-              summary: 'summary',
-            },
-          ],
-
-          unavailable: [],
-        },
-        total: 13,
-        updated: 7,
-        updates: {
-          available: [
-            {
-              level: ServiceStatusLevels.available,
-              pluginName: 'newlyAvailablePlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.available,
-              pluginName: 'newlyAvailablePluginDependantPlugin1',
-              summary: 'summary',
-            },
-            {
-              level: ServiceStatusLevels.available,
-              pluginName: 'newlyAvailablePluginDependantPlugin2',
-              summary: 'summary',
-            },
-          ],
-
-          critical: [],
-          degraded: [
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'newlyDegradedPlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'newlyDegradedPluginDependantPlugin1',
-              summary: 'summary',
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'anotherNewlyDegradedPlugin',
-              summary: 'summary',
-              isReportedStatus: true,
-            },
-            {
-              level: ServiceStatusLevels.degraded,
-              pluginName: 'anotherNewlyDegradedPluginDependantPlugin1',
-              summary: 'summary',
-            },
-          ],
-
-          unavailable: [],
-        },
-      })
-    ).toMatchInlineSnapshot(`
-      Array [
-        "'newlyAvailablePlugin' (and 2 more) are now available: summary",
-        "The following plugins are now degraded: newlyDegradedPlugin, anotherNewlyDegradedPlugin (and 2 more)
-       - 'newlyDegradedPlugin' is now degraded: summary
-       - 'anotherNewlyDegradedPlugin' is now degraded: summary",
-        "'alreadyCriticalPlugin' plugin (and some others that depend on it) are critical: summary",
-        "'alreadyDegradedPlugin' plugin (and some others that depend on it) are degraded: summary",
-      ]
-    `);
+    // these messages exceed the maxThrottledMessages quota, truncated + warning
+    expect(l.warn).nthCalledWith(
+      1,
+      '7 other status updates from [A] have been truncated to avoid flooding the logs'
+    );
+    // and the last message, after the buffered / truncated ones
+    expect(l.info).nthCalledWith(5, 'A plugin is now available: attempt #15');
   });
 });

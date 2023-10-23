@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of, BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import { of, BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 
 import { type ServiceStatus, ServiceStatusLevels, type CoreStatus } from '@kbn/core-status-common';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
@@ -23,16 +23,11 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 import {
-  getOverallStatusChangesMock,
-  getPluginsStatusChangesMock,
-  getPluginStatusChangesMessagesMock,
+  logCoreStatusChangesMock,
+  logPluginsStatusChangesMock,
+  logOverallStatusChangesMock,
 } from './status_service.test.mocks';
 import { StatusService, type StatusServiceSetupDeps } from './status_service';
-import type {
-  PluginsByStatus,
-  PluginStatusChanges,
-  PluginStatusWithName,
-} from './log_plugins_status';
 import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 import type { InternalStatusServiceSetup } from './types';
 
@@ -44,17 +39,13 @@ describe('StatusService', () => {
 
   beforeEach(() => {
     logger = loggingSystemMock.create();
-    // logger = loggerFactory.get('status') as MockedLogger;
     service = new StatusService(mockCoreContext.create({ logger }));
-
-    getOverallStatusChangesMock.mockReturnValue({ subscribe: jest.fn() });
-    getPluginsStatusChangesMock.mockReturnValue({ subscribe: jest.fn() });
   });
 
   afterEach(() => {
-    getOverallStatusChangesMock.mockReset();
-    getPluginsStatusChangesMock.mockReset();
-    getPluginStatusChangesMessagesMock.mockReset();
+    logCoreStatusChangesMock.mockReset();
+    logPluginsStatusChangesMock.mockReset();
+    logOverallStatusChangesMock.mockReset();
   });
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -70,29 +61,6 @@ describe('StatusService', () => {
   const critical: ServiceStatus<any> = {
     level: ServiceStatusLevels.critical,
     summary: 'This is critical!',
-  };
-
-  const emptyStatus: PluginsByStatus = {
-    available: [],
-    critical: [],
-    degraded: [],
-    unavailable: [],
-  };
-
-  const pluginStatusA: PluginStatusWithName = {
-    pluginName: 'pluginA',
-    level: ServiceStatusLevels.available,
-    summary: 'bootstrapped correctly!',
-  };
-  const pluginStatusB: PluginStatusWithName = {
-    pluginName: 'pluginB',
-    level: ServiceStatusLevels.available,
-    summary: 'bootstrapped correctly!',
-  };
-  const pluginStatusC: PluginStatusWithName = {
-    pluginName: 'pluginC',
-    level: ServiceStatusLevels.available,
-    summary: 'bootstrapped correctly!',
   };
 
   const setupDeps = (overrides: Partial<StatusServiceSetupDeps> = {}): StatusServiceSetupDeps => {
@@ -620,80 +588,46 @@ describe('StatusService', () => {
   });
 
   describe('#start', () => {
-    it('logs a message everytime the getOverallStatusChangesMock observable emits', async () => {
-      const subject = new Subject<string>();
-      getOverallStatusChangesMock.mockReturnValue(subject);
-
+    it('calls logCoreStatusChangesMock with the right params', async () => {
       await service.setup(setupDeps());
       await service.start();
 
-      subject.next('some message');
-      subject.next('another message');
-
-      const { info } = loggingSystemMock.collect(logger);
-      expect(info[0][0]).toEqual('some message');
-      expect(info[1][0]).toEqual('another message');
-    });
-
-    it('calls getPluginStatusChangesMessages and subscribe to the returned observable', async () => {
-      const mockSubscribe = jest.fn();
-      getPluginsStatusChangesMock.mockReturnValue({
-        subscribe: mockSubscribe,
-      });
-
-      await service.setup(setupDeps());
-      await service.start();
-
-      expect(getPluginsStatusChangesMock).toHaveBeenCalledTimes(1);
-      expect(mockSubscribe).toHaveBeenCalledTimes(1);
-    });
-
-    it('logs messages everytime the getPluginsStatusChangesMock observable emits', async () => {
-      const subject = new Subject<PluginStatusChanges>();
-      getPluginsStatusChangesMock.mockReturnValue(subject);
-
-      getPluginStatusChangesMessagesMock.mockImplementation(
-        ({ updates, updated, total }: PluginStatusChanges) => {
-          return [
-            `Updated ${updated} services out of ${total}: ${updates.available.map(
-              ({ pluginName }) => pluginName
-            )}`,
-          ];
-        }
+      expect(logCoreStatusChangesMock).toHaveBeenCalledTimes(1);
+      expect(logCoreStatusChangesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logger: expect.any(Object),
+          core$: expect.any(Observable),
+          stop$: expect.any(Observable),
+        })
       );
+    });
 
+    it('calls logPluginsStatusChangesMock with the right params', async () => {
       await service.setup(setupDeps());
       await service.start();
 
-      subject.next({
-        status: {
-          ...emptyStatus,
-          unavailable: [pluginStatusB, pluginStatusC],
-          available: [pluginStatusA],
-        },
-        updates: {
-          ...emptyStatus,
-          available: [pluginStatusA],
-        },
-        updated: 1,
-        total: 3,
-      });
-      subject.next({
-        status: {
-          ...emptyStatus,
-          available: [pluginStatusA, pluginStatusB, pluginStatusC],
-        },
-        updates: {
-          ...emptyStatus,
-          available: [pluginStatusB, pluginStatusC],
-        },
-        updated: 2,
-        total: 3,
-      });
+      expect(logPluginsStatusChangesMock).toHaveBeenCalledTimes(1);
+      expect(logPluginsStatusChangesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logger: expect.any(Object),
+          plugins$: expect.any(Observable),
+          stop$: expect.any(Observable),
+        })
+      );
+    });
 
-      const { info } = loggingSystemMock.collect(logger);
-      expect(info[0][0]).toEqual('Updated 1 services out of 3: pluginA');
-      expect(info[1][0]).toEqual('Updated 2 services out of 3: pluginB,pluginC');
+    it('calls logOverallStatusChangesMock with the right params', async () => {
+      await service.setup(setupDeps());
+      await service.start();
+
+      expect(logOverallStatusChangesMock).toHaveBeenCalledTimes(1);
+      expect(logOverallStatusChangesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logger: expect.any(Object),
+          overall$: expect.any(Observable),
+          stop$: expect.any(Observable),
+        })
+      );
     });
   });
 });

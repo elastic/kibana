@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-export const getOverallStatusChangesMock = jest.fn();
+export const logOverallStatusChangesMock = jest.fn();
 jest.doMock('./log_overall_status', () => ({
-  getOverallStatusChanges: getOverallStatusChangesMock,
+  logOverallStatusChanges: logOverallStatusChangesMock,
 }));
 
-export const getPluginsStatusChangesMock = jest.fn();
-export const getPluginStatusChangesMessagesMock = jest.fn();
+export const logCoreStatusChangesMock = jest.fn();
+jest.doMock('./log_core_services_status', () => ({
+  logCoreStatusChanges: logCoreStatusChangesMock,
+}));
+
+export const logPluginsStatusChangesMock = jest.fn();
 jest.doMock('./log_plugins_status', () => ({
-  getPluginsStatusChanges: getPluginsStatusChangesMock,
-  getPluginStatusChangesMessages: getPluginStatusChangesMessagesMock,
+  logPluginsStatusChanges: logPluginsStatusChangesMock,
 }));
