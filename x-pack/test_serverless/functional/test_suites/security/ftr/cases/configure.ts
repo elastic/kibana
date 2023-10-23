@@ -14,6 +14,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlSecNavigation = getService('svlSecNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const toasts = getService('toasts');
   const retry = getService('retry');
   const find = getService('find');
@@ -30,7 +31,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await svlCommonPage.forceLogout();
     });
 

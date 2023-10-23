@@ -18,6 +18,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Create Case', function () {
     const find = getService('find');
     const cases = getService('cases');
+    const svlCases = getService('svlCases');
     const testSubjects = getService('testSubjects');
     const svlCommonPage = getPageObject('svlCommonPage');
     const config = getService('config');
@@ -33,7 +34,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await svlCommonPage.forceLogout();
     });
 
