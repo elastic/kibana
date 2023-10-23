@@ -362,6 +362,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       // ecsAlert is needed for security solution
       const ecsAlert = ecsAlertsData[idx];
       if (alert) {
+        const data: Array<{ field: string; value: string[] }> = [];
+        Object.entries(alert ?? {}).forEach(([key, value]) => {
+          data.push({ field: key, value: value as string[] });
+        });
         if (isSystemCell(_props.columnId)) {
           return (
             <SystemCellFactory
@@ -377,7 +381,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
         return renderCellValue({
           ..._props,
-          data: oldAlertsData[idx],
+          data,
           ecsData: ecsAlert,
         });
       } else if (isLoading) {
@@ -393,7 +397,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       isLoadingCases,
       isLoadingMaintenanceWindows,
       maintenanceWindows,
-      oldAlertsData,
       pagination.pageIndex,
       pagination.pageSize,
       renderCellValue,
@@ -523,7 +526,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                               role="row"
                               className={`euiDataGridRow ${
                                 rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
-                              }`}
+                              } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
                               key={rowIndex}
                             >
                               {_visibleColumns.map((_col, colIndex) => (
