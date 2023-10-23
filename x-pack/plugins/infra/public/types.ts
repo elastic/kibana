@@ -77,6 +77,7 @@ export interface InfraClientStartExports {
 }
 
 export interface InfraClientSetupDeps {
+  [x: string]: any;
   logsShared: LogsSharedClientSetupExports;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
@@ -90,7 +91,7 @@ export interface InfraClientSetupDeps {
   lens: LensPublicStart;
   fieldFormats: FieldFormatsSetup;
   licensing: LicensingPluginSetup;
-  cloud?: { isCloudEnabled: boolean; isServerlessEnabled: boolean };
+  cloud?: { isCloudEnabled: boolean; cloudId?: string; isServerlessEnabled: boolean };
 }
 
 export interface InfraClientStartDeps {

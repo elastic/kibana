@@ -310,7 +310,7 @@ export class Plugin implements InfraClientPluginClass {
         const [coreStart, plugins, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/metrics_app');
 
-        const isCloudEnabled = pluginsSetup.cloud?.isCloudEnabled ?? false;
+        const isCloudEnabled = pluginsSetup.cloud?.isCloudEnabled || !!pluginsSetup.cloud?.cloudId;
         const isServerlessEnabled = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
         return renderApp(
           coreStart,
