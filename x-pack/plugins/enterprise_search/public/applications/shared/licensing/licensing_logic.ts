@@ -6,7 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { mergeMap, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { ILicense } from '@kbn/licensing-plugin/public';
 
@@ -66,13 +66,9 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
   },
   events: ({ props, actions, values }) => ({
     afterMount: () => {
-      const licenseSubscription = props.license$
-        .pipe(
-          mergeMap(async (license: ILicense) => {
-            actions.setLicense(license);
-          })
-        )
-        .subscribe();
+      const licenseSubscription = props.license$.subscribe((license: ILicense) => {
+        actions.setLicense(license);
+      });
       actions.setLicenseSubscription(licenseSubscription);
     },
     beforeUnmount: () => {
