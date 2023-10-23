@@ -7,7 +7,9 @@
  */
 
 import { format } from 'url';
-import { getRedirectAppPath, ReportingConfigType, ReportingServerInfo } from '../..';
+import { getRedirectAppPath } from '../../constants';
+import { ReportingConfigType } from '../../schema';
+import { ReportingServerInfo } from '../../types';
 import { buildKibanaPath } from './build_kibana_path';
 
 export function getFullRedirectAppUrl(

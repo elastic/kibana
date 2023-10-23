@@ -9,7 +9,7 @@
 export { CancellationToken } from './cancellation_token';
 export type { TaskRunMetrics, CsvMetrics, TaskRunResult } from './metrics';
 export * from './errors';
-export * from 'crypto';
+export * from './crypto';
 export * from './constants';
 export * from './schema_utils';
 export * from './schema';
@@ -26,7 +26,12 @@ export type {
   JobId,
   CommonReportingSetup,
 } from './types';
-export type { LocatorParams, UrlOrUrlLocatorTuple, IlmPolicyStatusResponse } from './url';
+export type {
+  LocatorParams,
+  UrlOrUrlLocatorTuple,
+  IlmPolicyStatusResponse,
+  ManagementLinkFn,
+} from './url';
 export { ExportType } from './export_type';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
 export {
@@ -43,4 +48,3 @@ export {
   generatePngObservable,
   buildKibanaPath,
 } from './export_type_helpers';
-export type { ManagementLinkFn } from './url';

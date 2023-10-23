@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import * as Rx from 'rxjs';
 import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
 import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
@@ -17,6 +16,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { CSV_REPORTING_ACTION } from '@kbn/reporting-common';
+import { firstValueFrom, Observable } from 'rxjs';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
@@ -33,7 +33,7 @@ export interface ActionContext {
 interface Params {
   apiClient: ReportingAPIClient;
   core: CoreSetup;
-  startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
+  startServices$: Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
   usesUiCapabilities: boolean;
 }
 
@@ -69,7 +69,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public async getSharingData(savedSearch: SavedSearch) {
-    const [{ uiSettings }, { data }] = await Rx.firstValueFrom(this.startServices$);
+    const [{ uiSettings }, { data }] = await firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }

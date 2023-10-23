@@ -7,7 +7,7 @@
  */
 
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import * as Rx from 'rxjs';
+import { Observable } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { PdfMetrics } from '../metrics';
 import { getTracker } from './pdf_tracker';
@@ -18,12 +18,12 @@ interface PdfResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
+type GetScreenshotsFn = (options: PdfScreenshotOptions) => Observable<PdfScreenshotResult>;
 
 export function generatePdfObservable(
   getScreenshots: GetScreenshotsFn,
   options: PdfScreenshotOptions
-): Rx.Observable<PdfResult> {
+): Observable<PdfResult> {
   const tracker = getTracker();
   tracker.startScreenshots();
 

@@ -8,9 +8,9 @@
 
 import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
-import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { Observable } from 'rxjs';
 import { PngMetrics } from '../metrics';
 import { REPORTING_TRANSACTION_TYPE } from '../constants';
 
@@ -20,13 +20,13 @@ interface PngResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options: PngScreenshotOptions) => Rx.Observable<PngScreenshotResult>;
+type GetScreenshotsFn = (options: PngScreenshotOptions) => Observable<PngScreenshotResult>;
 
 export function generatePngObservable(
   getScreenshots: GetScreenshotsFn,
   logger: Logger,
   options: Omit<PngScreenshotOptions, 'format'>
-): Rx.Observable<PngResult> {
+): Observable<PngResult> {
   const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
   if (!options.layout?.dimensions) {
     throw new Error(`LayoutParams.Dimensions is undefined.`);
