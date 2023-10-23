@@ -178,6 +178,8 @@ const createVagrantVm = async ({
       env: {
         VAGRANT_CWD,
       },
+      // Only `pipe` STDERR to parent process
+      stdio: ['inherit', 'inherit', 'pipe'],
     });
     // eslint-disable-next-line no-empty
   } catch (e) {}
@@ -191,7 +193,8 @@ const createVagrantVm = async ({
         CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
         CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
       },
-      stdio: ['inherit', 'inherit', 'inherit'],
+      // Only `pipe` STDERR to parent process
+      stdio: ['inherit', 'inherit', 'pipe'],
     });
   } catch (e) {
     log.error(e);
@@ -319,7 +322,8 @@ const enrollHostWithFleet = async ({
       env: {
         VAGRANT_CWD,
       },
-      stdio: ['inherit', 'inherit', 'inherit'],
+      // Only `pipe` STDERR to parent process
+      stdio: ['inherit', 'inherit', 'pipe'],
     });
   } else {
     log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);

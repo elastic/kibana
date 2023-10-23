@@ -184,7 +184,7 @@ export const dataLoaders = (
     },
 
     indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
-      const { kbnClient, esClient } = await stackServicesPromise;
+      const { kbnClient, esClient, log } = await stackServicesPromise;
       const {
         count: numHosts,
         version,
@@ -195,7 +195,7 @@ export const dataLoaders = (
         alertIds,
       } = options;
 
-      return cyLoadEndpointDataHandler(esClient, kbnClient, {
+      return cyLoadEndpointDataHandler(esClient, kbnClient, log, {
         numHosts,
         version,
         os,
@@ -317,9 +317,14 @@ export const dataLoadersForRealEndpoints = (
     fleetServerContainerId = data?.fleetServerContainerId;
   });
 
-  on('after:run', () => {
+  on('after:run', async () => {
+    const { log } = await stackServicesPromise;
     if (fleetServerContainerId) {
-      execa.sync('docker', ['kill', fleetServerContainerId]);
+      try {
+        execa.sync('docker', ['kill', fleetServerContainerId]);
+      } catch (error) {
+        log.error(error);
+      }
     }
   });
 
