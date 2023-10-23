@@ -15,7 +15,7 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
+import * as md from '@kbn/shared-ux-markdown';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Filter } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '../../../common/locator';
@@ -83,7 +83,7 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
+        text: toMountPoint(<md.MarkdownSimple src={String(error.message)} />, {
           theme: core.theme,
           i18n: core.i18n,
         }),
@@ -106,7 +106,7 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
+        text: toMountPoint(<md.MarkdownSimple src={String(error.message)} />, {
           theme: core.theme,
           i18n: core.i18n,
         }),
