@@ -74,7 +74,9 @@ exports[`SearchResponseWarnings renders "callout" correctly 1`] = `
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                <div />
+                <button>
+                  test
+                </button>
               </div>
             </div>
           </div>
@@ -157,12 +159,8 @@ exports[`SearchResponseWarnings renders "empty_prompt" correctly 1`] = `
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <button
-                    class="euiLink emotion-euiLink-primary"
-                    data-test-subj="viewWarningBtn"
-                    type="button"
-                  >
-                    View details
+                  <button>
+                    test
                   </button>
                 </div>
               </div>

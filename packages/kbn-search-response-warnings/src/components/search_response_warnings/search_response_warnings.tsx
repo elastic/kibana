@@ -25,17 +25,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ViewWarningButton } from '../view_warning_button';
-import type { SearchResponseWarning } from '../../types';
+import type { SearchResponseInterceptedWarning } from '../../types';
 
 /**
  * SearchResponseWarnings component props
  */
 export interface SearchResponseWarningsProps {
   /**
-   * An array of warnings
+   * An array of warnings which can have actions
    */
-  interceptedWarnings?: SearchResponseWarning[];
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
 
   /**
    * View variant
@@ -261,12 +260,12 @@ export const SearchResponseWarnings = ({
 };
 
 function WarningContent({
-  warning,
+  warning: { originalWarning, action },
   textSize = 's',
   groupStyles,
   'data-test-subj': dataTestSubj,
 }: {
-  warning: SearchResponseWarning;
+  warning: SearchResponseInterceptedWarning;
   textSize?: EuiTextProps['size'];
   groupStyles?: Partial<EuiFlexGroupProps>;
   'data-test-subj': string;
@@ -275,17 +274,10 @@ function WarningContent({
     <EuiFlexGroup gutterSize="xs" {...groupStyles} wrap>
       <EuiFlexItem grow={false}>
         <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningTitle`}>
-          {warning.message}
+          {originalWarning.message}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ViewWarningButton
-          color="primary"
-          size="s"
-          onClick={warning.openInInspector}
-          isButtonEmpty={true}
-        />
-      </EuiFlexItem>
+      {action ? <EuiFlexItem grow={false}>{action}</EuiFlexItem> : null}
     </EuiFlexGroup>
   );
 }

@@ -46,9 +46,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemRemove('agent');
       expect(await getTitles()).to.be('@timestamp Document');
     });
-
-    it('should show the the grid toolbar', async () => {
-      await testSubjects.existOrFail('dscGridToolbar');
-    });
   });
 }

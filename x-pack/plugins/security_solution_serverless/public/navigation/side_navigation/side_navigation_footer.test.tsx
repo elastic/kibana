@@ -12,7 +12,6 @@ import { SideNavigationFooter } from './side_navigation_footer';
 import { ExternalPageName } from '../links/constants';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ProjectSideNavItem } from './types';
-import { FOOTER_CATEGORIES } from '../categories';
 
 jest.mock('../../common/services');
 
@@ -55,12 +54,9 @@ describe('SideNavigationFooter', () => {
   });
 
   it('should render all the items', () => {
-    const component = render(
-      <SideNavigationFooter items={items} activeNodeId={''} categories={FOOTER_CATEGORIES} />,
-      {
-        wrapper: I18nProvider,
-      }
-    );
+    const component = render(<SideNavigationFooter items={items} activeNodeId={''} />, {
+      wrapper: I18nProvider,
+    });
 
     items.forEach((item) => {
       expect(component.queryByTestId(`solutionSideNavItemLink-${item.id}`)).toBeInTheDocument();
@@ -68,16 +64,9 @@ describe('SideNavigationFooter', () => {
   });
 
   it('should highlight the active node', () => {
-    const component = render(
-      <SideNavigationFooter
-        items={items}
-        activeNodeId={'dev_tools'}
-        categories={FOOTER_CATEGORIES}
-      />,
-      {
-        wrapper: I18nProvider,
-      }
-    );
+    const component = render(<SideNavigationFooter items={items} activeNodeId={'dev_tools'} />, {
+      wrapper: I18nProvider,
+    });
 
     items.forEach((item) => {
       const isSelected = component
@@ -93,16 +82,9 @@ describe('SideNavigationFooter', () => {
   });
 
   it('should highlight the active node inside the collapsible', () => {
-    const component = render(
-      <SideNavigationFooter
-        items={items}
-        activeNodeId={'management'}
-        categories={FOOTER_CATEGORIES}
-      />,
-      {
-        wrapper: I18nProvider,
-      }
-    );
+    const component = render(<SideNavigationFooter items={items} activeNodeId={'management'} />, {
+      wrapper: I18nProvider,
+    });
 
     items.forEach((item) => {
       const isSelected = component
@@ -118,12 +100,9 @@ describe('SideNavigationFooter', () => {
   });
 
   it('should render closed collapsible if it has no active node', () => {
-    const component = render(
-      <SideNavigationFooter items={items} activeNodeId={''} categories={FOOTER_CATEGORIES} />,
-      {
-        wrapper: I18nProvider,
-      }
-    );
+    const component = render(<SideNavigationFooter items={items} activeNodeId={''} />, {
+      wrapper: I18nProvider,
+    });
 
     const isOpen = component
       .queryByTestId('navFooterCollapsible-project-settings')
@@ -133,16 +112,9 @@ describe('SideNavigationFooter', () => {
   });
 
   it('should open collapsible if it has an active node', () => {
-    const component = render(
-      <SideNavigationFooter
-        items={items}
-        activeNodeId={'management'}
-        categories={FOOTER_CATEGORIES}
-      />,
-      {
-        wrapper: I18nProvider,
-      }
-    );
+    const component = render(<SideNavigationFooter items={items} activeNodeId={'management'} />, {
+      wrapper: I18nProvider,
+    });
 
     const isOpen = component
       .queryByTestId('navFooterCollapsible-project-settings')

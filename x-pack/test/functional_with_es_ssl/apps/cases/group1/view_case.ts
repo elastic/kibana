@@ -1154,7 +1154,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('customFields', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168534
+    describe.skip('customFields', () => {
       const customFields = [
         {
           key: 'valid_key_1',
@@ -1197,13 +1198,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
-        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
-        expect(await textField.getVisibleText()).equal('this is a text field value');
+        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        expect(await summary.getVisibleText()).equal('this is a text field value');
 
-        const toggle = await testSubjects.find(
+        const sync = await testSubjects.find(
           `case-toggle-custom-field-form-field-${customFields[1].key}`
         );
-        expect(await toggle.getAttribute('aria-checked')).equal('true');
+        expect(await sync.getAttribute('aria-checked')).equal('true');
 
         await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
 
@@ -1221,23 +1222,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
 
-        await header.waitUntilLoadingHasFinished();
-
         await retry.waitFor('update toast exist', async () => {
           return await testSubjects.exists('toastCloseButton');
         });
 
         await testSubjects.click('toastCloseButton');
 
-        await header.waitUntilLoadingHasFinished();
-
-        await toggle.click();
+        await sync.click();
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
+        expect(await summary.getVisibleText()).equal('this is a text field value edited!!');
 
-        expect(await toggle.getAttribute('aria-checked')).equal('false');
+        expect(await sync.getAttribute('aria-checked')).equal('false');
 
         // validate user action
         const userActions = await find.allByCssSelector(

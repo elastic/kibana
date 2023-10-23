@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   SecurityPageName,
   LinkCategoryType,
-  type LinkCategory,
   type SeparatorLinkCategory,
 } from '@kbn/security-solution-navigation';
-import { ExternalPageName } from './links/constants';
-import type { ProjectPageName } from './links/types';
+import { ExternalPageName } from '../links/constants';
 
-export const CATEGORIES: Array<SeparatorLinkCategory<ProjectPageName>> = [
+export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
     linkIds: [ExternalPageName.discover, SecurityPageName.dashboards],
@@ -44,26 +41,5 @@ export const CATEGORIES: Array<SeparatorLinkCategory<ProjectPageName>> = [
   {
     type: LinkCategoryType.separator,
     linkIds: [SecurityPageName.mlLanding],
-  },
-];
-
-export const FOOTER_CATEGORIES: Array<LinkCategory<ProjectPageName>> = [
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.landing, ExternalPageName.devTools],
-  },
-  {
-    type: LinkCategoryType.accordion,
-    label: i18n.translate('xpack.securitySolutionServerless.nav.projectSettings.title', {
-      defaultMessage: 'Project settings',
-    }),
-    iconType: 'gear',
-    linkIds: [
-      ExternalPageName.management,
-      ExternalPageName.integrationsSecurity,
-      ExternalPageName.cloudUsersAndRoles,
-      ExternalPageName.cloudPerformance,
-      ExternalPageName.cloudBilling,
-    ],
   },
 ];

@@ -8,11 +8,9 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { extractWarnings } from './extract_warnings';
 
 const mockInspectorService = {} as InspectorStartContract;
-const mockRequestAdapter = {} as RequestAdapter;
 
 describe('extract search response warnings', () => {
   describe('single cluster', () => {
@@ -42,7 +40,7 @@ describe('extract search response warnings', () => {
         aggregations: {},
       };
 
-      expect(extractWarnings(response, mockInspectorService, mockRequestAdapter)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'Results are partial and may be incomplete.',
@@ -68,7 +66,7 @@ describe('extract search response warnings', () => {
         _shards: {} as estypes.ShardStatistics,
         hits: { hits: [] },
       };
-      expect(extractWarnings(response, mockInspectorService, mockRequestAdapter)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'Results are partial and may be incomplete.',
@@ -96,8 +94,7 @@ describe('extract search response warnings', () => {
             total: 9000,
           },
         } as estypes.SearchResponse,
-        mockInspectorService,
-        mockRequestAdapter
+        mockInspectorService
       );
 
       expect(warnings).toEqual([]);
@@ -188,7 +185,7 @@ describe('extract search response warnings', () => {
         aggregations: {},
       };
 
-      expect(extractWarnings(response, mockInspectorService, mockRequestAdapter)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'Results are partial and may be incomplete.',
@@ -242,7 +239,7 @@ describe('extract search response warnings', () => {
         },
         hits: { hits: [] },
       };
-      expect(extractWarnings(response, mockInspectorService, mockRequestAdapter)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'Results are partial and may be incomplete.',
@@ -296,8 +293,7 @@ describe('extract search response warnings', () => {
           },
           hits: { hits: [] },
         } as estypes.SearchResponse,
-        mockInspectorService,
-        mockRequestAdapter
+        mockInspectorService
       );
 
       expect(warnings).toEqual([]);

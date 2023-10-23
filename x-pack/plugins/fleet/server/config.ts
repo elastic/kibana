@@ -21,6 +21,7 @@ import {
   PreconfiguredFleetProxiesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
+import { appContextService } from './services';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
@@ -106,23 +107,6 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
-    // Log invalid experimental values
-    (fullConfig, fromPath, addDeprecation) => {
-      for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
-        if (!isValidExperimentalValue(key)) {
-          addDeprecation({
-            configPath: 'xpack.fleet.fleet.enableExperimental',
-            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].`,
-            correctiveActions: {
-              manualSteps: [
-                `Use [xpack.fleet.fleet.enableExperimental] with an array of valid experimental features.`,
-              ],
-            },
-            level: 'warning',
-          });
-        }
-      }
-    },
   ],
   schema: schema.object(
     {
@@ -172,6 +156,15 @@ export const config: PluginConfigDescriptor = {
        */
       enableExperimental: schema.arrayOf(schema.string(), {
         defaultValue: () => [],
+        validate(list) {
+          for (const key of list) {
+            if (!isValidExperimentalValue(key)) {
+              appContextService
+                .getLogger()
+                .warn(`[${key}] is not a valid fleet experimental feature.`);
+            }
+          }
+        },
       }),
 
       internal: schema.maybe(

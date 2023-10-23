@@ -149,7 +149,7 @@ describe('DataTable', () => {
         wrapper
           .find('[data-test-subj="dataGridRowCell"]')
           .at(0)
-          .find('.euiDataGridRowCell__content')
+          .find('.euiDataGridRowCell__truncate')
           .childAt(0)
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);

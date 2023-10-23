@@ -64,11 +64,6 @@ export interface RouteConfigOptionsBody {
   accepts?: RouteContentType | RouteContentType[] | string | string[];
 
   /**
-   * A mime type string overriding the 'Content-Type' header value received.
-   */
-  override?: string;
-
-  /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
    *
    * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayload`.

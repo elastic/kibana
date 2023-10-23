@@ -28,6 +28,7 @@ export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>(
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
+const FleetInvalidExperimentalValue = class extends Error {};
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
@@ -35,14 +36,17 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * which should be a string of values delimited by a comma (`,`)
  *
  * @param configValue
+ * @throws FleetInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
   const enabledFeatures: Mutable<ExperimentalFeatures> = {};
 
   for (const value of configValue) {
-    if (isValidExperimentalValue(value)) {
-      enabledFeatures[value] = true;
+    if (!isValidExperimentalValue(value)) {
+      throw new FleetInvalidExperimentalValue(`[${value}] is not a supported experimental feature`);
     }
+
+    enabledFeatures[value] = true;
   }
 
   return {

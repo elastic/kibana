@@ -5,15 +5,11 @@
   },
   "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
+    "@kbn/data-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/inspector-plugin",
     "@kbn/core",
-    "@kbn/i18n-react",
-    "@kbn/es-types",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-notifications-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

@@ -9,8 +9,9 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
-import { type SearchResponseWarning, SearchResponseWarnings } from '@kbn/search-response-warnings';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
+import { SavedSearchEmbeddableBadge } from './saved_search_embeddable_badge';
 
 const containerStyles = css`
   width: 100%;
@@ -23,7 +24,7 @@ export interface SavedSearchEmbeddableBaseProps {
   prepend?: React.ReactElement;
   append?: React.ReactElement;
   dataTestSubj?: string;
-  interceptedWarnings?: SearchResponseWarning[];
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
 }
 
 export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps> = ({
@@ -44,26 +45,23 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
       data-test-subj={dataTestSubj}
     >
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          alignItems="center"
+          gutterSize="xs"
+          responsive={false}
+          wrap={true}
+        >
+          {Boolean(prepend) && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
 
-      {Boolean(prepend || totalHitCount) && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            alignItems="center"
-            gutterSize="xs"
-            responsive={false}
-            wrap={true}
-          >
-            {Boolean(prepend) && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
-
-            {!!totalHitCount && (
-              <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
-                <TotalDocuments totalHitCount={totalHitCount} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
+          {!!totalHitCount && (
+            <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
+              <TotalDocuments totalHitCount={totalHitCount} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
       <EuiFlexItem style={{ minHeight: 0 }}>{children}</EuiFlexItem>
 
@@ -71,11 +69,7 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
 
       {Boolean(interceptedWarnings?.length) && (
         <div>
-          <SearchResponseWarnings
-            variant="badge"
-            interceptedWarnings={interceptedWarnings}
-            data-test-subj="savedSearchEmbeddableWarningsCallout"
-          />
+          <SavedSearchEmbeddableBadge interceptedWarnings={interceptedWarnings} />
         </div>
       )}
     </EuiFlexGroup>

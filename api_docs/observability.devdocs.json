@@ -15618,7 +15618,7 @@
         "label": "observabilityPaths",
         "description": [],
         "signature": [
-          "{ alerts: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; slos: string; slosWelcome: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
+          "{ alerts: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; slos: string; slosWelcome: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,

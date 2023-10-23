@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SearchResponseWarning } from '../types';
+import type { SearchResponseWarning } from '@kbn/data-plugin/public';
 
 export const searchResponseIncompleteWarningLocalCluster: SearchResponseWarning = {
   type: 'incomplete',

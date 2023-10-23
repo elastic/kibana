@@ -15,7 +15,10 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { type SearchResponseWarning, SearchResponseWarnings } from '@kbn/search-response-warnings';
+import {
+  type SearchResponseInterceptedWarning,
+  SearchResponseWarnings,
+} from '@kbn/search-response-warnings';
 import {
   CONTEXT_STEP_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -23,9 +26,8 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
@@ -35,6 +37,7 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
+import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../components/discover_tour';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -50,7 +53,7 @@ export interface ContextAppContentProps {
   anchorStatus: LoadingStatus;
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
-  interceptedWarnings: SearchResponseWarning[] | undefined;
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
   useNewFieldsApi: boolean;
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
@@ -63,7 +66,7 @@ export function clamp(value: number) {
   return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }
 
-const DiscoverGridMemoized = React.memo(DiscoverGrid);
+const DiscoverGridMemoized = React.memo(UnifiedDataTable);
 const DocTableContextMemoized = React.memo(DocTableContext);
 const ActionBarMemoized = React.memo(ActionBar);
 
@@ -188,6 +191,7 @@ export function ContextAppContent({
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <DiscoverGridMemoized
               ariaLabelledBy="surDocumentsAriaLabel"
+              showColumnTokens
               columns={columns}
               rows={rows}
               dataView={dataView}
@@ -209,6 +213,7 @@ export function ContextAppContent({
               maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
               renderDocumentView={renderDocumentView}
               services={services}
+              componentsTourSteps={{ expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument }}
             />
           </CellActionsProvider>
         </div>

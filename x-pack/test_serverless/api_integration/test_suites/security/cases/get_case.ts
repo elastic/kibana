@@ -13,7 +13,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_case', () => {
     afterEach(async () => {
-      await svlCases.api.deleteCases();
+      await svlCases.api.deleteCasesByESQuery();
     });
 
     it('should return a case', async () => {

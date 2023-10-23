@@ -32,6 +32,5 @@
     "@kbn/core-mount-utils-browser-internal",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
-    "@kbn/search-response-warnings",
   ]
 }

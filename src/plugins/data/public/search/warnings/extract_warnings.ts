@@ -9,8 +9,10 @@
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
-import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { SearchResponseWarning } from './types';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { IInspectorInfo } from '../../../common/search/search_source';
+import { SearchResponseWarning } from '../types';
 
 /**
  * @internal
@@ -18,8 +20,7 @@ import type { SearchResponseWarning } from './types';
 export function extractWarnings(
   rawResponse: estypes.SearchResponse,
   inspectorService: InspectorStartContract,
-  requestAdapter: RequestAdapter,
-  requestId?: string
+  inspector?: IInspectorInfo
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
 
@@ -35,7 +36,7 @@ export function extractWarnings(
   if (isPartial) {
     warnings.push({
       type: 'incomplete',
-      message: i18n.translate('searchResponseWarnings.incompleteResultsMessage', {
+      message: i18n.translate('data.search.searchSource.fetch.incompleteResultsMessage', {
         defaultMessage: 'Results are partial and may be incomplete.',
       }),
       clusters: rawResponse._clusters
@@ -55,13 +56,23 @@ export function extractWarnings(
             },
           },
       openInInspector: () => {
+        const adapter = inspector?.adapter ? inspector.adapter : new RequestAdapter();
+        if (!inspector?.adapter) {
+          const requestResponder = adapter.start(
+            i18n.translate('data.search.searchSource.anonymousRequestTitle', {
+              defaultMessage: 'Request',
+            })
+          );
+          requestResponder.ok({ json: rawResponse });
+        }
+
         inspectorService.open(
           {
-            requests: requestAdapter,
+            requests: adapter,
           },
           {
             options: {
-              initialRequestId: requestId,
+              initialRequestId: inspector?.id,
               initialTabs: ['clusters', 'response'],
             },
           }

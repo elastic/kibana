@@ -5,41 +5,18 @@
  * 2.0.
  */
 
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { config } from './config';
+import { appContextService } from './services';
 
-const applyConfigDeprecations = (fleetSettings: Record<string, any> = {}) => {
-  const deprecationContext = configDeprecationsMock.createContext();
-  const deprecations = config.deprecations!(configDeprecationFactory);
-  const deprecationMessages: string[] = [];
-  const configPaths: string[] = [];
-  const { config: migrated } = applyDeprecations(
-    {
-      xpack: {
-        fleet: fleetSettings,
-      },
-    },
-    deprecations.map((deprecation) => ({
-      deprecation,
-      path: 'xpack.fleet',
-      context: deprecationContext,
-    })),
-    () =>
-      ({ message, configPath }) => {
-        deprecationMessages.push(message);
-        configPaths.push(configPath);
-      }
-  );
-  return {
-    configPaths,
-    messages: deprecationMessages,
-    migrated,
-  };
-};
+jest.mock('./services/app_context');
 
 describe('Config schema', () => {
+  beforeEach(() => {
+    const mockedLogger = loggingSystemMock.createLogger();
+    jest.mocked(appContextService.getLogger).mockReturnValue(mockedLogger);
+  });
   it('should not allow to specify both default output in xpack.fleet.ouputs and xpack.fleet.agents.elasticsearch.hosts ', () => {
     expect(() => {
       config.schema.validate({
@@ -102,25 +79,26 @@ describe('Config schema', () => {
       });
     }).not.toThrow();
   });
-  describe('deprecations', () => {
-    it('should add a depreciations when trying to enable a non existing experimental feature', () => {
-      const res = applyConfigDeprecations({
+
+  it('should log a warning when trying to enable a non existing experimental feature', () => {
+    expect(() => {
+      config.schema.validate({
         enableExperimental: ['notvalid'],
       });
+    }).not.toThrow();
 
-      expect(res.messages).toMatchInlineSnapshot(`
-        Array [
-          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].",
-        ]
-      `);
-    });
+    expect(appContextService.getLogger().warn).toBeCalledWith(
+      '[notvalid] is not a valid fleet experimental feature.'
+    );
+  });
 
-    it('should not add a depreciations when enabling an existing experimental feature', () => {
-      const res = applyConfigDeprecations({
+  it('should not log a warning when enabling an existing experimental feature', () => {
+    expect(() => {
+      config.schema.validate({
         enableExperimental: ['displayAgentMetrics'],
       });
+    }).not.toThrow();
 
-      expect(res.messages).toMatchInlineSnapshot(`Array []`);
-    });
+    expect(appContextService.getLogger().warn).not.toBeCalled();
   });
 });

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { Duration, SLO, toDurationUnit } from '../../../../domain/models';
-import { BurnRateRuleParams, WindowSchema } from '../types';
-import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
-import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';
+import { Duration, SLO, toMomentUnitOfTime } from '../../../../domain/models';
+import { WindowSchema } from '../types';
 
-type BurnRateWindowWithDuration = WindowSchema & {
+export type BurnRateWindowWithDuration = WindowSchema & {
   longDuration: Duration;
   shortDuration: Duration;
 };
@@ -101,14 +100,13 @@ function buildWindowAgg(
 }
 
 function buildWindowAggs(
-  startedAt: Date,
+  startedAt: string,
   slo: SLO,
-  burnRateWindows: BurnRateWindowWithDuration[],
-  delayInSeconds = 0
+  burnRateWindows: BurnRateWindowWithDuration[]
 ) {
   return burnRateWindows.reduce((acc, winDef, index) => {
-    const shortDateRange = getLookbackDateRange(startedAt, winDef.shortDuration, delayInSeconds);
-    const longDateRange = getLookbackDateRange(startedAt, winDef.longDuration, delayInSeconds);
+    const shortDateRange = getLookbackDateRange(startedAt, winDef.shortDuration);
+    const longDateRange = getLookbackDateRange(startedAt, winDef.longDuration);
     const windowId = generateWindowId(index);
     return {
       ...acc,
@@ -156,32 +154,12 @@ function buildEvaluation(burnRateWindows: BurnRateWindowWithDuration[]) {
 }
 
 export function buildQuery(
-  startedAt: Date,
   slo: SLO,
-  params: BurnRateRuleParams,
+  dateStart: string,
+  dateEnd: string,
+  burnRateWindows: BurnRateWindowWithDuration[],
   afterKey?: EvaluationAfterKey
 ) {
-  const delayInSeconds = getDelayInSecondsFromSLO(slo);
-  const burnRateWindows = params.windows.map((winDef) => {
-    return {
-      ...winDef,
-      longDuration: new Duration(winDef.longWindow.value, toDurationUnit(winDef.longWindow.unit)),
-      shortDuration: new Duration(
-        winDef.shortWindow.value,
-        toDurationUnit(winDef.shortWindow.unit)
-      ),
-    };
-  });
-
-  const longestLookbackWindow = burnRateWindows.reduce((acc, winDef) => {
-    return winDef.longDuration.isShorterThan(acc.longDuration) ? acc : winDef;
-  }, burnRateWindows[0]);
-  const longestDateRange = getLookbackDateRange(
-    startedAt,
-    longestLookbackWindow.longDuration,
-    delayInSeconds
-  );
-
   return {
     size: 0,
     query: {
@@ -192,8 +170,8 @@ export function buildQuery(
           {
             range: {
               '@timestamp': {
-                gte: longestDateRange.from.toISOString(),
-                lt: longestDateRange.to.toISOString(),
+                gte: dateStart,
+                lt: dateEnd,
               },
             },
           },
@@ -208,10 +186,22 @@ export function buildQuery(
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
         aggs: {
-          ...buildWindowAggs(startedAt, slo, burnRateWindows, delayInSeconds),
+          ...buildWindowAggs(dateEnd, slo, burnRateWindows),
           ...buildEvaluation(burnRateWindows),
         },
       },
     },
+  };
+}
+
+function getLookbackDateRange(startedAt: string, duration: Duration): { from: Date; to: Date } {
+  const unit = toMomentUnitOfTime(duration.unit);
+  const now = moment(startedAt);
+  const from = now.clone().subtract(duration.value, unit);
+  const to = now.clone();
+
+  return {
+    from: from.toDate(),
+    to: to.toDate(),
   };
 }

@@ -89,7 +89,6 @@ const createStartContractMock = () => {
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
   startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));
   startContract.hasHeaderBanner$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getIsSideNavCollapsed$.mockReturnValue(new BehaviorSubject(false));
   return startContract;
 };
 

@@ -118,11 +118,11 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
       ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
     }
   }
-  div .euiDataGridRowCell__contentWrapper {
-    display: flex;
-    align-items: center;
+  div .euiDataGridRowCell__contentByHeight {
+    height: auto;
+    align-self: center;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__content {
+  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
     flex-grow: 0;
     width: 100%;
   }

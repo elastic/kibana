@@ -37,6 +37,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/management-plugin",
     "@kbn/test-jest-helpers",
+    "@kbn/core-notifications-browser-mocks",
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/core-http-browser",
@@ -48,7 +49,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/data-service",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-response-warnings"
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*",

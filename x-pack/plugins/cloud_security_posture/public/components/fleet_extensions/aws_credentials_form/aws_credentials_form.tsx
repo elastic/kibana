@@ -255,6 +255,7 @@ export const AwsCredentialsForm = ({
       {setupFormat === 'manual' && (
         <>
           <AwsCredentialTypeSelector
+            disabled={disabled}
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy(
@@ -270,6 +271,7 @@ export const AwsCredentialsForm = ({
           <ReadDocumentation url={integrationLink} />
           <EuiSpacer size="l" />
           <AwsInputVarFields
+            disabled={disabled}
             fields={fields}
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
@@ -284,9 +286,11 @@ export const AwsCredentialsForm = ({
 const AwsCredentialTypeSelector = ({
   type,
   onChange,
+  disabled,
 }: {
   onChange(type: AwsCredentialsType): void;
   type: AwsCredentialsType;
+  disabled: boolean;
 }) => (
   <EuiFormRow
     fullWidth
@@ -295,6 +299,7 @@ const AwsCredentialTypeSelector = ({
     })}
   >
     <EuiSelect
+      disabled={disabled}
       fullWidth
       options={getAwsCredentialsFormManualOptions()}
       value={type}
@@ -308,9 +313,11 @@ const AwsCredentialTypeSelector = ({
 const AwsInputVarFields = ({
   fields,
   onChange,
+  disabled,
 }: {
   fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
+  disabled: boolean;
 }) => (
   <div>
     {fields.map((field) => (
@@ -318,6 +325,7 @@ const AwsInputVarFields = ({
         <>
           {field.type === 'password' && (
             <EuiFieldPassword
+              disabled={disabled}
               id={field.id}
               type="dual"
               fullWidth
@@ -327,6 +335,7 @@ const AwsInputVarFields = ({
           )}
           {field.type === 'text' && (
             <EuiFieldText
+              disabled={disabled}
               id={field.id}
               fullWidth
               value={field.value || ''}

@@ -7,7 +7,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 
 export interface ContextFetchState {
   /**
@@ -38,17 +38,17 @@ export interface ContextFetchState {
   /**
    * Intercepted warnings for anchor request
    */
-  anchorInterceptedWarnings: SearchResponseWarning[] | undefined;
+  anchorInterceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
 
   /**
    * Intercepted warnings for predecessors request
    */
-  predecessorsInterceptedWarnings: SearchResponseWarning[] | undefined;
+  predecessorsInterceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
 
   /**
    * Intercepted warnings for successors request
    */
-  successorsInterceptedWarnings: SearchResponseWarning[] | undefined;
+  successorsInterceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
 }
 
 export enum LoadingStatus {

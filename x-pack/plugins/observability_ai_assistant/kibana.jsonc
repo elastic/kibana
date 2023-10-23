@@ -18,8 +18,7 @@
       "security",
       "share",
       "taskManager",
-      "triggersActionsUi",
-      "dataViews"
+      "triggersActionsUi"
     ],
     "requiredBundles": ["fieldFormats", "kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],

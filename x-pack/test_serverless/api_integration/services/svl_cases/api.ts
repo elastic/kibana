@@ -79,7 +79,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
 
     async deleteAllCaseItems() {
       await Promise.all([
-        this.deleteCases(),
+        this.deleteCasesByESQuery(),
         this.deleteCasesUserActions(),
         this.deleteComments(),
         this.deleteConfiguration(),
@@ -91,7 +91,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
       await kbnServer.savedObjects.clean({ types: ['cases-user-actions'] });
     },
 
-    async deleteCases(): Promise<void> {
+    async deleteCasesByESQuery(): Promise<void> {
       await kbnServer.savedObjects.clean({ types: ['cases'] });
     },
 

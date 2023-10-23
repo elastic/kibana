@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('post_case', () => {
     afterEach(async () => {
-      await svlCases.api.deleteCases();
+      await svlCases.api.deleteCasesByESQuery();
     });
 
     it('should create a case', async () => {

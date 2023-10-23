@@ -17,14 +17,12 @@ import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
-import { getBundlesHref } from '../render_utils';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
 
 interface FactoryOptions {
-  /** Can be a URL, in the case of a CDN, or a base path if serving from Kibana */
-  baseHref: string;
+  serverBasePath: string;
   packageInfo: PackageInfo;
   uiPlugins: UiPlugins;
   auth: HttpAuth;
@@ -44,7 +42,7 @@ interface RendererResult {
 
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
-  baseHref,
+  serverBasePath,
   uiPlugins,
   auth,
   userSettingsService,
@@ -80,23 +78,23 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       darkMode,
     });
     const buildHash = packageInfo.buildNum;
-    const bundlesHref = getBundlesHref(baseHref, String(buildHash));
+    const regularBundlePath = `${serverBasePath}/${buildHash}/bundles`;
 
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,
-      bundlesHref,
+      regularBundlePath,
       isAnonymousPage,
     });
 
-    const jsDependencyPaths = getJsDependencyPaths(bundlesHref, bundlePaths);
+    const jsDependencyPaths = getJsDependencyPaths(regularBundlePath, bundlePaths);
 
     // These paths should align with the bundle routes configured in
     // src/optimize/bundles_route/bundles_route.ts
     const publicPathMap = JSON.stringify({
-      core: `${bundlesHref}/core/`,
-      'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
-      'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
-      'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
+      core: `${regularBundlePath}/core/`,
+      'kbn-ui-shared-deps-src': `${regularBundlePath}/kbn-ui-shared-deps-src/`,
+      'kbn-ui-shared-deps-npm': `${regularBundlePath}/kbn-ui-shared-deps-npm/`,
+      'kbn-monaco': `${regularBundlePath}/kbn-monaco/`,
       ...Object.fromEntries(
         [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
       ),

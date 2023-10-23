@@ -58,7 +58,6 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { StaticAssets, type IStaticAssets } from './static_assets';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -131,12 +130,7 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouterAfterListening: (router: IRouter) => void;
-  /**
-   * Register a static directory to be served by the Kibana server
-   * @note Static assets may be served over CDN
-   */
   registerStaticDir: (path: string, dirPath: string) => void;
-  staticAssets: IStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
@@ -236,13 +230,10 @@ export class HttpServer {
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
 
-    const staticAssets = new StaticAssets(basePathService, config.cdn);
-
     return {
       registerRouter: this.registerRouter.bind(this),
       registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
-      staticAssets,
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerAuth: this.registerAuth.bind(this),
@@ -614,7 +605,7 @@ export class HttpServer {
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
     const { authRequired, tags, body = {}, timeout } = route.options;
-    const { accepts: allow, override, maxBytes, output, parse } = body;
+    const { accepts: allow, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
@@ -641,12 +632,9 @@ export class HttpServer {
         // (All NP routes are already required to specify their own validation in order to access the payload)
         validate,
         // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
-        payload: [allow, override, maxBytes, output, parse, timeout?.payload].some(
-          (x) => x !== undefined
-        )
+        payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
           ? {
               allow,
-              override,
               maxBytes,
               output,
               parse,

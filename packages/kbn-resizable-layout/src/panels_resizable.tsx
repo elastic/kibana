@@ -64,17 +64,6 @@ export const PanelsResizable = ({
     () => setResizeWithPortalsHackIsResizing(false),
     []
   );
-  const baseButtonCss = css`
-    background-color: transparent !important;
-    gap: 0 !important;
-
-    &:not(:hover):not(:focus) {
-      &:before,
-      &:after {
-        width: 0;
-      }
-    }
-  `;
   const defaultButtonCss = css`
     z-index: 3;
   `;
@@ -218,10 +207,9 @@ export const PanelsResizable = ({
           </EuiResizablePanel>
           <EuiResizableButton
             className={resizeButtonClassName}
-            css={[
-              baseButtonCss,
-              resizeWithPortalsHackIsResizing ? resizeWithPortalsHackButtonCss : defaultButtonCss,
-            ]}
+            css={
+              resizeWithPortalsHackIsResizing ? resizeWithPortalsHackButtonCss : defaultButtonCss
+            }
             data-test-subj={`${dataTestSubj}ResizableButton`}
           />
           <EuiResizablePanel

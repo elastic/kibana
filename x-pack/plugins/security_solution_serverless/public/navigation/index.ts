@@ -9,11 +9,10 @@ import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
 import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import type { Services } from '../common/services';
-import { withServicesProvider } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
-import { SecuritySideNavComponent } from './project_navigation';
+import { getDefaultNavigationComponent } from './default_navigation';
 import { projectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
 
@@ -29,14 +28,15 @@ export const startNavigation = (services: Services) => {
   const { serverless, management } = services;
   serverless.setProjectHome(APP_PATH);
 
-  management.setupCardsNavigation({ enabled: true });
-
   const projectNavigationTree = new ProjectNavigationTree(services);
 
   if (services.experimentalFeatures.platformNavEnabled) {
-    const SideNavComponentWithServices = withServicesProvider(SecuritySideNavComponent, services);
-    serverless.setSideNavComponent(SideNavComponentWithServices);
+    projectNavigationTree.getNavigationTree$().subscribe((navigationTree) => {
+      serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
+    });
   } else {
+    management.setupCardsNavigation({ enabled: true });
+
     projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
       serverless.setNavigation({ navigationTree: chromeNavigationTree });
     });

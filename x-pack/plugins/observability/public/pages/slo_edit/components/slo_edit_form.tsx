@@ -15,7 +15,7 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GetSLOResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { sloFeatureId } from '../../../../common';
@@ -45,7 +45,7 @@ import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
-  slo?: GetSLOResponse;
+  slo: SLOWithSummaryResponse | undefined;
 }
 
 export const maxWidth = 775;
@@ -63,8 +63,6 @@ export function SloEditForm({ slo }: Props) {
   });
 
   const sloFormValuesFromUrlState = useParseUrlState();
-  const sloFormValuesFromSloResponse = transformSloResponseToCreateSloForm(slo);
-
   const isAddRuleFlyoutOpen = useAddRuleFlyoutState(isEditMode);
   const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
 
@@ -75,8 +73,8 @@ export function SloEditForm({ slo }: Props) {
   }, [isEditMode, rules, slo]);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
-    values: sloFormValuesFromUrlState ? sloFormValuesFromUrlState : sloFormValuesFromSloResponse,
+    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesFromUrlState),
+    values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState, trigger } = methods;

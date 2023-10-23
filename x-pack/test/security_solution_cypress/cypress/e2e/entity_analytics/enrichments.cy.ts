@@ -37,8 +37,7 @@ const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-// FLAKY: https://github.com/elastic/kibana/issues/169154
-describe.skip('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverUnload', 'risk_scores_new');
@@ -51,7 +50,8 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless
   });
 
   describe('Custom query rule', () => {
-    describe('from legacy risk scores', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/169154
+    describe.skip('from legacy risk scores', () => {
       beforeEach(() => {
         disableExpandableFlyout();
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });

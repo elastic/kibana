@@ -7,7 +7,7 @@
  */
 
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
@@ -22,4 +22,4 @@ export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlReques
   options?: TransportRequestOptions;
 }
 
-export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<T>;
+export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<TransportResult<T>>;

@@ -46,7 +46,7 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
 describe('getPluginsBundlePaths', () => {
   it('returns an entry for each plugin and their bundle dependencies', () => {
     const pluginBundlePaths = getPluginsBundlePaths({
-      bundlesHref: '/regular-bundle-path',
+      regularBundlePath: '/regular-bundle-path',
       uiPlugins: createUiPlugins({
         a: ['b', 'c'],
         b: ['d'],
@@ -59,7 +59,7 @@ describe('getPluginsBundlePaths', () => {
 
   it('returns correct paths for each bundle', () => {
     const pluginBundlePaths = getPluginsBundlePaths({
-      bundlesHref: '/regular-bundle-path',
+      regularBundlePath: '/regular-bundle-path',
       uiPlugins: createUiPlugins({
         a: ['b'],
       }),

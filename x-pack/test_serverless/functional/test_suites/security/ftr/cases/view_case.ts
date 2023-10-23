@@ -26,7 +26,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
-  const svlCases = getService('svlCases');
   const find = getService('find');
 
   const retry = getService('retry');
@@ -35,12 +34,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Case View', function () {
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
     });
 
     after(async () => {
-      await svlCases.api.deleteAllCaseItems();
+      await cases.api.deleteAllCases();
       await svlCommonPage.forceLogout();
     });
 
@@ -278,7 +279,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.testResources.removeKibanaSampleData('logs');
-        await svlCases.api.deleteAllCaseItems();
+        await cases.api.deleteAllCases();
       });
 
       it('adds lens visualization in description', async () => {
@@ -323,7 +324,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await svlCases.api.deleteAllCaseItems();
+        await cases.api.deleteAllCases();
       });
 
       it('initially renders user actions list correctly', async () => {
@@ -435,7 +436,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await svlCases.api.deleteAllCaseItems();
+        await cases.api.deleteAllCases();
       });
 
       it('should set the cases title', async () => {
@@ -497,17 +498,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await svlCases.api.deleteAllCaseItems();
+        await cases.api.deleteAllCases();
       });
 
       it('updates a custom field correctly', async () => {
-        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
-        expect(await textField.getVisibleText()).equal('this is a text field value');
+        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        expect(await summary.getVisibleText()).equal('this is a text field value');
 
-        const toggle = await testSubjects.find(
+        const sync = await testSubjects.find(
           `case-toggle-custom-field-form-field-${customFields[1].key}`
         );
-        expect(await toggle.getAttribute('aria-checked')).equal('true');
+        expect(await sync.getAttribute('aria-checked')).equal('true');
 
         await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
 
@@ -525,23 +526,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
 
-        await header.waitUntilLoadingHasFinished();
-
         await retry.waitFor('update toast exist', async () => {
           return await testSubjects.exists('toastCloseButton');
         });
 
         await testSubjects.click('toastCloseButton');
 
-        await header.waitUntilLoadingHasFinished();
-
-        await toggle.click();
+        await sync.click();
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
+        expect(await summary.getVisibleText()).equal('this is a text field value edited!!');
 
-        expect(await toggle.getAttribute('aria-checked')).equal('false');
+        expect(await sync.getAttribute('aria-checked')).equal('false');
 
         // validate user action
         const userActions = await find.allByCssSelector(

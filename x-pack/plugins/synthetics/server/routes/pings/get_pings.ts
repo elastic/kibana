@@ -21,6 +21,7 @@ export const getPingsRouteQuerySchema = schema.object({
   pageIndex: schema.maybe(schema.number()),
   sort: schema.maybe(schema.string()),
   status: schema.maybe(schema.string()),
+  finalAttempt: schema.maybe(schema.boolean()),
 });
 
 type GetPingsRouteRequest = TypeOf<typeof getPingsRouteQuerySchema>;
@@ -43,6 +44,7 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
       pageIndex,
       locations,
       excludedLocations,
+      finalAttempt,
     } = request.query as GetPingsRouteRequest;
 
     return await queryPings({
@@ -56,6 +58,7 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
       pageIndex,
       locations: locations ? JSON.parse(locations) : [],
       excludedLocations,
+      finalAttempt,
     });
   },
 });

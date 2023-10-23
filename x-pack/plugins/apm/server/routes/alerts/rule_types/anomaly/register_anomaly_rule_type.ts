@@ -174,6 +174,7 @@ export function registerAnomalyRuleType({
                     range: {
                       timestamp: {
                         gte: dateStart,
+                        format: 'epoch_millis',
                       },
                     },
                   },

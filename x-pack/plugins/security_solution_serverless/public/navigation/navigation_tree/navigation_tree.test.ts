@@ -48,12 +48,11 @@ describe('formatNavigationTree', () => {
   });
 
   it('should format flat nav nodes', async () => {
-    const navigationTree = formatNavigationTree([link1], [], []);
+    const navigationTree = formatNavigationTree([link1]);
     const securityNode = navigationTree.body?.[0] as GroupDefinition;
 
     expect(securityNode?.children).toEqual([
       {
-        id: link1.id,
         link: chromeNavLink1.id,
         title: link1.title,
       },
@@ -66,17 +65,15 @@ describe('formatNavigationTree', () => {
       type: LinkCategoryType.title,
       linkIds: [link1Id],
     };
-    const navigationTree = formatNavigationTree([link1], [category], []);
+    const navigationTree = formatNavigationTree([link1], [category]);
     const securityNode = navigationTree.body?.[0] as GroupDefinition;
 
     expect(securityNode?.children).toEqual([
       {
         title: category.label,
         id: expect.any(String),
-        breadcrumbStatus: 'hidden',
         children: [
           {
-            id: link1.id,
             link: chromeNavLink1.id,
             title: link1.title,
           },
@@ -91,24 +88,17 @@ describe('formatNavigationTree', () => {
       type: LinkCategoryType.separator,
       linkIds: [link1Id, link2Id],
     };
-    const navigationTree = formatNavigationTree([link1, link2], [category], []);
+    const navigationTree = formatNavigationTree([link1, link2], [category]);
     const securityNode = navigationTree.body?.[0] as GroupDefinition;
 
     expect(securityNode?.children).toEqual([
       {
-        breadcrumbStatus: 'hidden',
-        children: [
-          {
-            id: link1.id,
-            link: chromeNavLink1.id,
-            title: link1.title,
-          },
-          {
-            id: link2.id,
-            link: chromeNavLink2.id,
-            title: link2.title,
-          },
-        ],
+        link: chromeNavLink1.id,
+        title: link1.title,
+      },
+      {
+        link: chromeNavLink2.id,
+        title: link2.title,
       },
     ]);
   });
@@ -119,17 +109,15 @@ describe('formatNavigationTree', () => {
       type: LinkCategoryType.title,
       linkIds: [link1Id, link2Id],
     };
-    const navigationTree = formatNavigationTree([link1], [category], []);
+    const navigationTree = formatNavigationTree([link1], [category]);
     const securityNode = navigationTree.body?.[0] as GroupDefinition;
 
     expect(securityNode?.children).toEqual([
       {
         title: category.label,
         id: expect.any(String),
-        breadcrumbStatus: 'hidden',
         children: [
           {
-            id: link1.id,
             link: chromeNavLink1.id,
             title: link1.title,
           },
@@ -144,17 +132,15 @@ describe('formatNavigationTree', () => {
       type: LinkCategoryType.title,
       linkIds: [link1Id],
     };
-    const navigationTree = formatNavigationTree([link1, link2], [category], []);
+    const navigationTree = formatNavigationTree([link1, link2], [category]);
     const securityNode = navigationTree.body?.[0] as GroupDefinition;
 
     expect(securityNode?.children).toEqual([
       {
         title: category.label,
         id: expect.any(String),
-        breadcrumbStatus: 'hidden',
         children: [
           {
-            id: link1.id,
             link: chromeNavLink1.id,
             title: link1.title,
           },
@@ -164,12 +150,11 @@ describe('formatNavigationTree', () => {
   });
 
   it('should format external chrome nav nodes', async () => {
-    const navigationTree = formatNavigationTree([link3], [], []);
+    const navigationTree = formatNavigationTree([link3]);
     const securityNode = navigationTree.body?.[0] as GroupDefinition;
 
     expect(securityNode?.children).toEqual([
       {
-        id: link3.id,
         link: chromeNavLink3.id,
         title: link3.title,
       },
@@ -177,25 +162,20 @@ describe('formatNavigationTree', () => {
   });
 
   it('should set nested links', async () => {
-    const navigationTree = formatNavigationTree(
-      [{ ...link1, links: [{ ...link2, links: [link3] }] }],
-      [],
-      []
-    );
+    const navigationTree = formatNavigationTree([
+      { ...link1, links: [{ ...link2, links: [link3] }] },
+    ]);
     const securityNode = navigationTree.body?.[0] as GroupDefinition;
 
     expect(securityNode?.children).toEqual([
       {
-        id: link1.id,
         link: chromeNavLink1.id,
         title: link1.title,
         children: [
           {
-            id: link2.id,
             link: chromeNavLink2.id,
             title: link2.title,
-            children: [{ id: link3.id, link: chromeNavLink3.id, title: link3.title }],
-            renderAs: 'panelOpener',
+            children: [{ link: chromeNavLink3.id, title: link3.title }],
           },
         ],
       },
@@ -208,22 +188,19 @@ describe('formatNavigationTree', () => {
       id: `${APP_UI_ID}:${SecurityPageName.usersEvents}`, // userEvents link is blacklisted
     };
 
-    const navigationTree = formatNavigationTree(
-      [{ ...link1, id: SecurityPageName.usersEvents }, link2],
-      [],
-      []
-    );
+    const navigationTree = formatNavigationTree([
+      { ...link1, id: SecurityPageName.usersEvents },
+      link2,
+    ]);
     const securityNode = navigationTree.body?.[0] as GroupDefinition;
 
     expect(securityNode?.children).toEqual([
       {
-        id: SecurityPageName.usersEvents,
         link: chromeNavLinkTest.id,
         title: link1.title,
         breadcrumbStatus: 'hidden',
       },
       {
-        id: link2.id,
         link: chromeNavLink2.id,
         title: link2.title,
       },

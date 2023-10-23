@@ -55,7 +55,7 @@ export class RenderingService {
         router,
         renderer: bootstrapRendererFactory({
           uiPlugins,
-          baseHref: http.staticAssets.getHrefBase(),
+          serverBasePath: http.basePath.serverBasePath,
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
         }),
@@ -79,7 +79,7 @@ export class RenderingService {
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
         uiPlugins,
-        baseHref: http.staticAssets.getHrefBase(),
+        serverBasePath: http.basePath.serverBasePath,
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
         userSettingsService: userSettings,
@@ -114,7 +114,6 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
     };
     const buildNum = env.packageInfo.buildNum;
-    const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
@@ -181,7 +180,7 @@ export class RenderingService {
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
       themeVersion,
-      baseHref: staticAssetsHrefBase,
+      basePath: serverBasePath,
       buildNum,
     });
 
@@ -189,7 +188,7 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
-      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
+      uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
@@ -213,7 +212,6 @@ export class RenderingService {
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          // TODO: Make this load as part of static assets!
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         theme: {

@@ -21,8 +21,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T22:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T23:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -70,8 +70,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T23:52:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T23:55:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -119,8 +119,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T17:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T18:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -168,8 +168,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T23:27:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T23:30:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -217,8 +217,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-30T23:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T00:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -266,8 +266,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T21:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T22:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -315,8 +315,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-28T23:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-29T00:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -364,8 +364,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T17:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T18:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -445,8 +445,8 @@ Object {
         Object {
           "range": Object {
             "@timestamp": Object {
-              "gte": "2022-12-28T23:57:00.000Z",
-              "lt": "2022-12-31T23:57:00.000Z",
+              "gte": "2022-12-29T00:00:00.000Z",
+              "lt": "2023-01-01T00:00:00.000Z",
             },
           },
         },
@@ -478,8 +478,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T22:56:00.000Z",
-                "lt": "2022-12-31T23:56:00.000Z",
+                "gte": "2022-12-31T23:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -505,7 +505,7 @@ Object {
             },
             "script": Object {
               "params": Object {
-                "target": 0.98,
+                "target": 0.999,
               },
               "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
             },
@@ -527,8 +527,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T23:51:00.000Z",
-                "lt": "2022-12-31T23:56:00.000Z",
+                "gte": "2022-12-31T23:55:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -554,7 +554,7 @@ Object {
             },
             "script": Object {
               "params": Object {
-                "target": 0.98,
+                "target": 0.999,
               },
               "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
             },
@@ -576,8 +576,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T17:56:00.000Z",
-                "lt": "2022-12-31T23:56:00.000Z",
+                "gte": "2022-12-31T18:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -603,7 +603,7 @@ Object {
             },
             "script": Object {
               "params": Object {
-                "target": 0.98,
+                "target": 0.999,
               },
               "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
             },
@@ -625,8 +625,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T23:26:00.000Z",
-                "lt": "2022-12-31T23:56:00.000Z",
+                "gte": "2022-12-31T23:30:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -652,7 +652,7 @@ Object {
             },
             "script": Object {
               "params": Object {
-                "target": 0.98,
+                "target": 0.999,
               },
               "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
             },
@@ -674,8 +674,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-30T23:56:00.000Z",
-                "lt": "2022-12-31T23:56:00.000Z",
+                "gte": "2022-12-31T00:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -701,7 +701,7 @@ Object {
             },
             "script": Object {
               "params": Object {
-                "target": 0.98,
+                "target": 0.999,
               },
               "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
             },
@@ -723,8 +723,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T21:56:00.000Z",
-                "lt": "2022-12-31T23:56:00.000Z",
+                "gte": "2022-12-31T22:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -750,7 +750,7 @@ Object {
             },
             "script": Object {
               "params": Object {
-                "target": 0.98,
+                "target": 0.999,
               },
               "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
             },
@@ -772,8 +772,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-28T23:56:00.000Z",
-                "lt": "2022-12-31T23:56:00.000Z",
+                "gte": "2022-12-29T00:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -799,7 +799,7 @@ Object {
             },
             "script": Object {
               "params": Object {
-                "target": 0.98,
+                "target": 0.999,
               },
               "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
             },
@@ -821,8 +821,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T17:56:00.000Z",
-                "lt": "2022-12-31T23:56:00.000Z",
+                "gte": "2022-12-31T18:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -848,7 +848,7 @@ Object {
             },
             "script": Object {
               "params": Object {
-                "target": 0.98,
+                "target": 0.999,
               },
               "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
             },
@@ -902,8 +902,8 @@ Object {
         Object {
           "range": Object {
             "@timestamp": Object {
-              "gte": "2022-12-28T23:56:00.000Z",
-              "lt": "2022-12-31T23:56:00.000Z",
+              "gte": "2022-12-29T00:00:00.000Z",
+              "lt": "2023-01-01T00:00:00.000Z",
             },
           },
         },
@@ -935,8 +935,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T22:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T23:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -984,8 +984,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T23:52:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T23:55:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -1033,8 +1033,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T17:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T18:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -1082,8 +1082,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T23:27:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T23:30:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -1131,8 +1131,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-30T23:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T00:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -1180,8 +1180,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T21:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T22:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -1229,8 +1229,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-28T23:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-29T00:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -1278,8 +1278,8 @@ Object {
           "filter": Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "2022-12-31T17:57:00.000Z",
-                "lt": "2022-12-31T23:57:00.000Z",
+                "gte": "2022-12-31T18:00:00.000Z",
+                "lt": "2023-01-01T00:00:00.000Z",
               },
             },
           },
@@ -1362,8 +1362,8 @@ Object {
         Object {
           "range": Object {
             "@timestamp": Object {
-              "gte": "2022-12-28T23:57:00.000Z",
-              "lt": "2022-12-31T23:57:00.000Z",
+              "gte": "2022-12-29T00:00:00.000Z",
+              "lt": "2023-01-01T00:00:00.000Z",
             },
           },
         },

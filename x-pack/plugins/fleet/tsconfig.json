@@ -101,6 +101,5 @@
     "@kbn/core-http-common",
     "@kbn/dashboard-plugin",
     "@kbn/cloud",
-    "@kbn/config",
   ]
 }

@@ -703,14 +703,6 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/types.ts"
               },
@@ -925,22 +917,6 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
               },
               {
                 "plugin": "security",

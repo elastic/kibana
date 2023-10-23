@@ -60,7 +60,6 @@ export const DocumentExplorerCallout = () => {
 
   return (
     <EuiCallOut
-      data-test-subj="dscDocumentExplorerLegacyCallout"
       className="dscDocumentExplorerCallout"
       title={<CalloutTitle onCloseCallout={onCloseCallout} />}
       iconType="search"

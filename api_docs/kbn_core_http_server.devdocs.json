@@ -3373,14 +3373,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/enabled.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/get.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/anonymous_access/get_capabilities.ts"
               },
               {
@@ -3462,6 +3454,14 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/views/login.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/enabled.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/get.ts"
               },
               {
                 "plugin": "monitoringCollection",
@@ -5847,14 +5847,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/create.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/invalidate.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/analytics/authentication_type.ts"
               },
               {
@@ -5919,7 +5911,11 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/analytics/record_violations.ts"
+                "path": "x-pack/plugins/security/server/routes/api_keys/create.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/invalidate.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -7627,10 +7623,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/analytics/record_violations.test.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/create.test.ts"
               },
               {
@@ -7897,11 +7889,11 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.ts"
+                "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
               },
               {
                 "plugin": "actions",
@@ -11856,22 +11848,6 @@
                 "text": "RouteContentType"
               },
               "[] | undefined"
-            ],
-            "path": "packages/core/http/core-http-server/src/router/route.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-http-server",
-            "id": "def-common.RouteConfigOptionsBody.override",
-            "type": "string",
-            "tags": [],
-            "label": "override",
-            "description": [
-              "\nA mime type string overriding the 'Content-Type' header value received."
-            ],
-            "signature": [
-              "string | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,

@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom';
 import { transformPartialUrlStateToFormState } from '../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../types';
 
-export function useParseUrlState(): CreateSLOForm | undefined {
+export function useParseUrlState(): Partial<CreateSLOForm> | null {
   const history = useHistory();
   const urlStateStorage = createKbnUrlStateStorage({
     history,
@@ -20,7 +20,7 @@ export function useParseUrlState(): CreateSLOForm | undefined {
     useHashQuery: false,
   });
 
-  const urlState = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a');
+  const urlParams = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a');
 
-  return !!urlState ? transformPartialUrlStateToFormState(urlState) : undefined;
+  return !!urlParams ? transformPartialUrlStateToFormState(urlParams) : null;
 }

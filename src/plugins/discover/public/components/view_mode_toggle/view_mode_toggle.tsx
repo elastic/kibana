@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { DOC_TABLE_LEGACY, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
@@ -23,16 +23,9 @@ export const DocumentViewModeToggle = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
-  const tabsPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const tabsCss = css`
-    padding: ${tabsPadding} ${tabsPadding} 0 ${tabsPadding};
-
-    .euiTab__content {
-      line-height: ${euiTheme.size.xl};
-    }
+    padding: 0 ${euiTheme.size.s};
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -42,10 +35,11 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
+    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+        className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeDocumentButton"
       >
         <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
@@ -53,6 +47,7 @@ export const DocumentViewModeToggle = ({
       <EuiTab
         isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
+        className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeFieldStatsButton"
       >
         <FormattedMessage

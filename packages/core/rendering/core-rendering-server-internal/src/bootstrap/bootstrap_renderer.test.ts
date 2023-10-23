@@ -62,7 +62,7 @@ describe('bootstrapRenderer', () => {
       auth,
       packageInfo,
       uiPlugins,
-      baseHref: '/base-path',
+      serverBasePath: '/base-path',
     });
   });
 
@@ -134,7 +134,7 @@ describe('bootstrapRenderer', () => {
         auth,
         packageInfo,
         uiPlugins,
-        baseHref: '/base-path',
+        serverBasePath: '/base-path',
         userSettingsService,
       });
 
@@ -160,7 +160,7 @@ describe('bootstrapRenderer', () => {
         auth,
         packageInfo,
         uiPlugins,
-        baseHref: '/base-path',
+        serverBasePath: '/base-path',
         userSettingsService,
       });
 
@@ -186,7 +186,7 @@ describe('bootstrapRenderer', () => {
         auth,
         packageInfo,
         uiPlugins,
-        baseHref: '/base-path',
+        serverBasePath: '/base-path',
         userSettingsService,
       });
 
@@ -212,7 +212,7 @@ describe('bootstrapRenderer', () => {
         auth,
         packageInfo,
         uiPlugins,
-        baseHref: '/base-path',
+        serverBasePath: '/base-path',
         userSettingsService,
       });
 
@@ -319,7 +319,7 @@ describe('bootstrapRenderer', () => {
       expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
         isAnonymousPage,
         uiPlugins,
-        bundlesHref: '/base-path/42/bundles',
+        regularBundlePath: '/base-path/42/bundles',
       });
     });
   });

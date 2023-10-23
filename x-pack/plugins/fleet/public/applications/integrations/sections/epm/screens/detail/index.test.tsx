@@ -102,9 +102,6 @@ describe('when on integration detail', () => {
 
   describe('and the package is not installed and prerelease enabled', () => {
     beforeEach(async () => {
-      mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: true, id: '', fleet_server_hosts: [] },
-      });
       mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();
       await act(() => mockedApi.waitForApi());
@@ -168,9 +165,6 @@ describe('when on integration detail', () => {
 
   describe('and a custom UI extension is NOT registered', () => {
     beforeEach(async () => {
-      mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
-      });
       await render();
       await act(() => mockedApi.waitForApi());
       // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
@@ -207,9 +201,6 @@ describe('when on integration detail', () => {
 
     beforeEach(async () => {
       let setWasRendered: () => void;
-      mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
-      });
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;
       });
@@ -277,12 +268,6 @@ describe('when on integration detail', () => {
       });
 
       await render();
-
-      await act(() => mockedApi.waitForApi());
-      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
-      await act(() => mockedApi.waitForApi());
-      await act(() => mockedApi.waitForApi());
-      await act(() => mockedApi.waitForApi());
     });
 
     afterEach(() => {
@@ -290,7 +275,7 @@ describe('when on integration detail', () => {
       lazyComponentWasRendered = undefined;
     });
 
-    it('should display "assets" tab in navigation', async () => {
+    it('should display "assets" tab in navigation', () => {
       expect(renderResult.getByTestId('tab-assets'));
     });
 
@@ -308,11 +293,6 @@ describe('when on integration detail', () => {
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();
-      await act(() => mockedApi.waitForApi());
-      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
-      await act(() => mockedApi.waitForApi());
-      await act(() => mockedApi.waitForApi());
-      await act(() => mockedApi.waitForApi());
     });
 
     it('should link to the create page', () => {

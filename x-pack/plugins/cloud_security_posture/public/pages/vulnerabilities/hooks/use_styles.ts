@@ -46,15 +46,14 @@ export const useStyles = () => {
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
     }
-    & .euiDataGridRowCell__actions > [data-test-subj='euiDataGridCellExpandButton'] {
+    & .euiDataGridRowCell__expandActions > [data-test-subj='euiDataGridCellExpandButton'] {
       display: none;
     }
-    & .euiDataGridRowCell__actions--overlay {
+    & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
       padding: 0;
     }
 
-    & .euiDataGridRowCell__contentWrapper {
-      display: flex;
+    & .euiDataGridRowCell__expandFlex {
       align-items: center;
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {

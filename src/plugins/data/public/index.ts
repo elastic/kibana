@@ -169,6 +169,8 @@ export type {
   IEsError,
   Reason,
   WaitUntilNextSessionCompletesOptions,
+  SearchResponseWarning,
+  SearchResponseIncompleteWarning,
 } from './search';
 
 export {
@@ -270,6 +272,9 @@ export type {
   TimefilterSetup,
   GlobalQueryStateFromUrl,
 } from './query';
+
+// TODO: move to @kbn/search-response-warnings
+export { ViewWarningButton } from './search/warnings';
 
 export type { AggsStart } from './search/aggs';
 

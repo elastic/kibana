@@ -14,7 +14,7 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
@@ -79,7 +79,7 @@ export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
   textBasedHeaderWarning?: string;
-  interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
+  interceptedWarnings?: SearchResponseInterceptedWarning[]; // warnings (like shard failures)
 }
 
 export interface DataTotalHitsMsg extends DataMsg {

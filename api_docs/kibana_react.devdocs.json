@@ -2897,6 +2897,14 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/delete_button.tsx"
           },
           {

@@ -16,12 +16,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
-  const svlCases = getService('svlCases');
   const toasts = getService('toasts');
   const retry = getService('retry');
   const find = getService('find');
 
   describe('Configure Case', function () {
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
@@ -41,7 +42,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await svlCases.api.deleteAllCaseItems();
+      await cases.api.deleteAllCases();
       await svlCommonPage.forceLogout();
     });
 

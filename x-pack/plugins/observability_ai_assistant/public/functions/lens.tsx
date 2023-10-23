@@ -38,7 +38,6 @@ function Lens({
   end,
   lens,
   dataViews,
-  timeField,
 }: {
   indexPattern: string;
   xyDataLayer: XYDataLayer;
@@ -46,7 +45,6 @@ function Lens({
   end: string;
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
-  timeField: string;
 }) {
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
@@ -54,8 +52,9 @@ function Lens({
 
   const dataViewAsync = useAsync(() => {
     return dataViews.create({
+      id: indexPattern,
       title: indexPattern,
-      timeFieldName: timeField,
+      timeFieldName: '@timestamp',
     });
   }, [indexPattern]);
 
@@ -200,12 +199,6 @@ export function registerLensFunction({
               required: ['label', 'formula', 'format'],
             },
           },
-          timeField: {
-            type: 'string',
-            default: '@timefield',
-            description:
-              'time field to use for XY chart. Use @timefield if its available on the index.',
-          },
           breakdown: {
             type: 'object',
             additionalProperties: false,
@@ -242,7 +235,7 @@ export function registerLensFunction({
             description: 'The end of the time range, in Elasticsearch datemath',
           },
         },
-        required: ['layers', 'indexPattern', 'start', 'end', 'timeField'],
+        required: ['layers', 'indexPattern', 'start', 'end'],
       } as const,
     },
     async () => {
@@ -250,7 +243,7 @@ export function registerLensFunction({
         content: {},
       };
     },
-    ({ arguments: { layers, indexPattern, breakdown, seriesType, start, end, timeField } }) => {
+    ({ arguments: { layers, indexPattern, breakdown, seriesType, start, end } }) => {
       const xyDataLayer = new XYDataLayer({
         data: layers.map((layer) => ({
           type: 'formula',
@@ -270,8 +263,6 @@ export function registerLensFunction({
         },
       });
 
-      if (!timeField) return;
-
       return (
         <Lens
           indexPattern={indexPattern}
@@ -280,7 +271,6 @@ export function registerLensFunction({
           end={end}
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
-          timeField={timeField}
         />
       );
     }

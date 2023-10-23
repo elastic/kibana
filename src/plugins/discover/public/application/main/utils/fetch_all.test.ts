@@ -296,7 +296,11 @@ describe('test fetchAll', () => {
     const initialRecords = [records[0], records[1]];
     const moreRecords = [records[2], records[3]];
 
-    const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
+    const interceptedWarnings = [
+      {
+        originalWarning: searchResponseIncompleteWarningLocalCluster,
+      },
+    ];
 
     test('should add more records', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);

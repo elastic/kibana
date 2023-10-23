@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiButtonEmpty,
-  EuiToolTip,
   EuiSwitch,
 } from '@elastic/eui';
 
@@ -57,8 +56,8 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const { mutate: deleteKB, isLoading: isDeletingUpKB } = useDeleteKnowledgeBase({ http });
 
     // Resource enabled state
-    const isElserEnabled = kbStatus?.elser_exists ?? false;
-    const isKnowledgeBaseEnabled = (kbStatus?.index_exists && kbStatus?.pipeline_exists) ?? false;
+    const isKnowledgeBaseEnabled =
+      (kbStatus?.index_exists && kbStatus?.pipeline_exists && kbStatus?.elser_exists) ?? false;
     const isESQLEnabled = kbStatus?.esql_exists ?? false;
 
     // Resource availability state
@@ -66,11 +65,9 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isKnowledgeBaseAvailable = knowledgeBase.assistantLangChain && kbStatus?.elser_exists;
     const isESQLAvailable =
       knowledgeBase.assistantLangChain && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
-    // Prevent enabling if elser doesn't exist, but always allow to disable
-    const isSwitchDisabled = !kbStatus?.elser_exists && !knowledgeBase.assistantLangChain;
 
     // Calculated health state for EuiHealth component
-    const elserHealth = isElserEnabled ? 'success' : 'subdued';
+    const elserHealth = kbStatus?.elser_exists ? 'success' : 'subdued';
     const knowledgeBaseHealth = isKnowledgeBaseEnabled ? 'success' : 'subdued';
     const esqlHealth = isESQLEnabled ? 'success' : 'subdued';
 
@@ -96,24 +93,16 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
       return isLoadingKb ? (
         <EuiLoadingSpinner size="s" />
       ) : (
-        <EuiToolTip content={isSwitchDisabled && i18n.KNOWLEDGE_BASE_TOOLTIP} position={'right'}>
-          <EuiSwitch
-            showLabel={false}
-            data-test-subj="assistantLangChainSwitch"
-            disabled={isSwitchDisabled}
-            checked={knowledgeBase.assistantLangChain}
-            onChange={onEnableAssistantLangChainChange}
-            label={i18n.KNOWLEDGE_BASE_LABEL}
-            compressed
-          />
-        </EuiToolTip>
+        <EuiSwitch
+          showLabel={false}
+          data-test-subj="assistantLangChainSwitch"
+          checked={knowledgeBase.assistantLangChain}
+          onChange={onEnableAssistantLangChainChange}
+          label={i18n.KNOWLEDGE_BASE_LABEL}
+          compressed
+        />
       );
-    }, [
-      isLoadingKb,
-      isSwitchDisabled,
-      knowledgeBase.assistantLangChain,
-      onEnableAssistantLangChainChange,
-    ]);
+    }, [isLoadingKb, knowledgeBase.assistantLangChain, onEnableAssistantLangChainChange]);
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Knowledge Base Resource
@@ -216,7 +205,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
           display="columnCompressedSwitch"
           label={i18n.KNOWLEDGE_BASE_LABEL}
           css={css`
-            .euiFormRow__labelWrapper {
+            div {
               min-width: 95px !important;
             }
           `}

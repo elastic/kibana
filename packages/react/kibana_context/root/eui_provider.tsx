@@ -10,7 +10,7 @@ import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
-import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
+import { EuiProvider, EuiProviderProps } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
@@ -25,23 +25,18 @@ export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modi
 
 // Set up the caches.
 // https://eui.elastic.co/#/utilities/provider#cache-location
-const stylisPlugins = [euiStylisPrefixer]; // https://emotion.sh/docs/@emotion/cache#stylisplugins
-
 const emotionCache = createCache({
   key: 'css',
-  stylisPlugins,
   container: document.querySelector('meta[name="emotion"]') as HTMLElement,
 });
 
 const globalCache = createCache({
   key: EUI_STYLES_GLOBAL,
-  stylisPlugins,
   container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
 });
 
 const utilitiesCache = createCache({
   key: EUI_STYLES_UTILS,
-  stylisPlugins,
   container: document.querySelector(`meta[name="${EUI_STYLES_UTILS}"]`) as HTMLElement,
 });
 

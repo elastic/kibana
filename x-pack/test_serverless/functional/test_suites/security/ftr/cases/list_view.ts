@@ -14,11 +14,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
-  const svlCases = getService('svlCases');
   const svlSecNavigation = getService('svlSecNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Cases List', function () {
+    // multiple errors in after hook due to delete permission
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
 
@@ -28,7 +29,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await svlCases.api.deleteAllCaseItems();
+      await cases.api.deleteAllCases();
       await cases.casesTable.waitForCasesToBeDeleted();
       await svlCommonPage.forceLogout();
     });
@@ -48,6 +49,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('bulk actions', () => {
+      // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+      // action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
       describe('delete', () => {
         createNCasesBeforeDeleteAllAfter(8, getPageObject, getService);
 
@@ -107,7 +110,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await svlCases.api.deleteAllCaseItems();
+          await cases.api.deleteAllCases();
           await cases.casesTable.waitForCasesToBeDeleted();
         });
 
@@ -171,7 +174,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await svlCases.api.deleteAllCaseItems();
+        await cases.api.deleteAllCases();
         await cases.casesTable.waitForCasesToBeDeleted();
       });
 
@@ -276,7 +279,6 @@ const createNCasesBeforeDeleteAllAfter = (
   getService: FtrProviderContext['getService']
 ) => {
   const cases = getService('cases');
-  const svlCases = getService('svlCases');
   const header = getPageObject('header');
 
   before(async () => {
@@ -286,7 +288,7 @@ const createNCasesBeforeDeleteAllAfter = (
   });
 
   after(async () => {
-    await svlCases.api.deleteAllCaseItems();
+    await cases.api.deleteAllCases();
     await cases.casesTable.waitForCasesToBeDeleted();
   });
 };

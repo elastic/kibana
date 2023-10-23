@@ -48,10 +48,10 @@ export const validateEql = async ({
     )
   );
 
-  if (isValidationErrorResponse(response)) {
-    return { valid: false, errors: getValidationErrors(response) };
-  } else if (isErrorResponse(response)) {
-    throw new Error(JSON.stringify(response));
+  if (isValidationErrorResponse(response.body)) {
+    return { valid: false, errors: getValidationErrors(response.body) };
+  } else if (isErrorResponse(response.body)) {
+    throw new Error(JSON.stringify(response.body));
   } else {
     return { valid: true, errors: [] };
   }

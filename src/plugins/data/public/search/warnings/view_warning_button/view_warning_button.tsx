@@ -30,7 +30,7 @@ export default function ViewWarningButton({
   return (
     <Component color={color} size={size} onClick={onClick} data-test-subj="viewWarningBtn">
       <FormattedMessage
-        id="searchResponseWarnings.viewDetailsButtonLabel"
+        id="data.search.searchSource.warning.viewDetailsButtonLabel"
         defaultMessage="View details"
         description="View warning details button label"
       />

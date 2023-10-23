@@ -61,7 +61,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
   const listingTable = getService('listingTable');
-  const toasts = getService('toasts');
 
   const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
@@ -250,7 +249,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
              */
             await cases.create.createCase({ owner });
             await cases.common.expectToasterToContain('has been updated');
-            await toasts.dismissAllToastsWithChecks();
           }
 
           const casesCreatedFromFlyout = await findCases({ supertest });
@@ -327,7 +325,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
             await cases.common.expectToasterToContain('has been updated');
-            await toasts.dismissAllToastsWithChecks();
             await ensureFirstCommentOwner(currentCaseId, owner);
           }
         });
@@ -390,7 +387,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
@@ -418,7 +414,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);

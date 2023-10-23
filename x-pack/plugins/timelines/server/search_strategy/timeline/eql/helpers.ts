@@ -113,11 +113,11 @@ export const parseEqlResponse = async (
   } = options;
   let edges: TimelineEdges[] = [];
 
-  if (response.rawResponse.hits.sequences !== undefined) {
-    edges = await parseSequences(response.rawResponse.hits.sequences, options.fieldRequested);
-  } else if (response.rawResponse.hits.events !== undefined) {
+  if (response.rawResponse.body.hits.sequences !== undefined) {
+    edges = await parseSequences(response.rawResponse.body.hits.sequences, options.fieldRequested);
+  } else if (response.rawResponse.body.hits.events !== undefined) {
     edges = await Promise.all(
-      response.rawResponse.hits.events.map(async (event) =>
+      response.rawResponse.body.hits.events.map(async (event) =>
         formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, event as EventHit)
       )
     );

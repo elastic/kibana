@@ -7,10 +7,10 @@
 
 import { transformPartialUrlStateToFormState as transform } from './process_slo_form_values';
 
-describe('Transform partial URL state into form state', () => {
-  describe("with 'indicator' in URL state", () => {
-    it('returns default form values when no indicator type is specified', () => {
-      expect(transform({ indicator: { params: { index: 'my-index' } } })).toMatchSnapshot();
+describe('Transform Partial URL State into partial State Form', () => {
+  describe('indicators', () => {
+    it("returns an empty '{}' when no indicator type is specified", () => {
+      expect(transform({ indicator: { params: { index: 'my-index' } } })).toEqual({});
     });
 
     it('handles partial APM Availability state', () => {
@@ -23,7 +23,19 @@ describe('Transform partial URL state into form state', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        indicator: {
+          type: 'sli.apm.transactionErrorRate',
+          params: {
+            service: 'override-service',
+            environment: '',
+            filter: '',
+            index: '',
+            transactionName: '',
+            transactionType: '',
+          },
+        },
+      });
     });
 
     it('handles partial APM Latency state', () => {
@@ -36,7 +48,20 @@ describe('Transform partial URL state into form state', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        indicator: {
+          type: 'sli.apm.transactionDuration',
+          params: {
+            service: 'override-service',
+            environment: '',
+            filter: '',
+            index: '',
+            transactionName: '',
+            transactionType: '',
+            threshold: 250,
+          },
+        },
+      });
     });
 
     it('handles partial Custom KQL state', () => {
@@ -50,49 +75,78 @@ describe('Transform partial URL state into form state', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        indicator: {
+          type: 'sli.kql.custom',
+          params: {
+            index: 'override-index',
+            timestampField: '',
+            filter: '',
+            good: "some.override.filter:'foo'",
+            total: '',
+          },
+        },
+      });
     });
-  });
 
-  it('handles partial Custom Metric state', () => {
-    expect(
-      transform({
+    it('handles partial Custom Metric state', () => {
+      expect(
+        transform({
+          indicator: {
+            type: 'sli.metric.custom',
+            params: {
+              index: 'override-index',
+            },
+          },
+        })
+      ).toEqual({
         indicator: {
           type: 'sli.metric.custom',
           params: {
             index: 'override-index',
+            filter: '',
+            timestampField: '',
+            good: {
+              equation: 'A',
+              metrics: [{ aggregation: 'sum', field: '', name: 'A' }],
+            },
+            total: {
+              equation: 'A',
+              metrics: [{ aggregation: 'sum', field: '', name: 'A' }],
+            },
           },
         },
-      })
-    ).toMatchSnapshot();
-  });
+      });
+    });
 
-  it('handles partial Custom Histogram state', () => {
-    expect(
-      transform({
+    it('handles partial Custom Histogram state', () => {
+      expect(
+        transform({
+          indicator: {
+            type: 'sli.histogram.custom',
+            params: {
+              index: 'override-index',
+            },
+          },
+        })
+      ).toEqual({
         indicator: {
           type: 'sli.histogram.custom',
           params: {
             index: 'override-index',
+            filter: '',
+            timestampField: '',
+            good: {
+              aggregation: 'value_count',
+              field: '',
+            },
+            total: {
+              aggregation: 'value_count',
+              field: '',
+            },
           },
         },
-      })
-    ).toMatchSnapshot();
-  });
-
-  it("handles the 'budgetingMethod' URL state", () => {
-    expect(transform({ budgetingMethod: 'timeslices' })).toMatchSnapshot();
-  });
-
-  it("handles the 'timeWindow' URL state", () => {
-    expect(
-      transform({ timeWindow: { duration: '1M', type: 'calendarAligned' } })
-    ).toMatchSnapshot();
-  });
-
-  it("handles the 'objective' URL state", () => {
-    expect(
-      transform({ objective: { target: 0.945, timesliceTarget: 0.95, timesliceWindow: '2m' } })
-    ).toMatchSnapshot();
+      });
+    });
   });
 });

@@ -19,7 +19,7 @@ import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
 
-import { type SearchResponseWarning, ViewWarningButton } from '@kbn/search-response-warnings';
+import { SearchResponseWarning, ViewWarningButton } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';

@@ -8,7 +8,7 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -25,5 +25,5 @@ export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
   textBasedHeaderWarning?: string;
-  interceptedWarnings?: SearchResponseWarning[];
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
 }

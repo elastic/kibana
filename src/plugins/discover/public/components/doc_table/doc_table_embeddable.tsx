@@ -11,7 +11,7 @@ import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { usePager } from '@kbn/discover-utils';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 import {
   ToolBarPagination,
   MAX_ROWS_PER_PAGE_OPTION,
@@ -23,7 +23,7 @@ export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount?: number;
   rowsPerPageState?: number;
   sampleSizeState: number;
-  interceptedWarnings?: SearchResponseWarning[];
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
   onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
 }
 

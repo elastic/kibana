@@ -125,17 +125,12 @@ describe('Discover main content component', () => {
   describe('DocumentViewModeToggle', () => {
     it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
       const component = await mountComponent();
-      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
+      expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
     });
 
     it('should not show DocumentViewModeToggle when isPlainRecord is true', async () => {
       const component = await mountComponent({ isPlainRecord: true });
-      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeUndefined();
-    });
-
-    it('should show DocumentViewModeToggle for Field Statistics', async () => {
-      const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
-      expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
+      expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
     });
   });
 

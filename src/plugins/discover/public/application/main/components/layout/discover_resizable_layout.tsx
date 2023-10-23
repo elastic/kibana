@@ -71,6 +71,7 @@ export const DiscoverResizableLayout = ({
         minFlexPanelSize={minMainPanelWidth}
         fixedPanel={<OutPortal node={sidebarPanelNode} />}
         flexPanel={<OutPortal node={mainPanelNode} />}
+        resizeButtonClassName="dscSidebarResizeButton"
         data-test-subj="discoverLayout"
         onFixedPanelSizeChange={setSidebarWidth}
       />

@@ -19,7 +19,7 @@ export function toEqlKibanaSearchResponse(
 ): EqlSearchStrategyResponse {
   return {
     id: response.body.id,
-    rawResponse: response.body,
+    rawResponse: response,
     isPartial: response.body.is_partial,
     isRunning: response.body.is_running,
   };

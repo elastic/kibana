@@ -25,5 +25,9 @@ export const selectPingsLoading = createSelector(getState, (state) => state.ping
 export const selectMonitorPingsMetadata = createSelector(getState, (state) => state.pings);
 
 export const selectPingsError = createSelector(getState, (state) => state.error);
+export const selectShowOnlyFinalAttempts = createSelector(
+  getState,
+  (state) => state.showOnlyFinalAttempts ?? false
+);
 
 export const selectStatusFilter = createSelector(getState, (state) => state.statusFilter);

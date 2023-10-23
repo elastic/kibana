@@ -78,7 +78,7 @@ describe('CspDirectives', () => {
       const config = cspConfig.schema.validate({});
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"`
+        `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
       );
     });
 
@@ -91,7 +91,7 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self' baz; worker-src 'report-sample' 'self' blob: foo; style-src 'report-sample' 'self' 'unsafe-inline' bar dolly"`
+        `"script-src 'self' baz; worker-src blob: 'self' foo; style-src 'unsafe-inline' 'self' bar dolly"`
       );
     });
 
@@ -108,7 +108,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
+        `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
       );
     });
 
@@ -118,7 +118,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"`
+        `"script-src 'self' 'unsafe-hashes'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
       );
     });
   });

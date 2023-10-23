@@ -16,11 +16,11 @@ export interface PluginInfo {
 
 export const getPluginsBundlePaths = ({
   uiPlugins,
-  bundlesHref,
+  regularBundlePath,
   isAnonymousPage,
 }: {
   uiPlugins: UiPlugins;
-  bundlesHref: string;
+  regularBundlePath: string;
   isAnonymousPage: boolean;
 }) => {
   const pluginBundlePaths = new Map<string, PluginInfo>();
@@ -35,8 +35,8 @@ export const getPluginsBundlePaths = ({
     const { version } = plugin;
 
     pluginBundlePaths.set(pluginId, {
-      publicPath: `${bundlesHref}/plugin/${pluginId}/${version}/`,
-      bundlePath: `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`,
+      publicPath: `${regularBundlePath}/plugin/${pluginId}/${version}/`,
+      bundlePath: `${regularBundlePath}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`,
     });
 
     const pluginBundleIds = uiPlugins.internal.get(pluginId)?.requiredBundles ?? [];

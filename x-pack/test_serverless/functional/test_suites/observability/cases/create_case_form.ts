@@ -16,9 +16,10 @@ const owner = OBSERVABILITY_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Create Case', function () {
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+    this.tags(['failsOnMKI']);
     const find = getService('find');
     const cases = getService('cases');
-    const svlCases = getService('svlCases');
     const testSubjects = getService('testSubjects');
     const svlCommonPage = getPageObject('svlCommonPage');
     const config = getService('config');
@@ -34,7 +35,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await svlCases.api.deleteAllCaseItems();
+      await cases.api.deleteAllCases();
       await svlCommonPage.forceLogout();
     });
 

@@ -47,6 +47,7 @@ export function SavedSearchEmbeddableComponent({
       sampleSizeState={fetchedSampleSize}
       loadingState={searchProps.isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
       showFullScreenButton={false}
+      showColumnTokens
       query={query}
       className="unifiedDataTable"
     />

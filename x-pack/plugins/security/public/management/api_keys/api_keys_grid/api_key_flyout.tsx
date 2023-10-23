@@ -437,12 +437,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   <FormField
                     as={CodeEditorField}
                     name="access"
-                    aria-label={i18n.translate(
-                      'xpack.security.management.apiKeys.apiKeyFlyout.accessCodeEditor',
-                      {
-                        defaultMessage: 'Code editor for access permissions',
-                      }
-                    )}
                     value={formik.values.access}
                     options={{ readOnly: readOnly || (apiKey && !canEdit) }}
                     onChange={(value: string) => formik.setFieldValue('access', value)}
@@ -506,12 +500,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         <FormField
                           as={CodeEditorField}
                           name="role_descriptors"
-                          aria-label={i18n.translate(
-                            'xpack.security.management.apiKeys.apiKeyFlyout.roleDescriptorsCodeEditor',
-                            {
-                              defaultMessage: 'Code editor for role descriptors of this API key',
-                            }
-                          )}
                           value={formik.values.role_descriptors}
                           options={{ readOnly: readOnly || (apiKey && !canEdit) }}
                           onChange={(value: string) =>
@@ -643,13 +631,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       <FormField
                         as={CodeEditorField}
                         name="metadata"
-                        aria-label={i18n.translate(
-                          'xpack.security.management.apiKeys.apiKeyFlyout.metadataCodeEditor',
-                          {
-                            defaultMessage:
-                              'Code editor for arbitrary metadata associated with the API key',
-                          }
-                        )}
                         options={{ readOnly: readOnly || (apiKey && !canEdit) }}
                         value={formik.values.metadata}
                         onChange={(value: string) => formik.setFieldValue('metadata', value)}

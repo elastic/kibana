@@ -169,18 +169,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const $ = await euiDataGridRow.parseDomContent();
         rows.push({
           status: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="event.action"] .euiDataGridRowCell__content')
+            .find('[data-gridcell-column-id="event.action"] .euiDataGridRowCell__truncate')
             .text(),
           lastUpdated: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="@timestamp"] .euiDataGridRowCell__content')
+            .find('[data-gridcell-column-id="@timestamp"] .euiDataGridRowCell__truncate')
             .text(),
           duration: $.findTestSubjects('dataGridRowCell')
             .find(
-              '[data-gridcell-column-id="kibana.alert.duration.us"] [data-datagrid-cellcontent]'
+              '[data-gridcell-column-id="kibana.alert.duration.us"] .euiDataGridRowCell__truncate'
             )
             .text(),
           reason: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="kibana.alert.reason"] [data-datagrid-cellcontent]')
+            .find('[data-gridcell-column-id="kibana.alert.reason"] .euiDataGridRowCell__truncate')
             .text(),
         });
       }
