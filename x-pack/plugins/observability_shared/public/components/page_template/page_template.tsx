@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps, EuiErrorBoundary } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
 import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -14,6 +14,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateKibanaProvider,
@@ -208,15 +209,17 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <EuiErrorBoundary>
-                <KibanaPageTemplate.Section
-                  component="div"
-                  alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                  {...pageSectionProps}
-                >
-                  {children}
-                </KibanaPageTemplate.Section>
-              </EuiErrorBoundary>
+              <KibanaErrorBoundaryProvider>
+                <KibanaErrorBoundary>
+                  <KibanaPageTemplate.Section
+                    component="div"
+                    alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                    {...pageSectionProps}
+                  >
+                    {children}
+                  </KibanaPageTemplate.Section>
+                </KibanaErrorBoundary>
+              </KibanaErrorBoundaryProvider>
               {bottomBar && (
                 <KibanaPageTemplate.BottomBar {...bottomBarProps}>
                   {bottomBar}
