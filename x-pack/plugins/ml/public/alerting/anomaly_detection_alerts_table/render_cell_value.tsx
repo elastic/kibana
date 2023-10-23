@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash';
 import React, { type ReactNode } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
-import { ALERT_DURATION, ALERT_START } from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { getSeverityColor } from '@kbn/ml-anomaly-utils';
@@ -49,24 +49,31 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '—';
 };
 
-export const getRenderCellValue =
-  (fieldFormats: FieldFormatsRegistry): GetRenderCellValue =>
-  ({ setFlyoutAlert }) =>
-  (props): ReactNode => {
-    const { columnId, data } = props as Props;
-    if (!isDefined(data)) return;
+export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): GetRenderCellValue => {
+  const alertValueFormatter = getAlertFormatters(fieldFormats);
 
-    const mappedNonEcsValue = getMappedNonEcsValue({
-      data,
-      fieldName: columnId,
-    });
+  return ({ setFlyoutAlert }) =>
+    (props): ReactNode => {
+      const { columnId, data } = props as Props;
+      if (!isDefined(data)) return;
 
-    const value = getRenderValue(mappedNonEcsValue);
+      const mappedNonEcsValue = getMappedNonEcsValue({
+        data,
+        fieldName: columnId,
+      });
+      const value = getRenderValue(mappedNonEcsValue);
 
-    const getFormatter = getFieldFormatterProvider(fieldFormats);
+      return alertValueFormatter(columnId, value);
+    };
+};
 
+export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
+  const getFormatter = getFieldFormatterProvider(fieldFormats);
+
+  return (columnId: string, value: any): React.ReactElement => {
     switch (columnId) {
       case ALERT_START:
+      case ALERT_END:
       case ALERT_ANOMALY_TIMESTAMP:
         return <>{getFormatter(FIELD_FORMAT_IDS.DATE)(value)}</>;
       case ALERT_DURATION:
@@ -88,3 +95,6 @@ export const getRenderCellValue =
         return <>{value}</>;
     }
   };
+}
+
+export type RegisterFormatter = ReturnType<typeof getAlertFormatters>;

@@ -6,26 +6,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  AlertsTableFlyoutBaseProps,
-  AlertTableFlyoutComponent,
-  type TriggersAndActionsUIPublicPluginSetup,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { type TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
-import React from 'react';
-import { EuiDataGridColumn, EuiHealth } from '@elastic/eui';
+import { EuiDataGridColumn } from '@elastic/eui';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import { get } from 'lodash';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
-import { getSeverityColor } from '@kbn/ml-anomaly-utils';
+import {
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_START,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { getAlertFlyout } from './use_alerts_flyout';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
 } from '../../../common/constants/alerts';
-import { getRenderCellValue } from './render_cell_value';
+import { getAlertFormatters, getRenderCellValue } from './render_cell_value';
 
 export function registerAlertsTableConfiguration(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -36,6 +37,13 @@ export function registerAlertsTableConfiguration(
       id: ALERT_STATUS,
       displayAsText: i18n.translate('xpack.ml.alertsTable.columns.status', {
         defaultMessage: 'Status',
+      }),
+      initialWidth: 150,
+    },
+    {
+      id: ALERT_REASON,
+      displayAsText: i18n.translate('xpack.ml.alertsTable.columns.reason', {
+        defaultMessage: 'Reason',
       }),
       initialWidth: 150,
     },
@@ -56,14 +64,11 @@ export function registerAlertsTableConfiguration(
     {
       id: ALERT_ANOMALY_SCORE,
       displayAsText: i18n.translate('xpack.ml.alertsTable.columns.anomalyScore', {
-        defaultMessage: 'Anomaly score',
+        defaultMessage: 'Latest anomaly score',
       }),
       initialWidth: 150,
       isSortable: true,
       schema: 'number',
-      display: (value: number) => (
-        <EuiHealth color={getSeverityColor(value)}>{Math.floor(value)}</EuiHealth>
-      ),
     },
     {
       id: ALERT_START,
@@ -74,9 +79,17 @@ export function registerAlertsTableConfiguration(
       schema: 'datetime',
     },
     {
+      id: ALERT_END,
+      displayAsText: i18n.translate('xpack.ml.alertsTable.columns.recoveredAt', {
+        defaultMessage: 'Recovered at',
+      }),
+      initialWidth: 250,
+      schema: 'datetime',
+    },
+    {
       id: ALERT_ANOMALY_TIMESTAMP,
       displayAsText: i18n.translate('xpack.ml.alertsTable.columns.anomalyTime', {
-        defaultMessage: 'Anomaly time',
+        defaultMessage: 'Latest anomaly time',
       }),
       initialWidth: 250,
       schema: 'datetime',
@@ -90,27 +103,6 @@ export function registerAlertsTableConfiguration(
     },
   ];
 
-  const FlyoutBody: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => (
-    <ul>
-      {columns.map((column) => (
-        <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
-          {get(alert as any, column.id, [])[0]}
-        </li>
-      ))}
-    </ul>
-  );
-
-  const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {
-    const { 'kibana.alert.rule.name': name } = alert;
-    return <div data-test-subj="alertsFlyoutName">{name}</div>;
-  };
-
-  const useInternalFlyout = () => ({
-    body: FlyoutBody,
-    header: FlyoutHeader,
-    footer: null,
-  });
-
   const sort: SortCombinations[] = [
     {
       [ALERT_START]: {
@@ -123,9 +115,33 @@ export function registerAlertsTableConfiguration(
     id: ML_ALERTS_CONFIG_ID,
     columns,
     // cases: { featureId: 'cases', owner: ['observability'] },
-    useInternalFlyout,
+    useInternalFlyout: getAlertFlyout(columns, getAlertFormatters(fieldFormats)),
     getRenderCellValue: getRenderCellValue(fieldFormats),
     sort,
+    // useActionsColumn: () => ({
+    //   renderCustomActionsRow: ({
+    //     alert,
+    //     id,
+    //     setFlyoutAlert,
+    //     refresh,
+    //   }: RenderCustomActionsRowArgs) => {
+    //     return null;
+    //     return (
+    //       <AlertActions
+    //         config={config}
+    //         data={Object.entries(alert).reduce<AlertActionsProps['data']>(
+    //           (acc, [field, value]) => [...acc, { field, value: value as string[] }],
+    //           []
+    //         )}
+    //         ecsData={{ _id: alert._id, _index: alert._index }}
+    //         id={id}
+    //         observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+    //         setFlyoutAlert={setFlyoutAlert}
+    //         refresh={refresh}
+    //       />
+    //     );
+    //   },
+    // }),
   };
 
   triggersActionsUi.alertsTableConfigurationRegistry.register(config);
