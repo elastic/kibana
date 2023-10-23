@@ -16,7 +16,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
-import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
@@ -63,24 +62,20 @@ export const AppRouter: FunctionComponent<Props> = ({
             path={mounter.appRoute}
             exact={mounter.exactRoute}
             render={({ match: { path } }) => (
-              <KibanaErrorBoundaryProvider>
-                <KibanaErrorBoundary>
-                  <AppContainer
-                    appPath={path}
-                    appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                    createScopedHistory={createScopedHistory}
-                    {...{
-                      appId,
-                      mounter,
-                      setAppLeaveHandler,
-                      setAppActionMenu,
-                      setIsMounting,
-                      theme$,
-                      showPlainSpinner,
-                    }}
-                  />
-                </KibanaErrorBoundary>
-              </KibanaErrorBoundaryProvider>
+              <AppContainer
+                appPath={path}
+                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                createScopedHistory={createScopedHistory}
+                {...{
+                  appId,
+                  mounter,
+                  setAppLeaveHandler,
+                  setAppActionMenu,
+                  setIsMounting,
+                  theme$,
+                  showPlainSpinner,
+                }}
+              />
             )}
           />
         ))}

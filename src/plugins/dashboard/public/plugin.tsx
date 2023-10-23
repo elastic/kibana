@@ -9,8 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 
 import {
   App,
@@ -54,7 +52,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
@@ -239,45 +236,24 @@ export class DashboardPlugin
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        const RecallError = ({ error }: { error?: Error }) => {
-          if (error) {
-            throw error;
-          }
-          return null;
+        this.currentHistory = params.history;
+        params.element.classList.add(APP_WRAPPER_CLASS);
+        const { mountApp } = await import('./dashboard_app/dashboard_router');
+        appMounted();
+
+        const mountContext: DashboardMountContextProps = {
+          restorePreviousUrl,
+          scopedHistory: () => this.currentHistory!,
+          onAppLeave: params.onAppLeave,
+          setHeaderActionMenu: params.setHeaderActionMenu,
         };
 
-        try {
-          this.currentHistory = params.history;
-          params.element.classList.add(APP_WRAPPER_CLASS);
-          const { mountApp } = await import('./dashboard_app/dashboard_router');
-          appMounted();
-
-          const mountContext: DashboardMountContextProps = {
-            restorePreviousUrl,
-            scopedHistory: () => this.currentHistory!,
-            onAppLeave: params.onAppLeave,
-            setHeaderActionMenu: params.setHeaderActionMenu,
-          };
-
-          return mountApp({
-            core,
-            appUnMounted,
-            element: params.element,
-            mountContext,
-          });
-        } catch (error) {
-          render(
-            <KibanaErrorBoundaryProvider>
-              <KibanaErrorBoundary>
-                <RecallError error={error} />
-              </KibanaErrorBoundary>
-            </KibanaErrorBoundaryProvider>,
-            params.element
-          );
-          return () => {
-            unmountComponentAtNode(params.element);
-          };
-        }
+        return mountApp({
+          core,
+          appUnMounted,
+          element: params.element,
+          mountContext,
+        });
       },
     };
 
