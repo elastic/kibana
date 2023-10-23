@@ -160,19 +160,6 @@ export function registerAnomalyRuleType({
 
         const { dateStart } = getTimeRange(window);
 
-        console.log('params', ruleParams.windowSize, ruleParams.windowUnit);
-
-        console.log('default window', datemath.parse('now-30m')!.valueOf());
-
-        console.log(
-          'param window',
-          datemath
-            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)!
-            .valueOf()
-        );
-
-        console.log({ dateStart, window });
-
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {

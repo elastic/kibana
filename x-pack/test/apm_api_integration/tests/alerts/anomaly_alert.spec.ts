@@ -84,7 +84,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       // FLAKY: https://github.com/elastic/kibana/issues/169495
       describe.skip('with ml jobs', () => {
         it('checks if alert is active', async () => {
-          console.log('1');
           const createdRule = await createApmRule({
             supertest,
             name: 'Latency anomaly | service-a',
@@ -96,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.Anomaly,
           });
-          console.log('2');
+
           const ruleId = createdRule.id;
 
           if (!ruleId) {

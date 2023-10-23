@@ -24,7 +24,6 @@ export async function waitForRuleStatus({
       const status = response.body?.execution_status?.status;
 
       if (status !== expectedStatus) {
-        console.log(response.body);
         throw new Error(`waitForStatus(${expectedStatus}): got ${status}`);
       }
       return status;
