@@ -42,7 +42,7 @@ const getExceptionList1 = () => ({
 const EXCEPTION_LIST_NAME = 'Newly created list';
 
 describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     login();
 
     // Create exception list associated with a rule
@@ -61,10 +61,6 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
       )
     );
     createRule(getNewRule({ name: 'Rule to link to shared list' }));
-  });
-
-  beforeEach(() => {
-    login();
     visit(EXCEPTIONS_URL);
   });
 
