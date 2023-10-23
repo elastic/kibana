@@ -360,6 +360,7 @@ src/plugins/es_ui_shared @elastic/platform-deployment-management
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
+packages/kbn-eslint-plugin-i18n @elastic/actionable-observability
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/actionable-observability
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
@@ -540,6 +541,7 @@ x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/packages/observability/alert_details @elastic/actionable-observability
+x-pack/packages/observability/alerting_test_data @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_log_explorer @elastic/infra-monitoring-ui
 x-pack/plugins/observability_onboarding @elastic/apm-ui
@@ -679,6 +681,7 @@ packages/shared-ux/card/no_data/impl @elastic/appex-sharedux
 packages/shared-ux/card/no_data/mocks @elastic/appex-sharedux
 packages/shared-ux/card/no_data/types @elastic/appex-sharedux
 packages/shared-ux/chrome/navigation @elastic/appex-sharedux
+packages/shared-ux/error_boundary @elastic/appex-sharedux
 packages/shared-ux/file/context @elastic/appex-sharedux
 packages/shared-ux/file/image/impl @elastic/appex-sharedux
 packages/shared-ux/file/image/mocks @elastic/appex-sharedux

@@ -108,10 +108,12 @@ describe('<DefaultNavigation />', () => {
                 "href": "http://foo",
                 "id": "item1",
                 "isActive": false,
+                "isGroup": false,
                 "path": Array [
                   "group1",
                   "item1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "Item 1",
               },
               Object {
@@ -120,10 +122,12 @@ describe('<DefaultNavigation />', () => {
                 "href": "http://foo",
                 "id": "item2",
                 "isActive": false,
+                "isGroup": false,
                 "path": Array [
                   "group1",
                   "item2",
                 ],
+                "sideNavStatus": "visible",
                 "title": "Item 2",
               },
               Object {
@@ -134,11 +138,13 @@ describe('<DefaultNavigation />', () => {
                     "href": "http://foo",
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "group1",
                       "group1A",
                       "item1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Group 1A Item 1",
                   },
                   Object {
@@ -149,12 +155,14 @@ describe('<DefaultNavigation />', () => {
                         "href": "http://foo",
                         "id": "item1",
                         "isActive": false,
+                        "isGroup": false,
                         "path": Array [
                           "group1",
                           "group1A",
                           "group1A_1",
                           "item1",
                         ],
+                        "sideNavStatus": "visible",
                         "title": "Group 1A_1 Item 1",
                       },
                     ],
@@ -162,11 +170,13 @@ describe('<DefaultNavigation />', () => {
                     "href": undefined,
                     "id": "group1A_1",
                     "isActive": false,
+                    "isGroup": true,
                     "path": Array [
                       "group1",
                       "group1A",
                       "group1A_1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Group1A_1",
                   },
                 ],
@@ -174,10 +184,12 @@ describe('<DefaultNavigation />', () => {
                 "href": undefined,
                 "id": "group1A",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "group1",
                   "group1A",
                 ],
+                "sideNavStatus": "visible",
                 "title": "Group1A",
               },
             ],
@@ -185,9 +197,11 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "group1",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "group1",
             ],
+            "sideNavStatus": "visible",
             "title": "",
             "type": "navGroup",
           },
@@ -274,11 +288,13 @@ describe('<DefaultNavigation />', () => {
                     "href": undefined,
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "root",
                       "group1",
                       "item1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Title from deeplink",
                   },
                   Object {
@@ -293,11 +309,13 @@ describe('<DefaultNavigation />', () => {
                     "href": undefined,
                     "id": "item2",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "root",
                       "group1",
                       "item2",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Overwrite deeplink title",
                   },
                 ],
@@ -305,10 +323,12 @@ describe('<DefaultNavigation />', () => {
                 "href": undefined,
                 "id": "group1",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "root",
                   "group1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "",
               },
             ],
@@ -316,14 +336,139 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "root",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "root",
             ],
+            "sideNavStatus": "visible",
             "title": "",
             "type": "navGroup",
           },
         ]
       `);
+    });
+
+    test("shouldn't render hidden deeplink", async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        ...navLinksMock,
+        {
+          id: 'item1',
+          title: 'Item 1',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+        {
+          id: 'item',
+          title: 'Item 2',
+          hidden: true,
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const onProjectNavigationChange = jest.fn();
+
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          children: [
+            {
+              id: 'group1',
+              children: [
+                {
+                  id: 'item1',
+                  link: 'item1',
+                },
+                {
+                  id: 'item2',
+                  link: 'item2', // this should be hidden from sidenav
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      const { queryByTestId } = render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
+        </NavigationProvider>
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTreeGenerated] = lastCall;
+
+      expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Item 1",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item1",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item1",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Item 1",
+                  },
+                ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1",
+                "isActive": false,
+                "isGroup": true,
+                "path": Array [
+                  "root",
+                  "group1",
+                ],
+                "sideNavStatus": "visible",
+                "title": "",
+              },
+            ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "root",
+            "isActive": false,
+            "isGroup": true,
+            "path": Array [
+              "root",
+            ],
+            "sideNavStatus": "visible",
+            "title": "",
+            "type": "navGroup",
+          },
+        ]
+      `);
+
+      expect(await queryByTestId(/nav-item-deepLinkId-item1/)).not.toBeNull();
+      expect(await queryByTestId(/nav-item-deepLinkId-item2/)).toBeNull();
     });
 
     test('should allow href for absolute links', async () => {
@@ -375,11 +520,13 @@ describe('<DefaultNavigation />', () => {
                     "href": "https://example.com",
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "root",
                       "group1",
                       "item1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Absolute link",
                   },
                 ],
@@ -387,10 +534,12 @@ describe('<DefaultNavigation />', () => {
                 "href": undefined,
                 "id": "group1",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "root",
                   "group1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "",
               },
             ],
@@ -398,9 +547,11 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "root",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "root",
             ],
+            "sideNavStatus": "visible",
             "title": "",
             "type": "navGroup",
           },

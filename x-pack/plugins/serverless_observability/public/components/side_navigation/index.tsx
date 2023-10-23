@@ -63,6 +63,15 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           link: 'observability-overview:cases',
+          renderAs: 'item',
+          children: [
+            {
+              link: 'observability-overview:cases_configure',
+            },
+            {
+              link: 'observability-overview:cases_create',
+            },
+          ],
         },
         {
           link: 'observability-overview:slos',
@@ -172,7 +181,7 @@ const navigationTree: NavigationTreeDefinition = {
   ],
   footer: [
     {
-      type: 'navGroup',
+      type: 'navItem',
       title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
         defaultMessage: 'Get Started',
       }),
@@ -181,7 +190,7 @@ const navigationTree: NavigationTreeDefinition = {
       icon: 'launch',
     },
     {
-      type: 'navGroup',
+      type: 'navItem',
       id: 'devTools',
       title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
         defaultMessage: 'Developer tools',

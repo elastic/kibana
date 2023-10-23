@@ -9,10 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
-import { SAMPLE_SIZE_SETTING, buildDataTableRecordList } from '@kbn/discover-utils';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
+import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -21,9 +22,10 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, services, getAppState }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
-  searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
+  const sampleSize = getAppState().sampleSize;
+  searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);
@@ -70,12 +72,13 @@ export const fetchDocuments = (
 
   return lastValueFrom(fetch$).then((records) => {
     const adapter = inspectorAdapters.requests;
-    const interceptedWarnings = adapter
-      ? getSearchResponseInterceptedWarnings({
-          services,
-          adapter,
-        })
-      : [];
+    const interceptedWarnings: SearchResponseWarning[] = [];
+    if (adapter) {
+      services.data.search.showWarnings(adapter, (warning) => {
+        interceptedWarnings.push(warning);
+        return true; // suppress the default behaviour
+      });
+    }
 
     return {
       records,
