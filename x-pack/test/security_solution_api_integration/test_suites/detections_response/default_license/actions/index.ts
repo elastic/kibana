@@ -10,6 +10,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Actions API', function () {
     loadTestFile(require.resolve('./add_actions'));
     loadTestFile(require.resolve('./update_actions'));
-    loadTestFile(require.resolve('./legacy_actions_migrations'));
+    loadTestFile(require.resolve('./migrations'));
   });
 }

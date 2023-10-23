@@ -35,7 +35,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./runtime'));
     loadTestFile(require.resolve('./throttle'));
     loadTestFile(require.resolve('./ignore_fields'));
-    loadTestFile(require.resolve('./migrations'));
     loadTestFile(require.resolve('./risk_engine/init_and_status_apis'));
     loadTestFile(require.resolve('./risk_engine/risk_score_preview'));
     loadTestFile(require.resolve('./risk_engine/risk_score_calculation'));
