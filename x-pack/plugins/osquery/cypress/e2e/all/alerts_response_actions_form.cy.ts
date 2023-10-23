@@ -85,6 +85,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Query is a required field');
       inputQuery('select * from uptime');
       cy.contains('Advanced').click();
+      cy.contains('Query is a required field').should('not.exist');
       typeInECSFieldInput('message{downArrow}{enter}');
       cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
       cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
@@ -136,6 +137,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
       cy.contains('SELECT * FROM memory_info;');
       cy.contains('SELECT * FROM system_info;');
+      cy.wait(1000);
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
