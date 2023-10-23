@@ -137,11 +137,11 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      GITHUB_PR_LABELS.includes('ci:serverless-es-deploy') ||
-      GITHUB_PR_LABELS.includes('ci:serverless-oblt-deploy') ||
-      GITHUB_PR_LABELS.includes('ci:serverless-security-deploy')
+      GITHUB_PR_LABELS.includes('ci:project-es-deploy') ||
+      GITHUB_PR_LABELS.includes('ci:project-oblt-deploy') ||
+      GITHUB_PR_LABELS.includes('ci:project-security-deploy')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_serverless.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
