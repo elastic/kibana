@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
-  describe.only('Time Slider Control', async () => {
+  describe('Time Slider Control', async () => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
