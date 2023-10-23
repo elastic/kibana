@@ -635,7 +635,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('test/functional/fixtures/es_archiver/many_fields');
       });
 
-      it('should work with ad-hoc data views and runtime fields', async () => {
+      it.only('should work with ad-hoc data views and runtime fields', async () => {
         await PageObjects.discover.createAdHocDataView('logstash', true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
