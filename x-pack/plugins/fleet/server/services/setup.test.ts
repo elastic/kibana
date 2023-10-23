@@ -105,6 +105,10 @@ describe('setupFleet', () => {
       },
     ]);
 
+    soClient.get.mockImplementation((type, id) => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    });
+
     const result = await setupFleet(soClient, esClient);
 
     expect(result).toEqual({
@@ -120,6 +124,10 @@ describe('setupFleet', () => {
         packagePolicyId: '1',
       },
     ]);
+
+    soClient.get.mockImplementation((type, id) => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    });
 
     const result = await setupFleet(soClient, esClient);
 
