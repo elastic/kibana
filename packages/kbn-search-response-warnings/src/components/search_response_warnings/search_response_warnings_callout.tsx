@@ -30,35 +30,22 @@ export const SearchResponseWarningsCallout = (props: Props) => {
 
   return (
     <EuiCallOut
-      title={
-        <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row" wrap>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{getWarningsTitle(props.warnings)}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <p>{getWarningsDescription(props.warnings, props.visualizationLabel)}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ViewDetailsPopover
-              warnings={props.warnings}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      title={getWarningsTitle(props.warnings)}
       color="warning"
       iconType="warning"
       size="s"
-      css={css`
-        .euiTitle {
-          display: flex;
-          align-items: center;
-        }
-      `}
       data-test-subj="searchResponseWarningsCallout"
-    />
+    >
+      <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
+        <EuiFlexItem grow={false}>
+          {getWarningsDescription(props.warnings, props.visualizationLabel)}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ViewDetailsPopover
+            warnings={props.warnings}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCallOut>
   );
 };

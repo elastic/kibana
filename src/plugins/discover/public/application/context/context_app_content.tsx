@@ -7,6 +7,7 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -15,7 +16,7 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { type SearchResponseWarning, SearchResponseWarnings } from '@kbn/search-response-warnings';
+import { type SearchResponseWarning, SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import {
   CONTEXT_STEP_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -50,7 +51,7 @@ export interface ContextAppContentProps {
   anchorStatus: LoadingStatus;
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
-  interceptedWarnings: SearchResponseWarning[] | undefined;
+  interceptedWarnings: SearchResponseWarning[];
   useNewFieldsApi: boolean;
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
@@ -148,12 +149,13 @@ export function ContextAppContent({
   return (
     <Fragment>
       <WrapperWithPadding>
-        {!!interceptedWarnings?.length && (
+        {interceptedWarnings.length && (
           <>
-            <SearchResponseWarnings
-              variant="callout"
-              interceptedWarnings={interceptedWarnings}
-              data-test-subj="dscContextInterceptedWarnings"
+            <SearchResponseWarningsCallout
+              visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
+                defaultMessage: 'table',
+              })}
+              warnings={interceptedWarnings}
             />
             <EuiSpacer size="s" />
           </>

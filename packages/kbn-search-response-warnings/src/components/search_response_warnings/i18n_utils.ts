@@ -34,7 +34,7 @@ export function getWarningsTitle(warnings: SearchResponseWarning[]) {
 
   return warnings.length <= 1
     ? clustersClause
-    : i18n.translate('searchResponseWarnings.title.ClustersClauseAndRequestsClause', {
+    : i18n.translate('searchResponseWarnings.title.clustersClauseAndRequestsClause', {
         defaultMessage: '{clustersClause} in {requestsCount} requests',
         values: {
           clustersClause,

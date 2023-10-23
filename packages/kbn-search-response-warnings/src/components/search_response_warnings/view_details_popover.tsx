@@ -8,7 +8,8 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiIcon,
+  EuiLink,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiPopover,
@@ -29,13 +30,13 @@ export const ViewDetailsPopover = (props: Props) => {
 
   if (props.warnings.length === 1) {
     return (
-      <EuiButtonEmpty
+      <EuiLink
         color="primary"
         size="s"
         onClick={props.warnings[0].openInInspector}
       >
         {viewDetailsLabel}
-      </EuiButtonEmpty>
+      </EuiLink>
     );
   }
 
@@ -55,15 +56,17 @@ export const ViewDetailsPopover = (props: Props) => {
     <EuiPopover
       id="ViewDetailsPopover"
       button={
-        <EuiButtonEmpty
-          iconType="arrowDown"
-          iconSide="right"
+        <EuiLink
           color="primary"
           size="s"
           onClick={() => setIsPopoverOpen(true)}
         >
-          {viewDetailsLabel}
-        </EuiButtonEmpty>
+          <>
+            {viewDetailsLabel}
+            {' '}
+            <EuiIcon type="arrowRight" size="s" />
+          </>
+        </EuiLink>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
