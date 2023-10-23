@@ -191,7 +191,7 @@ export function useChangePointResults(
           runtimeMappings
         );
 
-        if (usageCollection?.reportUiCounter) {
+        if (usageCollection?.reportUiCounter && embeddingOrigin) {
           usageCollection.reportUiCounter(
             embeddingOrigin,
             METRIC_TYPE.COUNT,
@@ -204,7 +204,7 @@ export function useChangePointResults(
           { rawResponse: ChangePointAggResponse }
         >({ params: requestPayload });
 
-        if (usageCollection?.reportUiCounter) {
+        if (usageCollection?.reportUiCounter && embeddingOrigin) {
           usageCollection.reportUiCounter(
             embeddingOrigin,
             METRIC_TYPE.COUNT,
@@ -277,7 +277,7 @@ export function useChangePointResults(
           );
         }
       } catch (e) {
-        if (usageCollection?.reportUiCounter) {
+        if (usageCollection?.reportUiCounter && embeddingOrigin) {
           usageCollection.reportUiCounter(
             embeddingOrigin,
             METRIC_TYPE.COUNT,

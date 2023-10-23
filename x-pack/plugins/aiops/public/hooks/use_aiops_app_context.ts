@@ -121,7 +121,7 @@ export interface AiopsAppDependencies {
   cases?: CasesUiStart;
   isServerless?: boolean;
   /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
+  embeddingOrigin?: string;
 }
 
 /**
