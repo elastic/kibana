@@ -41,7 +41,7 @@ interface Props {
   onNext: () => void;
 }
 
-const NOT_ALLOWED_CHARS = ['"', ' ', '\\', '/', ',', '|', '>', '?', '*', '<'];
+const DISALLOWED_CHARS = ['"', ' ', '\\', '/', ',', '|', '>', '?', '*', '<'];
 
 export const configurationFormSchema: FormSchema = {
   name: {
@@ -67,11 +67,11 @@ export const configurationFormSchema: FormSchema = {
             {
               defaultMessage: `Should not contain any of the following characters: {notAllowedChars}`,
               values: {
-                notAllowedChars: NOT_ALLOWED_CHARS.join(', '),
+                notAllowedChars: DISALLOWED_CHARS.join(', '),
               },
             }
           ),
-          chars: NOT_ALLOWED_CHARS,
+          chars: DISALLOWED_CHARS,
         }),
       },
     ],
