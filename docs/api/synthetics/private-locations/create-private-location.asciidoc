@@ -1,0 +1,70 @@
+[[create-private-location-api]]
+== Create Private Location API
+++++
+<titleabbrev>Create Private Location</titleabbrev>
+++++
+
+Creates a private location with the following schema.
+
+=== {api-request-title}
+
+`POST <your-api-host>/api/private-locations`
+
+=== {api-prereq-title}
+
+To use this API, you must have appropriate permissions for creating private locations.
+
+[[private-location-request-body]]
+==== Request body
+
+The request body should contain the following attributes:
+
+`label`::
+(Required, string) A label for the private location.
+
+`agentPolicyId`::
+(Required, string) The ID of the agent policy associated with the private location.
+
+`tags`::
+(Optional, array of strings) An array of tags to categorize the private location.
+
+`geo`::
+(Optional, object) Geographic coordinates for the location. It should include the following attributes:
+
+- `lat` (Required, number): The latitude of the location.
+- `lon` (Required, number): The longitude of the location.
+
+[[private-location-create-example]]
+==== Example
+
+Here is an example of a POST request to create a private location:
+
+[source,sh]
+--------------------------------------------------
+POST /api/private-locations
+{
+  "label": "Private Location 1",
+  "agentPolicyId": "abcd1234",
+  "tags": ["private", "testing"],
+  "geo": {
+    "lat": 40.7128,
+    "lon": -74.0060
+  }
+}
+--------------------------------------------------
+
+The API returns the created private location as follows:
+
+[source,json]
+--------------------------------------------------
+{
+  "id": "unique-location-id",
+  "label": "Private Location 1",
+  "agentPolicyId": "abcd1234",
+  "tags": ["private", "testing"],
+  "geo": {
+    "lat": 40.7128,
+    "lon": -74.0060
+  }
+}
+--------------------------------------------------

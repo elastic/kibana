@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { getKqlFilter } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
@@ -33,28 +34,33 @@ const aggs = {
   },
 };
 
-export const getLocationMonitors: SyntheticsRestApiRouteFactory = () => ({
+export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
 
   validate: {},
-  handler: async ({ savedObjectsClient: soClient }): Promise<IKibanaResponse<Payload>> => {
-    const locationMonitors = await soClient?.find<unknown, ExpectedResponse>({
-      type: syntheticsMonitorType,
-      perPage: 0,
-      aggs,
-    });
-
-    const payload =
-      locationMonitors.aggregations?.locations.buckets.map(({ key: id, doc_count: count }) => ({
-        id,
-        count,
-      })) ?? [];
-
-    return {
-      options: {},
-      payload,
-      status: 200,
-    };
+  handler: async ({ savedObjectsClient: soClient }) => {
+    return await getMonitorsByLocation(soClient);
   },
 });
+
+export const getMonitorsByLocation = async (
+  soClient: SavedObjectsClientContract,
+  locationId?: string
+) => {
+  const locationFilter = getKqlFilter({ field: 'locations.id', values: locationId });
+
+  const locationMonitors = await soClient.find<unknown, ExpectedResponse>({
+    type: syntheticsMonitorType,
+    perPage: 0,
+    aggs,
+    filter: locationFilter,
+  });
+
+  return (
+    locationMonitors.aggregations?.locations.buckets.map(({ key: id, doc_count: count }) => ({
+      id,
+      count,
+    })) ?? []
+  );
+};

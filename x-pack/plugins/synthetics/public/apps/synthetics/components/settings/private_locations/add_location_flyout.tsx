@@ -49,7 +49,6 @@ export const AddLocationFlyout = ({
         lat: 0,
         lon: 0,
       },
-      concurrentMonitors: 1,
     },
   });
 

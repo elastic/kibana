@@ -25,7 +25,6 @@ describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
     id: 'policyId',
     label: 'Test Location',
-    concurrentMonitors: 1,
     agentPolicyId: 'policyId',
     isServiceManaged: false,
   };

@@ -84,7 +84,6 @@ describe('usePrivateLocationsAPI', () => {
         id: 'new',
         agentPolicyId: 'newPolicy',
         label: 'new',
-        concurrentMonitors: 1,
         geo: {
           lat: 0,
           lon: 0,
@@ -95,7 +94,6 @@ describe('usePrivateLocationsAPI', () => {
     await waitForNextUpdate();
 
     expect(addAPI).toHaveBeenCalledWith({
-      concurrentMonitors: 1,
       id: 'newPolicy',
       geo: {
         lat: 0,

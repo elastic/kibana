@@ -89,7 +89,6 @@ const privateLocations = times(1).map((n) => {
     },
     isServiceManaged: false,
     agentPolicyId: `loc-${n}`,
-    concurrentMonitors: 1,
   };
 }) as PrivateLocation[];
 

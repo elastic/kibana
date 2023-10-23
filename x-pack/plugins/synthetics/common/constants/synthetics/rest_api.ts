@@ -6,6 +6,9 @@
  */
 
 export enum SYNTHETICS_API_URLS {
+  // public apis
+  PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
+
   // Service end points
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
@@ -26,7 +29,6 @@ export enum SYNTHETICS_API_URLS {
   INDEX_SIZE = `/internal/synthetics/index_size`,
   PARAMS = `/internal/synthetics/params`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
-  PRIVATE_LOCATIONS = `/internal/synthetics/private_locations`,
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
   SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,
   ENABLE_DEFAULT_ALERTING = `/internal/synthetics/enable_default_alerting`,

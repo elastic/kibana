@@ -1,0 +1,39 @@
+[[delete-private-location-api]]
+== Delete Private Location API
+++++
+<titleabbrev>Delete Private Location</titleabbrev>
+++++
+
+Deletes a private location using the provided location ID.
+
+=== {api-request-title}
+
+`DELETE <your-api-host>/api/private-locations/{locationId}`
+
+=== {api-prereq-title}
+
+To use this API, you must have appropriate permissions for deleting private locations.
+
+[[private-location-delete-params]]
+==== Path Parameters
+
+`locationId`::
+(Required, string) The unique identifier of the private location to be deleted. It should be between 1 and 1024 characters.
+
+[[private-location-delete-example]]
+==== Example
+
+Here is an example of a DELETE request to delete a private location:
+
+[source,sh]
+--------------------------------------------------
+DELETE /api/private-locations/unique-location-id
+--------------------------------------------------
+
+The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.
+
+This API will delete the private location with the specified `locationId`.
+
+Location cannot be deleted if it has associated monitors in use. You must delete all monitors associated with the location before deleting the location.
+
+Please replace `<your-api-host>` with the actual host where your API is available and use a valid `locationId` in the DELETE request.

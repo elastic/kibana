@@ -97,7 +97,6 @@ describe('SyntheticsMonitorClient', () => {
       },
       isServiceManaged: false,
       agentPolicyId: `loc-${n}`,
-      concurrentMonitors: 1,
     };
   });
 

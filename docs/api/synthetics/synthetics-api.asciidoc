@@ -1,0 +1,11 @@
+[[synthetics-apis]]
+== Synthetics APIs
+
+The following APIs are available for Synthetics.
+
+* <<create-private-location-api, Create Private Location API>> to create a private location
+
+* <<delete-private-location-api, Delete Private Location API>> to delete a private location
+
+include::private-locations/create-private-location.asciidoc[leveloffset=+1]
+include::private-locations/delete-private-location.asciidoc[leveloffset=+1]
