@@ -18669,7 +18669,6 @@
     "xpack.infra.hostFlyout.explainProcessMessageTitle": "此进程是什么？",
     "xpack.infra.hosts.searchPlaceholder": "搜索主机（例如，cloud.provider:gcp AND system.load.1 > 0.5）",
     "xpack.infra.hostsPage.goToMetricsSettings": "检查设置",
-    "xpack.infra.hostsPage.tellUsWhatYouThinkLink": "告诉我们您的看法！",
     "xpack.infra.hostsViewPage.betaBadgeDescription": "此功能当前为公测版。如果遇到任何错误或有任何反馈，我们乐于倾听您的意见。请报告支持问题和/或通过“告诉我们您的看法！”反馈按钮分享您的反馈。",
     "xpack.infra.hostsViewPage.error.detailsButton": "错误详细信息",
     "xpack.infra.hostsViewPage.error.kqlErrorMessage": "无法显示任何结果，因为无法应用您的筛选。",
