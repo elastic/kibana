@@ -43,6 +43,7 @@ describe('StatusService', () => {
   });
 
   afterEach(() => {
+    loggingSystemMock.clear(logger);
     logCoreStatusChangesMock.mockReset();
     logPluginsStatusChangesMock.mockReset();
     logOverallStatusChangesMock.mockReset();
@@ -232,7 +233,7 @@ describe('StatusService', () => {
         );
         expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -252,15 +253,15 @@ describe('StatusService', () => {
         const subResult3 = await setup.overall$.pipe(first()).toPromise();
         expect(subResult1).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
         expect(subResult2).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
         expect(subResult3).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -305,15 +306,17 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Array [
+                "affectedPlugins": Array [],
+                "failingPlugins": Array [],
+                "failingServices": Array [
                   "savedObjects",
                 ],
               },
-              "summary": "1 service is degraded: savedObjects",
+              "summary": "1 service(s) and 0 plugin(s) are degraded: savedObjects",
             },
             Object {
               "level": available,
-              "summary": "All services are available",
+              "summary": "All services and plugins are available",
             },
           ]
         `);
@@ -355,15 +358,17 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Array [
+                "affectedPlugins": Array [],
+                "failingPlugins": Array [],
+                "failingServices": Array [
                   "savedObjects",
                 ],
               },
-              "summary": "1 service is degraded: savedObjects",
+              "summary": "1 service(s) and 0 plugin(s) are degraded: savedObjects",
             },
             Object {
               "level": available,
-              "summary": "All services are available",
+              "summary": "All services and plugins are available",
             },
           ]
         `);
@@ -384,7 +389,7 @@ describe('StatusService', () => {
         );
         expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -401,7 +406,7 @@ describe('StatusService', () => {
         );
         expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.critical,
-          summary: '1 service is critical: savedObjects',
+          summary: '1 service(s) and 0 plugin(s) are critical: savedObjects',
         });
       });
 
@@ -423,15 +428,15 @@ describe('StatusService', () => {
 
         expect(subResult1).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
         expect(subResult2).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
         expect(subResult3).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -476,11 +481,13 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Array [
+                "affectedPlugins": Array [],
+                "failingPlugins": Array [],
+                "failingServices": Array [
                   "savedObjects",
                 ],
               },
-              "summary": "1 service is degraded: savedObjects",
+              "summary": "1 service(s) and 0 plugin(s) are degraded: savedObjects",
             },
             Object {
               "level": available,
@@ -526,11 +533,13 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Array [
+                "affectedPlugins": Array [],
+                "failingPlugins": Array [],
+                "failingServices": Array [
                   "savedObjects",
                 ],
               },
-              "summary": "1 service is degraded: savedObjects",
+              "summary": "1 service(s) and 0 plugin(s) are degraded: savedObjects",
             },
             Object {
               "level": available,
@@ -555,17 +564,17 @@ describe('StatusService', () => {
         const { context$ } = analyticsMock.registerContextProvider.mock.calls[0][0];
         await expect(firstValueFrom(context$.pipe(take(2), toArray()))).resolves
           .toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "overall_status_level": "initializing",
-                "overall_status_summary": "Kibana is starting up",
-              },
-              Object {
-                "overall_status_level": "available",
-                "overall_status_summary": "All services are available",
-              },
-            ]
-          `);
+          Array [
+            Object {
+              "overall_status_level": "initializing",
+              "overall_status_summary": "Kibana is starting up",
+            },
+            Object {
+              "overall_status_level": "available",
+              "overall_status_summary": "All services and plugins are available",
+            },
+          ]
+        `);
       });
 
       test('registers and reports an event', async () => {
@@ -579,7 +588,7 @@ describe('StatusService', () => {
             "core-overall_status_changed",
             Object {
               "overall_status_level": "available",
-              "overall_status_summary": "All services are available",
+              "overall_status_summary": "All services and plugins are available",
             },
           ]
         `);

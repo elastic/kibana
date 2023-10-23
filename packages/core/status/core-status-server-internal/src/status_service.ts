@@ -15,7 +15,7 @@ import {
   tap,
   BehaviorSubject,
 } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import type { RootSchema } from '@kbn/analytics-client';
@@ -103,6 +103,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
+      // Prevent many emissions at once from dependency status resolution from making this too noisy
+      debounceTime(80),
       map(([serviceStatuses, pluginStatuses]) => {
         const summary = getSummaryStatus({ serviceStatuses, pluginStatuses });
         this.logger.debug<StatusLogMeta>(`Recalculated overall status`, {
@@ -119,6 +121,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.setupAnalyticsContextAndEvents(analytics);
 
     const coreOverall$ = core$.pipe(
+      // Prevent many emissions at once from dependency status resolution from making this too noisy
+      debounceTime(25),
       map((serviceStatuses) => {
         const coreOverall = getSummaryStatus({ serviceStatuses });
         this.logger.debug<StatusLogMeta>(`Recalculated core overall status`, {
