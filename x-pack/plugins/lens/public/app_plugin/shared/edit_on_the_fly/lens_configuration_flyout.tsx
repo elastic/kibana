@@ -53,7 +53,7 @@ export function LensEditConfigurationFlyout({
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
-  const displayCallout = activeDatasource?.displaysLimitedColumns?.(datasourceState);
+  const displayCallout = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
   }, []);

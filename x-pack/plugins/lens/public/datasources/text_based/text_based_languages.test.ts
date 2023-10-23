@@ -116,7 +116,7 @@ describe('Textbased Data Source', () => {
             },
           ],
           index: 'foo',
-          query: { sql: 'SELECT * FROM foo' },
+          query: { esql: 'FROM foo' },
         },
       },
       fieldList: [
@@ -226,7 +226,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            query: { sql: 'SELECT * FROM foo' },
+            query: { esql: 'FROM foo' },
             index: 'foo',
           },
         },
@@ -261,7 +261,7 @@ describe('Textbased Data Source', () => {
           ...baseState.layers,
           newLayer: {
             index: 'foo',
-            query: { sql: 'SELECT * FROM foo' },
+            query: { esql: 'FROM foo' },
             allColumns: [
               {
                 columnId: 'col1',
@@ -296,7 +296,7 @@ describe('Textbased Data Source', () => {
                   },
                 },
               ],
-              query: { sql: 'SELECT * FROM foo' },
+              query: { esql: 'FROM foo' },
               index: 'foo',
             },
           },
@@ -353,7 +353,7 @@ describe('Textbased Data Source', () => {
                   },
                 },
               ],
-              query: { sql: 'SELECT * FROM foo' },
+              query: { esql: 'FROM foo' },
               index: 'foo',
             },
           },
@@ -514,6 +514,175 @@ describe('Textbased Data Source', () => {
       );
       expect(suggestions).toEqual([]);
     });
+
+    it('should return the correct suggestions if non numeric columns are given', () => {
+      const textBasedQueryColumns = [
+        {
+          id: '@timestamp',
+          name: '@timestamp',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          id: 'dest',
+          name: 'dest',
+          meta: {
+            type: 'string',
+          },
+        },
+      ];
+      const state = {
+        layers: {},
+        initialContext: {
+          textBasedColumns: textBasedQueryColumns,
+          query: { esql: 'from foo' },
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsForVisualizeField(
+        state,
+        '1',
+        '',
+        indexPatterns
+      );
+      expect(suggestions[0].state).toEqual({
+        ...state,
+        fieldList: textBasedQueryColumns,
+        indexPatternRefs: [
+          {
+            id: '1',
+            timeField: undefined,
+            title: 'foo',
+          },
+        ],
+        layers: {
+          newid: {
+            allColumns: [
+              {
+                columnId: '@timestamp',
+                fieldName: '@timestamp',
+                inMetricDimension: true,
+                meta: {
+                  type: 'date',
+                },
+              },
+              {
+                columnId: 'dest',
+                fieldName: 'dest',
+                inMetricDimension: true,
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
+            columns: [
+              {
+                columnId: '@timestamp',
+                fieldName: '@timestamp',
+                inMetricDimension: true,
+                meta: {
+                  type: 'date',
+                },
+              },
+              {
+                columnId: 'dest',
+                fieldName: 'dest',
+                inMetricDimension: true,
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
+            index: '1',
+            query: {
+              esql: 'from foo',
+            },
+          },
+        },
+      });
+
+      expect(suggestions[0].table).toEqual({
+        changeType: 'initial',
+        columns: [
+          {
+            columnId: '@timestamp',
+            operation: {
+              dataType: 'date',
+              isBucketed: true,
+              label: '@timestamp',
+            },
+          },
+          {
+            columnId: 'dest',
+            operation: {
+              dataType: 'string',
+              isBucketed: true,
+              label: 'dest',
+            },
+          },
+        ],
+        isMultiRow: false,
+        layerId: 'newid',
+        notAssignedMetrics: true,
+      });
+    });
+  });
+
+  describe('#suggestsLimitedColumns', () => {
+    it('should return true if query returns big number of columns', () => {
+      const fieldList = [
+        {
+          id: 'a',
+          name: 'Test 1',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'b',
+          name: 'Test 2',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'c',
+          name: 'Test 3',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          id: 'd',
+          name: 'Test 4',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          id: 'e',
+          name: 'Test 5',
+          meta: {
+            type: 'string',
+          },
+        },
+      ];
+      const state = {
+        fieldList,
+        layers: {
+          a: {
+            query: { esql: 'from foo' },
+            index: 'foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+      expect(TextBasedDatasource?.suggestsLimitedColumns?.(state)).toBeTruthy();
+    });
   });
 
   describe('#getUserMessages', () => {
@@ -554,7 +723,7 @@ describe('Textbased Data Source', () => {
               },
             ],
             errors: [new Error('error 1'), new Error('error 2')],
-            query: { sql: 'SELECT * FROM foo' },
+            query: { esql: 'FROM foo' },
             index: 'foo',
           },
         },
@@ -636,7 +805,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            query: { sql: 'SELECT * FROM foo' },
+            query: { esql: 'FROM foo' },
             index: '1',
           },
         },
@@ -683,7 +852,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            query: { sql: 'SELECT * FROM foo' },
+            query: { esql: 'FROM foo' },
             index: '1',
           },
         },
@@ -741,7 +910,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            query: { sql: 'SELECT * FROM foo' },
+            query: { esql: 'FROM foo' },
             index: '1',
           },
         },
@@ -769,11 +938,14 @@ describe('Textbased Data Source', () => {
             },
             Object {
               "arguments": Object {
+                "locale": Array [
+                  "en",
+                ],
                 "query": Array [
-                  "SELECT * FROM foo",
+                  "FROM foo",
                 ],
               },
-              "function": "essql",
+              "function": "esql",
               "type": "function",
             },
             Object {

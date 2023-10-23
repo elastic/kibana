@@ -123,8 +123,8 @@ export function getTextBasedDatasource({
       const newLayerId = generateId();
       const textBasedQueryColumns = context.textBasedColumns ?? [];
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
-      // will not return number fields. In these cases we want to depict a table
-      // Datatable works differently in this datasource. On the metrics dimension can be all type of fields
+      // will not return number fields. In these cases we want to suggest a datatable
+      // Datatable works differently in this case. On the metrics dimension can be all type of fields
       const hasNumberTypeColumns = textBasedQueryColumns?.some((c) => c?.meta?.type === 'number');
       const newColumns = textBasedQueryColumns.map((c) => {
         const inMetricDimension = canColumnBeUsedBeInMetricDimension(
@@ -338,9 +338,9 @@ export function getTextBasedDatasource({
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
     // there are cases where a query can return a big amount of columns
-    // at this case we don't render all columns in a table but the first
+    // at this case we don't suggest all columns in a table but the first
     // MAX_NUM_OF_COLUMNS
-    displaysLimitedColumns(state: TextBasedPrivateState) {
+    suggestsLimitedColumns(state: TextBasedPrivateState) {
       const fieldsList = state?.fieldList ?? [];
       return fieldsList.length >= MAX_NUM_OF_COLUMNS;
     },

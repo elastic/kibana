@@ -512,7 +512,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   injectReferencesToLayers?: (state: T, references?: SavedObjectReference[]) => T;
 
-  displaysLimitedColumns?: (state: T) => boolean;
+  suggestsLimitedColumns?: (state: T) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
