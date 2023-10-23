@@ -46,7 +46,7 @@ export function getWarningsTitle(warnings: SearchResponseWarning[]) {
 export function getWarningsDescription(warnings: SearchResponseWarning[], visualizationLabel?: string) {
   const nonSuccessfulClusters = getNonSuccessfulClusters(warnings);
   return i18n.translate('searchResponseWarnings.description', {
-    defaultMessage: '{nonSuccessfulClustersCount, plural, one {This cluster} other {These clusters}} had issues returning results. This might result in an incomplete {visualizationLabel}.',
+    defaultMessage: '{nonSuccessfulClustersCount, plural, one {This cluster} other {These clusters}} had issues returning data. This might result in an incomplete {visualizationLabel}.',
     values: { 
       nonSuccessfulClustersCount: nonSuccessfulClusters.size,
       visualizationLabel: visualizationLabel

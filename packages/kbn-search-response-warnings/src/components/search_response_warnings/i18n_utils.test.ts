@@ -92,7 +92,7 @@ describe('getWarningsDescription', () => {
         openInInspector: () => {},
       },
     ];
-    expect(getWarningsDescription(warnings)).toEqual('This cluster had issues returning results. This might result in an incomplete visualization.');
+    expect(getWarningsDescription(warnings)).toEqual('This cluster had issues returning data. This might result in an incomplete visualization.');
   });
 
   test('Should show description for multiple non-successful cluster', () => {
@@ -114,7 +114,7 @@ describe('getWarningsDescription', () => {
         openInInspector: () => {},
       },
     ];
-    expect(getWarningsDescription(warnings)).toEqual('These clusters had issues returning results. This might result in an incomplete visualization.');
+    expect(getWarningsDescription(warnings)).toEqual('These clusters had issues returning data. This might result in an incomplete visualization.');
   });
 
   test('Should show custom visualization label', () => {
@@ -131,6 +131,6 @@ describe('getWarningsDescription', () => {
         openInInspector: () => {},
       },
     ];
-    expect(getWarningsDescription(warnings, 'table')).toEqual('This cluster had issues returning results. This might result in an incomplete table.');
+    expect(getWarningsDescription(warnings, 'table')).toEqual('This cluster had issues returning data. This might result in an incomplete table.');
   });
 });
