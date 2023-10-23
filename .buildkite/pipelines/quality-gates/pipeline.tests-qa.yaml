@@ -24,7 +24,6 @@ steps:
 
   - label: ":pipeline::ship::seedling: Trigger Fleet serverless smoke tests for ${ENVIRONMENT}"
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests
-    soft_fail: true # Remove this before release
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
