@@ -60,7 +60,6 @@ interface SetConversationProps {
 }
 
 interface UseConversation {
-  appendStreamMessage: ({ conversationId, message }: AppendMessageProps) => void;
   appendMessage: ({ conversationId, message }: AppendMessageProps) => Message[];
   amendMessage: ({ conversationId, content }: AmendMessageProps) => Message[];
   appendReplacements: ({
@@ -70,6 +69,7 @@ interface UseConversation {
   clearConversation: (conversationId: string) => void;
   createConversation: ({ conversationId, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
+  removeLastMessage: (conversationId: string) => Message[];
   setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
   setConversation: ({ conversation }: SetConversationProps) => void;
 }
@@ -78,21 +78,52 @@ export const useConversation = (): UseConversation => {
   const { allSystemPrompts, assistantTelemetry, setConversations } = useAssistantContext();
 
   /**
-   * Replaces the last message of conversation[] for a given conversationId
+   * Removes the last message of conversation[] for a given conversationId
    */
-  const amendMessage = useCallback(
-    ({ conversationId, content }) => {
+  const removeLastMessage = useCallback(
+    (conversationId: string) => {
       let messages: Message[] = [];
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
 
         if (prevConversation != null) {
-          const message = prevConversation.messages.pop();
+          prevConversation.messages.pop();
+          messages = prevConversation.messages;
+          const newConversation = {
+            ...prevConversation,
+            messages,
+          };
+          console.log('removeLastMessage newConversation', newConversation);
+          return {
+            ...prev,
+            [conversationId]: newConversation,
+          };
+        } else {
+          return prev;
+        }
+      });
+      return messages;
+    },
+    [setConversations]
+  );
+
+  /**
+   * Updates the last message of conversation[] for a given conversationId with provided content
+   */
+  const amendMessage = useCallback(
+    ({ conversationId, content }: AmendMessageProps) => {
+      let messages: Message[] = [];
+      setConversations((prev: Record<string, Conversation>) => {
+        const prevConversation: Conversation | undefined = prev[conversationId];
+
+        if (prevConversation != null) {
+          const message = prevConversation.messages.pop() as unknown as Message;
           messages = [...prevConversation.messages, { ...message, content }];
           const newConversation = {
             ...prevConversation,
             messages,
           };
+          console.log('amendMessage newConversation', newConversation);
           return {
             ...prev,
             [conversationId]: newConversation,
@@ -303,6 +334,7 @@ export const useConversation = (): UseConversation => {
     clearConversation,
     createConversation,
     deleteConversation,
+    removeLastMessage,
     setApiConfig,
     setConversation,
   };

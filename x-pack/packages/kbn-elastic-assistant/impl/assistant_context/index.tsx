@@ -13,7 +13,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { AppendMessageProps } from '../assistant/use_conversation';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -109,7 +108,14 @@ export interface UseAssistantContext {
   }: {
     currentConversation: Conversation;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
-    amendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
+    amendMessage: ({
+      conversationId,
+      content,
+    }: {
+      conversationId: string;
+      content: string;
+    }) => Message[];
+    regenerateMessage: () => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;

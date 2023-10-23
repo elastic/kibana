@@ -17,7 +17,7 @@ interface Props {
   amendMessage: (message: string) => void;
   content?: string;
   isLastComment: boolean;
-  lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+  regenerateMessage: () => void;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 
@@ -25,72 +25,47 @@ export const StreamComment = ({
   amendMessage,
   content,
   isLastComment,
-  lastCommentRef,
   reader,
+  regenerateMessage,
 }: Props) => {
-  const { error, isLoading, isStreaming, pendingMessage, setComplete, subscription } = useStream({
+  const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     amendMessage,
     content,
     reader,
   });
   const message = content ?? pendingMessage;
-  const controls = useMemo(
-    () =>
-      reader != null ? (
-        isLoading || isStreaming ? (
-          <StopGeneratingButton
-            onClick={() => {
-              subscription?.unsubscribe();
-              setComplete(true);
-              console.log('stop generating');
-              // setLoading(false);
-              // setDisplayedMessages((prevMessages) =>
-              //   prevMessages.concat({
-              //     '@timestamp': new Date().toISOString(),
-              //     message: {
-              //       ...pendingMessage!.message,
-              //     },
-              //   })
-              // );
-              // setPendingMessage((prev) => ({
-              //   message: {
-              //     role: MessageRole.Assistant,
-              //     ...prev?.message,
-              //   },
-              //   aborted: true,
-              //   error: new AbortError(),
-              // }));
-            }}
-          />
-        ) : isLastComment ? (
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={false}>
-              <RegenerateResponseButton
-                onClick={() => {
-                  console.log('RegenerateResponseButton');
-                  // reloadRecalledMessages();
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null
-      ) : null,
-    [isLastComment, isLoading, isStreaming, reader, setComplete, subscription]
-  );
+  const controls = useMemo(() => {
+    if (reader == null || !isLastComment) {
+      return;
+    }
+    if (isLoading || isStreaming) {
+      return (
+        <StopGeneratingButton
+          onClick={() => {
+            setComplete(true);
+          }}
+        />
+      );
+    }
+    return (
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem grow={false}>
+          <RegenerateResponseButton onClick={regenerateMessage} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, [isLastComment, isLoading, isStreaming, reader, regenerateMessage, setComplete]);
   return (
-    <>
-      <MessagePanel
-        body={
-          <MessageText
-            content={message}
-            loading={isLoading || isStreaming}
-            onActionClick={async () => {}}
-          />
-        }
-        error={error ? new Error(error) : undefined}
-        controls={controls}
-      />
-      {isLastComment && <span ref={lastCommentRef} />}
-    </>
+    <MessagePanel
+      body={
+        <MessageText
+          content={message}
+          loading={isLoading || isStreaming}
+          onActionClick={async () => {}}
+        />
+      }
+      error={error ? new Error(error) : undefined}
+      controls={controls}
+    />
   );
 };

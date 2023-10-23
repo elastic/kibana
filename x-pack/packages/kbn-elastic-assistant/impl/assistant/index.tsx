@@ -31,6 +31,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
 import { AssistantHeader } from './assistant_header';
@@ -339,6 +340,18 @@ const AssistantComponent: React.FC<Props> = ({
     [messageCodeBlocks]
   );
 
+  const { handleRegenerateResponse } = useChatSend({
+    allSystemPrompts,
+    currentConversation,
+    setPromptTextPreview,
+    setUserPrompt,
+    editingSystemPromptId,
+    http,
+    setEditingSystemPromptId,
+    selectedPromptContexts,
+    setSelectedPromptContexts,
+  });
+
   const chatbotComments = useMemo(
     () => (
       <>
@@ -348,6 +361,7 @@ const AssistantComponent: React.FC<Props> = ({
             lastCommentRef,
             showAnonymizedValues,
             amendMessage,
+            regenerateMessage: handleRegenerateResponse,
           })}
           css={css`
             margin-right: 20px;
@@ -382,6 +396,7 @@ const AssistantComponent: React.FC<Props> = ({
       editingSystemPromptId,
       getComments,
       handleOnSystemPromptSelectionChange,
+      handleRegenerateResponse,
       isSettingsModalVisible,
       promptContexts,
       promptTextPreview,

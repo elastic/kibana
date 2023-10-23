@@ -22,6 +22,7 @@ export const getComments = ({
   amendMessage,
   currentConversation,
   lastCommentRef,
+  regenerateMessage,
   showAnonymizedValues,
 }: {
   amendMessage: ({
@@ -33,6 +34,7 @@ export const getComments = ({
   }) => Message[];
   currentConversation: Conversation;
   lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+  regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
 }): EuiCommentProps[] => {
   const amendMessageOfConversation = (content: string) => {
@@ -40,6 +42,10 @@ export const getComments = ({
       conversationId: currentConversation.id,
       content,
     });
+  };
+
+  const regenerateMessageOfConversation = () => {
+    regenerateMessage(currentConversation.id);
   };
 
   return currentConversation.messages.map((message, index) => {
@@ -70,18 +76,22 @@ export const getComments = ({
       username: isUser ? i18n.YOU : i18n.ASSISTANT,
       ...(message.isError ? errorStyles : {}),
     };
+    const isLastComment = index === currentConversation.messages.length - 1;
 
+    // message still needs to stream, no response manipulation
     if (!(message.content && message.content.length)) {
       return {
         ...messageProps,
         children: (
-          <StreamComment
-            amendMessage={amendMessageOfConversation}
-            reader={message.reader}
-            index={index}
-            lastCommentRef={lastCommentRef}
-            isLastComment={index === currentConversation.messages.length - 1}
-          />
+          <>
+            <StreamComment
+              amendMessage={amendMessageOfConversation}
+              reader={message.reader}
+              regenerateMessage={regenerateMessageOfConversation}
+              isLastComment={isLastComment}
+            />
+            {isLastComment ? <span ref={lastCommentRef} /> : null}
+          </>
         ),
       };
     }
@@ -107,18 +117,12 @@ export const getComments = ({
             amendMessage={amendMessageOfConversation}
             content={showAnonymizedValues ? message.content : transformedMessage.content}
             reader={message.reader}
-            lastCommentRef={lastCommentRef}
-            isLastComment={index === currentConversation.messages.length - 1}
+            regenerateMessage={regenerateMessageOfConversation}
+            isLastComment={isLastComment}
           />
-          {index !== currentConversation.messages.length - 1 ? null : <span ref={lastCommentRef} />}
+          {isLastComment ? <span ref={lastCommentRef} /> : null}
         </>
       ),
     };
-
-    // return {
-    //   ...messageProps,
-    //   children: <EuiText>{'oh no an error happened'}</EuiText>,
-    //   ...errorStyles,
-    // };
   });
 };

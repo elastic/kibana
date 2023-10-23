@@ -42,7 +42,6 @@ interface UseStream {
   isStreaming: boolean;
   pendingMessage: string;
   setComplete: (complete: boolean) => void;
-  subscription: Subscription | undefined;
 }
 
 export const useStream = ({ amendMessage, content, reader }: UseStreamProps): UseStream => {
@@ -113,7 +112,6 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
             };
           }).pipe(concatMap((value) => of(value).pipe(delay(50))))
         : new Observable<PromptObservableState>(),
-
     [content, reader]
   );
 
@@ -123,13 +121,16 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 
   const onCompleteStream = useCallback(() => {
+    subscription?.unsubscribe();
+    setLoading(false);
     amendMessage(pendingMessage ?? '');
-  }, [amendMessage, pendingMessage]);
+  }, [amendMessage, pendingMessage, subscription]);
 
   const [complete, setComplete] = useState(false);
 
   useEffect(() => {
     if (complete) {
+      setComplete(false);
       onCompleteStream();
     }
   }, [complete, onCompleteStream]);
@@ -138,7 +139,6 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
     const newSubscription = observer$.pipe(share()).subscribe({
       next: ({ message, loading: isLoading }) => {
         setLoading(isLoading);
-
         setPendingMessage(message);
       },
       complete: () => {
@@ -152,17 +152,12 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
     setSubscription(newSubscription);
   }, [observer$]);
 
-  const { isLoading, isStreaming } = useMemo(() => {
-    return { isLoading: loading, isStreaming: loading && pendingMessage != null };
-  }, [loading, pendingMessage]);
-
   return {
     error,
-    isLoading,
-    isStreaming,
+    isLoading: loading,
+    isStreaming: loading && pendingMessage != null,
     pendingMessage: pendingMessage ?? '',
     setComplete,
-    subscription,
   };
 };
 

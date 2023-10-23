@@ -34,6 +34,7 @@ interface UseChatSend {
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
   handleSendMessage: (promptText: string) => void;
+  handleRegenerateResponse: () => void;
   isLoading: boolean;
 }
 
@@ -54,7 +55,8 @@ export const useChatSend = ({
   setUserPrompt,
 }: UseChatSendProps): UseChatSend => {
   const { isLoading, sendMessages } = useSendMessages();
-  const { appendMessage, appendReplacements, clearConversation } = useConversation();
+  const { appendMessage, appendReplacements, clearConversation, removeLastMessage } =
+    useConversation();
 
   const handlePromptChange = (prompt: string) => {
     setPromptTextPreview(prompt);
@@ -112,6 +114,24 @@ export const useChatSend = ({
     ]
   );
 
+  const handleRegenerateResponse = useCallback(async () => {
+    const updatedMessages = removeLastMessage(currentConversation.id);
+    const rawResponse = await sendMessages({
+      http,
+      apiConfig: currentConversation.apiConfig,
+      messages: updatedMessages,
+    });
+    const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+    appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+  }, [
+    appendMessage,
+    currentConversation.apiConfig,
+    currentConversation.id,
+    http,
+    removeLastMessage,
+    sendMessages,
+  ]);
+
   const handleButtonSendMessage = useCallback(
     (message: string) => {
       handleSendMessage(message);
@@ -146,6 +166,7 @@ export const useChatSend = ({
     handleOnChatCleared,
     handlePromptChange,
     handleSendMessage,
+    handleRegenerateResponse,
     isLoading,
   };
 };
