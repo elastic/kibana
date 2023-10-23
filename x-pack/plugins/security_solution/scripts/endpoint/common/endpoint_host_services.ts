@@ -231,7 +231,7 @@ const createMultipassVm = async ({
   };
 };
 
-const deleteMultipassVm = async (vmName: string): Promise<void> => {
+export const deleteMultipassVm = async (vmName: string): Promise<void> => {
   if (process.env.CI) {
     await execa.command(`vagrant destroy -f`, {
       env: {
@@ -313,7 +313,7 @@ const enrollHostWithFleet = async ({
 
   log.info(`Enrolling elastic agent with Fleet`);
   if (process.env.CI) {
-    log.info(`Command: vagrant ${agentInstallArguments.join(' ')}`);
+    log.verbose(`Command: vagrant ${agentInstallArguments.join(' ')}`);
 
     await execa(`vagrant`, ['ssh', '--', `cd ${vmDirName} && ${agentInstallArguments.join(' ')}`], {
       env: {
@@ -335,9 +335,10 @@ const enrollHostWithFleet = async ({
     ]);
   }
   log.info(`Waiting for Agent to check-in with Fleet`);
+
   const agent = await waitForHostToEnroll(kbnClient, vmName, 480000, log);
 
-  log.info(`Agent enrolled with Fleet`, agent.status);
+  log.info(`Agent enrolled with Fleet, status: `, agent.status);
 
   return {
     agentId: agent.id,

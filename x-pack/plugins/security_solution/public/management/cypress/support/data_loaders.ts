@@ -32,6 +32,7 @@ import type {
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import {
   createAndEnrollEndpointHost,
+  deleteMultipassVm,
   destroyEndpointHost,
   startEndpointHost,
   stopEndpointHost,
@@ -327,16 +328,35 @@ export const dataLoadersForRealEndpoints = (
       options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostResponse> => {
       const { kbnClient, log } = await stackServicesPromise;
-      return createAndEnrollEndpointHost({
-        useClosestVersionMatch: true,
-        ...options,
-        log,
-        kbnClient,
-      }).then((newHost) => {
-        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000).then(() => {
+
+      let retryAttempt = 0;
+      const attemptCreateEndpointHost = async (): Promise<CreateAndEnrollEndpointHostResponse> => {
+        try {
+          log.info(
+            `================= Creating endpoint host, attempt ${retryAttempt} =================`
+          );
+          const newHost = await createAndEnrollEndpointHost({
+            useClosestVersionMatch: true,
+            ...options,
+            log,
+            kbnClient,
+          });
+          await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
           return newHost;
-        });
-      });
+        } catch (err) {
+          log.info(`================= Caught error ${err} =================`);
+          if (retryAttempt === 0) {
+            retryAttempt++;
+            await deleteMultipassVm(options.hostname ?? 'test-host'); // Vagrant only in CI
+            log.info(`================= Deleted endpoint host =================`);
+            return attemptCreateEndpointHost();
+          } else {
+            throw err;
+          }
+        }
+      };
+
+      return attemptCreateEndpointHost();
     },
 
     destroyEndpointHost: async (

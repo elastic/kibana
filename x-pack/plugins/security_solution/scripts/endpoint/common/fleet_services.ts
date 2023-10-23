@@ -44,8 +44,6 @@ import type {
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
-import execa from 'execa';
-import fs from 'fs';
 import {
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
@@ -53,7 +51,6 @@ import {
 import { fetchKibanaStatus } from './stack_services';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
-import { VAGRANT_CWD } from './endpoint_host_services';
 
 const fleetGenerator = new FleetAgentGenerator();
 
@@ -137,6 +134,7 @@ export const fetchFleetAgents = async (
  * @param kbnClient
  * @param hostname
  * @param timeoutMs
+ * @param logger
  */
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
@@ -158,12 +156,7 @@ export const waitForHostToEnroll = async (
           perPage: 1,
           kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
           showInactive: false,
-        }).then((response) => {
-          if (logger) {
-            logger.info(JSON.stringify(response, null, 2));
-          }
-          return response.items.filter((agent) => agent.status === 'online')[0];
-        }),
+        }).then((response) => response.items.filter((agent) => agent.status === 'online')[0]),
       RETRYABLE_TRANSIENT_ERRORS,
       logger
     );
@@ -172,40 +165,6 @@ export const waitForHostToEnroll = async (
       // sleep and check again
       await new Promise((r) => setTimeout(r, 2000));
     }
-  }
-
-  try {
-    let stdout: string;
-    if (process.env.CI) {
-      const { stdout: vagrantSTDOUT } = await execa(
-        'vagrant',
-        ['ssh', '--', "sudo sh -c 'cat /opt/Elastic/Agent/elastic-agent-*'"],
-        {
-          env: {
-            VAGRANT_CWD,
-          },
-        }
-      );
-      stdout = vagrantSTDOUT;
-    } else {
-      stdout = '';
-    }
-    await execa('mkdir', [
-      '-p',
-      '../../../../../../target/kibana-security-solution/cypress/results/',
-    ]).catch((e) => {
-      logger?.info(e);
-    });
-
-    const abc = stdout.toString();
-
-    fs.writeFileSync(
-      '../../../../../../target/kibana-security-solution/cypress/results/agent-logs.txt',
-      abc
-    );
-    logger?.info(stdout);
-  } catch (e) {
-    logger?.info(e);
   }
 
   if (!found) {

@@ -53,7 +53,7 @@ export const retryOnError = async <T>(
   tryCount: number = 5,
   interval: number = 10000
 ): Promise<T> => {
-  const log = logger ?? new ToolingLog({ writeTo: { write(_: string) {} }, level: 'info' });
+  const log = logger ?? new ToolingLog({ writeTo: { write(_: string) {} }, level: 'silent' });
   const msg = (message: string): string => `retryOnError(): ${message}`;
   const isRetryableError = (err: Error): boolean => {
     return errors.some((retryMessage) => {
