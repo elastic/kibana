@@ -117,7 +117,7 @@ export class RulesClientFactory {
       maxScheduledPerMinute: this.maxScheduledPerMinute,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
+        includedHiddenTypes: ['alert', 'api_key_pending_invalidation', 'ad_hoc_rule_run_params'],
       }),
       authorization: this.authorization.create(request),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),

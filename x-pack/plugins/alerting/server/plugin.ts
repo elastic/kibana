@@ -102,6 +102,7 @@ import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 import { AdHocRuleRunClient } from './ad_hoc_runs/ad_hoc_rule_run_client';
+import { AdHocTaskRunnerFactory } from './ad_hoc_runs/ad_hoc_task_runner_factory';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -199,6 +200,7 @@ export class AlertingPlugin {
   private readonly logger: Logger;
   private ruleTypeRegistry?: RuleTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
+  private readonly adHocTaskRunnerFactory: AdHocTaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
   private isESOCanEncrypt?: boolean;
   private security?: SecurityPluginSetup;
@@ -222,6 +224,7 @@ export class AlertingPlugin {
     this.config = initializerContext.config.get();
     this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
+    this.adHocTaskRunnerFactory = new AdHocTaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
     this.alertsService = null;
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
@@ -275,6 +278,7 @@ export class AlertingPlugin {
     this.adHocRuleRunClient = new AdHocRuleRunClient({
       taskManager: plugins.taskManager,
       logger: this.logger,
+      adHocTaskRunnerFactory: this.adHocTaskRunnerFactory,
       coreStartServices: core.getStartServices(),
     });
 
@@ -451,6 +455,7 @@ export class AlertingPlugin {
       isESOCanEncrypt,
       logger,
       taskRunnerFactory,
+      adHocTaskRunnerFactory,
       ruleTypeRegistry,
       rulesClientFactory,
       alertingAuthorizationClientFactory,
@@ -561,6 +566,38 @@ export class AlertingPlugin {
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      executionContext: core.executionContext,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      alertsService: this.alertsService,
+      kibanaBaseUrl: this.kibanaBaseUrl,
+      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
+      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      maxAlerts: this.config.rules.run.alerts.max,
+      actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
+      usageCounter: this.usageCounter,
+      getRulesSettingsClientWithRequest,
+      getMaintenanceWindowClientWithRequest,
+    });
+
+    adHocTaskRunnerFactory.initialize({
+      logger,
+      data: plugins.data,
+      share: plugins.share,
+      dataViews: plugins.dataViews,
+      savedObjects: core.savedObjects,
+      uiSettings: core.uiSettings,
+      elasticsearch: core.elasticsearch,
+      getRulesClientWithRequest,
+      spaceIdToNamespace,
+      actionsPlugin: plugins.actions,
+      encryptedSavedObjectsClient,
+      basePathService: core.http.basePath,
+      eventLogger: this.eventLogger!,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
+        'alert',
+        'ad_hoc_rule_run_params',
+      ]),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       alertsService: this.alertsService,

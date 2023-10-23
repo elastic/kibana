@@ -34,7 +34,7 @@ export const scheduleAdHocRuleRun = (
         const rulesClient = (await context.alerting).getRulesClient();
         const body: ScheduleAdHocRuleRunRequestBodyV1 = req.body;
 
-        /* const result = */ rulesClient.scheduleAdHocRuleRun(transformRequestV1(body));
+        /* const result = */ await rulesClient.scheduleAdHocRuleRun(transformRequestV1(body));
         // const response: ScheduleAdHocRuleRunResponseV1 = {
         //   body: transformListTypesResponseV1(result),
         // };

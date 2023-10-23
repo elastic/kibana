@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import { CoreStart, ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import {
+  CoreStart,
+  ISavedObjectsRepository,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import {
+  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { ScheduleAdHocRuleRunOptions } from '../application/rule/methods/ad_hoc_runs/schedule/types';
 import { AlertingPluginsStart } from '../plugin';
+import { AdHocRuleRunParams } from '../types';
+import { AdHocTaskRunnerFactory } from './ad_hoc_task_runner_factory';
 
 interface ConstructorOpts {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
+  adHocTaskRunnerFactory: AdHocTaskRunnerFactory;
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>;
 }
 
 type QueueOpts = ScheduleAdHocRuleRunOptions & {
   spaceId: string;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 };
 export class AdHocRuleRunClient {
   private logger: Logger;
@@ -54,11 +64,7 @@ export class AdHocRuleRunClient {
     opts.taskManager.registerTaskDefinitions({
       [this.adHocRuleRunTaskType]: {
         title: 'Alerting Ad Hoc Rule Run',
-        createTaskRunner: () => {
-          return {
-            run: async () => {},
-          };
-        },
+        createTaskRunner: (context: RunContext) => opts.adHocTaskRunnerFactory.create(context),
       },
     });
   }
@@ -87,9 +93,9 @@ export class AdHocRuleRunClient {
     intervalStart,
     intervalDuration,
     intervalEnd,
+    unsecuredSavedObjectsClient,
   }: QueueOpts) {
-    const savedObjectsRepository = await this.getSavedObjectsRepository();
-    const bulkResponse = await savedObjectsRepository.bulkCreate(
+    const bulkResponse = await unsecuredSavedObjectsClient.bulkCreate(
       ruleIds.map((ruleId: string) => ({
         type: 'ad_hoc_rule_run_params',
         attributes: {
@@ -104,6 +110,7 @@ export class AdHocRuleRunClient {
       }))
     );
 
+    this.logger.info(`queue ${JSON.stringify(bulkResponse)}`);
     // TODO retry errors
     return bulkResponse.saved_objects.map((so, index) => ({
       ruleId: ruleIds[index],
@@ -130,6 +137,7 @@ export class AdHocRuleRunClient {
       try {
         this.logger.info(`Trying to get task with ID ${this.adHocRuleRunTaskType}`);
         await this.taskManager?.get(this.adHocRuleRunTaskType);
+        this.logger.info(`Found existing task, not scheduling another`);
         // found an ad hoc rule run task, don't schedule another one
         return;
       } catch (err) {
@@ -139,7 +147,7 @@ export class AdHocRuleRunClient {
 
       // Check if there are any ad hoc rule runs queued up
       const savedObjectsRepository = await this.getSavedObjectsRepository();
-      const findResponse = await savedObjectsRepository.find({
+      const findResponse = await savedObjectsRepository.find<AdHocRuleRunParams>({
         type: 'ad_hoc_rule_run_params',
         sortField: 'createdAt',
         perPage: 1,
@@ -148,7 +156,7 @@ export class AdHocRuleRunClient {
         `Find result for ad_hoc_rule_run_params SO: ${JSON.stringify(findResponse)}`
       );
 
-      if (findResponse.total > 0) {
+      if (findResponse.saved_objects.length > 0) {
         const adHocRun = findResponse.saved_objects[0];
 
         this.logger.info(
@@ -158,6 +166,7 @@ export class AdHocRuleRunClient {
             state: {},
             params: {
               adHocRuleRunParamsId: adHocRun.id,
+              spaceId: adHocRun.attributes.spaceId,
             },
           })}`
         );
@@ -168,6 +177,7 @@ export class AdHocRuleRunClient {
           state: {},
           params: {
             adHocRuleRunParamsId: adHocRun.id,
+            spaceId: adHocRun.attributes.spaceId,
           },
         });
       } else {

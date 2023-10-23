@@ -86,5 +86,9 @@ export async function scheduleAdHocRuleRun(
     context.ruleTypeRegistry.ensureRuleTypeEnabled(rule.attributes.alertTypeId);
   });
 
-  return context.adHocRuleRunClient.queue({ ...options, spaceId: context.spaceId });
+  return await context.adHocRuleRunClient.queue({
+    ...options,
+    spaceId: context.spaceId,
+    unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+  });
 }
