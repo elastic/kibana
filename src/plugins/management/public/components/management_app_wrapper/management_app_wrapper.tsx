@@ -10,9 +10,18 @@ import React, { createRef, Component } from 'react';
 
 import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import classNames from 'classnames';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
+
+/** @internal **/
+const RecallError = ({ error }: { error?: Error }) => {
+  if (error) {
+    throw error;
+  }
+  return null;
+};
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;
@@ -22,9 +31,21 @@ interface ManagementSectionWrapperProps {
   theme$: AppMountParameters['theme$'];
 }
 
-export class ManagementAppWrapper extends Component<ManagementSectionWrapperProps> {
+interface ManagementSectionWrapperState {
+  error?: Error;
+}
+
+export class ManagementAppWrapper extends Component<
+  ManagementSectionWrapperProps,
+  ManagementSectionWrapperState
+> {
   private unmount?: Unmount;
   private mountElementRef = createRef<HTMLDivElement>();
+
+  constructor(props: ManagementSectionWrapperProps) {
+    super(props);
+    this.state = {};
+  }
 
   componentDidMount() {
     const { setBreadcrumbs, app, onAppMounted, history, theme$ } = this.props;
@@ -42,9 +63,15 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
     onAppMounted(app.id);
 
     if (mountResult instanceof Promise) {
-      mountResult.then((um) => {
-        this.unmount = um;
-      });
+      mountResult
+        .then((um) => {
+          this.unmount = um;
+        })
+        .catch((error) => {
+          this.setState(() => ({
+            error,
+          }));
+        });
     } else {
       this.unmount = mountResult;
     }
@@ -58,11 +85,16 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
 
   render() {
     return (
-      <div
-        // The following classes are a stop-gap for this element that wraps children of KibanaPageTemplate
-        className={classNames('euiPageContentBody', APP_WRAPPER_CLASS)}
-        ref={this.mountElementRef}
-      />
+      <KibanaErrorBoundaryProvider>
+        <KibanaErrorBoundary>
+          <RecallError error={this.state.error} />
+          <div
+            // The following classes are a stop-gap for this element that wraps children of KibanaPageTemplate
+            className={classNames('euiPageContentBody', APP_WRAPPER_CLASS)}
+            ref={this.mountElementRef}
+          />
+        </KibanaErrorBoundary>
+      </KibanaErrorBoundaryProvider>
     );
   }
 }
