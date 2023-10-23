@@ -19,12 +19,7 @@ import {
   RESPONSE_ACTIONS_ITEM_1,
   RESPONSE_ACTIONS_ITEM_2,
 } from '../../tasks/response_actions';
-import {
-  checkActionItemsInResults,
-  clickRuleName,
-  inputQuery,
-  typeInECSFieldInput,
-} from '../../tasks/live_query';
+import { clickRuleName, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
 describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
@@ -139,12 +134,8 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains(packName);
       cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
-      checkActionItemsInResults({
-        cases: false,
-        lens: false,
-        discover: false,
-        timeline: false,
-      });
+      cy.contains('SELECT * FROM memory_info;');
+      cy.contains('SELECT * FROM system_info;');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
