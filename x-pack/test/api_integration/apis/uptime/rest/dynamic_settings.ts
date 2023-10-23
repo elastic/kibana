@@ -29,15 +29,24 @@ export default function ({ getService }: FtrProviderContext) {
         defaultConnectors: [],
       };
       const postResponse = await supertest
-        .post(API_URLS.DYNAMIC_SETTINGS)
+        .put(API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send(newSettings);
 
-      expect(postResponse.body).to.eql({ success: true });
+      expect(postResponse.body).to.eql({
+        heartbeatIndices: 'myIndex1*',
+        certExpirationThreshold: 5,
+        certAgeThreshold: 15,
+        defaultConnectors: [],
+        defaultEmail: { to: [], cc: [], bcc: [] },
+      });
       expect(postResponse.status).to.eql(200);
 
       const getResponse = await supertest.get(API_URLS.DYNAMIC_SETTINGS);
-      expect(getResponse.body).to.eql(newSettings);
+      expect(getResponse.body).to.eql({
+        ...newSettings,
+        defaultEmail: { to: [], cc: [], bcc: [] },
+      });
       expect(isRight(DynamicSettingsCodec.decode(getResponse.body))).to.be.ok();
     });
   });
