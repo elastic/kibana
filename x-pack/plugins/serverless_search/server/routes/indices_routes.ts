@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
 import { fetchIndices } from '../lib/indices/fetch_indices';
@@ -63,10 +64,22 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
       });
       return response.ok({
         body: {
-          index_names: Object.keys(result || {}),
+          index_names: Object.keys(result || {}).filter(
+            (indexName) => !isHidden(result[indexName]) && !isClosed(result[indexName])
+          ),
         },
         headers: { 'content-type': 'application/json' },
       });
     }
   );
 };
+
+function isHidden(index?: IndicesIndexState): boolean {
+  return index?.settings?.index?.hidden === true || index?.settings?.index?.hidden === 'true';
+}
+function isClosed(index?: IndicesIndexState): boolean {
+  return (
+    index?.settings?.index?.verified_before_close === true ||
+    index?.settings?.index?.verified_before_close === 'true'
+  );
+}
