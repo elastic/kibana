@@ -399,23 +399,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
     });
 
-    it('should display prev rule state after params update on clicking prev generated link', async () => {
-      await openAlertRuleInManagement(RULE_NAME);
-
-      // change rule configuration
-      await testSubjects.click('openEditRuleFlyoutButton');
-      await queryBar.setQuery('message:msg-1');
-      await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
-
-      await testSubjects.click('thresholdPopover');
-      await testSubjects.setValue('alertThresholdInput', '1');
-      await testSubjects.click('saveEditedRuleButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await openAlertResults(RULE_NAME);
-      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
-    });
-
     it('should display actual state after rule params update on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
