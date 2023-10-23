@@ -66,8 +66,7 @@ export default function AlertDetailsAppSection({
   ruleLink,
   setAlertSummaryFields,
 }: AppSectionProps) {
-  const { uiSettings, charts, aiops, data } = useKibana().services;
-  const { EmbeddableChangePointChart } = aiops;
+  const { uiSettings, charts, data } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
