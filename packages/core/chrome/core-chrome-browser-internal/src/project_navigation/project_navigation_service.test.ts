@@ -7,15 +7,17 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take } from 'rxjs';
+import { firstValueFrom, lastValueFrom, take, BehaviorSubject } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
+import type { ChromeNavLinks, ChromeBreadcrumb, AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
 const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) => {
   const projectNavigationService = new ProjectNavigationService();
   const history = createMemoryHistory();
+  const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+
   history.replace(locationPathName);
   const projectNavigation = projectNavigationService.start({
     application: {
@@ -24,15 +26,18 @@ const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) =
     },
     navLinks: {} as unknown as ChromeNavLinks,
     http: httpServiceMock.createStartContract(),
+    chromeBreadcrumbs$,
   });
 
-  return { projectNavigation, history };
+  return { projectNavigation, history, chromeBreadcrumbs$ };
 };
 
 describe('breadcrumbs', () => {
   const setupWithNavTree = () => {
     const currentLocationPathName = '/foo/item1';
-    const { projectNavigation, history } = setup({ locationPathName: currentLocationPathName });
+    const { projectNavigation, chromeBreadcrumbs$, history } = setup({
+      locationPathName: currentLocationPathName,
+    });
 
     const mockNavigation = {
       navigationTree: [
@@ -66,7 +71,7 @@ describe('breadcrumbs', () => {
       ],
     };
     projectNavigation.setProjectNavigation(mockNavigation);
-    return { projectNavigation, history, mockNavigation };
+    return { projectNavigation, history, mockNavigation, chromeBreadcrumbs$ };
   };
 
   test('should set breadcrumbs home / nav / custom', async () => {
@@ -90,6 +95,7 @@ describe('breadcrumbs', () => {
         },
         Object {
           "data-test-subj": "breadcrumb-deepLinkId-navItem1",
+          "deepLinkId": "navItem1",
           "href": "/foo/item1",
           "text": "Nav Item 1",
         },
@@ -134,6 +140,38 @@ describe('breadcrumbs', () => {
         Object {
           "href": "/custom1/custom2",
           "text": "custom2",
+        },
+      ]
+    `);
+  });
+
+  test('should merge nav breadcrumbs and chrome breadcrumbs', async () => {
+    const { projectNavigation, chromeBreadcrumbs$ } = setupWithNavTree();
+
+    projectNavigation.setProjectBreadcrumbs([]);
+    chromeBreadcrumbs$.next([
+      { text: 'Kibana' },
+      { deepLinkId: 'navItem1' as AppDeepLinkId, text: 'Nav Item 1 from Chrome' },
+      { text: 'Deep context from Chrome' },
+    ]);
+
+    const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data-test-subj": "breadcrumb-home",
+          "href": "/",
+          "text": <EuiIcon
+            type="home"
+          />,
+          "title": "Home",
+        },
+        Object {
+          "deepLinkId": "navItem1",
+          "text": "Nav Item 1 from Chrome",
+        },
+        Object {
+          "text": "Deep context from Chrome",
         },
       ]
     `);

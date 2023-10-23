@@ -27,9 +27,10 @@ export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
 
   crumbs = crumbs.map((breadcrumb, i) => {
     const isLast = i === breadcrumbs.length - 1;
+    const { deepLinkId, ...rest } = breadcrumb;
 
     return {
-      ...breadcrumb,
+      ...rest,
       href: isLast ? undefined : breadcrumb.href,
       onClick: isLast ? undefined : breadcrumb.onClick,
       'data-test-subj': classNames(
