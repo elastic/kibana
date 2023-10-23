@@ -15,5 +15,7 @@ export const reducerStreamRequestBodySchema = schema.object({
   timeout: schema.maybe(schema.number()),
   /** Setting to override headers derived compression */
   compressResponse: schema.maybe(schema.boolean()),
+  /** Boolean lag to enabled/disable 4KB payload flush fix. */
+  flushFix: schema.maybe(schema.boolean()),
 });
 export type ReducerStreamRequestBodySchema = TypeOf<typeof reducerStreamRequestBodySchema>;

@@ -6,15 +6,7 @@
  */
 
 import React, { useEffect, useState, type FC } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -93,8 +85,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     number | WindowParameters | undefined
   >(incomingInitialAnalysisStart);
   const [isBrushCleared, setIsBrushCleared] = useState(true);
-  const [isGzipEnabled, setIsGzipEnabled] = useState(true);
-  const [isFlushPayloadEnabled, setIsFlushPayloadEnabled] = useState(true);
   const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(
     LOG_RATE_ANALYSIS_TYPE.SPIKE
   );
@@ -150,36 +140,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     setInitialAnalysisStart(undefined);
   }
 
-  const onChangeIsGzipEnabled = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
-    setIsGzipEnabled(e.target.checked);
-  };
-
-  const onChangeIsFlushPayloadEnabled = (e: {
-    target: { checked: React.SetStateAction<boolean> };
-  }) => {
-    setIsFlushPayloadEnabled(e.target.checked);
-  };
-
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
-      <EuiFlexGroup style={{ maxWidth: 600 }}>
-        <EuiFlexItem>
-          <EuiSwitch
-            label={`gzip compression ${isGzipEnabled ? 'on' : 'off'}`}
-            checked={isGzipEnabled}
-            onChange={onChangeIsGzipEnabled}
-            compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSwitch
-            label={`flush payload ${isFlushPayloadEnabled ? 'on' : 'off'}`}
-            checked={isFlushPayloadEnabled}
-            onChange={onChangeIsFlushPayloadEnabled}
-            compressed
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer />
       {documentCountStats !== undefined && (
         <DocumentCountContent
@@ -205,8 +167,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           analysisType={logRateAnalysisType}
           earliest={earliest}
           isBrushCleared={isBrushCleared}
-          isGzipEnabled={isGzipEnabled}
-          isFlushPayloadEnabled={isFlushPayloadEnabled}
           latest={latest}
           stickyHistogram={stickyHistogram}
           onReset={clearSelection}

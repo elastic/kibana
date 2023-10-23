@@ -98,8 +98,6 @@ interface LogRateAnalysisResultsProps {
   /** End timestamp filter */
   latest: number;
   isBrushCleared: boolean;
-  isGzipEnabled: boolean;
-  isFlushPayloadEnabled: boolean;
   /** Option to make main histogram sticky */
   stickyHistogram?: boolean;
   /** Callback for resetting the analysis */
@@ -125,8 +123,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   earliest,
   isBrushCleared,
-  isGzipEnabled,
-  isFlushPayloadEnabled,
   latest,
   stickyHistogram,
   onReset,
@@ -192,8 +188,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.getIndexPattern(),
       grouping: true,
-      compressResponse: isGzipEnabled,
-      flushFix: isFlushPayloadEnabled,
+      flushFix: true,
       // If analysis type is `spike`, pass on window parameters as is,
       // if it's `dip`, swap baseline and deviation.
       ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
