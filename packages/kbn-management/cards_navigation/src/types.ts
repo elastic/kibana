@@ -77,7 +77,7 @@ export type CardNavExtensionDefinition = AppDefinition &
     | {
         /**
          * Optional prop that indicates if the card nav definition being declared,
-         * skips validation to ascertain it's key is a valid id for a mangement app.
+         * skips validation to ascertain it's key is a valid id for a management app.
          */
         skipValidation?: false;
       }

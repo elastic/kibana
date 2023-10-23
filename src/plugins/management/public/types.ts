@@ -34,7 +34,7 @@ export interface ManagementStart {
   setupCardsNavigation: ({
     enabled,
     hideLinksTo,
-    extendCardNavDefinitons,
+    extendCardNavDefinitions,
   }: NavigationCardsSubject) => void;
 }
 
@@ -88,7 +88,7 @@ export interface CreateManagementItemArgs {
 
 export interface NavigationCardsSubject extends Pick<CardsNavigationComponentProps, 'hideLinksTo'> {
   enabled: boolean;
-  extendCardNavDefinitons?: CardsNavigationComponentProps['extendedCardNavigationDefinitions'];
+  extendCardNavDefinitions?: CardsNavigationComponentProps['extendedCardNavigationDefinitions'];
 }
 
 export interface AppDependencies {
