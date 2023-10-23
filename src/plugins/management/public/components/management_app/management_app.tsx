@@ -42,7 +42,7 @@ export interface ManagementAppDependencies {
   coreStart: CoreStart;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
-  cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject<boolean>>;
+  cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
 }
 
 export const ManagementApp = ({

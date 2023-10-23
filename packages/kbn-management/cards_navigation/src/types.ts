@@ -57,7 +57,7 @@ export interface CardsNavigationComponentProps {
   appBasePath: string;
   onCardClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   hideLinksTo?: AppId[];
-  cardNavExtensionDefinitions?: Record<string, CardNavExtensionDefinition<boolean>>;
+  extendedCardNavigationDefinitions?: Record<string, CardNavExtensionDefinition>;
 }
 
 export interface ManagementAppProps {
@@ -72,10 +72,28 @@ export interface AppDefinition {
   icon: EuiIconProps['type'];
 }
 
-export interface CardNavExtensionDefinition<N extends boolean> extends AppDefinition {
-  noVerify: N;
-  href: [N] extends [true] ? string : never;
-  title: [N] extends [true] ? string : never;
-}
+export type CardNavExtensionDefinition = AppDefinition &
+  (
+    | {
+        /**
+         * Optional prop that indicates if the card nav definition being declared,
+         * skips validation to ascertain it's key is a valid id for a mangement app.
+         */
+        skipValidation?: false;
+      }
+    | {
+        skipValidation: true;
+        /**
+         * Specify the url that the card nav being defined should route to,
+         * and is only expected when the value of {@link skipValidation} prop is passed true.
+         */
+        href: string;
+        /**
+         * Defines the title of the card nav being defined,
+         * and is only expected when the {@link skipValidation} prop value is true.
+         */
+        title: string;
+      }
+  );
 
-export type AppProps = ManagementAppProps & (AppDefinition | CardNavExtensionDefinition<boolean>);
+export type AppProps = ManagementAppProps & (AppDefinition | CardNavExtensionDefinition);

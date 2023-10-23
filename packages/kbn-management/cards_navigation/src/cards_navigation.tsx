@@ -32,7 +32,7 @@ import {
 import { appCategories, appDefinitions as defaultCardNavigationDefinitions } from './consts';
 
 type AggregatedCardNavDefinitions =
-  | NonNullable<CardsNavigationComponentProps['cardNavExtensionDefinitions']>
+  | NonNullable<CardsNavigationComponentProps['extendedCardNavigationDefinitions']>
   | Record<AppId, AppDefinition>;
 
 // Retrieve the data we need from a given app from the management app registry
@@ -61,7 +61,7 @@ const getAppsForCategoryFactory =
   (category: string, filteredApps: { [key: string]: Application }) => {
     return getAppIdsByCategory(category, appDefinitions)
       .map((appId: AppId) => {
-        if ((appDefinitions[appId] as CardNavExtensionDefinition<boolean>).noVerify) {
+        if ((appDefinitions[appId] as CardNavExtensionDefinition).skipValidation) {
           return {
             id: appId,
             ...appDefinitions[appId],
@@ -139,14 +139,14 @@ export const CardsNavigation = ({
   appBasePath,
   onCardClick,
   hideLinksTo = [],
-  cardNavExtensionDefinitions: extendCardNavigationDefinitions = {},
+  extendedCardNavigationDefinitions = {},
 }: CardsNavigationComponentProps) => {
   const cardNavigationDefintions = useMemo<AggregatedCardNavDefinitions>(
     () => ({
       ...defaultCardNavigationDefinitions,
-      ...extendCardNavigationDefinitions,
+      ...extendedCardNavigationDefinitions,
     }),
-    [extendCardNavigationDefinitions]
+    [extendedCardNavigationDefinitions]
   );
 
   const appsByCategory = getEnabledAppsByCategory(sections, cardNavigationDefintions, hideLinksTo);
@@ -189,7 +189,7 @@ export const CardsNavigation = ({
                   title={app.title}
                   description={app.description}
                   href={
-                    (app as CardNavExtensionDefinition<boolean>).noVerify
+                    (app as CardNavExtensionDefinition).skipValidation
                       ? app.href
                       : appBasePath + app.href
                   }
