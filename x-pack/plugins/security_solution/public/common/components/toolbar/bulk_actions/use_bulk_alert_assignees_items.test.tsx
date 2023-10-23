@@ -7,7 +7,6 @@
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { act, fireEvent, render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import type {
@@ -23,7 +22,7 @@ jest.mock('./use_set_alert_assignees');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_get_user_profiles');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_suggest_users');
 
-const mockUserProfiles: UserProfileWithAvatar[] = [
+const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
   { uid: 'user-id-2', enabled: true, user: { username: 'fakeUser2' }, data: {} },
 ];

@@ -31,6 +31,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { isEqual } from 'lodash';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -62,6 +63,7 @@ import {
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import {
+  buildAlertAssigneesFilter,
   buildAlertStatusFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
@@ -135,6 +137,16 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
+  const [assignees, setAssignees] = useState<string[]>([]);
+  const handleSelectedAssignees = useCallback(
+    (newAssignees: string[]) => {
+      if (!isEqual(newAssignees, assignees)) {
+        setAssignees(newAssignees);
+      }
+    },
+    [assignees]
+  );
+
   const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
 
   // when arePageFiltersEnabled === false
@@ -176,8 +188,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ...filters,
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...buildAlertAssigneesFilter(assignees),
     ];
-  }, [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
+  }, [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
 
   const alertPageFilters = useMemo(() => {
     if (arePageFiltersEnabled) {
@@ -247,8 +260,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ...(alertPageFilters ?? []),
+      ...buildAlertAssigneesFilter(assignees),
     ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
+    [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
   );
 
   const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
@@ -360,6 +374,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           }}
           chainingSystem={'HIERARCHICAL'}
           onInit={setDetectionPageFilterHandler}
+          assignees={assignees}
+          onAssigneesChange={handleSelectedAssignees}
         />
       ),
     [
@@ -374,6 +390,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       timelinesUi,
       to,
       updatedAt,
+      assignees,
+      handleSelectedAssignees,
     ]
   );
 

@@ -23,6 +23,35 @@ jest.mock('../../../common/components/filter_group');
 
 jest.mock('../../../common/lib/kibana');
 
+const mockUserProfiles = [
+  {
+    uid: 'user-id-1',
+    enabled: true,
+    user: { username: 'user1', full_name: 'User 1', email: 'user1@test.com' },
+    data: {},
+  },
+  {
+    uid: 'user-id-2',
+    enabled: true,
+    user: { username: 'user2', full_name: 'User 2', email: 'user2@test.com' },
+    data: {},
+  },
+  {
+    uid: 'user-id-3',
+    enabled: true,
+    user: { username: 'user3', full_name: 'User 3', email: 'user3@test.com' },
+    data: {},
+  },
+];
+jest.mock('../../containers/detection_engine/alerts/use_suggest_users', () => {
+  return {
+    useSuggestUsers: () => ({
+      loading: false,
+      userProfiles: mockUserProfiles,
+    }),
+  };
+});
+
 const basicKibanaServicesMock = createStartServicesMock();
 
 const getFieldByNameMock = jest.fn(() => true);
