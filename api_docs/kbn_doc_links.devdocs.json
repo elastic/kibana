@@ -188,7 +188,7 @@
             "label": "cloud",
             "description": [],
             "signature": [
-              "{ readonly indexManagement: string; }"
+              "{ readonly beatsAndLogstashConfiguration: string; readonly indexManagement: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -546,7 +546,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly artifactControl: string; readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; }"
+              "{ readonly artifactControl: string; readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createEsqlRuleType: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -981,20 +981,6 @@
             "description": [],
             "signature": [
               "{ readonly featureRoles: string; }"
-            ],
-            "path": "packages/kbn-doc-links/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/doc-links",
-            "id": "def-common.DocLinks.esql",
-            "type": "Object",
-            "tags": [],
-            "label": "esql",
-            "description": [],
-            "signature": [
-              "{ readonly statsBy: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
