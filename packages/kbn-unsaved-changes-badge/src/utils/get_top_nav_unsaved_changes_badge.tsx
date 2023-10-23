@@ -9,12 +9,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
-import { UnsavedChangesBadge } from '../components/unsaved_changes_badge';
+import {
+  UnsavedChangesBadge,
+  type UnsavedChangesBadgeProps,
+} from '../components/unsaved_changes_badge';
 
 export interface TopNavUnsavedChangesBadgeParams {
-  onReset: () => Promise<void>;
-  onSave?: () => Promise<void>;
-  onSaveAs?: () => Promise<void>;
+  onReset: UnsavedChangesBadgeProps['onReset'];
+  onSave?: UnsavedChangesBadgeProps['onSave'];
+  onSaveAs?: UnsavedChangesBadgeProps['onSaveAs'];
 }
 
 export const getTopNavUnsavedChangesBadge = ({

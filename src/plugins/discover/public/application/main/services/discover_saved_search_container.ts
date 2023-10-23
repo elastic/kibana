@@ -247,6 +247,14 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     ...Object.keys(nextSavedSearchWithoutSearchSource),
   ]);
   const savedSearchDiff = [...keys].filter((key: string) => {
+    if (
+      // @ts-expect-error
+      typeof prevSavedSearch[key] === 'undefined' &&
+      // @ts-expect-error
+      nextSavedSearchWithoutSearchSource[key] === false
+    ) {
+      return false; // ignoring when default values are set
+    }
     // @ts-expect-error
     return !isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
   });

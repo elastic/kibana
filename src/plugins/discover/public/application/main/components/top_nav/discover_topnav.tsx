@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -116,17 +117,17 @@ export const DiscoverTopNav = ({
 
   const topNavCustomization = useDiscoverCustomization('top_nav');
 
+  const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
+  const hasUnsavedChanges =
+    hasSavedSearchChanges && Boolean(stateContainer.savedSearchState.getId());
   const topNavBadges = useMemo(
     () =>
       getTopNavBadges({
-        dataView,
-        services,
-        state: stateContainer,
-        isPlainRecord,
-        adHocDataViews,
+        stateContainer,
+        hasUnsavedChanges,
         topNavCustomization,
       }),
-    [adHocDataViews, dataView, isPlainRecord, services, stateContainer, topNavCustomization]
+    [stateContainer, hasUnsavedChanges, topNavCustomization]
   );
 
   const topNavMenu = useMemo(

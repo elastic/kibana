@@ -24,9 +24,9 @@ enum ProcessingType {
 }
 
 export interface UnsavedChangesBadgeProps {
-  onReset: () => Promise<void>;
-  onSave?: () => Promise<void>;
-  onSaveAs?: () => Promise<void>;
+  onReset: () => Promise<unknown>;
+  onSave?: () => Promise<unknown>;
+  onSaveAs?: () => Promise<unknown>;
   badgeText: string;
 }
 
@@ -58,7 +58,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
     }
   };
 
-  const handleMenuItem = async (type: ProcessingType, action: () => Promise<void>) => {
+  const handleMenuItem = async (type: ProcessingType, action: () => Promise<unknown>) => {
     try {
       setProcessingType(type);
       await action();

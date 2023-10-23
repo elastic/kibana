@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
-import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 
@@ -17,25 +15,23 @@ import type { TopNavCustomization } from '../../../../customizations';
  * Helper function to build the top nav badges
  */
 export const getTopNavBadges = ({
-  dataView,
-  services,
-  state,
-  isPlainRecord,
-  adHocDataViews,
+  hasUnsavedChanges,
+  stateContainer,
   topNavCustomization,
 }: {
-  dataView: DataView;
-  services: DiscoverServices;
-  state: DiscoverStateContainer;
-  isPlainRecord: boolean;
-  adHocDataViews: DataView[];
+  hasUnsavedChanges: boolean | undefined;
+  stateContainer: DiscoverStateContainer;
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuBadgeProps[] => {
   const badges: TopNavMenuBadgeProps[] = [];
 
   // TODO: make it customizable
 
-  badges.push(getTopNavUnsavedChangesBadge({ onReset: async () => {} }));
+  if (hasUnsavedChanges) {
+    badges.push(
+      getTopNavUnsavedChangesBadge({ onReset: stateContainer.actions.undoSavedSearchChanges })
+    );
+  }
 
   return badges;
 };
