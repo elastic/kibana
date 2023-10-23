@@ -10,7 +10,6 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import assert from 'assert';
-import fs from 'fs';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { cleanupDownloads, downloadAndStoreAgent } from './agent_downloads_service';
 import {
@@ -338,53 +337,53 @@ const enrollHostWithFleet = async ({
   log.info(`Waiting for Agent to check-in with Fleet`);
   const agent = await waitForHostToEnroll(kbnClient, vmName, 480000, log);
 
-  try {
-    let stdout: string;
-    if (process.env.CI) {
-      const { stdout: vagrantSTDOUT } = await execa(
-        'vagrant',
-        ['ssh', '--', 'sudo elastic-agent status'],
-        {
-          env: {
-            VAGRANT_CWD,
-          },
-        }
-      );
-      stdout = vagrantSTDOUT;
-    } else {
-      const { stdout: mpSTDOUT } = await execa('multipass', [
-        'exec',
-        vmName,
-        '--',
-        'sudo',
-        'elastic-agent',
-        'status',
-      ]);
-      stdout = mpSTDOUT;
-    }
-    await execa('mkdir', [
-      '-p',
-      '../../../../../../target/kibana-security-solution/cypress/results/',
-    ]).catch((e) => {
-      log.info(e);
-    });
-    const { stdout: pwdA } = await execa('pwd');
-    await execa('mkdir', [
-      '-p',
-      '../../../../../../target/kibana-security-solution/cypress/results/',
-    ]).catch((e) => {
-      log.info(e);
-    });
-
-    log.info(`pwd: ${pwdA}`);
-    fs.writeFileSync(
-      '../../../../../../target/kibana-security-solution/cypress/results/agent-status.txt',
-      stdout
-    );
-    log.info(stdout);
-  } catch (e) {
-    log.info(e);
-  }
+  // try {
+  //   let stdout: string;
+  //   if (process.env.CI) {
+  //     const { stdout: vagrantSTDOUT } = await execa(
+  //       'vagrant',
+  //       ['ssh', '--', 'sudo elastic-agent status'],
+  //       {
+  //         env: {
+  //           VAGRANT_CWD,
+  //         },
+  //       }
+  //     );
+  //     stdout = vagrantSTDOUT;
+  //   } else {
+  //     const { stdout: mpSTDOUT } = await execa('multipass', [
+  //       'exec',
+  //       vmName,
+  //       '--',
+  //       'sudo',
+  //       'elastic-agent',
+  //       'status',
+  //     ]);
+  //     stdout = mpSTDOUT;
+  //   }
+  //   await execa('mkdir', [
+  //     '-p',
+  //     '../../../../../../target/kibana-security-solution/cypress/results/',
+  //   ]).catch((e) => {
+  //     log.info(e);
+  //   });
+  //   const { stdout: pwdA } = await execa('pwd');
+  //   await execa('mkdir', [
+  //     '-p',
+  //     '../../../../../../target/kibana-security-solution/cypress/results/',
+  //   ]).catch((e) => {
+  //     log.info(e);
+  //   });
+  //
+  //   log.info(`pwd: ${pwdA}`);
+  //   fs.writeFileSync(
+  //     '../../../../../../target/kibana-security-solution/cypress/results/agent-status.txt',
+  //     stdout
+  //   );
+  //   log.info(stdout);
+  // } catch (e) {
+  //   log.info(e);
+  // }
 
   // log.info(`Agent status: ${result?.stdout}`);
 
