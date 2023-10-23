@@ -16,6 +16,8 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -38,6 +40,7 @@ import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from './custom_threshold';
 import { MetricsExplorerChartType } from '../hooks/use_metrics_explorer_options';
 import { AlertParams, MetricThresholdRuleTypeParams } from '../types';
+import AlertDetailsRelatedEvents from './alert_details_related_events';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type MetricThresholdRule = Rule<MetricThresholdRuleTypeParams>;
@@ -46,6 +49,8 @@ export type MetricThresholdAlert = TopAlert;
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
 const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
+const OVERVIEW_TAB_ID = 'overview';
+const RELATED_EVENTS_TAB_ID = 'relatedEvents';
 
 interface AppSectionProps {
   alert: MetricThresholdAlert;
@@ -88,6 +93,15 @@ export default function AlertDetailsAppSection({
       key={ALERT_TIME_RANGE_ANNOTATION_ID}
     />,
   ];
+
+  const derivedIndexPattern = useMemo<DataViewBase>(
+    () => ({
+      fields: dataView?.fields || [],
+      title: dataView?.getIndexPattern() || 'unknown-index',
+    }),
+    [dataView]
+  );
+
   useEffect(() => {
     setAlertSummaryFields([
       {
@@ -106,14 +120,6 @@ export default function AlertDetailsAppSection({
     ]);
   }, [alert, rule, ruleLink, setAlertSummaryFields]);
 
-  const derivedIndexPattern = useMemo<DataViewBase>(
-    () => ({
-      fields: dataView?.fields || [],
-      title: dataView?.getIndexPattern() || 'unknown-index',
-    }),
-    [dataView]
-  );
-
   useEffect(() => {
     const initDataView = async () => {
       const ruleSearchConfiguration = ruleParams.searchConfiguration;
@@ -129,65 +135,87 @@ export default function AlertDetailsAppSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource]);
 
-  const overview = !!ruleParams.criteria ? (
-    <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
-      {ruleParams.criteria.map((criterion, index) => (
-        <EuiFlexItem key={generateUniqueKey(criterion)}>
-          <EuiPanel hasBorder hasShadow={false}>
-            <EuiTitle size="xs">
-              <h4>
-                {criterion.aggType.toUpperCase()}{' '}
-                {'metric' in criterion ? criterion.metric : undefined}
-              </h4>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.observability.customThreshold.rule.alertDetailsAppSection.criterion.subtitle"
-                defaultMessage="Last {lookback} {timeLabel}"
-                values={{
-                  lookback: criterion.timeSize,
-                  timeLabel: TIME_LABELS[criterion.timeUnit as keyof typeof TIME_LABELS],
-                }}
-              />
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup>
-              <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
-                <Threshold
-                  chartProps={chartProps}
-                  id={`threshold-${generateUniqueKey(criterion)}`}
-                  threshold={criterion.threshold[0]}
-                  value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
-                  valueFormatter={(d) =>
-                    metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
-                  }
-                  title={i18n.translate(
-                    'xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle',
-                    {
-                      defaultMessage: 'Threshold breached',
+  const overviewTab = !!ruleParams.criteria ? (
+    <>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
+        {ruleParams.criteria.map((criterion, index) => (
+          <EuiFlexItem key={generateUniqueKey(criterion)}>
+            <EuiPanel hasBorder hasShadow={false}>
+              <EuiTitle size="xs">
+                <h4>
+                  {criterion.aggType.toUpperCase()}{' '}
+                  {'metric' in criterion ? criterion.metric : undefined}
+                </h4>
+              </EuiTitle>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.observability.customThreshold.rule.alertDetailsAppSection.criterion.subtitle"
+                  defaultMessage="Last {lookback} {timeLabel}"
+                  values={{
+                    lookback: criterion.timeSize,
+                    timeLabel: TIME_LABELS[criterion.timeUnit as keyof typeof TIME_LABELS],
+                  }}
+                />
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup>
+                <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
+                  <Threshold
+                    chartProps={chartProps}
+                    id={`threshold-${generateUniqueKey(criterion)}`}
+                    threshold={criterion.threshold[0]}
+                    value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
+                    valueFormatter={(d) =>
+                      metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
                     }
-                  )}
-                  comparator={criterion.comparator}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={5}>
-                <ExpressionChart
-                  annotations={annotations}
-                  chartType={MetricsExplorerChartType.line}
-                  derivedIndexPattern={derivedIndexPattern}
-                  expression={criterion}
-                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
-                  groupBy={ruleParams.groupBy}
-                  hideTitle
-                  timeRange={timeRange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+                    title={i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle',
+                      {
+                        defaultMessage: 'Threshold breached',
+                      }
+                    )}
+                    comparator={criterion.comparator}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={5}>
+                  <ExpressionChart
+                    annotations={annotations}
+                    chartType={MetricsExplorerChartType.line}
+                    derivedIndexPattern={derivedIndexPattern}
+                    expression={criterion}
+                    filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
+                    groupBy={ruleParams.groupBy}
+                    hideTitle
+                    timeRange={timeRange}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </>
   ) : null;
 
-  return overview;
+  const tabs: EuiTabbedContentTab[] = [
+    {
+      id: OVERVIEW_TAB_ID,
+      name: i18n.translate('xpack.observability.threshold.alertDetails.tab.overviewLabel', {
+        defaultMessage: 'Overview',
+      }),
+      'data-test-subj': 'overviewTab',
+      content: overviewTab,
+    },
+    {
+      id: RELATED_EVENTS_TAB_ID,
+      name: i18n.translate('xpack.observability.threshold.alertDetails.tab.relatedEventsLabel', {
+        defaultMessage: 'Related Events',
+      }),
+      'data-test-subj': 'relatedEventsTab',
+      content: <AlertDetailsRelatedEvents alert={alert} rule={rule} dataView={dataView} />,
+    },
+  ];
+
+  return <EuiTabbedContent data-test-subj="customThresholdAlertDetailsTabbedContent" tabs={tabs} />;
 }
