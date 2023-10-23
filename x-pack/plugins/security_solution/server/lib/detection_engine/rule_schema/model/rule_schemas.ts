@@ -58,7 +58,6 @@ import {
   RuleAuthorArray,
   RuleDescription,
   RuleFalsePositiveArray,
-  InvestigationFields,
   RuleFilterArray,
   RuleLicense,
   RuleMetadata,
@@ -78,6 +77,7 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
+  InvestigationFieldsCombined,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   savedIdOrUndefined,
@@ -99,7 +99,7 @@ export const baseRuleParams = t.exact(
     falsePositives: RuleFalsePositiveArray,
     from: RuleIntervalFrom,
     ruleId: RuleSignatureId,
-    investigationFields: t.union([InvestigationFields, t.undefined]),
+    investigationFields: t.union([InvestigationFieldsCombined, t.undefined]),
     immutable: IsRuleImmutable,
     license: t.union([RuleLicense, t.undefined]),
     outputIndex: AlertsIndex,

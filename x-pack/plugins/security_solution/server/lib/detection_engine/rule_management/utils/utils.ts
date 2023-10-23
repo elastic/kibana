@@ -22,6 +22,7 @@ import type {
   AlertSuppression,
   AlertSuppressionCamel,
   InvestigationFields,
+  InvestigationFieldsCombined,
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 
@@ -401,7 +402,7 @@ export const migrateRuleLegacyInvestigationFields = (rule: RuleAlertType): RuleA
 };
 
 export const migrateInvestigationFields = (
-  investigationFields: InvestigationFields | undefined
+  investigationFields: InvestigationFieldsCombined | undefined
 ): InvestigationFields | undefined => {
   if (investigationFields && Array.isArray(investigationFields)) {
     if (investigationFields.length) {

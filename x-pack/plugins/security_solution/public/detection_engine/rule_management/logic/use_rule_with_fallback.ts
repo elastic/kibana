@@ -8,6 +8,10 @@
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useEffect, useMemo } from 'react';
+import type {
+  InvestigationFields,
+  InvestigationFieldsCombined,
+} from '../../../../common/api/detection_engine';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
@@ -114,11 +118,35 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   };
 };
 
+export const migrateRuleLegacyInvestigationFields = (rule: Rule): Rule => {
+  if (!rule) return rule;
+
+  return { ...rule, investigation_fields: migrateInvestigationFields(rule.investigation_fields) };
+};
+
+export const migrateInvestigationFields = (
+  investigationFields: InvestigationFieldsCombined | undefined
+): InvestigationFields | undefined => {
+  if (investigationFields && Array.isArray(investigationFields)) {
+    if (investigationFields.length) {
+      return {
+        field_names: investigationFields,
+      };
+    }
+
+    return undefined;
+  }
+
+  return investigationFields;
+};
+
 /**
  * Transforms an alertHit into a Rule
  * @param data raw response containing single alert
  */
-const transformRuleFromAlertHit = (data: AlertSearchResponse<AlertHit>): Rule | undefined => {
+export const transformRuleFromAlertHit = (
+  data: AlertSearchResponse<AlertHit>
+): Rule | undefined => {
   // if results empty, return rule as undefined
   if (data.hits.hits.length === 0) {
     return undefined;
@@ -136,8 +164,8 @@ const transformRuleFromAlertHit = (data: AlertSearchResponse<AlertHit>): Rule | 
       ...expandedRuleWithParams?.kibana?.alert?.rule?.parameters,
     };
     delete expandedRule.parameters;
-    return expandedRule as Rule;
+    return migrateRuleLegacyInvestigationFields(expandedRule as Rule);
   }
 
-  return rule;
+  return migrateRuleLegacyInvestigationFields(rule);
 };
