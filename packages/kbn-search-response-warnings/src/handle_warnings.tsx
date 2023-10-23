@@ -9,42 +9,45 @@
 import React from 'react';
 import { EuiTextAlign } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
-import { ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import { SearchRequest } from '..';
-import { getNotifications } from '../../services';
-import type { IInspectorInfo } from '../../../common/search/search_source';
+import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,
   WarningHandlerCallback,
-} from '../types';
+} from './types';
 import { extractWarnings } from './extract_warnings';
-import { ViewWarningButton } from './view_warning_button';
+import { ViewWarningButton } from './components/view_warning_button';
+
+interface Services {
+  i18n: I18nStart;
+  inspector: InspectorStart;
+  notifications: NotificationsStart;
+  theme: ThemeServiceStart;
+}
 
 /**
  * @internal
  * All warnings are expected to come from the same response.
  */
 export function handleWarnings({
-  request,
-  response,
-  theme,
   callback,
+  request,
   requestId,
-  inspector,
-  inspectorService,
+  requestAdapter,
+  response,
+  services,
 }: {
-  request: SearchRequest;
-  response: estypes.SearchResponse;
-  theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
+  request: estypes.SearchRequest;
+  requestAdapter: RequestAdapter;
   requestId?: string;
-  inspector?: IInspectorInfo;
-  inspectorService: InspectorStartContract;
+  response: estypes.SearchResponse;
+  services: Services;
 }) {
-  const warnings = extractWarnings(response, inspectorService, inspector);
+  const warnings = extractWarnings(response, services.inspector, requestAdapter, requestId);
   if (warnings.length === 0) {
     return;
   }
@@ -63,13 +66,13 @@ export function handleWarnings({
   }
 
   const [incompleteWarning] = incompleteWarnings as SearchResponseIncompleteWarning[];
-  getNotifications().toasts.addWarning({
+  services.notifications.toasts.addWarning({
     title: incompleteWarning.message,
     text: toMountPoint(
       <EuiTextAlign textAlign="right">
         <ViewWarningButton onClick={incompleteWarning.openInInspector} />
       </EuiTextAlign>,
-      { theme$: theme.theme$ }
+      { theme: services.theme, i18n: services.i18n }
     ),
   });
 }
@@ -77,10 +80,10 @@ export function handleWarnings({
 /**
  * @internal
  */
-export function filterWarnings(
+function filterWarnings(
   warnings: SearchResponseWarning[],
   cb: WarningHandlerCallback,
-  request: SearchRequest,
+  request: estypes.SearchRequest,
   response: estypes.SearchResponse,
   requestId: string | undefined
 ) {
