@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useMutation } from '@tanstack/react-query';
@@ -35,6 +35,7 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { TimelineDataTableContext } from '../../timeline/unified_components/render_custom_body';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -131,21 +132,21 @@ function useDeleteNote(noteId: string | null | undefined) {
 }
 
 const DeleteNoteButton = React.memo<{ noteId?: string | null }>(({ noteId }) => {
-  const [confirmingNoteId, setConfirmingNoteId] = useState<string | null | undefined>(null);
+  const { confirmingNoteId, setConfirmingNoteId } = useContext(TimelineDataTableContext);
   const { mutate, isLoading } = useDeleteNote(noteId);
 
   const handleOpenDeleteModal = useCallback(async () => {
     setConfirmingNoteId(noteId);
-  }, [noteId]);
+  }, [noteId, setConfirmingNoteId]);
 
   const handleCancelDelete = useCallback(() => {
     setConfirmingNoteId(null);
-  }, []);
+  }, [setConfirmingNoteId]);
 
   const handleConfirmDelete = useCallback(() => {
     mutate(noteId);
     setConfirmingNoteId(null);
-  }, [mutate, noteId]);
+  }, [mutate, noteId, setConfirmingNoteId]);
 
   const disableDelete = useMemo(() => {
     return isLoading || noteId == null;
@@ -162,7 +163,8 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null }>(({ noteId }) => 
         onClick={handleOpenDeleteModal}
         disabled={disableDelete}
       />
-      {confirmingNoteId != null && (
+      <span>{confirmingNoteId}</span>
+      {confirmingNoteId && (
         <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
       )}
     </>

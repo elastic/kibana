@@ -128,7 +128,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
   }
 
-  .udtTimeline .ccccccc {
+  .udtTimeline .rowCellWrapper {
     display: flex;
   }
 

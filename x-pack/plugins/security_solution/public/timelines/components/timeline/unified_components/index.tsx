@@ -324,6 +324,87 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
     [columns, dispatch, onRemoveColumn, timelineId]
   );
 
+  const sidebarPanel = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="none" className="test-gr">
+        <EuiFlexItem>
+          {dataView ? (
+            <UnifiedFieldListSidebarContainer
+              ref={unifiedFieldListContainerRef}
+              showFieldList={true}
+              variant="responsive"
+              getCreationOptions={getCreationOptions}
+              services={fieldListSidebarServices}
+              dataView={dataView}
+              fullWidth
+              allFields={dataView.fields}
+              workspaceSelectedFieldNames={defaultColumns}
+              onAddFieldToWorkspace={onAddFieldToWorkspace}
+              onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+              onAddFilter={onAddFilter}
+              onFieldEdited={async () => Promise.resolve(refetch())}
+            />
+          ) : null}
+        </EuiFlexItem>
+        <EuiHideFor sizes={['xs', 's']}>
+          <StyledSplitFlexItem grow={false} className="thinBorderSplit" />
+        </EuiHideFor>
+      </EuiFlexGroup>
+    ),
+    [
+      dataView,
+      defaultColumns,
+      fieldListSidebarServices,
+      onAddFieldToWorkspace,
+      onAddFilter,
+      onRemoveFieldFromWorkspace,
+      refetch,
+    ]
+  );
+
+  const table = useMemo(
+    () => (
+      <DataGridMemoized
+        columns={columns}
+        rowRenderers={rowRenderers}
+        timelineId={timelineId}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
+        sort={sort}
+        events={events}
+        refetch={refetch}
+        dataLoadingState={dataLoadingState}
+        totalCount={totalCount}
+        onEventClosed={onEventClosed}
+        expandedDetail={expandedDetail}
+        showExpandedDetails={showExpandedDetails}
+        onChangePage={onChangePage}
+        activeTab={activeTab}
+        updatedAt={updatedAt}
+        isTextBasedQuery={isTextBasedQuery}
+      />
+    ),
+    [
+      activeTab,
+      columns,
+      dataLoadingState,
+      events,
+      expandedDetail,
+      isTextBasedQuery,
+      itemsPerPage,
+      itemsPerPageOptions,
+      onChangePage,
+      onEventClosed,
+      refetch,
+      rowRenderers,
+      showExpandedDetails,
+      sort,
+      timelineId,
+      totalCount,
+      updatedAt,
+    ]
+  );
+
   if (!dataView) {
     return null;
   }
@@ -333,30 +414,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
       <TimelineResizableLayout
         container={sidebarContainer}
         unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
-        sidebarPanel={
-          <EuiFlexGroup gutterSize="none" className="test-gr">
-            <EuiFlexItem>
-              <UnifiedFieldListSidebarContainer
-                ref={unifiedFieldListContainerRef}
-                showFieldList={true}
-                variant="responsive"
-                getCreationOptions={getCreationOptions}
-                services={fieldListSidebarServices}
-                dataView={dataView}
-                fullWidth
-                allFields={dataView.fields}
-                workspaceSelectedFieldNames={defaultColumns}
-                onAddFieldToWorkspace={onAddFieldToWorkspace}
-                onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-                onAddFilter={onAddFilter}
-                onFieldEdited={async () => Promise.resolve(refetch())}
-              />
-            </EuiFlexItem>
-            <EuiHideFor sizes={['xs', 's']}>
-              <StyledSplitFlexItem grow={false} className="thinBorderSplit" />
-            </EuiHideFor>
-          </EuiFlexGroup>
-        }
+        sidebarPanel={sidebarPanel}
         mainPanel={
           <StyledPageContentWrapper>
             <StyledMainEuiPanel
@@ -376,27 +434,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
                 onDrop={onDropFieldToTable}
               >
                 <DropOverlayWrapper isVisible={isDropAllowed}>
-                  <EventDetailsWidthProvider>
-                    <DataGridMemoized
-                      columns={columns}
-                      rowRenderers={rowRenderers}
-                      timelineId={timelineId}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      sort={sort}
-                      events={events}
-                      refetch={refetch}
-                      dataLoadingState={dataLoadingState}
-                      totalCount={totalCount}
-                      onEventClosed={onEventClosed}
-                      expandedDetail={expandedDetail}
-                      showExpandedDetails={showExpandedDetails}
-                      onChangePage={onChangePage}
-                      activeTab={activeTab}
-                      updatedAt={updatedAt}
-                      isTextBasedQuery={isTextBasedQuery}
-                    />
-                  </EventDetailsWidthProvider>
+                  <EventDetailsWidthProvider>{table}</EventDetailsWidthProvider>
                 </DropOverlayWrapper>
               </DragDrop>
             </StyledMainEuiPanel>

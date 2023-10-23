@@ -21,7 +21,7 @@ import { of } from 'rxjs';
 
 export const SIDEBAR_WIDTH_KEY = 'timeline:sidebarWidth';
 
-export const TimelineResizableLayout = ({
+export const TimelineResizableLayoutComponent = ({
   container,
   sidebarPanel,
   mainPanel,
@@ -79,3 +79,7 @@ export const TimelineResizableLayout = ({
     </>
   );
 };
+
+export const TimelineResizableLayout = React.memo(TimelineResizableLayoutComponent);
+// eslint-disable-next-line import/no-default-export
+export { TimelineResizableLayout as default };

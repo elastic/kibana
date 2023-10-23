@@ -63,7 +63,8 @@ import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
 import { RowRendererId } from '../../../../../common/api/timeline';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, progressStyle } from './styles';
-import CustomGridBodyControls from './render_custom_body';
+import type { NotesMap } from './render_custom_body';
+import CustomGridBodyControls, { TimelineDataTableContext } from './render_custom_body';
 import RowDetails from './row_details';
 
 export const SAMPLE_SIZE_SETTING = 500;
@@ -352,9 +353,9 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
               loadingEventIds={loadingEventIds}
               onRowSelected={x.onRowSelected ? x.onRowSelected : () => {}}
               showCheckboxes={x.showCheckboxes ?? false}
-              showNotes={showNotes[discoverGridRows[cveProps.rowIndex].id]}
+              // showNotes={showNotes[discoverGridRows[cveProps.rowIndex].id]}
               timelineId={timelineId}
-              toggleShowNotes={() => onToggleShowNotes(discoverGridRows[cveProps.rowIndex])}
+              // toggleShowNotes={() => onToggleShowNotes(discoverGridRows[cveProps.rowIndex])}
               refetch={refetch}
               setEventsLoading={setEventsLoading}
               isUnifiedDataTable={true}
@@ -372,12 +373,10 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       pinnedEventIds,
       eventIdToNoteIds,
       loadingEventIds,
-      showNotes,
       timelineId,
       refetch,
       setEventsLoading,
       expandedDoc,
-      onToggleShowNotes,
     ]
   );
 
@@ -422,27 +421,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
   }, [excludedRowRendererIds, rowRenderers]);
 
-  const getRowRendererBody = useCallback(
-    ({
-      Cell,
-      visibleRowData,
-      visibleColumns,
-      setCustomGridBodyProps,
-    }: EuiDataGridCustomBodyProps) => (
-      <CustomGridBodyControls
-        timelineId={timelineId}
-        discoverGridRows={discoverGridRows}
-        Cell={Cell}
-        visibleColumns={visibleColumns}
-        visibleRowData={visibleRowData}
-        setCustomGridBodyProps={setCustomGridBodyProps}
-        hasAddNotes={showNotes}
-        hasRowRenderers={enabledRowRenderers.length > 0}
-      />
-    ),
-    [discoverGridRows, enabledRowRenderers.length, showNotes, timelineId]
-  );
-
   // The custom row details is actually a trailing control column cell with
   // a hidden header. This is important for accessibility and markup reasons
   // @see https://fuschia-stretch.glitch.me/ for more
@@ -463,20 +441,29 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
         // the automatic width/heights calculated by EuiDataGrid
         rowCellRender: ({ setCellProps, rowIndex }) => {
           setCellProps({ style: { width: '100%', height: 'auto' } });
-          return (
-            <RowDetails
-              timelineId={timelineId}
-              event={discoverGridRows[rowIndex]}
-              rowIndex={rowIndex}
-              onToggleShowNotes={onToggleShowNotes}
-              rowRenderers={enabledRowRenderers}
-              showAddNote={!!showNotes[discoverGridRows[rowIndex].id]}
-            />
-          );
+          return <RowDetails event={discoverGridRows[rowIndex]} rowIndex={rowIndex} />;
         },
       },
     ],
-    [discoverGridRows, enabledRowRenderers, onToggleShowNotes, showNotes, timelineId]
+    [discoverGridRows]
+  );
+
+  const getRowRendererBody = useCallback(
+    ({
+      Cell,
+      visibleRowData,
+      visibleColumns,
+      setCustomGridBodyProps,
+    }: EuiDataGridCustomBodyProps) => (
+      <CustomGridBodyControls
+        discoverGridRows={discoverGridRows}
+        Cell={Cell}
+        visibleColumns={visibleColumns}
+        visibleRowData={visibleRowData}
+        setCustomGridBodyProps={setCustomGridBodyProps}
+      />
+    ),
+    [discoverGridRows]
   );
 
   // Columns management
@@ -565,6 +552,15 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [columns, timelineId, updatedAt]
   );
 
+  const [notesMap, setNotesMap] = useState<NotesMap>({
+    0: {
+      notes: [],
+      isAddingNote: true,
+    },
+  });
+
+  const [confirmingNoteId, setConfirmingNoteId] = useState<string | null | undefined>(null);
+
   const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
 
   if (!dataView) {
@@ -583,59 +579,69 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
             css={progressStyle}
           />
         )}
-
-        <DataGridMemoized
-          ariaLabelledBy="timelineDocumentsAriaLabel"
-          className={'udtTimeline'}
-          columns={defaultColumns}
-          expandedDoc={expandedDoc}
-          dataView={dataView}
-          loadingState={dataLoadingState}
-          onFilter={onAddFilter as DocViewFilterFn}
-          onResize={onResizeDataGrid}
-          onSetColumns={onSetColumns}
-          onSort={!isTextBasedQuery ? onSort : undefined}
-          rows={discoverGridRows}
-          sampleSize={SAMPLE_SIZE_SETTING}
-          setExpandedDoc={onSetExpandedDoc}
-          settings={tableSettings}
-          showTimeCol={showTimeCol}
-          isSortEnabled={true}
-          sort={sortingColumns}
-          rowHeightState={3}
-          onUpdateRowHeight={() => {}}
-          isPlainRecord={isTextBasedQuery}
-          rowsPerPageState={itemsPerPage}
-          onUpdateRowsPerPage={onChangeItemsPerPage}
-          onFieldEdited={() => refetch()}
-          cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-          services={{
-            theme,
-            fieldFormats,
-            storage,
-            toastNotifications: toastsService,
-            uiSettings,
-            dataViewFieldEditor,
-            data: dataPluginContract,
+        <TimelineDataTableContext.Provider
+          value={{
+            notesMap,
+            setNotesMap,
+            confirmingNoteId,
+            setConfirmingNoteId,
+            timelineId,
+            rowRenderers,
           }}
-          visibleCellActions={3}
-          externalCustomRenderers={customColumnRenderers}
-          renderDocumentView={() => <></>}
-          externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
-          externalAdditionalControls={additionalControls}
-          // trailingControlColumns={trailingControlColumns}
-          // renderCustomGridBody={getRowRendererBody}
-          rowsPerPageOptions={itemsPerPageOptions}
-          showFullScreenButton={false}
-          useNewFieldsApi={true}
-          maxDocFieldsDisplayed={50}
-          consumer="timeline"
-          totalHits={totalCount}
-          onFetchMoreRecords={handleFetchMoreRecords}
-          configRowHeight={3}
-          showMultiFields={true}
-          cellActionsMetadata={cellActionsMetadata}
-        />
+        >
+          <DataGridMemoized
+            ariaLabelledBy="timelineDocumentsAriaLabel"
+            className={'udtTimeline'}
+            columns={defaultColumns}
+            expandedDoc={expandedDoc}
+            dataView={dataView}
+            loadingState={dataLoadingState}
+            onFilter={onAddFilter as DocViewFilterFn}
+            onResize={onResizeDataGrid}
+            onSetColumns={onSetColumns}
+            onSort={!isTextBasedQuery ? onSort : undefined}
+            rows={discoverGridRows}
+            sampleSize={SAMPLE_SIZE_SETTING}
+            setExpandedDoc={onSetExpandedDoc}
+            settings={tableSettings}
+            showTimeCol={showTimeCol}
+            isSortEnabled={true}
+            sort={sortingColumns}
+            rowHeightState={3}
+            onUpdateRowHeight={() => {}}
+            isPlainRecord={isTextBasedQuery}
+            rowsPerPageState={itemsPerPage}
+            onUpdateRowsPerPage={onChangeItemsPerPage}
+            onFieldEdited={() => refetch()}
+            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+            services={{
+              theme,
+              fieldFormats,
+              storage,
+              toastNotifications: toastsService,
+              uiSettings,
+              dataViewFieldEditor,
+              data: dataPluginContract,
+            }}
+            visibleCellActions={3}
+            externalCustomRenderers={customColumnRenderers}
+            renderDocumentView={() => <></>}
+            externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
+            externalAdditionalControls={additionalControls}
+            trailingControlColumns={trailingControlColumns}
+            renderCustomGridBody={getRowRendererBody}
+            rowsPerPageOptions={itemsPerPageOptions}
+            showFullScreenButton={false}
+            useNewFieldsApi={true}
+            maxDocFieldsDisplayed={50}
+            consumer="timeline"
+            totalHits={totalCount}
+            onFetchMoreRecords={handleFetchMoreRecords}
+            configRowHeight={3}
+            showMultiFields={true}
+            cellActionsMetadata={cellActionsMetadata}
+          />
+        </TimelineDataTableContext.Provider>
         {showExpandedDetails && (
           <DetailsPanel
             browserFields={browserFields}

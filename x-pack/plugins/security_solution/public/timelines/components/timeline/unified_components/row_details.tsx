@@ -4,43 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useMemo, useCallback, useRef, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { TimelineItem } from '../../../../../common/search_strategy';
 import type { State } from '../../../../common/store';
 import { appSelectors } from '../../../../common/store';
 import { timelineActions } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { RowRenderer } from '../../../../../common/types/timeline';
 import { EventsTrSupplement } from '../styles';
 import { NoteCards } from '../../notes/note_cards';
 import { eventIsPinned } from '../body/helpers';
 import type { TimelineResultNote } from '../../open_timeline/types';
 import { timelineBodySelector } from '../body/selectors';
 import { timelineDefaults } from '../../../store/timeline/defaults';
+import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
+import { TimelineDataTableContext } from './render_custom_body';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;
 
 interface Props {
-  timelineId: string;
-  event: DataTableRecord;
   rowIndex: number;
-  onToggleShowNotes: (event: DataTableRecord) => void;
-  rowRenderers: RowRenderer[];
-  showAddNote: boolean;
+  event: TimelineItem;
 }
 
-export const RowDetailsComponent: React.FC<Props> = ({
-  event,
-  timelineId,
-  rowIndex,
-  onToggleShowNotes,
-  rowRenderers,
-  showAddNote,
-}) => {
+export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
   const dispatch = useDispatch();
+  const { timelineId, notesMap, rowRenderers, setNotesMap } = useContext(TimelineDataTableContext);
+
+  const onToggleShowNotes = useCallback(() => {
+    setNotesMap((notesMap: NotesMap) => {
+      const row = notesMap[rowIndex];
+      if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
+
+      return {
+        ...notesMap,
+        [rowIndex]: { ...row, isAddingNote: true },
+      };
+    });
+  }, [rowIndex, setNotesMap]);
 
   const {
     timeline: { eventIdToNoteIds, excludedRowRendererIds, pinnedEventIds } = timelineDefaults,
@@ -54,10 +58,10 @@ export const RowDetailsComponent: React.FC<Props> = ({
         pinnedEventIds,
       });
       if (!isEventPinned) {
-        dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event.id }));
+        dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event._id }));
       }
     },
-    [dispatch, event.id, pinnedEventIds, timelineId]
+    [dispatch, event._id, pinnedEventIds, timelineId]
   );
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
@@ -90,11 +94,11 @@ export const RowDetailsComponent: React.FC<Props> = ({
       >
         <NoteCards
           ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
-          associateNote={(noteId: string) => associateNote(noteId, event.id)}
+          associateNote={(noteId: string) => associateNote(noteId, event._id)}
           data-test-subj="note-cards"
-          notes={getNotes(event.id)}
-          showAddNote={showAddNote}
-          toggleShowAddNote={() => onToggleShowNotes(event)}
+          notes={getNotes(event._id)}
+          showAddNote={notesMap && (notesMap[rowIndex]?.isAddingNote ?? false)}
+          toggleShowAddNote={() => onToggleShowNotes()}
         />
       </EventsTrSupplement>
       <EuiFlexGroup gutterSize="none" justifyContent="center">
@@ -103,7 +107,7 @@ export const RowDetailsComponent: React.FC<Props> = ({
             <StatefulRowRenderer
               ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
               containerRef={containerRef}
-              event={event as unknown as TimelineItem}
+              event={event as TimelineItem}
               lastFocusedAriaColindex={rowIndex - 1}
               rowRenderers={rowRenderers}
               timelineId={timelineId}
