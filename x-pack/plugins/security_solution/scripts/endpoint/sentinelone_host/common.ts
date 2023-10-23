@@ -149,7 +149,7 @@ export class S1Client {
     }
 
     this.log.info(
-      `Using SentinelOne agent package v${agentPackage.version} [${agentPackage.fileName}]: ${agentPackage.link}`
+      `Using SentinelOne agent package v${agentPackage.version} [${agentPackage.fileName}]:\n${agentPackage.link}`
     );
     this.log.debug('Agent package: ', agentPackage);
 
