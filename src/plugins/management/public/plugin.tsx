@@ -90,7 +90,7 @@ export class ManagementPlugin
   private hasAnyEnabledApps = true;
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-  private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject<boolean>>({
+  private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
     enabled: false,
     hideLinksTo: [],
     extendCardNavDefinitons: {},
