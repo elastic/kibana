@@ -97,7 +97,13 @@ export function registerAnomalyRuleType({
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ params, services, spaceId, startedAt }) => {
+      executor: async ({
+        params,
+        services,
+        spaceId,
+        startedAt,
+        getTimeRange,
+      }) => {
         if (!ml) {
           return { state: {} };
         }
@@ -144,12 +150,14 @@ export function registerAnomalyRuleType({
         }
 
         // start time must be at least 30, does like this to support rules created before this change where default was 15
-        const startTime = Math.min(
-          datemath.parse('now-30m')!.valueOf(),
+        const window =
+          datemath.parse('now-30m')!.valueOf() >
           datemath
-            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)
-            ?.valueOf() || 0
-        );
+            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)!
+            .valueOf()
+            ? '30m'
+            : `${ruleParams.windowSize}${ruleParams.windowUnit}`;
+        const { dateStart } = getTimeRange(window);
 
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
@@ -165,8 +173,7 @@ export function registerAnomalyRuleType({
                   {
                     range: {
                       timestamp: {
-                        gte: startTime,
-                        format: 'epoch_millis',
+                        gte: dateStart,
                       },
                     },
                   },

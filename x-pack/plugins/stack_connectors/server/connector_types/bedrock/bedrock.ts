@@ -150,6 +150,6 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     };
 
     const res = await this.runApi({ body: JSON.stringify(req), model });
-    return res.completion.trim();
+    return { message: res.completion.trim() };
   }
 }

@@ -85,6 +85,8 @@ function NavigationGroupInternalComp<
       return null;
     }
 
+    if (navNodeWithChildren.sideNavStatus === 'hidden') return null;
+
     if (unstyled) {
       // No UI for unstyled groups
       return children;
