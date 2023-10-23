@@ -13,7 +13,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -31,8 +30,6 @@ import {
   AlertActiveTimeRangeAnnotation,
 } from '@kbn/observability-alert-details';
 import { DataView } from '@kbn/data-views-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
-import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../..';
