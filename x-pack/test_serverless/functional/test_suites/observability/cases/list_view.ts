@@ -14,13 +14,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
 
   describe('Cases list', function () {
-    // multiple errors in after hook due to delete permission
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
@@ -28,7 +27,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await cases.casesTable.waitForCasesToBeDeleted();
       await svlCommonPage.forceLogout();
     });
@@ -107,7 +106,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await cases.api.deleteAllCases();
+          await svlCases.api.deleteAllCaseItems();
           await cases.casesTable.waitForCasesToBeDeleted();
         });
 
@@ -170,7 +169,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
         await cases.casesTable.waitForCasesToBeDeleted();
       });
 
@@ -274,6 +273,7 @@ const createNCasesBeforeDeleteAllAfter = (
   getService: FtrProviderContext['getService']
 ) => {
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const header = getPageObject('header');
 
   before(async () => {
@@ -283,7 +283,7 @@ const createNCasesBeforeDeleteAllAfter = (
   });
 
   after(async () => {
-    await cases.api.deleteAllCases();
+    await svlCases.api.deleteAllCaseItems();
     await cases.casesTable.waitForCasesToBeDeleted();
   });
 };

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { handleWarnings } from './handle_warnings';
-export { ViewWarningButton } from './view_warning_button';
+require('../src/setup_node_env');
+require('../src/dev/yarn_deduplicate');
