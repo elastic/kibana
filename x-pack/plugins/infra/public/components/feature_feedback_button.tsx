@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import React, { ReactElement } from 'react';
 import { EuiButton } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
@@ -44,11 +44,22 @@ const getSurveyFeedbackURL = (formUrl: string, kibanaVersion?: string, deploymen
 interface FeatureFeedbackButtonProps {
   formUrl: string;
   'data-test-subj': string;
+  surveyButtonText?: ReactElement;
+  onClickCapture?: () => void;
+  defaultButton?: boolean;
 }
 
 export const FeatureFeedbackButton = ({
   formUrl,
   'data-test-subj': dts,
+  onClickCapture,
+  defaultButton,
+  surveyButtonText = (
+    <FormattedMessage
+      id="xpack.infra.homePage.tellUsWhatYouThinkLink"
+      defaultMessage="Tell us what you think!"
+    />
+  ),
 }: FeatureFeedbackButtonProps) => {
   const {
     services: { kibanaVersion, isCloudEnabled, isServerlessEnabled },
@@ -59,14 +70,12 @@ export const FeatureFeedbackButton = ({
     <EuiButton
       href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType)}
       target="_blank"
-      color="warning"
-      iconType="editorComment"
+      color={defaultButton ? undefined : 'warning'}
+      iconType={defaultButton ? undefined : 'editorComment'}
       data-test-subj={dts}
+      onClickCapture={onClickCapture}
     >
-      <FormattedMessage
-        id="xpack.infra.homePage.tellUsWhatYouThinkLink"
-        defaultMessage="Tell us what you think!"
-      />
+      {surveyButtonText}
     </EuiButton>
   );
 };
