@@ -56,6 +56,7 @@ import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
+import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
 import { downloadAndStoreAgent } from './agent_downloads_service';
 import type { HostVm } from './types';
@@ -1000,44 +1001,83 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
   });
 };
 
-// TODO:PT implement (if needed)
-// export const addEndpointIntegrationToAgentPolicy = async () => {
-//   const {
-//     version: packageVersion,
-//     name: packageName,
-//     title: packageTitle,
-//   } = await getEndpointPackageInfo(kbnClient);
-//   const newIntegrationPolicy = await createIntegrationPolicy(kbnClient, {
-//     name: integrationPolicyName,
-//     description: `Created by ${__filename}`,
-//     namespace: 'default',
-//     policy_id: agentPolicyId,
-//     enabled: true,
-//     inputs: [
-//       {
-//         enabled: true,
-//         streams: [],
-//         type: 'ENDPOINT_INTEGRATION_CONFIG',
-//         config: {
-//           _config: {
-//             value: {
-//               type: 'endpoint',
-//               endpointConfig: {
-//                 preset: 'EDRComplete',
-//               },
-//             },
-//           },
-//         },
-//       },
-//     ],
-//     package: {
-//       name: packageName,
-//       title: packageTitle,
-//       version: packageVersion,
-//     },
-//   });
-//
-//   log.verbose(`New ${integration} integration policy created: `, newIntegrationPolicy);
-//
-//   return newIntegrationPolicy;
-// };
+interface AddEndpointIntegrationToAgentPolicyOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  agentPolicyId: string;
+  name?: string;
+}
+
+/**
+ * Adds Endpoint integration to the Fleet agent policy provided on input
+ * @param kbnClient
+ * @param log
+ * @param agentPolicyId
+ * @param name
+ */
+export const addEndpointIntegrationToAgentPolicy = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  name = `${CURRENT_USERNAME} test policy`,
+}: AddEndpointIntegrationToAgentPolicyOptions): Promise<PackagePolicy> => {
+  const agentPolicy = await fetchAgentPolicy(kbnClient, agentPolicyId);
+
+  log.verbose('Agent policy', agentPolicy);
+
+  const integrationPolicies = agentPolicy.package_policies ?? [];
+
+  for (const integrationPolicy of integrationPolicies) {
+    if (integrationPolicy.package?.name === 'endpoint') {
+      log.debug(
+        `Returning existing Endpoint Integration Policy included in agent policy [${agentPolicyId}]`
+      );
+      log.verbose(integrationPolicy);
+
+      return integrationPolicy;
+    }
+  }
+
+  const {
+    version: packageVersion,
+    name: packageName,
+    title: packageTitle,
+  } = await getEndpointPackageInfo(kbnClient);
+
+  const newIntegrationPolicy = await createIntegrationPolicy(kbnClient, {
+    name,
+    description: `Created by: ${__filename}`,
+    namespace: 'default',
+    policy_id: agentPolicyId,
+    enabled: true,
+    inputs: [
+      {
+        enabled: true,
+        streams: [],
+        type: 'ENDPOINT_INTEGRATION_CONFIG',
+        config: {
+          _config: {
+            value: {
+              type: 'endpoint',
+              endpointConfig: {
+                preset: 'EDRComplete',
+              },
+            },
+          },
+        },
+      },
+    ],
+    package: {
+      name: packageName,
+      title: packageTitle,
+      version: packageVersion,
+    },
+  });
+
+  log.verbose(
+    `New Endpoint integration policy created: Name[${name}], Id[${newIntegrationPolicy.id}]`
+  );
+  log.debug(newIntegrationPolicy);
+
+  return newIntegrationPolicy;
+};
