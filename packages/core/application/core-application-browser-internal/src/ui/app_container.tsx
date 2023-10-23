@@ -9,7 +9,7 @@
 import './app_container.scss';
 
 import { Observable } from 'rxjs';
-import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
+import React, { FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -22,6 +22,7 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -39,6 +40,13 @@ interface Props {
   showPlainSpinner?: boolean;
 }
 
+const RecallError = ({ error }: { error: Error | null }) => {
+  if (error) {
+    throw error;
+  }
+  return null;
+};
+
 export const AppContainer: FC<Props> = ({
   mounter,
   appId,
@@ -51,6 +59,7 @@ export const AppContainer: FC<Props> = ({
   theme$,
   showPlainSpinner,
 }: Props) => {
+  const [error, setError] = useState<Error | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -87,7 +96,7 @@ export const AppContainer: FC<Props> = ({
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
       } catch (e) {
-        // TODO: add error UI
+        setError(e);
         // eslint-disable-next-line no-console
         console.error(e);
       } finally {
@@ -114,13 +123,16 @@ export const AppContainer: FC<Props> = ({
   ]);
 
   return (
-    <Fragment>
-      {appNotFound && <AppNotFound />}
-      {showSpinner && !appNotFound && (
-        <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
-      )}
-      <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
-    </Fragment>
+    <KibanaErrorBoundaryProvider>
+      <KibanaErrorBoundary>
+        <RecallError error={error} />
+        {appNotFound && <AppNotFound />}
+        {showSpinner && !appNotFound && (
+          <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
+        )}
+        <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
+      </KibanaErrorBoundary>
+    </KibanaErrorBoundaryProvider>
   );
 };
 
