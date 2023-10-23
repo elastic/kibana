@@ -102,8 +102,8 @@ export const AppContainer: FC<Props> = ({
       } finally {
         if (elementRef.current) {
           setShowSpinner(false);
-          setIsMounting(false);
         }
+        setIsMounting(false);
       }
     };
 
