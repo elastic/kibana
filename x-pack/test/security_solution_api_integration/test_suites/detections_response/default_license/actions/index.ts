@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Exceptions API', function () {
+  describe('Actions API', function () {
     loadTestFile(require.resolve('./add_actions'));
     loadTestFile(require.resolve('./update_actions'));
   });
