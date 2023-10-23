@@ -50,7 +50,7 @@ VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$V
 retry 5 30 vault login -no-print "$VAULT_TOKEN"
 retry 5 5 vault write "secret/kibana-issues/dev/project-deploy/$PROJECT_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
 
-cat << EOF | buildkite-agent annotate --style "info" --context cloud
+cat << EOF | buildkite-agent annotate --style "info" --context project
   ### Project Deployment
 
   Kibana: $PROJECT_KIBANA_URL
