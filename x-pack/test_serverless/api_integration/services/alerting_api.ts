@@ -12,7 +12,7 @@ import type {
 
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-
+import { SloBurnRateRuleParams } from './slo_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AlertingApiProvider({ getService }: FtrProviderContext) {
@@ -117,7 +117,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     }: {
       ruleTypeId: string;
       name: string;
-      params: MetricThresholdParams | ThresholdParams;
+      params: MetricThresholdParams | ThresholdParams | SloBurnRateRuleParams;
       actions?: any[];
       tags?: any[];
       schedule?: { interval: string };
@@ -139,6 +139,17 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
           actions,
         });
       return body;
+    },
+
+    async findRule(ruleId: string) {
+      if (!ruleId) {
+        throw new Error(`'ruleId' is undefined`);
+      }
+      const response = await supertest
+        .get(`/api/alerting/rule/${ruleId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+      return response.body || {};
     },
   };
 }

@@ -15,6 +15,7 @@ import {
   createIndexConnector,
   snoozeRule,
   createLatencyThresholdRule,
+  createEsQueryRule,
 } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -88,6 +89,53 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     after(async () => {
       await svlCommonPage.forceLogout();
+    });
+
+    it('should create an ES Query Rule and display it when consumer is observability', async () => {
+      const esQuery = await createEsQueryRule({
+        supertest,
+        name: 'ES Query',
+        consumer: 'observability',
+        ruleTypeId: '.es-query',
+        params: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+        },
+      });
+      ruleIdList = [esQuery.id];
+
+      await refreshRulesList();
+      const searchResults = await svlTriggersActionsUI.getRulesList();
+      expect(searchResults.length).toEqual(1);
+    });
+
+    it('should create an ES Query rule but not display it when consumer is alert', async () => {
+      const esQuery = await createEsQueryRule({
+        supertest,
+        name: 'ES Query',
+        consumer: 'alerts',
+        ruleTypeId: '.es-query',
+        params: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+        },
+      });
+      ruleIdList = [esQuery.id];
+
+      await refreshRulesList();
+      await testSubjects.missingOrFail('rule-row');
     });
 
     it('should display rules in alphabetical order', async () => {
@@ -600,7 +648,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('ruleTypeFilterButton');
         }
 
-        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Observability');
+        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
+          'Observability'
+        );
       });
 
       await testSubjects.click('ruleTypeapm.anomalyFilterOption');
