@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'home', 'dashboardControls']);
   const browser = getService('browser');
 
-  describe.only('Dashboard controls a11y tests', () => {
+  describe('Dashboard controls a11y tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
