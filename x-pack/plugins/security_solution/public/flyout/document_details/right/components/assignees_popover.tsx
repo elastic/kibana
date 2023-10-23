@@ -117,7 +117,7 @@ export const AssigneesPopover: FC<AssigneesPopoverProps> = memo(
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
         panelStyle={{
-          minWidth: 520,
+          minWidth: 414,
         }}
         selectableProps={{
           onSearchChange: (term: string) => {

@@ -23,7 +23,7 @@ const mockUserProfiles = [
   { uid: 'user-id-2', enabled: true, user: { username: 'user2' }, data: {} },
 ];
 
-const mockSuggestedUserProfiles: UserProfileWithAvatar[] = [
+const mockSuggestedUserProfiles = [
   ...mockUserProfiles,
   { uid: 'user-id-3', enabled: true, user: { username: 'user3' }, data: {} },
   { uid: 'user-id-4', enabled: true, user: { username: 'user4' }, data: {} },

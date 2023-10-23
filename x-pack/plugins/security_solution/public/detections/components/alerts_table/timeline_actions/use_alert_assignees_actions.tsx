@@ -72,7 +72,7 @@ export const useAlertAssigneesActions = ({
           alertItems: alertAssigneeData,
           refresh,
         });
-        return { title: panel.title, content, id: panel.id };
+        return { title: panel.title, content, id: panel.id, width: 414 };
       }),
     [alertAssigneeData, alertAssigneesPanels, closePopover, refresh]
   );
