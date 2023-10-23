@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tz } from 'moment';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { tz } from 'moment-timezone';
 import { Job } from '../job';
 import { ReportingAPIClient } from './reporting_api_client';
 
