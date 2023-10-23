@@ -137,13 +137,13 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
       cy.contains('SELECT * FROM memory_info;');
       cy.contains('SELECT * FROM system_info;');
-      cy.wait(1000);
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
+    cy.wait(5000);
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChanges');
     cy.contains('Save changes').click();
     cy.wait('@saveRuleChanges');
