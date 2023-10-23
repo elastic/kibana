@@ -25,9 +25,6 @@ get:
                 type: integer
               count_open_cases:
                 type: integer
-          examples:
-            getStatusResponse:
-              $ref: '../components/examples/get_status_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:

@@ -34,7 +34,11 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> d3608f10db8 ([OAS] Custom fields in case APIs (#169327))
 delete:
   summary: Deletes one or more cases in the default space.
   operationId: deleteCaseDefaultSpace
