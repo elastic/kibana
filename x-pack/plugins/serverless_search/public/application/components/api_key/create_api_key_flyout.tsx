@@ -171,6 +171,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
             title={i18n.translate('xpack.serverlessSearch.apiKey.flyout.errorTitle', {
               defaultMessage: 'Error creating API key',
             })}
+            data-test-subj="create-api-key-error-callout"
           >
             {createError}
           </EuiCallOut>
@@ -256,6 +257,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
                 label={privilegesEnabled ? ENABLED_LABEL : DISABLED_LABEL}
                 checked={privilegesEnabled}
                 onChange={togglePrivileges}
+                data-test-subj="create-api-role-descriptors-switch"
               />
             }
             forceState={privilegesOpen}
@@ -310,6 +312,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
                 label={metadataEnabled ? ENABLED_LABEL : DISABLED_LABEL}
                 checked={metadataEnabled}
                 onChange={toggleMetadata}
+                data-test-subj="create-api-metadata-switch"
               />
             }
             forceState={metadataOpen}
