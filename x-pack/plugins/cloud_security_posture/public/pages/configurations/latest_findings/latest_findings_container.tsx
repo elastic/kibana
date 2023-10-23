@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery, Filter, Query } from '@kbn/es-query';
 import { isNoneGroup, useGrouping, getGroupingQuery } from '@kbn/securitysolution-grouping';
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
+import { useUrlQuery } from '../../../common/hooks/use_url_query';
+import {
+  useBaseEsQuery,
+  usePersistedQuery,
+} from '../../../common/hooks/use_cloud_posture_table/utils';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import type { Evaluation } from '../../../../common/types';
@@ -118,14 +123,17 @@ export const FINDINGS_UNIT = (totalCount: number) =>
   });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  // const cloudPostureTable = useCloudPostureTable({
-  //   dataView,
-  //   paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
-  //   columnsLocalStorageKey,
-  //   defaultQuery: getDefaultQuery,
-  // });
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
-  // const { query, sort } = cloudPostureTable;
+  const [activePage, setActivePage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const baseEsQuery = useBaseEsQuery({
+    dataView,
+    filters: urlQuery.filters,
+    query: urlQuery.query,
+  });
 
   const grouping = useGrouping({
     componentProps: {
@@ -155,12 +163,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     fields: dataView.fields,
     groupingId: 'cspLatestFindings',
     maxGroupingLevels: 1,
-    // onGroupChange: (params) => {
-    //   console.log('onGroupChange', params);
-    // },
-    // onOptionsChange: (options) => {
-    //   console.log('onOptionsChange', options);
-    // },
+    onGroupChange: (params) => {
+      console.log('onGroupChange', params);
+    },
+    onOptionsChange: (options) => {
+      console.log('onOptionsChange', options);
+    },
   });
 
   const selectedGroup = grouping.selectedGroups[0];
@@ -168,15 +176,15 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   console.log({ selectedGroup });
 
   const groupingQuery = getGroupingQuery({
-    additionalFilters: [],
-    from: 'now-1y',
+    additionalFilters: [baseEsQuery.query],
     groupByField: selectedGroup,
     uniqueValue: selectedGroup,
+    from: 'now-1y',
     to: 'now',
-    // pageNumber,
+    pageNumber: activePage,
     // rootAggregations,
     // runtimeMappings,
-    // size = DEFAULT_GROUP_BY_FIELD_SIZE,
+    size: pageSize,
     // sort,
     // statsAggregations,
     // to,
@@ -203,27 +211,30 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 
   if (isNoneSelected) {
     return (
-      <LatestFindingsContainerOld dataView={dataView} groupSelector={grouping.groupSelector} />
+      <>
+        <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
+        <LatestFindingsContainerOld dataView={dataView} groupSelector={grouping.groupSelector} />
+      </>
     );
   }
 
   return (
     <>
+      <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
       {grouping.getGrouping({
-        activePage: 0,
+        activePage,
         data: aggs,
         groupingLevel: 0,
         inspectButton: undefined,
         isLoading: isFetching,
-        itemsPerPage: 10,
-        onChangeGroupsItemsPerPage: () => {
-          console.log('onChangeGroupsItemsPerPage');
+        itemsPerPage: pageSize,
+        onChangeGroupsItemsPerPage: (size) => {
+          setPageSize(size);
         },
-        onChangeGroupsPage: () => {
-          console.log('onChangeGroupsPage');
+        onChangeGroupsPage: (index) => {
+          setActivePage(index);
         },
         renderChildComponent: (groupFilter) => {
-          console.log({ groupFilter });
           return <LatestFindingsContainerTable dataView={dataView} filter={groupFilter} />;
         },
         onGroupClose: () => {
@@ -243,15 +254,10 @@ export const LatestFindingsContainerTable = ({ dataView, filter }: FindingsBaseP
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
+    additionalFilters: filter,
   });
 
-  const { query, sort, queryError, setUrlQuery, getRowsFromPages } = cloudPostureTable;
-
-  useEffect(() => {
-    setUrlQuery({
-      filters: filter,
-    });
-  }, [filter, setUrlQuery]);
+  const { query, sort, queryError, getRowsFromPages } = cloudPostureTable;
 
   const {
     data,
@@ -271,7 +277,6 @@ export const LatestFindingsContainerTable = ({ dataView, filter }: FindingsBaseP
 
   return (
     <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
-      <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
       <EuiSpacer size="m" />
       {error && <ErrorCallout error={error} />}
       {!error && (
@@ -340,7 +345,6 @@ export const LatestFindingsContainerOld = ({ dataView, groupSelector }: Findings
 
   return (
     <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
-      <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
       <EuiSpacer size="m" />
       {error && <ErrorCallout error={error} />}
       {!error && (

@@ -6,7 +6,7 @@
  */
 import { Dispatch, SetStateAction, useCallback } from 'react';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { CriteriaWithPagination } from '@elastic/eui';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { useUrlQuery } from '../use_url_query';
@@ -21,7 +21,7 @@ export interface CloudPostureTableResult {
   sort: any;
   // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   filters: any[];
-  query?: { bool: BoolQuery };
+  query: { bool: BoolQuery };
   queryError?: Error;
   pageIndex: number;
   // TODO: remove any, urlQuery is an object with query fields but we also add custom fields to it, need to assert usages
@@ -48,12 +48,14 @@ export const useCloudPostureTable = ({
   dataView,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
+  additionalFilters,
 }: {
   // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   defaultQuery?: (params: any) => any;
   dataView: DataView;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
+  additionalFilters?: Filter;
 }): CloudPostureTableResult => {
   const getPersistedDefaultQuery = usePersistedQuery(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -117,6 +119,7 @@ export const useCloudPostureTable = ({
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
+    ...(additionalFilters ? { additionalFilters: [additionalFilters] } : {}),
   });
 
   const handleUpdateQuery = useCallback(
@@ -133,12 +136,14 @@ export const useCloudPostureTable = ({
       })
       .flat() || [];
 
+  const queryError = baseEsQuery instanceof Error ? baseEsQuery : undefined;
+
   return {
     setUrlQuery,
     sort: urlQuery.sort,
     filters: urlQuery.filters,
     query: baseEsQuery.query,
-    queryError: baseEsQuery.error,
+    queryError,
     pageIndex: urlQuery.pageIndex,
     urlQuery,
     setTableOptions,

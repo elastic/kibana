@@ -23,15 +23,13 @@ const getBaseQuery = ({
   filters,
   config,
 }: FindingsBaseURLQuery & FindingsBaseProps & FindingsBaseESQueryConfig) => {
+  console.log('filters', filters);
   try {
     return {
       query: buildEsQuery(dataView, query, filters, config), // will throw for malformed query
     };
   } catch (error) {
-    return {
-      query: undefined,
-      error: error instanceof Error ? error : new Error('Unknown Error'),
-    };
+    throw new Error(error);
   }
 };
 
@@ -59,6 +57,7 @@ export const useBaseEsQuery = ({
   dataView,
   filters,
   query,
+  additionalFilters,
 }: FindingsBaseURLQuery & FindingsBaseProps) => {
   const {
     notifications: { toasts },
@@ -70,8 +69,14 @@ export const useBaseEsQuery = ({
   const allowLeadingWildcards = uiSettings.get('query:allowLeadingWildcards');
   const config: EsQueryConfig = useMemo(() => ({ allowLeadingWildcards }), [allowLeadingWildcards]);
   const baseEsQuery = useMemo(
-    () => getBaseQuery({ dataView, filters, query, config }),
-    [dataView, filters, query, config]
+    () =>
+      getBaseQuery({
+        dataView,
+        filters: filters.concat(additionalFilters ?? []).flat(),
+        query,
+        config,
+      }),
+    [dataView, filters, additionalFilters, query, config]
   );
 
   /**
@@ -83,7 +88,7 @@ export const useBaseEsQuery = ({
   }, [filters, filterManager, queryString, query]);
 
   const handleMalformedQueryError = () => {
-    const error = baseEsQuery.error;
+    const error = baseEsQuery instanceof Error ? baseEsQuery : undefined;
     if (error) {
       toasts.addError(error, {
         title: i18n.translate('xpack.csp.findings.search.queryErrorToastMessage', {
@@ -94,7 +99,7 @@ export const useBaseEsQuery = ({
     }
   };
 
-  useEffect(handleMalformedQueryError, [baseEsQuery.error, toasts]);
+  useEffect(handleMalformedQueryError, [baseEsQuery, toasts]);
 
   return baseEsQuery;
 };

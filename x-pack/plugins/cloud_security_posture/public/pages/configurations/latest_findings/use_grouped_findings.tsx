@@ -58,6 +58,7 @@ export interface FindingsGroupingAggregation {
 export const getGroupedFindingsQuery = (query: any) => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
   ...query,
+  size: 0,
 });
 
 export const useGroupedFindings = ({ query, enabled = true }: any) => {
@@ -84,39 +85,7 @@ export const useGroupedFindings = ({ query, enabled = true }: any) => {
 
       if (!aggregations) throw new Error('Failed to aggregate by, missing resource id');
 
-      // if (
-      //   !Array.isArray(aggregations.resources.buckets) ||
-      //   !Array.isArray(aggregations.count.buckets)
-      // )
-      //   throw new Error('Failed to group by, missing resource id');
-
-      // const page = aggregations.resources.buckets.map(createFindingsByResource);
-
-      // const aggs = parseGroupingQuery(
-      //   // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
-      //   queriedGroup.current === null ? selectedGroup : queriedGroup.current,
-      //   uniqueValue,
-      //   alertsGroupsData?.aggregations
-      // );
-
       return aggregations;
-      // return {
-      //   ...aggregations,
-      //   groupByFields: {
-      //     ...aggregations.groupByFields,
-      //     buckets: [
-      //       ...aggregations.groupByFields.buckets.map((bucket) => ({
-      //         ...bucket,
-      //         unitsCount: {
-      //           value: 2,
-      //         },
-      //         selectedGroup: 'resource.id',
-      //         key_as_string: 'Vulnerability: CVE-2022-28734',
-      //         key: ['Vulnerability: CVE-2022-28734'],
-      //       })),
-      //     ],
-      //   },
-      // };
     },
     {
       onError: (err: Error) => showErrorToast(toasts, err),
