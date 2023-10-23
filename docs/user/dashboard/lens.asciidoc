@@ -14,6 +14,7 @@ With *Lens*, you can:
 * Perform math on aggregations using *Formula*.
 * Use time shifts to compare the data in two time intervals, such as month over month.
 * Add annotations and reference lines.
+* Add mappings between terms and colors.
 
 [float]
 [[create-the-visualization-panel]]
@@ -82,7 +83,7 @@ Tables are highly customizable, and provide you with text alignment, value forma
 +
 All columns that belong to the same layer pane group are sorted in the table.
 
-. To change the display options, click a *Metrics* field in the layer pane, then configure the following options:
+. To change the display options, click a *Metric* field in the layer pane, then configure the following options:
 
 * *Name* &mdash; Specifies the field display name. 
 
@@ -99,6 +100,25 @@ All columns that belong to the same layer pane group are sorted in the table.
 * *Summary row* &mdash; Adds a row that displays the summary value. When specified, allows you to enter a *Summary label*.
 
 * *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
+
+[float]
+[[create-term-to-color-mapping]]
+==== Create term to color mapping
+
+preview::[]
+
+Visualizations in Lens now support a color to term mapping system. These color mappings provide a visual guide for understanding the data presented in our visualizations. The feature is enabled by default and a maximum of 10 colors can be mapped to terms. 
+
+. from the *Visualize Library* click *Create visualization* and select *Lens*.
+. Drag the fields you want to visualize to the workspace. 
+. In the layer pane, underneath *Breakdown*, click the field name.
+. In the *Breakdown* pane, under *Appearance*, click on the color palette labelled *Color mapping*.
+. To edit the default color mapping, turn off the *Auto assign* slider. 
++
+[role="screenshot"]
+image::images/lens-color-mapping.png[A screenshot of the new Lens color mapping feature]
++
+. Once you are happy with your edits, click *Back* and then *Close*.
 
 [float]
 [[drag-and-drop-keyboard-navigation]]
@@ -189,7 +209,7 @@ To create partition charts with multiple metrics, use the layer settings. Multip
 
 [float]
 [[improve-visualization-loading-time]]
-=== Improve visualization loading time
+==== Improve visualization loading time
 
 preview::[]
 
