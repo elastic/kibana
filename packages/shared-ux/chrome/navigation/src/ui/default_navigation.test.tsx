@@ -14,6 +14,7 @@ import type {
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { getServicesMock } from '../../mocks/src/jest';
 import { NavigationProvider } from '../services';
@@ -81,9 +82,11 @@ describe('<DefaultNavigation />', () => {
       ];
 
       const { findAllByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -252,13 +255,15 @@ describe('<DefaultNavigation />', () => {
       ];
 
       render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -494,9 +499,11 @@ describe('<DefaultNavigation />', () => {
       ];
 
       render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -590,9 +597,11 @@ describe('<DefaultNavigation />', () => {
 
       const expectToThrow = () => {
         render(
-          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-            <DefaultNavigation navigationTree={{ body: navigationBody }} />
-          </NavigationProvider>
+          <EuiThemeProvider>
+            <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+              <DefaultNavigation navigationTree={{ body: navigationBody }} />
+            </NavigationProvider>
+          </EuiThemeProvider>
         );
       };
 
@@ -615,9 +624,11 @@ describe('<DefaultNavigation />', () => {
       ];
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -683,9 +694,11 @@ describe('<DefaultNavigation />', () => {
       const getActiveNodes$ = () => activeNodes$;
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} navLinks$={navLinks$} activeNodes$={getActiveNodes$()}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} navLinks$={navLinks$} activeNodes$={getActiveNodes$()}>
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -741,14 +754,16 @@ describe('<DefaultNavigation />', () => {
       };
 
       const { findByTestId } = render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          activeNodes$={getActiveNodes$()}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            activeNodes$={getActiveNodes$()}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -804,13 +819,15 @@ describe('<DefaultNavigation />', () => {
       ];
 
       render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <DefaultNavigation projectNavigationTree={projectNavigationTree} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <DefaultNavigation projectNavigationTree={projectNavigationTree} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -833,9 +850,11 @@ describe('<DefaultNavigation />', () => {
     describe('cloud links', () => {
       test('render the cloud link', async () => {
         const { findByTestId } = render(
-          <NavigationProvider {...services}>
-            <DefaultNavigation projectNavigationTree={[]} />
-          </NavigationProvider>
+          <EuiThemeProvider>
+            <NavigationProvider {...services}>
+              <DefaultNavigation projectNavigationTree={[]} />
+            </NavigationProvider>
+          </EuiThemeProvider>
         );
 
         expect(
