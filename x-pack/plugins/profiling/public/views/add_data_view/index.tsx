@@ -188,7 +188,10 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
                 content: (
                   <EuiCodeBlock paddingSize="s" isCopyable>
                     {i18n.translate('xpack.profiling.tabs.binaryEnsurePermissions', {
-                      defaultMessage: `chmod +x pf-host-agent-${stackVersion}-linux-${arch}/pf-host-agent`,
+                      defaultMessage: 'chmod +x pf-host-agent-{stackVersion}-linux-{arch}/pf-host-agent',
+                    }, values: {
+                    stackVersion, 
+                    arch
                     })}
                   </EuiCodeBlock>
                 ),
