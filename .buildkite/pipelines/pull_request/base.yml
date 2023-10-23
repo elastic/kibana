@@ -87,7 +87,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '*'
@@ -198,8 +198,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - 'target/kibana-osquery/**/*'
 
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
     label: 'Security Solution Cypress tests, burning changed specs'
@@ -212,13 +210,6 @@ steps:
       automatic: false
     soft_fail: true
 
-  - command: .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
-    label: 'Security Solution OpenAPI codegen'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
-    parallelism: 1
-
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
     label: 'Osquery Cypress Tests, burning changed specs'
     agents:
@@ -228,8 +219,6 @@ steps:
     soft_fail: true
     retry:
       automatic: false
-    artifact_paths:
-      - 'target/kibana-osquery/**/*'
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Serverless Osquery Cypress Tests'
@@ -242,8 +231,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - 'target/kibana-osquery/**/*'
 
   # status_exception: Native role management is not enabled in this Elasticsearch instance
   # - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
