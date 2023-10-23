@@ -1,0 +1,10 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+FROM packetbeat-*
+| STATS doc_count = COUNT(destination.domain) BY destination.domain
+| SORT doc_count DESC
+| LIMIT 10
+```

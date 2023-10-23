@@ -26,6 +26,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
@@ -129,6 +130,7 @@ export function ChartPreview({
           showLegend={true}
           legendPosition={'bottom'}
           legendSize={legendSize}
+          locale={i18n.getLocale()}
         />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
