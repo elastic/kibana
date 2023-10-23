@@ -26,11 +26,11 @@ describe('Paths', () => {
 
   describe('getCasesConfigurePath', () => {
     it('returns the correct path', () => {
-      expect(getCasesConfigurePath('test')).toBe('test/configure');
+      expect(getCasesConfigurePath('test')).toBe('test/settings');
     });
 
     it('normalize the path correctly', () => {
-      expect(getCasesConfigurePath('//test//page')).toBe('/test/page/configure');
+      expect(getCasesConfigurePath('//test//page')).toBe('/test/page/settings');
     });
   });
 

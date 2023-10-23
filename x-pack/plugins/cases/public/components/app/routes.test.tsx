@@ -28,7 +28,7 @@ jest.mock('../create', () => ({
 }));
 
 jest.mock('../configure_cases', () => ({
-  ConfigureCases: () => <div>{'Configure cases'}</div>,
+  ConfigureCases: () => <div>{'Settings'}</div>,
 }));
 
 const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
@@ -98,12 +98,12 @@ describe('Cases routes', () => {
 
   describe('Configure cases', () => {
     it('navigates to the configure cases page', () => {
-      renderWithRouter(['/cases/configure']);
-      expect(screen.getByText('Configure cases')).toBeInTheDocument();
+      renderWithRouter(['/cases/settings']);
+      expect(screen.getByText('Settings')).toBeInTheDocument();
     });
 
     it('shows the no privileges page if the user does not have update privileges', () => {
-      renderWithRouter(['/cases/configure'], noUpdateCasesPermissions());
+      renderWithRouter(['/cases/settings'], noUpdateCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });
