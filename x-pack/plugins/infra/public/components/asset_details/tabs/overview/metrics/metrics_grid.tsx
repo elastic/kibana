@@ -12,7 +12,7 @@ import {
   type XYConfig,
   XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
 } from '../../../../../common/visualizations';
-import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../../../hooks/use_metadata_state';
 import { Chart } from './chart';
 
 interface Props {
@@ -34,7 +34,7 @@ export const MetricsGrid = ({
   charts,
   ...props
 }: Props) => {
-  const { metadata } = useMetadataStateProviderContext();
+  const { metadata } = useMetadataStateContext();
 
   const chartsToRender = useMemo(
     () =>

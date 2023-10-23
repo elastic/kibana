@@ -29,6 +29,7 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
+import { Subject } from 'rxjs';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import type { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
@@ -197,6 +198,8 @@ interface Props {
   dateRange?: TimeRange;
   // In case the date picker is managed outside this component
   hideDatePicker?: boolean;
+  // subject to watch the completition of the request
+  request$?: Subject<() => Promise<unknown>>;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -209,6 +212,7 @@ export const AnomaliesTable = ({
   hostName,
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
+  request$,
 }: Props) => {
   const [search, setSearch] = useState('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
@@ -461,9 +465,13 @@ export const AnomaliesTable = ({
 
   useEffect(() => {
     if (getAnomalies) {
-      getAnomalies(undefined, search, hostName);
+      if (request$) {
+        request$.next(() => getAnomalies(undefined, search, hostName));
+      } else {
+        getAnomalies(undefined, search, hostName);
+      }
     }
-  }, [getAnomalies, search, hostName]);
+  }, [getAnomalies, hostName, request$, search]);
 
   return (
     <EuiFlexGroup direction="column">

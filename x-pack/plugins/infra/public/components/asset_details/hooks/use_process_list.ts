@@ -14,6 +14,7 @@ import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../co
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useSourceContext } from '../../../containers/metrics_source';
+import { useRequestObservable } from './use_request_observable';
 
 export interface SortBy {
   name: string;
@@ -26,6 +27,7 @@ export function useProcessList(
   sortBy: SortBy,
   searchFilter: object
 ) {
+  const { request$ } = useRequestObservable();
   const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern().title;
 
@@ -61,8 +63,8 @@ export function useProcessList(
   );
 
   useEffect(() => {
-    makeRequest();
-  }, [makeRequest]);
+    request$.next(makeRequest);
+  }, [makeRequest, request$]);
 
   return {
     error: (error && error.message) || null,

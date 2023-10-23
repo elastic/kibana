@@ -9,11 +9,13 @@ import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { BehaviorSubject } from 'rxjs';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { type InfraMetadata, InfraMetadataRT } from '../../../../common/http_api/metadata_api';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { getFilteredMetrics } from '../../../pages/metrics/metric_detail/lib/get_filtered_metrics';
 import type { InventoryItemType, InventoryMetric } from '../../../../common/inventory_models/types';
+import { useRequestObservable } from './use_request_observable';
 
 interface UseMetadataProps {
   assetId: string;
@@ -24,6 +26,8 @@ interface UseMetadataProps {
     from: number;
     to: number;
   };
+  requestCount$?: BehaviorSubject<number>;
+  searchSessionId?: string;
 }
 export function useMetadata({
   assetId,
@@ -32,9 +36,11 @@ export function useMetadata({
   timeRange,
   requiredMetrics = [],
 }: UseMetadataProps) {
+  const { request$ } = useRequestObservable();
   const decodeResponse = (response: any) => {
     return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
   };
+
   const { error, loading, response, makeRequest } = useHTTPRequest<InfraMetadata>(
     '/api/infra/metadata',
     'POST',
@@ -51,10 +57,8 @@ export function useMetadata({
   );
 
   useEffect(() => {
-    (async () => {
-      await makeRequest();
-    })();
-  }, [makeRequest]);
+    request$.next(makeRequest);
+  }, [makeRequest, request$]);
 
   return {
     name: (response && response.name) || '',

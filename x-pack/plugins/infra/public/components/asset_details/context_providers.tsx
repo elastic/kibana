@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
-import { DateRangeProvider } from './hooks/use_date_range';
+import { DatePickerProvider } from './hooks/use_date_picker';
+import { LoadingStateProvider } from './hooks/use_loading_observable';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
 import { AssetDetailsProps } from './types';
 
@@ -28,18 +29,20 @@ export const ContextProviders = ({
   } = props;
 
   return (
-    <DateRangeProvider dateRange={dateRange} autoRefresh={autoRefresh}>
-      <MetadataStateProvider assetId={assetId} assetType={assetType}>
-        <AssetDetailsRenderPropsProvider
-          assetId={assetId}
-          assetName={assetName}
-          assetType={assetType}
-          overrides={overrides}
-          renderMode={renderMode}
-        >
-          {children}
-        </AssetDetailsRenderPropsProvider>
-      </MetadataStateProvider>
-    </DateRangeProvider>
+    <DatePickerProvider dateRange={dateRange} autoRefresh={autoRefresh}>
+      <LoadingStateProvider>
+        <MetadataStateProvider assetId={assetId} assetType={assetType}>
+          <AssetDetailsRenderPropsProvider
+            assetId={assetId}
+            assetName={assetName}
+            assetType={assetType}
+            overrides={overrides}
+            renderMode={renderMode}
+          >
+            {children}
+          </AssetDetailsRenderPropsProvider>
+        </MetadataStateProvider>
+      </LoadingStateProvider>
+    </DatePickerProvider>
   );
 };

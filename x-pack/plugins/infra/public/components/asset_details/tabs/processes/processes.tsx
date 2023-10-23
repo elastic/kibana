@@ -26,7 +26,7 @@ import { SummaryTable } from './summary_table';
 import { SortBy, useProcessList, ProcessListContextProvider } from '../../hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { ProcessesExplanationMessage } from '../../components/processes_explanation';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
@@ -39,7 +39,7 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 
 export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
+  const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');

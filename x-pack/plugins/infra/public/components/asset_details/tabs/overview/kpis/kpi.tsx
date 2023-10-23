@@ -11,8 +11,7 @@ import { TimeRange } from '@kbn/es-query';
 import { LensChart, TooltipContent } from '../../../../lens';
 import { AVERAGE_SUBTITLE, type KPIChartProps } from '../../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-
-import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
+import { useLoadingStateContext } from '../../../hooks/use_loading_observable';
 
 export const Kpi = ({
   id,
@@ -29,7 +28,7 @@ export const Kpi = ({
   assetName: string;
   dateRange: TimeRange;
 }) => {
-  const { refreshTs } = useDateRangeProviderContext();
+  const { searchSessionId } = useLoadingStateContext();
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -48,13 +47,13 @@ export const Kpi = ({
       dataView={dataView}
       dateRange={dateRange}
       layers={layers}
-      lastReloadRequestTime={refreshTs}
       height={height}
       filters={filters}
       title={title}
       subtitle={AVERAGE_SUBTITLE}
       toolTip={tooltipContent}
       visualizationType="lnsMetric"
+      searchSessionId={searchSessionId}
       disableTriggers
       hidePanelTitles
     />

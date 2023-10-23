@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useEffect, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { map, mergeMap, filter } from 'rxjs/operators';
+import { catchError, of, from, Subject, withLatestFrom } from 'rxjs';
+import { useLoadingStateContext } from './use_loading_observable';
+import { useDatePickerContext } from './use_date_picker';
+
+export const useRequestObservable = <T>() => {
+  const { requestState$, isAutoRefreshRequestPending$ } = useLoadingStateContext();
+  const { autoRefreshConfig$ } = useDatePickerContext();
+  const request$ = useRef(new Subject<() => Promise<T>>());
+
+  useEffect(() => {
+    const uuid = uuidv4();
+    // Subscribe to updates in the request$
+    const subscription = request$.current
+      .pipe(
+        // Combine latest values from request$, autoRefreshConfig$, and pendingRequests$
+        withLatestFrom(isAutoRefreshRequestPending$, autoRefreshConfig$),
+        // Filter out requests if there are pending requests or autoRefresh is paused
+        // Prevents aborting running requests when autoRefresh is on
+        filter(([, isAutoRefreshRequestPending, autoRefreshConfig]) => {
+          return !isAutoRefreshRequestPending || autoRefreshConfig?.isPaused === true;
+        }),
+        mergeMap(([requestFn]) => {
+          // If request function is not defined, return an observable that emits null
+          if (!requestFn) {
+            return of(null);
+          }
+
+          requestState$.next('running');
+          return from(requestFn()).pipe(
+            map((response) => {
+              requestState$.next('done');
+              return response;
+            }),
+            catchError((error) => {
+              requestState$.next('done');
+              throw error;
+            })
+          );
+        })
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [autoRefreshConfig$, isAutoRefreshRequestPending$, requestState$]);
+
+  return { request$: request$.current };
+};

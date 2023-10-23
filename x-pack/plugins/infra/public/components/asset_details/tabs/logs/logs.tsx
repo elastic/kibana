@@ -18,7 +18,7 @@ import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
-import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
@@ -26,7 +26,7 @@ const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDateRangeProviderContext();
+  const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsProviderContext();

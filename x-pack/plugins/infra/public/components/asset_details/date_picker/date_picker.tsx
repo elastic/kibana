@@ -13,7 +13,8 @@ import type {
 } from '@elastic/eui/src/components/date_picker/types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { useDateRangeProviderContext } from '../hooks/use_date_range';
+import { useDatePickerContext } from '../hooks/use_date_picker';
+import { useLoadingStateContext } from '../hooks/use_loading_observable';
 
 const COMMONLY_USED_RANGES: DurationRange[] = [
   {
@@ -54,13 +55,15 @@ const COMMONLY_USED_RANGES: DurationRange[] = [
 ];
 
 export const DatePicker = () => {
-  const { dateRange, autoRefresh, setDateRange, setAutoRefresh } = useDateRangeProviderContext();
+  const { dateRange, autoRefresh, setDateRange, setAutoRefresh, onAutoRefresh } =
+    useDatePickerContext();
+  const { updateSearchSessionId } = useLoadingStateContext();
 
   const handleRefresh = useCallback(
     ({ start, end }: OnRefreshProps) => {
-      setDateRange({ from: start, to: end });
+      onAutoRefresh({ from: start, to: end });
     },
-    [setDateRange]
+    [onAutoRefresh]
   );
   const handleTimeChange = useCallback(
     ({ start, end, isInvalid }: OnTimeChangeProps) => {
@@ -87,6 +90,8 @@ export const DatePicker = () => {
     [dateRange.from, setAutoRefresh, setDateRange]
   );
 
+  const handleOnClick = useCallback(() => updateSearchSessionId(), [updateSearchSessionId]);
+
   return (
     <MemoEuiSuperDatePicker
       commonlyUsedRanges={COMMONLY_USED_RANGES}
@@ -97,12 +102,23 @@ export const DatePicker = () => {
       onRefresh={autoRefresh && handleRefresh}
       onRefreshChange={autoRefresh && handleAutoRefreshChange}
       refreshInterval={autoRefresh && autoRefresh.interval}
+      onClick={handleOnClick}
       width="full"
     />
   );
 };
 
 // Memo EuiSuperDatePicker to prevent re-renders from resetting the auto-refresh cycle
-const MemoEuiSuperDatePicker = React.memo((props: EuiSuperDatePickerProps) => (
-  <EuiSuperDatePicker {...props} updateButtonProps={{ iconOnly: true }} />
-));
+const MemoEuiSuperDatePicker = React.memo(
+  ({ onClick, ...props }: EuiSuperDatePickerProps & { onClick?: () => void }) => (
+    <EuiSuperDatePicker
+      {...props}
+      updateButtonProps={{
+        iconOnly: true,
+        contentProps: {
+          onClick,
+        },
+      }}
+    />
+  )
+);

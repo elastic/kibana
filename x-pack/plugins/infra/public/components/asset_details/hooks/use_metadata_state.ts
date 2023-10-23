@@ -10,14 +10,14 @@ import createContainer from 'constate';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
-import { useDateRangeProviderContext } from './use_date_range';
+import { useDatePickerContext } from './use_date_picker';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'assetId' | 'assetType'>;
 
 export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderProps) {
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
+  const { getDateRangeInTimestamp } = useDatePickerContext();
   const { sourceId } = useSourceContext();
 
   const { loading, error, metadata, reload } = useMetadata({
@@ -45,5 +45,5 @@ export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderP
   };
 }
 
-export const [MetadataStateProvider, useMetadataStateProviderContext] =
+export const [MetadataStateProvider, useMetadataStateContext] =
   createContainer(useMetadataProvider);
