@@ -11,11 +11,11 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { createApmRule, deleteApmRules } from './helpers/alerting_api_helper';
 import { waitForRuleStatus } from './helpers/wait_for_rule_status';
-import type { SuperTest, Test } from 'supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
