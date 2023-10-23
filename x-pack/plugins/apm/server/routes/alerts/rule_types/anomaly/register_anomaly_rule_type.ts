@@ -151,13 +151,27 @@ export function registerAnomalyRuleType({
 
         // start time must be at least 30, does like this to support rules created before this change where default was 15
         const window =
-          datemath.parse('now-30m')!.valueOf() >
+          datemath.parse('now-30m')!.valueOf() <
           datemath
             .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)!
             .valueOf()
             ? '30m'
             : `${ruleParams.windowSize}${ruleParams.windowUnit}`;
+
         const { dateStart } = getTimeRange(window);
+
+        console.log('params', ruleParams.windowSize, ruleParams.windowUnit);
+
+        console.log('default window', datemath.parse('now-30m')!.valueOf());
+
+        console.log(
+          'param window',
+          datemath
+            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)!
+            .valueOf()
+        );
+
+        console.log({ dateStart, window });
 
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
