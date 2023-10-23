@@ -39,12 +39,12 @@ export const FooterComponent: FC<Props> = ({ isAutohide = false, isHidden = fals
     <div className={root} style={{ height: FOOTER_HEIGHT }}>
       <Scrubber />
       <EuiBottomBar style={{ bottom: isAutohide && isHidden ? -FOOTER_HEIGHT : 0 }}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
           <EuiFlexItem className={title}>
             <Title />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="m" responsive={false}>
               <PageControls />
               <Settings />
             </EuiFlexGroup>

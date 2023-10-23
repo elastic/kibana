@@ -52,7 +52,7 @@ export const PageControlsComponent: FC<Props> = ({
   const currentPage = page + 1;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" style={{ margin: '0 12px' }}>
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           color="text"
