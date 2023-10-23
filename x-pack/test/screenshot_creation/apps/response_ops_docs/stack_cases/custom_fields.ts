@@ -44,6 +44,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         1400,
         1400
       );
+      await cases.navigation.navigateToApp();
+      await testSubjects.click('createNewCaseBtn');
+      await commonScreenshots.takeScreenshot('cases-create', screenshotDirectories, 1400, 1900);
+      await testSubjects.click('create-case-cancel');
     });
   });
 }
