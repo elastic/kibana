@@ -22,9 +22,10 @@ import {
 import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
-  ruleUpdatesTabClick,
+  assertRulesNotPresentInRuleUpdatesTable,
+  assertRuleUpgradeSuccessToastShown,
   assertUpgradeRequestIsComplete,
-  assertUpgradeSuccess,
+  clickRuleUpdatesTab,
 } from '../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
@@ -68,7 +69,7 @@ describe(
         installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
 
         visitRulesManagementTable();
-        ruleUpdatesTabClick();
+        clickRuleUpdatesTab();
       });
 
       it('should upgrade prebuilt rules one by one', () => {
@@ -79,7 +80,8 @@ describe(
         // Wait for request to complete
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1]);
 
-        assertUpgradeSuccess([OUTDATED_RULE_1]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_1]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_1]);
       });
 
       it('should upgrade multiple selected prebuilt rules by selecting them individually', () => {
@@ -89,20 +91,23 @@ describe(
         ]);
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertUpgradeSuccess([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
       });
 
       it('should upgrade multiple selected prebuilt rules by selecting all in page', () => {
         cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertUpgradeSuccess([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
       });
 
       it('should upgrade all rules with available upgrades at once', () => {
         cy.get(UPGRADE_ALL_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertUpgradeSuccess([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
       });
 
       it('should display an empty screen when all rules with available updates have been upgraded', () => {
