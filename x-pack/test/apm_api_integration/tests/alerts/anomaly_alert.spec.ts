@@ -36,8 +36,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const spikeEnd = moment().subtract(1, 'hours').valueOf();
 
       before(async () => {
-        await cleanup(supertest);
-
         const serviceA = apm
           .service({ name: 'a', environment: 'production', agentName: 'java' })
           .instance('a');
@@ -67,9 +65,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await createAndRunApmMlJobs({ es, ml, environments: ['production'] });
       });
 
-      // after(async () => {
-      //   await cleanup(supertest);
-      // });
+      after(async () => {
+        await cleanup(supertest);
+      });
 
       async function cleanup(supertest: SuperTest<Test>) {
         try {
