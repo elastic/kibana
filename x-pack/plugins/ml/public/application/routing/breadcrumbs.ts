@@ -110,7 +110,6 @@ export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
     defaultMessage: 'Create job',
   }),
   href: '/jobs/new_job',
-  deepLinkId: 'ml:createJob',
 });
 
 export const CALENDAR_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
