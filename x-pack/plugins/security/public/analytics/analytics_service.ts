@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { filter } from 'rxjs';
+import { filter, mergeMap } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 
 import type {
@@ -58,15 +58,16 @@ export class AnalyticsService {
     this.securityFeaturesSubscription = this.securityLicense.features$
       .pipe(
         filter(({ allowLogin }) => allowLogin),
-        throttleTime(5000)
+        throttleTime(5000),
+        mergeMap(async () => {
+          try {
+            await AnalyticsService.recordAuthTypeAnalytics(http);
+          } catch {
+            // do nothing
+          }
+        })
       )
-      .subscribe(async () => {
-        try {
-          await AnalyticsService.recordAuthTypeAnalytics(http);
-        } catch {
-          // do nothing
-        }
-      });
+      .subscribe();
   }
 
   public stop() {

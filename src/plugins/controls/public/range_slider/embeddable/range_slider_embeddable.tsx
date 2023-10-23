@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash';
 import { batch } from 'react-redux';
 import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { Subscription, lastValueFrom } from 'rxjs';
+import { Subscription, lastValueFrom, mergeMap } from 'rxjs';
 import { distinctUntilChanged, skip, map } from 'rxjs/operators';
 
 import {
@@ -168,14 +168,18 @@ export class RangeSliderEmbeddable
 
     // fetch available min/max when input changes
     this.subscriptions.add(
-      dataFetchPipe.subscribe(async (changes) => {
-        try {
-          await this.runRangeSliderQuery();
-          await this.buildFilter();
-        } catch (e) {
-          this.onLoadingError(e.message);
-        }
-      })
+      dataFetchPipe
+        .pipe(
+          mergeMap(async (changes) => {
+            try {
+              await this.runRangeSliderQuery();
+              await this.buildFilter();
+            } catch (e) {
+              this.onLoadingError(e.message);
+            }
+          })
+        )
+        .subscribe()
     );
 
     // build filters when value changes
@@ -183,9 +187,10 @@ export class RangeSliderEmbeddable
       this.getInput$()
         .pipe(
           distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', ''])),
-          skip(1) // skip the first input update because initial filters will be built by initialize.
+          skip(1), // skip the first input update because initial filters will be built by initialize.
+          mergeMap(this.buildFilter)
         )
-        .subscribe(this.buildFilter)
+        .subscribe()
     );
   };
 

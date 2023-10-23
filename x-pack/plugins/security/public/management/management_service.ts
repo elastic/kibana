@@ -6,6 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
+import { mergeMap } from 'rxjs';
 
 import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import type {
@@ -66,53 +67,57 @@ export class ManagementService {
   }
 
   start({ capabilities, uiConfig }: StartParams) {
-    this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
-      const securitySection = this.securitySection!;
+    this.licenseFeaturesSubscription = this.license.features$
+      .pipe(
+        mergeMap(async (features) => {
+          const securitySection = this.securitySection!;
 
-      const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
-        [securitySection.getApp(apiKeysManagementApp.id)!, features.showLinks],
-      ];
+          const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
+            [securitySection.getApp(apiKeysManagementApp.id)!, features.showLinks],
+          ];
 
-      if (!uiConfig || uiConfig.userManagementEnabled) {
-        securityManagementAppsStatuses.push([
-          securitySection.getApp(usersManagementApp.id)!,
-          features.showLinks,
-        ]);
-      }
+          if (!uiConfig || uiConfig.userManagementEnabled) {
+            securityManagementAppsStatuses.push([
+              securitySection.getApp(usersManagementApp.id)!,
+              features.showLinks,
+            ]);
+          }
 
-      if (!uiConfig || uiConfig.roleManagementEnabled) {
-        securityManagementAppsStatuses.push([
-          securitySection.getApp(rolesManagementApp.id)!,
-          features.showLinks,
-        ]);
-      }
+          if (!uiConfig || uiConfig.roleManagementEnabled) {
+            securityManagementAppsStatuses.push([
+              securitySection.getApp(rolesManagementApp.id)!,
+              features.showLinks,
+            ]);
+          }
 
-      if (!uiConfig || uiConfig.roleMappingManagementEnabled) {
-        securityManagementAppsStatuses.push([
-          securitySection.getApp(roleMappingsManagementApp.id)!,
-          features.showLinks && features.showRoleMappingsManagement,
-        ]);
-      }
+          if (!uiConfig || uiConfig.roleMappingManagementEnabled) {
+            securityManagementAppsStatuses.push([
+              securitySection.getApp(roleMappingsManagementApp.id)!,
+              features.showLinks && features.showRoleMappingsManagement,
+            ]);
+          }
 
-      // Iterate over all registered apps and update their enable status depending on the available
-      // license features.
-      for (const [app, enableStatus] of securityManagementAppsStatuses) {
-        if (capabilities.management.security[app.id] !== true) {
-          app.disable();
-          continue;
-        }
+          // Iterate over all registered apps and update their enable status depending on the available
+          // license features.
+          for (const [app, enableStatus] of securityManagementAppsStatuses) {
+            if (capabilities.management.security[app.id] !== true) {
+              app.disable();
+              continue;
+            }
 
-        if (app.enabled === enableStatus) {
-          continue;
-        }
+            if (app.enabled === enableStatus) {
+              continue;
+            }
 
-        if (enableStatus) {
-          app.enable();
-        } else {
-          app.disable();
-        }
-      }
-    });
+            if (enableStatus) {
+              app.enable();
+            } else {
+              app.disable();
+            }
+          }
+        })
+      )
+      .subscribe();
   }
 
   stop() {

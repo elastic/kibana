@@ -7,7 +7,7 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription, ReplaySubject } from 'rxjs';
+import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
@@ -474,27 +474,34 @@ export class VisualizeEmbeddable
     });
 
     this.subscriptions.push(
-      this.handler.events$.subscribe(async (event) => {
-        if (!this.input.disableTriggers) {
-          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
-          let context;
+      this.handler.events$
+        .pipe(
+          mergeMap(async (event) => {
+            if (!this.input.disableTriggers) {
+              const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+              let context;
 
-          if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-            context = {
-              embeddable: this,
-              timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
-              ...event.data,
-            };
-          } else {
-            context = {
-              embeddable: this,
-              data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
-            };
-          }
+              if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+                context = {
+                  embeddable: this,
+                  timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+                  ...event.data,
+                };
+              } else {
+                context = {
+                  embeddable: this,
+                  data: {
+                    timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+                    ...event.data,
+                  },
+                };
+              }
 
-          getUiActions().getTrigger(triggerId).exec(context);
-        }
-      })
+              getUiActions().getTrigger(triggerId).exec(context);
+            }
+          })
+        )
+        .subscribe()
     );
 
     if (this.vis.description) {
