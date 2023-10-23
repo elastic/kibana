@@ -217,7 +217,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(error)) {
         this.log.error(`401 Unauthorized`, {
-          http: { response: { status_code: 401 } },
+          http: {
+            response: { status_code: 401 },
+            request: { method: request.route?.method, path: request.route?.path },
+          },
+          error: { message: error.message },
         });
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(error))
@@ -226,7 +230,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
       // return a generic 500 to avoid error info / stack trace surfacing
       this.log.error(`500 Server Error`, {
-        http: { response: { status_code: 500 } },
+        http: {
+          response: { status_code: 500 },
+          request: { method: request.route?.method, path: request.route?.path },
+        },
+        error: { message: error.message },
       });
       return hapiResponseAdapter.toInternalError();
     }
