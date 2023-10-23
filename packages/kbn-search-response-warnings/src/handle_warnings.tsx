@@ -49,7 +49,13 @@ export function handleWarnings({
   response: estypes.SearchResponse;
   services: Services;
 }) {
-  const warnings = extractWarnings(response, services.inspector, requestAdapter, requestName, requestId);
+  const warnings = extractWarnings(
+    response,
+    services.inspector,
+    requestAdapter,
+    requestName,
+    requestId
+  );
   if (warnings.length === 0) {
     return;
   }

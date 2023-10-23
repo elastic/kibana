@@ -257,7 +257,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
 
-          const requestName = options.inspector?.title 
+          const requestName = options.inspector?.title
             ? options.inspector.title
             : i18n.translate('data.searchService.anonymousRequestTitle', {
                 defaultMessage: 'Request',
@@ -266,12 +266,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             ? options.inspector?.adapter
             : new RequestAdapter();
           if (!options.inspector?.adapter) {
-            const requestResponder = requestAdapter.start(
-              requestName,
-              {
-                id: request.id,
-              }
-            );
+            const requestResponder = requestAdapter.start(requestName, {
+              id: request.id,
+            });
             requestResponder.json(request.body);
             requestResponder.ok({ json: response });
           }
