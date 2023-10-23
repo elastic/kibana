@@ -13,6 +13,9 @@ import { CASES_CONNECTOR_ID } from './constants';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
+import { createCasesClientMock } from '../../client/mocks';
+import { mockCases } from '../../mocks';
+import type { Cases } from '../../../common';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -24,11 +27,23 @@ describe('CasesConnector', () => {
   const services = actionsMock.createServices();
 
   const alerts = [
-    { 'host.name': 'A', 'dest.ip': '0.0.0.1', 'source.ip': '0.0.0.2' },
-    { 'host.name': 'B', 'dest.ip': '0.0.0.1', 'file.hash': '12345' },
-    { 'host.name': 'A', 'dest.ip': '0.0.0.1' },
-    { 'host.name': 'B', 'dest.ip': '0.0.0.3' },
-    { 'host.name': 'A', 'source.ip': '0.0.0.5' },
+    {
+      _id: 'alert-id-0',
+      _index: 'alert-index-0',
+      'host.name': 'A',
+      'dest.ip': '0.0.0.1',
+      'source.ip': '0.0.0.2',
+    },
+    {
+      _id: 'alert-id-1',
+      _index: 'alert-index-1',
+      'host.name': 'B',
+      'dest.ip': '0.0.0.1',
+      'file.hash': '12345',
+    },
+    { _id: 'alert-id-2', _index: 'alert-index-2', 'host.name': 'A', 'dest.ip': '0.0.0.1' },
+    { _id: 'alert-id-3', _index: 'alert-index-3', 'host.name': 'B', 'dest.ip': '0.0.0.3' },
+    { _id: 'alert-id-4', _index: 'alert-index-4', 'host.name': 'A', 'source.ip': '0.0.0.5' },
   ];
 
   const groupingBy = ['host.name', 'dest.ip'];
@@ -83,139 +98,341 @@ describe('CasesConnector', () => {
     },
   ];
 
+  const cases: Cases = mockCases.map((so) => ({
+    ...so.attributes,
+    id: so.id,
+    version: so.version ?? '',
+    totalComment: 0,
+    totalAlerts: 0,
+  }));
+
   const mockGetRecordId = jest.fn();
   const mockBulkGetRecords = jest.fn();
   const mockBulkCreateRecord = jest.fn();
   const mockGetCaseId = jest.fn();
 
+  const getCasesClient = jest.fn();
+  const casesClientMock = createCasesClientMock();
+
   let connector: CasesConnector;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  describe('With grouping', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
 
-    CasesOracleServiceMock.mockImplementation(() => {
-      let oracleIdCounter = 0;
+      CasesOracleServiceMock.mockImplementation(() => {
+        let oracleIdCounter = 0;
 
-      return {
-        getRecordId: mockGetRecordId.mockImplementation(
-          () => `so-oracle-record-${oracleIdCounter++}`
-        ),
-        bulkGetRecords: mockBulkGetRecords.mockResolvedValue(oracleRecords),
-        bulkCreateRecord: mockBulkCreateRecord.mockResolvedValue([
-          {
-            ...oracleRecords[0],
-            id: groupedAlertsWithOracleKey[2].oracleKey,
-            grouping: groupedAlertsWithOracleKey[2].grouping,
-            version: 'so-version-2',
-          },
-        ]),
-      };
-    });
-
-    CasesServiceMock.mockImplementation(() => {
-      let caseIdCounter = 0;
-
-      return {
-        getCaseId: mockGetCaseId.mockImplementation(() => `so-case-id-${caseIdCounter++}`),
-      };
-    });
-
-    connector = new CasesConnector({
-      configurationUtilities: actionsConfigMock.create(),
-      config: {},
-      secrets: {},
-      connector: { id: '1', type: CASES_CONNECTOR_ID },
-      logger: loggingSystemMock.createLogger(),
-      services,
-    });
-  });
-
-  describe('run', () => {
-    describe('Oracle records', () => {
-      it('generates the oracle keys correctly with grouping by one field', async () => {
-        await connector.run({ alerts, groupingBy: ['host.name'], owner, rule });
-
-        expect(mockGetRecordId).toHaveBeenCalledTimes(2);
-
-        expect(mockGetRecordId).nthCalledWith(1, {
-          ruleId: rule.id,
-          grouping: { 'host.name': 'A' },
-          owner,
-          spaceId: 'default',
-        });
-
-        expect(mockGetRecordId).nthCalledWith(2, {
-          ruleId: rule.id,
-          grouping: { 'host.name': 'B' },
-          owner,
-          spaceId: 'default',
-        });
+        return {
+          getRecordId: mockGetRecordId.mockImplementation(
+            () => `so-oracle-record-${oracleIdCounter++}`
+          ),
+          bulkGetRecords: mockBulkGetRecords.mockResolvedValue(oracleRecords),
+          bulkCreateRecord: mockBulkCreateRecord.mockResolvedValue([
+            {
+              ...oracleRecords[0],
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              grouping: groupedAlertsWithOracleKey[2].grouping,
+              version: 'so-version-2',
+            },
+          ]),
+        };
       });
 
-      it('generates the oracle keys correct with grouping by multiple fields', async () => {
-        await connector.run({ alerts, groupingBy, owner, rule });
+      CasesServiceMock.mockImplementation(() => {
+        let caseIdCounter = 0;
 
-        expect(mockGetRecordId).toHaveBeenCalledTimes(3);
+        return {
+          getCaseId: mockGetCaseId.mockImplementation(() => `mock-id-${++caseIdCounter}`),
+        };
+      });
 
-        for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
-          expect(mockGetRecordId).nthCalledWith(index + 1, {
+      casesClientMock.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
+
+      getCasesClient.mockReturnValue(casesClientMock);
+
+      connector = new CasesConnector({
+        casesParams: { getCasesClient },
+        connectorParams: {
+          configurationUtilities: actionsConfigMock.create(),
+          config: {},
+          secrets: {},
+          connector: { id: '1', type: CASES_CONNECTOR_ID },
+          logger: loggingSystemMock.createLogger(),
+          services,
+        },
+      });
+    });
+
+    describe('run', () => {
+      describe('Oracle records', () => {
+        it('generates the oracle keys correctly with grouping by one field', async () => {
+          await connector.run({ alerts, groupingBy: ['host.name'], owner, rule });
+
+          expect(mockGetRecordId).toHaveBeenCalledTimes(2);
+
+          expect(mockGetRecordId).nthCalledWith(1, {
             ruleId: rule.id,
-            grouping,
+            grouping: { 'host.name': 'A' },
             owner,
             spaceId: 'default',
           });
-        }
+
+          expect(mockGetRecordId).nthCalledWith(2, {
+            ruleId: rule.id,
+            grouping: { 'host.name': 'B' },
+            owner,
+            spaceId: 'default',
+          });
+        });
+
+        it('generates the oracle keys correct with grouping by multiple fields', async () => {
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(mockGetRecordId).toHaveBeenCalledTimes(3);
+
+          for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
+            expect(mockGetRecordId).nthCalledWith(index + 1, {
+              ruleId: rule.id,
+              grouping,
+              owner,
+              spaceId: 'default',
+            });
+          }
+        });
+
+        it('gets the oracle records correctly', async () => {
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(mockBulkGetRecords).toHaveBeenCalledWith([
+            groupedAlertsWithOracleKey[0].oracleKey,
+            groupedAlertsWithOracleKey[1].oracleKey,
+            groupedAlertsWithOracleKey[2].oracleKey,
+          ]);
+        });
+
+        it('created the non found oracle records correctly', async () => {
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(mockBulkCreateRecord).toHaveBeenCalledWith([
+            {
+              recordId: groupedAlertsWithOracleKey[2].oracleKey,
+              payload: {
+                cases: [],
+                grouping: groupedAlertsWithOracleKey[2].grouping,
+                rules: [],
+              },
+            },
+          ]);
+        });
+
+        it('does not create oracle records if there are no 404 errors', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(mockBulkCreateRecord).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('Cases', () => {
+        it('generates the case ids correctly', async () => {
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(mockGetCaseId).toHaveBeenCalledTimes(3);
+
+          for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
+            expect(mockGetCaseId).nthCalledWith(index + 1, {
+              ruleId: rule.id,
+              grouping,
+              owner,
+              spaceId: 'default',
+              counter: 1,
+            });
+          }
+        });
+
+        it('gets the cases correctly', async () => {
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
+            ids: ['mock-id-1', 'mock-id-2', 'mock-id-3'],
+          });
+        });
+      });
+
+      describe('Alerts', () => {
+        it('attach the alerts to the correct cases correctly', async () => {
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+            caseId: 'mock-id-1',
+            attachments: [
+              {
+                alertId: 'alert-id-0',
+                index: 'alert-index-0',
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+              {
+                alertId: 'alert-id-2',
+                index: 'alert-index-2',
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+            ],
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+            caseId: 'mock-id-2',
+            attachments: [
+              {
+                alertId: 'alert-id-1',
+                index: 'alert-index-1',
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+            ],
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+            caseId: 'mock-id-3',
+            attachments: [
+              {
+                alertId: 'alert-id-3',
+                index: 'alert-index-3',
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+            ],
+          });
+        });
+      });
+    });
+  });
+
+  describe('Without grouping', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      CasesOracleServiceMock.mockImplementation(() => {
+        let oracleIdCounter = 0;
+
+        return {
+          getRecordId: mockGetRecordId.mockImplementation(
+            () => `so-oracle-record-${oracleIdCounter++}`
+          ),
+          bulkGetRecords: mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]),
+          bulkCreateRecord: mockBulkCreateRecord.mockResolvedValue([]),
+        };
+      });
+
+      CasesServiceMock.mockImplementation(() => {
+        let caseIdCounter = 0;
+
+        return {
+          getCaseId: mockGetCaseId.mockImplementation(() => `mock-id-${++caseIdCounter}`),
+        };
+      });
+
+      casesClientMock.cases.bulkGet.mockResolvedValue({ cases: [cases[0]], errors: [] });
+
+      getCasesClient.mockReturnValue(casesClientMock);
+
+      connector = new CasesConnector({
+        casesParams: { getCasesClient },
+        connectorParams: {
+          configurationUtilities: actionsConfigMock.create(),
+          config: {},
+          secrets: {},
+          connector: { id: '1', type: CASES_CONNECTOR_ID },
+          logger: loggingSystemMock.createLogger(),
+          services,
+        },
+      });
+    });
+
+    describe('Oracle records', () => {
+      it('generates the oracle keys correctly with no grouping', async () => {
+        await connector.run({ alerts, groupingBy: [], owner, rule });
+
+        expect(mockGetRecordId).toHaveBeenCalledTimes(1);
+
+        expect(mockGetRecordId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+        });
       });
 
       it('gets the oracle records correctly', async () => {
-        await connector.run({ alerts, groupingBy, owner, rule });
+        await connector.run({ alerts, groupingBy: [], owner, rule });
 
-        expect(mockBulkGetRecords).toHaveBeenCalledWith([
-          groupedAlertsWithOracleKey[0].oracleKey,
-          groupedAlertsWithOracleKey[1].oracleKey,
-          groupedAlertsWithOracleKey[2].oracleKey,
-        ]);
-      });
-
-      it('created the non found oracle records correctly', async () => {
-        await connector.run({ alerts, groupingBy, owner, rule });
-
-        expect(mockBulkCreateRecord).toHaveBeenCalledWith([
-          {
-            recordId: groupedAlertsWithOracleKey[2].oracleKey,
-            payload: {
-              cases: [],
-              grouping: groupedAlertsWithOracleKey[2].grouping,
-              rules: [],
-            },
-          },
-        ]);
-      });
-
-      it('does not create oracle records if there are no 404 errors', async () => {
-        mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
-
-        await connector.run({ alerts, groupingBy, owner, rule });
-
-        expect(mockBulkCreateRecord).not.toHaveBeenCalled();
+        expect(mockBulkGetRecords).toHaveBeenCalledWith(['so-oracle-record-0']);
       });
     });
 
     describe('Cases', () => {
       it('generates the case ids correctly', async () => {
-        await connector.run({ alerts, groupingBy, owner, rule });
+        await connector.run({ alerts, groupingBy: [], owner, rule });
 
-        expect(mockGetCaseId).toHaveBeenCalledTimes(3);
+        expect(mockGetCaseId).toHaveBeenCalledTimes(1);
 
-        for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
-          expect(mockGetCaseId).nthCalledWith(index + 1, {
-            ruleId: rule.id,
-            grouping,
-            owner,
-            spaceId: 'default',
-            counter: 1,
-          });
-        }
+        expect(mockGetCaseId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+          counter: 1,
+        });
+      });
+
+      it('gets the cases correctly', async () => {
+        await connector.run({ alerts, groupingBy: [], owner, rule });
+
+        expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
+          ids: ['mock-id-1'],
+        });
+      });
+    });
+
+    describe('Alerts', () => {
+      it('attach all alerts to the same case when the grouping is not defined', async () => {
+        await connector.run({ alerts, groupingBy: [], owner, rule });
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+
+        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          caseId: 'mock-id-1',
+          attachments: alerts.map((alert) => ({
+            alertId: alert._id,
+            index: alert._index,
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          })),
+        });
       });
     });
   });

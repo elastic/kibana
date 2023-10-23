@@ -7,6 +7,7 @@
 
 export const CASES_CONNECTOR_ID = '.cases';
 export const CASES_CONNECTOR_TITLE = 'Cases';
+export const MAX_CONCURRENT_REQUEST_ATTACH_ALERTS = 5;
 
 export enum CASES_CONNECTOR_SUB_ACTION {
   RUN = 'run',
