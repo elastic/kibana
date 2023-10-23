@@ -37,7 +37,7 @@ interface CreateIndexParams {
 }
 
 /**
- * A fallback for the the query `size` that determines how many documents to
+ * A fallback for the query `size` that determines how many documents to
  * return from Elasticsearch when performing a similarity search.
  *
  * The size is typically determined by the implementation of LangChain's
@@ -122,7 +122,7 @@ export class ElasticsearchStore extends VectorStore {
         i.index?._id != null && i.index.error == null ? [i.index._id] : []
       );
     } catch (e) {
-      this.logger.error('Error loading data into KB', e);
+      this.logger.error(`Error loading data into KB\n ${e}`);
       return [];
     }
   };
@@ -360,14 +360,17 @@ export class ElasticsearchStore extends VectorStore {
    * @param modelId ID of the model to check
    * @returns Promise<boolean> indicating whether the model is installed
    */
-  async isModelInstalled(modelId: string): Promise<boolean> {
+  async isModelInstalled(modelId?: string): Promise<boolean> {
     try {
-      const getResponse = await this.esClient.ml.getTrainedModels({
-        model_id: modelId,
-        include: 'definition_status',
+      const getResponse = await this.esClient.ml.getTrainedModelsStats({
+        model_id: modelId ?? this.model,
       });
 
-      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
+      return getResponse.trained_model_stats.some(
+        (stats) =>
+          stats.deployment_stats?.state === 'started' &&
+          stats.deployment_stats?.allocation_status.state === 'fully_allocated'
+      );
     } catch (e) {
       // Returns 404 if it doesn't exist
       return false;

@@ -24,23 +24,8 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const {
-    appBasePath,
-    sections,
-    kibanaVersion,
-    cardsNavigationConfig,
-    landingPageRedirect,
-    navigateToUrl,
-    basePath,
-  } = useAppContext();
+  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig } = useAppContext();
   setBreadcrumbs();
-
-  // Redirect the user to the configured landing page if there is one
-  useEffect(() => {
-    if (landingPageRedirect) {
-      navigateToUrl(basePath.prepend(landingPageRedirect));
-    }
-  }, [landingPageRedirect, navigateToUrl, basePath]);
 
   useEffect(() => {
     onAppMounted('');
