@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { concatMap, delay, Observable, of, share } from 'rxjs';
-import { StopGeneratingButton } from './buttons/stop_generating_button';
-import { RegenerateResponseButton } from './buttons/regenerate_response_button';
-import { MessagePanel } from './message_panel';
-import { MessageText } from './message_text';
+interface UseStreamProps {
+  amendMessage: (message: string, index: number) => void;
+  index: number;
+  reader: ReadableStreamDefaultReader<Uint8Array>;
+}
+
+interface UseStream {
+  error: string | undefined;
+  isLoading: boolean;
+  isStreaming: boolean;
+  pendingMessage: string;
+  setComplete: (complete: boolean) => void;
+  subscription: Subscription | undefined;
+}
 
 export interface PromptObservableState {
   chunks: Chunk[];
@@ -35,29 +44,7 @@ interface Chunk {
   choices: ChunkChoice[];
 }
 
-function getMessageFromChunks(chunks: Chunk[]) {
-  let message = '';
-  chunks.forEach((chunk) => {
-    message += chunk.choices[0]?.delta.content ?? '';
-  });
-  return message;
-}
-
-interface Props {
-  amendMessage: (message: string, index: number) => void;
-  index: number;
-  isLastComment: boolean;
-  lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
-  reader: ReadableStreamDefaultReader<Uint8Array>;
-}
-
-export const StreamComment = ({
-  amendMessage,
-  index,
-  isLastComment,
-  lastCommentRef,
-  reader,
-}: Props) => {
+export const useStream = ({ amendMessage, index, reader }: UseStreamProps): UseStream => {
   const observer$ = useMemo(
     () =>
       new Observable<PromptObservableState>((observer) => {
@@ -124,12 +111,8 @@ export const StreamComment = ({
 
     [reader]
   );
-  // const response = useObservable(observer$);
 
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
-
-  // const [recalledMessages, setRecalledMessages] = useState<Message[] | undefined>(undefined);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [subscription, setSubscription] = useState<Subscription | undefined>();
@@ -147,7 +130,6 @@ export const StreamComment = ({
   }, [complete, onCompleteStream]);
 
   useEffect(() => {
-    console.log('observer$', { observer$ });
     const newSubscription = observer$.pipe(share()).subscribe({
       next: ({ message, loading: isLoading }) => {
         setLoading(isLoading);
@@ -155,7 +137,6 @@ export const StreamComment = ({
         setPendingMessage(message);
       },
       complete: () => {
-        console.log('on complete');
         setComplete(true);
         setLoading(false);
       },
@@ -178,59 +159,20 @@ export const StreamComment = ({
 
   const isLoading = state === 'init' || state === 'loading';
   const isStreaming = state === 'streaming';
-
-  return (
-    <>
-      <MessagePanel
-        body={
-          <MessageText
-            content={pendingMessage ?? ''}
-            loading={isLoading || isStreaming}
-            onActionClick={async () => {}}
-          />
-        }
-        error={error ? new Error(error) : undefined}
-        controls={
-          isLoading || isStreaming ? (
-            <StopGeneratingButton
-              onClick={() => {
-                subscription?.unsubscribe();
-                setComplete(true);
-                console.log('stop generating');
-                // setLoading(false);
-                // setDisplayedMessages((prevMessages) =>
-                //   prevMessages.concat({
-                //     '@timestamp': new Date().toISOString(),
-                //     message: {
-                //       ...pendingMessage!.message,
-                //     },
-                //   })
-                // );
-                // setPendingMessage((prev) => ({
-                //   message: {
-                //     role: MessageRole.Assistant,
-                //     ...prev?.message,
-                //   },
-                //   aborted: true,
-                //   error: new AbortError(),
-                // }));
-              }}
-            />
-          ) : (
-            <EuiFlexGroup direction="row">
-              <EuiFlexItem grow={false}>
-                <RegenerateResponseButton
-                  onClick={() => {
-                    console.log('RegenerateResponseButton');
-                    // reloadRecalledMessages();
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )
-        }
-      />
-      {isLastComment && <span ref={lastCommentRef} />}
-    </>
-  );
+  return {
+    error,
+    isLoading,
+    isStreaming,
+    pendingMessage: pendingMessage ?? '',
+    setComplete,
+    subscription,
+  };
 };
+
+function getMessageFromChunks(chunks: Chunk[]) {
+  let message = '';
+  chunks.forEach((chunk) => {
+    message += chunk.choices[0]?.delta.content ?? '';
+  });
+  return message;
+}

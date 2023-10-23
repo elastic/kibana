@@ -321,12 +321,20 @@ const AssistantComponent: React.FC<Props> = ({
 
   const createCodeBlockPortals = useCallback(
     () =>
-      messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[]) => {
-        return codeBlocks.map((codeBlock: CodeBlockDetails) => {
-          const getElement = codeBlock.getControlContainer;
-          const element = getElement?.();
-          return element ? createPortal(codeBlock.button, element) : <></>;
-        });
+      messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[], i: number) => {
+        return (
+          <span key={`${i}`}>
+            {codeBlocks.map((codeBlock: CodeBlockDetails, j: number) => {
+              const getElement = codeBlock.getControlContainer;
+              const element = getElement?.();
+              return (
+                <span key={`${i}+${j}`}>
+                  {element ? createPortal(codeBlock.button, element) : <></>}
+                </span>
+              );
+            })}
+          </span>
+        );
       }),
     [messageCodeBlocks]
   );
