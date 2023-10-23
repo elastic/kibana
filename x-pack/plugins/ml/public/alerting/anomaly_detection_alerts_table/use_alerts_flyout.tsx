@@ -11,12 +11,17 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { get } from 'lodash';
 import React from 'react';
-import { EuiDescriptionList, type EuiDataGridColumn, EuiPanel } from '@elastic/eui';
+import { EuiDescriptionList, type EuiDataGridColumn, EuiPanel, EuiTitle } from '@elastic/eui';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { RegisterFormatter } from './render_cell_value';
 
 const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {
-  const { 'kibana.alert.rule.name': name } = alert;
-  return <div data-test-subj="alertsFlyoutName">{name}</div>;
+  const name = alert[ALERT_RULE_NAME];
+  return (
+    <EuiTitle size="s">
+      <h3>{name}</h3>
+    </EuiTitle>
+  );
 };
 
 export const getAlertFlyout =
