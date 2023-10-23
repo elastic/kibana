@@ -9,6 +9,7 @@ import React from 'react';
 
 import type { EuiTableComputedColumnType } from '@elastic/eui';
 import type { CaseUI } from '../../../containers/types';
+import { getEmptyTagValue } from '../../empty_value';
 
 export const getColumn = ({
   key,
@@ -22,7 +23,15 @@ export const getColumn = ({
     const index = theCase.customFields.findIndex((element) => element.key === key);
 
     if (index !== -1) {
-      return <p>{theCase.customFields[index].value}</p>;
+      return (
+        <p data-test-subj={`text-custom-field-column-view-${key}`}>
+          {theCase.customFields[index].value}
+        </p>
+      );
     }
+
+    return (
+      <div data-test-subj={`empty-text-custom-field-column-view-${key}`}>{getEmptyTagValue()}</div>
+    );
   },
 });

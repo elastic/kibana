@@ -13,9 +13,14 @@ import { createAppMockRenderer } from '../../common/mock';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('../../common/use_cases_features');
+jest.mock('../../containers/configure/use_get_case_configuration');
 
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
 describe('useCasesColumnsConfiguration ', () => {
@@ -31,6 +36,7 @@ describe('useCasesColumnsConfiguration ', () => {
       caseAssignmentAuthorized: true,
       isAlertsEnabled: true,
     });
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
   it('returns all columns correctly', async () => {
@@ -197,5 +203,34 @@ describe('useCasesColumnsConfiguration ', () => {
         "name": "Solution",
       }
     `);
+  });
+
+  it('includes custom field columns correctly', async () => {
+    const textKey = 'text_key';
+    const toggleKey = 'toggle_key';
+
+    const textLabel = 'Text Label';
+    const toggleLabel = 'Toggle Label';
+
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: [
+          { key: textKey, label: textLabel, type: CustomFieldTypes.TEXT },
+          { key: toggleKey, label: toggleLabel, type: CustomFieldTypes.TOGGLE },
+        ],
+      },
+    }));
+
+    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    expect(result.current[textKey]).toEqual({ field: textKey, name: textLabel, canDisplay: true });
+    expect(result.current[toggleKey]).toEqual({
+      field: toggleKey,
+      name: toggleLabel,
+      canDisplay: true,
+    });
   });
 });
