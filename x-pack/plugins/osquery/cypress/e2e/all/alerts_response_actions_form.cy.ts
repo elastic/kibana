@@ -124,7 +124,19 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
+
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
     cy.getBySel('ruleEditSubmitButton').click();
+    cy.wait('@saveRuleSingleQuery').should(({ request }) => {
+      const oneQuery = [
+        {
+          interval: 3600,
+          query: 'select * from uptime;',
+          id: Object.keys(packData.queries)[0],
+        },
+      ];
+      expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
+    });
 
     cy.contains(`${ruleName} was saved`).should('exist');
     closeToastIfVisible();
@@ -143,11 +155,10 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.wait(5000);
-    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChanges');
+    cy.wait(3000);
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleChanges');
-    cy.get('@saveRuleChanges').should(({ response }) => {
+    cy.wait('@saveRuleMultiQuery').should(({ request }) => {
       const threeQueries = [
         {
           interval: 3600,
@@ -166,7 +177,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
           id: Object.keys(multiQueryPackData.queries)[2],
         },
       ];
-      expect(response.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
+      expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
     });
   });
 });
