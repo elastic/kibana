@@ -13,7 +13,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -31,8 +30,6 @@ import {
   AlertActiveTimeRangeAnnotation,
 } from '@kbn/observability-alert-details';
 import { DataView } from '@kbn/data-views-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
-import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../..';
@@ -42,7 +39,8 @@ import { ExpressionChart } from './expression_chart';
 import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from './custom_threshold';
 import { MetricsExplorerChartType } from '../hooks/use_metrics_explorer_options';
-import { AlertParams, MetricExpression, MetricThresholdRuleTypeParams } from '../types';
+import { AlertParams, MetricThresholdRuleTypeParams } from '../types';
+import AlertDetailsRelatedEvents from './alert_details_related_events';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type MetricThresholdRule = Rule<MetricThresholdRuleTypeParams>;
@@ -53,18 +51,6 @@ const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
 const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 const OVERVIEW_TAB_ID = 'overview';
 const RELATED_EVENTS_TAB_ID = 'relatedEvents';
-
-const cpuMetricPrefix = 'system.cpu';
-const memoryMetricPrefix = 'system.memory';
-const relatedMetrics = [
-  'system.cpu.user.pct',
-  'system.load.1',
-  'system.memory.actual.used.pct',
-  'system.filesystem.used.pct',
-  'host.network.ingress.bytes',
-  'host.network.egress.bytes',
-];
-const fnList = ['avg', 'sum', 'min', 'max'];
 
 interface AppSectionProps {
   alert: MetricThresholdAlert;
@@ -80,8 +66,7 @@ export default function AlertDetailsAppSection({
   ruleLink,
   setAlertSummaryFields,
 }: AppSectionProps) {
-  const { uiSettings, charts, aiops, data } = useKibana().services;
-  const { EmbeddableChangePointChart } = aiops;
+  const { uiSettings, charts, data } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
@@ -108,6 +93,15 @@ export default function AlertDetailsAppSection({
       key={ALERT_TIME_RANGE_ANNOTATION_ID}
     />,
   ];
+
+  const derivedIndexPattern = useMemo<DataViewBase>(
+    () => ({
+      fields: dataView?.fields || [],
+      title: dataView?.getIndexPattern() || 'unknown-index',
+    }),
+    [dataView]
+  );
+
   useEffect(() => {
     setAlertSummaryFields([
       {
@@ -125,14 +119,6 @@ export default function AlertDetailsAppSection({
       },
     ]);
   }, [alert, rule, ruleLink, setAlertSummaryFields]);
-
-  const derivedIndexPattern = useMemo<DataViewBase>(
-    () => ({
-      fields: dataView?.fields || [],
-      title: dataView?.getIndexPattern() || 'unknown-index',
-    }),
-    [dataView]
-  );
 
   useEffect(() => {
     const initDataView = async () => {
@@ -212,88 +198,6 @@ export default function AlertDetailsAppSection({
     </>
   ) : null;
 
-  const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
-    criterion.metrics?.some(
-      (metric: CustomThresholdExpressionMetric) =>
-        metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
-    );
-
-  const relatedMetricsPerCriteria = () => {
-    const hasCpuOrMemoryCriteria = ruleParams.criteria.some((criterion) =>
-      isCpuOrMemoryCriterion(criterion)
-    );
-
-    const relatedMetricsInDataView = hasCpuOrMemoryCriteria
-      ? dataView?.fields
-          .map((field) => field.name)
-          .filter((fieldName) => relatedMetrics.includes(fieldName))
-      : [];
-
-    const aggType = ruleParams.criteria
-      .find((criterion) => isCpuOrMemoryCriterion(criterion))
-      ?.metrics?.find(
-        (metric) =>
-          metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
-      )?.aggType;
-
-    const metricAggType = fnList.includes(aggType || '') ? aggType : 'avg';
-
-    return { relatedMetricsInDataView, metricAggType };
-  };
-
-  const relatedEventsTimeRangeEnd = moment(alert.start).add(
-    (ruleParams.criteria[0].timeSize ?? 5) * 2,
-    ruleParams.criteria[0].timeUnit ?? 'minutes'
-  );
-
-  const relatedEventsTimeRange = (): TimeRange => {
-    return {
-      from: moment(alert.start)
-        .subtract(
-          (ruleParams.criteria[0].timeSize ?? 5) * 2,
-          ruleParams.criteria[0].timeUnit ?? 'minutes'
-        )
-        .toISOString(),
-      to:
-        relatedEventsTimeRangeEnd.valueOf() > moment.now()
-          ? moment().toISOString()
-          : relatedEventsTimeRangeEnd.toISOString(),
-      mode: 'absolute',
-    };
-  };
-
-  const { relatedMetricsInDataView, metricAggType } = relatedMetricsPerCriteria();
-
-  const relatedEventsTab = !!ruleParams.criteria ? (
-    <>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup direction="column" data-test-subj="thresholdAlertRelatedEventsSection">
-        {relatedMetricsInDataView?.map(
-          (relatedMetric, relatedMetricIndex) =>
-            dataView &&
-            dataView.id && (
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>
-                    {metricAggType}({relatedMetric})
-                  </h4>
-                </EuiTitle>
-                <EuiHorizontalRule margin="xs" />
-                <EmbeddableChangePointChart
-                  id={`relatedMetric${relatedMetricIndex}`}
-                  key={`relatedMetric${relatedMetricIndex}`}
-                  dataViewId={dataView.id}
-                  timeRange={relatedEventsTimeRange()}
-                  fn={metricAggType || 'avg'}
-                  metricField={relatedMetric}
-                />
-              </EuiFlexItem>
-            )
-        )}
-      </EuiFlexGroup>
-    </>
-  ) : null;
-
   const tabs: EuiTabbedContentTab[] = [
     {
       id: OVERVIEW_TAB_ID,
@@ -309,9 +213,9 @@ export default function AlertDetailsAppSection({
         defaultMessage: 'Related Events',
       }),
       'data-test-subj': 'relatedEventsTab',
-      content: relatedEventsTab,
+      content: <AlertDetailsRelatedEvents alert={alert} rule={rule} dataView={dataView} />,
     },
   ];
 
-  return <EuiTabbedContent data-test-subj="thresholdAlertDetailsTabbedContent" tabs={tabs} />;
+  return <EuiTabbedContent data-test-subj="customThresholdAlertDetailsTabbedContent" tabs={tabs} />;
 }
