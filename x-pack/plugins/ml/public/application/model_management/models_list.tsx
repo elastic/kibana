@@ -68,7 +68,7 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
-import { TestTrainedModelFlyout } from './test_models';
+import { TestFlyoutWrapper } from './test_models';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { useEnabledFeatures } from '../contexts/ml';
@@ -764,7 +764,7 @@ export const ModelsList: FC<Props> = ({
         />
       )}
       {modelToTest === null ? null : (
-        <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
+        <TestFlyoutWrapper model={modelToTest} onClose={setModelToTest.bind(null, null)} />
       )}
       {dfaModelToTest === null ? null : (
         <TestDfaModelsFlyout model={dfaModelToTest} onClose={setDfaModelToTest.bind(null, null)} />

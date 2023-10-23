@@ -72,6 +72,7 @@ export abstract class InferenceBase<TInferResponse> {
   private isValid$ = new BehaviorSubject<boolean>(false);
   private pipeline$ = new BehaviorSubject<estypes.IngestPipeline>({});
   private supportedFieldTypes: ES_FIELD_TYPES[] = [ES_FIELD_TYPES.TEXT];
+  private pipelineForCreation: estypes.IngestPipeline | undefined;
 
   protected readonly info: string[] = [];
 
@@ -81,8 +82,10 @@ export abstract class InferenceBase<TInferResponse> {
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     protected readonly model: estypes.MlTrainedModelConfig,
     protected readonly inputType: INPUT_TYPE,
-    protected readonly deploymentId: string
+    protected readonly deploymentId: string,
+    protected readonly pipeline?: estypes.IngestPipeline
   ) {
+    this.pipelineForCreation = pipeline;
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField$.next(this.modelInputField);
   }
@@ -243,6 +246,10 @@ export abstract class InferenceBase<TInferResponse> {
     return this.pipeline$.getValue();
   }
 
+  public getPipelineForCreation(): estypes.IngestPipeline | undefined {
+    return this.pipelineForCreation;
+  }
+
   public getSupportedFieldTypes(): ES_FIELD_TYPES[] {
     return this.supportedFieldTypes;
   }
@@ -312,8 +319,9 @@ export abstract class InferenceBase<TInferResponse> {
   ): Promise<TInferResponse[]> {
     try {
       this.setRunning();
+      const pipeline = this.getPipelineForCreation() ?? this.getPipeline();
       const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
-        this.getPipeline(),
+        pipeline,
         this.getPipelineDocs()
       );
       const processedResponse = docs.map((d) => processResponse(this.getDocFromResponse(d)));

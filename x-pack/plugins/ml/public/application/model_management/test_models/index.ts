@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { TestTrainedModelFlyout } from './test_flyout';
+export { TestFlyoutWrapper } from './test_flyout_wrapper';
 export { isTestable, isDfaTrainedModel } from './utils';

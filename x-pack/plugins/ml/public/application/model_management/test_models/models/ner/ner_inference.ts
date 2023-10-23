@@ -37,9 +37,10 @@ export class NerInference extends InferenceBase<NerResponse> {
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    pipeline?: estypes.IngestPipeline
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, pipeline);
 
     this.initialize();
   }

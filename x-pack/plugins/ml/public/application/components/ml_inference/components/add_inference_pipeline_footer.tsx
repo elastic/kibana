@@ -9,7 +9,7 @@ import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AddInferencePipelineSteps } from '../types';
+import type { AddInferencePipelineSteps } from '../types';
 import {
   BACK_BUTTON_LABEL,
   CANCEL_BUTTON_LABEL,
@@ -26,7 +26,8 @@ interface Props {
   step: AddInferencePipelineSteps;
   onClose: () => void;
   onCreate: () => void;
-  setStep: React.Dispatch<React.SetStateAction<AddInferencePipelineSteps>>;
+  setStep: (step: AddInferencePipelineSteps) => void;
+  hasProcessorStep: boolean;
 }
 
 export const AddInferencePipelineFooter: FC<Props> = ({
@@ -38,10 +39,11 @@ export const AddInferencePipelineFooter: FC<Props> = ({
   onCreate,
   step,
   setStep,
+  hasProcessorStep,
 }) => {
   const { nextStep, previousStep, isContinueButtonEnabled } = useMemo(
-    () => getSteps(step, isDetailsStepValid, isConfigureProcessorStepValid),
-    [isDetailsStepValid, isConfigureProcessorStepValid, step]
+    () => getSteps(step, isDetailsStepValid, isConfigureProcessorStepValid, hasProcessorStep),
+    [isDetailsStepValid, isConfigureProcessorStepValid, step, hasProcessorStep]
   );
 
   return (

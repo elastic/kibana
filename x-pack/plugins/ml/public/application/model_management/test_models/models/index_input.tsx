@@ -79,8 +79,15 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
           }
         )}
       >
-        <EuiCodeBlock language="json" fontSize="s" paddingSize="s" lineNumbers isCopyable={true}>
-          {JSON.stringify(pipeline, null, 2)}
+        <EuiCodeBlock
+          language="json"
+          fontSize="s"
+          paddingSize="s"
+          lineNumbers
+          isCopyable={true}
+          overflowHeight={300}
+        >
+          {JSON.stringify(inferrer.getPipelineForCreation() ?? pipeline, null, 2)}
         </EuiCodeBlock>
       </EuiAccordion>
     </>

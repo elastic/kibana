@@ -52,9 +52,10 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    pipeline?: estypes.IngestPipeline
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, pipeline);
 
     this.initialize(
       [this.queryText$.pipe(map((questionText) => questionText !== ''))],

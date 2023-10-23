@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { FC, useState } from 'react';
+
+import { type ModelsListContextType, ModelsListContext } from './models_list_context';
+import type { ModelItem } from '../models_list';
+import { TestTrainedModelFlyout } from './test_flyout';
+import { CreatePipelineForModelFlyout } from '../create_pipeline_for_model/create_pipeline_for_model_flyout';
+
+interface Props {
+  model: ModelItem;
+  onClose: () => void;
+}
+export const TestFlyoutWrapper: FC<Props> = ({ model, onClose }) => {
+  const [currentContext, setCurrentContext] = useState<ModelsListContextType>({
+    pipelineConfig: undefined,
+    createPipelineFlyoutOpen: false,
+  });
+
+  return (
+    <ModelsListContext.Provider value={{ currentContext, setCurrentContext }}>
+      {currentContext.createPipelineFlyoutOpen === false ? (
+        <TestTrainedModelFlyout model={model} onClose={onClose} />
+      ) : null}
+      {currentContext.createPipelineFlyoutOpen ? (
+        <CreatePipelineForModelFlyout model={model} onClose={onClose} />
+      ) : null}
+    </ModelsListContext.Provider>
+  );
+};

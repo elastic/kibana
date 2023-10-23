@@ -6,7 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useMemo, useEffect } from 'react';
+import React, { FC, useContext, useMemo, useEffect } from 'react';
 
 import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { NerInference } from './models/ner';
@@ -22,6 +22,7 @@ import {
 import { TextEmbeddingInference } from './models/text_embedding';
 
 import { useMlApiContext } from '../../contexts/kibana';
+import { ModelsListContext } from './models_list_context';
 import { InferenceInputForm } from './models/inference_input_form';
 import { InferrerType } from './models';
 import { INPUT_TYPE } from './models/inference_base';
@@ -35,6 +36,11 @@ interface Props {
 
 export const SelectedModel: FC<Props> = ({ model, inputType, deploymentId }) => {
   const { trainedModels } = useMlApiContext();
+  const currentContext = useContext(ModelsListContext);
+  const pipeline =
+    (currentContext?.currentContext.createPipelineFlyoutOpen &&
+      currentContext?.currentContext.pipelineConfig) ||
+    undefined;
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
@@ -42,26 +48,56 @@ export const SelectedModel: FC<Props> = ({ model, inputType, deploymentId }) => 
 
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
-          return new NerInference(trainedModels, model, inputType, deploymentId);
+          return new NerInference(trainedModels, model, inputType, deploymentId, pipeline);
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
-          return new TextClassificationInference(trainedModels, model, inputType, deploymentId);
+          return new TextClassificationInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            pipeline
+          );
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
-          return new ZeroShotClassificationInference(trainedModels, model, inputType, deploymentId);
+          return new ZeroShotClassificationInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            pipeline
+          );
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
-          return new TextEmbeddingInference(trainedModels, model, inputType, deploymentId);
+          return new TextEmbeddingInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            pipeline
+          );
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
-          return new FillMaskInference(trainedModels, model, inputType, deploymentId);
+          return new FillMaskInference(trainedModels, model, inputType, deploymentId, pipeline);
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
-          return new QuestionAnsweringInference(trainedModels, model, inputType, deploymentId);
+          return new QuestionAnsweringInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            pipeline
+          );
         case SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION:
-          return new TextExpansionInference(trainedModels, model, inputType, deploymentId);
+          return new TextExpansionInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            pipeline
+          );
         default:
           break;
       }
     } else if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-      return new LangIdentInference(trainedModels, model, inputType, deploymentId);
+      return new LangIdentInference(trainedModels, model, inputType, deploymentId, pipeline);
     }
-  }, [inputType, model, trainedModels, deploymentId]);
+  }, [inputType, model, trainedModels, deploymentId, pipeline]);
 
   useEffect(() => {
     return () => {

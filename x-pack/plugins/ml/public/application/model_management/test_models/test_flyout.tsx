@@ -26,11 +26,11 @@ import { SelectedModel } from './selected_model';
 import { INPUT_TYPE } from './models/inference_base';
 import { type ModelItem } from '../models_list';
 
-interface Props {
+interface ContentProps {
   model: ModelItem;
-  onClose: () => void;
 }
-export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => {
+
+export const TestTrainedModelFlyoutContent: FC<ContentProps> = ({ model }) => {
   const [deploymentId, setDeploymentId] = useState<string>(model.deployment_ids[0]);
   const mediumPadding = useEuiPaddingSize('m');
 
@@ -41,90 +41,96 @@ export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => {
       ? INPUT_TYPE.INDEX
       : undefined;
   }, [model]);
-
   return (
     <>
-      <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>
+      {' '}
+      {model.deployment_ids.length > 1 ? (
+        <>
+          <EuiFormRow
+            fullWidth
+            label={
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
-                defaultMessage="Test trained model"
+                id="xpack.ml.trainedModels.testModelsFlyout.deploymentIdLabel"
+                defaultMessage="Deployment ID"
               />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiTitle size="xs">
-            <h4>{model.model_id}</h4>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {model.deployment_ids.length > 1 ? (
-            <>
-              <EuiFormRow
-                fullWidth
-                label={
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.testModelsFlyout.deploymentIdLabel"
-                    defaultMessage="Deployment ID"
-                  />
-                }
-              >
-                <EuiSelect
-                  fullWidth
-                  options={model.deployment_ids.map((v) => {
-                    return { text: v, value: v };
-                  })}
-                  value={deploymentId}
-                  onChange={(e) => {
-                    setDeploymentId(e.target.value);
-                  }}
-                />
-              </EuiFormRow>
-              <EuiSpacer size="l" />
-            </>
-          ) : null}
+            }
+          >
+            <EuiSelect
+              fullWidth
+              options={model.deployment_ids.map((v) => {
+                return { text: v, value: v };
+              })}
+              value={deploymentId}
+              onChange={(e) => {
+                setDeploymentId(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
+      {onlyShowTab === undefined ? (
+        <>
+          <EuiTabs
+            size="m"
+            css={{
+              marginTop: `-${mediumPadding}`,
+            }}
+          >
+            <EuiTab
+              isSelected={inputType === INPUT_TYPE.TEXT}
+              onClick={() => setInputType(INPUT_TYPE.TEXT)}
+            >
+              <FormattedMessage
+                id="xpack.ml.trainedModels.testModelsFlyout.textTab"
+                defaultMessage="Test using text"
+              />
+            </EuiTab>
+            <EuiTab
+              isSelected={inputType === INPUT_TYPE.INDEX}
+              onClick={() => setInputType(INPUT_TYPE.INDEX)}
+            >
+              <FormattedMessage
+                id="xpack.ml.trainedModels.testModelsFlyout.indexTab"
+                defaultMessage="Test using existing index"
+              />
+            </EuiTab>
+          </EuiTabs>
 
-          {onlyShowTab === undefined ? (
-            <>
-              <EuiTabs
-                size="m"
-                css={{
-                  marginTop: `-${mediumPadding}`,
-                }}
-              >
-                <EuiTab
-                  isSelected={inputType === INPUT_TYPE.TEXT}
-                  onClick={() => setInputType(INPUT_TYPE.TEXT)}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.testModelsFlyout.textTab"
-                    defaultMessage="Test using text"
-                  />
-                </EuiTab>
-                <EuiTab
-                  isSelected={inputType === INPUT_TYPE.INDEX}
-                  onClick={() => setInputType(INPUT_TYPE.INDEX)}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.testModelsFlyout.indexTab"
-                    defaultMessage="Test using existing index"
-                  />
-                </EuiTab>
-              </EuiTabs>
-
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-
-          <SelectedModel
-            model={model}
-            inputType={onlyShowTab ?? inputType}
-            deploymentId={deploymentId ?? model.model_id}
-          />
-        </EuiFlyoutBody>
-      </EuiFlyout>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+      <SelectedModel
+        model={model}
+        inputType={onlyShowTab ?? inputType}
+        deploymentId={deploymentId ?? model.model_id}
+      />
     </>
   );
 };
+
+interface Props {
+  model: ModelItem;
+  onClose: () => void;
+}
+export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => (
+  <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="m">
+        <h2>
+          <FormattedMessage
+            id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
+            defaultMessage="Test trained model"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiTitle size="xs">
+        <h4>{model.model_id}</h4>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <TestTrainedModelFlyoutContent model={model} />
+    </EuiFlyoutBody>
+  </EuiFlyout>
+);

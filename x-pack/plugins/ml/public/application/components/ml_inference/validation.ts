@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceModelTypes } from './types';
@@ -44,6 +45,19 @@ const INFERENCE_CONFIG_MODEL_TYPE_ERROR = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.incorrectModelTypeError',
   {
     defaultMessage: 'Inference configuration inference type must match model type.',
+  }
+);
+const PROCESSOR_REQUIRED = i18n.translate(
+  'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.processorRequiredError',
+  {
+    defaultMessage: 'At least one processor is required to create the pipeline.',
+  }
+);
+const INFERENCE_PROCESSOR_REQUIRED = i18n.translate(
+  'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.inferenceProcessorRequiredError',
+  {
+    defaultMessage:
+      "An inference processor specifying 'model_id' and 'inference_config' is required.",
   }
 );
 
@@ -112,6 +126,27 @@ export const validateFieldMap = (
     } else {
       error = FIELD_MAP_REQUIRED_FIELDS_ERROR;
     }
+  }
+
+  return error;
+};
+
+export const validatePipelineProcessors = (pipelineProcessors: estypes.IngestPipeline) => {
+  const { processors } = pipelineProcessors;
+  let error;
+  // Must have at least one processor
+  if (!Array.isArray(processors) || (Array.isArray(processors) && processors.length < 1)) {
+    error = PROCESSOR_REQUIRED;
+  }
+
+  const hasInferenceProcessor = processors?.some((processor) => {
+    return (
+      processor.inference && processor.inference.model_id && processor.inference.inference_config
+    );
+  });
+
+  if (hasInferenceProcessor === false) {
+    error = INFERENCE_PROCESSOR_REQUIRED;
   }
 
   return error;
