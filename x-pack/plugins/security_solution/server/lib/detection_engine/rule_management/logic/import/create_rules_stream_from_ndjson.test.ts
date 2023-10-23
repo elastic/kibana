@@ -16,6 +16,7 @@ import {
   getSampleDetailsAsNdjson,
 } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import type { RuleExceptionsPromiseFromStreams } from './import_rules_utils';
+import type { InvestigationFields } from '../../../../../../common/api/detection_engine';
 
 export const getOutputSample = (): Partial<RuleToImport> => ({
   rule_id: 'rule-1',
@@ -323,12 +324,12 @@ describe('create_rules_stream_from_ndjson', () => {
     test('migrates investigation_fields', async () => {
       const sample1 = {
         ...getOutputSample(),
-        investigation_fields: ['foo', 'bar'],
+        investigation_fields: ['foo', 'bar'] as unknown as InvestigationFields,
       };
       const sample2 = {
         ...getOutputSample(),
         rule_id: 'rule-2',
-        investigation_fields: [],
+        investigation_fields: [] as unknown as InvestigationFields,
       };
       sample2.rule_id = 'rule-2';
       const ndJsonStream = new Readable({

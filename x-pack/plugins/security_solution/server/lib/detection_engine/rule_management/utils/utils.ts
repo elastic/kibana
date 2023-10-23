@@ -383,6 +383,14 @@ export const convertAlertSuppressionToSnake = (
       }
     : undefined;
 
+/*
+ * In ESS 8.10.x "investigation_fields" are mapped as string[].
+ * For 8.11+ logic is added on read in our endpoints to migrate
+ * the data over to it's intended type of { field_names: string[] }.
+ * The SO rule type will continue to support both types until we deprecate,
+ * but APIs will only support intended object format.
+ * See PR 169061
+ */
 export const migrateRuleLegacyInvestigationFields = (rule: RuleAlertType): RuleAlertType => {
   if (!rule) return rule;
 
@@ -401,6 +409,14 @@ export const migrateRuleLegacyInvestigationFields = (rule: RuleAlertType): RuleA
   return rule;
 };
 
+/*
+ * In ESS 8.10.x "investigation_fields" are mapped as string[].
+ * For 8.11+ logic is added on read in our endpoints to migrate
+ * the data over to it's intended type of { field_names: string[] }.
+ * The SO rule type will continue to support both types until we deprecate,
+ * but APIs will only support intended object format.
+ * See PR 169061
+ */
 export const migrateInvestigationFields = (
   investigationFields: InvestigationFieldsCombined | undefined
 ): InvestigationFields | undefined => {
