@@ -13,7 +13,6 @@ export const SecurityPagePath = {
   [SecurityPageName.mlLanding]: '/ml',
   [SecurityPageName.assets]: '/assets',
   [SecurityPageName.cloudDefend]: '/cloud_defend',
-  [SecurityPageName.projectSettings]: '/project_settings',
 } as const;
 
 /**
@@ -74,6 +73,7 @@ export enum ExternalPageName {
   integrationsSecurity = 'integrations:/browse/security',
   // Management
   // Ref: packages/default-nav/management/default_navigation.ts
+  management = 'management:',
   managementIngestPipelines = 'management:ingest_pipelines',
   managementPipelines = 'management:pipelines',
   managementIndexManagement = 'management:index_management',
@@ -97,4 +97,5 @@ export enum ExternalPageName {
   // cloudUrlKey Ref: x-pack/plugins/security_solution_serverless/public/navigation/links/util.ts
   cloudUsersAndRoles = 'cloud:usersAndRoles',
   cloudBilling = 'cloud:billing',
+  cloudPerformance = 'cloud:performance',
 }
