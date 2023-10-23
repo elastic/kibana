@@ -33,7 +33,7 @@ import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_dat
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 // FLAKY: https://github.com/elastic/kibana/issues/168284
-describe.skip('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe.skip('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
