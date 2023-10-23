@@ -61,11 +61,8 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
   const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().threat ?? []);
   const expectedNumberOfRules = 1;
 
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
+    cleanKibana();
     login();
     visit(CREATE_RULE_URL);
   });
