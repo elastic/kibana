@@ -787,6 +787,7 @@ packages/kbn-unified-field-list @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
+packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/uptime @elastic/uptime
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
