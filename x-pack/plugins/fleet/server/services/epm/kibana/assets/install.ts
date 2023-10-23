@@ -349,7 +349,9 @@ export async function installKibanaSavedObjects({
       ];
 
       const errors = [
-        ...(indexPatternResults.errors ?? []),
+        // Ignore conflict errors for index patterns, as they're expected when the index pattern
+        // already exists and we're passing `overwrite: false` above.
+        ...(indexPatternResults.errors?.filter((e) => !isImportConflictError(e)) ?? []),
         ...(nonIndexPatternResults.errors ?? []),
       ];
 
