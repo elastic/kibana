@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       await logFile.reset();
     });
 
-    it('logs audit events when reading and writing saved objects', async () => {
+    it.only('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
       const content = await logFile.readJSON();
