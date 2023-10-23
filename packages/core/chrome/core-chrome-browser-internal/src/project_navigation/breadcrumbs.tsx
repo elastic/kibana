@@ -13,7 +13,6 @@ import {
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
 } from '@kbn/core-chrome-browser';
-import classnames from 'classnames';
 import { createHomeBreadcrumb } from './home_breadcrumbs';
 
 export function buildBreadcrumbs({
