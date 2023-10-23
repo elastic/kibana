@@ -59,7 +59,7 @@ export const typeInECSFieldInput = (text: string, index = 0) =>
     .getBySel('ECS-field-input')
     .eq(index)
     .within(() => {
-      cy.getBySel('comboBoxInput').type(text);
+      cy.getBySel('comboBoxInput').click().type(text);
     });
 
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
