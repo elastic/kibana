@@ -2378,7 +2378,6 @@
     "discover.notifications.notSavedSearchTitle": "搜索“{savedSearchTitle}”未保存。",
     "discover.notifications.savedSearchTitle": "搜索“{savedSearchTitle}”已保存",
     "discover.pageTitleWithoutSavedSearch": "Discover - 尚未保存搜索",
-    "discover.reloadSavedSearchButton": "重置搜索",
     "discover.rootBreadcrumb": "Discover",
     "discover.sampleData.viewLinkLabel": "Discover",
     "discover.savedSearch.savedObjectName": "已保存搜索",

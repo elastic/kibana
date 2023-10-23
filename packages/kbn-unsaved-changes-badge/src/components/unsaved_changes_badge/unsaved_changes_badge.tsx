@@ -118,7 +118,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
     <EuiContextMenuItem
       data-test-subj="resetUnsavedChangesMenuItem"
       key="reset"
-      icon="returnKey"
+      icon="editorUndo"
       disabled={disabled}
       onClick={async () => {
         await handleMenuItem(ProcessingType.resetting, onReset);
