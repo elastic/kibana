@@ -9,6 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { createFormatter } from '../../../../../common/custom_threshold_rule/formatters';
 import { Evaluation } from './evaluate_rule';
 
+export type FormattedEvaluation = Omit<Evaluation, 'currentValue' | 'threshold'> & {
+  currentValue: string;
+  threshold: string[];
+};
+
 export const formatAlertResult = (evaluationResult: Evaluation): FormattedEvaluation => {
   const { metric, currentValue, threshold, comparator } = evaluationResult;
   const noDataValue = i18n.translate(

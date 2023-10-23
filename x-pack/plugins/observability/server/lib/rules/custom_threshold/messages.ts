@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Evaluation } from './lib/evaluate_rule';
-import { formatAlertResult } from './lib/format_alert_result';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { formatDurationFromTimeUnitChar } from '../../../../common';
+import { Evaluation } from './lib/evaluate_rule';
+import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 const toNumber = (value: number | string) =>
@@ -74,11 +74,6 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
 };
 
 const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? '' : ` for ${group}`);
-
-type FormattedEvaluation = Omit<Evaluation, 'currentValue' | 'threshold'> & {
-  currentValue: string;
-  threshold: string[];
-};
 
 export const buildFiredAlertReason: (
   alertResults: Array<Record<string, Evaluation>>,
