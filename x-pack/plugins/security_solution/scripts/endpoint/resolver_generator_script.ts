@@ -11,9 +11,10 @@ import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { EndpointSecurityTestRolesLoader } from './common/role_and_user_loader';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
@@ -277,10 +278,7 @@ async function main() {
   let clientOptions: ClientOptions;
   let url: string;
   let node: string;
-  const logger = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  });
+  const logger = createToolingLogger();
   const toolingLogOptions = { log: logger };
 
   let kbnClientOptions: KbnClientOptions = {
