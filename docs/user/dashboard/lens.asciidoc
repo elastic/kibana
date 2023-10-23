@@ -107,7 +107,7 @@ All columns that belong to the same layer pane group are sorted in the table.
 
 preview::[]
 
-Visualizations in Lens now support a color to term mapping system. These color mappings provide a visual guide for understanding the data presented in our visualizations. The feature is enabled by default and a maximum of 10 colors can be mapped to terms. 
+Visualizations in Lens now support a color to term mapping system. These color mappings provide a visual guide for understanding the data presented in our visualizations. The visualization types that use this feature are bar charts, line and area graphs, and proportion charts. The feature is enabled by default and a maximum of 10 colors can be mapped to key terms. 
 
 . from the *Visualize Library* click *Create visualization* and select *Lens*.
 . Drag the fields you want to visualize to the workspace. 
