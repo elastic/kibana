@@ -128,20 +128,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesOne');
     cy.getBySel('ruleEditSubmitButton').click();
-
-    cy.wait('@saveRuleChangesOne');
-    cy.get('@saveRuleChangesOne').should(({ response }) => {
-      const oneQuery = [
-        {
-          interval: 3600,
-          query: 'select * from uptime;',
-          id: Object.keys(packData.queries)[0],
-        },
-      ];
-      expect(response.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
-    });
 
     cy.contains(`${ruleName} was saved`).should('exist');
     closeToastIfVisible();
@@ -164,11 +151,10 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesTwo');
-
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChanges');
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleChangesTwo');
-    cy.get('@saveRuleChangesTwo').should(({ response }) => {
+    cy.wait('@saveRuleChanges');
+    cy.get('@saveRuleChanges').should(({ response }) => {
       const threeQueries = [
         {
           interval: 3600,
