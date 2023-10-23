@@ -6,5 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { Markdown } from './markdown';
-export { MarkdownSimple, type MarkdownSimpleProps } from './markdown_simple';
+import React from 'react';
+import { EuiMarkdownFormat } from '@elastic/eui';
+
+export interface MarkdownSimpleProps {
+  src: string;
+}
+
+export const MarkdownSimple: React.FC<MarkdownSimpleProps> = ({ src }) => (
+  <EuiMarkdownFormat
+    aria-label={'markdown component'}
+    children={src}
+  />
+);
