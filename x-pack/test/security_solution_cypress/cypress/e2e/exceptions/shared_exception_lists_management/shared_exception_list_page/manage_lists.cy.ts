@@ -57,7 +57,6 @@ describe.skip(
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {
-        cy.task('esArchiverResetKibana');
         createRule(getNewRule({ name: 'Another rule' }));
 
         // Create exception list associated with a rule
