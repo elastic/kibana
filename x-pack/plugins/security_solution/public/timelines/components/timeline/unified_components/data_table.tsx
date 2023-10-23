@@ -139,6 +139,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const [fetchedPage, setFechedPage] = useState<number>(0);
+  const [sampleSize, setSampleSize] = useState<number>(SAMPLE_SIZE_SETTING);
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const { browserFields, runtimeMappings, sourcererDataView } = useSourcererDataView(
     SourcererScopeName.timeline
@@ -563,6 +564,10 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 
   const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
 
+  const onUpdateSampleSize = useCallback((newSampleSize: number) => {
+    setSampleSize(newSampleSize);
+  }, []);
+
   if (!dataView) {
     return null;
   }
@@ -601,7 +606,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
             onSetColumns={onSetColumns}
             onSort={!isTextBasedQuery ? onSort : undefined}
             rows={discoverGridRows}
-            sampleSize={SAMPLE_SIZE_SETTING}
+            sampleSizeState={sampleSize}
+            onUpdateSampleSize={onUpdateSampleSize}
             setExpandedDoc={onSetExpandedDoc}
             settings={tableSettings}
             showTimeCol={showTimeCol}
