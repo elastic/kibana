@@ -59,6 +59,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'ml:anomalyDetection',
       });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Jobs',
+      });
+      await testSubjects.click('mlCreateNewJobButton');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'AIOps',
+        'Anomaly Detection',
+        'Create job',
+      ]);
 
       // navigate to a different section
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
