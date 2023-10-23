@@ -52,7 +52,5 @@ export const isBottomNavItemId = (id: string) =>
   id === SecurityPageName.landing ||
   id === ExternalPageName.devTools ||
   id === ExternalPageName.management ||
-  id === ExternalPageName.integrationsSecurity ||
   id === ExternalPageName.cloudUsersAndRoles ||
-  id === ExternalPageName.cloudPerformance ||
   id === ExternalPageName.cloudBilling;

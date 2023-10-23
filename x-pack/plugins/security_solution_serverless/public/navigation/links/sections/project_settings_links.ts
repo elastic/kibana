@@ -24,10 +24,6 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
     title: i18n.MANAGEMENT_TITLE,
   },
   {
-    id: ExternalPageName.integrationsSecurity,
-    title: i18n.INTEGRATIONS_TITLE,
-  },
-  {
     id: ExternalPageName.cloudUsersAndRoles,
     title: i18n.CLOUD_USERS_ROLES_TITLE,
   },
@@ -36,13 +32,24 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
     title: i18n.CLOUD_BILLING_TITLE,
   },
   {
+    id: ExternalPageName.integrationsSecurity,
+    title: i18n.INTEGRATIONS_TITLE,
+    description: i18n.INTEGRATIONS_DESCRIPTION,
+    landingIcon: 'indexManagementApp',
+    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). Is is displayed in the management cards landing.
+  },
+  {
     id: ExternalPageName.maps,
     title: i18n.CLOUD_MAPS_TITLE,
-    disabled: true, // the link will be available in the navigationTree (breadcrumbs) but not appear in the sideNav
+    description: i18n.CLOUD_MAPS_DESCRIPTION,
+    landingIcon: 'graphApp',
+    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). Is is displayed in the management cards landing.
   },
   {
     id: ExternalPageName.visualize,
     title: i18n.CLOUD_VISUALIZE_TITLE,
-    disabled: true, // the link will be available in the navigationTree (breadcrumbs) but not appear in the sideNav
+    description: i18n.CLOUD_VISUALIZE_DESCRIPTION,
+    landingIcon: 'visualizeApp',
+    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). Is is displayed in the management cards landing.
   },
 ];
