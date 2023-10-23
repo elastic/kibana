@@ -48,9 +48,6 @@ export function buildBreadcrumbs({
       href: node.deepLink?.url ?? node.href,
       deepLinkId: node.deepLink?.id as AppDeepLinkId,
       text: node.title,
-      'data-test-subj': classnames({
-        [`breadcrumb-deepLinkId-${node.deepLink?.id}`]: !!node.deepLink,
-      }),
     })
   );
 

@@ -94,7 +94,6 @@ describe('breadcrumbs', () => {
           "title": "Home",
         },
         Object {
-          "data-test-subj": "breadcrumb-deepLinkId-navItem1",
           "deepLinkId": "navItem1",
           "href": "/foo/item1",
           "text": "Nav Item 1",

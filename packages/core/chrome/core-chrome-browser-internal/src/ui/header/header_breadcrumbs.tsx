@@ -35,6 +35,7 @@ export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
       onClick: isLast ? undefined : breadcrumb.onClick,
       'data-test-subj': classNames(
         'breadcrumb',
+        deepLinkId && `breadcrumb-deepLinkId-${deepLinkId}`,
         breadcrumb['data-test-subj'],
         i === 0 && 'first',
         isLast && 'last'

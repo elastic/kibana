@@ -190,8 +190,29 @@ Array [
         "title": "Deeplink ml:notifications",
       },
       Object {
+        "children": undefined,
+        "deepLink": Object {
+          "baseUrl": "/mocked",
+          "href": "http://mocked/ml:memoryUsage",
+          "id": "ml:memoryUsage",
+          "title": "Deeplink ml:memoryUsage",
+          "url": "/mocked/ml:memoryUsage",
+        },
+        "href": undefined,
+        "id": "ml:memoryUsage",
+        "isActive": false,
+        "isGroup": false,
+        "path": Array [
+          "rootNav:ml",
+          "ml:memoryUsage",
+        ],
+        "sideNavStatus": "visible",
+        "title": "Deeplink ml:memoryUsage",
+      },
+      Object {
         "children": Array [
           Object {
+            "breadcrumbStatus": "hidden",
             "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
@@ -206,7 +227,7 @@ Array [
             "isGroup": false,
             "path": Array [
               "rootNav:ml",
-              "anomaly_detection",
+              "ml:anomalyDetection",
               "ml:anomalyDetection",
             ],
             "sideNavStatus": "visible",
@@ -227,7 +248,7 @@ Array [
             "isGroup": false,
             "path": Array [
               "rootNav:ml",
-              "anomaly_detection",
+              "ml:anomalyDetection",
               "ml:anomalyExplorer",
             ],
             "sideNavStatus": "visible",
@@ -248,7 +269,7 @@ Array [
             "isGroup": false,
             "path": Array [
               "rootNav:ml",
-              "anomaly_detection",
+              "ml:anomalyDetection",
               "ml:singleMetricViewer",
             ],
             "sideNavStatus": "visible",
@@ -269,21 +290,27 @@ Array [
             "isGroup": false,
             "path": Array [
               "rootNav:ml",
-              "anomaly_detection",
+              "ml:anomalyDetection",
               "ml:settings",
             ],
             "sideNavStatus": "visible",
             "title": "Deeplink ml:settings",
           },
         ],
-        "deepLink": undefined,
+        "deepLink": Object {
+          "baseUrl": "/mocked",
+          "href": "http://mocked/ml:anomalyDetection",
+          "id": "ml:anomalyDetection",
+          "title": "Deeplink ml:anomalyDetection",
+          "url": "/mocked/ml:anomalyDetection",
+        },
         "href": undefined,
-        "id": "anomaly_detection",
+        "id": "ml:anomalyDetection",
         "isActive": false,
         "isGroup": true,
         "path": Array [
           "rootNav:ml",
-          "anomaly_detection",
+          "ml:anomalyDetection",
         ],
         "sideNavStatus": "visible",
         "title": "Anomaly Detection",
@@ -291,6 +318,7 @@ Array [
       Object {
         "children": Array [
           Object {
+            "breadcrumbStatus": "hidden",
             "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
@@ -305,7 +333,7 @@ Array [
             "isGroup": false,
             "path": Array [
               "rootNav:ml",
-              "data_frame_analytics",
+              "ml:dataFrameAnalytics",
               "ml:dataFrameAnalytics",
             ],
             "sideNavStatus": "visible",
@@ -326,7 +354,7 @@ Array [
             "isGroup": false,
             "path": Array [
               "rootNav:ml",
-              "data_frame_analytics",
+              "ml:dataFrameAnalytics",
               "ml:resultExplorer",
             ],
             "sideNavStatus": "visible",
@@ -347,21 +375,27 @@ Array [
             "isGroup": false,
             "path": Array [
               "rootNav:ml",
-              "data_frame_analytics",
+              "ml:dataFrameAnalytics",
               "ml:analyticsMap",
             ],
             "sideNavStatus": "visible",
             "title": "Deeplink ml:analyticsMap",
           },
         ],
-        "deepLink": undefined,
+        "deepLink": Object {
+          "baseUrl": "/mocked",
+          "href": "http://mocked/ml:dataFrameAnalytics",
+          "id": "ml:dataFrameAnalytics",
+          "title": "Deeplink ml:dataFrameAnalytics",
+          "url": "/mocked/ml:dataFrameAnalytics",
+        },
         "href": undefined,
-        "id": "data_frame_analytics",
+        "id": "ml:dataFrameAnalytics",
         "isActive": false,
         "isGroup": true,
         "path": Array [
           "rootNav:ml",
-          "data_frame_analytics",
+          "ml:dataFrameAnalytics",
         ],
         "sideNavStatus": "visible",
         "title": "Data Frame Analytics",
@@ -476,6 +510,7 @@ Array [
               "title": "Deeplink ml:dataDrift",
               "url": "/mocked/ml:dataDrift",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:dataDrift",
             "isActive": false,
@@ -512,6 +547,7 @@ Array [
               "title": "Deeplink ml:logRateAnalysis",
               "url": "/mocked/ml:logRateAnalysis",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:logRateAnalysis",
             "isActive": false,
@@ -533,6 +569,7 @@ Array [
               "title": "Deeplink ml:logPatternAnalysis",
               "url": "/mocked/ml:logPatternAnalysis",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:logPatternAnalysis",
             "isActive": false,
@@ -554,6 +591,7 @@ Array [
               "title": "Deeplink ml:changePointDetections",
               "url": "/mocked/ml:changePointDetections",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:changePointDetections",
             "isActive": false,
