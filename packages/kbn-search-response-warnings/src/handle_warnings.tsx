@@ -36,6 +36,7 @@ export function handleWarnings({
   callback,
   request,
   requestId,
+  requestName,
   requestAdapter,
   response,
   services,
@@ -44,10 +45,11 @@ export function handleWarnings({
   request: estypes.SearchRequest;
   requestAdapter: RequestAdapter;
   requestId?: string;
+  requestName: string;
   response: estypes.SearchResponse;
   services: Services;
 }) {
-  const warnings = extractWarnings(response, services.inspector, requestAdapter, requestId);
+  const warnings = extractWarnings(response, services.inspector, requestAdapter, requestName, requestId);
   if (warnings.length === 0) {
     return;
   }

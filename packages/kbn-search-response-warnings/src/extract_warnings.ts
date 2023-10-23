@@ -19,6 +19,7 @@ export function extractWarnings(
   rawResponse: estypes.SearchResponse,
   inspectorService: InspectorStartContract,
   requestAdapter: RequestAdapter,
+  requestName: string,
   requestId?: string
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
@@ -35,7 +36,7 @@ export function extractWarnings(
   if (isPartial) {
     warnings.push({
       type: 'incomplete',
-      requestName: 'my request',
+      requestName,
       message: i18n.translate('searchResponseWarnings.incompleteResultsMessage', {
         defaultMessage: 'Results are partial and may be incomplete.',
       }),

@@ -43,6 +43,7 @@ export const ViewDetailsPopover = (props: Props) => {
         return {
           name: warning.requestName,
           onClick: () => {
+            setIsPopoverOpen(false);
             warning.openInInspector();
           },
         };
