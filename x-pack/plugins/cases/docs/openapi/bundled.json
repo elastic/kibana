@@ -447,6 +447,11 @@
                       },
                       "created_by": {
                         "type": "object",
+                        "required": [
+                          "email",
+                          "full_name",
+                          "username"
+                        ],
                         "properties": {
                           "email": {
                             "type": "string",
@@ -509,6 +514,11 @@
                       },
                       "updated_by": {
                         "type": "object",
+                        "required": [
+                          "email",
+                          "full_name",
+                          "username"
+                        ],
                         "properties": {
                           "email": {
                             "type": "string",
@@ -660,6 +670,11 @@
                     },
                     "created_by": {
                       "type": "object",
+                      "required": [
+                        "email",
+                        "full_name",
+                        "username"
+                      ],
                       "properties": {
                         "email": {
                           "type": "string",
@@ -722,6 +737,11 @@
                     },
                     "updated_by": {
                       "type": "object",
+                      "required": [
+                        "email",
+                        "full_name",
+                        "username"
+                      ],
                       "properties": {
                         "email": {
                           "type": "string",
@@ -877,6 +897,11 @@
                     },
                     "created_by": {
                       "type": "object",
+                      "required": [
+                        "email",
+                        "full_name",
+                        "username"
+                      ],
                       "properties": {
                         "email": {
                           "type": "string",
@@ -939,6 +964,11 @@
                     },
                     "updated_by": {
                       "type": "object",
+                      "required": [
+                        "email",
+                        "full_name",
+                        "username"
+                      ],
                       "properties": {
                         "email": {
                           "type": "string",
@@ -1012,6 +1042,11 @@
                   "maxItems": 10000,
                   "items": {
                     "type": "object",
+                    "required": [
+                      "email",
+                      "full_name",
+                      "username"
+                    ],
                     "properties": {
                       "email": {
                         "type": "string",
@@ -2186,6 +2221,11 @@
                       },
                       "created_by": {
                         "type": "object",
+                        "required": [
+                          "email",
+                          "full_name",
+                          "username"
+                        ],
                         "properties": {
                           "email": {
                             "type": "string",
@@ -2248,6 +2288,11 @@
                       },
                       "updated_by": {
                         "type": "object",
+                        "required": [
+                          "email",
+                          "full_name",
+                          "username"
+                        ],
                         "properties": {
                           "email": {
                             "type": "string",
@@ -2402,6 +2447,11 @@
                     },
                     "created_by": {
                       "type": "object",
+                      "required": [
+                        "email",
+                        "full_name",
+                        "username"
+                      ],
                       "properties": {
                         "email": {
                           "type": "string",
@@ -2464,6 +2514,11 @@
                     },
                     "updated_by": {
                       "type": "object",
+                      "required": [
+                        "email",
+                        "full_name",
+                        "username"
+                      ],
                       "properties": {
                         "email": {
                           "type": "string",
@@ -2622,6 +2677,11 @@
                     },
                     "created_by": {
                       "type": "object",
+                      "required": [
+                        "email",
+                        "full_name",
+                        "username"
+                      ],
                       "properties": {
                         "email": {
                           "type": "string",
@@ -2684,6 +2744,11 @@
                     },
                     "updated_by": {
                       "type": "object",
+                      "required": [
+                        "email",
+                        "full_name",
+                        "username"
+                      ],
                       "properties": {
                         "email": {
                           "type": "string",
@@ -2839,6 +2904,11 @@
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "required": [
+                      "email",
+                      "full_name",
+                      "username"
+                    ],
                     "properties": {
                       "email": {
                         "type": "string",
@@ -4559,6 +4629,11 @@
           },
           "created_by": {
             "type": "object",
+            "required": [
+              "email",
+              "full_name",
+              "username"
+            ],
             "properties": {
               "email": {
                 "type": "string",
@@ -4600,6 +4675,11 @@
           },
           "pushed_by": {
             "type": "object",
+            "required": [
+              "email",
+              "full_name",
+              "username"
+            ],
             "properties": {
               "email": {
                 "type": "string",
@@ -4652,6 +4732,11 @@
           },
           "updated_by": {
             "type": "object",
+            "required": [
+              "email",
+              "full_name",
+              "username"
+            ],
             "properties": {
               "email": {
                 "type": "string",

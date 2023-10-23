@@ -23,6 +23,10 @@ get:
             type: array
             items:
               type: object
+              required:
+                - email
+                - full_name
+                - username
               properties:
                 $ref: '../components/schemas/user_properties.yaml'
           examples:

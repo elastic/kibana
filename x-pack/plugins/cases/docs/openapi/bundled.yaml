@@ -279,6 +279,10 @@ paths:
                       example: '2022-06-01T17:07:17.767Z'
                     created_by:
                       type: object
+                      required:
+                        - email
+                        - full_name
+                        - username
                       properties:
                         email:
                           type: string
@@ -325,6 +329,10 @@ paths:
                       example: '2022-06-01T19:58:48.169Z'
                     updated_by:
                       type: object
+                      required:
+                        - email
+                        - full_name
+                        - username
                       properties:
                         email:
                           type: string
@@ -432,6 +440,10 @@ paths:
                     example: '2022-06-01T17:07:17.767Z'
                   created_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
                         type: string
@@ -478,6 +490,10 @@ paths:
                     example: '2022-06-01T19:58:48.169Z'
                   updated_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
                         type: string
@@ -587,6 +603,10 @@ paths:
                     example: '2022-06-01T17:07:17.767Z'
                   created_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
                         type: string
@@ -633,6 +653,10 @@ paths:
                     example: '2022-06-01T19:58:48.169Z'
                   updated_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
                         type: string
@@ -682,6 +706,10 @@ paths:
                 maxItems: 10000
                 items:
                   type: object
+                  required:
+                    - email
+                    - full_name
+                    - username
                   properties:
                     email:
                       type: string
@@ -1400,6 +1428,10 @@ paths:
                       example: '2022-06-01T17:07:17.767Z'
                     created_by:
                       type: object
+                      required:
+                        - email
+                        - full_name
+                        - username
                       properties:
                         email:
                           type: string
@@ -1446,6 +1478,10 @@ paths:
                       example: '2022-06-01T19:58:48.169Z'
                     updated_by:
                       type: object
+                      required:
+                        - email
+                        - full_name
+                        - username
                       properties:
                         email:
                           type: string
@@ -1554,6 +1590,10 @@ paths:
                     example: '2022-06-01T17:07:17.767Z'
                   created_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
                         type: string
@@ -1600,6 +1640,10 @@ paths:
                     example: '2022-06-01T19:58:48.169Z'
                   updated_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
                         type: string
@@ -1710,6 +1754,10 @@ paths:
                     example: '2022-06-01T17:07:17.767Z'
                   created_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
                         type: string
@@ -1756,6 +1804,10 @@ paths:
                     example: '2022-06-01T19:58:48.169Z'
                   updated_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
                         type: string
@@ -1856,6 +1908,10 @@ paths:
                 type: array
                 items:
                   type: object
+                  required:
+                    - email
+                    - full_name
+                    - username
                   properties:
                     email:
                       type: string
@@ -3023,6 +3079,10 @@ components:
           example: '2022-03-24T02:31:03.210Z'
         created_by:
           type: object
+          required:
+            - email
+            - full_name
+            - username
           properties:
             email:
               type: string
@@ -3054,6 +3114,10 @@ components:
           nullable: true
         pushed_by:
           type: object
+          required:
+            - email
+            - full_name
+            - username
           properties:
             email:
               type: string
@@ -3093,6 +3157,10 @@ components:
           example: null
         updated_by:
           type: object
+          required:
+            - email
+            - full_name
+            - username
           properties:
             email:
               type: string
