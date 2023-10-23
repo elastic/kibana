@@ -27,7 +27,7 @@ interface S1ClientOptions {
 
 export class S1Client {
   protected readonly API_SITES_PATH = '/web/api/v2.1/sites';
-  protected readonly API_AGENT_PACKAGES = '/web/api/v2.1/update/agent/packages';
+  protected readonly API_AGENT_PACKAGES_PATH = '/web/api/v2.1/update/agent/packages';
 
   protected readonly log: ToolingLog;
   protected readonly setup: Promise<{
@@ -120,7 +120,7 @@ export class S1Client {
     const archType = arch || { arm64: 'aarch64', x64: 'x86_64' }[process.arch as string];
 
     const { data: allPackages } = await this.request<S1AgentPackageListApiResponse>({
-      url: this.API_AGENT_PACKAGES,
+      url: this.API_AGENT_PACKAGES_PATH,
       params: {
         packageTypes: 'Agent',
         osTypes: osType,
