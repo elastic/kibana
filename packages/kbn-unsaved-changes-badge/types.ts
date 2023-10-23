@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+export type { UnsavedChangesBadgeProps } from './src/components/unsaved_changes_badge';
 export type { TopNavUnsavedChangesBadgeParams } from './src/utils/get_top_nav_unsaved_changes_badge';

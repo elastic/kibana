@@ -6,24 +6,33 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { TopNavMenuBadge } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
+import { UnsavedChangesBadge } from '../components/unsaved_changes_badge';
 
 export interface TopNavUnsavedChangesBadgeParams {
   onReset: () => Promise<void>;
   onSave?: () => Promise<void>;
+  onSaveAs?: () => Promise<void>;
 }
 
 export const getTopNavUnsavedChangesBadge = ({
   onReset,
   onSave,
-}: TopNavUnsavedChangesBadgeParams): TopNavMenuBadge => {
+  onSaveAs,
+}: TopNavUnsavedChangesBadgeParams): TopNavMenuBadgeProps => {
   return {
-    'data-test-subj': 'topNavUnsavedChangesBadge',
     badgeText: i18n.translate('unsavedChangesBadge.unsavedChangesTitle', {
       defaultMessage: 'Unsaved changes',
     }),
-    title: '',
-    color: 'warning',
+    renderCustomBadge: ({ badgeText }) => (
+      <UnsavedChangesBadge
+        badgeText={badgeText}
+        onReset={onReset}
+        onSave={onSave}
+        onSaveAs={onSaveAs}
+      />
+    ),
   };
 };

@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TopNavMenuBadge } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -30,8 +30,8 @@ export const getTopNavBadges = ({
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
-}): TopNavMenuBadge[] => {
-  const badges: TopNavMenuBadge[] = [];
+}): TopNavMenuBadgeProps[] => {
+  const badges: TopNavMenuBadgeProps[] = [];
 
   // TODO: make it customizable
 
