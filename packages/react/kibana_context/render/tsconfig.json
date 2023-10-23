@@ -17,5 +17,6 @@
   ],
   "kbn_references": [
     "@kbn/react-kibana-context-root",
+    "@kbn/shared-ux-error-boundary",
   ]
 }
