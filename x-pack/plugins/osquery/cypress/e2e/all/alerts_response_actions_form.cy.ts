@@ -84,8 +84,8 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime');
-      cy.contains('Advanced').click();
       cy.contains('Query is a required field').should('not.exist');
+      cy.contains('Advanced').click();
       typeInECSFieldInput('message{downArrow}{enter}');
       cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
       cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
