@@ -30,7 +30,6 @@ export function buildBreadcrumbs({
   chromeBreadcrumbs: ChromeBreadcrumb[];
   activeNodes: ChromeProjectNavigationNode[][];
 }): ChromeProjectBreadcrumb[] {
-  console.log({ homeHref, projectBreadcrumbs, activeNodes, chromeBreadcrumbs });
   const homeBreadcrumb = createHomeBreadcrumb({
     homeHref,
   });
