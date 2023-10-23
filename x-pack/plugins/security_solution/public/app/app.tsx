@@ -15,9 +15,8 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { CellActionsProvider } from '@kbn/cell-actions';
-
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -67,29 +66,29 @@ const StartAppComponent: FC<StartAppComponent> = ({
             <ReduxStoreProvider store={store}>
               <KibanaThemeProvider theme$={theme$}>
                 <EuiThemeProvider darkMode={darkMode}>
-                  <AssistantProvider>
-                    <MlCapabilitiesProvider>
-                      <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                        <ManageUserInfo>
-                          <NavigationProvider core={services}>
-                            <ReactQueryClientProvider>
-                              <CellActionsProvider
-                                getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                              >
-                                <UpsellingProvider upsellingService={upselling}>
-                                  <DiscoverInTimelineContextProvider>
+                  <MlCapabilitiesProvider>
+                    <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                      <ManageUserInfo>
+                        <NavigationProvider core={services}>
+                          <ReactQueryClientProvider>
+                            <CellActionsProvider
+                              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                            >
+                              <UpsellingProvider upsellingService={upselling}>
+                                <DiscoverInTimelineContextProvider>
+                                  <AssistantProvider>
                                     <PageRouter history={history} onAppLeave={onAppLeave}>
                                       {children}
                                     </PageRouter>
-                                  </DiscoverInTimelineContextProvider>
-                                </UpsellingProvider>
-                              </CellActionsProvider>
-                            </ReactQueryClientProvider>
-                          </NavigationProvider>
-                        </ManageUserInfo>
-                      </UserPrivilegesProvider>
-                    </MlCapabilitiesProvider>
-                  </AssistantProvider>
+                                  </AssistantProvider>
+                                </DiscoverInTimelineContextProvider>
+                              </UpsellingProvider>
+                            </CellActionsProvider>
+                          </ReactQueryClientProvider>
+                        </NavigationProvider>
+                      </ManageUserInfo>
+                    </UserPrivilegesProvider>
+                  </MlCapabilitiesProvider>
                 </EuiThemeProvider>
               </KibanaThemeProvider>
               <ErrorToastDispatcher />
