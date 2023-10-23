@@ -6,15 +6,160 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+import type {
+  S1SitesListApiResponse,
+  S1AgentPackage,
+  S1AgentPackageListApiResponse,
+} from './types';
 import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
 import type { HostVm } from '../common/types';
 
+interface S1ClientOptions {
+  /** The base URL for SentinelOne */
+  url: string;
+  /** The API token that should be used to communicate with SentinelOne */
+  apiToken: string;
+  log?: ToolingLog;
+}
+
+export class S1Client {
+  protected readonly API_SITES_PATH = '/web/api/v2.1/sites';
+  protected readonly API_AGENT_PACKAGES = '/web/api/v2.1/update/agent/packages';
+
+  protected readonly log: ToolingLog;
+  protected readonly setup: Promise<{
+    siteToken: string;
+    siteId: string;
+  }>;
+
+  constructor(private readonly options: S1ClientOptions) {
+    // FIXME:PT use `createToolingLogger()` when that is available
+    this.log = options.log ?? new ToolingLog({ level: 'info', writeTo: process.stdout });
+
+    this.setup = this.request<S1SitesListApiResponse>({
+      url: this.API_SITES_PATH,
+      params: {
+        isDefault: true,
+      },
+    }).then((response) => {
+      this.log.verbose(response);
+
+      const site = response.data.sites[0];
+
+      if (!site) {
+        throw new Error(
+          `Unable to retrieve SentinelOne Site information. No default sites returned`
+        );
+      }
+
+      return {
+        siteToken: site.registrationToken,
+        siteId: site.id,
+      };
+    });
+  }
+
+  protected async request<T = unknown>({
+    url = '',
+    params = {},
+    ...options
+  }: AxiosRequestConfig): Promise<T> {
+    const apiFullUrl = this.buildUrl(url);
+
+    const requestOptions: AxiosRequestConfig = {
+      ...options,
+      url: apiFullUrl,
+      params: {
+        APIToken: this.options.apiToken,
+        ...params,
+      },
+    };
+
+    this.log.debug(`Request: `, requestOptions);
+
+    return axios
+      .request<T>(requestOptions)
+      .then((response) => {
+        this.log.verbose(`Response: `, response);
+        return response.data;
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+
+  public buildUrl(path: string): string {
+    const uri = new URL(this.options.url);
+    uri.pathname = path;
+    return uri.toString();
+  }
+
+  public async getSiteToken(): Promise<string> {
+    return this.setup.then(({ siteToken }) => siteToken);
+  }
+
+  public async getSiteId(): Promise<string> {
+    return this.setup.then(({ siteId }) => siteId);
+  }
+
+  /**
+   * Returns the Agent download url (including API key in the URL)
+   * @param arch
+   * @param osType
+   * @param fileExtension
+   */
+  public async getAgentDownloadUrl({
+    arch,
+    osType = 'linux',
+    fileExtension = '.deb',
+  }: Partial<{
+    arch: 'x86_64' | 'aarch64';
+    osType: 'linux';
+    fileExtension: '.deb';
+  }> = {}): Promise<string> {
+    const archType = arch || { arm64: 'aarch64', x64: 'x86_64' }[process.arch as string];
+
+    const { data: allPackages } = await this.request<S1AgentPackageListApiResponse>({
+      url: this.API_AGENT_PACKAGES,
+      params: {
+        packageTypes: 'Agent',
+        osTypes: osType,
+        siteIds: await this.getSiteId(),
+        fileExtension,
+        limit: 5,
+        sortBy: 'version',
+        sortOrder: 'desc',
+      },
+    });
+
+    let agentPackage: S1AgentPackage | undefined;
+
+    // Finds the correct package for the arch
+    for (const thisPackage of allPackages) {
+      if (thisPackage.fileName.includes(`_${archType}_`)) {
+        agentPackage = thisPackage;
+        break;
+      }
+    }
+
+    if (!agentPackage) {
+      throw new Error(
+        `Unable to find a package for Agent using: arch[${archType}], osType[${osType}], fileExtension[${fileExtension}]`
+      );
+    }
+
+    this.log.info(
+      `Using SentinelOne agent package v${agentPackage.version} [${agentPackage.fileName}]: ${agentPackage.link}`
+    );
+    this.log.debug('Agent package: ', agentPackage);
+
+    return `${agentPackage.link}?APIToken=${this.options.apiToken}`;
+  }
+}
+
 interface InstallSentinelOneAgentOptions {
   hostVm: HostVm;
-  agentUrl: string;
-  apiToken: string;
-  siteToken: string;
+  s1Client: S1Client;
   log?: ToolingLog;
 }
 
@@ -23,17 +168,15 @@ interface InstallSentinelOneAgentResponse {
   status: string;
 }
 
-export const ensureValidApiToken = async (s1BaseUrl: string, apiToken: string): Promise<void> => {
-  await axios
-    .get(s1BaseUrl.concat(`/web/api/v2.1/system/info?APIToken=${apiToken}`))
-    .catch(catchAxiosErrorFormatAndThrow);
-};
-
+/**
+ * Installs the SentinelOne Agent (owned by SentinelOne) on the given VM
+ * @param hostVm
+ * @param s1Client
+ * @param log
+ */
 export const installSentinelOneAgent = async ({
   hostVm,
-  agentUrl,
-  apiToken,
-  siteToken,
+  s1Client,
   // FIXME:PT use `createToolingLogger()` when that is available
   log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
 }: InstallSentinelOneAgentOptions): Promise<InstallSentinelOneAgentResponse> => {
@@ -42,10 +185,14 @@ export const installSentinelOneAgent = async ({
   const installPath = '/opt/sentinelone/bin/sentinelctl';
 
   return log.indent(4, async () => {
-    log.debug(`Agent URL: [${agentUrl}]\nApi Token: [${apiToken}]\nSite Token: [${siteToken}]`);
+    const [siteToken, agentUrl] = await Promise.all([
+      s1Client.getSiteToken(),
+      s1Client.getAgentDownloadUrl(),
+    ]);
 
+    log.debug(`siteToken[ ${siteToken} ]\nagentURL[ ${agentUrl} ]`);
     log.info(`Downloading SentinelOne agent`);
-    await hostVm.exec(`curl ${agentUrl}?APIToken=${apiToken} -o sentinel.deb`);
+    await hostVm.exec(`curl ${agentUrl} -o sentinel.deb`);
 
     log.info(`Installing agent and starting service`);
     await hostVm.exec(`sudo dpkg -i sentinel.deb`);

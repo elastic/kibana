@@ -18,14 +18,12 @@ import {
   enrollHostVmWithFleet,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
-import { installSentinelOneAgent } from './common';
+import { installSentinelOneAgent, S1Client } from './common';
 import { createVm } from '../common/vm_services';
 import { createRuntimeServices } from '../common/stack_services';
 
 export const cli = async () => {
   // TODO:PT add support for CPU, Disk and Memory input args
-
-  // TODO:PT is it possible to simplify the argumnets by only requiring that user provide S1 management console URL? and then we get download URL from it?
 
   return run(runCli, {
     description:
@@ -38,9 +36,8 @@ export const cli = async () => {
         'password',
         'version',
         'policy',
-        's1AgentUrl',
+        's1Url',
         's1ApiToken',
-        's1SiteToken',
         'vmName',
       ],
       boolean: ['force'],
@@ -54,9 +51,9 @@ export const cli = async () => {
         force: false,
       },
       help: `
-      --s1AgentUrl        Required. The URL for the SentinelOne agent
+      --s1Url             Required. The base URL for SentinelOne management console.
+                          Ex: https://usea1-partners.sentinelone.net (valid as of Oct. 2023)
       --s1ApiToken        Required. The API token for SentinelOne
-      --s1SiteToken       Required. The Site token for SentinelOne
       --vmName            Optional. The name for the VM
       --version           Optional. The Agent version to be used when installing fleet server.
                           Default: uses the same version as the stack (kibana). Version
@@ -83,34 +80,24 @@ const runCli: RunFn = async ({ log, flags }) => {
   const kibanaUrl = flags.kibanaUrl as string;
   const elasticUrl = flags.elasticUrl as string;
   const version = flags.version as string;
-  const s1AgentUrl = flags.s1AgentUrl as string;
+  const s1Url = flags.s1Url as string;
   const s1ApiToken = flags.s1ApiToken as string;
-  const s1SiteToken = flags.s1SiteToken as string;
   const policy = flags.policy as string;
   const force = flags.force as boolean;
 
+  // FIXME:PT set default logging level for tooling based on log level from cli script
+
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
 
-  ok(s1AgentUrl, getRequiredArgMessage('s1AgentUrl'));
+  ok(s1Url, getRequiredArgMessage('s1Url'));
   ok(s1ApiToken, getRequiredArgMessage('s1ApiToken'));
-  ok(s1SiteToken, getRequiredArgMessage('s1SiteToken'));
-
-  // FIXME:PT validate API token valid
 
   const vmName =
     (flags.vmName as string) ||
     `${userInfo().username.toLowerCase().replaceAll('.', '-')}-sentinelone-${Math.random()
       .toString()
       .substring(2, 6)}`;
-
-  // derive the SentinelOne management console URL from the download URL
-  const s1ManagementConsoleUri = new URL(s1AgentUrl);
-  s1ManagementConsoleUri.pathname = '';
-  s1ManagementConsoleUri.hash = '';
-  s1ManagementConsoleUri.username = '';
-  s1ManagementConsoleUri.pathname = '';
-  s1ManagementConsoleUri.search = '';
-
+  const s1Client = new S1Client({ url: s1Url, apiToken: s1ApiToken, log });
   const { kbnClient } = await createRuntimeServices({
     kibanaUrl,
     elasticsearchUrl: elasticUrl,
@@ -127,14 +114,10 @@ const runCli: RunFn = async ({ log, flags }) => {
     disk: '10G',
   });
 
-  // TODO: can we validate tha the s1 URL + api token is valid?
-
   const s1Info = await installSentinelOneAgent({
     hostVm,
     log,
-    agentUrl: s1AgentUrl,
-    apiToken: s1ApiToken,
-    siteToken: s1SiteToken,
+    s1Client,
   });
 
   if (force || !(await isFleetServerRunning(kbnClient))) {
@@ -147,7 +130,7 @@ const runCli: RunFn = async ({ log, flags }) => {
     kbnClient,
     log,
     agentPolicyId,
-    consoleUrl: s1ManagementConsoleUri.toString(),
+    consoleUrl: s1Url,
     apiToken: s1ApiToken,
   });
 
