@@ -143,6 +143,12 @@ export class RemoteClustersFormField extends PureComponent {
           hasNoInitialSelection={!hasClusters}
           isInvalid={areErrorsVisible && Boolean(errorMessage)}
           data-test-subj="remoteClusterSelect"
+          aria-label={i18n.translate(
+            'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterSelectAriaLabel',
+            {
+              defaultMessage: 'Remote cluster',
+            }
+          )}
         />
         {areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null}
         {errorMessage}
