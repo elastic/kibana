@@ -18,7 +18,7 @@ export interface CodeBlockDetails {
   button?: React.ReactNode;
 }
 
-export type QueryType = 'eql' | 'esql' | 'kql' | 'dsl' | 'json' | 'no-type';
+export type QueryType = 'eql' | 'esql' | 'kql' | 'dsl' | 'json' | 'no-type' | 'sql';
 
 /**
  * `analyzeMarkdown` is a helper that enriches content returned from a query
