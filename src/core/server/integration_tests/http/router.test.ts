@@ -601,12 +601,12 @@ describe('Handler', () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
+    router.get({ path: '/{query}', validate: false }, (context, req, res) => {
       throw Boom.unauthorized();
     });
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/').expect(500);
+    const result = await supertest(innerServer.listener).get('/some-data').expect(500);
 
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
@@ -616,7 +616,14 @@ describe('Handler', () => {
         Array [
           "500 Server Error",
           Object {
+            "error": Object {
+              "message": "Unauthorized",
+            },
             "http": Object {
+              "request": Object {
+                "method": "get",
+                "path": "/{query}",
+              },
               "response": Object {
                 "status_code": 500,
               },
@@ -645,7 +652,14 @@ describe('Handler', () => {
         Array [
           "500 Server Error",
           Object {
+            "error": Object {
+              "message": "Unexpected result from Route Handler. Expected KibanaResponse, but given: string.",
+            },
             "http": Object {
+              "request": Object {
+                "method": "get",
+                "path": "/",
+              },
               "response": Object {
                 "status_code": 500,
               },
@@ -1173,7 +1187,14 @@ describe('Response factory', () => {
           Array [
             "500 Server Error",
             Object {
+              "error": Object {
+                "message": "expected 'location' header to be set",
+              },
               "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
                 "response": Object {
                   "status_code": 500,
                 },
@@ -1586,7 +1607,14 @@ describe('Response factory', () => {
           Array [
             "500 Server Error",
             Object {
+              "error": Object {
+                "message": "Unexpected Http status code. Expected from 400 to 599, but given: 200",
+              },
               "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
                 "response": Object {
                   "status_code": 500,
                 },
@@ -1662,7 +1690,14 @@ describe('Response factory', () => {
           Array [
             "500 Server Error",
             Object {
+              "error": Object {
+                "message": "expected 'location' header to be set",
+              },
               "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
                 "response": Object {
                   "status_code": 500,
                 },
@@ -1809,7 +1844,14 @@ describe('Response factory', () => {
           Array [
             "500 Server Error",
             Object {
+              "error": Object {
+                "message": "expected error message to be provided",
+              },
               "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
                 "response": Object {
                   "status_code": 500,
                 },
@@ -1842,7 +1884,14 @@ describe('Response factory', () => {
           Array [
             "500 Server Error",
             Object {
+              "error": Object {
+                "message": "expected error message to be provided",
+              },
               "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
                 "response": Object {
                   "status_code": 500,
                 },
@@ -1874,7 +1923,14 @@ describe('Response factory', () => {
           Array [
             "500 Server Error",
             Object {
+              "error": Object {
+                "message": "options.statusCode is expected to be set. given options: undefined",
+              },
               "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
                 "response": Object {
                   "status_code": 500,
                 },
@@ -1906,7 +1962,14 @@ describe('Response factory', () => {
           Array [
             "500 Server Error",
             Object {
+              "error": Object {
+                "message": "Unexpected Http status code. Expected from 100 to 599, but given: 20.",
+              },
               "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
                 "response": Object {
                   "status_code": 500,
                 },
