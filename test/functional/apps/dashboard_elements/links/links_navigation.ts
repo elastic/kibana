@@ -213,7 +213,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isDisabled).to.be('true');
       });
 
-      it('should create an external link when openInNewTab is enabled', async () => {
+      // TODO We should not be using an external website for our tests. This will be flaky
+      // if external network connectivity issues exist.
+      it.skip('should create an external link when openInNewTab is enabled', async () => {
         await testSubjects.clickWhenNotDisabled('externalLink--link999');
 
         // Should have opened another tab
@@ -224,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(currentUrl).to.be('https://example.com/1');
       });
 
-      it('should open in same tab when openInNewTab is disabled', async () => {
+      it.skip('should open in same tab when openInNewTab is disabled', async () => {
         await testSubjects.clickWhenNotDisabled('externalLink--link888');
 
         // Should have opened in the same tab
