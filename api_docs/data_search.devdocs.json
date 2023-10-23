@@ -113,41 +113,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.ViewWarningButton",
-        "type": "Function",
-        "tags": [],
-        "label": "ViewWarningButton",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "Props",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/data/public/search/warnings/view_warning_button/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ViewWarningButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "src/plugins/data/public/search/warnings/view_warning_button/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.waitUntilNextSessionCompletes$",
         "type": "Function",
         "tags": [],
@@ -657,7 +622,13 @@
                 "text": "RequestAdapter"
               },
               ", cb?: ",
-              "WarningHandlerCallback",
+              {
+                "pluginId": "@kbn/search-response-warnings",
+                "scope": "common",
+                "docId": "kibKbnSearchResponseWarningsPluginApi",
+                "section": "def-common.WarningHandlerCallback",
+                "text": "WarningHandlerCallback"
+              },
               " | undefined) => void"
             ],
             "path": "src/plugins/data/public/search/types.ts",
@@ -695,7 +666,13 @@
                   "WarningHandlerCallback - optional callback to intercept warnings"
                 ],
                 "signature": [
-                  "WarningHandlerCallback",
+                  {
+                    "pluginId": "@kbn/search-response-warnings",
+                    "scope": "common",
+                    "docId": "kibKbnSearchResponseWarningsPluginApi",
+                    "section": "def-common.WarningHandlerCallback",
+                    "text": "WarningHandlerCallback"
+                  },
                   " | undefined"
                 ],
                 "path": "src/plugins/data/public/search/types.ts",
@@ -946,93 +923,6 @@
             "path": "src/plugins/data/public/search/errors/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.SearchResponseIncompleteWarning",
-        "type": "Interface",
-        "tags": [],
-        "label": "SearchResponseIncompleteWarning",
-        "description": [
-          "\nA warning object for a search response with incomplete ES results\nES returns incomplete results when:\n1) Set timeout flag on search and the timeout expires on cluster\n2) Some shard failures on a cluster\n3) skipped remote(s) (skip_unavailable=true)\n  a. all shards failed\n  b. disconnected/not-connected"
-        ],
-        "path": "src/plugins/data/public/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchResponseIncompleteWarning.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\ntype: for sorting out incomplete warnings"
-            ],
-            "signature": [
-              "\"incomplete\""
-            ],
-            "path": "src/plugins/data/public/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchResponseIncompleteWarning.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [
-              "\nmessage: human-friendly message"
-            ],
-            "path": "src/plugins/data/public/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchResponseIncompleteWarning.clusters",
-            "type": "Object",
-            "tags": [],
-            "label": "clusters",
-            "description": [
-              "\nclusters: cluster details."
-            ],
-            "signature": [
-              "{ [x: string]: ",
-              {
-                "pluginId": "@kbn/es-types",
-                "scope": "common",
-                "docId": "kibKbnEsTypesPluginApi",
-                "section": "def-common.ClusterDetails",
-                "text": "ClusterDetails"
-              },
-              "; }"
-            ],
-            "path": "src/plugins/data/public/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchResponseIncompleteWarning.openInInspector",
-            "type": "Function",
-            "tags": [],
-            "label": "openInInspector",
-            "description": [
-              "\nopenInInspector: callback to open warning in inspector"
-            ],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/data/public/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1556,29 +1446,6 @@
           "\"search_sessions\""
         ],
         "path": "src/plugins/data/public/search/session/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.SearchResponseWarning",
-        "type": "Type",
-        "tags": [],
-        "label": "SearchResponseWarning",
-        "description": [
-          "\nA warning object for a search response with warnings"
-        ],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-public.SearchResponseIncompleteWarning",
-            "text": "SearchResponseIncompleteWarning"
-          }
-        ],
-        "path": "src/plugins/data/public/search/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
