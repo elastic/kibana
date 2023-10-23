@@ -43,7 +43,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { UnifiedDataTableSettings, ValueToStringConverter } from '../types';
+import { UnifiedDataTableSettings, ValueToStringConverter, DataTableColumnTypes } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
@@ -88,6 +88,12 @@ export interface UnifiedDataTableProps {
    * Determines ids of the columns which are displayed
    */
   columns: string[];
+  /**
+   * If not provided, types will be derived by default from the dataView field types.
+   * For displaying text-based search results, pass column types (which are available separately in the fetch request) down here.
+   * Check available utils in `utils/get_column_types.ts`
+   */
+  columnTypes?: DataTableColumnTypes;
   /**
    * If set, the given document is displayed in a flyout
    */
@@ -300,6 +306,7 @@ const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 export const UnifiedDataTable = ({
   ariaLabelledBy,
   columns,
+  columnTypes,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
   loadingState,
@@ -618,6 +625,7 @@ export const UnifiedDataTable = ({
         onFilter,
         editField,
         visibleCellActions,
+        columnTypes,
       }),
     [
       onFilter,
@@ -635,6 +643,7 @@ export const UnifiedDataTable = ({
       valueToStringConverter,
       editField,
       visibleCellActions,
+      columnTypes,
     ]
   );
 

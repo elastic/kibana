@@ -538,4 +538,64 @@ describe('Data table columns', function () {
       expect(actual).toEqual(['timestamp', 'extension', 'message']);
     });
   });
+
+  describe('Textbased languages grid columns', () => {
+    it('returns eui grid with in memory sorting for text based languages and columns on the dataview', async () => {
+      const columnsNotInDataview = getVisibleColumns(
+        ['extension'],
+        dataViewWithTimefieldMock,
+        true
+      ) as string[];
+      const gridColumns = getEuiGridColumns({
+        columns: columnsNotInDataview,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnTypes: {
+          var_test: 'number',
+        },
+      });
+      expect(gridColumns[1].schema).toBe('string');
+    });
+
+    it('returns eui grid with in memory sorting for text based languages and columns not on the columnTypes', async () => {
+      const columnsNotInDataview = getVisibleColumns(
+        ['var_test'],
+        dataViewWithTimefieldMock,
+        true
+      ) as string[];
+      const gridColumns = getEuiGridColumns({
+        columns: columnsNotInDataview,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnTypes: {
+          var_test: 'number',
+        },
+      });
+      expect(gridColumns[1].schema).toBe('numeric');
+    });
+  });
 });

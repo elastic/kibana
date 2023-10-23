@@ -19,7 +19,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
-import { UnifiedDataTableSettings } from '../types';
+import type { UnifiedDataTableSettings, DataTableColumnTypes } from '../types';
 import type { ValueToStringConverter } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -80,6 +80,7 @@ function buildEuiGridColumn({
   editField,
   columnCellActions,
   visibleCellActions,
+  columnTypes,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -95,6 +96,7 @@ function buildEuiGridColumn({
   editField?: (fieldName: string) => void;
   columnCellActions?: EuiDataGridColumnCellAction[];
   visibleCellActions?: number;
+  columnTypes?: DataTableColumnTypes;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
@@ -118,9 +120,11 @@ function buildEuiGridColumn({
       : [];
   }
 
+  const columnType = columnTypes?.[columnName] ?? dataViewField?.type;
+
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(dataViewField?.type),
+    schema: getSchemaByKbnType(columnType),
     isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     displayAsText: columnDisplayName,
     actions: {
@@ -203,6 +207,7 @@ export function getEuiGridColumns({
   onFilter,
   editField,
   visibleCellActions,
+  columnTypes,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -221,6 +226,7 @@ export function getEuiGridColumns({
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
+  columnTypes?: DataTableColumnTypes;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
@@ -240,6 +246,7 @@ export function getEuiGridColumns({
       onFilter,
       editField,
       visibleCellActions,
+      columnTypes,
     })
   );
 }

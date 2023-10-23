@@ -543,7 +543,6 @@ const GcpInputVarFields = ({
         {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
             <EuiSelect
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
@@ -557,7 +556,6 @@ const GcpInputVarFields = ({
         {credentialsTypeValue === credentialFieldValue && credentialFilesFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.file'].label}>
             <EuiFieldText
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
               fullWidth
@@ -569,7 +567,6 @@ const GcpInputVarFields = ({
         {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
             <EuiTextArea
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
               id={credentialJSONFields.id}
               fullWidth

@@ -120,6 +120,7 @@ export const useGetPackageInfoByKeyQuery = (
   queryOptions: {
     // If enabled is false, the query will not be fetched
     enabled?: boolean;
+    refetchOnMount?: boolean | 'always';
   } = {
     enabled: true,
   }
@@ -141,7 +142,7 @@ export const useGetPackageInfoByKeyQuery = (
           ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
         },
       }),
-    { enabled: queryOptions.enabled }
+    { enabled: queryOptions.enabled, refetchOnMount: queryOptions.refetchOnMount }
   );
 
   const confirm = async () => {
