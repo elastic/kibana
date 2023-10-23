@@ -16,6 +16,9 @@ import { getLogEntryAnomalies } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
+  if (!framework.config.featureFlags.logsUIEnabled) {
+    return;
+  }
   framework
     .registerVersionedRoute({
       access: 'internal',

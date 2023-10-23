@@ -70,7 +70,7 @@ export function DataDimensionEditor(
     darkMode: boolean;
   }
 ) {
-  const { state, layerId, accessor, darkMode } = props;
+  const { state, layerId, accessor, darkMode, isInlineEditing } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index] as XYDataLayerConfig;
   const canUseColorMapping = layer.colorMapping ? true : false;
@@ -208,6 +208,7 @@ export function DataDimensionEditor(
                       defaultMessage: 'Edit colors',
                     })
               }
+              isInlineEditing={isInlineEditing}
             >
               <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
                 <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">

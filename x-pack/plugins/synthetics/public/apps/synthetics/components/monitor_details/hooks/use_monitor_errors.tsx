@@ -11,7 +11,7 @@ import { useSelectedLocation } from './use_selected_location';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
-  FINAL_SUMMARY_FILTER,
+  SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -37,7 +37,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
         query: {
           bool: {
             filter: [
-              FINAL_SUMMARY_FILTER,
+              SUMMARY_FILTER,
               EXCLUDE_RUN_ONCE_FILTER,
               {
                 range: {
@@ -120,9 +120,13 @@ export function useMonitorErrors(monitorIdArg?: string) {
       (hits[0]?._source as Ping).monitor?.status === 'down' &&
       !!errorStates?.length;
 
+    const upStatesSortedAsc = upStates.sort(
+      (a, b) => Number(new Date(a.state.started_at)) - Number(new Date(b.state.started_at))
+    );
+
     return {
       errorStates,
-      upStates,
+      upStates: upStatesSortedAsc,
       loading,
       data,
       hasActiveError,

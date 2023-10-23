@@ -210,6 +210,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await returnTo(INVENTORY_PATH);
           });
         });
+
+        it('Should show auto-refresh option', async () => {
+          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
+          expect(kibanaRefreshConfig.interval).to.equal('5');
+          expect(kibanaRefreshConfig.units).to.equal('Seconds');
+          expect(kibanaRefreshConfig.isPaused).to.equal(true);
+        });
       });
 
       it('shows query suggestions', async () => {
@@ -372,6 +379,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await pageObjects.infraHome.ensurePopoverClosed();
         });
+      });
+
+      it('should not have an option to create custom threshold alert', async () => {
+        await pageObjects.infraHome.clickAlertsAndRules();
+        await pageObjects.infraHome.ensurePopoverOpened();
+        await pageObjects.infraHome.ensureCustomThresholdAlertMenuItemIsMissing();
+        await pageObjects.infraHome.clickAlertsAndRules();
       });
     });
 

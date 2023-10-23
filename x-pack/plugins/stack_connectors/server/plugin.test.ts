@@ -164,7 +164,7 @@ describe('Stack Connectors Plugin', () => {
         4,
         expect.objectContaining({
           id: '.bedrock',
-          name: 'AWS Bedrock',
+          name: 'Amazon Bedrock',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(

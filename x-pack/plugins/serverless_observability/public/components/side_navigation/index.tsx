@@ -46,7 +46,23 @@ const navigationTree: NavigationTreeDefinition = {
           },
         },
         {
+          title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
+            defaultMessage: 'Visualizations',
+          }),
+          link: 'visualize',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return (
+              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+              pathNameSerialized.startsWith(prepend('/app/lens')) ||
+              pathNameSerialized.startsWith(prepend('/app/maps'))
+            );
+          },
+        },
+        {
           link: 'observability-overview:alerts',
+        },
+        {
+          link: 'observability-overview:cases',
         },
         {
           link: 'observability-overview:slos',
@@ -125,41 +141,47 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
+          id: 'metrics',
+          title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
+            defaultMessage: 'Infrastructure',
+          }),
+          accordionProps: {
+            arrowProps: { css: { display: 'none' } },
+          },
+          children: [
+            {
+              link: 'metrics:inventory',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+              },
+            },
+            {
+              link: 'metrics:hosts',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+              },
+            },
+          ],
+        },
+        {
           id: 'groups-spacer-2',
           isGroupTitle: true,
-        },
-        {
-          link: 'observability-overview:cases',
-        },
-        {
-          title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
-            defaultMessage: 'Visualizations',
-          }),
-          link: 'visualize',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
-          },
-        },
-        {
-          id: 'groups-spacer-3',
-          isGroupTitle: true,
-        },
-        {
-          title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-            defaultMessage: 'Add data',
-          }),
-          link: 'observabilityOnboarding',
         },
       ],
     },
   ],
   footer: [
     {
-      type: 'navGroup',
+      type: 'navItem',
+      title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+        defaultMessage: 'Get Started',
+      }),
+      link: 'observabilityOnboarding',
+      isGroupTitle: true,
+      icon: 'launch',
+    },
+    {
+      type: 'navItem',
       id: 'devTools',
       title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
         defaultMessage: 'Developer tools',

@@ -1224,6 +1224,35 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The key associated with the significant term."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the significant term."
+            ],
+            "signature": [
+              "\"keyword\" | \"log_pattern\""
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
             "id": "def-common.SignificantTerm.doc_count",
             "type": "number",
             "tags": [],
@@ -1552,6 +1581,35 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupItem.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The key associated with the significant term."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupItem.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the significant term."
+            ],
+            "signature": [
+              "\"keyword\" | \"log_pattern\""
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
             "id": "def-common.SignificantTermGroupItem.docCount",
             "type": "number",
             "tags": [],
@@ -1810,8 +1868,43 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantTermType",
+        "type": "Type",
+        "tags": [],
+        "label": "SignificantTermType",
+        "description": [
+          "\nRepresents the type of significant term as determined by the SIGNIFICANT_TERM_TYPE enumeration."
+        ],
+        "signature": [
+          "\"keyword\" | \"log_pattern\""
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SIGNIFICANT_TERM_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "SIGNIFICANT_TERM_TYPE",
+        "description": [
+          "\nEnumeration of significant term types."
+        ],
+        "signature": [
+          "{ readonly KEYWORD: \"keyword\"; readonly LOG_PATTERN: \"log_pattern\"; }"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

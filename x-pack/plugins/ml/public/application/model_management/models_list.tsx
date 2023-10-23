@@ -35,6 +35,7 @@ import {
   BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
+  DeploymentState,
   ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
@@ -43,7 +44,6 @@ import {
   type ModelState,
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { css } from '@emotion/react';
 import { useStorage } from '@kbn/ml-local-storage';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
@@ -69,6 +69,7 @@ import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
+import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { useEnabledFeatures } from '../contexts/ml';
 
@@ -163,6 +164,7 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [modelToTest, setModelToTest] = useState<ModelItem | null>(null);
+  const [dfaModelToTest, setDfaModelToTest] = useState<ModelItem | null>(null);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -350,7 +352,7 @@ export const ModelsList: FC<Props> = ({
         );
         if (elasticModels.length > 0) {
           for (const model of elasticModels) {
-            if (model.state === MODEL_STATE.STARTED) {
+            if (Object.values(DEPLOYMENT_STATE).includes(model.state as DeploymentState)) {
               // no need to check for the download status if the model has been deployed
               continue;
             }
@@ -410,6 +412,7 @@ export const ModelsList: FC<Props> = ({
     isLoading,
     fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
+    onDfaTestAction: setDfaModelToTest,
     onModelsDeleteRequest: setModelsToDelete,
     onModelDeployRequest: setModelToDeploy,
     onLoading: setIsLoading,
@@ -456,7 +459,7 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: modelIdColumnName,
-      width: '15%',
+      width: '215px',
       sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
       textOnly: false,
@@ -477,7 +480,7 @@ export const ModelsList: FC<Props> = ({
       },
     },
     {
-      width: '35%',
+      width: '300px',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
         defaultMessage: 'Description',
       }),
@@ -485,32 +488,28 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnDescription',
       render: ({ description, recommended }: ModelItem) => {
         if (!description) return null;
-        return (
-          <>
-            {description.replace('(Tech Preview)', '')}
-            {recommended ? (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                    defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
-                  />
-                }
-              >
-                <b
-                  css={css`
-                    text-wrap: nowrap;
-                  `}
-                >
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                    defaultMessage="(Recommended)"
-                  />
-                </b>
-              </EuiToolTip>
-            ) : null}
-          </>
+        const descriptionText = description.replace('(Tech Preview)', '');
+        return recommended ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+              />
+            }
+          >
+            <>
+              {descriptionText}&nbsp;
+              <b>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                  defaultMessage="(Recommended)"
+                />
+              </b>
+            </>
+          </EuiToolTip>
+        ) : (
+          descriptionText
         );
       },
     },
@@ -534,6 +533,7 @@ export const ModelsList: FC<Props> = ({
         </EuiFlexGroup>
       ),
       'data-test-subj': 'mlModelsTableColumnType',
+      width: '130px',
     },
     {
       field: 'state',
@@ -551,6 +551,7 @@ export const ModelsList: FC<Props> = ({
         ) : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
+      width: '130px',
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
@@ -561,8 +562,10 @@ export const ModelsList: FC<Props> = ({
       render: (v: number) => dateFormatter(v),
       sortable: true,
       'data-test-subj': 'mlModelsTableColumnCreatedAt',
+      width: '210px',
     },
     {
+      width: '150px',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
@@ -696,12 +699,13 @@ export const ModelsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
         <EuiInMemoryTable<ModelItem>
+          css={{ overflowX: 'auto' }}
+          isSelectable={true}
+          isExpandable={true}
+          hasActions={true}
           allowNeutralSort={false}
           columns={columns}
-          hasActions={true}
-          isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isSelectable={false}
           items={items}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
@@ -761,6 +765,9 @@ export const ModelsList: FC<Props> = ({
       )}
       {modelToTest === null ? null : (
         <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
+      )}
+      {dfaModelToTest === null ? null : (
+        <TestDfaModelsFlyout model={dfaModelToTest} onClose={setDfaModelToTest.bind(null, null)} />
       )}
       {modelToDeploy !== undefined ? (
         <AddInferencePipelineFlyout

@@ -57,7 +57,6 @@ export class AssetManagerServerPlugin
     this.logger.info('Server is enabled');
 
     const assetClient = new AssetClient({
-      source: this.config.lockedSource,
       sourceIndices: this.config.sourceIndices,
       getApmIndices: plugins.apmDataAccess.getApmIndices,
       metricsClient: plugins.metricsDataAccess.client,
@@ -77,14 +76,11 @@ export class AssetManagerServerPlugin
       return;
     }
 
-    // create/update assets-* index template
-    if (this.config.lockedSource === 'assets') {
-      upsertTemplate({
-        esClient: core.elasticsearch.client.asInternalUser,
-        template: assetsIndexTemplateConfig,
-        logger: this.logger,
-      });
-    }
+    upsertTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      template: assetsIndexTemplateConfig,
+      logger: this.logger,
+    });
 
     return {};
   }

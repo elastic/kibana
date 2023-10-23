@@ -31,15 +31,17 @@ import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
 test('throws error when no data views are available', async () => {
-  pluginServices.getServices().data.dataViews.getDefaultDataView = jest
+  pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
     .fn()
-    .mockReturnValue(undefined);
+    .mockReturnValue(false);
   await expect(async () => {
     await createDashboard();
   }).rejects.toThrow('Dashboard requires at least one data view before it can be initialized.');
 
   // reset get default data view
-  pluginServices.getServices().data.dataViews.getDefaultDataView = jest.fn().mockResolvedValue({});
+  pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
+    .fn()
+    .mockResolvedValue(true);
 });
 
 test('throws error when provided validation function returns invalid', async () => {

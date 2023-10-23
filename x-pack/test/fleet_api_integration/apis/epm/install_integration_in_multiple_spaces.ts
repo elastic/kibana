@@ -67,7 +67,8 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  describe('When installing system integration in multiple spaces', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/161624
+  describe.skip('When installing system integration in multiple spaces', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 

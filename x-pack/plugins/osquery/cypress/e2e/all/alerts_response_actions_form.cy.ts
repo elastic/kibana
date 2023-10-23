@@ -14,10 +14,10 @@ import {
   packFixture,
 } from '../../tasks/api_fixtures';
 import {
+  OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
   RESPONSE_ACTIONS_ITEM_0,
   RESPONSE_ACTIONS_ITEM_1,
   RESPONSE_ACTIONS_ITEM_2,
-  OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
 } from '../../tasks/response_actions';
 import {
   checkActionItemsInResults,
@@ -26,9 +26,22 @@ import {
   typeInECSFieldInput,
 } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
-import { ServerlessRoleName } from '../../support/roles';
 
-// Issue: https://github.com/elastic/security-team/issues/7731
+interface ITestRuleBody {
+  response_actions: [
+    {
+      params: {
+        queries: Array<{
+          interval?: number;
+          query: string;
+          platform: string;
+          id: string;
+        }>;
+      };
+    }
+  ];
+}
+// flaky
 describe.skip(
   'Alert Event Details - Response Actions Form',
   { tags: ['@ess', '@serverless'] },
@@ -55,7 +68,6 @@ describe.skip(
         ruleId = data.id;
         ruleName = data.name;
       });
-      cy.login(ServerlessRoleName.SOC_MANAGER);
     });
     afterEach(() => {
       cleanupPack(packId);
@@ -80,7 +92,6 @@ describe.skip(
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
         cy.contains('Run a set of queries in a pack').click();
       });
-      cy.contains('Save changes').click();
       cy.getBySel('response-actions-error')
         .within(() => {
           cy.contains('Pack is a required field');
@@ -135,18 +146,22 @@ describe.skip(
         cy.contains('Log message optimized for viewing in a log viewer');
         cy.contains('Days of uptime');
       });
-      cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
+      cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesOne');
       cy.getBySel('ruleEditSubmitButton').click();
-      cy.wait('@saveRuleSingleQuery').should(({ request }) => {
-        const oneQuery = [
-          {
-            interval: 3600,
-            query: 'select * from uptime;',
-            id: Object.keys(packData.queries)[0],
-          },
-        ];
-        expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
-      });
+
+      cy.wait('@saveRuleChangesOne');
+      cy.get<{ request: { url: string; body: ITestRuleBody } }>('@saveRuleChangesOne').should(
+        ({ request }) => {
+          const oneQuery = [
+            {
+              interval: 3600,
+              query: 'select * from uptime;',
+              id: Object.keys(packData.queries)[0],
+            },
+          ];
+          expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
+        }
+      );
 
       cy.contains(`${ruleName} was saved`).should('exist');
       closeToastIfVisible();
@@ -169,30 +184,33 @@ describe.skip(
         cy.contains('Log message optimized for viewing in a log viewer');
         cy.contains('Days of uptime');
       });
-      cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
+      cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesTwo');
 
       cy.contains('Save changes').click();
-      cy.wait('@saveRuleMultiQuery').should(({ request }) => {
-        const threeQueries = [
-          {
-            interval: 3600,
-            query: 'SELECT * FROM memory_info;',
-            platform: 'linux',
-            id: Object.keys(multiQueryPackData.queries)[0],
-          },
-          {
-            interval: 3600,
-            query: 'SELECT * FROM system_info;',
-            id: Object.keys(multiQueryPackData.queries)[1],
-          },
-          {
-            interval: 10,
-            query: 'select opera_extensions.* from users join opera_extensions using (uid);',
-            id: Object.keys(multiQueryPackData.queries)[2],
-          },
-        ];
-        expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
-      });
+      cy.wait('@saveRuleChangesTwo');
+      cy.get<{ request: { url: string; body: ITestRuleBody } }>('@saveRuleChangesTwo').should(
+        ({ request }) => {
+          const threeQueries = [
+            {
+              interval: 3600,
+              query: 'SELECT * FROM memory_info;',
+              platform: 'linux',
+              id: Object.keys(multiQueryPackData.queries)[0],
+            },
+            {
+              interval: 3600,
+              query: 'SELECT * FROM system_info;',
+              id: Object.keys(multiQueryPackData.queries)[1],
+            },
+            {
+              interval: 10,
+              query: 'select opera_extensions.* from users join opera_extensions using (uid);',
+              id: Object.keys(multiQueryPackData.queries)[2],
+            },
+          ];
+          expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
+        }
+      );
     });
   }
 );

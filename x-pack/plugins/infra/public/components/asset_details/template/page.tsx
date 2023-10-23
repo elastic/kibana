@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
@@ -21,12 +21,12 @@ import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
 
-export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps) => {
+export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
   const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
-  const { asset, assetType } = useAssetDetailsRenderPropsContext();
-  const { headerHeight } = useKibanaHeader();
+  const { asset } = useAssetDetailsRenderPropsContext();
+  const { actionMenuHeight } = useKibanaHeader();
   const trackOnlyOnce = React.useRef(false);
 
   const { activeTabId } = useTabSwitcherContext();
@@ -42,7 +42,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       const integrations = getIntegrationsAvailable(metadata);
       const telemetryParams = {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
-        assetType,
+        assetType: asset.type,
         tabId: activeTabId,
       };
 
@@ -56,13 +56,18 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       );
       trackOnlyOnce.current = true;
     }
-  }, [activeTabId, assetType, metadata, metadataLoading, telemetry]);
+  }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
+
+  const heightWithOffset = useMemo(
+    () => `calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px)`,
+    [actionMenuHeight]
+  );
 
   return loading ? (
     <EuiFlexGroup
       direction="column"
       css={css`
-        height: calc(100vh - ${headerHeight}px);
+        height: ${heightWithOffset};
       `}
     >
       <InfraLoadingPanel
@@ -79,9 +84,11 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       contentBorder={false}
       offset={0}
       restrictWidth={false}
-      style={{ minBlockSize: `calc(100vh - ${headerHeight}px)` }}
+      style={{
+        minBlockSize: heightWithOffset,
+      }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
-      data-asset-type={assetType}
+      data-asset-type={asset.type}
     >
       <EuiPageTemplate.Section paddingSize="none">
         <EuiPageTemplate.Header

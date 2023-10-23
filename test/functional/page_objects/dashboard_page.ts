@@ -425,7 +425,7 @@ export class DashboardPageObject extends FtrService {
   public async clearSavedObjectsFromAppLinks() {
     await this.header.clickVisualize();
     await this.visualize.gotoLandingPage();
-    await this.header.clickDashboard();
+    await this.navigateToAppFromAppsMenu();
     await this.gotoDashboardLandingPage();
   }
 
@@ -583,7 +583,7 @@ export class DashboardPageObject extends FtrService {
 
     await this.gotoDashboardLandingPage();
 
-    await this.listingTable.searchForItemWithName(dashboardName);
+    await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
       await this.listingTable.clickItemLink('dashboard', dashboardName);
       await this.header.waitUntilLoadingHasFinished();

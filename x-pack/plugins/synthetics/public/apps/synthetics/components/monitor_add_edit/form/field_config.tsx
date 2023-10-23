@@ -1586,6 +1586,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     component: Switch,
     controlled: true,
     props: ({ setValue, field, trigger }): EuiSwitchProps => ({
+      disabled: readOnly,
       id: 'syntheticsMonitorConfigMaxAttempts',
       label: i18n.translate('xpack.synthetics.monitorConfig.retest.label', {
         defaultMessage: 'Enable retest on failure',
