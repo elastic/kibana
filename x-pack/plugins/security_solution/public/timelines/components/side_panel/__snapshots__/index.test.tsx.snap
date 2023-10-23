@@ -50,7 +50,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -74,6 +74,60 @@ Array [
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <h3
+                class="euiTitle emotion-euiTitle-xxs"
+                data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
+              >
+                Assigned:
+              </h3>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <span
+                data-test-subj="securitySolutionFlyoutHeaderAssigneesValue"
+              />
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiPopover emotion-euiPopover"
+              >
+                <div
+                  class="euiPopover__anchor css-16vtueo-render"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  >
+                    <button
+                      aria-label="Update assignees"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                      data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="plusInCircle"
+                      />
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -187,7 +241,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+          class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -195,6 +249,60 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
             <div
               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
             />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <h3
+                  class="euiTitle emotion-euiTitle-xxs"
+                  data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
+                >
+                  Assigned:
+                </h3>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <span
+                  data-test-subj="securitySolutionFlyoutHeaderAssigneesValue"
+                />
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiPopover emotion-euiPopover"
+                >
+                  <div
+                    class="euiPopover__anchor css-16vtueo-render"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <button
+                        aria-label="Update assignees"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                        data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="plusInCircle"
+                        />
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

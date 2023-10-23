@@ -12,6 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 
+import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { getRawData } from '../../../../assistant/helpers';
 import type { BrowserFields } from '../../../../common/containers/source';
@@ -87,6 +88,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       skip: !expandedEvent.eventId,
     }
   );
+  const getFieldsData = useGetFieldsData(rawEventData?.fields);
 
   const {
     isolateAction,
@@ -130,6 +132,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           showAlertDetails={showAlertDetails}
           timestamp={timestamp}
           promptContextId={promptContextId}
+          scopeId={scopeId}
+          refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       ) : (
         <ExpandableEventTitle
@@ -141,6 +146,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           timestamp={timestamp}
           handleOnEventClosed={handleOnEventClosed}
           promptContextId={promptContextId}
+          scopeId={scopeId}
+          refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       ),
     [
@@ -154,8 +162,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       ruleName,
       showAlertDetails,
       timestamp,
-      handleOnEventClosed,
       promptContextId,
+      handleOnEventClosed,
+      scopeId,
+      refetchFlyoutData,
+      getFieldsData,
     ]
   );
 

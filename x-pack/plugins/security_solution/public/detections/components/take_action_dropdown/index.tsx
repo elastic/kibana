@@ -35,6 +35,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { getOsqueryActionItem } from '../osquery/osquery_action_item';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
 import { useAlertTagsActions } from '../alerts_table/timeline_actions/use_alert_tags_actions';
+import { useAlertAssigneesActions } from '../alerts_table/timeline_actions/use_alert_assignees_actions';
 
 interface ActionsData {
   alertStatus: Status;
@@ -189,6 +190,13 @@ export const TakeActionDropdown = React.memo(
       refetch,
     });
 
+    const { alertAssigneesItems, alertAssigneesPanels } = useAlertAssigneesActions({
+      closePopover: closePopoverHandler,
+      ecsRowData: ecsData ?? { _id: actionsData.eventId },
+      refresh: refetchFlyoutData,
+      refetch,
+    });
+
     const { investigateInTimelineActionItems } = useInvestigateInTimeline({
       ecsRowData: ecsData,
       onInvestigateInTimelineAlertClick: closePopoverHandler,
@@ -214,7 +222,12 @@ export const TakeActionDropdown = React.memo(
     const alertsActionItems = useMemo(
       () =>
         !isEvent && actionsData.ruleId
-          ? [...statusActionItems, ...alertTagsItems, ...exceptionActionItems]
+          ? [
+              ...statusActionItems,
+              ...alertTagsItems,
+              ...alertAssigneesItems,
+              ...exceptionActionItems,
+            ]
           : isEndpointEvent && canCreateEndpointEventFilters
           ? eventFilterActionItems
           : [],
@@ -227,6 +240,7 @@ export const TakeActionDropdown = React.memo(
         isEvent,
         actionsData.ruleId,
         alertTagsItems,
+        alertAssigneesItems,
       ]
     );
 
@@ -271,6 +285,7 @@ export const TakeActionDropdown = React.memo(
         items,
       },
       ...alertTagsPanels,
+      ...alertAssigneesPanels,
     ];
 
     const takeActionButton = useMemo(
