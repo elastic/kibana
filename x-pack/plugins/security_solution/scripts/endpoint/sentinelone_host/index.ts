@@ -11,12 +11,7 @@ import { userInfo } from 'os';
 import { ok } from 'assert';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import {
-  isFleetServerRunning,
-  startFleetServer,
-} from '../common/fleet_server/fleet_server_services';
-import {
   addSentinelOneIntegrationToAgentPolicy,
-  enrollHostVmWithFleet,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
 import { installSentinelOneAgent, S1Client } from './common';
@@ -56,15 +51,9 @@ export const cli = async () => {
                           Ex: https://usea1-partners.sentinelone.net (valid as of Oct. 2023)
       --s1ApiToken        Required. The API token for SentinelOne
       --vmName            Optional. The name for the VM
-      --version           Optional. The Agent version to be used when installing fleet server.
-                          Default: uses the same version as the stack (kibana). Version
-                          can also be from 'SNAPSHOT'.
-                          Examples: 8.6.0, 8.7.0-SNAPSHOT
-      --policy            Optional. The UUID of the agent policy that should be used to enroll
-                          the Elastic Agent with Kibana/ES (Default: uses existing (if found) or
-                          creates a new one)
-      --force             Optional. If true, then fleet-server will be started and connected to
-                          kibana even if one seems to already be configured.
+      --policy            Optional. The UUID of the Fleet Agent Policy that should be used to setup
+                          the SentinelOne Integration
+                          Default: re-uses existing dev policy (if found) or creates a new one
       --username          Optional. User name to be used for auth against elasticsearch and
                           kibana (Default: elastic).
       --password          Optional. Password associated with the username (Default: changeme)
@@ -80,11 +69,9 @@ const runCli: RunFn = async ({ log, flags }) => {
   const password = flags.password as string;
   const kibanaUrl = flags.kibanaUrl as string;
   const elasticUrl = flags.elasticUrl as string;
-  const version = flags.version as string;
   const s1Url = flags.s1Url as string;
   const s1ApiToken = flags.s1ApiToken as string;
   const policy = flags.policy as string;
-  const force = flags.force as boolean;
 
   createToolingLogger.defaultLogLevel = flags.verbose
     ? 'verbose'
@@ -129,10 +116,6 @@ const runCli: RunFn = async ({ log, flags }) => {
     s1Client,
   });
 
-  if (force || !(await isFleetServerRunning(kbnClient))) {
-    await startFleetServer({ kbnClient, logger: log, version, force });
-  }
-
   const agentPolicyId = policy || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
 
   await addSentinelOneIntegrationToAgentPolicy({
@@ -141,14 +124,6 @@ const runCli: RunFn = async ({ log, flags }) => {
     agentPolicyId,
     consoleUrl: s1Url,
     apiToken: s1ApiToken,
-  });
-
-  await enrollHostVmWithFleet({
-    hostVm,
-    kbnClient,
-    log,
-    agentPolicyId,
-    version,
   });
 
   log.info(`Done!
