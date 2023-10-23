@@ -26,6 +26,7 @@
     "@kbn/rison",
     "@kbn/std",
     "@kbn/safer-lodash-set",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/shared-ux-error-boundary"
   ]
 }
