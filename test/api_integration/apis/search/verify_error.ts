@@ -20,7 +20,8 @@ export const verifyErrorResponse = (
   }
   if (shouldHaveAttrs) {
     expect(r).to.have.property('attributes');
-    expect(r.attributes).to.have.property('root_cause');
+    expect(r.attributes).to.have.property('error');
+    expect(r.attributes.error).to.have.property('root_cause');
   } else {
     expect(r).not.to.have.property('attributes');
   }
