@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, type FC } from 'react';
-import { EuiEmptyPrompt, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -142,7 +142,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
-      <EuiSpacer />
       {documentCountStats !== undefined && (
         <DocumentCountContent
           brushSelectionUpdateHandler={brushSelectionUpdate}
