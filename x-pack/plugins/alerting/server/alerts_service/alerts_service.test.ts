@@ -2370,7 +2370,7 @@ describe('Alerts Service', () => {
             dataStreamAdapter,
           });
 
-          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);
 
           expect(logger.debug).toHaveBeenCalledWith(
             `Server is stopping; must stop all async operations`
