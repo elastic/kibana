@@ -11,7 +11,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { sloDetailsLocatorID } from '../../common';
 import { SLOS_PATH } from '../../common/locators/paths';
 
-interface SloDetailsLocatorParams extends SerializableRecord {
+export interface SloDetailsLocatorParams extends SerializableRecord {
   sloId?: string;
   instanceId?: string;
 }

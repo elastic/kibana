@@ -17,7 +17,7 @@ import {
   SLO_LIST_SEARCH_URL_STORAGE_KEY,
 } from '../pages/slos/hooks/use_url_search_state';
 
-interface SloListLocatorParams extends SerializableRecord {
+export interface SloListLocatorParams extends SerializableRecord {
   kqlQuery?: string;
 }
 
