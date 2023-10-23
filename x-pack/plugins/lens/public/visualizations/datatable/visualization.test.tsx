@@ -138,6 +138,26 @@ describe('Datatable Visualization', () => {
       expect(suggestions.length).toBeGreaterThan(0);
     });
 
+    it('should force table as suggestion when there are no number fields', () => {
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          columns: [{ columnId: 'col1' }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [strCol('col1'), strCol('col2')],
+          notAssignedMetrics: true,
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+    });
+
     it('should reject suggestion with static value', () => {
       function staticValueCol(columnId: string): TableSuggestionColumn {
         return {
@@ -386,6 +406,48 @@ describe('Datatable Visualization', () => {
           frame,
         }).groups[2].accessors
       ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
+    });
+
+    it('should compute the groups correctly for text based languages', () => {
+      const datasource = createMockDatasource('textBased', {
+        isTextBasedLanguage: jest.fn(() => true),
+      });
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
+      const frame = mockFrame();
+      frame.datasourceLayers = { first: datasource.publicAPIMock };
+
+      const groups = datatableVisualization.getConfiguration({
+        layerId: 'first',
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          columns: [{ columnId: 'b', isMetric: true }, { columnId: 'c' }],
+        },
+        frame,
+      }).groups;
+
+      // rows
+      expect(groups[0].accessors).toEqual([
+        {
+          columnId: 'c',
+          triggerIconType: undefined,
+        },
+      ]);
+
+      // columns
+      expect(groups[1].accessors).toEqual([]);
+
+      // metrics
+      expect(groups[2].accessors).toEqual([
+        {
+          columnId: 'b',
+          triggerIconType: undefined,
+          palette: undefined,
+        },
+      ]);
     });
   });
 

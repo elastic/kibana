@@ -195,7 +195,7 @@ export const getDatatableVisualization = ({
   - Form based: It relies on the isBucketed flag to identify groups. It allows only numeric fields
   on the Metrics dimension
   - Text based: It relies on the isMetric flag to identify groups. It allows all type of fields
-  on the Metric dimension
+  on the Metric dimension in cases where there are no numeric columns
   **/
   getConfiguration({ state, frame, layerId }) {
     const { sortedColumns, datasource } =
@@ -209,7 +209,6 @@ export const getDatatableVisualization = ({
     if (!sortedColumns) {
       return { groups: [] };
     }
-
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
 
     return {
