@@ -1494,7 +1494,7 @@ describe('runs with default preResponse handlers', () => {
     expect(response.header.foo).toBe('bar');
     expect(response.header['kbn-name']).toBe('kibana');
     expect(response.header['content-security-policy']).toBe(
-      `script-src 'self' 'unsafe-eval'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+      `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
     );
   });
 });
