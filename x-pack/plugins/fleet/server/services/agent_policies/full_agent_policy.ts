@@ -202,7 +202,10 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
-    if (output && output.type === outputType.Elasticsearch) {
+    if (
+      output &&
+      (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
+    ) {
       const permissions: FullAgentPolicyOutputPermissions = {};
       if (outputId === getOutputIdForAgentPolicy(monitoringOutput)) {
         Object.assign(permissions, monitoringPermissions);
@@ -467,6 +470,10 @@ export function transformOutputToFullPolicyOutput(
   if (output.type === outputType.Elasticsearch && standalone) {
     newOutput.username = '${ES_USERNAME}';
     newOutput.password = '${ES_PASSWORD}';
+  }
+
+  if (output.type === outputType.RemoteElasticsearch) {
+    newOutput.service_token = output.service_token;
   }
 
   return newOutput;
