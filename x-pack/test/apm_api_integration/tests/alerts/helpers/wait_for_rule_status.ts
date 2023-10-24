@@ -9,6 +9,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import type SuperTest from 'supertest';
 
+const RETRIES_COUNT = 10;
+
 export async function waitForActiveRule({
   ruleId,
   supertest,
@@ -25,14 +27,18 @@ export async function waitForActiveRule({
       const expectedStatus = 'active';
 
       if (status !== expectedStatus) {
-        if (logger) {
-          logger.info(`Expected: ${expectedStatus}: got ${status}`);
-        }
         throw new Error(`Expected: ${expectedStatus}: got ${status}`);
       }
 
       return status;
     },
-    { retries: 10 }
+    {
+      retries: RETRIES_COUNT,
+      onFailedAttempt: (error) => {
+        if (logger) {
+          logger.info(`Attempt ${error.attemptNumber}/${RETRIES_COUNT}: Waiting for active rule`);
+        }
+      },
+    }
   );
 }
