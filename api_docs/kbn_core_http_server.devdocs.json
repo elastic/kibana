@@ -13610,6 +13610,10 @@
                 "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
               },
               {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/server/options_list/options_list_cluster_settings_route.ts"
               },
@@ -13972,6 +13976,10 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
