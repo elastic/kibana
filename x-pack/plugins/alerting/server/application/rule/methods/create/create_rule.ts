@@ -26,7 +26,12 @@ import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../ru
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
-import { RuleActionTypes, RuleSystemAction, SanitizedRule } from '../../../../types';
+import {
+  getRuleCircuitBreakerErrorMessage,
+  RuleActionTypes,
+  RuleSystemAction,
+  SanitizedRule,
+} from '../../../../types';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
@@ -37,7 +42,7 @@ import { RuleAttributes } from '../../../../data/rule/types';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
-import { validateScheduleLimit } from '../get_schedule_frequency';
+import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { denormalizeActions } from '../../../../rules_client/lib/denormalize_actions';
 
 export interface CreateRuleOptions {
