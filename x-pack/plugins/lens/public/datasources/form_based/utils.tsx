@@ -19,7 +19,7 @@ import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
 
-import { type SearchResponseWarning, ViewWarningButton } from '@kbn/search-response-warnings';
+import { type SearchResponseWarning, SearchResponseWarningsBadgePopoverContent } from '@kbn/search-response-warnings';
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
@@ -307,19 +307,10 @@ export function getSearchWarningMessages(
               displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
               shortMessage: '',
               longMessage: (closePopover) => (
-                <>
-                  <EuiText size="s">{warning.message}</EuiText>
-                  <EuiSpacer size="s" />
-                  <ViewWarningButton
-                    onClick={() => {
-                      closePopover();
-                      warning.openInInspector();
-                    }}
-                    size="m"
-                    color="primary"
-                    isButtonEmpty={true}
-                  />
-                </>
+                <SearchResponseWarningsBadgePopoverContent
+                  onViewDetailsClick={closePopover}
+                  warnings={[warning]}
+                />
               ),
             } as UserMessage,
           ];

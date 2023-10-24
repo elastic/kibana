@@ -7,5 +7,6 @@
  */
 
 export { SearchResponseWarningsBadge } from './badge';
+export { SearchResponseWarningsBadgePopoverContent } from './badge_popover_content';
 export { SearchResponseWarningsCallout } from './callout';
 export { SearchResponseWarningsEmptyPrompt } from './empty_prompt';

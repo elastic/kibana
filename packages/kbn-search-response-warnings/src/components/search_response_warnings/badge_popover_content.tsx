@@ -56,6 +56,7 @@ export const SearchResponseWarningsBadgePopoverContent = (props: Props) => {
         </EuiText>
         <EuiButtonEmpty
           color="primary"
+          flush="left"
           iconSide={props.warnings.length > 1 ? 'right' : undefined}
           iconType={props.warnings.length > 1 ? 'arrowRight' : undefined}
           onClick={() => {
