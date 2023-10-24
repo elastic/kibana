@@ -259,7 +259,6 @@ const nodeToEuiCollapsibleNavProps = (
       id,
       title,
       isSelected,
-      accordionProps: navNode.accordionProps,
       linkProps,
       onClick,
       href,
@@ -283,9 +282,11 @@ const nodeToEuiCollapsibleNavProps = (
 };
 
 const DEFAULT_IS_COLLAPSED = true;
+const DEFAULT_IS_COLLAPSIBLE = true;
 
 interface AccordionItemState {
   [key: string]: {
+    isCollapsible: boolean;
     isCollapsed: boolean;
     // We want to auto expand the group automatically if the node is active (URL match)
     // but once the user manually expand a group we don't want to close it afterward automatically.
@@ -323,6 +324,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
       if (node.children) {
         acc[_id] = {
           isCollapsed: !node.isActive ?? DEFAULT_IS_COLLAPSED,
+          isCollapsible: node.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE,
           doCollapseFromActiveState: true,
         };
       }
@@ -354,10 +356,15 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
       _accordionProps?: Partial<EuiAccordionProps>
     ): Partial<EuiAccordionProps> | undefined => {
       const isCollapsed = navNodesState[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED;
+      const isCollapsible = navNodesState[id]?.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE;
+
+      let forceState: EuiAccordionProps['forceState'] = isCollapsed ? 'closed' : 'open';
+      if (!isCollapsible) forceState = 'open'; // Allways open if the accordion is not collapsible
 
       const updated: Partial<EuiAccordionProps> = {
         ..._accordionProps,
-        forceState: isCollapsed ? 'closed' : 'open',
+        ...(!isCollapsible && { arrowProps: { css: { display: 'none' } } }),
+        forceState,
         onToggle: () => {
           toggleAccordion(id);
         },
@@ -379,7 +386,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
   }, [closePanel, isSideNavCollapsed, navNode, navigateToUrl, openPanel]);
 
   const [props] = items;
-  const { items: accordionItems, accordionProps } = props;
+  const { items: accordionItems } = props;
 
   if (!isEuiCollapsibleNavItemProps(props)) {
     throw new Error(`Invalid EuiCollapsibleNavItem props for node ${props.id}`);
@@ -395,6 +402,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
         if (node.children && (!prev[_id] || prev[_id].doCollapseFromActiveState)) {
           acc[_id] = {
             isCollapsed: !node.isActive ?? DEFAULT_IS_COLLAPSED,
+            isCollapsible: node.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE,
             doCollapseFromActiveState: true,
           };
         }
@@ -435,7 +443,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
     <EuiCollapsibleNavItem
       {...props}
       items={collapsibleNavSubItems}
-      accordionProps={setAccordionProps(navNode.id, accordionProps)}
+      accordionProps={setAccordionProps(navNode.id)}
     />
   );
 };
