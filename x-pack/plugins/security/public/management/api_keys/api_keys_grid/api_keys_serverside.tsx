@@ -72,7 +72,7 @@ const useAsyncTable = (): UseAsyncTableResult => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<QueryContainer>({});
   const [from, setFrom] = useState<number>(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(25);
   const { services } = useKibana<CoreStart>();
 
   const fetchApiKeys = async () => {
@@ -97,7 +97,7 @@ const useAsyncTable = (): UseAsyncTableResult => {
 
   useEffect(() => {
     fetchApiKeys();
-  }, [query, from]);
+  }, [query, from, pageSize]);
 
   return {
     state,
@@ -190,7 +190,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
     pageIndex: from / pageSize,
     pageSize,
     totalItemCount: requestState.total,
-    pageSizeOptions: [10, 25, 50],
+    pageSizeOptions: [25, 50, 100],
   };
 
   return (
