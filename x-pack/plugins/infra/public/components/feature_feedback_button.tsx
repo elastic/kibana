@@ -14,8 +14,8 @@ const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
 
 const getDeploymentType = (
-  isCloudEnabled?: boolean,
-  isServerlessEnabled?: boolean
+  isCloudEnabled: boolean,
+  isServerlessEnabled: boolean
 ): string | undefined => {
   if (isServerlessEnabled) {
     return 'Serverless (fully-managed projects)';
@@ -23,10 +23,7 @@ const getDeploymentType = (
   if (isCloudEnabled) {
     return 'Elastic Cloud (we manage)';
   }
-  if (isCloudEnabled === false) {
-    return 'Self-Managed (you manage)';
-  }
-  return undefined;
+  return 'Self-Managed (you manage)';
 };
 
 const getSurveyFeedbackURL = (formUrl: string, kibanaVersion?: string, deploymentType?: string) => {
