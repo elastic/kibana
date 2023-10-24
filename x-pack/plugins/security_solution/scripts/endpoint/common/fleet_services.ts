@@ -25,7 +25,7 @@ import {
   APP_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import {
@@ -45,6 +45,7 @@ import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import {
+  createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../common/endpoint/data_loaders/utils';
@@ -59,7 +60,7 @@ export const checkInFleetAgent = async (
   agentId: string,
   {
     agentStatus = 'online',
-    log = new ToolingLog(),
+    log = createToolingLogger(),
   }: Partial<{
     /** The agent status to be sent. If set to `random`, then one will be randomly generated */
     agentStatus: AgentStatus | 'random';
