@@ -6,7 +6,8 @@
  */
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CancellationToken, generatePdfObservableV2, LocatorParams } from '@kbn/reporting-common';
+import { CancellationToken, LocatorParams } from '@kbn/reporting-common';
+import { generatePdfObservableV2 } from '@kbn/reporting-common-export-types-helpers';
 import { cryptoFactory } from '@kbn/reporting-common/crypto';
 import { TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
@@ -15,7 +16,7 @@ import { of } from 'rxjs';
 import type { Writable } from 'stream';
 import { createMockConfigSchema } from '../../test_helpers';
 
-jest.mock('@kbn/reporting-common/export_type_helpers/generate_pdf_v2');
+jest.mock('@kbn/reporting-common-export-types-helpers/generate_pdf_v2');
 
 let content: string;
 let mockPdfExportType: PdfExportType;

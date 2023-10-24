@@ -4,9 +4,7 @@
     "owner": "@elastic/appex-sharedux",
     "plugin": {
       "server": true,
-      "browser": true,
-      "requiredBundles": ["kibanaUtils"],
-      "extraPublicDirs": ["common"]
+      "browser": false,
     }
   }
   

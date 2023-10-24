@@ -11,8 +11,8 @@ import type { Logger } from '@kbn/logging';
 import { finalize, map, tap } from 'rxjs/operators';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { Observable } from 'rxjs';
-import { PngMetrics } from '../metrics';
-import { REPORTING_TRANSACTION_TYPE } from '../constants';
+import { PngMetrics } from '@kbn/reporting-common/metrics';
+import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-common/constants';
 
 interface PngResult {
   buffer: Buffer;

@@ -9,7 +9,8 @@ import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
-import { CancellationToken, setFieldFormats } from '@kbn/reporting-common';
+import { CancellationToken } from '@kbn/reporting-common';
+import { setFieldFormats } from '@kbn/reporting-common-export-types-helpers';
 import {
   PNG_REPORT_TYPE_V2,
   PDF_REPORT_TYPE_V2,

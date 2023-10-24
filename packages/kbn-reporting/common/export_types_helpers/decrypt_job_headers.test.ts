@@ -8,7 +8,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { decryptJobHeaders } from '.';
-import { cryptoFactory } from '../crypto';
+import { cryptoFactory } from '@kbn/reporting-common/crypto';
 
 const logger = loggingSystemMock.createLogger();
 

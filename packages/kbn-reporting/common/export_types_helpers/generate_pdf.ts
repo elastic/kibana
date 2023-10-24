@@ -9,7 +9,7 @@
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { Observable } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { PdfMetrics } from '../metrics';
+import { PdfMetrics } from '@kbn/reporting-common/metrics';
 import { getTracker } from './pdf_tracker';
 
 interface PdfResult {

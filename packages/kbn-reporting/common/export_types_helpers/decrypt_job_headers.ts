@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
-import { cryptoFactory } from '../crypto';
+import { cryptoFactory } from '@kbn/reporting-common/crypto';
 
 export const decryptJobHeaders = async (
   encryptionKey: string | undefined,
