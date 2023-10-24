@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButton,
@@ -85,14 +84,7 @@ export const PrivateLocationsTable = ({
       render: (val: string[]) => {
         const tags = val ?? [];
         if (tags.length === 0) {
-          return (
-            <EuiText>
-              <FormattedMessage
-                id="app_not_found_in_i18nrc.columns.--TextLabel"
-                defaultMessage="--"
-              />
-            </EuiText>
-          );
+          return '--';
         }
         return (
           <EuiFlexGroup gutterSize="xs" wrap>
