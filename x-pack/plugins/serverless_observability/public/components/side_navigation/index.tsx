@@ -78,7 +78,7 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'aiops',
           title: 'AIOps',
           renderAs: 'accordion',
-          isCollapsible: false,
+          isCollapsible: true,
           spaceBefore: null,
           children: [
             {
@@ -131,7 +131,7 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Applications',
           }),
           renderAs: 'accordion',
-          isCollapsible: false,
+          isCollapsible: true,
           children: [
             {
               link: 'apm:services',
@@ -160,7 +160,7 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Infrastructure',
           }),
           renderAs: 'accordion',
-          isCollapsible: false,
+          isCollapsible: true,
           children: [
             {
               link: 'metrics:inventory',
