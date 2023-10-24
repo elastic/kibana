@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, Fragment, useCallback } from 'react';
+import React, { FC, useCallback } from 'react';
 import {
   EuiListGroup,
   EuiTitle,
@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { PanelNavItem } from './panel_nav_item';
 
 const accordionButtonClassName = 'sideNavPanelAccordion__button';
@@ -42,6 +42,16 @@ const getClassnames = (euiTheme: EuiThemeComputed<{}>) => ({
   `,
 });
 
+const someChildIsVisible = (children: ChromeProjectNavigationNode[]) => {
+  return children.some((child) => {
+    if (child.renderAs === 'item') return true;
+    if (child.children) {
+      return child.children.every(({ sideNavStatus }) => sideNavStatus !== 'hidden');
+    }
+    return true;
+  });
+};
+
 interface Props {
   navNode: ChromeProjectNavigationNode;
   /** Flag to indicate if the group is the first in the list of groups when looping */
@@ -52,14 +62,23 @@ interface Props {
 
 export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRuleBefore }) => {
   const { euiTheme } = useEuiTheme();
-  const { id, title, appendHorizontalRule } = navNode;
+  const { id, title, appendHorizontalRule, spaceBefore: _spaceBefore } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
-  const totalChildren = filteredChildren?.length ?? 0;
   const classNames = getClassnames(euiTheme);
   const hasTitle = !!title && title !== '';
   const removePaddingTop = !hasTitle && !isFirstInList;
   const someChildIsGroup = filteredChildren?.some((child) => !!child.children);
   const firstChildIsGroup = !!filteredChildren?.[0]?.children;
+
+  let spaceBefore = _spaceBefore;
+  if (spaceBefore === undefined) {
+    if (!hasTitle && isFirstInList) {
+      // If the first group has no title, we don't add any space.
+      spaceBefore = null;
+    } else {
+      spaceBefore = hasHorizontalRuleBefore ? 'm' : 'l';
+    }
+  }
 
   const renderChildren = useCallback(() => {
     if (!filteredChildren) return null;
@@ -69,21 +88,19 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
       return isItem ? (
         <PanelNavItem key={item.id} item={item} />
       ) : (
-        <Fragment key={item.id}>
-          <PanelGroup navNode={item} />
-          {i < totalChildren - 1 && <EuiSpacer />}
-        </Fragment>
+        <PanelGroup navNode={item} key={item.id} />
       );
     });
-  }, [filteredChildren, totalChildren]);
+  }, [filteredChildren]);
 
-  if (!filteredChildren?.length) {
+  if (!filteredChildren?.length || !someChildIsVisible(filteredChildren)) {
     return null;
   }
 
   if (navNode.renderAs === 'accordion') {
     return (
       <>
+        {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
         <EuiAccordion
           id={id}
           buttonContent={title}
@@ -91,7 +108,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
           buttonClassName={accordionButtonClassName}
         >
           <>
-            <EuiSpacer size={firstChildIsGroup ? 'l' : 's'} />
+            {!firstChildIsGroup && <EuiSpacer size="s" />}
             {renderChildren()}
           </>
         </EuiAccordion>
@@ -102,9 +119,10 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
 
   return (
     <>
+      {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
       {hasTitle && (
         <EuiTitle size="xxxs" className={classNames.title}>
-          <h2>{navNode.title}</h2>
+          <h2>{title}</h2>
         </EuiTitle>
       )}
       <EuiListGroup
