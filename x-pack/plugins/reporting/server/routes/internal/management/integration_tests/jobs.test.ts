@@ -12,7 +12,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { ExportType } from '@kbn/reporting-common';
+import { ExportType } from '@kbn/reporting-common-export-types-helpers';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';

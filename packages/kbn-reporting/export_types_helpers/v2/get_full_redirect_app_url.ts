@@ -10,7 +10,7 @@ import { format } from 'url';
 import { getRedirectAppPath } from '@kbn/reporting-common/constants';
 import { ReportingConfigType } from '@kbn/reporting-common/schema';
 import { ReportingServerInfo } from '@kbn/reporting-common/types';
-import { buildKibanaPath } from './build_kibana_path';
+import { buildKibanaPath } from '@kbn/reporting-common/build_kibana_path';
 
 export function getFullRedirectAppUrl(
   config: ReportingConfigType,

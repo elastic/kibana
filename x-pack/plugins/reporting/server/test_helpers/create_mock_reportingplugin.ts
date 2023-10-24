@@ -26,7 +26,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DeepPartial } from 'utility-types';
-import { setFieldFormats } from '@kbn/reporting-common';
+import { setFieldFormats } from '@kbn/reporting-common-export-types-helpers';
 import { ReportingCore } from '..';
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
