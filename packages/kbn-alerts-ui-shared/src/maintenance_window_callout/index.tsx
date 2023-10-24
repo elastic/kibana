@@ -38,6 +38,16 @@ const maintenanceWindowMultipleCategoryNames = (names: string[]) =>
     values: { commaSeparatedList: names.slice(0, -1).join(', '), last: names.slice(-1).join('') },
   });
 
+const APP_CATEGORIES = {
+  ...DEFAULT_APP_CATEGORIES,
+  management: {
+    ...DEFAULT_APP_CATEGORIES.management,
+    label: i18n.translate('alertsUIShared.maintenanceWindowCallout.managementCategoryLabel', {
+      defaultMessage: 'Stack',
+    }),
+  },
+};
+
 export function MaintenanceWindowCallout({
   kibanaServices,
   categories,
@@ -93,8 +103,7 @@ export function MaintenanceWindowCallout({
     const activeCategories = activeCategoryIds
       .map(
         (categoryId) =>
-          Object.values(DEFAULT_APP_CATEGORIES).find((c) => c.id === categoryId)?.label ??
-          categoryId
+          Object.values(APP_CATEGORIES).find((c) => c.id === categoryId)?.label ?? categoryId
       )
       .filter(Boolean) as string[];
     return activeCategories.length === 0
