@@ -18,6 +18,7 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -175,6 +176,8 @@ export const useInvestigateInTimeline = ({
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {
+    createHistoryEntry();
+
     startTransaction({ name: ALERTS_ACTIONS.INVESTIGATE_IN_TIMELINE });
     if (onInvestigateInTimelineAlertClick) {
       onInvestigateInTimelineAlertClick();

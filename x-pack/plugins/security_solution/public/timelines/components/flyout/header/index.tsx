@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
@@ -136,6 +137,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   );
 
   const handleClose = useCallback(() => {
+    createHistoryEntry();
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     focusActiveTimelineButton();
   }, [dispatch, timelineId]);

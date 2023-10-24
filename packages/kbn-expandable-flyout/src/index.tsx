@@ -69,7 +69,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     ? mostRecentPreview?.params?.banner
     : undefined;
 
-  const showBackButton = preview && preview.length > 1;
+  const showBackButton = !!preview && preview.length > 1;
   const previewSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
     [mostRecentPreview, registeredPanels]
@@ -86,7 +86,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     showPreview,
   });
 
-  const hideFlyout = !left && !right && !preview.length;
+  const hideFlyout = !left && !right && !preview?.length;
   if (hideFlyout) {
     return null;
   }

@@ -47,11 +47,9 @@ export const Description: FC = () => {
         indexName,
         scopeId,
         banner: {
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
-              defaultMessage="Preview rule details"
-            />
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.right.about.description.rulePreviewTitle',
+            { defaultMessage: 'Preview rule details' }
           ),
           backgroundColor: 'warning',
           textColor: 'warning',

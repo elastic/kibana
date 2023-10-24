@@ -17,7 +17,7 @@ import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvidersComponent } from '../../../../common/mock';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
-import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
+import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
@@ -58,7 +58,7 @@ describe('<HeaderAction />', () => {
   describe('Share alert url action', () => {
     it('should render share button in the title and copy the the value to clipboard if document is an alert', () => {
       const syncedFlyoutState = 'flyoutState';
-      const query = `?${FLYOUT_URL_PARAM}=${syncedFlyoutState}`;
+      const query = `?${URL_PARAM_KEY.eventFlyout}=${syncedFlyoutState}`;
 
       Object.defineProperty(window, 'location', {
         value: {
@@ -73,7 +73,7 @@ describe('<HeaderAction />', () => {
       fireEvent.click(shareButton);
 
       expect(copyToClipboard).toHaveBeenCalledWith(
-        `${alertUrl}&${FLYOUT_URL_PARAM}=${syncedFlyoutState}`
+        `${alertUrl}&${URL_PARAM_KEY.eventFlyout}=${syncedFlyoutState}`
       );
     });
 

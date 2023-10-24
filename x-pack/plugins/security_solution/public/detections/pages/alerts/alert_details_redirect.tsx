@@ -23,7 +23,6 @@ import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
 import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
 import { resolveFlyoutParams } from './utils';
-import { FLYOUT_URL_PARAM } from '../../../flyout/document_details/shared/hooks/url/use_sync_flyout_state_with_url';
 
 export const AlertDetailsRedirect = () => {
   const { alertId } = useParams<{ alertId: string }>();
@@ -72,7 +71,7 @@ export const AlertDetailsRedirect = () => {
 
   const pageFiltersQuery = encode(formatPageFilterSearchParam([statusPageFilter]));
 
-  const currentFlyoutParams = searchParams.get(FLYOUT_URL_PARAM);
+  const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.eventFlyout);
 
   const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 

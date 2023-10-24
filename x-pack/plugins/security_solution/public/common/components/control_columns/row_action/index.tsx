@@ -110,16 +110,19 @@ const RowActionComponent = ({
     };
 
     if (showExpandableFlyout) {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
+      openFlyout(
+        {
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: tableId,
+            },
           },
         },
-      });
+        tableId !== TableId.rulePreview
+      );
     }
     // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
     // support of old flyout in cases page

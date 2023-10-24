@@ -26,7 +26,7 @@ export type Action =
       payload: {
         right?: FlyoutPanelProps;
         left?: FlyoutPanelProps;
-        preview?: FlyoutPanelProps;
+        preview?: FlyoutPanelProps[];
       };
     }
   | {

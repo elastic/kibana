@@ -23,10 +23,6 @@ import { RightPanelProvider } from './document_details/right/context';
 import type { LeftPanelProps } from './document_details/left';
 import { LeftPanel, DocumentDetailsLeftPanelKey } from './document_details/left';
 import { LeftPanelProvider } from './document_details/left/context';
-import {
-  SecuritySolutionFlyoutUrlSyncProvider,
-  useSecurityFlyoutUrlSync,
-} from './document_details/shared/context/url_sync';
 import type { PreviewPanelProps } from './document_details/preview';
 import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details/preview';
 import { PreviewPanelProvider } from './document_details/preview/context';
@@ -84,42 +80,20 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   },
 ];
 
-const OuterProviders: FC = ({ children }) => {
-  return <SecuritySolutionFlyoutUrlSyncProvider>{children}</SecuritySolutionFlyoutUrlSyncProvider>;
-};
-
-const InnerProviders: FC = ({ children }) => {
-  const [flyoutRef, handleFlyoutChangedOrClosed] = useSecurityFlyoutUrlSync();
-
-  return (
-    <ExpandableFlyoutProvider
-      onChanges={handleFlyoutChangedOrClosed}
-      onClosePanels={handleFlyoutChangedOrClosed}
-      ref={flyoutRef}
-    >
-      {children}
-    </ExpandableFlyoutProvider>
-  );
-};
-
 export const SecuritySolutionFlyoutContextProvider: FC = ({ children }) => (
-  <OuterProviders>
-    <InnerProviders>{children}</InnerProviders>
-  </OuterProviders>
+  <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
 );
 
 SecuritySolutionFlyoutContextProvider.displayName = 'SecuritySolutionFlyoutContextProvider';
 
-export const SecuritySolutionFlyout = memo(() => {
-  const [_flyoutRef, handleFlyoutChangedOrClosed] = useSecurityFlyoutUrlSync();
+const handleFlyoutChangedOrClosed = () => {};
 
-  return (
-    <ExpandableFlyout
-      registeredPanels={expandableFlyoutDocumentsPanels}
-      handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
-      paddingSize="none"
-    />
-  );
-});
+export const SecuritySolutionFlyout = memo(() => (
+  <ExpandableFlyout
+    registeredPanels={expandableFlyoutDocumentsPanels}
+    handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
+    paddingSize="none"
+  />
+));
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';

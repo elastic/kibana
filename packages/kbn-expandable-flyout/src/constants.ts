@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ExpandableFlyout } from './src';
-export {
-  ExpandableFlyoutProvider,
-  useExpandableFlyoutContext,
-  type ExpandableFlyoutContext,
-} from './src/context';
-
-export type { ExpandableFlyoutProps } from './src';
-export type { FlyoutPanelProps, PanelPath } from './src/types';
+export const EXPANDABLE_FLYOUT_URL_KEY = 'eventFlyout' as const;
