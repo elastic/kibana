@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { AssetFilters } from './types_api';
+
 export interface SharedAssetsOptionsPublic {
   from: string;
   to?: string;
+  filters?: AssetFilters;
+  stringFilters?: string;
 }
 
 export type GetHostsOptionsPublic = SharedAssetsOptionsPublic;

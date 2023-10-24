@@ -166,18 +166,21 @@ export interface K8sCluster extends WithTimestamp {
   };
 }
 
-export interface AssetFilters {
-  type?: AssetType | AssetType[];
-  kind?: AssetKind | AssetKind[];
-  ean?: string | string[];
-  id?: string;
-  typeLike?: string;
-  kindLike?: string;
-  eanLike?: string;
-  collectionVersion?: number | 'latest' | 'all';
-  from?: string | number;
-  to?: string | number;
-}
+export const assetFiltersRT = rt.exact(
+  rt.partial({
+    type: rt.union([assetTypeRT, rt.array(assetTypeRT)]),
+    kind: rt.union([assetKindRT, rt.array(assetKindRT)]),
+    ean: rt.union([rt.string, rt.array(rt.string)]),
+    id: rt.string,
+    typeLike: rt.string,
+    kindLike: rt.string,
+    eanLike: rt.string,
+    ['cloud.provider']: rt.string,
+    ['cloud.region']: rt.string,
+  })
+);
+
+export type AssetFilters = rt.TypeOf<typeof assetFiltersRT>;
 
 export const relationRT = rt.union([
   rt.literal('ancestors'),
@@ -205,6 +208,8 @@ export const getHostAssetsQueryOptionsRT = rt.exact(
     from: assetDateRT,
     to: assetDateRT,
     size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersRT,
   })
 );
 export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptionsRT>;
@@ -222,6 +227,8 @@ export const getServiceAssetsQueryOptionsRT = rt.exact(
     to: assetDateRT,
     size: sizeRT,
     parent: rt.string,
+    stringFilters: rt.string,
+    filters: assetFiltersRT,
   })
 );
 
@@ -230,3 +237,26 @@ export const getServiceAssetsResponseRT = rt.type({
   services: rt.array(assetRT),
 });
 export type GetServiceAssetsResponse = rt.TypeOf<typeof getServiceAssetsResponseRT>;
+
+export function isAssetFilters(parsed: object): parsed is AssetFilters {
+  // return true if parsed is {}
+  if (typeof parsed === 'object' && parsed !== null && Object.keys(parsed).length === 0) {
+    return true;
+  }
+  const submittedKeys = Object.keys(parsed);
+  const validated = assetFiltersRT.decode(parsed);
+
+  if (validated._tag === 'Right') {
+    const validatedKeys = Object.keys(validated.right);
+
+    // Manually check for extra keys since iots won't fail in this case
+    const extraSubmittedKeys = submittedKeys.filter((key) => !validatedKeys.includes(key));
+    if (extraSubmittedKeys.length > 0) {
+      return false;
+    }
+
+    return true;
+  } else {
+    return false;
+  }
+}

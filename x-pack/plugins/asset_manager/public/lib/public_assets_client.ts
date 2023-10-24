@@ -15,9 +15,11 @@ export class PublicAssetsClient implements IPublicAssetsClient {
   constructor(private readonly http: HttpStart) {}
 
   async getHosts(options: GetHostsOptionsPublic) {
+    const { filters, ...otherOptions } = options;
     const results = await this.http.get<GetHostAssetsResponse>(GET_HOSTS, {
       query: {
-        ...options,
+        stringFilters: JSON.stringify(filters),
+        ...otherOptions,
       },
     });
 
@@ -25,9 +27,11 @@ export class PublicAssetsClient implements IPublicAssetsClient {
   }
 
   async getServices(options: GetServicesOptionsPublic) {
+    const { filters, ...otherOptions } = options;
     const results = await this.http.get<GetServiceAssetsResponse>(GET_SERVICES, {
       query: {
-        ...options,
+        stringFilters: JSON.stringify(filters),
+        ...otherOptions,
       },
     });
 

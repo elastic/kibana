@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Asset } from '../../../../common/types_api';
 import { collectHosts } from '../../collectors/hosts';
 import { GetHostsOptionsPublic } from '../../../../common/types_client';
@@ -21,15 +22,44 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
     savedObjectsClient: options.savedObjectsClient,
   });
 
+  const filters: QueryDslQueryContainer[] = [];
+
+  if (options.filters?.ean) {
+    const fn = options.filters.ean.includes('*') ? 'wildcard' : 'term';
+    filters.push({
+      [fn]: {
+        'host.hostname': options.filters.ean,
+      },
+    });
+  }
+
+  if (options.filters?.['cloud.provider']) {
+    filters.push({
+      term: {
+        'cloud.provider': options.filters['cloud.provider'],
+      },
+    });
+  }
+
+  if (options.filters?.['cloud.region']) {
+    filters.push({
+      term: {
+        'cloud.region': options.filters['cloud.region'],
+      },
+    });
+  }
+
   const { assets } = await collectHosts({
     client: options.elasticsearchClient,
     from: options.from,
     to: options.to || 'now',
+    filters,
     sourceIndices: {
       metrics: metricsIndices,
       logs: options.sourceIndices.logs,
     },
   });
+
   return {
     hosts: assets,
   };

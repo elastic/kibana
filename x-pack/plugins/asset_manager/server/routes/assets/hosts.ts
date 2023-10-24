@@ -7,7 +7,11 @@
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { GetHostAssetsQueryOptions, getHostAssetsQueryOptionsRT } from '../../../common/types_api';
+import {
+  GetHostAssetsQueryOptions,
+  getHostAssetsQueryOptionsRT,
+  isAssetFilters,
+} from '../../../common/types_api';
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
 import * as routePaths from '../../../common/constants_routes';
@@ -18,21 +22,37 @@ export function hostsRoutes<T extends RequestHandlerContext>({
   router,
   assetClient,
 }: SetupRouteOptions<T>) {
+  const validate = createRouteValidationFunction(getHostAssetsQueryOptionsRT);
   router.get<unknown, GetHostAssetsQueryOptions, unknown>(
     {
       path: routePaths.GET_HOSTS,
       validate: {
-        query: createRouteValidationFunction(getHostAssetsQueryOptionsRT),
+        query: (q, res) => {
+          if (typeof q.stringFilters === 'string') {
+            try {
+              const parsedFilters = JSON.parse(q.stringFilters);
+              if (isAssetFilters(parsedFilters)) {
+                q.filters = parsedFilters;
+              } else {
+                return res.badRequest(new Error(`Invalid filters - ${q.filters}`));
+              }
+            } catch (err: any) {
+              return res.badRequest(err);
+            }
+          }
+          return validate(q, res);
+        },
       },
     },
     async (context, req, res) => {
-      const { from = 'now-24h', to = 'now' } = req.query || {};
+      const { from = 'now-24h', to = 'now', filters } = req.query || {};
       const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
 
       try {
         const response = await assetClient.getHosts({
           from,
           to,
+          filters, // safe due to route validation, are there better ways to do this?
           elasticsearchClient,
           savedObjectsClient,
         });
