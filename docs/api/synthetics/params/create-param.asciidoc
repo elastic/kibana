@@ -1,23 +1,23 @@
-[[create-parameter-api]]
-== Create Parameter API
+[[add-parameters-api]]
+== Add Parameters API
 ++++
-<titleabbrev>Create Parameter</titleabbrev>
+<titleabbrev>Add Parameters</titleabbrev>
 ++++
 
-Creates a parameter with the following schema.
+Adds one or more parameters to the system.
 
 === {api-request-title}
 
-`POST <your-api-host>/api/synthetics/parameters`
+`POST <your-api-host>/api/synthetics/params`
 
 === {api-prereq-title}
 
-To use this API, you must have appropriate permissions for creating parameters.
+To use this API, you must have appropriate permissions for adding parameters.
 
-[[parameter-create-request-body]]
+[[parameters-add-request-body]]
 ==== Request body
 
-The request body should contain the following attributes:
+The request body can contain either a single parameter object or an array of parameter objects. The parameter object schema includes the following attributes:
 
 `key`::
 (Required, string) The key of the parameter.
@@ -34,14 +34,18 @@ The request body should contain the following attributes:
 `share_across_spaces`::
 (Optional, boolean) Whether the parameter should be shared across spaces.
 
-[[parameter-create-example]]
+When adding a single parameter, provide a single object. When adding multiple parameters, provide an array of parameter objects.
+
+[[parameters-add-example]]
 ==== Example
 
-Here is an example of a POST request to create a parameter:
+Here are examples of POST requests to add parameters, either as a single parameter or as an array of parameters:
+
+To add a single parameter:
 
 [source,sh]
 --------------------------------------------------
-POST /api/synthetics/parameters
+POST /api/synthetics/params
 {
   "key": "api_key",
   "value": "your-api-key-value",
@@ -51,18 +55,23 @@ POST /api/synthetics/parameters
 }
 --------------------------------------------------
 
-The API returns the created parameter as follows:
+To add multiple parameters:
 
-[source,json]
+[source,sh]
 --------------------------------------------------
-{
-  "id": "unique-parameter-id",
-  "key": "api_key",
-  "value": "your-api-key-value",
-  "description": "API Key for authentication",
-  "tags": ["authentication", "security"],
-  "share_across_spaces": true
-}
+POST /api/synthetics/params
+[
+  {
+    "key": "param1",
+    "value": "value1"
+  },
+  {
+    "key": "param2",
+    "value": "value2"
+  }
+]
 --------------------------------------------------
 
-This example provides documentation for creating a parameter using the specified schema and includes an example of a POST request and the expected response. You can replace `<your-api-host>` with the actual host where your API is available.
+The API returns a response based on the request. If you added a single parameter, it will return a single parameter object. If you added multiple parameters, it will return an array of parameter objects.
+
+This example provides documentation for adding parameters, whether as a single parameter or an array of parameters, using the specified schema. You can replace `<your-api-host>` with the actual host where your API is available.

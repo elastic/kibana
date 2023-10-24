@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import {
   SyntheticsParamRequest,
@@ -25,7 +26,9 @@ const ParamsObjectSchema = schema.object({
   share_across_spaces: schema.maybe(schema.boolean()),
 });
 
-export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<SyntheticsParams> = () => ({
+export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
+  SyntheticsParams | SyntheticsParams[]
+> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PARAMS,
   validate: {},
@@ -40,28 +43,23 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<SyntheticsP
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
       };
-      const { share_across_spaces: shareAcrossSpaces, ...data } =
-        request.body as SyntheticsParamRequest;
 
-      const {
-        attributes: { key, tags, description },
-        id,
-        namespaces,
-      } = await savedObjectsClient.create<Omit<SyntheticsParamSOAttributes, 'id'>>(
-        syntheticsParamType,
-        data,
-        {
-          initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
-        }
+      const savedObjectsData = parseParamBody(
+        spaceId,
+        request.body as SyntheticsParamRequest[] | SyntheticsParamRequest
       );
-      return {
-        id,
-        description,
-        key,
-        namespaces,
-        tags,
-        value: data.value,
-      };
+
+      const result = await savedObjectsClient.bulkCreate<Omit<SyntheticsParamSOAttributes, 'id'>>(
+        savedObjectsData
+      );
+
+      if (savedObjectsData.length > 1) {
+        return result.saved_objects.map((savedObject) => {
+          return toClientResponse(savedObject);
+        });
+      } else {
+        return toClientResponse(result.saved_objects[0]);
+      }
     } catch (error) {
       if (error.output?.statusCode === 404) {
         const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -74,3 +72,42 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<SyntheticsP
     }
   },
 });
+
+const toClientResponse = (savedObject: SavedObject<Omit<SyntheticsParamSOAttributes, 'id'>>) => {
+  const { id, attributes: data, namespaces } = savedObject;
+  const { description, key, tags } = data;
+  return {
+    id,
+    description,
+    key,
+    namespaces,
+    tags,
+    value: data.value,
+  };
+};
+
+const parseParamBody = (
+  spaceId: string,
+  body: SyntheticsParamRequest[] | SyntheticsParamRequest
+): Array<SavedObjectsBulkCreateObject<Omit<SyntheticsParamSOAttributes, 'id'>>> => {
+  if (Array.isArray(body)) {
+    const params = body as SyntheticsParamRequest[];
+    return params.map((param) => {
+      const { share_across_spaces: shareAcrossSpaces, ...data } = param;
+      return {
+        type: syntheticsParamType,
+        attributes: data,
+        initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
+      };
+    });
+  }
+
+  const { share_across_spaces: shareAcrossSpaces, ...data } = body;
+  return [
+    {
+      type: syntheticsParamType,
+      attributes: data,
+      initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
+    },
+  ];
+};
