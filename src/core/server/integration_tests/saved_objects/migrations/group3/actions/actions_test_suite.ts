@@ -104,12 +104,35 @@ export const runActionTestSuite = ({
       { _source: { title: 'doc 3' } },
       { _source: { title: 'saved object 4', type: 'another_unused_type' } },
       { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
-      { _source: { title: new Array(1000).fill('a').join(), type: 'large' } }, // "large" saved object
+      {
+        _source: { title: new Array(1000).fill('a').join(), type: 'large' },
+      }, // "large" saved objects
     ] as unknown as SavedObjectsRawDoc[];
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_docs',
       operations: docs.map((doc) => createBulkIndexOperationTuple(doc)),
+      refresh: 'wait_for',
+    })();
+
+    await createIndex({
+      client,
+      indexName: 'existing_index_with_100k_docs',
+      aliases: ['existing_index_with_100k_docs_alias'],
+      esCapabilities,
+      mappings: {
+        dynamic: true,
+        properties: {},
+      },
+    })();
+    const docs100k = new Array(100000).fill({
+      _source: { title: new Array(1000).fill('a').join(), type: 'large' },
+    }) as unknown as SavedObjectsRawDoc[]; // 100k "large" saved objects
+
+    await bulkOverwriteTransformedDocuments({
+      client,
+      index: 'existing_index_with_100k_docs',
+      operations: docs100k.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
 
@@ -756,8 +779,7 @@ export const runActionTestSuite = ({
 
   // Reindex doesn't return any errors on it's own, so we have to test
   // together with waitForReindexTask
-  // Failing: See https://github.com/elastic/kibana/issues/166190
-  describe.skip('reindex & waitForReindexTask', () => {
+  describe('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
@@ -1122,15 +1144,16 @@ export const runActionTestSuite = ({
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       const readyTaskRes = await waitForIndexStatus({
         client,
-        index: 'existing_index_with_docs',
+        index: 'existing_index_with_100k_docs',
         status: 'yellow',
+        timeout: '300s',
       })();
 
       expect(Either.isRight(readyTaskRes)).toBe(true);
 
       const res = (await reindex({
         client,
-        sourceIndex: 'existing_index_with_docs',
+        sourceIndex: 'existing_index_with_100k_docs',
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1428,7 +1451,7 @@ export const runActionTestSuite = ({
     });
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/166199
+  // FLAKY: https://github.com/elastic/kibana/issues/166199
   describe.skip('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
@@ -1469,7 +1492,7 @@ export const runActionTestSuite = ({
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_docs',
+        'existing_index_with_100k_docs',
         1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
