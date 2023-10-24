@@ -12,8 +12,10 @@ tags:
   - name: alerting
     description: Alerting APIs enable you to create and manage rules and alerts.
 servers:
-  - url: 'http://localhost:5601'
-    description: local
+  - url: https://{kibanaUrl}
+    variables:
+      kibanaUrl:
+        default: localhost:5601
 paths:
   '/s/{spaceId}/api/alerting/rule':
     $ref: 'paths/s@{spaceid}@api@alerting@rule.yaml'

@@ -14,8 +14,12 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601",
-      "description": "local"
+      "url": "https://{kibanaUrl}",
+      "variables": {
+        "kibanaUrl": {
+          "default": "localhost:5601"
+        }
+      }
     }
   ],
   "security": [
@@ -112,18 +116,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}": {
       "get": {
@@ -177,12 +171,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes a rule.",
@@ -226,12 +215,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Creates a rule with a specific rule identifier.",
@@ -321,12 +305,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for a rule.",
@@ -397,18 +376,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_disable": {
       "post": {
@@ -453,18 +422,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_enable": {
       "post": {
@@ -509,18 +468,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rules/_find": {
       "get": {
@@ -694,18 +643,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/_health": {
       "get": {
@@ -825,12 +764,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule_types": {
       "get": {
@@ -1109,12 +1043,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all": {
       "post": {
@@ -1149,18 +1078,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all": {
       "post": {
@@ -1195,18 +1114,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key": {
       "post": {
@@ -1241,18 +1150,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute": {
       "post": {
@@ -1290,18 +1189,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute": {
       "post": {
@@ -1339,18 +1228,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}": {
       "delete": {
@@ -1393,12 +1272,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Retrieves an alert by its identifier.",
@@ -1444,12 +1318,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Create an alert.",
@@ -1600,12 +1469,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for an alert.",
@@ -1742,18 +1606,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_disable": {
       "post": {
@@ -1796,18 +1650,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_enable": {
       "post": {
@@ -1850,18 +1694,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all": {
       "post": {
@@ -1904,18 +1738,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all": {
       "post": {
@@ -1958,18 +1782,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alerts/_find": {
       "get": {
@@ -2136,18 +1950,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alerts/_health": {
       "get": {
@@ -2263,12 +2067,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alerts/list_alert_types": {
       "get": {
@@ -2418,12 +2217,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute": {
       "post": {
@@ -2476,18 +2270,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute": {
       "post": {
@@ -2540,18 +2324,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     }
   },
   "components": {
