@@ -25,7 +25,7 @@ import {
   SPACE_IDS,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { omit, padStart } from 'lodash';
+import { omit, padStart, sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createIndexConnector, createEsQueryRule } from './helpers/alerting_api_helper';
 import {
@@ -466,9 +466,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(resp2.hits.hits.length).to.be(1);
 
-      resp.hits.hits.sort((a, b) => b._source.new - a._source.new);
+      const hits = sortBy(resp.hits.hits, ['_source.new']);
 
-      const document = resp.hits.hits[0];
+      const document = hits[1];
       expect(document._source).to.eql({
         all: '1',
         new: '1',
@@ -479,7 +479,7 @@ export default function ({ getService }: FtrProviderContext) {
         recoveredIds: '[]',
       });
 
-      const document1 = resp.hits.hits[1];
+      const document1 = hits[0];
       expect(document1._source).to.eql({
         all: '1',
         new: '0',

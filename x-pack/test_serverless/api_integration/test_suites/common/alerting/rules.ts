@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { get } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createIndexConnector,
@@ -253,8 +254,9 @@ export default function ({ getService }: FtrProviderContext) {
         num: 2,
       });
       expect(resp2.hits.hits.length).to.be(2);
+      const index = resp2.hits.hits.findIndex((hit) => get(hit, '_source.ruleName') === 'def');
 
-      const document2 = resp2.hits.hits.find((hit) => hit._source.ruleName === 'def');
+      const document2 = resp2.hits.hits[index];
       expect(document2._source).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
