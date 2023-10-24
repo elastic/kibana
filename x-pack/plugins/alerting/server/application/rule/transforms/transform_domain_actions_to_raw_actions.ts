@@ -6,28 +6,11 @@
  */
 
 import { RuleAttributes } from '../../../data/rule/types';
-import {
-  NormalizedAlertActionWithGeneratedValues,
-  RulesClientContext,
-} from '../../../rules_client';
-import { denormalizeActions } from '../../../rules_client/lib/denormalize_actions';
+import { DenormalizedAction } from '../../../rules_client';
 
 interface Args {
-  actions: NormalizedAlertActionWithGeneratedValues[];
-  context: RulesClientContext;
+  actions: DenormalizedAction[];
 }
 
-export const transformDomainActionsToRawActions = async ({
-  actions,
-  context,
-}: Args): Promise<RuleAttributes['actions']> => {
-  const { actions: actionsWithExtractedRefs } = await denormalizeActions(context, actions);
-
-  const actionsWithoutType = actionsWithExtractedRefs.map((action) => {
-    const { type, ...restAction } = action;
-
-    return restAction;
-  });
-
-  return actionsWithoutType;
-};
+export const transformDomainActionsToRawActions = ({ actions }: Args): RuleAttributes['actions'] =>
+  actions.map(({ type, ...restAction }) => restAction);

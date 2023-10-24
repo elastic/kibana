@@ -4,19 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { DistributiveOmit } from '@elastic/eui';
 import { SavedObjectReference } from '@kbn/core/server';
 import {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from '../common/constants';
-import { NormalizedAlertActionWithGeneratedValues, RulesClientContext } from '../types';
-
-type DenormalizedAction = DistributiveOmit<NormalizedAlertActionWithGeneratedValues, 'id'> & {
-  actionRef: string;
-  actionTypeId: string;
-};
+import {
+  DenormalizedAction,
+  NormalizedAlertActionWithGeneratedValues,
+  RulesClientContext,
+} from '../types';
 
 export async function denormalizeActions(
   context: RulesClientContext,
