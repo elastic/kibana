@@ -15,8 +15,8 @@ export async function readConfig(filePath: string) {
 }
 
 export async function createConfig(configFile: string) {
-  const config = await readConfig(configFile);
-  return config;
+  const data = await fs.promises.readFile(configFile);
+  return parse(data.toString());
 }
 
 type TransitionMethod = 'linear' | 'exp' | 'sine';

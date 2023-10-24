@@ -25,6 +25,7 @@ export async function startLiveDataUpload({
   const file = runOptions.file;
 
   const { logger, apmEsClient } = await bootstrap(runOptions);
+
   const scenario = await getScenario({ file, logger });
   const { generate } = await scenario({ ...runOptions, logger });
 
@@ -33,7 +34,7 @@ export async function startLiveDataUpload({
 
   const stream = new PassThrough({
     objectMode: true,
-  }).setMaxListeners(1000);
+  });
 
   apmEsClient.index(stream);
 
@@ -49,6 +50,7 @@ export async function startLiveDataUpload({
 
   async function uploadNextBatch() {
     const now = Date.now();
+
     if (now > requestedUntil.getTime()) {
       const bucketFrom = requestedUntil;
       const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);

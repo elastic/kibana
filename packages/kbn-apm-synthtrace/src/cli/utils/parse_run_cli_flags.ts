@@ -12,8 +12,8 @@ import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
 import { RunCliFlags } from '../run_synthtrace';
 
-function getParseConfigFile(flags: RunCliFlags) {
-  const { config, _ } = flags;
+function getParsedConfigFile(flags: RunCliFlags) {
+  const { config } = flags;
   if (config) {
     const parsedConfig = config as string;
     const configPath = [
@@ -64,7 +64,7 @@ function getParsedFile(flags: RunCliFlags) {
 export function parseRunCliFlags(flags: RunCliFlags) {
   const { logLevel } = flags;
   const parsedFile = getParsedFile(flags);
-  const parsedConfigFile = getParseConfigFile(flags);
+  const parsedConfigFile = getParsedConfigFile(flags);
 
   let parsedLogLevel = LogLevel.info;
   switch (logLevel) {

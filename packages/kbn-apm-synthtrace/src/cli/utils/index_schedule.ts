@@ -181,7 +181,7 @@ export async function createEvents(
       .reduce<Writable>((prev, current) => {
         const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
         return currentStream.pipe(prev);
-      }, new PassThrough({ objectMode: true }));
+      }, new PassThrough({ objectMode: true }).setMaxListeners(100));
 
     concatenatedStream.pipe(stream, { end: false });
     await awaitStream(concatenatedStream);
@@ -224,7 +224,7 @@ export async function indexSchedule(config: Config, apmEsClient, logger) {
   const compiledSchedule = config.schedule.map(parseSchedule(now));
   const stream = new PassThrough({
     objectMode: true,
-  });
+  }).setMaxListeners(100);
   apmEsClient.index(stream);
   for (const schedule of compiledSchedule) {
     const interval = schedule.interval ?? DEFAULT_INTERVAL;

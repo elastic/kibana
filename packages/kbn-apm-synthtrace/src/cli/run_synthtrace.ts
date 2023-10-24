@@ -70,7 +70,8 @@ function options(y: Argv) {
       },
     })
     .positional('config', {
-      describe: 'Scenario configurations',
+      describe:
+        'File under config folder that contains a schedule of trace scenarios (located within self contained scenarios folder)',
       string: true,
     })
     .showHelpOnFail(false);
@@ -94,7 +95,6 @@ async function run(argv: RunCliFlags) {
   if (live) {
     await startLiveDataUpload({ runOptions, start: from });
   } else if (runOptions.config) {
-    console.log('schedule indexer');
     const config = await createConfig(runOptions.config);
     const { apmEsClient, logger } = await bootstrap(runOptions);
 

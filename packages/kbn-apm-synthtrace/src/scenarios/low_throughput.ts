@@ -16,10 +16,9 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend'];
+
   return {
     generate: ({ range }) => {
-      console.log('!!low throughput');
-
       const successfulTimestamps = range.ratePerMinute(60);
 
       const instances = services.map((serviceName, index) =>
