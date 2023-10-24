@@ -5,12 +5,254 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
+Previous versions: {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
-//NOTE: The notable-highlights tagged regions are re-used in the
-//Installation and Upgrade Guide
+[discrete]
+=== Discover
 
-// tag::notable-highlights[]
+[discrete]
+==== ES|QL in Discover - Shorten your time to insights by creating aggregations and visualizations directly from Discover
 
-// end::notable-highlights[]
+preview:[] In 8.11 we are introducing link:https://www.elastic.co/guide/en/elasticsearch/reference/master/esql.html[Elasticsearch Query Language (ES|QL)], Elastic’s new piped language for data exploration and investigation. ES|QL transforms, enriches, and simplifies your data explorations process. 
+
+[role="screeshot"]
+image::images/esql-demo.gif[A short video demo of ES|QL]
+
+Here is what you can expect: 
+
+* *Easy start:* To begin using ES|QL in Discover, simply select “Try ES|QL” from the data-view picker. It’s user-friendly and straightforward. 
+* *Efficient and easy query building:* ES|QL in Discover offers auto-complete and in-app documentation, making it easy to craft powerful queries right from the query bar. 
+* *Comprehensive and powerful data exploration:* Conduct ad-hoc data exploration within Discover. Create aggregations, transform data, enrich datasets, and more directly from the query builder. Results are presented in a tabular format or as visualizations. It depends on the query you are executing. 
+* *Contextual Visualizations:* When writing ES|QL queries in Discover, you’ll receive visual representations powered by the Lens suggestion engine. Your query’s nature determines the type of visualization you get, for example whether it’s a Metric, Histogram Heatmap, and so on. 
+* *Enrichment:* Use the enrich command to enhance your query dataset with fields from another dataset, complete with in-context suggestions for the selected policy (such as hinting the matching field and enriched columns).
+* *In-line visualization editing:* Edit ES|QL visualizations directly within Discover and Dashboards. No need to navigate to Lens for quick edits, so you can make changes seamlessly. 
+* *Dashboard integration:* Save your ES|QL visualizations to a Dashboard directly from Discover once you’re satisfied with the results. 
+* *Alerting:* Utilize ES|QL for observability and security alerts, setting aggregated values as thresholds. Enhance detection accuracy and receive actionable notifications by emphasizing meaningful trends over isolated incidents, reducing false positives. 
+
+ES|QL in Discover brings efficiency and power to your data investigations, streamlining your path to insights. 
+
+Learn more about ES|QL language’s capabilities in the link:https://www.elastic.co/guide/en/elasticsearch/reference/master/esql.html[documentation]. 
+
+.Example of ES|QL query with an Observability use case: 
+
+[role="screenshot"]
+image::images/obvs.png[An example of ES|QL]
+
+[role="screenshot"]
+image::images/obv-use-case.png[An example using ES|QL in an Observability use case]
+
+.Example of ES|QL query with Observability use case and using GROK: 
+
+[role="screenshot"]
+image::images/grok.png[An example of ES|QL]
+
+[role="screenshot"]
+image::images/grok-use-case.gif[An example using ES|QL in an Observability use case]
+
+[discrete]
+=== Dashboard 
+
+[discrete]
+==== Lens inline editing in Dashboards
+
+You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the Lens editor. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
+
+[role="screenshot"]
+image::images/lens-inline-editing.gif[An example of inline editing in Lens]
+
+[discrete]
+==== Links panel
+
+You can now easily navigate from one dashboard to another using the links panel. Better organize your dashboards and make them more performant by chunking them in multiple dashboards with fewer visualizations and linking them together. You can carry over your filters, query and time range when navigating to other related dashboards. Display your links horizontally or vertically as it better suits your dashboard layout. You can also use the links panel to include external links in your dashboards, such as to your wiki page or other applications. Decide whether you want to open the links in the same browser tab or in a new one.
+
+[role="screenshot"]
+image::images/links-panel.gif[An example of the new links panel]
+
+[role="screenshot"]
+image::images/edit-links-panel.png[An example of the edit links panel flyout]
+
+[role="screenshot"]
+image::images/edit-links.png[An example of how to edit links using the panel flyout]
+
+[discrete]
+==== Introducing our new color mapping feature for enhanced data visualization
+
+We’re thrilled to announce our latest feature, which brings significant benefits to your data visualization experience. Color is a fundamental visual element, alongside position and shape, that plays a crucial role in conveying information effectively. 
+
+[role="screenshot"]
+image::images/color-mapping.png[An example of the new term-to-color mapping feature]
+
+Here’s what our new feature offers:
+
+* *Effortless categorization:* Easily assign one or more field categories to specific colors. This makes it simpler than ever to organize and understand your data. 
+* *Guided color selection:* Our intuitive color picker provides you with predefined palettes that ensures your charts not only look great but also align seamlessly with different Kibana themes. 
+* *Enhanced color palettes:* We’ve reintroduced a clear concept of Color Palettes, making it easier for you to select and apply gradients, improving the overall aesthetics of your visualizations. 
+
+Whether you’re working with Cartesian, Partition, or Tag Clouds charts, these enhancements are designed to help you make the most of your data. With this feature, you can expect an improved ability to categorize, differentiate, and emphasize data points on your charts, ultimately leading to better insights and more visually appealing dashboards.
+
+[discrete]
+==== Cross cluster search query inspector
+
+Customers querying data from multiple clusters link:https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-cross-cluster-search.html[(CCS queries)] will get more information about each of the cluster's responses. For each of the visualizations in a dashboard as well as in the Discover app, you can look at response times per cluster and shard failures. This is especially important when one or more clusters were not able to provide all the data so you know that you are looking at partial results and why they fail.
+
+[role="screenshot"]
+image::images/ccs-query-inspector.png[An example of the new cross cluster search query inspector, width=50%]
+
+[discrete]
+==== Individual annotation editing from the library
+
+We've introduced full annotation group editing in the **Visualize Library**. Now, you can easily edit shared annotation groups without leaving Lens. No more searching for consuming visualizations.
+
+[role="screenshot"]
+image::images/annotation-editing.png[An example of annotation editing]
+
+[discrete]
+=== Machine Learning
+ 
+[discrete]
+==== ELSER is improved and is now generally available
+
+In 8.8 we introduced Elastic Learned Sparse Encoder in technical preview. ELSER is Elastic’s text expansion language model for AI search. It offers superior relevance out of the box, without the need for retraining on in-domain data or any other ML or MLOps effort. Deploy it with a couple of clicks from Elastic’s UI and start leveraging the power of AI with your search. 
+
+In 8.11 we release a generally available second version. ELSER model-2 comes in two versions:
+
+* The optimized model which runs on the linux-x86_64 platform
+* The cross-platform model 
+
+Both ELSER model-2 versions, platform-optimized and cross-platform, show improved relevance compared to the original ELSER release, as measured against the BEIR benchmarks. Importantly, the optimized version also shows significantly improved performance (reduced inference latency). The Elastic Cloud supports the optimized version and so Elastic Cloud users will benefit from the materially improved performance of the optimized ELSER model-2.
+
+[role="screenshot"]
+image::images/elser-model-2.png[An example of ELSER model 2, width=60%]
+
+Please note that the original version of ELSER (the model available prior to 8.11) will remain in technical preview. 
+
+[discrete]
+==== Inference APIs
+
+preview:[] We are working to introduce a unified inference API that abstracts away the complexity of performing inference on different models that are trained for different tasks. The API introduces a simple, intuitive syntax of the form:
+
+[source,bash]
+----
+POST /_inference/<task_type>/<model_id>
+----
+
+In 8.11, we are releasing a contained first link:https://www.elastic.co/guide/en/elasticsearch/reference/master/inference-apis.html[MVP iteration of this framework], which initially only supports ELSER. This link:https://www.elastic.co/guide/en/elasticsearch/reference/master/semantic-search-elser.html#inference-ingest-pipeline[greatly simplifies the syntax] for creating an inference pipeline.
+
+More importantly, in the future the new inference API will support both internal and external models and will integrate with the LLM ecosystem for our users to have the most powerful AI effortlessly and seamlessly at their fingertips, through a unified, self-explanatory API.
+
+[discrete]
+==== AIOps: Log rate analysis supports text fields 
+
+preview:[] Continuing enhancing log analysis capabilities with smart AIOps tools for drastically shorter MTTR, we now support detection of log rate changes that are due to text fields, for example the common **message** log field. Previously log rate change was limited to detecting spikes and dips caused by keyword fields. With the addition of text fields, we integrate pattern analysis into log rate analysis and patterns and events that were previously taking very long to detect and diagnose (or may go unnoticed for long) are now surfaced effortlessly in seconds.
+
+[role="screenshot"]
+image::images/text-field-support.png[An example of log rate analysis supporting text fields]
+
+[discrete]
+==== Data drift workflows
+ 
+preview:[] In 8.10 we introduced the **Data comparison** view to help you detect data drift. In 8.11 we have renamed it to **Data drift** and we have enhanced it to include workflows that help you visualize changes in the model input data and detect potential model performance degradation over time.
+
+[role="screenshot"]
+image::images/data-drift.png[An example of data drift workflows]
+
+[discrete]
+==== UX improvements in anomaly detection embeddability and data frame analytics pipelines
+
+We have improved the UX for attaching anomaly swim lanes and anomaly charts to dashboards. It is now more friendly and consistent with the same functionality from Lens. In addition, you can now attach these ML charts to new dashboards (previously this was only able to be done for existing ones). 
+
+In **Data Frame Analytics** we previously added the ability to link directly to **Discover** and **Dashboards** from the results data grid filtering for the row’s field/values for all visible columns. For improved usability, you can now do this during the job creation as well. We have also made UX improvements for the deployment of trained models from Data Frame Analytics jobs, including an option to reindex your data at the end of the ingest pipeline creation.
+
+[discrete]
+=== ResponseOps
+
+[discrete]
+==== New ES|QL rule type
+
+A new ES|QL alerting rule type is now available under the existing Elasticsearch rule type. This rule type brings all the new functionalities that are available within the new and powerful language, ES|QL, to Kibana Alerting to allow and unlock new alerting use cases.
+
+With the new type, users will be able to generate a single alert based on defined ES|QL query and preview the query result before saving the rule. When the query returns an empty result no alerts will be generated.
+
+[role="screenshot"]
+image::images/esql-rule-type.gif[An example of creating a rule type using ES|QL]
+
+[discrete]
+==== Kibana cases custom field
+
+A new functionality is now available in Kibana cases. Users will be able to add custom fields to the case structure so they can use it for better classification and case enrichment. As a first step those fields will be available in the case view only, but next step we’re planning to have more fields types (List, Text Area for To-Do items, Json, and more), dedicated privilege, support filters and search capabilities in the case table accordingly.
+
+[role="screenshot"]
+image::images/custom-field.gif[An example of creating a custom case field in Kibana]
+
+[discrete]
+==== Supporting multi levels of term aggregations in Elasticsearch rule type 
+
+The existing Elasticsearch alerting rule (KQL based) is now supported by multiple selection when grouping by alert fields which allows you to define multiple layers of term aggregations.
+
+[role="screenshot"]
+image::images/term-aggs.png[An example of creating multiple layers of term aggregations]
+
+[discrete]
+==== Slack connector - allow List
+
+The Slack connector supports a new allow list so customers will be able to manage the available slack channels within the alert actions. 
+
+[discrete]
+=== Observability
+
+[discrete]
+==== Elasticsearch alerting rule availability in Observability solution
+
+The existing Elasticsearch alerting rule is now available in o11y flow so customers will be able to manage all their alerting rules and alerts within the o11y scope. Before this update, customers who leverage the ES rule were required to move between Stack Management and O11y to manage their alerts.
+In order to manage the o11y roles properly, a new field is added to determine which role will be allowed to maintain the created rule and its generated alerts. 
+
+[role="screenshot"]
+image::images/alerting-rule.png[An example of creating an altering rule in Observability]
+
+[discrete]
+=== Global Experience 
+
+[discrete]
+==== Create and manage ES|QL enrichment index policies
+
+In support of our new ES|QL capabilities, we have added link:https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html[enrich policies] to our **Index Management** experience. Users can now create their enrichment policies right from here and get started using it right away. Once configured, all enrich policies are available in the **Enrich Policies** tab. Existing policies can be managed right from the enrichment policies tab in index management.
+
+.Example of an ES|QL Query utilizing an enrich policy with enrich:
+
+[role="screenshot"]
+image::images/esql-enrich.png[An example of ES|QL Query utilizing an enrich policy]
+
+.Example of the enrich policies shown in the UI:
+
+[role="screenshot"]
+image::images/enrich-ui.png[An example of where to add an enrich policy in the UI]
+
+[role="screenshot"]
+image::images/enrich-index-management.png[An example of where an enrich policy lives in the UI]
+
+
+[discrete]
+==== Start Discover ES|QL from global search
+
+**Discover** searches are powered by KQL by default. You can easily switch to ES|QL mode within Discover and search your data with this new query language. You can also access ES|QL in Discover from the global search bar within Elastic. With just a few keystrokes, simply type in “ESQL” and you can access **Discover** with ES|QL enabled for you.
+
+[role="screenshot"]
+image::images/start-esql-in-discover.gif[An example of using ES|QL in Discover]
+
+[discrete]
+==== Easily access Elasticsearch connection details
+
+Never go hunting for the connection details to your Elasticsearch cluster again. Now you can view the Elasticsearch endpoint, link:https://www.elastic.co/guide/en/cloud/current/ec-cloud-id.html[Cloud ID], and even manage your API keys from many areas in Elastic such as integrations. You can also access the connection details on any page in Elastic via the help menu from the header bar.
+
+[role="screenshot"]
+image::images/endpoints.png[An example of where to find the endpoints in the UI, width=40%]
+
+//[role="screenshot"]
+//image::images/endpoints-example.png[An example of what the endpoints and cloud ID UI looks like, width=60%]
+
+
+[discrete]
+==== AWS CloudFormation template updates
+
+When subscribing to Elastic via the link:https://aws.amazon.com/marketplace/pp/prodview-voru33wi6xs7k[AWS Marketplace], users have the option to quickly get set up with an AWS CloudFormation Template. This step allows you to create an Elastic deployment in the AWS region of your choice. We’ve updated the AWS CloudFormation Template with bug fixes and stability improvements to better help you get started.
