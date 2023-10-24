@@ -42,7 +42,9 @@ describe('extract search response warnings', () => {
         aggregations: {},
       };
 
-      expect(extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')).toEqual([
+      expect(
+        extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')
+      ).toEqual([
         {
           type: 'incomplete',
           requestName: 'My request',
@@ -68,7 +70,9 @@ describe('extract search response warnings', () => {
         _shards: {} as estypes.ShardStatistics,
         hits: { hits: [] },
       };
-      expect(extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')).toEqual([
+      expect(
+        extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')
+      ).toEqual([
         {
           type: 'incomplete',
           requestName: 'My request',
@@ -98,7 +102,7 @@ describe('extract search response warnings', () => {
         } as estypes.SearchResponse,
         mockInspectorService,
         mockRequestAdapter,
-        'My request',
+        'My request'
       );
 
       expect(warnings).toEqual([]);
@@ -189,7 +193,9 @@ describe('extract search response warnings', () => {
         aggregations: {},
       };
 
-      expect(extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')).toEqual([
+      expect(
+        extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')
+      ).toEqual([
         {
           type: 'incomplete',
           requestName: 'My request',
@@ -243,7 +249,9 @@ describe('extract search response warnings', () => {
         },
         hits: { hits: [] },
       };
-      expect(extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')).toEqual([
+      expect(
+        extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')
+      ).toEqual([
         {
           type: 'incomplete',
           requestName: 'My request',
@@ -299,7 +307,7 @@ describe('extract search response warnings', () => {
         } as estypes.SearchResponse,
         mockInspectorService,
         mockRequestAdapter,
-        'My request',
+        'My request'
       );
 
       expect(warnings).toEqual([]);
