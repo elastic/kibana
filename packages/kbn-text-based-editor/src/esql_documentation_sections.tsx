@@ -1093,8 +1093,8 @@ ROW a=1.8
 Extracts parts of a date, like year, month, day, hour. The supported field types are those provided by Java's \`java.time.temporal.ChronoField\`.
 
 \`\`\`
-ROW date = DATE_PARSE("2022-05-06", "yyyy-MM-dd")
-| EVAL year = DATE_EXTRACT(date, "year")
+ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
+| EVAL year = DATE_EXTRACT("year", date)
 \`\`\`
               `,
               description:
@@ -1122,7 +1122,7 @@ Returns a string representation of a date in the provided format. If no format i
 \`\`\`
 FROM employees
 | KEEP first_name, last_name, hire_date
-| EVAL hired = DATE_FORMAT(hire_date, "YYYY-MM-dd")
+| EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)
 \`\`\`
               `,
               description:
@@ -1149,7 +1149,7 @@ Converts a string to a date, in the provided format. If no format is specified, 
 
 \`\`\`
 ROW date_string = "2022-05-06"
-| EVAL date = DATE_PARSE(date_string, "yyyy-MM-dd")
+| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 \`\`\`
               `,
               description:
