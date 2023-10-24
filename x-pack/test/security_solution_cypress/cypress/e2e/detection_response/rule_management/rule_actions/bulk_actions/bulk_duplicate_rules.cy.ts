@@ -63,7 +63,6 @@ describe('Detection rules, bulk duplicate', { tags: ['@ess', '@serverless'] }, (
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
     createRule(
       getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false })
     ).then((response) => {

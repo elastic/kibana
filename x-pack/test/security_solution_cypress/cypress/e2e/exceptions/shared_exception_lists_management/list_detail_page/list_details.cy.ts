@@ -48,7 +48,6 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     before(() => {
-      cy.task('esArchiverResetKibana');
       login();
 
       // Create exception list associated with a rule
