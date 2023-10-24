@@ -14,6 +14,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('navigation', function () {
     before(async () => {
@@ -100,6 +101,23 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'observability-overview:cases',
       });
       expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases']);
+
+      await testSubjects.click('createNewCaseBtn');
+      expect(await browser.getCurrentUrl()).contain('app/observability/cases/create');
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:cases',
+      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Create New Case']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+      await testSubjects.click('configure-case-button');
+      expect(await browser.getCurrentUrl()).contain('app/observability/cases/configure');
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:cases',
+      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Configure Cases']);
     });
   });
 }
