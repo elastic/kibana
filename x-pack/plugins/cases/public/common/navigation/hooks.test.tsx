@@ -135,7 +135,7 @@ describe('hooks', () => {
 
       expect(getAppUrl).toHaveBeenCalledWith({
         absolute: false,
-        path: '/settings',
+        path: '/configure',
         deepLinkId: APP_ID,
       });
     });
@@ -149,7 +149,7 @@ describe('hooks', () => {
         result.current.navigateToConfigureCases();
       });
 
-      expect(navigateTo).toHaveBeenCalledWith({ path: '/settings', deepLinkId: APP_ID });
+      expect(navigateTo).toHaveBeenCalledWith({ path: '/configure', deepLinkId: APP_ID });
     });
   });
 

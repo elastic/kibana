@@ -41,7 +41,7 @@ describe('Configuration button', () => {
 
   test('it pass the correct props to the button', () => {
     expect(wrapper.find('[data-test-subj="configure-case-button"]').first().props()).toMatchObject({
-      href: `/app/security/cases/settings`,
+      href: `/app/security/cases/configure`,
       iconType: 'controlsHorizontal',
       isDisabled: false,
       'aria-label': 'My label',

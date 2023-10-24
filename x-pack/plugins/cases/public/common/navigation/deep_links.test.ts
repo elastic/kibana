@@ -23,7 +23,7 @@ describe('getCasesDeepLinks', () => {
         },
         {
           id: 'cases_configure',
-          path: '/cases/settings',
+          path: '/cases/configure',
           title: 'Settings',
         },
       ],
@@ -44,7 +44,7 @@ describe('getCasesDeepLinks', () => {
         },
         {
           id: 'cases_configure',
-          path: '/test/settings',
+          path: '/test/configure',
           title: 'Settings',
         },
       ],
@@ -80,7 +80,7 @@ describe('getCasesDeepLinks', () => {
         },
         {
           id: 'cases_configure',
-          path: '/cases/settings',
+          path: '/cases/configure',
           title: 'Settings',
           order: 8002,
         },
@@ -119,7 +119,7 @@ describe('getCasesDeepLinks', () => {
         },
         {
           id: 'cases_configure',
-          path: '/cases/settings',
+          path: '/cases/configure',
           title: 'Settings',
         },
       ],
@@ -153,7 +153,7 @@ describe('getCasesDeepLinks', () => {
         },
         {
           id: 'cases_configure',
-          path: '/cases/settings',
+          path: '/cases/configure',
           title: 'My new settings title',
         },
       ],

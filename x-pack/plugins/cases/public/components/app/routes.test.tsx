@@ -98,12 +98,12 @@ describe('Cases routes', () => {
 
   describe('Configure cases', () => {
     it('navigates to the configure cases page', () => {
-      renderWithRouter(['/cases/settings']);
+      renderWithRouter(['/cases/configure']);
       expect(screen.getByText('Settings')).toBeInTheDocument();
     });
 
     it('shows the no privileges page if the user does not have update privileges', () => {
-      renderWithRouter(['/cases/settings'], noUpdateCasesPermissions());
+      renderWithRouter(['/cases/configure'], noUpdateCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });
