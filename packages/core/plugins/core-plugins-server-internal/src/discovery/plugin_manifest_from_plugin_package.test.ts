@@ -32,6 +32,7 @@ const basic: PluginPackageManifest = {
     optionalPlugins: ['someOtherPlugin'],
     requiredBundles: ['someRequiresBundlePlugin'],
     requiredPlugins: ['someRequiredPlugin'],
+    runtimePluginDependencies: ['someRuntimeDependencyPlugin'],
   },
   serviceFolders: ['foo', 'bar'],
 };
@@ -58,6 +59,9 @@ describe('pluginManifestFromPluginPackage()', () => {
         ],
         "requiredPlugins": Array [
           "someRequiredPlugin",
+        ],
+        "runtimePluginDependencies": Array [
+          "someRuntimeDependencyPlugin",
         ],
         "server": true,
         "serviceFolders": Array [
