@@ -46,13 +46,13 @@ describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(TIMELINE_EVENT).should('have.length', defaultPageSize);
   });
 
-  it(`should select ${defaultPageSize} items per page by default`, () => {
-    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', defaultPageSize);
-  });
-
-  it('should be able to go to next / previous page', { tags: '@brokenInServerless' }, () => {
+  it('should be able to go to next / previous page', () => {
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
+  });
+
+  it(`should select ${defaultPageSize} items per page by default`, () => {
+    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', defaultPageSize);
   });
 
   it('should be able to change items count per page with the dropdown', () => {
