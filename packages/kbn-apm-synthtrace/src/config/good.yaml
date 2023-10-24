@@ -1,5 +1,5 @@
 schedule:
-  - template: "good"
+  - scenario: "good"
     start: "now-5m"
     end: "now-3m"
     randomness: 0.2

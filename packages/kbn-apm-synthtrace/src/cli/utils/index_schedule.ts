@@ -16,7 +16,7 @@ import { getScenario } from './get_scenario';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 
 interface Schedule {
-  template: string;
+  scenario: string;
   start: number;
   end: number | boolean;
   interval?: number;
@@ -34,7 +34,7 @@ type EventsPerCycle =
     };
 
 interface ParsedSchedule {
-  template: string;
+  scenario: string;
   start: string;
   end: string | boolean;
   interval?: number;
@@ -139,7 +139,7 @@ export async function createEvents(
   stream,
   apmEsClient
 ) {
-  const scenarioFile = `../../config/scenarios/${schedule.template}`;
+  const scenarioFile = `../../config/scenarios/${schedule.scenario}`;
   const scenario = await getScenario({ file: scenarioFile, logger });
   const { generate } = await scenario({
     logLevel: 1,
@@ -215,7 +215,7 @@ export async function createEvents(
       apmEsClient
     );
   }
-  logger.info(`Indexing complete for ${schedule.template} events.`);
+  logger.info(`Indexing complete for ${schedule.scenario} events.`);
 }
 
 export async function indexSchedule(config: Config, apmEsClient, logger) {
@@ -242,7 +242,7 @@ export async function indexSchedule(config: Config, apmEsClient, logger) {
       throw new Error(errorMessage);
     }
     console.log(
-      `Indexing "${schedule.template}" events from ${startTs.toISOString()} to ${
+      `Indexing "${schedule.scenario}" events from ${startTs.toISOString()} to ${
         end === false ? 'indefinatly' : end.toISOString()
       }`
     );

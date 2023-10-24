@@ -1,10 +1,10 @@
 schedule:
-  - template: "good"
+  - scenario: "good"
     start: "now-50m"
     end: "now-45m"
-  - template: "bad"
+  - scenario: "bad"
     start: "now-45m"
     end: "now-40m"
-  - template: "good"
+  - scenario: "good"
     start: "now-40m"
     end: "now"

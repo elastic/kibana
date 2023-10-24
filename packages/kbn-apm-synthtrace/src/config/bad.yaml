@@ -1,4 +1,4 @@
 schedule:
-  - template: "bad"
+  - scenario: "bad"
     start: "now-15m"
     end: "now+15m"
