@@ -16,6 +16,11 @@ export async function getHasSetupPrivileges({
   securityPluginStart: NonNullable<ProfilingPluginStartDeps['security']>;
   request: KibanaRequest;
 }) {
+  // If we have a license which doesn't enable security, or we're a legacy user we shouldn't disable any ui capabilities
+  if (!securityPluginStart.authz.mode.useRbacForRequest(request)) {
+    return true;
+  }
+
   const { hasAllRequested } = await securityPluginStart.authz
     .checkPrivilegesWithRequest(request)
     .globally({
