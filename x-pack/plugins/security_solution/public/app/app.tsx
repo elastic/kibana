@@ -66,29 +66,29 @@ const StartAppComponent: FC<StartAppComponent> = ({
           <ReduxStoreProvider store={store}>
             <KibanaThemeProvider theme$={theme$}>
               <EuiThemeProvider darkMode={darkMode}>
-                <AssistantProvider>
-                  <MlCapabilitiesProvider>
-                    <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                      <ManageUserInfo>
-                        <NavigationProvider core={services}>
-                          <ReactQueryClientProvider>
-                            <CellActionsProvider
-                              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                            >
-                              <UpsellingProvider upsellingService={upselling}>
-                                <DiscoverInTimelineContextProvider>
+                <MlCapabilitiesProvider>
+                  <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                    <ManageUserInfo>
+                      <NavigationProvider core={services}>
+                        <ReactQueryClientProvider>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                          >
+                            <UpsellingProvider upsellingService={upselling}>
+                              <DiscoverInTimelineContextProvider>
+                                <AssistantProvider>
                                   <PageRouter history={history} onAppLeave={onAppLeave}>
                                     {children}
                                   </PageRouter>
-                                </DiscoverInTimelineContextProvider>
-                              </UpsellingProvider>
-                            </CellActionsProvider>
-                          </ReactQueryClientProvider>
-                        </NavigationProvider>
-                      </ManageUserInfo>
-                    </UserPrivilegesProvider>
-                  </MlCapabilitiesProvider>
-                </AssistantProvider>
+                                </AssistantProvider>
+                              </DiscoverInTimelineContextProvider>
+                            </UpsellingProvider>
+                          </CellActionsProvider>
+                        </ReactQueryClientProvider>
+                      </NavigationProvider>
+                    </ManageUserInfo>
+                  </UserPrivilegesProvider>
+                </MlCapabilitiesProvider>
               </EuiThemeProvider>
             </KibanaThemeProvider>
             <ErrorToastDispatcher />
