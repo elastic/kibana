@@ -157,7 +157,7 @@ export const waitForHostToEnroll = async (
           kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
           showInactive: false,
         }).then((response) => {
-          agentId = response.items[0].id;
+          agentId = response.items[0]?.id;
           return response.items.filter((agent) => agent.status === 'online')[0];
         }),
       RETRYABLE_TRANSIENT_ERRORS
