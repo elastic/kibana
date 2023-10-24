@@ -39,7 +39,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
       <EuiFlexItem>
         <EuiTitle size="s">
           <h2>
-            {i18n.translate('xpack.serverlessSearch.connectors.config.linkToElasticTitle', {
+            {i18n.translate('xpack.serverlessSearch.connectors.config.link.linkToElasticTitle', {
               defaultMessage: 'Link your connector to Elasticsearch',
             })}
           </h2>
