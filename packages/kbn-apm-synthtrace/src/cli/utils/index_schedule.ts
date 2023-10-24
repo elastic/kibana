@@ -12,8 +12,13 @@ import parser from 'datemath-parser';
 import { PassThrough, Readable, Writable } from 'stream';
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { isGeneratorObject } from 'util/types';
+import * as rt from 'io-ts';
 import { getScenario } from './get_scenario';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
+import { Logger } from '../../lib/utils/create_logger';
+import { bootstrap } from './bootstrap';
+import { RunOptions } from './parse_run_cli_flags';
+import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
 
 interface Schedule {
   scenario: string;
@@ -25,6 +30,25 @@ interface Schedule {
 
 type TransitionMethod = 'linear' | 'exp' | 'sine';
 
+const TransitionMethodRT = rt.keyof({
+  linear: null,
+  exp: null,
+  sine: null,
+});
+
+export const EventsPerCycleTransitionDefRT = rt.intersection([
+  rt.type({
+    start: rt.number,
+    end: rt.number,
+    method: TransitionMethodRT,
+  }),
+  rt.partial({
+    options: rt.partial({
+      period: rt.number,
+    }),
+  }),
+]);
+
 type EventsPerCycle =
   | number
   | {
@@ -35,11 +59,11 @@ type EventsPerCycle =
 
 interface ParsedSchedule {
   scenario: string;
-  start: string;
-  end: string | boolean;
+  start: number;
+  end: number | boolean;
   interval?: number;
   eventsPerCycle: EventsPerCycle;
-  randomness: number;
+  randomness?: number;
 }
 
 export interface Config {
@@ -101,29 +125,27 @@ function createEventsPerCycleFn(
   schedule: ParsedSchedule,
   eventsPerCycle: EventsPerCycle
 ): (timestamp: Moment) => number {
-  if (typeof eventsPerCycle !== 'number') {
-    if (isNumber(schedule.end)) {
-      const startPoint = { x: schedule.start, y: eventsPerCycle.start };
-      const endPoint = { x: schedule.end, y: eventsPerCycle.end };
-      if (eventsPerCycle.method === 'exp') {
-        return createExponentialFunction(startPoint, endPoint);
-      }
-      if (eventsPerCycle.method === 'sine') {
-        return createSineFunction(startPoint, endPoint, 60); // TODO add  eventsPerCycle.options?.period
-      }
-      return createLinearFunction(startPoint, endPoint);
+  if (EventsPerCycleTransitionDefRT.is(eventsPerCycle) && isNumber(schedule.end)) {
+    const startPoint = { x: schedule.start, y: eventsPerCycle.start };
+    const endPoint = { x: schedule.end, y: eventsPerCycle.end };
+    if (eventsPerCycle.method === 'exp') {
       return createExponentialFunction(startPoint, endPoint);
-    } else if (schedule.end === false) {
-      console.log('EventsPerCycle must be a number if the end value of schedule is false.');
     }
+    if (eventsPerCycle.method === 'sine') {
+      return createSineFunction(startPoint, endPoint, 60); // TODO add  eventsPerCycle.options?.period
+    }
+    return createLinearFunction(startPoint, endPoint);
+  } else if (EventsPerCycleTransitionDefRT.is(eventsPerCycle) && schedule.end === false) {
+    // eslint-disable-next-line no-console
+    console.log('EventsPerCycle must be a number if the end value of schedule is false.');
   }
 
   return (_timestamp: Moment) =>
     typeof eventsPerCycle === 'number' ? eventsPerCycle : eventsPerCycle.end;
 }
 
-export async function wait(delay: number) {
-  console.log(`Waiting ${delay}ms`);
+export async function wait(delay: number, logger: Logger) {
+  logger.info(`Waiting ${delay}ms`);
   await new Promise((resolve) => {
     setTimeout(resolve, delay);
   });
@@ -135,10 +157,10 @@ export async function createEvents(
   end: Moment | false,
   currentTimestamp: Moment,
   continueIndexing = false,
-  logger,
-  stream,
-  apmEsClient
-) {
+  logger: Logger,
+  stream: PassThrough,
+  apmEsClient: ApmSynthtraceEsClient
+): Promise<void> {
   const scenarioFile = `../../config/scenarios/${schedule.scenario}`;
   const scenario = await getScenario({ file: scenarioFile, logger });
   const { generate } = await scenario({
@@ -203,7 +225,7 @@ export async function createEvents(
     );
   }
   if (currentTimestamp.isSameOrAfter(endTs) && continueIndexing) {
-    await wait(DEFAULT_INTERVAL);
+    await wait(DEFAULT_INTERVAL, logger);
     return createEvents(
       config,
       schedule,
@@ -218,7 +240,9 @@ export async function createEvents(
   logger.info(`Indexing complete for ${schedule.scenario} events.`);
 }
 
-export async function indexSchedule(config: Config, apmEsClient, logger) {
+export async function indexSchedule(config: Config, runOptions: RunOptions) {
+  const { apmEsClient, logger } = await bootstrap(runOptions);
+
   const now = moment();
 
   const compiledSchedule = config.schedule.map(parseSchedule(now));
@@ -238,10 +262,10 @@ export async function indexSchedule(config: Config, apmEsClient, logger) {
     // We add one interval to the start to prevent overlap with the previous schedule.
     if (end !== false && end.isBefore(startTs)) {
       const errorMessage = `Start (${startTs.toISOString()} must come before the end (${end.toISOString()}))`;
-      console.log(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
-    console.log(
+    logger.info(
       `Indexing "${schedule.scenario}" events from ${startTs.toISOString()} to ${
         end === false ? 'indefinatly' : end.toISOString()
       }`

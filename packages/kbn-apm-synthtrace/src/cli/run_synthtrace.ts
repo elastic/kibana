@@ -14,7 +14,6 @@ import { startHistoricalDataUpload } from './utils/start_historical_data_upload'
 import { startLiveDataUpload } from './utils/start_live_data_upload';
 import { indexSchedule } from './utils/index_schedule';
 import { createConfig } from './utils/get_config';
-import { bootstrap } from './utils/bootstrap';
 
 function options(y: Argv) {
   return y
@@ -96,9 +95,7 @@ async function run(argv: RunCliFlags) {
     await startLiveDataUpload({ runOptions, start: from });
   } else if (runOptions.config) {
     const config = await createConfig(runOptions.config);
-    const { apmEsClient, logger } = await bootstrap(runOptions);
-
-    await indexSchedule(config, apmEsClient, logger);
+    await indexSchedule(config, runOptions);
   } else {
     await startHistoricalDataUpload({ runOptions, from, to });
   }
