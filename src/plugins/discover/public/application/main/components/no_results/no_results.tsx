@@ -37,11 +37,7 @@ export function DiscoverNoResults({
   const interceptedWarnings = useDataState(documents$).interceptedWarnings;
 
   if (interceptedWarnings?.length) {
-    return (
-      <SearchResponseWarningsEmptyPrompt
-        warnings={interceptedWarnings}
-      />
-    );
+    return <SearchResponseWarningsEmptyPrompt warnings={interceptedWarnings} />;
   }
 
   return (

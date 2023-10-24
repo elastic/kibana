@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { ViewDetailsPopover } from './view_details_popover';
 import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
@@ -35,13 +35,14 @@ export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
       }
       body={
         <EuiText textAlign="left" size="s" grow={false}>
-          <strong>
-            {getWarningsTitle(props.warnings)}
-          </strong>
+          <strong>{getWarningsTitle(props.warnings)}</strong>
           <p>
-            {getWarningsDescription(props.warnings, i18n.translate('searchResponseWarnings.description.pageLabel', {
-            defaultMessage: 'page',
-          }))}
+            {getWarningsDescription(
+              props.warnings,
+              i18n.translate('searchResponseWarnings.description.pageLabel', {
+                defaultMessage: 'page',
+              })
+            )}
           </p>
           <ViewDetailsPopover warnings={props.warnings} />
         </EuiText>

@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { PropsWithChildren, useEffect, useState } from 'react';
+import React, { PropsWithChildren, useState } from 'react';
 import {
-  EuiCallOut,
-  EuiEmptyPrompt,
   EuiText,
   EuiTextProps,
   EuiFlexGroup,
