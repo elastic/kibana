@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo --- Check Mappings Update
+echo --- Check SO definition changes
 cmd="node scripts/jest_integration -u src/core/server/integration_tests/ci_checks"
 
 eval "$cmd"
