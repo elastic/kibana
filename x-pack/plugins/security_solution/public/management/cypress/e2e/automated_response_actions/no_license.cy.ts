@@ -19,7 +19,7 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
   describe('User cannot use endpoint action in form', () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
-    before(() => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_access);
     });
 
@@ -34,8 +34,7 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     });
   });
 
-  // FIXME: Flaky. Needs fixing (security team issue #7763)
-  describe.skip('User cannot see results', () => {
+  describe('User cannot see results', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);

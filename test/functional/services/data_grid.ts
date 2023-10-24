@@ -7,6 +7,7 @@
  */
 
 import { chunk } from 'lodash';
+import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
@@ -268,8 +269,8 @@ export class DataGridService extends FtrService {
 
     const textArr = [];
     for (const cell of result) {
-      const textContent = await cell.getAttribute('textContent');
-      textArr.push(textContent.trim());
+      const cellText = await cell.getVisibleText();
+      textArr.push(cellText.trim());
     }
     return Promise.resolve(textArr);
   }
@@ -364,6 +365,28 @@ export class DataGridService extends FtrService {
 
   public async resetRowHeightValue() {
     await this.testSubjects.click('resetDisplaySelector');
+  }
+
+  private async findSampleSizeInput() {
+    return await this.find.byCssSelector(
+      'input[type="number"][data-test-subj="unifiedDataTableSampleSizeInput"]'
+    );
+  }
+
+  public async getCurrentSampleSizeValue() {
+    const sampleSizeInput = await this.findSampleSizeInput();
+    return Number(await sampleSizeInput.getAttribute('value'));
+  }
+
+  public async changeSampleSizeValue(newValue: number) {
+    const sampleSizeInput = await this.findSampleSizeInput();
+    await sampleSizeInput.focus();
+    // replacing the input values with a new one
+    await sampleSizeInput.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      'a',
+    ]);
+    await sampleSizeInput.type(String(newValue));
   }
 
   public async getDetailsRow(): Promise<WebElementWrapper> {

@@ -36,6 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: '',
             documentType: ApmDocumentType.TransactionMetric,
             rollupInterval: RollupInterval.OneMinute,
+            useDurationSummary: true,
           },
         },
       }),

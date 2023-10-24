@@ -21,12 +21,14 @@ export const useTimeRange = ({
   timeRange: { from, to },
   timeInterval,
   isPlainRecord,
+  timeField,
 }: {
   uiSettings: IUiSettingsClient;
   bucketInterval?: UnifiedHistogramBucketInterval;
   timeRange: TimeRange;
   timeInterval?: string;
   isPlainRecord?: boolean;
+  timeField?: string;
 }) => {
   const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
 
@@ -44,6 +46,10 @@ export const useTimeRange = ({
   );
 
   const timeRangeText = useMemo(() => {
+    if (!timeField && isPlainRecord) {
+      return '';
+    }
+
     const timeRange = {
       from: dateMath.parse(from),
       to: dateMath.parse(to, { roundUp: true }),
@@ -70,18 +76,18 @@ export const useTimeRange = ({
         });
 
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
-  }, [bucketInterval?.description, from, isPlainRecord, timeInterval, to, toMoment]);
+  }, [bucketInterval?.description, from, isPlainRecord, timeField, timeInterval, to, toMoment]);
 
   const { euiTheme } = useEuiTheme();
   const timeRangeCss = css`
     padding: 0 ${euiTheme.size.s} 0 ${euiTheme.size.s};
   `;
 
-  let timeRangeDisplay = (
+  let timeRangeDisplay = timeRangeText ? (
     <EuiText size="xs" textAlign="center" css={timeRangeCss}>
       {timeRangeText}
     </EuiText>
-  );
+  ) : null;
 
   if (bucketInterval?.scaled) {
     const toolTipTitle = i18n.translate('unifiedHistogram.timeIntervalWithValueWarning', {

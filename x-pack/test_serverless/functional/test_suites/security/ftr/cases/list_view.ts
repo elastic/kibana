@@ -14,10 +14,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const svlSecNavigation = getService('svlSecNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('Cases List', () => {
+  describe('Cases List', function () {
     before(async () => {
       await svlCommonPage.login();
 
@@ -27,7 +28,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await cases.casesTable.waitForCasesToBeDeleted();
       await svlCommonPage.forceLogout();
     });
@@ -106,7 +107,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await cases.api.deleteAllCases();
+          await svlCases.api.deleteAllCaseItems();
           await cases.casesTable.waitForCasesToBeDeleted();
         });
 
@@ -148,6 +149,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('severity filtering', () => {
+      // Error: retry.tryForTime timeout: Error: expected 10 to equal 5
       before(async () => {
         await testSubjects.click('solutionSideNavItemLink-cases');
 
@@ -169,7 +171,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
         await cases.casesTable.waitForCasesToBeDeleted();
       });
 
@@ -196,6 +198,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('pagination', () => {
+      // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
       createNCasesBeforeDeleteAllAfter(12, getPageObject, getService);
 
       it('paginates cases correctly', async () => {
@@ -273,6 +276,7 @@ const createNCasesBeforeDeleteAllAfter = (
   getService: FtrProviderContext['getService']
 ) => {
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const header = getPageObject('header');
 
   before(async () => {
@@ -282,7 +286,7 @@ const createNCasesBeforeDeleteAllAfter = (
   });
 
   after(async () => {
-    await cases.api.deleteAllCases();
+    await svlCases.api.deleteAllCaseItems();
     await cases.casesTable.waitForCasesToBeDeleted();
   });
 };

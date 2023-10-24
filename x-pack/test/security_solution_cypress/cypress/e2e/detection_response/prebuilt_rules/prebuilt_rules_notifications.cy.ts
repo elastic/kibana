@@ -14,12 +14,12 @@ import {
 import { deleteFirstRule } from '../../../tasks/alerts_detection_rules';
 import {
   installAllPrebuiltRulesRequest,
+  installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import {
   resetRulesTableState,
   deleteAlertsAndRules,
-  reload,
   deletePrebuiltRulesAssets,
 } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
@@ -30,10 +30,9 @@ const RULE_1 = createRuleAssetSavedObject({
   rule_id: 'rule_1',
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       login();
@@ -56,8 +55,8 @@ describe(
       });
 
       it('should NOT display install or update notifications when latest rules are installed', () => {
-        createAndInstallMockedPrebuiltRules({ rules: [RULE_1], installToKibana: true });
         visitRulesManagementTable();
+        createAndInstallMockedPrebuiltRules([RULE_1]);
 
         /* Assert that there are no installation or update notifications */
         /* Add Elastic Rules button should not contain a number badge */
@@ -69,7 +68,7 @@ describe(
 
     describe('Notifications', () => {
       beforeEach(() => {
-        createAndInstallMockedPrebuiltRules({ rules: [RULE_1], installToKibana: false });
+        installPrebuiltRuleAssets([RULE_1]);
       });
 
       describe('Rules installation notification when no rules have been installed', () => {
@@ -98,11 +97,8 @@ describe(
               rule_id: 'rule_3',
             });
 
-            createAndInstallMockedPrebuiltRules({
-              rules: [RULE_2, RULE_3],
-              installToKibana: false,
-            });
             visitRulesManagementTable();
+            installPrebuiltRuleAssets([RULE_2, RULE_3]);
           });
         });
 
@@ -120,7 +116,7 @@ describe(
           /* Install available rules, assert that the notification is gone */
           /* then delete one rule and assert that the notification is back */
           installAllPrebuiltRulesRequest().then(() => {
-            reload();
+            cy.reload();
             deleteFirstRule();
             cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
             cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
@@ -138,9 +134,8 @@ describe(
               rule_id: 'rule_1',
               version: 2,
             });
-            createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
+            installPrebuiltRuleAssets([UPDATED_RULE]);
             visitRulesManagementTable();
-            reload();
           });
         });
 
@@ -169,10 +164,7 @@ describe(
               rule_id: 'rule_1',
               version: 2,
             });
-            createAndInstallMockedPrebuiltRules({
-              rules: [RULE_2, UPDATED_RULE],
-              installToKibana: false,
-            });
+            installPrebuiltRuleAssets([RULE_2, UPDATED_RULE]);
             visitRulesManagementTable();
           });
         });
