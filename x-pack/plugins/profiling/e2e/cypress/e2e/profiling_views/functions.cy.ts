@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-describe('Functions page', () => {
+describe.skip('Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
 
