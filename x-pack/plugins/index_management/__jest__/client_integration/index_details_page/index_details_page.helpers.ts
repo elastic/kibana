@@ -36,6 +36,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
   actions: {
     getHeader: () => string;
     clickIndexDetailsTab: (tab: IndexDetailsTabIds) => Promise<void>;
+    getIndexDetailsTabs: () => string[];
     getActiveTabContent: () => string;
     mappings: {
       getCodeBlockContent: () => string;
@@ -124,6 +125,12 @@ export const setup = async ({
       find(`indexDetailsTab-${tab}`).simulate('click');
     });
     component.update();
+  };
+
+  const getIndexDetailsTabs = () => {
+    return component
+      .find('div[role="tablist"] button[data-test-subj^="indexDetailsTab"]')
+      .map((tab) => tab.text());
   };
 
   const getActiveTabContent = () => {
@@ -284,6 +291,7 @@ export const setup = async ({
     actions: {
       getHeader,
       clickIndexDetailsTab,
+      getIndexDetailsTabs,
       getActiveTabContent,
       mappings,
       settings,

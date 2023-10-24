@@ -29,4 +29,5 @@ export interface IndexDetailsTab {
   id: IndexDetailsTabIds;
   name: ReactNode;
   renderTabContent: (indexName: string, index: Index) => ReactNode;
+  order: number;
 }

@@ -708,16 +708,17 @@ describe('<IndexDetailsPage />', () => {
     });
   });
   describe('extension service tabs', () => {
-    it('renders an additional tab', async () => {
-      const testTabId = 'testTab' as IndexDetailsTabIds;
-      const testContent = 'Test content';
-      const additionalTab: IndexDetailsTab = {
-        id: testTabId,
-        name: 'Test tab',
-        renderTabContent: () => {
-          return <span>{testContent}</span>;
-        },
-      };
+    const testTabId = 'testTab' as IndexDetailsTabIds;
+    const testContent = 'Test content';
+    const additionalTab: IndexDetailsTab = {
+      id: testTabId,
+      name: 'Test tab',
+      renderTabContent: () => {
+        return <span>{testContent}</span>;
+      },
+      order: 1,
+    };
+    beforeAll(async () => {
       const extensionsServiceMock = {
         indexDetailsTabs: [additionalTab],
       };
@@ -730,10 +731,34 @@ describe('<IndexDetailsPage />', () => {
         });
       });
       testBed.component.update();
+    });
 
+    it('renders an additional tab', async () => {
       await testBed.actions.clickIndexDetailsTab(testTabId);
       const content = testBed.actions.getActiveTabContent();
       expect(content).toEqual(testContent);
+    });
+
+    it('additional tab is the first in the order', () => {
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Test tab', 'Overview', 'Mappings', 'Settings', 'Statistics']);
+    });
+
+    it('additional tab is the last in the order', async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [{ ...additionalTab, order: 100 }],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Overview', 'Mappings', 'Settings', 'Statistics', 'Test tab']);
     });
   });
 });

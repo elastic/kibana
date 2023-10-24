@@ -50,6 +50,7 @@ const defaultTabs: IndexDetailsTab[] = [
     renderTabContent: (indexName: string, index: Index) => (
       <DetailsPageOverview indexDetails={index} />
     ),
+    order: 10,
   },
   {
     id: IndexDetailsSection.Mappings,
@@ -59,6 +60,7 @@ const defaultTabs: IndexDetailsTab[] = [
     renderTabContent: (indexName: string, index: Index) => (
       <DetailsPageMappings indexName={indexName} />
     ),
+    order: 20,
   },
   {
     id: IndexDetailsSection.Settings,
@@ -68,6 +70,7 @@ const defaultTabs: IndexDetailsTab[] = [
     renderTabContent: (indexName: string, index: Index) => (
       <DetailsPageSettings indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
     ),
+    order: 30,
   },
 ];
 
@@ -77,6 +80,7 @@ const statsTab: IndexDetailsTab = {
   renderTabContent: (indexName: string, index: Index) => (
     <DetailsPageStats indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
   ),
+  order: 40,
 };
 
 const getSelectedTabContent = ({
@@ -111,11 +115,18 @@ export const DetailsPage: FunctionComponent<
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
 
-  const tabs = [...defaultTabs];
-  if (config.enableIndexStats) {
-    tabs.push(statsTab);
-  }
-  tabs.push(...extensionsService.indexDetailsTabs);
+  const tabs = useMemo(() => {
+    const sortedTabs = [...defaultTabs];
+    if (config.enableIndexStats) {
+      sortedTabs.push(statsTab);
+    }
+    sortedTabs.push(...extensionsService.indexDetailsTabs);
+
+    sortedTabs.sort((tabA, tabB) => {
+      return tabA.order - tabB.order;
+    });
+    return sortedTabs;
+  }, [config.enableIndexStats, extensionsService.indexDetailsTabs]);
 
   const tabQueryParam = queryParams.get('tab') ?? IndexDetailsSection.Overview;
   let indexDetailsSection = IndexDetailsSection.Overview;
