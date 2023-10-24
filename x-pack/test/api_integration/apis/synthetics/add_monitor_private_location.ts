@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
           geo: { lat: 0, lon: 0 },
           url: 'mockDevUrl',
           isServiceManaged: true,
-          status: 'experimental',
+          status: 'experimental' as const,
           isInvalid: false,
         },
         {
