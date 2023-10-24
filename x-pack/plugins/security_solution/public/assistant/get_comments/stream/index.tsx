@@ -48,7 +48,7 @@ export const StreamComment = ({
       );
     }
     return (
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="row" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <RegenerateResponseButton onClick={regenerateMessage} />
         </EuiFlexItem>
