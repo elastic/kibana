@@ -19,7 +19,6 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { streamFactory } from '@kbn/ml-response-stream/server';
 import type {
   SignificantItem,
   SignificantItemGroup,
@@ -38,13 +37,10 @@ import {
   addSignificantItemsGroupAction,
   addSignificantItemsGroupHistogramAction,
   addSignificantItemsHistogramAction,
-  addErrorAction,
-  pingAction,
   resetAllAction,
   resetErrorsAction,
   resetGroupsAction,
   updateLoadingStateAction,
-  AiopsLogRateAnalysisApiAction,
 } from '../../../common/api/log_rate_analysis/actions';
 import type {
   AiopsLogRateAnalysisSchema,
@@ -56,6 +52,7 @@ import { AIOPS_API_ENDPOINT } from '../../../common/api';
 import { PLUGIN_ID } from '../../../common';
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
+import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
 import { fetchSignificantCategories } from './queries/fetch_significant_categories';
@@ -66,10 +63,7 @@ import { fetchTerms2CategoriesCounts } from './queries/fetch_terms_2_categories_
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
 import { getSignificantItemGroups } from './queries/get_significant_item_groups';
-import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
-
-// 10s ping frequency to keep the stream alive.
-const PING_FREQUENCY = 10000;
+import { logRateAnalysisResponseStreamFactory } from './response_stream/log_rate_analysis_response_stream';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
@@ -106,88 +100,30 @@ export function routeHandlerFactory<T extends ApiVersion>(
     const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
 
     return await coreStart.executionContext.withContext(executionContext, () => {
-      let logMessageCounter = 1;
-
-      function logDebugMessage(msg: string) {
-        logger.debug(`Log Rate Analysis #${logMessageCounter}: ${msg}`);
-        logMessageCounter++;
-      }
-
-      logDebugMessage('Starting analysis.');
-
       const groupingEnabled = !!request.body.grouping;
       const sampleProbability = request.body.sampleProbability ?? 1;
 
-      const controller = new AbortController();
-      const abortSignal = controller.signal;
-
-      let isRunning = false;
-      let loaded = 0;
-      let shouldStop = false;
-      request.events.aborted$.subscribe(() => {
-        logDebugMessage('aborted$ subscription trigger.');
-        shouldStop = true;
-        controller.abort();
-      });
-      request.events.completed$.subscribe(() => {
-        logDebugMessage('completed$ subscription trigger.');
-        shouldStop = true;
-        controller.abort();
-      });
-
       const {
-        end: streamEnd,
+        abortSignal,
+        end,
+        endWithUpdatedLoadingState,
+        logDebugMessage,
         push,
+        pushError,
+        pushPingWithTimeout,
         responseWithHeaders,
-      } = streamFactory<AiopsLogRateAnalysisApiAction<T>>(
+        state,
+      } = logRateAnalysisResponseStreamFactory<T>(
+        request.body,
+        request.events,
         request.headers,
-        logger,
-        request.body.compressResponse,
-        request.body.flushFix
+        logger
       );
-
-      function pushPingWithTimeout() {
-        setTimeout(() => {
-          if (isRunning) {
-            logDebugMessage('Ping message.');
-            push(pingAction());
-            pushPingWithTimeout();
-          }
-        }, PING_FREQUENCY);
-      }
-
-      function end() {
-        if (isRunning) {
-          isRunning = false;
-          logDebugMessage('Ending analysis.');
-          streamEnd();
-        } else {
-          logDebugMessage('end() was called again with isRunning already being false.');
-        }
-      }
-
-      function endWithUpdatedLoadingState() {
-        push(
-          updateLoadingStateAction({
-            ccsWarning: false,
-            loaded: 1,
-            loadingState: i18n.translate('xpack.aiops.logRateAnalysis.loadingState.doneMessage', {
-              defaultMessage: 'Done.',
-            }),
-          })
-        );
-
-        end();
-      }
-
-      function pushError(m: string) {
-        logDebugMessage('Push error.');
-        push(addErrorAction(m));
-      }
 
       async function runAnalysis() {
         try {
-          isRunning = true;
+          logDebugMessage('Starting analysis.');
+          state.isRunning = true;
 
           if (!request.body.overrides) {
             logDebugMessage('Full Reset.');
@@ -204,7 +140,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
           if (request.body.overrides?.loaded) {
             logDebugMessage(`Set 'loaded' override to '${request.body.overrides?.loaded}'.`);
-            loaded = request.body.overrides?.loaded;
+            state.loaded = request.body.overrides?.loaded;
           }
 
           pushPingWithTimeout();
@@ -223,7 +159,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded,
+                loaded: state.loaded,
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.loadingIndexInformation',
                   {
@@ -257,14 +193,14 @@ export function routeHandlerFactory<T extends ApiVersion>(
             logDebugMessage(`Total document count: ${totalDocCount}`);
             logDebugMessage(`Sample probability: ${sampleProbability}`);
 
-            loaded += LOADED_FIELD_CANDIDATES;
+            state.loaded += LOADED_FIELD_CANDIDATES;
 
             pushPingWithTimeout();
 
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded,
+                loaded: state.loaded,
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldCandidates',
                   {
@@ -280,7 +216,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
             if (fieldCandidatesCount === 0) {
               endWithUpdatedLoadingState();
-            } else if (shouldStop) {
+            } else if (state.shouldStop) {
               logDebugMessage('shouldStop after fetching field candidates.');
               end();
               return;
@@ -379,7 +315,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
           logDebugMessage('Fetch p-values.');
 
           const pValuesQueue = queue(async function (fieldCandidate: string) {
-            loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
+            state.loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
 
             let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
@@ -417,7 +353,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded,
+                loaded: state.loaded,
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldValuePairs',
                   {
@@ -439,7 +375,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
               pushError(`Failed to fetch p-values.`);
               pValuesQueue.kill();
               end();
-            } else if (shouldStop) {
+            } else if (state.shouldStop) {
               logDebugMessage('shouldStop fetching p-values.');
               pValuesQueue.kill();
               end();
@@ -493,7 +429,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded,
+                loaded: state.loaded,
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.loadingHistogramData',
                   {
@@ -504,7 +440,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             );
           }
 
-          if (shouldStop) {
+          if (state.shouldStop) {
             logDebugMessage('shouldStop after fetching overall histogram.');
             end();
             return;
@@ -516,7 +452,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded,
+                loaded: state.loaded,
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.groupingResults',
                   {
@@ -564,7 +500,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                 itemSets.push(...significantCategoriesItemSets);
               }
 
-              if (shouldStop) {
+              if (state.shouldStop) {
                 logDebugMessage('shouldStop after fetching frequent_item_sets.');
                 end();
                 return;
@@ -585,11 +521,11 @@ export function routeHandlerFactory<T extends ApiVersion>(
                   push(addSignificantItemsGroupAction(significantItemGroups, version));
                 }
 
-                loaded += PROGRESS_STEP_GROUPING;
+                state.loaded += PROGRESS_STEP_GROUPING;
 
                 pushHistogramDataLoadingState();
 
-                if (shouldStop) {
+                if (state.shouldStop) {
                   logDebugMessage('shouldStop after grouping.');
                   end();
                   return;
@@ -598,7 +534,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                 logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
 
                 const groupHistogramQueue = queue(async function (cpg: SignificantItemGroup) {
-                  if (shouldStop) {
+                  if (state.shouldStop) {
                     logDebugMessage('shouldStop abort fetching group histograms.');
                     groupHistogramQueue.kill();
                     end();
@@ -696,7 +632,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             }
           }
 
-          loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
+          state.loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
           logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
 
@@ -707,7 +643,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             !request.body.overrides?.regroupOnly
           ) {
             const fieldValueHistogramQueue = queue(async function (cp: SignificantItem) {
-              if (shouldStop) {
+              if (state.shouldStop) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
                 fieldValueHistogramQueue.kill();
                 end();
@@ -785,7 +721,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
                 const { fieldName, fieldValue } = cp;
 
-                loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
+                state.loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                 pushHistogramDataLoadingState();
                 push(
                   addSignificantItemsHistogramAction(
@@ -890,7 +826,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
               const { fieldName, fieldValue } = cp;
 
-              loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
+              state.loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
               pushHistogramDataLoadingState();
               push(
                 addSignificantItemsHistogramAction(
