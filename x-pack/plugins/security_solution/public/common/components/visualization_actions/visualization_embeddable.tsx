@@ -36,6 +36,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
       queryId: id,
     });
   const { indicesExist } = useSourcererDataView(lensProps.scopeId);
+  console.log('@@', { indicesExist });
 
   const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
@@ -53,6 +54,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
       `;
   const onEmbeddableLoad = useCallback(
     ({ requests, responses, isLoading }: EmbeddableData) => {
+      console.log(`@@ embeddables loaded`, { request, response });
       dispatch(
         inputsActions.setQuery({
           inputId,

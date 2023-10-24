@@ -26,7 +26,7 @@ const NoWrapEuiStat = styled(EuiStat)`
 export const StatsContainer = styled.span`
   font-size: ${euiThemeVars.euiFontSizeXS};
   font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-  border-right: ${euiThemeVars.euiBorderThin};
+  /* border-right: ${euiThemeVars.euiBorderThin}; */
   padding-right: 16px;
   .smallDot {
     width: 3px !important;

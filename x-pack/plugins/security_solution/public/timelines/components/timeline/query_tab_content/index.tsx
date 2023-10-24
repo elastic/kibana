@@ -370,7 +370,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               />
             </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
-          <TimelineKpi />
+          <TimelineKpi timelineId={timelineId} />
 
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody

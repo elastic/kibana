@@ -77,33 +77,38 @@ export const ToggleContainer = React.forwardRef<
             className="header-section-titles"
             justifyContent="spaceBetween"
           >
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false} data-test-subj="toggle-container-control">
-                <EuiButtonIcon
-                  data-test-subj="query-toggle-header"
-                  aria-label={TOGGLE_CONTAINER_TITLE(localToggleStatus)}
-                  color="text"
-                  display="empty"
-                  iconType={localToggleStatus ? 'arrowDown' : 'arrowRight'}
-                  onClick={toggle}
-                  size="s"
-                  title={TOGGLE_CONTAINER_TITLE(localToggleStatus)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} data-test-subj="toggle-container-title">
-                <EuiTitle size={'m'}>
-                  <h4 data-test-subj="header-section-title">
-                    <span className="eui-textBreakNormal">{title}</span>
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="toggle-container-append" grow={false}>
-                {append}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false} data-test-subj="toggle-container-control">
+                  <EuiButtonIcon
+                    data-test-subj="query-toggle-header"
+                    aria-label={TOGGLE_CONTAINER_TITLE(localToggleStatus)}
+                    color="text"
+                    display="empty"
+                    iconType={localToggleStatus ? 'arrowDown' : 'arrowRight'}
+                    onClick={toggle}
+                    size="s"
+                    title={TOGGLE_CONTAINER_TITLE(localToggleStatus)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true} data-test-subj="toggle-container-title">
+                  <EuiTitle size={'m'}>
+                    <h4 data-test-subj="header-section-title">
+                      <span className="eui-textBreakNormal">{title}</span>
+                    </h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup>
+                <EuiFlexItem data-test-subj="toggle-container-append" grow={false}>
+                  {append}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
+          {localToggleStatus ? <EuiFlexGroup>{children}</EuiFlexGroup> : null}
         </div>
       </StyledPanel>
     </div>
