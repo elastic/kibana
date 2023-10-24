@@ -34,7 +34,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
     cy.task('esArchiverUnload', 'bulk_process');
   });
 
-  context('Alerts', { tags: ['@brokenInServerless'] }, () => {
+  context('Alerts', () => {
     before(() => {
       createRule(getNewRule());
     });

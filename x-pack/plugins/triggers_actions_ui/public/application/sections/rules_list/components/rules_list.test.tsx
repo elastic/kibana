@@ -458,7 +458,8 @@ describe('rules_list ', () => {
     });
   });
 
-  describe('rules_list component with items', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/149061
+  describe.skip('rules_list component with items', () => {
     it('should render basic table and its row', async () => {
       renderWithProviders(<RulesList />);
       await waitFor(() => expect(screen.queryAllByTestId('rule-row')).toHaveLength(6));

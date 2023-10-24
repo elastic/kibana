@@ -9,23 +9,27 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import type { PluginsService, PluginsServiceSetup } from '@kbn/core-plugins-browser-internal';
+import type {
+  PluginsService,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
+} from '@kbn/core-plugins-browser-internal';
 import type { BuildFlavor } from '@kbn/config/src/types';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<PluginsServiceSetup> = {
+const createInternalSetupContractMock = () => {
+  const setupContract: jest.Mocked<InternalPluginsServiceSetup> = {
     contracts: new Map(),
   };
   // we have to suppress type errors until decide how to mock es6 class
-  return setupContract as PluginsServiceSetup;
+  return setupContract as InternalPluginsServiceSetup;
 };
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<PluginsServiceSetup> = {
+const createInternalStartContractMock = () => {
+  const startContract: jest.Mocked<InternalPluginsServiceStart> = {
     contracts: new Map(),
   };
   // we have to suppress type errors until decide how to mock es6 class
-  return startContract as PluginsServiceSetup;
+  return startContract as InternalPluginsServiceSetup;
 };
 
 const createPluginInitializerContextMock = (
@@ -68,14 +72,14 @@ const createMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockResolvedValue(createSetupContractMock());
-  mocked.start.mockResolvedValue(createStartContractMock());
+  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
+  mocked.start.mockResolvedValue(createInternalStartContractMock());
   return mocked;
 };
 
 export const pluginsServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
+  createInternalSetupContract: createInternalSetupContractMock,
+  createInternalStartContract: createInternalStartContractMock,
   createPluginInitializerContext: createPluginInitializerContextMock,
 };
