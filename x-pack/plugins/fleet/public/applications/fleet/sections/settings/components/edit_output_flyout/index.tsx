@@ -53,9 +53,6 @@ import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placehold
 import { useOutputForm } from './use_output_form';
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 import { AdvancedOptionsSection } from './advanced_options_section';
-
-const { outputSecretsStorage: outputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
-
 export interface EditOutputFlyoutProps {
   output?: Output;
   onClose: () => void;
@@ -72,7 +69,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
   const { euiTheme } = useEuiTheme();
-  const [useSecretsStorage, setUseSecretsStorage] = React.useState(outputSecretsStorageEnabled);
+  const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
+  const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
 
   const onUsePlainText = () => {
     setUseSecretsStorage(false);
