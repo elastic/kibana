@@ -13,6 +13,9 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import {
   addErrorAction,
   pingAction,
+  resetAllAction,
+  resetErrorsAction,
+  resetGroupsAction,
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
 } from '../../../../common/api/log_rate_analysis/actions';
@@ -116,15 +119,68 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
     push(addErrorAction(m));
   }
 
+  function isRunning(d?: boolean) {
+    if (typeof d === 'boolean') {
+      state.isRunning = d;
+    } else {
+      return state.isRunning;
+    }
+  }
+
+  function loaded(): number;
+  function loaded(d: number, replace?: boolean): undefined;
+  function loaded(d?: number, replace = true) {
+    if (typeof d === 'number') {
+      if (replace) {
+        state.loaded = d;
+      } else {
+        state.loaded += d;
+      }
+    } else {
+      return state.loaded;
+    }
+  }
+
+  function shouldStop(d?: boolean) {
+    if (typeof d === 'boolean') {
+      state.shouldStop = d;
+    } else {
+      return state.shouldStop;
+    }
+  }
+
+  function overridesHandler() {
+    if (!params.overrides) {
+      logDebugMessage('Full Reset.');
+      push(resetAllAction());
+    } else {
+      logDebugMessage('Reset Errors.');
+      push(resetErrorsAction());
+    }
+
+    if (params.overrides?.regroupOnly) {
+      logDebugMessage('Reset Groups.');
+      push(resetGroupsAction());
+    }
+
+    if (params.overrides?.loaded) {
+      logDebugMessage(`Set 'loaded' override to '${params.overrides?.loaded}'.`);
+      loaded(params.overrides?.loaded);
+    }
+  }
+
   return {
     abortSignal,
     end,
     endWithUpdatedLoadingState,
+    isRunning,
+    loaded,
     logDebugMessage,
+    overridesHandler,
     push,
     pushError,
     pushPingWithTimeout,
     responseWithHeaders,
-    state,
+    shouldStop,
   };
 };

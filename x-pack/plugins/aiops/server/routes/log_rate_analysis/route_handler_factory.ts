@@ -37,9 +37,6 @@ import {
   addSignificantItemsGroupAction,
   addSignificantItemsGroupHistogramAction,
   addSignificantItemsHistogramAction,
-  resetAllAction,
-  resetErrorsAction,
-  resetGroupsAction,
   updateLoadingStateAction,
 } from '../../../common/api/log_rate_analysis/actions';
 import type {
@@ -107,12 +104,15 @@ export function routeHandlerFactory<T extends ApiVersion>(
         abortSignal,
         end,
         endWithUpdatedLoadingState,
+        isRunning,
+        loaded,
         logDebugMessage,
+        overridesHandler,
         push,
         pushError,
         pushPingWithTimeout,
         responseWithHeaders,
-        state,
+        shouldStop,
       } = logRateAnalysisResponseStreamFactory<T>(
         request.body,
         request.events,
@@ -123,26 +123,9 @@ export function routeHandlerFactory<T extends ApiVersion>(
       async function runAnalysis() {
         try {
           logDebugMessage('Starting analysis.');
-          state.isRunning = true;
 
-          if (!request.body.overrides) {
-            logDebugMessage('Full Reset.');
-            push(resetAllAction());
-          } else {
-            logDebugMessage('Reset Errors.');
-            push(resetErrorsAction());
-          }
-
-          if (request.body.overrides?.regroupOnly) {
-            logDebugMessage('Reset Groups.');
-            push(resetGroupsAction());
-          }
-
-          if (request.body.overrides?.loaded) {
-            logDebugMessage(`Set 'loaded' override to '${request.body.overrides?.loaded}'.`);
-            state.loaded = request.body.overrides?.loaded;
-          }
-
+          isRunning(true);
+          overridesHandler();
           pushPingWithTimeout();
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
@@ -159,7 +142,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded: state.loaded,
+                loaded: loaded(),
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.loadingIndexInformation',
                   {
@@ -193,14 +176,14 @@ export function routeHandlerFactory<T extends ApiVersion>(
             logDebugMessage(`Total document count: ${totalDocCount}`);
             logDebugMessage(`Sample probability: ${sampleProbability}`);
 
-            state.loaded += LOADED_FIELD_CANDIDATES;
+            loaded(LOADED_FIELD_CANDIDATES, false);
 
             pushPingWithTimeout();
 
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded: state.loaded,
+                loaded: loaded(),
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldCandidates',
                   {
@@ -216,7 +199,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
             if (fieldCandidatesCount === 0) {
               endWithUpdatedLoadingState();
-            } else if (state.shouldStop) {
+            } else if (shouldStop()) {
               logDebugMessage('shouldStop after fetching field candidates.');
               end();
               return;
@@ -315,7 +298,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
           logDebugMessage('Fetch p-values.');
 
           const pValuesQueue = queue(async function (fieldCandidate: string) {
-            state.loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
+            loaded((1 / fieldCandidatesCount) * loadingStepSizePValues, false);
 
             let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
@@ -353,7 +336,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded: state.loaded,
+                loaded: loaded(),
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldValuePairs',
                   {
@@ -375,7 +358,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
               pushError(`Failed to fetch p-values.`);
               pValuesQueue.kill();
               end();
-            } else if (state.shouldStop) {
+            } else if (shouldStop()) {
               logDebugMessage('shouldStop fetching p-values.');
               pValuesQueue.kill();
               end();
@@ -429,7 +412,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded: state.loaded,
+                loaded: loaded(),
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.loadingHistogramData',
                   {
@@ -440,7 +423,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             );
           }
 
-          if (state.shouldStop) {
+          if (shouldStop()) {
             logDebugMessage('shouldStop after fetching overall histogram.');
             end();
             return;
@@ -452,7 +435,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
-                loaded: state.loaded,
+                loaded: loaded(),
                 loadingState: i18n.translate(
                   'xpack.aiops.logRateAnalysis.loadingState.groupingResults',
                   {
@@ -500,7 +483,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                 itemSets.push(...significantCategoriesItemSets);
               }
 
-              if (state.shouldStop) {
+              if (shouldStop()) {
                 logDebugMessage('shouldStop after fetching frequent_item_sets.');
                 end();
                 return;
@@ -521,11 +504,10 @@ export function routeHandlerFactory<T extends ApiVersion>(
                   push(addSignificantItemsGroupAction(significantItemGroups, version));
                 }
 
-                state.loaded += PROGRESS_STEP_GROUPING;
-
+                loaded(PROGRESS_STEP_GROUPING, false);
                 pushHistogramDataLoadingState();
 
-                if (state.shouldStop) {
+                if (shouldStop()) {
                   logDebugMessage('shouldStop after grouping.');
                   end();
                   return;
@@ -534,7 +516,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                 logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
 
                 const groupHistogramQueue = queue(async function (cpg: SignificantItemGroup) {
-                  if (state.shouldStop) {
+                  if (shouldStop()) {
                     logDebugMessage('shouldStop abort fetching group histograms.');
                     groupHistogramQueue.kill();
                     end();
@@ -632,7 +614,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             }
           }
 
-          state.loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
+          loaded(PROGRESS_STEP_HISTOGRAMS_GROUPS, false);
 
           logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
 
@@ -643,7 +625,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             !request.body.overrides?.regroupOnly
           ) {
             const fieldValueHistogramQueue = queue(async function (cp: SignificantItem) {
-              if (state.shouldStop) {
+              if (shouldStop()) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
                 fieldValueHistogramQueue.kill();
                 end();
@@ -721,7 +703,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
                 const { fieldName, fieldValue } = cp;
 
-                state.loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
+                loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
                 pushHistogramDataLoadingState();
                 push(
                   addSignificantItemsHistogramAction(
@@ -826,7 +808,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
               const { fieldName, fieldValue } = cp;
 
-              state.loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
+              loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
               pushHistogramDataLoadingState();
               push(
                 addSignificantItemsHistogramAction(
