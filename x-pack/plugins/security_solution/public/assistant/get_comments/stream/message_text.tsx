@@ -16,7 +16,8 @@ import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo, useRef } from 'react';
 import type { Node } from 'unist';
-import { EsqlCodeBlock } from './esql_code_block';
+import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
+import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
 
 export type ChatActionClickHandler = (payload: { type: string; query: string }) => Promise<unknown>;
 interface Props {
@@ -89,32 +90,6 @@ const loadingCursorPlugin = () => {
   };
 };
 
-const esqlLanguagePlugin = () => {
-  const visitor = (node: Node, parent?: Parent) => {
-    if ('children' in node) {
-      const nodeAsParent = node as Parent;
-      nodeAsParent.children.forEach((child) => {
-        visitor(child, nodeAsParent);
-      });
-    }
-
-    if (node.type === 'code' && node.lang === 'esql') {
-      node.type = 'esql';
-    }
-    // TODO: make these renderers
-    if (
-      (node.type === 'code' && node.lang === 'kql') ||
-      (node.type === 'code' && node.lang === 'eql')
-    ) {
-      node.type = 'esql';
-    }
-  };
-
-  return (tree: Node) => {
-    visitor(tree);
-  };
-};
-
 export function MessageText({ loading, content, onActionClick }: Props) {
   const containerClassName = css`
     overflow-wrap: break-word;
@@ -133,19 +108,15 @@ export function MessageText({ loading, content, onActionClick }: Props) {
 
     processingPlugins[1][1].components = {
       ...components,
-      cursor: Cursor,
-      esql: (props) => {
+      customCodeBlock: (props) => {
         return (
           <>
-            <EsqlCodeBlock
-              value={props.value}
-              actionsDisabled={loading}
-              onActionClick={onActionClickRef.current}
-            />
+            <CustomCodeBlock value={props.value} />
             <EuiSpacer size="m" />
           </>
         );
       },
+      cursor: Cursor,
       table: (props) => (
         <>
           <div className="euiBasicTable">
@@ -183,7 +154,7 @@ export function MessageText({ loading, content, onActionClick }: Props) {
     };
 
     return {
-      parsingPluginList: [loadingCursorPlugin, esqlLanguagePlugin, ...parsingPlugins],
+      parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins],
       processingPluginList: processingPlugins,
     };
   }, [loading]);
