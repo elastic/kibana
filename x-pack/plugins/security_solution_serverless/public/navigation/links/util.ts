@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
+import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-
+import { ExternalPageName } from './constants';
 import type { GetCloudUrl, ProjectPageName } from './types';
 import { SECURITY_PROJECT_TYPE } from '../../../common';
 
@@ -50,3 +50,16 @@ export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
       return undefined;
   }
 };
+
+/**
+ * Defines the navigation items that should be in the footer of the side navigation.
+ * @todo Make it a new property in the `NavigationLink` type `position?: 'top' | 'bottom' (default: 'top')`
+ */
+export const isBottomNavItemId = (id: string) =>
+  id === SecurityPageName.landing ||
+  id === ExternalPageName.devTools ||
+  id === ExternalPageName.management ||
+  id === ExternalPageName.integrationsSecurity ||
+  id === ExternalPageName.cloudUsersAndRoles ||
+  id === ExternalPageName.cloudPerformance ||
+  id === ExternalPageName.cloudBilling;
