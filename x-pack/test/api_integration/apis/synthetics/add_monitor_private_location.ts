@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   ConfigKey,
   HTTPFields,
+  LocationStatus,
   PrivateLocation,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -72,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
           geo: { lat: 0, lon: 0 },
           url: 'mockDevUrl',
           isServiceManaged: true,
-          status: 'experimental' as const,
+          status: LocationStatus.EXPERIMENTAL,
           isInvalid: false,
         },
         {

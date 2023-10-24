@@ -8,6 +8,7 @@ import moment from 'moment';
 import {
   ConfigKey,
   HTTPFields,
+  LocationStatus,
   PrivateLocation,
   ServiceLocation,
   SyntheticsParams,
@@ -77,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
           geo: { lat: 0, lon: 0 },
           url: 'mockDevUrl',
           isServiceManaged: true,
-          status: 'experimental',
+          status: LocationStatus.EXPERIMENTAL,
           isInvalid: false,
         },
         {
