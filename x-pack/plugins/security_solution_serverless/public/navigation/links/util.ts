@@ -9,6 +9,7 @@ import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 import type { GetCloudUrl, ProjectPageName } from './types';
+import { SECURITY_PROJECT_TYPE } from '../../../common';
 
 export const getNavLinkIdFromProjectPageName = (projectNavLinkId: ProjectPageName): string => {
   const cleanId = projectNavLinkId.replace(/\/(.*)$/, ''); // remove any trailing path
@@ -44,7 +45,7 @@ export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
       return cloud.projectsUrl;
     case 'project':
       const projectId = getProjectDetails(cloud)?.projectId;
-      return projectId ? `${cloud.projectsUrl}/security/${projectId}` : undefined;
+      return projectId ? `${cloud.projectsUrl}/${SECURITY_PROJECT_TYPE}/${projectId}` : undefined;
     default:
       return undefined;
   }
