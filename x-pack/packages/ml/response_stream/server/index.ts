@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { streamFactory } from './stream_factory';
+export { streamFactory, type UncompressedResponseStream } from './stream_factory';
