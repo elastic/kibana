@@ -25,10 +25,6 @@ export interface SearchResponseIncompleteWarning {
    */
   type: 'incomplete';
   /**
-   * message: human-friendly message
-   */
-  message: string;
-  /**
    * requestName: human-friendly request name
    */
   requestName: string;
