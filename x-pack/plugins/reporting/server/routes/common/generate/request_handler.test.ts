@@ -4,17 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-jest.mock(
-  'puid',
-  () =>
-    class MockPuid {
-      generate() {
-        return 'mock-report-id';
-      }
-    }
-);
-
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import rison from '@kbn/rison';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -26,7 +15,17 @@ import { RequestHandler } from './request_handler';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated/printable_pdf';
 import { CommonReportingSetup, TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
 
-jest.mock('@kbn/reporting-common/crypto', () => ({
+jest.mock(
+  'puid',
+  () =>
+    class MockPuid {
+      generate() {
+        return 'mock-report-id';
+      }
+    }
+);
+
+jest.mock('@kbn/reporting-common-export-types-helpers/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),
