@@ -14,6 +14,26 @@ export type { ObservabilityAIAssistantServerRouteRepository } from './routes/get
 import { config as configSchema } from './config';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
+  deprecations: ({ unusedFromRoot }) => [
+    unusedFromRoot('xpack.observability.aiAssistant.enabled', {
+      level: 'warning',
+    }),
+    unusedFromRoot('xpack.observability.aiAssistant.provider.azureOpenAI.deploymentId', {
+      level: 'warning',
+    }),
+    unusedFromRoot('xpack.observability.aiAssistant.provider.azureOpenAI.resourceName', {
+      level: 'warning',
+    }),
+    unusedFromRoot('xpack.observability.aiAssistant.provider.azureOpenAI.apiKey', {
+      level: 'warning',
+    }),
+    unusedFromRoot('xpack.observability.aiAssistant.provider.openAI.apiKey', {
+      level: 'warning',
+    }),
+    unusedFromRoot('xpack.observability.aiAssistant.provider.openAI.model', {
+      level: 'warning',
+    }),
+  ],
   exposeToBrowser: {},
   schema: configSchema,
 };
