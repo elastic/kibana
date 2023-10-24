@@ -10,6 +10,7 @@ import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
 import { ManagementSection } from '../../utils';
@@ -28,22 +29,24 @@ export const ManagementRouter = memo(
       <Router history={history}>
         <Routes>
           {sections.map((section) =>
-            section
-              .getAppsEnabled()
-              .map((app) => (
-                <Route
-                  path={`${app.basePath}`}
-                  component={() => (
-                    <ManagementAppWrapper
-                      app={app}
-                      setBreadcrumbs={setBreadcrumbs}
-                      onAppMounted={onAppMounted}
-                      history={history}
-                      theme$={theme$}
-                    />
-                  )}
-                />
-              ))
+            section.getAppsEnabled().map((app) => (
+              <Route
+                path={`${app.basePath}`}
+                component={() => (
+                  <KibanaErrorBoundaryProvider>
+                    <KibanaErrorBoundary>
+                      <ManagementAppWrapper
+                        app={app}
+                        setBreadcrumbs={setBreadcrumbs}
+                        onAppMounted={onAppMounted}
+                        history={history}
+                        theme$={theme$}
+                      />
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                )}
+              />
+            ))
           )}
           {sections.map((section) =>
             section
