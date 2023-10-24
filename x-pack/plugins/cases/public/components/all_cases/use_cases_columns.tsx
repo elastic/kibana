@@ -247,7 +247,7 @@ export const useCasesColumns = ({
     width: '100px',
   });
 
-  if (filterStatus.includes(CaseStatuses.closed)) {
+  if (filterStatus[0] === CaseStatuses.closed) {
     columns.push({
       field: 'closedAt',
       name: i18n.CLOSED_ON,
@@ -317,7 +317,7 @@ export const useCasesColumns = ({
         sortable: true,
         render: (status: CaseUI['status']) => {
           if (status != null) {
-            return <Status status={status} />;
+            return <Status status={Array.isArray(status) ? status[0] : status} />;
           }
 
           return getEmptyTagValue();
@@ -329,7 +329,8 @@ export const useCasesColumns = ({
     field: 'severity',
     name: i18n.SEVERITY,
     sortable: true,
-    render: (severity: CaseUI['severity']) => {
+    render: (_severity: CaseUI['severity']) => {
+      const severity = Array.isArray(_severity) ? _severity[0] : _severity;
       if (severity != null) {
         const severityData = severities[severity ?? CaseSeverity.LOW];
         return (

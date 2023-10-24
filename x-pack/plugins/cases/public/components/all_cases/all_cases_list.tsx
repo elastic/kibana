@@ -161,7 +161,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
         if (newFilterOptions?.status) {
-          // FIXME: rethink where status[0] is being used
           if (
             newFilterOptions.status[0] === CaseStatuses.closed &&
             queryParams.sortField === SortFieldCase.createdAt
