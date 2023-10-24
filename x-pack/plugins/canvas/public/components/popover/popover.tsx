@@ -17,7 +17,6 @@ interface Props {
   ownFocus?: boolean;
   tooltip?: string;
   panelClassName?: string;
-  anchorClassName?: string;
   anchorPosition?: string;
   panelPaddingSize?: 'none' | 's' | 'm' | 'l';
   id?: string;

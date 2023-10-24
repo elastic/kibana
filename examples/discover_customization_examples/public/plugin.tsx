@@ -213,7 +213,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       {currentSavedSearch.title ?? 'None selected'}
                     </EuiButton>
                   }
-                  anchorClassName="eui-fullWidth"
                   isOpen={isPopoverOpen}
                   panelPaddingSize="none"
                   closePopover={closePopover}
@@ -280,7 +279,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       {currentSavedSearch.title ?? 'None selected'}
                     </EuiButton>
                   }
-                  anchorClassName="eui-fullWidth"
                   isOpen={isPopoverOpen}
                   panelPaddingSize="none"
                   closePopover={closePopover}

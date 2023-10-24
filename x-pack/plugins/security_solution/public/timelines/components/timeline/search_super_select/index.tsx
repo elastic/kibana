@@ -133,7 +133,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
       input={superSelect}
       isOpen={isPopoverOpen}
       closePopover={handleClosePopover}
-      anchorClassName="rightArrowIcon"
+      className="rightArrowIcon"
     >
       <SelectableTimeline
         hideUntitled={hideUntitled}
