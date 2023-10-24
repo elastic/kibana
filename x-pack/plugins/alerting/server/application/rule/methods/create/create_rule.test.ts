@@ -4004,26 +4004,6 @@ describe('create()', () => {
       `);
     });
 
-    test('should throw an error if the system action does not exist', async () => {
-      const action: RuleSystemAction = {
-        id: 'fake-system-action',
-        uuid: '123',
-        params: {},
-        actionTypeId: '.test',
-        type: RuleActionTypes.SYSTEM,
-      };
-
-      const data = getMockData({ actions: [action] });
-      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Action fake-system-action is not a system action]`
-      );
-
-      expect(actionsClient.getBulk).toBeCalledWith({
-        ids: ['fake-system-action'],
-        throwIfSystemAction: false,
-      });
-    });
-
     test('should throw an error if the system action contains the frequency', async () => {
       const action = {
         id: 'system_action-id',

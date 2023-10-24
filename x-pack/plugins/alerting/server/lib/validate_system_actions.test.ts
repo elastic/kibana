@@ -12,9 +12,12 @@ import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapte
 import { ConnectorAdapter } from '../connector_adapters/types';
 import { NormalizedSystemAction } from '../rules_client';
 import { RuleActionTypes, RuleSystemAction } from '../types';
-import { validateSystemActions } from './validate_system_actions';
+import {
+  validateSystemActionsWithoutRuleTypeId,
+  validateSystemActionsWithRuleTypeId,
+} from './validate_system_actions';
 
-describe('validateSystemActions', () => {
+describe('validateSystemActionsWithoutRuleTypeId', () => {
   const connectorAdapter: ConnectorAdapter = {
     connectorTypeId: '.test',
     ruleActionParamsSchema: schema.object({ foo: schema.string() }),
@@ -42,7 +45,7 @@ describe('validateSystemActions', () => {
   });
 
   it('should not validate with empty system actions', async () => {
-    const res = await validateSystemActions({
+    const res = await validateSystemActionsWithoutRuleTypeId({
       connectorAdapterRegistry: registry,
       systemActions: [],
       actionsClient,
@@ -69,7 +72,7 @@ describe('validateSystemActions', () => {
     actionsClient.isSystemAction.mockReturnValue(false);
 
     await expect(() =>
-      validateSystemActions({
+      validateSystemActionsWithoutRuleTypeId({
         connectorAdapterRegistry: registry,
         systemActions,
         actionsClient,
@@ -93,7 +96,7 @@ describe('validateSystemActions', () => {
     actionsClient.isSystemAction.mockReturnValue(true);
 
     await expect(() =>
-      validateSystemActions({
+      validateSystemActionsWithoutRuleTypeId({
         connectorAdapterRegistry: registry,
         systemActions,
         actionsClient,
@@ -117,7 +120,7 @@ describe('validateSystemActions', () => {
     actionsClient.isSystemAction.mockReturnValue(true);
 
     await expect(() =>
-      validateSystemActions({
+      validateSystemActionsWithoutRuleTypeId({
         connectorAdapterRegistry: registry,
         systemActions,
         actionsClient,
@@ -171,7 +174,7 @@ describe('validateSystemActions', () => {
 
     actionsClient.isSystemAction.mockReturnValue(true);
 
-    const res = await validateSystemActions({
+    const res = await validateSystemActionsWithoutRuleTypeId({
       connectorAdapterRegistry: registry,
       systemActions,
       actionsClient,
@@ -183,5 +186,51 @@ describe('validateSystemActions', () => {
       ids: ['system_action-id', 'system_action-id-2'],
       throwIfSystemAction: false,
     });
+  });
+});
+
+describe('validateSystemActionsWithRuleTypeId', () => {
+  const connectorAdapter: ConnectorAdapter = {
+    connectorTypeId: '.test',
+    ruleActionParamsSchema: schema.object({ foo: schema.string() }),
+    buildActionParams: jest.fn(),
+  };
+
+  let registry: ConnectorAdapterRegistry;
+
+  beforeEach(() => {
+    registry = new ConnectorAdapterRegistry();
+  });
+
+  it('should not validate with empty system actions', async () => {
+    const res = validateSystemActionsWithRuleTypeId({
+      connectorAdapterRegistry: registry,
+      systemActions: [],
+    });
+
+    expect(res).toBe(undefined);
+  });
+
+  it('should throw an error if the params are not valid', async () => {
+    const systemActions: RuleSystemAction[] = [
+      {
+        id: 'system_action-id',
+        uuid: '123',
+        params: { 'not-exist': 'test' },
+        actionTypeId: '.test',
+        type: RuleActionTypes.SYSTEM,
+      },
+    ];
+
+    registry.register(connectorAdapter);
+
+    expect(() =>
+      validateSystemActionsWithRuleTypeId({
+        connectorAdapterRegistry: registry,
+        systemActions,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [undefined]"`
+    );
   });
 });
