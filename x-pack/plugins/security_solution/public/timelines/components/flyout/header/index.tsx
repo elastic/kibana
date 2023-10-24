@@ -289,11 +289,12 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
     );
   }, [dispatch, timelineId]);
 
-  return (
+  const hasDescription = !!description;
+  return hasDescription ? (
     <EuiText size="s" data-test-subj="timeline-description">
-      <ReadMoreButton description={description || ''} onclick={onReadMore} />
+      <ReadMoreButton description={description} onclick={onReadMore} />
     </EuiText>
-  );
+  ) : null;
 };
 
 const TimelineDescription = React.memo(TimelineDescriptionComponent);
