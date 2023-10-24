@@ -55,6 +55,7 @@ export const getRuleObjectCorrelations = ({
       cases_count_total: casesRuleIds.get(ruleId) || 0,
       has_legacy_notification: hasLegacyNotification,
       has_notification: hasNotification,
+      has_legacy_investigation_field: Array.isArray(attributes.params.investigationFields),
     };
   });
 };
