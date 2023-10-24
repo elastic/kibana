@@ -42,7 +42,7 @@ export const SelectableSpacesControl = (props: Props) => {
       content={
         <FormattedMessage
           id="xpack.spaces.management.copyToSpace.selectSpacesControl.disabledTooltip"
-          defaultMessage="The object already exists in this space."
+          defaultMessage="The object or a related object already exists in this space."
         />
       }
       position="left"
