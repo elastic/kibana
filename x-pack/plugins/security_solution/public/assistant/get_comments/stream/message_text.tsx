@@ -77,7 +77,7 @@ const loadingCursorPlugin = () => {
 
     textNode.value = textNode.value.replace(CURSOR, '');
 
-    const indexOfNode = parent?.children.indexOf(textNode);
+    const indexOfNode = parent?.children.indexOf(textNode) ?? 0;
     parent?.children.splice(indexOfNode + 1, 0, {
       type: 'cursor' as Text['type'],
       value: CURSOR,

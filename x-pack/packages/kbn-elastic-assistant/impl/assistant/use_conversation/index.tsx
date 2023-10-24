@@ -93,7 +93,6 @@ export const useConversation = (): UseConversation => {
             ...prevConversation,
             messages,
           };
-          console.log('removeLastMessage newConversation', newConversation);
           return {
             ...prev,
             [conversationId]: newConversation,
@@ -123,7 +122,6 @@ export const useConversation = (): UseConversation => {
             ...prevConversation,
             messages,
           };
-          console.log('amendMessage newConversation', newConversation);
           return {
             ...prev,
             [conversationId]: newConversation,
