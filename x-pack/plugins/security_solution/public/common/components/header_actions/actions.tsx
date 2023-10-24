@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { NOTES_BUTTON_CLASS_NAME } from '../../../timelines/components/timeline/properties/helpers';
+import type { NotesMap } from '../../../timelines/components/timeline/unified_components/render_custom_body';
 import { TimelineDataTableContext } from '../../../timelines/components/timeline/unified_components/render_custom_body';
 import {
   eventHasNotes,
@@ -79,6 +81,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { notesMap, setNotesMap } = useContext(TimelineDataTableContext);
+  const trGroupRef = useRef<HTMLDivElement | null>(null);
 
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -110,12 +113,21 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   const toggleShowNotesEvent = useCallback(() => {
-    setNotesMap(() => {
+    setNotesMap((prevShowNotes: NotesMap) => {
       const row = notesMap[eventId];
       if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
 
+      if (prevShowNotes[eventId]) {
+        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
+        setTimeout(() => {
+          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
+            `.${NOTES_BUTTON_CLASS_NAME}`
+          );
+          notesButtonElement?.focus();
+        }, 0);
+      }
       return {
-        ...notesMap,
+        ...prevShowNotes,
         [eventId]: { ...row, isAddingNote: true },
       };
     });

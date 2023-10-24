@@ -6,12 +6,11 @@
  */
 import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
 import { logicalCSS } from '@elastic/eui';
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext } from 'react';
 import { css } from '@emotion/react';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useSelector } from 'react-redux';
-import { RowRendererId } from '../../../../../common/api/timeline';
 import type { State } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import type { RowRenderer } from '../../../../../common/types/timeline';
@@ -42,14 +41,14 @@ export const TimelineDataTableContext = createContext<{
   confirmingNoteId: string | null | undefined;
   setConfirmingNoteId: Function;
   timelineId: string;
-  rowRenderers: RowRenderer[];
+  enabledRowRenderers: RowRenderer[];
 }>({
   notesMap: {},
   setNotesMap: () => {},
   confirmingNoteId: null,
   setConfirmingNoteId: () => {},
   timelineId: TimelineId.active,
-  rowRenderers: [],
+  enabledRowRenderers: [],
 });
 
 export const RenderCustomGridBodyComponent: React.FC<Props & EuiDataGridCustomBodyProps> = ({
@@ -58,28 +57,14 @@ export const RenderCustomGridBodyComponent: React.FC<Props & EuiDataGridCustomBo
   visibleColumns: visibleCols,
   Cell,
 }) => {
-  const { notesMap, timelineId, rowRenderers } = useContext(TimelineDataTableContext);
+  const { notesMap, enabledRowRenderers, timelineId } = useContext(TimelineDataTableContext);
   // Ensure we're displaying correctly-paginated rows
   const visibleRows = discoverGridRows.slice(visibleRowData.startRow, visibleRowData.endRow);
 
-  console.log(visibleRows);
-
-  const { timeline: { excludedRowRendererIds } = timelineDefaults } = useSelector((state: State) =>
+  const { timeline: { eventIdToNoteIds } = timelineDefaults } = useSelector((state: State) =>
     timelineBodySelector(state, timelineId)
   );
-
-  // Row renderers
-  const enabledRowRenderers = useMemo(() => {
-    if (
-      excludedRowRendererIds &&
-      excludedRowRendererIds.length === Object.keys(RowRendererId).length
-    )
-      return [];
-
-    if (!excludedRowRendererIds) return rowRenderers;
-
-    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-  }, [excludedRowRendererIds, rowRenderers]);
+  console.log(eventIdToNoteIds);
 
   return (
     <>
@@ -117,10 +102,8 @@ export const RenderCustomGridBodyComponent: React.FC<Props & EuiDataGridCustomBo
           </div>
           {/* This renders the last row which is our expandableRow and where we put row rendering and notes */}
           {enabledRowRenderers.length > 0 ||
-          (notesMap &&
-            notesMap[discoverGridRows[rowIndex].id] &&
-            (notesMap[discoverGridRows[rowIndex].id].isAddingNote === true ||
-              notesMap[discoverGridRows[rowIndex].id].notes)) ? (
+          (notesMap && notesMap[row.id] && notesMap[row.id].isAddingNote === true) ||
+          eventIdToNoteIds[row.id] ? (
             <Cell
               colIndex={visibleCols.length - 1} // If the row is being shown, it should always be the last index
               visibleRowIndex={rowIndex}

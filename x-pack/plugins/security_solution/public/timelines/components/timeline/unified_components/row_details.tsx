@@ -32,23 +32,24 @@ interface Props {
 
 export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
   const dispatch = useDispatch();
-  const { timelineId, notesMap, rowRenderers, setNotesMap } = useContext(TimelineDataTableContext);
+  const { timelineId, notesMap, enabledRowRenderers, setNotesMap } =
+    useContext(TimelineDataTableContext);
 
   const onToggleShowNotes = useCallback(() => {
-    setNotesMap((notesMap: NotesMap) => {
+    setNotesMap(() => {
       const row = notesMap[event._id];
-      if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
+      if (row?.isAddingNote === false) return notesMap;
 
       return {
         ...notesMap,
-        [event._id]: { ...row, isAddingNote: true },
+        [event._id]: { ...row, isAddingNote: false },
       };
     });
-  }, [event._id, setNotesMap]);
+  }, [event._id, notesMap, setNotesMap]);
 
-  const {
-    timeline: { eventIdToNoteIds, excludedRowRendererIds, pinnedEventIds } = timelineDefaults,
-  } = useSelector((state: State) => timelineBodySelector(state, timelineId));
+  const { timeline: { eventIdToNoteIds, pinnedEventIds } = timelineDefaults } = useSelector(
+    (state: State) => timelineBodySelector(state, timelineId)
+  );
 
   const associateNote = useCallback(
     (noteId: string, eventId: string) => {
@@ -97,24 +98,26 @@ export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
           associateNote={(noteId: string) => associateNote(noteId, event._id)}
           data-test-subj="note-cards"
           notes={getNotes(event._id)}
-          showAddNote={notesMap && (notesMap[rowIndex]?.isAddingNote ?? false)}
+          showAddNote={notesMap && (notesMap[event._id]?.isAddingNote ?? false)}
           toggleShowAddNote={() => onToggleShowNotes()}
         />
       </EventsTrSupplement>
-      <EuiFlexGroup gutterSize="none" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EventsTrSupplement>
-            <StatefulRowRenderer
-              ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
-              containerRef={containerRef}
-              event={event as TimelineItem}
-              lastFocusedAriaColindex={rowIndex - 1}
-              rowRenderers={rowRenderers}
-              timelineId={timelineId}
-            />
-          </EventsTrSupplement>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {enabledRowRenderers.length > 0 ? (
+        <EuiFlexGroup gutterSize="none" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EventsTrSupplement>
+              <StatefulRowRenderer
+                ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
+                containerRef={containerRef}
+                event={event}
+                lastFocusedAriaColindex={rowIndex - 1}
+                rowRenderers={enabledRowRenderers}
+                timelineId={timelineId}
+              />
+            </EventsTrSupplement>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
     </>
   );
 };

@@ -11,7 +11,7 @@ import {
   type EuiDataGridCustomBodyProps,
   type EuiDataGridProps,
 } from '@elastic/eui';
-import React, { useMemo, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -24,6 +24,7 @@ import { UnifiedDataTable, useColumns, DataLoadingState } from '@kbn/unified-dat
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { RowRendererId } from '../../../../../common/api/timeline';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { StatefulEventContext } from '../../../../common/components/events_viewer/stateful_event_context';
 import type {
@@ -55,7 +56,6 @@ import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { Actions } from '../../../../common/components/header_actions/actions';
 import { getColumnHeaderUnified } from '../body/column_headers/helpers';
 import { eventIsPinned } from '../body/helpers';
-import { NOTES_BUTTON_CLASS_NAME } from '../properties/helpers';
 import { getFormattedFields } from '../body/renderers/formatted_field_udt';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
@@ -135,10 +135,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   const isEnterprisePlus = useLicense().isEnterprise();
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
-  const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const [fetchedPage, setFechedPage] = useState<number>(0);
   const [sampleSize, setSampleSize] = useState<number>(SAMPLE_SIZE_SETTING);
-  const trGroupRef = useRef<HTMLDivElement | null>(null);
   const { browserFields, runtimeMappings, sourcererDataView } = useSourcererDataView(
     SourcererScopeName.timeline
   );
@@ -172,26 +170,9 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       selectedEventIds,
       filterManager,
       pinnedEventIds,
+      excludedRowRendererIds,
     } = timelineDefaults,
   } = useSelector((state: State) => timelineBodySelector(state, timelineId));
-
-  const onToggleShowNotes = useCallback((event: DataTableRecord) => {
-    const eventId = event.id;
-
-    setShowNotes((prevShowNotes) => {
-      if (prevShowNotes[eventId]) {
-        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
-        setTimeout(() => {
-          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
-            `.${NOTES_BUTTON_CLASS_NAME}`
-          );
-          notesButtonElement?.focus();
-        }, 0);
-      }
-
-      return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
-    });
-  }, []);
 
   // const { activeStep, isTourShown, incrementStep } = useTourContext();
 
@@ -451,6 +432,19 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [discoverGridRows]
   );
 
+  // Row renderers
+  const enabledRowRenderers = useMemo(() => {
+    if (
+      excludedRowRendererIds &&
+      excludedRowRendererIds.length === Object.keys(RowRendererId).length
+    )
+      return [];
+
+    if (!excludedRowRendererIds) return rowRenderers;
+
+    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+  }, [excludedRowRendererIds, rowRenderers]);
+
   // Columns management
   const { onSetColumns } = useColumns({
     capabilities,
@@ -570,7 +564,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
             confirmingNoteId,
             setConfirmingNoteId,
             timelineId,
-            rowRenderers,
+            enabledRowRenderers,
           }}
         >
           <DataGridMemoized
