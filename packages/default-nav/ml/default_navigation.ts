@@ -114,6 +114,9 @@ export const defaultNavigation: MlNodeDefinition = {
             defaultMessage: 'Data view',
           }),
           link: 'ml:indexDataVisualizer',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('datavisualizer'));
+          },
         },
         {
           title: i18n.translate('defaultNavigation.ml.dataComparison', {
