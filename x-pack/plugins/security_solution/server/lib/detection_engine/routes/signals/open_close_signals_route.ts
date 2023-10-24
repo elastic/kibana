@@ -9,10 +9,10 @@ import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ALERT_WORKFLOW_STATUS,
-  ALERT_WORKFLOW_UPDATED_AT,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import {
   setSignalStatusValidateTypeDependents,
@@ -27,7 +27,7 @@ import {
 import { buildSiemResponse } from '../utils';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
-import type { SetupPlugins } from '../../../../plugin';
+import type { StartPlugins } from '../../../../plugin';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
   getSessionIDfromKibanaRequest,
@@ -37,8 +37,8 @@ import {
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
-  security: SetupPlugins['security'],
-  sender: ITelemetryEventsSender
+  sender: ITelemetryEventsSender,
+  startServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.versioned
     .post({
@@ -77,6 +77,8 @@ export const setSignalsStatusRoute = (
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+        const [_, { security }] = await startServices();
+        const user = security.authc.getCurrentUser(request);
 
         const clusterId = sender.getClusterID();
         const [isTelemetryOptedIn, username] = await Promise.all([
@@ -101,8 +103,6 @@ export const setSignalsStatusRoute = (
             await sender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
           }
         }
-
-        const user = (await context.securitySolution).getUser();
 
         try {
           if (signalIds) {
@@ -186,8 +186,10 @@ const getUpdateSignalStatusScript = (
 ) => ({
   source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != '${status}') {
       ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
-      ctx._source['${ALERT_WORKFLOW_USER}'] = '${user?.username ?? 'unknown'}';
-      ctx._source['${ALERT_WORKFLOW_UPDATED_AT}'] = '${new Date().toISOString()}';
+      ctx._source['${ALERT_WORKFLOW_USER}'] = ${
+    user?.profile_uid ? `'${user.profile_uid}'` : 'null'
+  };
+      ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
     }
     if (ctx._source.signal != null && ctx._source.signal.status != null) {
       ctx._source.signal.status = '${status}'

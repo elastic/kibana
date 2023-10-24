@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { parse as parseCookie } from 'tough-cookie';
+import { adminTestUser } from '@kbn/test';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -28,6 +30,7 @@ import {
   getSignalsByIds,
   waitForRuleSuccess,
   getRuleForSignalTesting,
+  refreshIndex,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -149,7 +152,68 @@ export default ({ getService }: FtrProviderContext) => {
           expect(everySignalOpen).to.eql(true);
         });
 
-        it('should be able to get a count of 10 closed signals when closing 10', async () => {
+        it('should be able to close signals while logged in and populate workflow_user', async () => {
+          // Login so we can test changing alert status within an interactive session
+          // We write `profile_uid` to `kibana.alert.workflow_user` if it's available,
+          // but `profile_uid` is only available in interactive sessions
+          const response = await supertestWithoutAuth
+            .post('/internal/security/login')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              providerType: 'basic',
+              providerName: 'basic',
+              currentURL: '/',
+              params: { username: adminTestUser.username, password: adminTestUser.password },
+            })
+            .expect(200);
+
+          const cookies = response.headers['set-cookie'];
+          expect(cookies).to.have.length(1);
+
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccess({ supertest, log, id });
+          await waitForSignalsToBePresent(supertest, log, 10, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+          const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
+
+          // set all of the signals to the state of closed. There is no reason to use a waitUntil here
+          // as this route intentionally has a waitFor within it and should only return when the query has
+          // the data.
+          await supertestWithoutAuth
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .set('Cookie', parseCookie(cookies[0])!.cookieString())
+            .send(setSignalStatus({ signalIds, status: 'closed' }))
+            .expect(200);
+
+          await refreshIndex(es, '.alerts-security.alerts-default*');
+
+          const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
+            await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+              .set('kbn-xsrf', 'true')
+              .send(getQuerySignalIds(signalIds))
+              .expect(200);
+          expect(signalsClosed.hits.hits.length).to.equal(10);
+          const everySignalClosed = signalsClosed.hits.hits.every(
+            (hit) => hit._source?.['kibana.alert.workflow_status'] === 'closed'
+          );
+          expect(everySignalClosed).to.eql(true);
+          const everySignalWorkflowUserExists = signalsClosed.hits.hits.every(
+            (hit) => hit._source?.['kibana.alert.workflow_user'] !== null
+          );
+          expect(everySignalWorkflowUserExists).to.eql(true);
+          const everySignalWorkflowStatusUpdatedAtExists = signalsClosed.hits.hits.every(
+            (hit) => hit._source?.['kibana.alert.workflow_status_updated_at'] !== null
+          );
+          expect(everySignalWorkflowStatusUpdatedAtExists).to.eql(true);
+        });
+
+        it('should be able close signals without logging in and workflow_user is set to null', async () => {
           const rule = {
             ...getRuleForSignalTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
@@ -169,35 +233,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
-            await supertest
-              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-              .set('kbn-xsrf', 'true')
-              .send(getQuerySignalIds(signalIds))
-              .expect(200);
-          expect(signalsClosed.hits.hits.length).to.equal(10);
-        });
-
-        // Test is failing after changing refresh to false
-        it.skip('should be able close signals immediately and they all should be closed', async () => {
-          const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            query: 'process.executable: "/usr/bin/sudo"',
-          };
-          const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-          const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
-
-          // set all of the signals to the state of closed. There is no reason to use a waitUntil here
-          // as this route intentionally has a waitFor within it and should only return when the query has
-          // the data.
-          await supertest
-            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(setSignalStatus({ signalIds, status: 'closed' }))
-            .expect(200);
+          await refreshIndex(es, '.alerts-security.alerts-default*');
 
           const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
             await supertest
@@ -210,6 +246,14 @@ export default ({ getService }: FtrProviderContext) => {
             (hit) => hit._source?.['kibana.alert.workflow_status'] === 'closed'
           );
           expect(everySignalClosed).to.eql(true);
+          const everySignalWorkflowUserNull = signalsClosed.hits.hits.every(
+            (hit) => hit._source?.['kibana.alert.workflow_user'] === null
+          );
+          expect(everySignalWorkflowUserNull).to.eql(true);
+          const everySignalWorkflowStatusUpdatedAtExists = signalsClosed.hits.hits.every(
+            (hit) => hit._source?.['kibana.alert.workflow_status_updated_at'] !== null
+          );
+          expect(everySignalWorkflowStatusUpdatedAtExists).to.eql(true);
         });
 
         // This fails and should be investigated or removed if it no longer applies
