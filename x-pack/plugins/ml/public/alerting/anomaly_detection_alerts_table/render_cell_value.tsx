@@ -80,7 +80,7 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
         return (
           <>
             {getFormatter(FIELD_FORMAT_IDS.DURATION, {
-              inputFormat: 'nanoseconds',
+              inputFormat: 'microseconds',
               outputFormat: 'humanizePrecise',
             })(value)}
           </>
