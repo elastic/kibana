@@ -45,6 +45,7 @@
     "@kbn/reporting-export-types-png",
     "@kbn/core-http-common",
     "@kbn/react-kibana-context-theme",
+    "@kbn/reporting-common-export-types-helpers",
   ],
   "exclude": [
     "target/**/*",

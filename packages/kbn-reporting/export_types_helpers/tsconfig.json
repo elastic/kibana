@@ -21,5 +21,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/logging",
     "@kbn/core",
+    "@kbn/reporting-common",
   ]
 }
