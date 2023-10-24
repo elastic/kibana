@@ -38,7 +38,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
             );
           }
 
-          // await PageObjects.svlCommonNavigation.search.hideSearch();
+          await PageObjects.svlCommonNavigation.search.hideSearch();
         });
       }
 
