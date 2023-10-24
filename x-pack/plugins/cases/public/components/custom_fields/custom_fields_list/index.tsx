@@ -63,9 +63,6 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                 hasShadow={false}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="grab" />
-                  </EuiFlexItem>
                   <EuiFlexItem grow={true}>
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
