@@ -29,6 +29,10 @@ import { debounceByKey } from './debounce_by_key';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common/constants';
 import { LATEST_VERSION } from '../common/content_management/v1/constants';
+import { StaleWhileRevalidateCache } from './data_views/stale_while_revalidate_cache';
+
+const SWR_CACHE_NAME = 'data-views';
+const SWR_CACHE_ENTRY_LIFETIME_MS = 1000 * 60 * 5; // 5 minutes
 
 export class DataViewsPublicPlugin
   implements
@@ -81,12 +85,17 @@ export class DataViewsPublicPlugin
     );
 
     const config = this.initializerContext.config.get<ClientConfigType>();
+    const staleWhileRevalidateCache = new StaleWhileRevalidateCache(
+      SWR_CACHE_NAME,
+      SWR_CACHE_ENTRY_LIFETIME_MS,
+      console.error
+    );
 
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http),
+      apiClient: new DataViewsApiClient(http, staleWhileRevalidateCache),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {

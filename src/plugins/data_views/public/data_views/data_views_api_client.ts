@@ -12,6 +12,7 @@ import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
 import { FIELDS_FOR_WILDCARD_PATH } from '../../common/constants';
+import { StaleWhileRevalidateCache } from './stale_while_revalidate_cache';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
@@ -20,99 +21,49 @@ const version = '1';
  * Data Views API Client - client implementation
  */
 export class DataViewsApiClient implements IDataViewsApiClient {
-  private static fieldsForWildcardRequestMap: Map<string, Promise<FieldsForWildcardResponse>> =
-    new Map();
-  private http: HttpSetup;
-
   /**
    * constructor
    * @param http http dependency
+   * @param staleWhileRevalidateCache cache dependency
    */
-  constructor(http: HttpSetup) {
-    this.http = http;
-  }
+  constructor(
+    private readonly http: HttpSetup,
+    private readonly staleWhileRevalidateCache: StaleWhileRevalidateCache
+  ) {}
 
   private async _request<T = unknown>(
     url: string,
+    cache: 'stale-while-revalidate' | 'reload' | 'no-store',
     query?: {},
-    body?: string,
-    forceRefresh?: boolean
+    body?: string
   ): Promise<T | undefined> {
     let request: Promise<T>;
 
     if (body) {
       request = this.http.post<T>(url, { query, body, version });
+    } else if (cache === 'no-store') {
+      request = this.http.get<T>(url, { query, version });
     } else {
-      request = caches.open('data-views').then(async (cache) => {
-        // debugger;
-        // Cache key is the URL with the query params
-        const cacheKey = format({
-          pathname: this.http.basePath.prepend(url),
-          query,
-        });
+      debugger;
+      request = this.staleWhileRevalidateCache
+        .cachedFetch({
+          url: format({
+            pathname: this.http.basePath.prepend(url),
+            query,
+          }),
+          fetch: async () => {
+            const { response } = await this.http.fetch<T>(url, {
+              query,
+              version,
+              asResponse: true,
+              rawResponse: true,
+            });
 
-        let expiredResponse: Promise<T> | undefined;
-
-        // Don't check the cache if we're forcing a refresh
-        if (!forceRefresh) {
-          const cachedResponse = await cache.match(cacheKey);
-
-          if (cachedResponse) {
-            const responseDateString = cachedResponse?.headers.get('date');
-
-            // If the reponse doesn't have a date header, it's invalid
-            if (responseDateString) {
-              const responseDate = new Date(responseDateString);
-              const now = new Date();
-              const diff = now.getTime() - responseDate.getTime();
-              const lifetime = 1000 * 60 * 5; // 5 minutes
-              const isExpired = diff > lifetime;
-              const json = cachedResponse.json();
-
-              // If the response is expired we'll still return it,
-              // but first we'll make a request to update the cache
-              if (isExpired) {
-                expiredResponse = json;
-              } else {
-                return json;
-              }
-            }
-          }
-        }
-
-        const activeRequest = DataViewsApiClient.fieldsForWildcardRequestMap.get(cacheKey);
-
-        // If there's an active request for this cache key, we either return
-        // the expired response if one exists to show results sooner, or we
-        // wait for the active request to finish and return its response
-        if (activeRequest) {
-          return expiredResponse ?? activeRequest;
-        }
-
-        const returnRequest = this.http
-          .fetch<T>(url, { query, version, asResponse: true, rawResponse: true })
-          .then((resp) => {
-            // Clone the response so we can cache it
-            const responseClone = resp.response?.clone();
-
-            if (responseClone) {
-              cache.put(cacheKey, responseClone);
-            }
-
-            return resp.response?.json();
-          })
-          .finally(() => {
-            // Remove the request from the map since it's no longer active
-            DataViewsApiClient.fieldsForWildcardRequestMap.delete(cacheKey);
-          });
-
-        // Add the request to the map so we can check for it later
-        DataViewsApiClient.fieldsForWildcardRequestMap.set(cacheKey, returnRequest);
-
-        // If there's an expired response, return it immediately,
-        // otherwise wait for the current request to finish
-        return expiredResponse ?? returnRequest;
-      });
+            return response!;
+          },
+          forceRefresh: cache === 'reload',
+        })
+        .then((resp) => resp.json());
     }
 
     return request.catch((resp) => {
@@ -146,6 +97,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     } = options;
     return this._request<FieldsForWildcardResponse>(
       FIELDS_FOR_WILDCARD_PATH,
+      forceRefresh ? 'reload' : 'stale-while-revalidate',
       {
         pattern,
         meta_fields: metaFields,
@@ -155,8 +107,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         include_unmapped: includeUnmapped,
         fields,
       },
-      indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
-      forceRefresh
+      indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined
     ).then((response) => {
       return response || { fields: [], indices: [] };
     });
@@ -167,7 +118,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    */
   async hasUserDataView(): Promise<boolean> {
     const response = await this._request<{ result: boolean }>(
-      this._getUrl(['has_user_index_pattern'])
+      this._getUrl(['has_user_index_pattern']),
+      'no-store'
     );
     return response?.result ?? false;
   }
