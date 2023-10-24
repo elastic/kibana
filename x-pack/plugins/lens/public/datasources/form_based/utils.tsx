@@ -12,14 +12,17 @@ import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
 
-import { type SearchResponseWarning, SearchResponseWarningsBadgePopoverContent } from '@kbn/search-response-warnings';
+import {
+  type SearchResponseWarning,
+  SearchResponseWarningsBadgePopoverContent,
+} from '@kbn/search-response-warnings';
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
