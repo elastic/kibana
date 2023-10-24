@@ -158,7 +158,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel size="s" items={items} data-test-subj="unsavedChangesBadgeMenuPanel" />
     </EuiPopover>
   );
 };
