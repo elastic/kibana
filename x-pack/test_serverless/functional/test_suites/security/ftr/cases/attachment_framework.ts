@@ -9,7 +9,7 @@ import { expect } from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  const browser = getService('browser');
+  const common = getPageObject('common');
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
   const svlSecNavigation = getService('svlSecNavigation');
@@ -27,7 +27,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await svlCommonPage.login();
         await svlSecNavigation.navigateToLandingPage();
-        await browser.get('/app/security/dashboards');
+        await common.navigateToUrl('security', '/dashboards');
         await header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('createDashboardButton', async () => {
@@ -88,7 +88,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           owner: 'securitySolution',
         });
 
-        await browser.get('/app/security/dashboards');
+        await common.navigateToUrl('security', '/dashboards');
         await header.waitUntilLoadingHasFinished();
 
         if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {

@@ -16,17 +16,12 @@
 const NAVIGATION_BASE = '[data-test-subj^="sideNavItemLink-security_project_nav"]';
 const PANEL_BUTTON_BASE = '[data-test-subj^="panelOpener-security_project_nav"]';
 
-// main links
+// main panels links
 export const DASHBOARDS = `${NAVIGATION_BASE}[data-test-subj$="dashboards"]`;
 export const DASHBOARDS_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="dashboards"]`;
 
-export const ALERTS = `${NAVIGATION_BASE}[data-test-subj$="alerts"]`;
-
-export const CSP_FINDINGS = `${NAVIGATION_BASE}[data-test-subj$="cloud_security_posture-findings"]`;
-
-export const CASES = `${NAVIGATION_BASE}[data-test-subj$="cases"]`;
-
 export const INVESTIGATIONS = `${NAVIGATION_BASE}[data-test-subj$="investigations"]`;
+export const INVESTIGATIONS_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="investigations"]`;
 
 export const EXPLORE = `${NAVIGATION_BASE}[data-test-subj$="explore"]`;
 export const EXPLORE_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="explore"]`;
@@ -36,6 +31,16 @@ export const RULES_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="rules-land
 
 export const ASSETS = `${NAVIGATION_BASE}[data-test-subj$="assets"]`;
 export const ASSETS_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="assets"]`;
+
+// main direct links
+export const DISCOVER = '[data-test-subj*="nav-item-deepLinkId-discover"]';
+
+export const ALERTS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:alerts"]';
+
+export const CSP_FINDINGS =
+  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:cloud_security_posture-findings"]';
+
+export const CASES = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:cases"]';
 
 // nested links
 
