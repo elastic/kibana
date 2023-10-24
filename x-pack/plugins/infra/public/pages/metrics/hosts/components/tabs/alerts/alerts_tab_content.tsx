@@ -51,7 +51,6 @@ export const AlertsTabContent = () => {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
               featureIds={infraAlertFeatureIds}
-              flyoutSize="s"
               id={ALERTS_TABLE_ID}
               pageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}

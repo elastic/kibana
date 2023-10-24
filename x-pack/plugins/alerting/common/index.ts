@@ -37,6 +37,7 @@ export * from './rrule_type';
 export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
 export * from './saved_objects/rules/mappings';
+export * from './rule_circuit_breaker_error_message';
 
 export { isSystemAction } from './system_actions/is_system_action';
 

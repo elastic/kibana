@@ -38,6 +38,7 @@ export const defaultNavigation: MlNodeDefinition = {
         defaultMessage: 'Anomaly Detection',
       }),
       id: 'anomaly_detection',
+      renderAs: 'accordion',
       children: [
         {
           title: i18n.translate('defaultNavigation.ml.jobs', {
@@ -61,6 +62,7 @@ export const defaultNavigation: MlNodeDefinition = {
       title: i18n.translate('defaultNavigation.ml.dataFrameAnalytics', {
         defaultMessage: 'Data Frame Analytics',
       }),
+      renderAs: 'accordion',
       children: [
         {
           title: 'Jobs',
@@ -79,6 +81,7 @@ export const defaultNavigation: MlNodeDefinition = {
       title: i18n.translate('defaultNavigation.ml.modelManagement', {
         defaultMessage: 'Model Management',
       }),
+      renderAs: 'accordion',
       children: [
         {
           link: 'ml:nodesOverview',
@@ -93,6 +96,7 @@ export const defaultNavigation: MlNodeDefinition = {
       title: i18n.translate('defaultNavigation.ml.dataVisualizer', {
         defaultMessage: 'Data Visualizer',
       }),
+      renderAs: 'accordion',
       children: [
         {
           title: i18n.translate('defaultNavigation.ml.file', {
@@ -119,6 +123,7 @@ export const defaultNavigation: MlNodeDefinition = {
       title: i18n.translate('defaultNavigation.ml.aiopsLabs', {
         defaultMessage: 'AIOps labs',
       }),
+      renderAs: 'accordion',
       children: [
         {
           link: 'ml:logRateAnalysis',
