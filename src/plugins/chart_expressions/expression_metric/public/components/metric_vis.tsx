@@ -314,6 +314,7 @@ export const MetricVis = ({
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
             onWillRender={onWillRender}
+            locale={i18n.getLocale()}
             theme={[
               {
                 background: { color: 'transparent' },

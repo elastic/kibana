@@ -19,28 +19,8 @@ import {
   RESPONSE_ACTIONS_ITEM_1,
   RESPONSE_ACTIONS_ITEM_2,
 } from '../../tasks/response_actions';
-import {
-  checkActionItemsInResults,
-  clickRuleName,
-  inputQuery,
-  typeInECSFieldInput,
-} from '../../tasks/live_query';
+import { clickRuleName, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
-
-interface ITestRuleBody {
-  response_actions: [
-    {
-      params: {
-        queries: Array<{
-          interval?: number;
-          query: string;
-          platform: string;
-          id: string;
-        }>;
-      };
-    }
-  ];
-}
 
 describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
   let multiQueryPackId: string;
@@ -104,8 +84,9 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime');
+      cy.contains('Query is a required field').should('not.exist');
       cy.contains('Advanced').click();
-      typeInECSFieldInput('message{downArrow}{enter}');
+      typeInECSFieldInput('{downArrow}{enter}');
       cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
       cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
     });
@@ -122,7 +103,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
       cy.contains('select * from uptime');
-      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
       cy.contains('Days of uptime');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
@@ -140,25 +121,22 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
-      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesOne');
-    cy.getBySel('ruleEditSubmitButton').click();
 
-    cy.wait('@saveRuleChangesOne');
-    cy.get<{ request: { url: string; body: ITestRuleBody } }>('@saveRuleChangesOne').should(
-      ({ request }) => {
-        const oneQuery = [
-          {
-            interval: 3600,
-            query: 'select * from uptime;',
-            id: Object.keys(packData.queries)[0],
-          },
-        ];
-        expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
-      }
-    );
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
+    cy.getBySel('ruleEditSubmitButton').click();
+    cy.wait('@saveRuleSingleQuery').should(({ request }) => {
+      const oneQuery = [
+        {
+          interval: 3600,
+          query: 'select * from uptime;',
+          id: Object.keys(packData.queries)[0],
+        },
+      ];
+      expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
+    });
 
     cy.contains(`${ruleName} was saved`).should('exist');
     closeToastIfVisible();
@@ -166,47 +144,42 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel('editRuleSettingsLink').click();
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.getBySel('edit-rule-actions-tab').click();
-    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
-      cy.contains(packName);
-      cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
-      checkActionItemsInResults({
-        cases: false,
-        lens: false,
-        discover: false,
-        timeline: false,
-      });
-    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
+      .within(() => {
+        cy.contains(packName);
+        cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
+        cy.contains('SELECT * FROM memory_info;');
+        cy.contains('SELECT * FROM system_info;');
+      })
+      .clickOutside();
+
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
-      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesTwo');
-
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleChangesTwo');
-    cy.get<{ request: { url: string; body: ITestRuleBody } }>('@saveRuleChangesTwo').should(
-      ({ request }) => {
-        const threeQueries = [
-          {
-            interval: 3600,
-            query: 'SELECT * FROM memory_info;',
-            platform: 'linux',
-            id: Object.keys(multiQueryPackData.queries)[0],
-          },
-          {
-            interval: 3600,
-            query: 'SELECT * FROM system_info;',
-            id: Object.keys(multiQueryPackData.queries)[1],
-          },
-          {
-            interval: 10,
-            query: 'select opera_extensions.* from users join opera_extensions using (uid);',
-            id: Object.keys(multiQueryPackData.queries)[2],
-          },
-        ];
-        expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
-      }
-    );
+    cy.wait('@saveRuleMultiQuery').should(({ request }) => {
+      const threeQueries = [
+        {
+          interval: 3600,
+          query: 'SELECT * FROM memory_info;',
+          platform: 'linux',
+          id: Object.keys(multiQueryPackData.queries)[0],
+        },
+        {
+          interval: 3600,
+          query: 'SELECT * FROM system_info;',
+          id: Object.keys(multiQueryPackData.queries)[1],
+        },
+        {
+          interval: 10,
+          query: 'select opera_extensions.* from users join opera_extensions using (uid);',
+          id: Object.keys(multiQueryPackData.queries)[2],
+        },
+      ];
+      expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
+    });
   });
 });

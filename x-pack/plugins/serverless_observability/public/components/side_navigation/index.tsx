@@ -46,7 +46,32 @@ const navigationTree: NavigationTreeDefinition = {
           },
         },
         {
+          title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
+            defaultMessage: 'Visualizations',
+          }),
+          link: 'visualize',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return (
+              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+              pathNameSerialized.startsWith(prepend('/app/lens')) ||
+              pathNameSerialized.startsWith(prepend('/app/maps'))
+            );
+          },
+        },
+        {
           link: 'observability-overview:alerts',
+        },
+        {
+          link: 'observability-overview:cases',
+          renderAs: 'item',
+          children: [
+            {
+              link: 'observability-overview:cases_configure',
+            },
+            {
+              link: 'observability-overview:cases_create',
+            },
+          ],
         },
         {
           link: 'observability-overview:slos',
@@ -54,9 +79,11 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'aiops',
           title: 'AIOps',
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
+          spaceBefore: null,
           children: [
             {
               title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
@@ -91,14 +118,11 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          id: 'groups-spacer-1',
-          isGroupTitle: true,
-        },
-        {
           id: 'apm',
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
@@ -129,6 +153,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
@@ -147,42 +172,20 @@ const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
-        {
-          id: 'groups-spacer-2',
-          isGroupTitle: true,
-        },
-        {
-          link: 'observability-overview:cases',
-        },
-        {
-          title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
-            defaultMessage: 'Visualizations',
-          }),
-          link: 'visualize',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
-          },
-        },
-        {
-          id: 'groups-spacer-3',
-          isGroupTitle: true,
-        },
-        {
-          title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-            defaultMessage: 'Add data',
-          }),
-          link: 'observabilityOnboarding',
-        },
       ],
     },
   ],
   footer: [
     {
-      type: 'navGroup',
+      type: 'navItem',
+      title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+        defaultMessage: 'Get started',
+      }),
+      link: 'observabilityOnboarding',
+      icon: 'launch',
+    },
+    {
+      type: 'navItem',
       id: 'devTools',
       title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
         defaultMessage: 'Developer tools',

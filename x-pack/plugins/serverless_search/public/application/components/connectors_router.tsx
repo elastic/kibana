@@ -16,7 +16,7 @@ export const EDIT_CONNECTOR_PATH = `${BASE_CONNECTORS_PATH}/:id`;
 export const ConnectorsRouter: React.FC = () => {
   return (
     <Routes>
-      <Route path={'/:id'}>
+      <Route exact path={'/:id'}>
         <EditConnector />
       </Route>
       <Route exact path="/">

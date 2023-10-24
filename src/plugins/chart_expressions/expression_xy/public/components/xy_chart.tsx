@@ -33,6 +33,7 @@ import {
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -869,6 +870,7 @@ export function XYChart({
                   }
                 : undefined
             }
+            locale={i18n.getLocale()}
             {...settingsOverrides}
           />
           <XYCurrentTime
