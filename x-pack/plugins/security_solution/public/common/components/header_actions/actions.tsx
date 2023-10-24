@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { TimelineDataTableContext } from '../../../timelines/components/timeline/unified_components/render_custom_body';
 import {
   eventHasNotes,
   getEventType,
@@ -77,6 +78,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
   isUnifiedDataTable = false,
 }) => {
   const dispatch = useDispatch();
+  const { notesMap, setNotesMap } = useContext(TimelineDataTableContext);
+
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timelineType = useShallowEqualSelector(
@@ -105,6 +108,18 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }),
     [eventId, onRowSelected]
   );
+
+  const toggleShowNotesEvent = useCallback(() => {
+    setNotesMap(() => {
+      const row = notesMap[eventId];
+      if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
+
+      return {
+        ...notesMap,
+        [eventId]: { ...row, isAddingNote: true },
+      };
+    });
+  }, [eventId, notesMap, setNotesMap]);
 
   const handlePinClicked = useCallback(
     () =>
@@ -303,13 +318,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
           />
         )}
 
-        {!isEventViewer && toggleShowNotes && (
+        {!isEventViewer && (
           <>
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
               showNotes={showNotes ?? false}
-              toggleShowNotes={toggleShowNotes}
+              toggleShowNotes={toggleShowNotesEvent}
               timelineType={timelineType}
             />
             <PinEventAction

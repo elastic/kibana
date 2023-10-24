@@ -553,12 +553,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [columns, timelineId, updatedAt]
   );
 
-  const [notesMap, setNotesMap] = useState<NotesMap>({
-    0: {
-      notes: [],
-      isAddingNote: true,
-    },
-  });
+  const [notesMap, setNotesMap] = useState<NotesMap>({});
 
   const [confirmingNoteId, setConfirmingNoteId] = useState<string | null | undefined>(null);
 

@@ -36,15 +36,15 @@ export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
 
   const onToggleShowNotes = useCallback(() => {
     setNotesMap((notesMap: NotesMap) => {
-      const row = notesMap[rowIndex];
+      const row = notesMap[event._id];
       if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
 
       return {
         ...notesMap,
-        [rowIndex]: { ...row, isAddingNote: true },
+        [event._id]: { ...row, isAddingNote: true },
       };
     });
-  }, [rowIndex, setNotesMap]);
+  }, [event._id, setNotesMap]);
 
   const {
     timeline: { eventIdToNoteIds, excludedRowRendererIds, pinnedEventIds } = timelineDefaults,

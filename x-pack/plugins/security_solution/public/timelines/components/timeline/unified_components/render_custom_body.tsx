@@ -6,12 +6,17 @@
  */
 import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
 import { logicalCSS } from '@elastic/eui';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { useSelector } from 'react-redux';
+import { RowRendererId } from '../../../../../common/api/timeline';
+import type { State } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import type { RowRenderer } from '../../../../../common/types/timeline';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineBodySelector } from '../body/selectors';
 
 interface Props {
   discoverGridRows: DataTableRecord[];
@@ -30,7 +35,7 @@ const styles = {
   `,
 };
 
-export type NotesMap = Record<number, { notes?: string[]; isAddingNote?: boolean }>;
+export type NotesMap = Record<string, { notes?: string[]; isAddingNote?: boolean }>;
 export const TimelineDataTableContext = createContext<{
   notesMap: NotesMap;
   setNotesMap: Function;
@@ -53,11 +58,28 @@ export const RenderCustomGridBodyComponent: React.FC<Props & EuiDataGridCustomBo
   visibleColumns: visibleCols,
   Cell,
 }) => {
-  const { notesMap } = useContext(TimelineDataTableContext);
+  const { notesMap, timelineId, rowRenderers } = useContext(TimelineDataTableContext);
   // Ensure we're displaying correctly-paginated rows
   const visibleRows = discoverGridRows.slice(visibleRowData.startRow, visibleRowData.endRow);
 
-  // console.log(visibleRows);
+  console.log(visibleRows);
+
+  const { timeline: { excludedRowRendererIds } = timelineDefaults } = useSelector((state: State) =>
+    timelineBodySelector(state, timelineId)
+  );
+
+  // Row renderers
+  const enabledRowRenderers = useMemo(() => {
+    if (
+      excludedRowRendererIds &&
+      excludedRowRendererIds.length === Object.keys(RowRendererId).length
+    )
+      return [];
+
+    if (!excludedRowRendererIds) return rowRenderers;
+
+    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+  }, [excludedRowRendererIds, rowRenderers]);
 
   return (
     <>
@@ -89,22 +111,21 @@ export const RenderCustomGridBodyComponent: React.FC<Props & EuiDataGridCustomBo
                     key={`${rowIndex},${colIndex}`}
                   />
                 );
-                // return dr(column, colIndex, row, rowIndex);
               }
-              return <></>;
+              return null;
             })}
           </div>
           {/* This renders the last row which is our expandableRow and where we put row rendering and notes */}
-          <div css={styles.rowDetailsWrapper}>
-            {notesMap &&
-            notesMap[rowIndex] &&
-            (notesMap[rowIndex].isAddingNote === true || notesMap[rowIndex].notes) ? (
-              <Cell
-                colIndex={visibleCols.length - 1} // If the row is being shown, it should always be the last index
-                visibleRowIndex={rowIndex}
-              />
-            ) : null}
-          </div>
+          {enabledRowRenderers.length > 0 ||
+          (notesMap &&
+            notesMap[discoverGridRows[rowIndex].id] &&
+            (notesMap[discoverGridRows[rowIndex].id].isAddingNote === true ||
+              notesMap[discoverGridRows[rowIndex].id].notes)) ? (
+            <Cell
+              colIndex={visibleCols.length - 1} // If the row is being shown, it should always be the last index
+              visibleRowIndex={rowIndex}
+            />
+          ) : null}
         </div>
       ))}
     </>
