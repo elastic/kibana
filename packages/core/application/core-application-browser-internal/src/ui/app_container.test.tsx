@@ -12,6 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { type AppMountParameters, AppStatus } from '@kbn/core-application-browser';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { AppContainer } from './app_container';
 import type { Mounter } from '../types';
 import { createMemoryHistory } from 'history';
@@ -222,20 +223,24 @@ describe('AppContainer', () => {
     };
 
     const wrapper = mountWithIntl(
-      <AppContainer
-        appPath={`/app/${appId}`}
-        appId={appId}
-        appStatus={AppStatus.accessible}
-        mounter={mounter}
-        setAppLeaveHandler={setAppLeaveHandler}
-        setAppActionMenu={setAppActionMenu}
-        setIsMounting={setIsMounting}
-        createScopedHistory={(appPath: string) =>
-          // Create a history using the appPath as the current location
-          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
-        }
-        theme$={theme$}
-      />
+      <KibanaErrorBoundaryProvider>
+        <KibanaErrorBoundary>
+          <AppContainer
+            appPath={`/app/${appId}`}
+            appId={appId}
+            appStatus={AppStatus.accessible}
+            mounter={mounter}
+            setAppLeaveHandler={setAppLeaveHandler}
+            setAppActionMenu={setAppActionMenu}
+            setIsMounting={setIsMounting}
+            createScopedHistory={(appPath: string) =>
+              // Create a history using the appPath as the current location
+              new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+            }
+            theme$={theme$}
+          />
+        </KibanaErrorBoundary>
+      </KibanaErrorBoundaryProvider>
     );
 
     expect(setIsMounting).toHaveBeenCalledTimes(1);
