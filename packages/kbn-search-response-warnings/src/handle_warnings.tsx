@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiTextAlign } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
 import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -20,6 +20,7 @@ import {
 } from './types';
 import { extractWarnings } from './extract_warnings';
 import { ViewWarningButton } from './components/view_warning_button';
+import { getWarningsDescription, getWarningsTitle, viewDetailsLabel } from './components/search_response_warnings/i18n_utils';
 
 interface Services {
   i18n: I18nStart;
@@ -75,11 +76,22 @@ export function handleWarnings({
 
   const [incompleteWarning] = incompleteWarnings as SearchResponseIncompleteWarning[];
   services.notifications.toasts.addWarning({
-    title: incompleteWarning.message,
+    title: getWarningsTitle([incompleteWarning]),
     text: toMountPoint(
-      <EuiTextAlign textAlign="right">
-        <ViewWarningButton onClick={incompleteWarning.openInInspector} />
-      </EuiTextAlign>,
+        <>
+          <EuiText size="s">
+            {getWarningsDescription([incompleteWarning])}
+          </EuiText>
+          <EuiButtonEmpty
+            color="primary"
+            flush="left"
+            onClick={() => {
+              incompleteWarning.openInInspector();
+            }}
+          >
+            {viewDetailsLabel}
+          </EuiButtonEmpty>
+        </>,
       { theme: services.theme, i18n: services.i18n }
     ),
   });
