@@ -11,4 +11,5 @@ export {
   type SearchResponseWarningsProps,
 } from './search_response_warnings';
 
-export { SearchResponseWarningsCallout } from './search_response_warnings_callout';
+export { SearchResponseWarningsCallout } from './callout';
+export { SearchResponseWarningsEmptyPrompt } from './empty_prompt';

@@ -13,8 +13,7 @@ import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
-  visualizationLabel?;
-  string;
+  visualizationLabel?: string;
   warnings: SearchResponseWarning[];
 }
 

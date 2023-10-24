@@ -12,6 +12,7 @@ export {
   SearchResponseWarnings,
   type SearchResponseWarningsProps,
   SearchResponseWarningsCallout,
+  SearchResponseWarningsEmptyPrompt,
 } from './src/components/search_response_warnings';
 export { ViewWarningButton } from './src/components/view_warning_button';
 
