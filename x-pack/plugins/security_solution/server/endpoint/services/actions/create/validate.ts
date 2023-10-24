@@ -44,7 +44,7 @@ export const HOST_NOT_ENROLLED = i18n.translate(
 );
 
 export const FIELD_NOT_EXIST = (field: string) =>
-  i18n.translate('xpack.securitySolution.responseActionsList.error.licenseTooLow', {
+  i18n.translate('xpack.securitySolution.responseActionsList.error.nonExistingFieldName', {
     defaultMessage: 'The action was called with a non-existing event field name: {field}',
     values: { field },
   });
