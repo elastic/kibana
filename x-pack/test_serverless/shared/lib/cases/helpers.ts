@@ -13,14 +13,14 @@ export const createOneCaseBeforeDeleteAllAfter = (
   getService: FtrProviderContext['getService'],
   owner: string
 ) => {
-  const cases = getService('cases');
+  const svlCases = getService('svlCases');
 
   before(async () => {
     await createAndNavigateToCase(getPageObject, getService, owner);
   });
 
   after(async () => {
-    await cases.api.deleteAllCases();
+    await svlCases.api.deleteAllCaseItems();
   });
 };
 
@@ -29,14 +29,14 @@ export const createOneCaseBeforeEachDeleteAllAfterEach = (
   getService: FtrProviderContext['getService'],
   owner: string
 ) => {
-  const cases = getService('cases');
+  const svlCases = getService('svlCases');
 
   beforeEach(async () => {
     await createAndNavigateToCase(getPageObject, getService, owner);
   });
 
   afterEach(async () => {
-    await cases.api.deleteAllCases();
+    await svlCases.api.deleteAllCaseItems();
   });
 };
 
