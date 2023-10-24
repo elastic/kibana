@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  EuiIcon,
   EuiButtonIcon,
 } from '@elastic/eui';
 
