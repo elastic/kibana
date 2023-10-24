@@ -32,10 +32,6 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
     title: i18n.CLOUD_USERS_ROLES_TITLE,
   },
   {
-    id: ExternalPageName.cloudPerformance,
-    title: i18n.CLOUD_PERFORMANCE_TITLE,
-  },
-  {
     id: ExternalPageName.cloudBilling,
     title: i18n.CLOUD_BILLING_TITLE,
   },

@@ -109,7 +109,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '*'
@@ -182,6 +182,18 @@ steps:
     depends_on: build
     timeout_in_minutes: 120
     parallelism: 2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
+    label: 'Osquery Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 50
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
