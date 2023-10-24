@@ -227,7 +227,7 @@ export class MlServerPlugin
         coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
-      getEnabledFeatures: () => Object.assign({}, this.enabledFeatures), // object.freeze()?
+      getEnabledFeatures: () => this.enabledFeatures,
     };
 
     // Register Anomaly Detection routes
