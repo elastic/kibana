@@ -1420,6 +1420,14 @@ export function dataRecognizerFactory(
   );
 }
 
+/**
+ * Filters an array of modules based on the provided tag filters
+ *
+ * @param configs - The array of module config objects to filter.
+ * @param compatibleModuleType - The CompatibleModule type to filter by, or null to include all modules. The compatibleModuleType is provided by the kibana yml config.
+ * @param moduleTagFilters - An array of module tags to filter by. Only modules that have at least one matching tag will be included. The moduleTagFilters are provided as a query parameter to the endpoint.
+ * @returns An array of module Config objects that match the provided criteria.
+ */
 export function filterConfigs(
   configs: Config[],
   compatibleModuleType: CompatibleModule | null,

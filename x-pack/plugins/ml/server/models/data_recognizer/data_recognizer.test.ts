@@ -121,22 +121,81 @@ describe('ML - data recognizer', () => {
         },
       ] as unknown as Config[];
 
+      // no compatible module type, no filters
+      // test all modules are returned
       const c1 = filterConfigs(configs, null, []);
-      expect(c1.length).toBe(7);
+      expect(c1).toStrictEqual(configs);
+
+      // compatible module type is security, no filters
+      // test only security modules and modules without tags are returned
       const c2 = filterConfigs(configs, 'security', []);
-      expect(c2.length).toBe(6);
+      expect(c2).toStrictEqual([
+        {
+          module: { tags: ['security'] },
+        },
+        {
+          module: { tags: ['security', 'observability'] },
+        },
+        {
+          module: { tags: ['security', 'logs'] },
+        },
+        {
+          module: { tags: [] },
+        },
+        {
+          module: { tags: [] },
+        },
+        {
+          module: {},
+        },
+      ]);
+
+      // no compatible module type, filter is search
+      // test only modules with search tag are returned
       const c3 = filterConfigs(configs, null, ['search']);
-      expect(c3.length).toBe(1);
+      expect(c3).toStrictEqual([
+        {
+          module: { tags: ['search'] },
+        },
+      ]);
+
+      // compatible module type is security, filter is search
+      // test no modules are returned
       const c4 = filterConfigs(configs, 'security', ['search']);
-      expect(c4.length).toBe(0);
+      expect(c4).toStrictEqual([]);
+
+      // compatible module type is observability, filter is search
+      // test no modules are returned
       const c5 = filterConfigs(configs, 'observability', ['search']);
-      expect(c5.length).toBe(0);
+      expect(c5).toStrictEqual([]);
+
+      // compatible module type is observability, filter is security
+      // test only modules with security and observability tags are returned
       const c6 = filterConfigs(configs, 'observability', ['security']);
-      expect(c6.length).toBe(1);
+      expect(c6).toStrictEqual([
+        {
+          module: { tags: ['security', 'observability'] },
+        },
+      ]);
+
+      // filter is not a valid tag
+      // test no modules are returned
       const c7 = filterConfigs(configs, null, ['missing']);
-      expect(c7.length).toBe(0);
+      expect(c7).toStrictEqual([]);
+
+      // compatible module type is not a valid tag, no filters
       const c8 = filterConfigs(configs, 'missing' as any, []);
-      expect(c8.length).toBe(3);
+      expect(c8).toStrictEqual([
+        {
+          module: { tags: [] },
+        },
+        {
+          module: { tags: [] },
+        },
+        {
+          module: {},
+        },
+      ]);
     });
   });
 });
