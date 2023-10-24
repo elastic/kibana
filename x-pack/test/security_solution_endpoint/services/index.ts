@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SupertestProvider as svlSupertestProvider } from '../../../test_serverless/shared/services/supertest';
 import { services as xPackFunctionalServices } from '../../functional/services';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
@@ -16,6 +17,7 @@ import { EndpointArtifactsTestResources } from './endpoint_artifacts';
 
 export const services = {
   ...xPackFunctionalServices,
+
   endpointTestResources: EndpointTestResources,
   telemetryTestResources: EndpointTelemetryTestResourcesProvider,
   ingestManager: IngestManagerProvider,
@@ -23,4 +25,6 @@ export const services = {
   detections: DetectionsTestService,
   endpointArtifactTestResources: EndpointArtifactsTestResources,
   policyTestResources: EndpointPolicyTestResourcesProvider,
+
+  supertest: svlSupertestProvider,
 };
