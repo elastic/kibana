@@ -38,6 +38,7 @@ import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
+import { denormalizeActions } from '../../../../rules_client/lib/denormalize_actions';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -160,10 +161,11 @@ export async function createRule<Params extends RuleParams = never>(
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
   const throttle = data.throttle ?? null;
 
+  const { actions: actionsWithRefs } = await denormalizeActions(context, data.actions);
+
   // Convert domain rule object to ES rule attributes
-  const ruleAttributes = await transformRuleDomainToRuleAttributes({
-    actions: data.actions,
-    context,
+  const ruleAttributes = transformRuleDomainToRuleAttributes({
+    actionsWithRefs,
     rule: {
       ...data,
       // TODO (http-versioning) create a rule domain version of this function
