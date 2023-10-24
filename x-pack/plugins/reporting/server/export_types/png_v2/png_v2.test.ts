@@ -11,10 +11,9 @@ import { Writable } from 'stream';
 import { CancellationToken, LocatorParams } from '@kbn/reporting-common';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { PngExportType } from '@kbn/reporting-export-types-png';
-import { cryptoFactory } from '@kbn/reporting-common/crypto';
 import { createMockConfigSchema } from '../../test_helpers';
 import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png/types';
-import { generatePngObservable } from '@kbn/reporting-common-export-types-helpers';
+import { generatePngObservable, cryptoFactory } from '@kbn/reporting-common-export-types-helpers';
 
 jest.mock('@kbn/reporting-common-export-types-helpers/generate_png');
 
