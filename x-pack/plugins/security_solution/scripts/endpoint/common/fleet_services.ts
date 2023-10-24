@@ -135,13 +135,11 @@ export const fetchFleetAgents = async (
  * @param kbnClient
  * @param hostname
  * @param timeoutMs
- * @param logger
  */
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   hostname: string,
-  timeoutMs: number = 30000,
-  logger?: ToolingLog
+  timeoutMs: number = 30000
 ): Promise<Agent> => {
   const started = new Date();
   const hasTimedOut = (): boolean => {
@@ -149,6 +147,7 @@ export const waitForHostToEnroll = async (
     return elapsedTime > timeoutMs;
   };
   let found: Agent | undefined;
+  let agentId: string | undefined;
 
   while (!found && !hasTimedOut()) {
     found = await retryOnError(
@@ -157,9 +156,11 @@ export const waitForHostToEnroll = async (
           perPage: 1,
           kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
           showInactive: false,
-        }).then((response) => response.items.filter((agent) => agent.status === 'online')[0]),
-      RETRYABLE_TRANSIENT_ERRORS,
-      logger
+        }).then((response) => {
+          agentId = response.items[0].id;
+          return response.items.filter((agent) => agent.status === 'online')[0];
+        }),
+      RETRYABLE_TRANSIENT_ERRORS
     );
 
     if (!found) {
@@ -169,10 +170,11 @@ export const waitForHostToEnroll = async (
   }
 
   if (!found) {
-    throw new Error(
-      `Timed out waiting for host [${hostname}] to show up in Fleet in ${
-        timeoutMs / 60
-      } second timeout after ${(Date.now() - started.getTime()) / 60} ms`
+    throw Object.assign(
+      new Error(
+        `Timed out waiting for host [${hostname}] to show up in Fleet in ${timeoutMs / 60} seconds`
+      ),
+      { agentId, hostname }
     );
   }
 
