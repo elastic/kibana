@@ -66,6 +66,12 @@ export function updateSavedSearch({
     if (typeof state.rowHeight !== 'undefined') {
       savedSearch.rowHeight = state.rowHeight;
     }
+    if (typeof state.rowsPerPage !== 'undefined') {
+      savedSearch.rowsPerPage = state.rowsPerPage;
+    }
+    if (typeof state.sampleSize !== 'undefined') {
+      savedSearch.sampleSize = state.sampleSize;
+    }
 
     if (state.viewMode) {
       savedSearch.viewMode = state.viewMode;
