@@ -104,7 +104,6 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
   cat << EOF | buildkite-agent pipeline upload
 steps:
   - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
-    async: true
     branches: main
     trigger: gpctl-promote-with-e2e-tests
     build:
