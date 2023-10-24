@@ -9,7 +9,6 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
-import { Role } from '@kbn/security-plugin/common';
 import {
   SecurityRoleName,
   KNOWN_SERVERLESS_ROLES,
@@ -222,32 +221,6 @@ export const getEnvAuth = (): User => {
 
 export const logout = () => {
   cy.visit(LOGOUT_URL);
-};
-
-const createRole = (role: Role): void => {
-  const { name: roleName, ...roleDefinition } = role;
-
-  rootRequest({
-    method: 'PUT',
-    url: `/api/security/role/${roleName}`,
-    body: roleDefinition,
-  });
-};
-
-const createUser = (username: string, password: string, roles: string[] = []): void => {
-  const user = {
-    username,
-    password,
-    roles,
-    full_name: username,
-    email: '',
-  };
-
-  rootRequest({
-    method: 'POST',
-    url: `/internal/security/users/${username}`,
-    body: user,
-  });
 };
 
 const loginWithUsernameAndPassword = (username: string, password: string) => {
