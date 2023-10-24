@@ -39,8 +39,8 @@ export interface CasePersistedAttributes {
   external_service: ExternalServicePersisted | null;
   owner: string;
   settings: { syncAlerts: boolean };
-  severity: CasePersistedSeverity | CasePersistedSeverity[];
-  status: CasePersistedStatus | CasePersistedStatus[];
+  severity: CasePersistedSeverity;
+  status: CasePersistedStatus;
   tags: string[];
   title: string;
   total_alerts: number;

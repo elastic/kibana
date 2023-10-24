@@ -35,14 +35,6 @@ import { ConnectorReferenceHandler } from '../connector_reference_handler';
 import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
 import type { ExternalServicePersisted } from '../../common/types/external_service';
 
-const processArrayOrItem = <T, K>({ param, cb }: { param: T | T[]; cb: (arg: T) => K | K[] }) => {
-  if (Array.isArray(param)) {
-    return param.map(cb) as K[];
-  }
-
-  return cb(param) as K;
-};
-
 export function transformUpdateResponseToExternalModel(
   updatedCase: SavedObjectsUpdateResponse<CasePersistedAttributes>
 ): SavedObjectsUpdateResponse<CaseTransformedAttributes> {
@@ -81,18 +73,8 @@ export function transformUpdateResponseToExternalModel(
     ...updatedCase,
     attributes: {
       ...restUpdateAttributes,
-      ...((severity || severity === 0) && {
-        severity: processArrayOrItem({
-          param: severity,
-          cb: (option) => SEVERITY_ESMODEL_TO_EXTERNAL[option],
-        }),
-      }),
-      ...((status || status === 0) && {
-        status: processArrayOrItem({
-          param: status,
-          cb: (option) => STATUS_ESMODEL_TO_EXTERNAL[option],
-        }),
-      }),
+      ...((severity || severity === 0) && { severity: SEVERITY_ESMODEL_TO_EXTERNAL[severity] }),
+      ...((status || status === 0) && { status: STATUS_ESMODEL_TO_EXTERNAL[status] }),
       ...(transformedConnector && { connector: transformedConnector }),
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
@@ -141,18 +123,8 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
       ...restAttributes,
       ...transformedConnector,
       ...transformedExternalService,
-      ...(severity && {
-        severity: processArrayOrItem({
-          param: severity,
-          cb: (option) => SEVERITY_EXTERNAL_TO_ESMODEL[option],
-        }),
-      }),
-      ...(status && {
-        status: processArrayOrItem({
-          param: status,
-          cb: (option) => STATUS_EXTERNAL_TO_ESMODEL[option],
-        }),
-      }),
+      ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
+      ...(status && { status: STATUS_EXTERNAL_TO_ESMODEL[status] }),
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
@@ -202,19 +174,9 @@ export function transformSavedObjectToExternalModel(
       total_comments: -1,
     } as CasePersistedAttributes);
 
-  const severity = caseSavedObjectAttributes.severity
-    ? processArrayOrItem({
-        param: caseSavedObjectAttributes.severity,
-        cb: (option) => SEVERITY_ESMODEL_TO_EXTERNAL[option],
-      })
-    : CaseSeverity.LOW;
-  const status = caseSavedObjectAttributes.status
-    ? processArrayOrItem({
-        param: caseSavedObjectAttributes.status,
-        cb: (option) => STATUS_ESMODEL_TO_EXTERNAL[option],
-      })
-    : CaseStatuses.open;
-
+  const severity =
+    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
+  const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
   const customFields = !caseSavedObjectAttributes.customFields
     ? []

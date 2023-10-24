@@ -317,7 +317,7 @@ export const useCasesColumns = ({
         sortable: true,
         render: (status: CaseUI['status']) => {
           if (status != null) {
-            return <Status status={Array.isArray(status) ? status[0] : status} />;
+            return <Status status={status} />;
           }
 
           return getEmptyTagValue();
@@ -329,8 +329,7 @@ export const useCasesColumns = ({
     field: 'severity',
     name: i18n.SEVERITY,
     sortable: true,
-    render: (_severity: CaseUI['severity']) => {
-      const severity = Array.isArray(_severity) ? _severity[0] : _severity;
+    render: (severity: CaseUI['severity']) => {
       if (severity != null) {
         const severityData = severities[severity ?? CaseSeverity.LOW];
         return (

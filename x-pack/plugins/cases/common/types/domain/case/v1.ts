@@ -15,16 +15,14 @@ import { CaseCustomFieldsRt } from '../custom_field/v1';
 
 export { CaseStatuses };
 
-const CaseStatusRtPrimitive = rt.union([
+/**
+ * Status
+ */
+export const CaseStatusRt = rt.union([
   rt.literal(CaseStatuses.open),
   rt.literal(CaseStatuses['in-progress']),
   rt.literal(CaseStatuses.closed),
 ]);
-
-/**
- * Status
- */
-export const CaseStatusRt = rt.union([CaseStatusRtPrimitive, rt.array(CaseStatusRtPrimitive)]);
 
 export const caseStatuses = Object.values(CaseStatuses);
 
@@ -39,16 +37,11 @@ export enum CaseSeverity {
   CRITICAL = 'critical',
 }
 
-const CaseSeverityRtPrimitive = rt.union([
+export const CaseSeverityRt = rt.union([
   rt.literal(CaseSeverity.LOW),
   rt.literal(CaseSeverity.MEDIUM),
   rt.literal(CaseSeverity.HIGH),
   rt.literal(CaseSeverity.CRITICAL),
-]);
-
-export const CaseSeverityRt = rt.union([
-  CaseSeverityRtPrimitive,
-  rt.array(CaseSeverityRtPrimitive),
 ]);
 
 /**
