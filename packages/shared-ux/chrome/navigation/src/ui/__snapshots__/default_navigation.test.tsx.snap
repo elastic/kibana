@@ -493,6 +493,7 @@ Array [
               "title": "Deeplink ml:indexDataVisualizer",
               "url": "/mocked/ml:indexDataVisualizer",
             },
+            "getIsActive": [Function],
             "href": undefined,
             "id": "ml:indexDataVisualizer",
             "isActive": false,
