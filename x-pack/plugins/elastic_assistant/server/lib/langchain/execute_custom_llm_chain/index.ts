@@ -5,47 +5,78 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { ConversationChain } from 'langchain/chains';
+import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { BaseMessage } from 'langchain/schema';
+import { ChainTool, Tool } from 'langchain/tools';
 
+import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
-import { ResponseBody } from '../helpers';
+import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
+import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 
-export const executeCustomLlmChain = async ({
+export const callAgentExecutor = async ({
   actions,
   connectorId,
+  esClient,
   langChainMessages,
+  llmType,
+  logger,
   request,
-}: {
-  actions: ActionsPluginStart;
-  connectorId: string;
-  langChainMessages: BaseMessage[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<unknown, unknown, any, any>;
-}): Promise<ResponseBody> => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request });
+  elserId,
+  kbResource,
+}: AgentExecutorParams): AgentExecutorResponse => {
+  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
 
   const memory = new BufferMemory({
     chatHistory: new ChatMessageHistory(pastMessages),
+    memoryKey: 'chat_history', // this is the key expected by https://github.com/langchain-ai/langchainjs/blob/a13a8969345b0f149c1ca4a120d63508b06c52a5/langchain/src/agents/initialize.ts#L166
+    inputKey: 'input',
+    outputKey: 'output',
+    returnMessages: true,
   });
 
-  const chain = new ConversationChain({ llm, memory });
+  // ELSER backed ElasticsearchStore for Knowledge Base
+  const esStore = new ElasticsearchStore(
+    esClient,
+    KNOWLEDGE_BASE_INDEX_PATTERN,
+    logger,
+    elserId,
+    kbResource
+  );
 
-  await chain.call({ input: latestMessage[0].content }); // kick off the chain with the last message
+  const modelExists = await esStore.isModelInstalled();
+  if (!modelExists) {
+    throw new Error(
+      'Please ensure ELSER is configured to use the Knowledge Base, otherwise disable the Knowledge Base in Advanced Settings to continue.'
+    );
+  }
 
-  // The assistant (on the client side) expects the same response returned
-  // from the actions framework, so we need to return the same shape of data:
-  const responseBody = {
+  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
+
+  const tools: Tool[] = [
+    new ChainTool({
+      name: 'esql-language-knowledge-base',
+      description:
+        'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
+      chain,
+    }),
+  ];
+
+  const executor = await initializeAgentExecutorWithOptions(tools, llm, {
+    agentType: 'chat-conversational-react-description',
+    memory,
+    verbose: false,
+  });
+
+  await executor.call({ input: latestMessage[0].content });
+
+  return {
     connector_id: connectorId,
     data: llm.getActionResultData(), // the response from the actions framework
     status: 'ok',
   };
-
-  return responseBody;
 };

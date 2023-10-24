@@ -34,6 +34,7 @@ export const fetchRiskScorePreview = async ({
   params: RiskScorePreviewRequestSchema;
 }): Promise<CalculateScoresResponse> => {
   return KibanaServices.get().http.fetch<CalculateScoresResponse>(RISK_SCORE_PREVIEW_URL, {
+    version: '1',
     method: 'POST',
     body: JSON.stringify(params),
     signal,
@@ -49,6 +50,7 @@ export const fetchRiskEngineStatus = async ({
   signal?: AbortSignal;
 }): Promise<GetRiskEngineStatusResponse> => {
   return KibanaServices.get().http.fetch<GetRiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
+    version: '1',
     method: 'GET',
     signal,
   });
@@ -59,6 +61,7 @@ export const fetchRiskEngineStatus = async ({
  */
 export const initRiskEngine = async (): Promise<InitRiskEngineResponse> => {
   return KibanaServices.get().http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
+    version: '1',
     method: 'POST',
   });
 };
@@ -68,6 +71,7 @@ export const initRiskEngine = async (): Promise<InitRiskEngineResponse> => {
  */
 export const enableRiskEngine = async (): Promise<EnableRiskEngineResponse> => {
   return KibanaServices.get().http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
+    version: '1',
     method: 'POST',
   });
 };
@@ -77,6 +81,7 @@ export const enableRiskEngine = async (): Promise<EnableRiskEngineResponse> => {
  */
 export const disableRiskEngine = async (): Promise<DisableRiskEngineResponse> => {
   return KibanaServices.get().http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
+    version: '1',
     method: 'POST',
   });
 };

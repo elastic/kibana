@@ -12,39 +12,44 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const find = getService('find');
+  const toasts = getService('toasts');
 
-  describe('Cases persistable attachments', () => {
+  describe('Cases persistable attachments', function () {
     describe('lens visualization', () => {
       before(async () => {
+        await svlCommonPage.login();
+        await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
         await svlObltNavigation.navigateToLandingPage();
-
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
         await dashboard.clickNewDashboard();
-
         await lens.createAndAddLensFromDashboard({});
-
         await dashboard.waitForRenderComplete();
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
 
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
+
+        await kibanaServer.savedObjects.cleanStandardList();
+        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {
@@ -66,8 +71,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
-
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');
@@ -101,6 +106,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');

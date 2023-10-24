@@ -25,6 +25,7 @@ export type {
   RegisterCustomizationProfile,
   DiscoverCustomization,
   DiscoverCustomizationService,
+  FlyoutCustomization,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
   TopNavCustomization,

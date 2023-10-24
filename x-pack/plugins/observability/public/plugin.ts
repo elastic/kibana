@@ -56,6 +56,7 @@ import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
@@ -98,7 +99,6 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
-  compositeSlo: { enabled: boolean };
 }
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -111,6 +111,7 @@ export interface ObservabilityPublicPluginsSetup {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
@@ -286,6 +287,14 @@ export class Plugin
     coreSetup.application.register(app);
 
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
+    const registerSloEmbeddableFactory = async () => {
+      const { SloOverviewEmbeddableFactoryDefinition } = await import(
+        './embeddable/slo/overview/slo_embeddable_factory'
+      );
+      const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
+      pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+    };
+    registerSloEmbeddableFactory();
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
@@ -300,6 +309,14 @@ export class Plugin
         icon: 'logoObservability',
         path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
+        isVisible: (capabilities) => {
+          const obs = capabilities.catalogue[observabilityFeatureId];
+          const uptime = capabilities.catalogue.uptime;
+          const infra = capabilities.catalogue.infra;
+          const apm = capabilities.catalogue.apm;
+
+          return obs || uptime || infra || apm;
+        },
       });
     }
 

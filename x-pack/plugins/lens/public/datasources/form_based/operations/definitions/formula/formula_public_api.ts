@@ -41,6 +41,7 @@ export interface FormulaPublicApi {
         id: string;
         params?: {
           decimals: number;
+          compact?: boolean;
         };
       };
     },

@@ -24,6 +24,7 @@ import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 
 interface Props {
+  isDisabled?: boolean;
   /** Handler for creating new visualization of a specified type */
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
   /** Handler for creating a new embeddable of a specified type */
@@ -43,7 +44,7 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => {
+export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }: Props) => {
   const {
     embeddable,
     visualizations: {
@@ -273,6 +274,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Add panel',
       })}
+      isDisabled={isDisabled}
       size="s"
       iconType="plusInCircle"
       panelPaddingSize="none"

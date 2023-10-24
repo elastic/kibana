@@ -8,18 +8,15 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiPopover,
   EuiPopoverProps,
-  EuiTitle,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import styled from '@emotion/styled';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { DatasetSelection } from '../../../utils/dataset_selection';
-import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID, selectDatasetLabel } from '../constants';
+import { DatasetSelection } from '../../../../common/dataset_selection';
+import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 
 const panelStyle = { width: DATA_VIEW_POPOVER_CONTENT_WIDTH };
@@ -60,8 +57,8 @@ export const DatasetsPopover = ({
             <EuiIcon type={iconType} />
           ) : hasIntegration ? (
             <PackageIcon
-              packageName={parentIntegration.name}
-              version={parentIntegration.version}
+              packageName={parentIntegration.name ?? ''}
+              version={parentIntegration.version ?? '1.0.0'}
               icons={parentIntegration.icons}
               size="m"
               tryApi
@@ -81,17 +78,8 @@ export const DatasetsPopover = ({
         css={panelStyle}
         data-test-subj="datasetSelectorContent"
       >
-        <Title size="xxs">
-          <span>{selectDatasetLabel}</span>
-        </Title>
-        <EuiHorizontalRule margin="none" />
         {children}
       </EuiPanel>
     </EuiPopover>
   );
 };
-
-const Title = styled(EuiTitle)`
-  padding: 12px;
-  display: block;
-`;

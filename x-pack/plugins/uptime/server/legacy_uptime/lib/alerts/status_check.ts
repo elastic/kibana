@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { min } from 'lodash';
 import moment from 'moment';
@@ -280,6 +281,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   plugins
 ) => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
+  category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',

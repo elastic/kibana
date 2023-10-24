@@ -6,13 +6,8 @@
  */
 
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability/locators';
 
-export interface ObservabilityOnboardingLocatorParams
-  extends SerializableRecord {
-  /** If given, it will load the given map else will load the create a new map page. */
-  source?: 'customLogs' | 'systemLogs';
-}
-
+export type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability/locators';
 export type ObservabilityOnboardingLocator =
   LocatorPublic<ObservabilityOnboardingLocatorParams>;

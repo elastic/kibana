@@ -40,7 +40,7 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
-import { ServerlessPluginSetup } from '@kbn/serverless/server';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client/actions_client';
@@ -179,7 +179,7 @@ export interface ActionsPluginsStart {
   eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
-  serverless?: ServerlessPluginSetup;
+  serverless?: ServerlessPluginStart;
 }
 
 const includedHiddenTypes = [

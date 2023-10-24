@@ -24,12 +24,14 @@
       "observabilityAIAssistant",
       "unifiedSearch",
       "share",
+      "embeddable",
       "profilingDataAccess"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "advancedSettings"
     ]
   }
 }

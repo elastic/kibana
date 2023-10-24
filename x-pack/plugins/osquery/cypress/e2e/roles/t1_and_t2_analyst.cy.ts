@@ -25,7 +25,7 @@ import type { ServerlessRoleName } from '../../support/roles';
 
 describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
   ['t1_analyst', 't2_analyst'].forEach((role: string) => {
-    describe(`${role}- READ + runSavedQueries `, { tags: ['@ess', '@serverless'] }, () => {
+    describe(`${role}- READ + runSavedQueries `, () => {
       let savedQueryName: string;
       let savedQueryId: string;
       let packName: string;
@@ -57,7 +57,6 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
 
       it('should be able to run saved queries but not add new ones', () => {
         navigateTo('/app/osquery/saved_queries');
-        cy.waitForReact(1000);
         cy.contains(savedQueryName);
         cy.contains('Add saved query').should('be.disabled');
         cy.react('PlayButtonComponent', {
@@ -79,7 +78,6 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
 
       it('should be able to play in live queries history', () => {
         navigateTo('/app/osquery/live_queries');
-        cy.waitForReact(1000);
         cy.contains('New live query').should('not.be.disabled');
         cy.contains(liveQueryQuery);
         cy.wait(1000);
@@ -91,7 +89,6 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
 
       it('should be able to use saved query in a new query', () => {
         navigateTo('/app/osquery/live_queries');
-        cy.waitForReact(1000);
         cy.contains('New live query').should('not.be.disabled').click();
         selectAllAgents();
         getSavedQueriesDropdown().type(`${savedQueryName}{downArrow} {enter}`);
@@ -102,7 +99,6 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
 
       it('should not be able to add nor edit packs', () => {
         navigateTo('/app/osquery/packs');
-        cy.waitForReact(1000);
         cy.getBySel('tablePaginationPopoverButton').click();
         cy.getBySel('tablePagination-50-rows').click();
         cy.contains('Add pack').should('be.disabled');

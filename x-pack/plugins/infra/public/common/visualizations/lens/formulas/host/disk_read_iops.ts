@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const diskIORead: FormulaValueConfig = {
-  label: 'Disk Read IOPS',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.diskIORead', {
+    defaultMessage: 'Disk Read IOPS',
+  }),
   value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
   format: {
     id: 'number',

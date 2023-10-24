@@ -25,6 +25,7 @@ import {
   ConnectorTypes,
   AttachmentType,
   ExternalReferenceStorageType,
+  CustomFieldTypes,
 } from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
 
@@ -42,6 +43,8 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   AttachmentUI,
+  CaseUICustomField,
+  CasesConfigurationUICustomField,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -247,6 +250,7 @@ export const basicCase: CaseUI = {
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
+  customFields: [],
 };
 
 export const basicFileMock: FileJSON = {
@@ -364,6 +368,7 @@ export const mockCase: CaseUI = {
   },
   assignees: [],
   category: null,
+  customFields: [],
 };
 
 export const basicCasePost: CaseUI = {
@@ -537,6 +542,7 @@ export const basicCaseSnake: Case = {
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
+  customFields: [],
 } as Case;
 
 export const caseWithAlertsSnake = {
@@ -742,6 +748,15 @@ export const getUserAction = (
             { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' },
             { uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0' },
           ],
+        },
+        ...overrides,
+      };
+    case UserActionTypes.customFields:
+      return {
+        ...commonProperties,
+        type: UserActionTypes.customFields,
+        payload: {
+          customFields: customFieldsMock,
         },
         ...overrides,
       };
@@ -1131,3 +1146,13 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
     ],
   };
 };
+
+export const customFieldsMock: CaseUICustomField[] = [
+  { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: 'My text test value 1' },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
+];
+
+export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
+  { type: CustomFieldTypes.TEXT, key: 'test_key_1', label: 'My test label 1', required: true },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', label: 'My test label 2', required: false },
+];

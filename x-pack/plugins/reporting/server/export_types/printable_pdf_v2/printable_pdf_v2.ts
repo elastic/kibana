@@ -75,7 +75,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
   ) => {
     const jobLogger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
+    const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
     const { encryptionKey } = this.config;
 
@@ -103,12 +103,12 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
 
         apmGetAssets?.end();
 
-        apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
+        apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
         return generatePdfObservable(
           this.config,
           this.getServerInfo(),
           () =>
-            this.startDeps.reporting.getScreenshots({
+            this.startDeps.reporting.getScreenshots!({
               format: 'pdf',
               title,
               logo,
@@ -149,7 +149,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    apmTrans?.end();
+    apmTrans.end();
     return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

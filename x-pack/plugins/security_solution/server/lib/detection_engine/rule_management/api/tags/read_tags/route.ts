@@ -29,11 +29,8 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
       },
       async (context, request, response): Promise<IKibanaResponse<ReadTagsResponse>> => {
         const siemResponse = buildSiemResponse(response);
-        const rulesClient = (await context.alerting)?.getRulesClient();
-
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const ctx = await context.resolve(['alerting']);
+        const rulesClient = ctx.alerting.getRulesClient();
 
         try {
           const tags = await readTags({

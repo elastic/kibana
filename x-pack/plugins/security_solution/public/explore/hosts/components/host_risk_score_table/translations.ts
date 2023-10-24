@@ -18,16 +18,8 @@ export const HOST_RISK_SCORE = i18n.translate(
 );
 
 export const HOST_RISK = i18n.translate('xpack.securitySolution.hostsRiskTable.riskTitle', {
-  defaultMessage: 'Host risk classification',
+  defaultMessage: 'Host risk level',
 });
-
-export const HOST_RISK_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.hostsRiskTable.hostRiskToolTip',
-  {
-    defaultMessage:
-      'Host risk classification is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
-  }
-);
 
 export const HOST_RISK_TITLE = i18n.translate(
   'xpack.securitySolution.hostsRiskTable.hostRiskTitle',
@@ -36,16 +28,15 @@ export const HOST_RISK_TITLE = i18n.translate(
   }
 );
 
-export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.hostsRiskTable.hostsTableTooltip',
-  {
-    defaultMessage:
-      'The host risk table is not affected by the KQL time range. This table shows the latest recorded risk score for each host.',
-  }
-);
-
 export const VIEW_HOSTS_BY_SEVERITY = (severity: string) =>
   i18n.translate('xpack.securitySolution.hostsRiskTable.filteredHostsTitle', {
     values: { severity },
     defaultMessage: 'View {severity} risk hosts',
   });
+
+export const LAST_UPDATED = i18n.translate(
+  'xpack.securitySolution.hostsRiskTable.lastUpdatedTitle',
+  {
+    defaultMessage: 'Last updated',
+  }
+);

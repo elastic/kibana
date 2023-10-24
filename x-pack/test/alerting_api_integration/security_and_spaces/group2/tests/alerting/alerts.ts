@@ -20,7 +20,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   AlertUtils,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   TaskManagerUtils,
   getEventLog,
 } from '../../../../common/lib';
@@ -130,7 +130,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -254,7 +254,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -500,7 +500,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -601,7 +601,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.authorization',
                   'alertsFixture'
@@ -719,7 +719,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -815,7 +815,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -873,7 +873,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -953,7 +953,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1018,7 +1018,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1074,7 +1074,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1133,7 +1133,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1192,7 +1192,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing',
                   'alertsFixture'
@@ -1256,7 +1256,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
@@ -1318,7 +1318,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
@@ -1392,7 +1392,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
@@ -1447,7 +1447,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
@@ -1676,7 +1676,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'

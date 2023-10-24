@@ -10,14 +10,14 @@ import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from '
 import './context_app.scss';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { removeInterceptedWarningDuplicates } from '@kbn/search-response-warnings';
 import {
   DOC_TABLE_LEGACY,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -176,12 +176,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 
   const interceptedWarnings = useMemo(
-    () =>
-      removeInterceptedWarningDuplicates([
-        ...(fetchedState.predecessorsInterceptedWarnings || []),
-        ...(fetchedState.anchorInterceptedWarnings || []),
-        ...(fetchedState.successorsInterceptedWarnings || []),
-      ]),
+    () => [
+      ...(fetchedState.predecessorsInterceptedWarnings || []),
+      ...(fetchedState.anchorInterceptedWarnings || []),
+      ...(fetchedState.successorsInterceptedWarnings || []),
+    ],
     [
       fetchedState.predecessorsInterceptedWarnings,
       fetchedState.anchorInterceptedWarnings,
@@ -208,12 +207,14 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       showSearchBar: true,
       showQueryInput: false,
       showFilterBar: true,
-      showSaveQuery: false,
+      saveQueryMenuVisibility: 'hidden' as const,
       showDatePicker: false,
       indexPatterns: [dataView],
       useDefaultBehaviors: true,
     };
   };
+
+  const titlePadding = useEuiPaddingSize('m');
 
   return (
     <Fragment>
@@ -235,12 +236,16 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageBody
               panelled
-              paddingSize="s"
+              paddingSize="none"
               className="dscDocsContent"
               panelProps={{ role: 'main' }}
             >
-              <EuiSpacer size="s" />
-              <EuiText data-test-subj="contextDocumentSurroundingHeader">
+              <EuiText
+                data-test-subj="contextDocumentSurroundingHeader"
+                css={css`
+                  padding: ${titlePadding} ${titlePadding} 0;
+                `}
+              >
                 <strong>
                   <FormattedMessage
                     id="discover.context.contextOfTitle"

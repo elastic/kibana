@@ -31,7 +31,7 @@ const TabNavigationItemComponent = ({
   const handleClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateTo({ path: hrefWithSearch });
+      navigateTo({ path: hrefWithSearch, restoreScroll: true });
       track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
     },
     [navigateTo, hrefWithSearch, id]

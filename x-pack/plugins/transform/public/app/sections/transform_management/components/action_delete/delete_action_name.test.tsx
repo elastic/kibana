@@ -16,9 +16,11 @@ jest.mock('../../../../app_dependencies');
 describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {
     const props: DeleteActionNameProps = {
+      items: [],
       canDeleteTransform: true,
       disabled: false,
       isBulkAction: false,
+      forceDisable: false,
     };
 
     const { container } = render(<DeleteActionName {...props} />);

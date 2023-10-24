@@ -43,6 +43,7 @@ async function mountComponent({
   allSuggestions,
   isPlainRecord,
   hasDashboardPermissions,
+  isChartLoading,
 }: {
   noChart?: boolean;
   noHits?: boolean;
@@ -54,6 +55,7 @@ async function mountComponent({
   allSuggestions?: Suggestion[];
   isPlainRecord?: boolean;
   hasDashboardPermissions?: boolean;
+  isChartLoading?: boolean;
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
@@ -98,6 +100,7 @@ async function mountComponent({
     breakdown: noBreakdown ? undefined : { field: undefined },
     currentSuggestion,
     allSuggestions,
+    isChartLoading: Boolean(isChartLoading),
     isPlainRecord,
     appendHistogram,
     onResetChartHeight: jest.fn(),
@@ -171,6 +174,11 @@ describe('Chart', () => {
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
     ).toBeTruthy();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+  });
+
+  test('render progress bar when text based and request is loading', async () => {
+    const component = await mountComponent({ isPlainRecord: true, isChartLoading: true });
+    expect(component.find('[data-test-subj="unifiedHistogramProgressBar"]').exists()).toBeTruthy();
   });
 
   test('triggers onEditVisualization on click', async () => {

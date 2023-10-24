@@ -168,7 +168,7 @@ export class SecurityPageObject extends FtrService {
     );
   }
 
-  private async isLoginFormVisible() {
+  public async isLoginFormVisible() {
     return await this.testSubjects.exists('loginForm');
   }
 
@@ -295,18 +295,44 @@ export class SecurityPageObject extends FtrService {
     return user as AuthenticatedUser;
   }
 
-  async forceLogout() {
+  async forceLogout(
+    { waitForLoginPage }: { waitForLoginPage: boolean } = { waitForLoginPage: true }
+  ) {
     this.log.debug('SecurityPage.forceLogout');
     if (await this.find.existsByDisplayedByCssSelector('.login-form', 100)) {
       this.log.debug('Already on the login page, not forcing anything');
       return;
     }
 
-    this.log.debug('Redirecting to /logout to force the logout');
+    this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
     const url = this.deployment.getHostPort() + '/logout';
     await this.browser.get(url);
-    this.log.debug('Waiting on the login form to appear');
-    await this.waitForLoginPage();
+
+    // After logging out, the user can be redirected to various locations depending on the context. By default, we
+    // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
+    // we should simply wait until the user is redirected *elsewhere*.
+    if (waitForLoginPage) {
+      this.log.debug('Waiting on the login form to appear');
+      await this.waitForLoginPage();
+    } else {
+      this.log.debug('Waiting for logout to complete');
+      await this.retry.waitFor('Waiting for logout to complete', async () => {
+        // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
+        // current page and lose the state (e.g. unsaved changes) via native alert dialog.
+        const alert = await this.browser.getAlert();
+        if (alert?.accept) {
+          await alert.accept();
+        }
+
+        if (this.config.get('serverless')) {
+          // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+          this.log.debug('Wait 5 sec for Cloud login page to be displayed');
+          return await this.find.existsByDisplayedByCssSelector('.login-form-password', 5000);
+        } else {
+          return !(await this.browser.getCurrentUrl()).includes('/logout');
+        }
+      });
+    }
   }
 
   async clickRolesSection() {
@@ -635,10 +661,6 @@ export class SecurityPageObject extends FtrService {
   }
 
   async selectRole(role: string) {
-    const dropdown = await this.testSubjects.find('rolesDropdown');
-    const input = await dropdown.findByCssSelector('input');
-    await input.type(role);
-    await this.find.clickByCssSelector(`[role=option][title="${role}"]`);
-    await this.testSubjects.click('comboBoxToggleListButton');
+    await this.comboBox.set('rolesDropdown', role);
   }
 }

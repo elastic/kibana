@@ -53,14 +53,56 @@ export const sourceCommands = {
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from.markdown',
             {
               defaultMessage: `### FROM
 The \`FROM\` source command returns a table with up to 10,000 documents from a data stream, index, or alias. Each row in the resulting table represents a document. Each column corresponds to a field, and can be accessed by the name of that field.
-              
+
 \`\`\`
-FROM index
+FROM employees
+\`\`\`
+
+You can use [date math](https://www.elastic.co/guide/en/elasticsearch/reference/current/api-conventions.html#api-date-math-index-names) to refer to indices, aliases and data streams. This can be useful for time series data.
+
+Use comma-separated lists or wildcards to query multiple data streams, indices, or aliases:
+
+\`\`\`
+FROM employees-00001,employees-*
+\`\`\`
+
+#### Metadata
+
+ES|QL can access the following metadata fields:
+
+* \`_index\`: the index to which the document belongs. The field is of the type \`keyword\`.
+* \`_id\`: the source document's ID. The field is of the type \`keyword\`.
+* \`_version\`: the source document's version. The field is of the type \`long\`.
+
+Use the \`METADATA\` directive to enable metadata fields:
+
+\`\`\`
+FROM index [METADATA _index, _id]
+\`\`\`
+
+Metadata fields are only available if the source of the data is an index. Consequently, \`FROM\` is the only source commands that supports the \`METADATA\` directive.
+
+Once enabled, the fields are then available to subsequent processing commands, just like the other index fields:
+
+\`\`\`
+FROM ul_logs, apps [METADATA _index, _version]
+| WHERE id IN (13, 14) AND _version == 1
+| EVAL key = CONCAT(_index, "_", TO_STR(id))
+| SORT id, _index
+| KEEP id, _index, _version, key
+\`\`\`
+
+Also, similar to the index fields, once an aggregation is performed, a metadata field will no longer be accessible to subsequent commands, unless used as grouping field:
+
+\`\`\`
+FROM employees [METADATA _index, _id]
+| STATS max = MAX(emp_no) BY _index
 \`\`\`
             `,
               description:
@@ -156,6 +198,7 @@ export const processingCommands = {
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dissect.markdown',
             {
@@ -219,6 +262,7 @@ FROM employees
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich.markdown',
             {
@@ -277,7 +321,7 @@ In case of name collisions, the newly created fields will override the existing 
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval.markdown',
             {
               defaultMessage: `### EVAL
-\`EVAL\` enables you to add new columns to the end of a table:
+\`EVAL\` enables you to add new columns:
 
 \`\`\`
 FROM employees
@@ -312,6 +356,7 @@ FROM employees
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok.markdown',
             {
@@ -444,7 +489,7 @@ ROW a=[1,2,3], b="b", j=["a","b"]
 Use \`RENAME\` to rename a column using the following syntax:
 
 \`\`\`
-RENAME <new-name> = <old-name>
+RENAME <old-name> AS <new-name>
 \`\`\`
 
 For example:
@@ -452,7 +497,7 @@ For example:
 \`\`\`
 FROM employees
 | KEEP first_name, last_name, still_hired
-| RENAME employed = still_hired
+| RENAME still_hired AS employed
 \`\`\`
 
 If a column with the new name already exists, it will be replaced by the new column.
@@ -462,7 +507,7 @@ Multiple columns can be renamed with a single \`RENAME\` command:
 \`\`\`
 FROM employees
 | KEEP first_name, last_name
-| RENAME fn = first_name, ln = last_name
+| RENAME first_name AS fn, last_name AS ln
 \`\`\`
             `,
               description:
@@ -600,56 +645,11 @@ FROM employees
 \`\`\`
 
 #### Operators
-These binary comparison operators are supported:
 
-* equality: \`==\`
-* inequality: \`!=\`
-* less than: \`<\`
-* less than or equal: \`<=\`
-* larger than: \`>\`
-* larger than or equal: \`>=\`
-
-The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
-
-\`\`\`
-ROW a = 1, b = 4, c = 3
-| WHERE c-a IN (3, b / 2, a)
-\`\`\`
-
-For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
-
-* Use \`LIKE\` to match strings using wildcards. The following wildcard characters are supported:
-  * \`*\` matches zero or more characters. 
-  * \`?\` matches one character. 
-
-  \`\`\`
-  FROM employees 
-  | WHERE first_name LIKE "?b*" 
-  | KEEP first_name, last_name
-  \`\`\`
-
-* Use \`RLIKE\` to match strings using [regular expressions](https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html):
-
-  \`\`\`
-  FROM employees 
-  | WHERE first_name RLIKE ".leja.*" 
-  | KEEP first_name, last_name
-  \`\`\`
-
-You can use the following boolean operators:
-
-* \`AND\`
-* \`OR\`
-* \`NOT\`
-
-\`\`\`
-FROM employees
-| KEEP first_name, last_name, height, still_hired
-| WHERE height > 2 AND NOT still_hired
-\`\`\`
+Refer to **Operators** for an overview of the supported operators.
 
 #### Functions
-\`WHERE\` supports various functions for calculating values. Refer to Functions for more information.
+\`WHERE\` supports various functions for calculating values. Refer to **Functions** for more information.
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -691,6 +691,114 @@ Returns the absolute value.
 FROM employees
 | KEEP first_name, last_name, height
 | EVAL abs_height = ABS(0.0 - height)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acosFunction',
+        {
+          defaultMessage: 'ACOS',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acosFunction.markdown',
+            {
+              defaultMessage: `### ACOS
+Inverse cosine trigonometric function.
+
+\`\`\`
+ROW a=.9
+| EVAL acos=ACOS(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asinFunction',
+        {
+          defaultMessage: 'ASIN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asinFunction.markdown',
+            {
+              defaultMessage: `### ASIN
+Inverse sine trigonometric function.
+
+\`\`\`
+ROW a=.9
+| EVAL asin=ASIN(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atanFunction',
+        {
+          defaultMessage: 'ATAN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atanFunction.markdown',
+            {
+              defaultMessage: `### ATAN
+Inverse tangent trigonometric function.
+
+\`\`\`
+ROW a=12.9
+| EVAL atan=ATAN(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2Function',
+        {
+          defaultMessage: 'ATAN2',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2Function.markdown',
+            {
+              defaultMessage: `### ATAN2
+The angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane.
+
+\`\`\`
+ROW y=12.9, x=.6
+| EVAL atan2=ATAN2(y, x)
 \`\`\`
               `,
               description:
@@ -808,6 +916,35 @@ FROM employees
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceilFunction',
+        {
+          defaultMessage: 'CEIL',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceilFunction.markdown',
+            {
+              defaultMessage: `### CEIL
+Round a number up to the nearest integer.
+
+\`\`\`
+ROW a=1.8
+| EVAL a=CEIL(a)
+\`\`\`
+
+Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the the closest \`double\` value to the integer similar to Java's \`Math.ceil\`.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction',
         {
           defaultMessage: 'CIDR_MATCH',
@@ -826,6 +963,33 @@ Returns \`true\` if the provided IP is contained in one of the provided CIDR blo
 \`\`\`
 FROM hosts
 | WHERE CIDR_MATCH(ip, "127.0.0.2/32", "127.0.0.3/32")
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesceFunction',
+        {
+          defaultMessage: 'COALESCE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesceFunction.markdown',
+            {
+              defaultMessage: `### COALESCE
+Returns the first non-null value.
+
+\`\`\`
+ROW a=null, b="b"
+| EVAL COALESCE(a, b)
 \`\`\`
               `,
               description:
@@ -865,6 +1029,87 @@ FROM employees
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosFunction',
+        {
+          defaultMessage: 'COS',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosFunction.markdown',
+            {
+              defaultMessage: `### COS
+Cosine trigonometric function.
+
+\`\`\`
+ROW a=1.8
+| EVAL cos=COS(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coshFunction',
+        {
+          defaultMessage: 'COSH',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coshFunction.markdown',
+            {
+              defaultMessage: `### COSH
+Cosine hyperbolic function.
+
+\`\`\`
+ROW a=1.8
+| EVAL cosh=COSH(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateExtractFunction',
+        {
+          defaultMessage: 'DATE_EXTRACT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateExtractFunction.markdown',
+            {
+              defaultMessage: `### DATE_EXTRACT
+Extracts parts of a date, like year, month, day, hour. The supported field types are those provided by Java's \`java.time.temporal.ChronoField\`.
+
+\`\`\`
+ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
+| EVAL year = DATE_EXTRACT("year", date)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateFormatFunction',
         {
           defaultMessage: 'DATE_FORMAT',
@@ -881,7 +1126,34 @@ Returns a string representation of a date in the provided format. If no format i
 \`\`\`
 FROM employees
 | KEEP first_name, last_name, hire_date
-| EVAL hired = DATE_FORMAT(hire_date, "YYYY-MM-dd")
+| EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateParseFunction',
+        {
+          defaultMessage: 'DATE_PARSE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateParseFunction.markdown',
+            {
+              defaultMessage: `### DATE_PARSE
+Converts a string to a date, in the provided format. If no format is specified, the \`yyyy-MM-dd'T'HH:mm:ss.SSSZ\` format is used.
+
+\`\`\`
+ROW date_string = "2022-05-06"
+| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 \`\`\`
               `,
               description:
@@ -955,6 +1227,64 @@ Euler’s number.
 \`\`\`
 ROW E()
 \`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floorFunction',
+        {
+          defaultMessage: 'FLOOR',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floorFunction.markdown',
+            {
+              defaultMessage: `### FLOOR
+Round a number down to the nearest integer.
+
+\`\`\`
+ROW a=1.8
+| EVAL a=FLOOR(a)
+\`\`\`
+
+Note: this is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the the closest \`double\` value to the integer similar to Java's \`Math.floor\`.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatestFunction',
+        {
+          defaultMessage: 'GREATEST',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatestFunction.markdown',
+            {
+              defaultMessage: `### GREATEST
+Returns the maximum value from many columns. This is similar to \`MV_MAX\` except it's intended to run on multiple columns at once.
+
+\`\`\`
+ROW a = 10, b = 20
+| EVAL g = GREATEST(a, b);
+\`\`\`
+
+Note: when run on \`keyword\` or \`text\` fields, this will return the last string in alphabetical order. When run on \`boolean\` columns this will return \`true\` if any values are \`true\`.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1046,29 +1376,54 @@ ROW d = 1.0
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isNullFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leastFunction',
         {
-          defaultMessage: 'IS_NULL',
+          defaultMessage: 'LEAST',
         }
       ),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isNullFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leastFunction.markdown',
             {
-              defaultMessage: `### IS_NULL
-Returns a boolean than indicates whether its input is \`null\`.
+              defaultMessage: `### LEAST
+Returns the minimum value from many columns. This is similar to \`MV_MIN\` except it's intended to run on multiple columns at once.
+
+\`\`\`
+ROW a = 10, b = 20
+| EVAL l = LEAST(a, b)
+\`\`\`
+
+Note: when run on \`keyword\` or \`text\` fields, this will return the first string in alphabetical order. When run on \`boolean\` columns this will return \`false\` if any values are \`false\`.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leftFunction',
+        {
+          defaultMessage: 'LEFT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leftFunction.markdown',
+            {
+              defaultMessage: `### LEFT
+Return the substring that extracts \`length\` chars from the \`string\`, starting from the left.
 
 \`\`\`
 FROM employees
-| WHERE IS_NULL(first_name)
-\`\`\`
-
-Combine this function with \`NOT\` to filter out any \`null\` data:
-
-\`\`\`
-FROM employees
-| WHERE NOT IS_NULL(first_name)
+| KEEP last_name
+| EVAL left = LEFT(last_name, 3)
+| SORT last_name ASC
+| LIMIT 5
 \`\`\`
               `,
               description:
@@ -1126,6 +1481,36 @@ Logs of negative numbers are NaN. Logs of infinites are infinite, as is the log 
 \`\`\`
 ROW d = 1000.0
 | EVAL s = LOG10(d)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrimunction',
+        {
+          defaultMessage: 'LTRIM',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrimFunction.markdown',
+            {
+              defaultMessage: `### LTRIM
+Removes leading whitespaces from strings.
+
+\`\`\`
+ROW message = "   some text  ",  color = " red "
+| EVAL message = LTRIM(message)
+| EVAL color = LTRIM(color)
+| EVAL message = CONCAT("'", message, "'")
+| EVAL color = CONCAT("'", color, "'")
 \`\`\`
               `,
               description:
@@ -1460,6 +1845,32 @@ NOTE: The input type can be any number and the output type is the same as the in
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.nowFunction',
+        {
+          defaultMessage: 'NOW',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.nowFunction.markdown',
+            {
+              defaultMessage: `### NOW
+Returns current date and time.
+
+\`\`\`
+ROW current_date = NOW()
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.piFunction',
         {
           defaultMessage: 'PI',
@@ -1471,7 +1882,7 @@ NOTE: The input type can be any number and the output type is the same as the in
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.piFunction.markdown',
             {
               defaultMessage: `### PI
-The ratio of a circle’s circumference to its diameter.
+The ratio of a circle's circumference to its diameter.
 
 \`\`\`
 ROW PI()
@@ -1497,11 +1908,81 @@ ROW PI()
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.powFunction.markdown',
             {
               defaultMessage: `### POW
-Returns the the value of a base (first argument) raised to a power (second argument).
+Returns the the value of a base (first argument) raised to a power (second argument). Both arguments must be numeric.
 
 \`\`\`
 ROW base = 2.0, exponent = 2.0 
 | EVAL s = POW(base, exponent)
+\`\`\`
+
+#### Type rules
+
+The type of the returned value is determined by the types of the base and exponent. The following rules are applied to determine the result type:
+
+* If either of the base or exponent are of a floating point type, the result will be a double
+* Otherwise, if either the base or the exponent are 64-bit (long or unsigned long), the result will be a long
+* Otherwise, the result will be a 32-bit integer (this covers all other numeric types, including int, short and byte)
+
+For example, using simple integers as arguments will lead to an integer result:
+
+\`\`\`
+ROW base = 2, exponent = 2
+| EVAL s = POW(base, exponent)
+\`\`\`
+
+Note: the actual power function is performed using double precision values for all cases. This means that for very large non-floating point values there is a small chance that the operation can lead to slightly different answers than expected. However, a more likely outcome of very large non-floating point values is numerical overflow.
+
+#### Arithmetic errors
+
+Arithmetic errors and numeric overflow do not result in an error. Instead, the result will be \`null\` and a warning for the \`ArithmeticException\` added. For example:
+
+\`\`\`
+ROW x = POW(9223372036854775808, 2)
+\`\`\`
+
+If it is desired to protect against numerical overruns, use \`TO_DOUBLE\` on either of the arguments:
+
+\`\`\`
+ROW x = POW(9223372036854775808, TO_DOUBLE(1))
+\`\`\`
+
+#### Fractional exponents
+
+The exponent can be a fraction, which is similar to performing a root. For example, the exponent of 0.5 will give the square root of the base:
+
+\`\`\`
+ROW base = 4, exponent = 0.5
+| EVAL s = POW(base, exponent)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rightFunction',
+        {
+          defaultMessage: 'RIGHT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rightFunction.markdown',
+            {
+              defaultMessage: `### RIGHT
+Return the substring that extracts \`length\` chars from the string starting from the \`right\`.
+
+\`\`\`
+FROM employees
+| KEEP last_name
+| EVAL right = RIGHT(last_name, 3)
+| SORT last_name ASC
+| LIMIT 5
 \`\`\`
               `,
               description:
@@ -1541,6 +2022,90 @@ FROM employees
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrimFunction',
+        {
+          defaultMessage: 'RTRIM',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrimFunction.markdown',
+            {
+              defaultMessage: `### RTRIM
+Removes trailing whitespaces from strings.
+
+\`\`\`
+ROW message = "   some text  ",  color = " red "
+| EVAL message = RTRIM(message)
+| EVAL color = RTRIM(color)
+| EVAL message = CONCAT("'", message, "'")
+| EVAL color = CONCAT("'", color, "'")
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinFunction',
+        {
+          defaultMessage: 'SIN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinFunction.markdown',
+            {
+              defaultMessage: `### SIN
+Sine trigonometric function.
+
+\`\`\`
+ROW a=1.8
+| EVAL sin=SIN(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinhFunction',
+        {
+          defaultMessage: 'SINH',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinhFunction.markdown',
+            {
+              defaultMessage: `### SINH
+Sine hyperbolic function.
+
+\`\`\`
+ROW a=1.8
+| EVAL sinh=SINH(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.splitFunction',
         {
           defaultMessage: 'SPLIT',
@@ -1566,6 +2131,35 @@ foo;bar;baz;qux;quux;corge | [foo,bar,baz,qux,quux,corge]
 \`\`\`
 
 NOTE: Only single byte delimiters are currently supported.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrtFunction',
+        {
+          defaultMessage: 'SQRT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrtFunction.markdown',
+            {
+              defaultMessage: `### SQRT
+Returns the square root of a number. The input can be any numeric value, the return value is always a double.
+
+Square roots of negative numbers are NaN. Square roots of infinites are infinite.
+
+\`\`\`
+ROW d = 100.0
+| EVAL s = SQRT(d)
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1648,6 +2242,60 @@ FROM employees
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanFunction',
+        {
+          defaultMessage: 'TAN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanFunction.markdown',
+            {
+              defaultMessage: `### TAN
+Tangent trigonometric function.
+
+\`\`\`
+ROW a=1.8
+| EVAL tan=TAN(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanhFunction',
+        {
+          defaultMessage: 'TANH',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanhFunction.markdown',
+            {
+              defaultMessage: `### TANH
+Tangent hyperbolic function.
+
+\`\`\`
+ROW a=1.8
+| EVAL tanh=TANH(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tauFunction',
         {
           defaultMessage: 'TAU',
@@ -1659,7 +2307,7 @@ FROM employees
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tauFunction.markdown',
             {
               defaultMessage: `### TAU
-The ratio of a circle’s circumference to its radius.
+The ratio of a circle's circumference to its radius.
 
 \`\`\`
 ROW TAU()
@@ -1759,6 +2407,35 @@ Returning:
 \`\`\`
 
 Alias: TO_DT
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDegreesFunction',
+        {
+          defaultMessage: 'TO_DEGREES',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDegreesFunction.markdown',
+            {
+              defaultMessage: `### TO_DEGREES
+Converts a number in radians to degrees.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a numeric type and result is always \`double\`.
+
+\`\`\`
+ROW rad = [1.57, 3.14, 4.71]
+| EVAL deg = TO_DEGREES(rad)
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1927,11 +2604,40 @@ Returning:
 2147483648 | 2147483648.2 | foo | 2147483648 | 2147483648 | null
 \`\`\`
 
-Note that in this example, the last conversion of the string isn’t possible. When this happens, the result is a **null** value. 
+Note that in this example, the last conversion of the string isn't possible. When this happens, the result is a **null** value. 
 
 If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to integer.
 
-Boolean **true** will be converted to long **1**, **false** to **0**.
+Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toRadiansFunction',
+        {
+          defaultMessage: 'TO_RADIANS',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toRadiansFunction.markdown',
+            {
+              defaultMessage: `### TO_RADIANS
+Converts a number in degrees to radians.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a numeric type and result is always \`double\`.
+
+\`\`\`
+ROW deg = [90.0, 180.0, 270.0]
+| EVAL rad = TO_RADIANS(deg)
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1966,6 +2672,53 @@ It also works fine on multivalued fields:
 ROW a=[10, 9, 8]
 | EVAL j = TO_STRING(a)
 \`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUnsignedLongFunction',
+        {
+          defaultMessage: 'TO_UNSIGNED_LONG',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUnsignedLongFunction.markdown',
+            {
+              defaultMessage: `### TO_UNSIGNED_LONG
+Converts an input value to an unsigned long value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+
+\`\`\`
+ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
+| EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
+\`\`\`
+
+Note that in this example, the last conversion of the string isn't possible. When this happens, the result is a **null** value. In this case a Warning header is added to the response. The header will provide information on the source of the failure:
+
+\`\`\`
+"Line 1:133: evaluation of [TO_UL(str3)] failed, treating result as null. Only first 20 failures recorded."
+\`\`\`
+
+A following header will contain the failure reason and the offending value:
+
+\`\`\`
+"java.lang.NumberFormatException: Character f is neither a decimal digit number, decimal point, nor \"e\" notation exponential mark."
+\`\`\`
+
+If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.
+
+Boolean \`true\` will be converted to unsigned long \`1\`, \`false\` to \`0\`.
+
+Alias: TO_ULONG, TO_UL
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -2117,6 +2870,7 @@ NOTE: There isn’t yet a \`COUNT(*)\`. Please count a single valued field if yo
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countDistinctFunction.markdown',
             {
@@ -2305,6 +3059,179 @@ The sum of a numeric field.
 \`\`\`
 FROM employees
 | STATS SUM(languages)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+  ],
+};
+
+export const operators = {
+  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.operators', {
+    defaultMessage: 'Operators',
+  }),
+  description: i18n.translate(
+    'textBasedEditor.query.textBasedLanguagesEditor.operatorsDocumentationESQLDescription',
+    {
+      defaultMessage: `ES|QL supports the following operators:`,
+    }
+  ),
+  items: [
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.binaryOperators',
+        {
+          defaultMessage: 'Binary operators',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.binaryOperators.markdown',
+            {
+              defaultMessage: `### Binary operators
+These binary comparison operators are supported:
+
+* equality: \`==\`
+* inequality: \`!=\`
+* less than: \`<\`
+* less than or equal: \`<=\`
+* larger than: \`>\`
+* larger than or equal: \`>=\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.booleanOperators',
+        {
+          defaultMessage: 'Boolean operators',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.booleanOperators.markdown',
+            {
+              defaultMessage: `### Boolean operators
+The following boolean operators are supported:
+
+* \`AND\`
+* \`OR\`
+* \`NOT\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator',
+        {
+          defaultMessage: 'IN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator.markdown',
+            {
+              defaultMessage: `### IN
+The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
+
+\`\`\`
+ROW a = 1, b = 4, c = 3
+| WHERE c-a IN (3, b / 2, a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stringOperators',
+        {
+          defaultMessage: 'LIKE and RLIKE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stringOperators.markdown',
+            {
+              defaultMessage: `### LIKE and RLIKE
+For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
+
+Use \`LIKE\` to match strings using wildcards. The following wildcard characters are supported:
+
+* \`*\` matches zero or more characters.
+* \`?\` matches one character.
+
+\`\`\`
+FROM employees
+| WHERE first_name LIKE "?b*"
+| KEEP first_name, last_name
+\`\`\`
+
+Use \`RLIKE\` to match strings using regular expressions:
+
+\`\`\`
+FROM employees
+| WHERE first_name RLIKE ".leja.*"
+| KEEP first_name, last_name
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.predicates',
+        {
+          defaultMessage: 'NULL values',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.predicates.markdown',
+            {
+              defaultMessage: `### NULL values
+For NULL comparison use the \`IS NULL\` and \`IS NOT NULL\` predicates:
+
+\`\`\`
+FROM employees
+| WHERE birth_date IS NULL
+| KEEP first_name, last_name
+| SORT first_name
+| LIMIT 3
+\`\`\`
+
+\`\`\`
+FROM employees
+| WHERE is_rehired IS NOT NULL
+| STATS count(emp_no)
 \`\`\`
               `,
               description:

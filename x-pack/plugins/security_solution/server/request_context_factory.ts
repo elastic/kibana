@@ -139,7 +139,6 @@ export class RequestContextFactory implements IRequestContextFactory {
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             soClient: coreContext.savedObjects.client,
             namespace: getSpaceId(),
-            dataStreamAdapter: plugins.alerting.getDataStreamAdapter(),
           })
       ),
     };

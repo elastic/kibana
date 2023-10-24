@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import React from 'react';
@@ -13,19 +11,22 @@ import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rx
 import { dynamic } from '../utils/dynamic';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 import { LogExplorerStateContainer } from '../components/log_explorer';
+import { LogExplorerStartDeps } from '../types';
+import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
-  data: DataPublicPluginStart;
+  plugins: LogExplorerStartDeps;
   state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core, data, state$ }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({ core, plugins, state$ }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
+    const { data, dataViews, discover } = plugins;
     // Lazy load dependencies
     const datasetServiceModuleLoadable = import('../services/datasets');
     const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
@@ -33,11 +34,12 @@ export const createLogExplorerProfileCustomizations =
     const [{ DatasetsService }, { initializeLogExplorerProfileStateService, waitForState }] =
       await Promise.all([datasetServiceModuleLoadable, logExplorerMachineModuleLoadable]);
 
-    const datasetsService = new DatasetsService().start({
+    const datasetsClient = new DatasetsService().start({
       http: core.http,
-    });
+    }).client;
 
     const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
+      datasetsClient,
       stateContainer,
       toasts: core.notifications.toasts,
     });
@@ -68,12 +70,20 @@ export const createLogExplorerProfileCustomizations =
      */
     customizations.set({
       id: 'search_bar',
-      CustomDataViewPicker: () => (
-        <LazyCustomDatasetSelector
-          datasetsClient={datasetsService.client}
-          logExplorerProfileStateService={logExplorerProfileStateService}
-        />
-      ),
+      CustomDataViewPicker: () => {
+        const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+
+        return (
+          <KibanaContextProviderForPlugin>
+            <LazyCustomDatasetSelector
+              datasetsClient={datasetsClient}
+              dataViews={dataViews}
+              discover={discover}
+              logExplorerProfileStateService={logExplorerProfileStateService}
+            />
+          </KibanaContextProviderForPlugin>
+        );
+      },
       PrependFilterBar: () => (
         <LazyCustomDatasetFilters
           logExplorerProfileStateService={logExplorerProfileStateService}
@@ -91,6 +101,19 @@ export const createLogExplorerProfileCustomizations =
         newItem: { disabled: true },
         openItem: { disabled: true },
         saveItem: { disabled: true },
+      },
+    });
+
+    /**
+     * Hide flyout actions to prevent rendering hard-coded actions.
+     */
+    customizations.set({
+      id: 'flyout',
+      actions: {
+        defaultActions: {
+          viewSingleDocument: { disabled: true },
+          viewSurroundingDocument: { disabled: true },
+        },
       },
     });
 

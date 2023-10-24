@@ -34,6 +34,7 @@ const Button = styled(EuiButtonEmpty)`
 export const AgentsSelectionStatus: React.FunctionComponent<{
   totalAgents: number;
   selectableAgents: number;
+  managedAgentsOnCurrentPage: number;
   selectionMode: SelectionMode;
   setSelectionMode: (mode: SelectionMode) => void;
   selectedAgents: Agent[];
@@ -41,15 +42,19 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
 }> = ({
   totalAgents,
   selectableAgents,
+  managedAgentsOnCurrentPage,
   selectionMode,
   setSelectionMode,
   selectedAgents,
   setSelectedAgents,
 }) => {
+  const showSelectionInfoAndOptions =
+    (selectionMode === 'manual' && selectedAgents.length > 0) ||
+    (selectionMode === 'query' && totalAgents > 0);
   const showSelectEverything =
     selectionMode === 'manual' &&
     selectedAgents.length === selectableAgents &&
-    selectableAgents < totalAgents;
+    selectableAgents < totalAgents - managedAgentsOnCurrentPage;
 
   return (
     <>
@@ -74,14 +79,13 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
             )}
           </EuiText>
         </EuiFlexItem>
-        {(selectionMode === 'manual' && selectedAgents.length) ||
-        (selectionMode === 'query' && totalAgents > 0) ? (
+        {showSelectionInfoAndOptions ? (
           <>
             <FlexItem grow={false}>
               <Divider />
             </FlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
+              <EuiText size="xs" color="subdued" data-test-subj="selectedAgentCountLabel">
                 <FormattedMessage
                   id="xpack.fleet.agentBulkActions.agentsSelected"
                   defaultMessage="{count, plural, one {# agent} other {# agents} =all {All agents}} selected"
@@ -97,7 +101,12 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                   <Divider />
                 </FlexItem>
                 <EuiFlexItem grow={false}>
-                  <Button size="xs" flush="left" onClick={() => setSelectionMode('query')}>
+                  <Button
+                    size="xs"
+                    flush="left"
+                    data-test-subj="selectedEverythingOnAllPagesButton"
+                    onClick={() => setSelectionMode('query')}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.agentBulkActions.selectAll"
                       defaultMessage="Select everything on all pages"
@@ -113,6 +122,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
               <Button
                 size="xs"
                 flush="left"
+                data-test-subj="clearAgentSelectionButton"
                 onClick={() => {
                   setSelectionMode('manual');
                   setSelectedAgents([]);

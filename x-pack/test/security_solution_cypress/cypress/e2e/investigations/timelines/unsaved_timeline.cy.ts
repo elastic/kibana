@@ -23,7 +23,8 @@ import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { closeTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   addNameAndDescriptionToTimeline,
@@ -31,7 +32,9 @@ import {
   populateTimeline,
   waitForTimelineChanges,
 } from '../../../tasks/timeline';
-import { HOSTS_URL, MANAGE_URL } from '../../../urls/navigation';
+import { hostsUrl, MANAGE_URL } from '../../../urls/navigation';
+
+// https://github.com/elastic/kibana/issues/169021
 
 describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
@@ -50,14 +53,14 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServ
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     createNewTimeline();
   });
 
   it('unchanged & unsaved timeline should NOT prompt when user navigates away', () => {
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
-    cy.url().should('not.contain', HOSTS_URL);
+    cy.url().should('not.contain', hostsUrl('allHosts'));
   });
 
   it('Changed & unsaved timeline should prompt when user navigates away from security solution', () => {
@@ -107,7 +110,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServ
     );
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
-    cy.url().should('not.contain', HOSTS_URL);
+    cy.url().should('not.contain', hostsUrl('allHosts'));
   });
 
   it('Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled', () => {
@@ -127,7 +130,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServ
     );
     openKibanaNavigation();
     cy.get(MANAGE_PAGE).click();
-    cy.url().should('not.contain', HOSTS_URL);
+    cy.url().should('not.contain', hostsUrl('allHosts'));
   });
 
   it('When user navigates to the page where timeline is present, Time save modal should not exists.', () => {

@@ -15,11 +15,16 @@
       "data",
       "discover",
       "logExplorer",
-      "observabilityShared"
+      "observabilityShared",
+      "share",
+      "kibanaUtils",
     ],
     "optionalPlugins": [
       "serverless"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact"],
+    "extraPublicDirs": [
+      "common",
+    ]
   }
 }

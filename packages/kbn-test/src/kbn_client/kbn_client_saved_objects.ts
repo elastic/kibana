@@ -96,8 +96,14 @@ const STANDARD_LIST_TYPES = [
   'dashboard',
   'search',
   'lens',
+  'links',
   'map',
+  // cases saved objects
   'cases',
+  'cases-comments',
+  'cases-user-actions',
+  'cases-configure',
+  'cases-connector-mappings',
   // synthetics based objects
   'synthetics-monitor',
   'uptime-dynamic-settings',
@@ -105,6 +111,7 @@ const STANDARD_LIST_TYPES = [
   'osquery-saved-query',
   'osquery-pack',
   'infrastructure-ui-source',
+  'metrics-data-source',
   'metrics-explorer-view',
   'inventory-view',
   'infrastructure-monitoring-log-view',

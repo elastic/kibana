@@ -104,6 +104,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         ],
       }
     }
+    searchFormat="eql"
     selection={
       Object {
         "onSelectionChange": [Function],

@@ -34,15 +34,18 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
-import { login, visit } from '../../../tasks/login';
-import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { kqlSearch } from '../../../tasks/security_header';
 import { createNewTimeline } from '../../../tasks/timeline';
-import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../../urls/navigation';
+import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../../urls/navigation';
 
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/168772
+// FLAKY: https://github.com/elastic/kibana/issues/168771
+describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());
@@ -50,7 +53,7 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
 
   beforeEach(() => {
     login();
-    visit(DETECTIONS_RESPONSE_URL);
+    visit(DETECTION_AND_RESPONSE_URL);
   });
 
   context('KQL search bar', () => {
@@ -60,8 +63,6 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
-
-      clearSearchBar();
     });
 
     it(`finds the host when filtering with KQL search bar query`, () => {
@@ -70,8 +71,6 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
       cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
-
-      clearSearchBar();
     });
 
     it(`filters out the users with KQL search bar query`, () => {
@@ -80,8 +79,6 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
-
-      clearSearchBar();
     });
 
     it(`finds the user when filtering with KQL search bar query`, () => {
@@ -90,8 +87,6 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
       cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
-
-      clearSearchBar();
     });
   });
 

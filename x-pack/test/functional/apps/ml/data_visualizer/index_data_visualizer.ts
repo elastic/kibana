@@ -244,7 +244,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensMetricField.fieldName,
-            'legacyMtrVis'
+            'xyVisChart'
           );
           await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
@@ -255,7 +255,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensNonMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensNonMetricField.fieldName,
-            'legacyMtrVis'
+            'xyVisChart'
           );
           await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }

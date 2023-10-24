@@ -8,6 +8,7 @@
 import { TimeRange } from '@kbn/es-query';
 import { Search } from 'history';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
+import type { InfraWaffleMapOptions } from '../../lib/lib';
 
 export type { AssetDetailsUrlState } from './hooks/use_asset_details_url_state';
 
@@ -36,7 +37,7 @@ export interface OverridableTabState {
     onClose?: () => void;
   };
   alertRule?: {
-    onCreateRuleClick?: () => void;
+    options?: Partial<Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>>;
   };
 }
 
@@ -63,8 +64,13 @@ export interface Tab {
 export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
 
 export interface AssetDetailsProps {
-  asset: Asset;
+  assetId: string;
+  assetName?: string;
   assetType: InventoryItemType;
+  autoRefresh?: {
+    isPaused?: boolean;
+    interval?: number;
+  };
   dateRange?: TimeRange;
   tabs: Tab[];
   overrides?: OverridableTabState;
@@ -77,9 +83,7 @@ export interface AssetDetailsProps {
 
 export type TabsStateChangeFn = (state: TabState) => void;
 
-export interface ContentTemplateProps {
-  header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
-}
+export type ContentTemplateProps = Pick<AssetDetailsProps, 'tabs' | 'links'>;
 
 export interface RouteState {
   originAppId: string;
@@ -88,3 +92,7 @@ export interface RouteState {
 }
 
 export type DataViewOrigin = 'logs' | 'metrics';
+
+export enum INTEGRATION_NAME {
+  kubernetes = 'kubernetes',
+}

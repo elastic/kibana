@@ -24,7 +24,8 @@ import {
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
-import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
 import {
@@ -42,7 +43,7 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
+describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -51,23 +52,19 @@ describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    visit(TIMELINE_TEMPLATES_URL);
   });
 
-  it(
-    'Should have the same query and open the timeline modal',
-    { tags: '@brokenInServerless' },
-    () => {
-      selectCustomTemplates();
-      expandEventAction();
-      clickingOnCreateTimelineFormTemplateBtn();
+  it('Should have the same query and open the timeline modal', () => {
+    selectCustomTemplates();
+    expandEventAction();
+    clickingOnCreateTimelineFormTemplateBtn();
 
-      cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
-      cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
-      closeTimeline();
-    }
-  );
+    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+    closeTimeline();
+  });
 });
 
 describe('Timelines', (): void => {
@@ -79,7 +76,7 @@ describe('Timelines', (): void => {
     context('Privileges: CRUD', { tags: '@ess' }, () => {
       beforeEach(() => {
         login();
-        visit(OVERVIEW_URL);
+        visitWithTimeRange(OVERVIEW_URL);
       });
 
       it('toggle create timeline ', () => {
@@ -92,7 +89,7 @@ describe('Timelines', (): void => {
     context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.reader);
-        visit(OVERVIEW_URL, undefined, ROLES.reader);
+        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.reader });
       });
 
       it('should not be able to create/update timeline ', () => {
@@ -109,20 +106,20 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe.skip(
+  describe(
     'Creates a timeline by clicking untitled timeline from bottom bar',
-    { tags: '@brokenInServerless' },
+    { tags: ['@ess', '@serverless'] },
     () => {
       beforeEach(() => {
         login();
-        visit(OVERVIEW_URL);
+        visitWithTimeRange(OVERVIEW_URL);
         openTimelineUsingToggle();
         addNameAndDescriptionToTimeline(getTimeline());
         populateTimeline();
         goToQueryTab();
       });
 
-      it('can be added filter', () => {
+      it.skip('can be added filter', () => {
         addFilter(getTimeline().filter);
         cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
       });
@@ -138,7 +135,8 @@ describe('Timelines', (): void => {
         cy.get(LOCKED_ICON).should('be.visible');
       });
 
-      it('can be added notes', () => {
+      // TO-DO: Issue 163398
+      it.skip('can be added notes', () => {
         addNotesToTimeline(getTimeline().notes);
         cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
           .find(NOTES_TEXT)

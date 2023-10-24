@@ -8,7 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleStatusFailedCallOut } from './rule_status_failed_callout';
 
 jest.mock('../../../../common/lib/kibana');
@@ -32,22 +33,22 @@ describe('RuleStatusFailedCallOut', () => {
   });
 
   it('is hidden if status is "going to run"', () => {
-    const result = renderWith(RuleExecutionStatus['going to run']);
+    const result = renderWith(RuleExecutionStatusEnum['going to run']);
     expect(result.queryByTestId(TEST_ID)).toBe(null);
   });
 
   it('is hidden if status is "running"', () => {
-    const result = renderWith(RuleExecutionStatus.running);
+    const result = renderWith(RuleExecutionStatusEnum.running);
     expect(result.queryByTestId(TEST_ID)).toBe(null);
   });
 
   it('is hidden if status is "succeeded"', () => {
-    const result = renderWith(RuleExecutionStatus.succeeded);
+    const result = renderWith(RuleExecutionStatusEnum.succeeded);
     expect(result.queryByTestId(TEST_ID)).toBe(null);
   });
 
   it('is visible if status is "partial failure"', () => {
-    const result = renderWith(RuleExecutionStatus['partial failure']);
+    const result = renderWith(RuleExecutionStatusEnum['partial failure']);
     result.getByTestId(TEST_ID);
     result.getByText('Warning at');
     result.getByText('Jan 27, 2022 @ 15:03:31.176');
@@ -55,7 +56,7 @@ describe('RuleStatusFailedCallOut', () => {
   });
 
   it('is visible if status is "failed"', () => {
-    const result = renderWith(RuleExecutionStatus.failed);
+    const result = renderWith(RuleExecutionStatusEnum.failed);
     result.getByTestId(TEST_ID);
     result.getByText('Rule failure at');
     result.getByText('Jan 27, 2022 @ 15:03:31.176');

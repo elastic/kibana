@@ -74,6 +74,33 @@ describe('Create case', () => {
       });
     });
 
+    it('customFields are decoded correctly', () => {
+      const customFields = [
+        {
+          key: 'first_custom_field_key',
+          type: 'text',
+          value: 'this is a text field value',
+        },
+        {
+          key: 'second_custom_field_key',
+          type: 'toggle',
+          value: true,
+        },
+      ];
+
+      const defaultRequestWithCustomFields = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, customFields },
+      };
+
+      const query = CreateCaseUserActionRt.decode(defaultRequestWithCustomFields);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequestWithCustomFields,
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = CreateCaseUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
 
@@ -156,6 +183,33 @@ describe('Create case', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: requestWithStringCategory,
+      });
+    });
+
+    it('customFields are decoded correctly', () => {
+      const customFields = [
+        {
+          key: 'first_custom_field_key',
+          type: 'text',
+          value: 'this is a text field value',
+        },
+        {
+          key: 'second_custom_field_key',
+          type: 'toggle',
+          value: true,
+        },
+      ];
+
+      const defaultRequestWithCustomFields = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, customFields },
+      };
+
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(defaultRequestWithCustomFields);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequestWithCustomFields,
       });
     });
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject } from 'react';
+import React from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -17,7 +17,7 @@ import { ResetSearchButton } from './reset_search_button';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
-  resizeRef: RefObject<HTMLDivElement>;
+  container: HTMLElement | null;
 }
 
 const histogramLayoutCss = css`
@@ -28,7 +28,7 @@ export const DiscoverHistogramLayout = ({
   isPlainRecord,
   dataView,
   stateContainer,
-  resizeRef,
+  container,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
   const { dataState } = stateContainer;
@@ -53,7 +53,7 @@ export const DiscoverHistogramLayout = ({
       {...unifiedHistogramProps}
       searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
-      resizeRef={resizeRef}
+      container={container}
       appendHitsCounter={
         savedSearch.id ? (
           <ResetSearchButton resetSavedSearch={stateContainer.actions.undoSavedSearchChanges} />

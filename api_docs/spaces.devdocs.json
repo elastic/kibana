@@ -2832,7 +2832,7 @@
         "\nSetup contract for the Spaces plugin."
       ],
       "signature": [
-        "{}"
+        "{ hasOnlyDefaultSpace: boolean; }"
       ],
       "path": "x-pack/plugins/spaces/public/plugin.tsx",
       "deprecated": false,
@@ -2906,6 +2906,19 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "spaces",
+          "id": "def-public.SpacesApi.hasOnlyDefaultSpace",
+          "type": "boolean",
+          "tags": [],
+          "label": "hasOnlyDefaultSpace",
+          "description": [
+            "\nDetermines whether Kibana supports multiple spaces or only the default space.\n\nWhen `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden."
+          ],
+          "path": "x-pack/plugins/spaces/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "spaces",
@@ -4359,6 +4372,23 @@
           "path": "x-pack/plugins/spaces/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "spaces",
+          "id": "def-server.SpacesPluginSetup.hasOnlyDefaultSpace$",
+          "type": "Object",
+          "tags": [],
+          "label": "hasOnlyDefaultSpace$",
+          "description": [
+            "\nDetermines whether Kibana supports multiple spaces or only the default space.\n\nWhen `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden."
+          ],
+          "signature": [
+            "Observable",
+            "<boolean>"
+          ],
+          "path": "x-pack/plugins/spaces/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -4394,6 +4424,23 @@
               "section": "def-server.SpacesServiceStart",
               "text": "SpacesServiceStart"
             }
+          ],
+          "path": "x-pack/plugins/spaces/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "spaces",
+          "id": "def-server.SpacesPluginStart.hasOnlyDefaultSpace$",
+          "type": "Object",
+          "tags": [],
+          "label": "hasOnlyDefaultSpace$",
+          "description": [
+            "\nDetermines whether Kibana supports multiple spaces or only the default space.\n\nWhen `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden."
+          ],
+          "signature": [
+            "Observable",
+            "<boolean>"
           ],
           "path": "x-pack/plugins/spaces/server/plugin.ts",
           "deprecated": false,

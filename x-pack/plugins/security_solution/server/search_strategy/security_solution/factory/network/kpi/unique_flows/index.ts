@@ -11,16 +11,15 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   NetworkKpiQueries,
   NetworkKpiUniqueFlowsStrategyResponse,
-  NetworkKpiUniqueFlowsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildUniqueFlowsQuery } from './query.network_kpi_unique_flows.dsl';
 
 export const networkKpiUniqueFlows: SecuritySolutionFactory<NetworkKpiQueries.uniqueFlows> = {
-  buildDsl: (options: NetworkKpiUniqueFlowsRequestOptions) => buildUniqueFlowsQuery(options),
+  buildDsl: (options) => buildUniqueFlowsQuery(options),
   parse: async (
-    options: NetworkKpiUniqueFlowsRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkKpiUniqueFlowsStrategyResponse> => {
     const inspect = {

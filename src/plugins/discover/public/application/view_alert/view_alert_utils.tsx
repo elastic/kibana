@@ -8,8 +8,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { getIndexPatternFromESQLQuery, type AggregateQuery } from '@kbn/es-query';
 import { CoreStart, ToastsStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
@@ -21,6 +22,8 @@ import { DiscoverAppLocatorParams } from '../../../common/locator';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;
+  esqlQuery?: AggregateQuery;
+  timeField?: string;
 }
 
 export interface QueryParams {
@@ -50,7 +53,8 @@ export const getAlertUtils = (
   queryParams: QueryParams,
   toastNotifications: ToastsStart,
   core: CoreStart,
-  data: DataPublicPluginStart
+  data: DataPublicPluginStart,
+  dataViews: DataViewsPublicPluginStart
 ) => {
   const showDataViewFetchError = (alertId: string) => {
     const errorTitle = i18n.translate('discover.viewAlert.dataViewErrorTitle', {
@@ -111,14 +115,31 @@ export const getAlertUtils = (
     }
   };
 
-  const buildLocatorParams = ({
+  const buildLocatorParams = async ({
     alert,
     searchSource,
   }: {
     alert: Rule<SearchThresholdAlertParams>;
     searchSource: ISearchSource;
-  }): DiscoverAppLocatorParams => {
-    const dataView = searchSource.getField('index');
+  }): Promise<DiscoverAppLocatorParams> => {
+    let dataView = searchSource.getField('index');
+    let query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+
+    // Dataview and query for ES|QL alerts
+    if (
+      alert.params &&
+      'esqlQuery' in alert.params &&
+      alert.params.esqlQuery &&
+      'esql' in alert.params.esqlQuery
+    ) {
+      query = alert.params.esqlQuery;
+      const indexPattern: string = getIndexPatternFromESQLQuery(alert.params.esqlQuery.esql);
+      dataView = await dataViews.create({
+        title: indexPattern,
+        timeFieldName: alert.params.timeField,
+      });
+    }
+
     const timeFieldName = dataView?.timeFieldName;
     // data view fetch error
     if (!dataView || !timeFieldName) {
@@ -131,7 +152,7 @@ export const getAlertUtils = (
       : buildTimeRangeFilter(dataView, alert, timeFieldName);
 
     return {
-      query: searchSource.getField('query') || data.query.queryString.getDefaultQuery(),
+      query,
       dataViewSpec: dataView.toSpec(false),
       timeRange,
       filters: searchSource.getField('filter') as Filter[],

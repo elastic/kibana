@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSearchBar,
   EuiEmptyPrompt,
   EuiButton,
-  EuiIconTip,
   EuiTitle,
   Query,
   EuiFlexGroup,
@@ -24,16 +23,14 @@ import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
-import {
-  SortBy,
-  useProcessList,
-  ProcessListContextProvider,
-} from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
+import { SortBy, useProcessList, ProcessListContextProvider } from '../../hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 import { ProcessesExplanationMessage } from '../../components/processes_explanation';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -41,17 +38,20 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 }));
 
 export const Processes = () => {
+  const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset, assetType } = useAssetDetailsRenderPropsContext();
-
+  const { asset } = useAssetDetailsRenderPropsContext();
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
 
-  const currentTimestamp = getDateRangeInTimestamp().to;
+  const toTimestamp = useMemo(() => getDateRangeInTimestamp().to, [getDateRangeInTimestamp]);
+  const state = useIntersectingState(ref, {
+    currentTimestamp: toTimestamp,
+  });
 
   const [sortBy, setSortBy] = useState<SortBy>({
     name: 'cpu',
@@ -59,16 +59,16 @@ export const Processes = () => {
   });
 
   const hostTerm = useMemo(() => {
-    const field = getFieldByType(assetType) ?? assetType;
+    const field = getFieldByType(asset.type) ?? asset.type;
     return { [field]: asset.name };
-  }, [asset.name, assetType]);
+  }, [asset.name, asset.type]);
 
   const {
     loading,
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, currentTimestamp, sortBy, parseSearchString(searchText));
+  } = useProcessList(hostTerm, state.currentTimestamp, sortBy, parseSearchString(searchText));
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
@@ -98,18 +98,18 @@ export const Processes = () => {
   }, [setUrlState]);
 
   return (
-    <ProcessListContextProvider hostTerm={hostTerm} to={currentTimestamp}>
-      <EuiFlexGroup direction="column" gutterSize="m">
+    <ProcessListContextProvider hostTerm={hostTerm} to={state.currentTimestamp}>
+      <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
         <EuiFlexItem grow={false}>
           <SummaryTable
-            isLoading={loading}
+            isLoading={loading && !response}
             processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle data-test-subj="infraAssetDetailsAlertsTitle" size="xxs">
+              <EuiTitle data-test-subj="infraAssetDetailsTopProcessesTitle" size="xxs">
                 <span>
                   <FormattedMessage
                     id="xpack.infra.metrics.nodeDetails.processesHeader"
@@ -119,31 +119,21 @@ export const Processes = () => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIconTip
-                aria-label={i18n.translate(
-                  'xpack.infra.metrics.nodeDetails.processesHeader.tooltipLabel',
-                  {
-                    defaultMessage: 'More info',
-                  }
-                )}
-                size="m"
-                type="iInCircle"
-                content={i18n.translate(
-                  'xpack.infra.metrics.nodeDetails.processesHeader.tooltipBody',
-                  {
-                    defaultMessage:
-                      'The table below aggregates the top CPU and top memory consuming processes. It does not display all processes.',
-                  }
-                )}
-              />
+              <TopProcessesTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        {loading ? (
-          <EuiLoadingSpinner />
-        ) : (
-          !error && (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
-        )}
+          {!error && (
+            <EuiFlexGroup alignItems="flexStart">
+              <EuiFlexItem>
+                {loading && !response ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiSearchBar
             query={searchBarState}
@@ -170,7 +160,7 @@ export const Processes = () => {
         <EuiFlexItem grow={false}>
           {!error ? (
             <ProcessesTable
-              currentTime={currentTimestamp}
+              currentTime={state.currentTimestamp}
               isLoading={loading || !response}
               processList={response?.processList ?? []}
               sortBy={sortBy}

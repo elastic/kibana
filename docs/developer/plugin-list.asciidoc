@@ -102,6 +102,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |The Event Annotation service contains expressions for event annotations
 
 
+|{kib-repo}blob/{branch}/src/plugins/event_annotation_listing/README.md[eventAnnotationListing]
+|This plugin contains the library listing page for event annotation groups.
+
+
 |{kib-repo}blob/{branch}/src/plugins/expression_error/README.md[expressionError]
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
 
@@ -232,6 +236,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_utils/README.md[kibanaUtils]
 |Utilities for building Kibana plugins.
+
+
+|{kib-repo}blob/{branch}/src/plugins/links/README.md[links]
+|This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
 
 
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
@@ -447,8 +455,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/asset_manager/README.md[assetManager]
-|This plugin provides access to the asset data stored in assets-* indices, primarily
-for inventory and topology purposes.
+|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
@@ -469,10 +476,6 @@ for inventory and topology purposes.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
 |Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat_provider/README.md[cloudChatProvider]
-|This plugin exists as a workaround for using cloudChat plugin in plugins which can't have a direct dependency on security plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
@@ -633,7 +636,7 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/log_explorer/README.md[logExplorer]
-|This plugin provides a LogExplorer component using the Discover customization framework, offering several affordances specifically designed for log consumption.
+|This plugin is home to the <LogExplorer /> component and related types. It implements several of the underlying concepts that the Observability Log Explorer app builds upon.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/logs_shared/README.md[logsShared]
@@ -646,6 +649,10 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/metrics_data_access/README.md[metricsDataAccess]
+|Exposes utilities to access metrics data.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]

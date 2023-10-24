@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiTabs, EuiTab, useEuiPaddingSize } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { DOC_TABLE_LEGACY, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
@@ -22,11 +21,18 @@ export const DocumentViewModeToggle = ({
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
+  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
+  const tabsPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const tabsCss = css`
-    padding: 0 ${useEuiPaddingSize('s')};
-    background-color: ${euiThemeVars.euiPageBackgroundColor};
+    padding: ${tabsPadding} ${tabsPadding} 0 ${tabsPadding};
+
+    .euiTab__content {
+      line-height: ${euiTheme.size.xl};
+    }
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -36,11 +42,10 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
+    <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
-        className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeDocumentButton"
       >
         <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
@@ -48,7 +53,6 @@ export const DocumentViewModeToggle = ({
       <EuiTab
         isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
-        className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeFieldStatsButton"
       >
         <FormattedMessage

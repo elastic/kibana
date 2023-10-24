@@ -17,6 +17,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { PageTitle } from './components/page_title';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -39,7 +40,6 @@ import {
 } from '../../utils/alert_summary_widget';
 import type { AlertStatus } from '../../../common/typings';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 

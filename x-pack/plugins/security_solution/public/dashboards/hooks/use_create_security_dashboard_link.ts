@@ -7,24 +7,28 @@
 
 import { useMemo } from 'react';
 import { useSecurityTags } from '../context/dashboard_context';
-import { useKibana } from '../../common/lib/kibana';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { SecurityPageName } from '../../../common';
 
 type UseCreateDashboard = () => { isLoading: boolean; url: string };
 
 export const useCreateSecurityDashboardLink: UseCreateDashboard = () => {
-  const { dashboard } = useKibana().services;
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const securityTags = useSecurityTags();
-
+  const url = getSecuritySolutionUrl({
+    deepLinkId: SecurityPageName.dashboards,
+    path: 'create',
+  });
   const result = useMemo(() => {
     const firstSecurityTagId = securityTags?.[0]?.id;
     if (!firstSecurityTagId) {
-      return { isLoading: true, url: '' };
+      return { isLoading: true, url };
     }
     return {
       isLoading: false,
-      url: dashboard?.locator?.getRedirectUrl({ tags: [firstSecurityTagId] }) ?? '',
+      url,
     };
-  }, [securityTags, dashboard?.locator]);
+  }, [securityTags, url]);
 
   return result;
 };

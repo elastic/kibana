@@ -41,12 +41,16 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 jest.mock('../../lib/kibana');
 
 describe('QueryBar ', () => {
+  const mockClearInstanceCache = jest.fn().mockImplementation(({ id }: { id: string }) => {
+    return id;
+  });
+
   (useKibana as jest.Mock).mockReturnValue({
     services: {
       data: {
         dataViews: {
           create: jest.fn().mockResolvedValue(getMockIndexPattern()),
-          clearInstanceCache: jest.fn(),
+          clearInstanceCache: mockClearInstanceCache,
         },
       },
     },
@@ -119,6 +123,9 @@ describe('QueryBar ', () => {
           getMockIndexPattern().id
         );
       });
+      // ensure useEffect cleanup is called correctly after component unmounts
+      wrapper.unmount();
+      expect(mockClearInstanceCache).toHaveBeenCalledWith(getMockIndexPattern().id);
     });
   });
 

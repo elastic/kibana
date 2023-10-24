@@ -93,7 +93,7 @@ ${JSON.stringify(argv, null, 2)}
 ----------------------------------------------
 `);
 
-      const isOpen = argv._[0] === 'open';
+      const isOpen = argv._.includes('open');
 
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
@@ -128,6 +128,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const isGrepReturnedFilePaths = _.isArray(grepSpecPattern);
       const isGrepReturnedSpecPattern = !isGrepReturnedFilePaths && grepSpecPattern === specPattern;
+      const grepFilterSpecs = cypressConfigFile.env?.grepFilterSpecs;
 
       // IMPORTANT!
       // When grep returns the same spec pattern as it gets in its arguments, we treat it as
@@ -136,7 +137,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       // If we don't return early, these specs will start executing, and Cypress will be skipping
       // tests at runtime: those that should be excluded according to the tags passed in the config.
       // This can take so much time that the job can fail by timeout in CI.
-      if (isGrepReturnedSpecPattern) {
+      if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
         // eslint-disable-next-line no-process-exit
         return process.exit(0);
@@ -175,6 +176,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const fleetServerPorts: number[] = [8220];
 
       const getEsPort = <T>(): T | number => {
+        if (isOpen) {
+          return 9220;
+        }
+
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
         if (esPorts.includes(esPort)) {
           return getEsPort();
@@ -262,7 +267,17 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 Cypress FTR setup for file: ${filePath}:
 ----------------------------------------------
 
-${JSON.stringify(config.getAll(), null, 2)}
+${JSON.stringify(
+  config.getAll(),
+  (key, v) => {
+    if (Array.isArray(v) && v.length > 32) {
+      return v.slice(0, 32).concat('... trimmed after 32 items.');
+    } else {
+      return v;
+    }
+  },
+  2
+)}
 
 ----------------------------------------------
 `);
@@ -401,7 +416,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             } else {
               try {
                 result = await cypress.run({
-                  browser: 'chrome',
+                  browser: 'electron',
                   spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
@@ -435,7 +450,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
           results,
-          (result) => result?.status === 'finished' && result.totalFailed > 0
+          (result) =>
+            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (result as CypressCommandLine.CypressRunResult)?.totalFailed
         );
         if (hasFailedTests) {
           throw createFailError('Not all tests passed');

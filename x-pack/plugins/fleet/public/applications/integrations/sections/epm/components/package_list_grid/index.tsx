@@ -8,6 +8,7 @@
 import type { ReactNode, FunctionComponent } from 'react';
 import { useMemo } from 'react';
 import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 import {
   EuiFlexGroup,
@@ -41,6 +42,11 @@ import { ControlsColumn } from './controls';
 import { GridColumn } from './grid';
 import { MissingIntegrationContent } from './missing_integrations';
 import { SearchBox } from './search_box';
+
+const StickySidebar = styled(EuiFlexItem)`
+  position: sticky;
+  top: 120px;
+`;
 
 export interface Props {
   isLoading?: boolean;
@@ -168,9 +174,9 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       gutterSize="xl"
       data-test-subj="epmList.integrationCards"
     >
-      <EuiFlexItem data-test-subj="epmList.controlsSideColumn" grow={1} className="kbnStickyMenu">
+      <StickySidebar data-test-subj="epmList.controlsSideColumn" grow={1}>
         <ControlsColumn controls={controls} title={title} />
-      </EuiFlexItem>
+      </StickySidebar>
       <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{ alignSelf: 'stretch' }}>
         <EuiFlexItem grow={false}>
           <SearchBox

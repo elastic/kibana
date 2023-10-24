@@ -82,6 +82,7 @@ export const Instructions = (props: InstructionProps) => {
   useEffect(() => {
     // If we detect a CloudFormation integration, we want to hide the selection type
     if (
+      props.cloudSecurityIntegration?.isAzureArmTemplate ||
       props.cloudSecurityIntegration?.isCloudFormation ||
       props.cloudSecurityIntegration?.cloudShellUrl
     ) {

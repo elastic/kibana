@@ -3354,6 +3354,34 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.SerializableAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializableAttributes",
+        "description": [],
+        "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.SerializableAttributes.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.SerializedVis",
         "type": "Interface",
         "tags": [],
@@ -5520,6 +5548,323 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.VisualizationClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisualizationClient",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizationClient",
+            "text": "VisualizationClient"
+          },
+          "<ContentType, Attr>"
+        ],
+        "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizationClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<Attr>; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }>"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizationClient.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizationClient.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(visualization: Omit<",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.CreateIn",
+                "text": "CreateIn"
+              },
+              "<ContentType, Attr, Pick<",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SavedObjectCreateOptions",
+                "text": "SavedObjectCreateOptions"
+              },
+              ", \"references\" | \"overwrite\">>, \"contentTypeId\">) => Promise<{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<Attr>; }>"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizationClient.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "visualization",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.CreateIn",
+                    "text": "CreateIn"
+                  },
+                  "<ContentType, Attr, Pick<",
+                  {
+                    "pluginId": "@kbn/content-management-utils",
+                    "scope": "common",
+                    "docId": "kibKbnContentManagementUtilsPluginApi",
+                    "section": "def-common.SavedObjectCreateOptions",
+                    "text": "SavedObjectCreateOptions"
+                  },
+                  ", \"references\" | \"overwrite\">>, \"contentTypeId\">"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizationClient.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(visualization: Omit<",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.UpdateIn",
+                "text": "UpdateIn"
+              },
+              "<ContentType, Partial<Attr>, Pick<",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SavedObjectUpdateOptions",
+                "text": "SavedObjectUpdateOptions"
+              },
+              "<unknown>, \"references\">>, \"contentTypeId\">) => Promise<{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadataPartial",
+                "text": "SOWithMetadataPartial"
+              },
+              "<Attr>; }>"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizationClient.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "visualization",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.UpdateIn",
+                    "text": "UpdateIn"
+                  },
+                  "<ContentType, Partial<Attr>, Pick<",
+                  {
+                    "pluginId": "@kbn/content-management-utils",
+                    "scope": "common",
+                    "docId": "kibKbnContentManagementUtilsPluginApi",
+                    "section": "def-common.SavedObjectUpdateOptions",
+                    "text": "SavedObjectUpdateOptions"
+                  },
+                  "<unknown>, \"references\">>, \"contentTypeId\">"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizationClient.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteResult",
+                "text": "DeleteResult"
+              },
+              ">"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizationClient.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizationClient.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "(query: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchQuery",
+                "text": "SearchQuery"
+              },
+              ", options?: object | undefined) => Promise<{ hits: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<Attr>[]; pagination: { total: number; cursor?: string | undefined; }; }>"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizationClient.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.SearchQuery",
+                    "text": "SearchQuery"
+                  }
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizationClient.search.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "object | undefined"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.VisualizationListItem",
         "type": "Interface",
         "tags": [],
@@ -6382,15 +6727,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined>; updateInput: (changes: Partial<",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          ">) => void; openInspector: () => ",
+          " | undefined>; openInspector: () => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -6462,7 +6799,15 @@
             "section": "def-common.ErrorLike",
             "text": "ErrorLike"
           },
-          ", domNode: Element | HTMLElement) => any) | undefined; fatalError?: Error | undefined; refreshInputFromParent: () => void; getIsContainer: () => this is ",
+          ", domNode: Element | HTMLElement) => any) | undefined; fatalError?: Error | undefined; getAppContext: () => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableAppContext",
+            "text": "EmbeddableAppContext"
+          },
+          " | undefined; refreshInputFromParent: () => void; getIsContainer: () => this is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -6586,7 +6931,15 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          ">; updateOutput: (outputChanges: Partial<",
+          ">; updateInput: (changes: Partial<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">) => void; updateOutput: (outputChanges: Partial<",
           "VisualizeOutput",
           ">) => void; }"
         ],
@@ -8838,7 +9191,7 @@
             "label": "alignment",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9980,7 +10333,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"top\" | \"left\" | \"right\" | \"bottom\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -10267,7 +10620,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"top\" | \"left\" | \"right\" | \"bottom\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -10309,7 +10662,7 @@
             "label": "horizontalAlignment",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | undefined"
+              "\"right\" | \"left\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13399,7 +13752,7 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"above\" | \"below\" | \"auto\" | undefined"
+              "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14861,7 +15214,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"last_value\" | \"percentile\" | \"range\" | \"date_histogram\" | \"average\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -14891,7 +15244,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"last_value\" | \"percentile\" | \"range\" | \"date_histogram\" | \"average\" | \"terms\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -15463,7 +15816,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"bottom\" | \"auto\""
+          "\"right\" | \"left\" | \"bottom\" | \"auto\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,

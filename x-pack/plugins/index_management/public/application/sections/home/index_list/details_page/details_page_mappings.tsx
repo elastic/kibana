@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -20,17 +20,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { useLoadIndexMappings, documentationService } from '../../../../services';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 
-export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexName: string }>> = ({
-  match: {
-    params: { indexName },
-  },
-}) => {
+export const DetailsPageMappings: FunctionComponent<{ indexName: string }> = ({ indexName }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(indexName);
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsMappings);
+  }, []);
 
   if (isLoading) {
     return (
@@ -61,10 +61,9 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.mappings.errorDescription"
-                defaultMessage="There was an error loading mappings for index {indexName}: {error}"
+                defaultMessage="We encountered an error loading mappings for index {indexName}. Make sure that the index name in the URL is correct and try again."
                 values={{
                   indexName,
-                  error: error.error,
                 }}
               />
             </EuiText>
@@ -138,7 +137,7 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
           >
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
-              defaultMessage="Learn more"
+              defaultMessage="Learn more about mappings"
             />
           </EuiLink>
         </EuiPanel>

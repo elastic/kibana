@@ -158,7 +158,7 @@ describe('DeleteSLOInstances', () => {
             ],
           },
         },
-        "wait_for_completion": false,
+        "refresh": true,
       }
     `);
   });

@@ -25,16 +25,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { SearchResponseInterceptedWarning } from '../../types';
+import { ViewWarningButton } from '../view_warning_button';
+import type { SearchResponseWarning } from '../../types';
 
 /**
  * SearchResponseWarnings component props
  */
 export interface SearchResponseWarningsProps {
   /**
-   * An array of warnings which can have actions
+   * An array of warnings
    */
-  interceptedWarnings?: SearchResponseInterceptedWarning[];
+  interceptedWarnings?: SearchResponseWarning[];
 
   /**
    * View variant
@@ -260,33 +261,31 @@ export const SearchResponseWarnings = ({
 };
 
 function WarningContent({
-  warning: { originalWarning, action },
+  warning,
   textSize = 's',
   groupStyles,
   'data-test-subj': dataTestSubj,
 }: {
-  warning: SearchResponseInterceptedWarning;
+  warning: SearchResponseWarning;
   textSize?: EuiTextProps['size'];
   groupStyles?: Partial<EuiFlexGroupProps>;
   'data-test-subj': string;
 }) {
-  const hasDescription = 'text' in originalWarning;
-
   return (
     <EuiFlexGroup gutterSize="xs" {...groupStyles} wrap>
       <EuiFlexItem grow={false}>
         <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningTitle`}>
-          {hasDescription ? <strong>{originalWarning.message}</strong> : originalWarning.message}
+          {warning.message}
         </EuiText>
       </EuiFlexItem>
-      {hasDescription ? (
-        <EuiFlexItem grow={false}>
-          <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningMessage`}>
-            <p>{originalWarning.text}</p>
-          </EuiText>
-        </EuiFlexItem>
-      ) : null}
-      {action ? <EuiFlexItem grow={false}>{action}</EuiFlexItem> : null}
+      <EuiFlexItem grow={false}>
+        <ViewWarningButton
+          color="primary"
+          size="s"
+          onClick={warning.openInInspector}
+          isButtonEmpty={true}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
@@ -306,6 +305,7 @@ function CalloutTitleWrapper({
           onClick={onCloseCallout}
           type="button"
           iconType="cross"
+          color="warning"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

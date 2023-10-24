@@ -24,22 +24,26 @@ import {
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
 import {
-  ESS_RESOURCES_PATHS,
-  ESS_SECRETS_PATH,
-  ESS_JWKS_PATH,
-  ESS_CONFIG_PATH,
-  ESS_FILES_PATH,
+  SERVERLESS_RESOURCES_PATHS,
+  SERVERLESS_SECRETS_PATH,
+  SERVERLESS_JWKS_PATH,
+  SERVERLESS_CONFIG_PATH,
+  SERVERLESS_FILES_PATH,
+  SERVERLESS_SECRETS_SSL_PATH,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
-} from './ess_file_realm';
+} from './serverless_file_realm';
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
-interface BaseOptions {
-  tag?: string;
+interface ImageOptions {
   image?: string;
+  tag?: string;
+}
+
+interface BaseOptions extends ImageOptions {
   port?: number;
   ssl?: boolean;
   /** Kill running cluster before starting a new cluster  */
@@ -52,16 +56,23 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
+  /** Publish ES docker container on additional host IP */
+  host?: string;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
   basePath: string;
-  /** If this process exits, teardown the ES cluster as well */
-  teardown?: boolean;
+  /** If this process exits, leave the ES cluster running in the background */
+  skipTeardown?: boolean;
   /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
+  /**
+   * Resource file(s) to overwrite
+   * (see list of files that can be overwritten under `packages/kbn-es/src/serverless_resources/users`)
+   */
+  resources?: string | string[];
 }
 
 interface ServerlessEsNodeArgs {
@@ -105,9 +116,10 @@ export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
-export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
-export const SERVERLESS_TAG = 'latest';
-export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
+export const ES_SERVERLESS_REPO_KIBANA = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch-serverless`;
+export const ES_SERVERLESS_REPO_ELASTICSEARCH = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
+export const ES_SERVERLESS_LATEST_VERIFIED_TAG = 'latest-verified';
+export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SERVERLESS_LATEST_VERIFIED_TAG}`;
 
 // See for default cluster settings
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
@@ -153,48 +165,62 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.ml.enabled', 'true'],
 
-  ['xpack.security.enabled', 'false'],
-];
-
-const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.enabled', 'true'],
 
-  ['xpack.security.http.ssl.enabled', 'true'],
+  // JWT realm settings are to closer emulate a real ES serverless env
+  ['xpack.security.authc.realms.jwt.jwt1.allowed_audiences', 'elasticsearch'],
 
-  ['xpack.security.http.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
+  ['xpack.security.authc.realms.jwt.jwt1.allowed_issuer', 'https://kibana.elastic.co/jwt/'],
 
-  ['xpack.security.http.ssl.verification_mode', 'certificate'],
+  ['xpack.security.authc.realms.jwt.jwt1.claims.principal', 'sub'],
 
-  ['xpack.security.transport.ssl.enabled', 'true'],
-
-  ['xpack.security.transport.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
-
-  ['xpack.security.transport.ssl.verification_mode', 'certificate'],
-
-  ['xpack.security.operator_privileges.enabled', 'true'],
-];
-
-const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.authc.realms.jwt.jwt1.client_authentication.type', 'shared_secret'],
 
   ['xpack.security.authc.realms.jwt.jwt1.order', '-98'],
 
-  ['xpack.security.authc.realms.jwt.jwt1.allowed_issuer', 'https://kibana.elastic.co/jwt/'],
+  [
+    'xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path',
+    `${SERVERLESS_CONFIG_PATH}secrets/jwks.json`,
+  ],
 
-  ['xpack.security.authc.realms.jwt.jwt1.allowed_audiences', 'elasticsearch'],
+  ['xpack.security.operator_privileges.enabled', 'true'],
 
-  ['xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path', `${ESS_CONFIG_PATH}secrets/jwks.json`],
+  ['xpack.security.transport.ssl.enabled', 'true'],
 
-  ['xpack.security.authc.realms.jwt.jwt1.claims.principal', 'sub'],
+  [
+    'xpack.security.transport.ssl.keystore.path',
+    `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`,
+  ],
+
+  ['xpack.security.transport.ssl.verification_mode', 'certificate'],
+];
+
+const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
+  ['xpack.security.http.ssl.enabled', 'true'],
+
+  ['xpack.security.http.ssl.keystore.path', `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`],
+
+  ['xpack.security.http.ssl.verification_mode', 'certificate'],
 ];
 
 const DOCKER_SSL_ESARGS: Array<[string, string]> = [
+  ['xpack.security.enabled', 'true'],
+
   ['xpack.security.http.ssl.keystore.password', ES_P12_PASSWORD],
+
+  ['xpack.security.transport.ssl.enabled', 'true'],
+
+  [
+    'xpack.security.transport.ssl.keystore.path',
+    `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`,
+  ],
+
+  ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 
   ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 ];
 
-const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
+export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es01',
     params: [
@@ -260,7 +286,12 @@ export function resolveDockerImage({
   image,
   repo,
   defaultImg,
-}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) {
+}: {
+  tag?: string;
+  image?: string;
+  repo: string;
+  defaultImg: string;
+}) {
   if (image) {
     if (!image.includes(DOCKER_REGISTRY)) {
       throw createCliError(
@@ -277,19 +308,21 @@ export function resolveDockerImage({
 }
 
 /**
- * Determine the port to bind the Serverless index node or Docker node to
+ * Determine the port and optionally an additional host to bind the Serverless index node or Docker node to
  */
 export function resolvePort(options: ServerlessOptions | DockerOptions) {
-  if (options.port) {
-    return [
-      '-p',
-      `127.0.0.1:${options.port}:${options.port}`,
-      '--env',
-      `http.port=${options.port}`,
-    ];
+  const port = options.port || DEFAULT_PORT;
+  const value = ['-p', `127.0.0.1:${port}:${port}`];
+
+  if ((options as ServerlessOptions).host) {
+    value.push('-p', `${(options as ServerlessOptions).host}:${port}:${port}`);
   }
 
-  return ['-p', `127.0.0.1:${DEFAULT_PORT}:${DEFAULT_PORT}`];
+  if (options.port) {
+    value.push('--env', `http.port=${options.port}`);
+  }
+
+  return value;
 }
 
 /**
@@ -343,7 +376,7 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
     stdio: ['ignore', 'inherit', 'pipe'],
   }).catch(({ message }) => {
     throw createCliError(
-      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.      
+      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
 Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
 
 ${message}`
@@ -418,13 +451,6 @@ export function resolveEsArgs(
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
 
-      // Guide the user to use SSL flag instead of manual setup
-      if (key === 'xpack.security.enabled' && value?.[0] === 'true') {
-        throw createCliError(
-          'Use the --ssl flag to automatically enable and set up the security plugin.'
-        );
-      }
-
       esArgs.set(key.trim(), value.join('=').trim());
     });
   }
@@ -436,24 +462,24 @@ export function resolveEsArgs(
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
 }
 
-function getESp12Volume() {
-  return ['--volume', `${ES_P12_PATH}:${ESS_CONFIG_PATH}certs/elasticsearch.p12`];
+export function getESp12Volume() {
+  return ['--volume', `${ES_P12_PATH}:${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`];
 }
 
 /**
  * Removes REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.
- * Returns the path where a file will be mounted inside the ES or ESS container.
+ * Returns the path where a file will be mounted inside the ES or ES serverless container.
  * /root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json
  */
 export function getDockerFileMountPath(hostPath: string) {
-  return join(ESS_FILES_PATH, hostPath.replace(REPO_ROOT, ''));
+  return join(SERVERLESS_FILES_PATH, hostPath.replace(REPO_ROOT, ''));
 }
 
 /**
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, files } = options;
+  const { basePath, clean, ssl, files, resources } = options;
   const objectStorePath = resolve(basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
@@ -492,24 +518,50 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     volumeCmds.push(...fileCmds);
   }
 
-  if (ssl) {
-    const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
-      acc.push('--volume', `${path}:${ESS_CONFIG_PATH}${basename(path)}`);
+  const resourceFileOverrides: Record<string, string> = resources
+    ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
+        acc[basename(filePath)] = resolve(process.cwd(), filePath);
+        return acc;
+      }, {} as Record<string, string>)
+    : {};
 
-      return acc;
-    }, []);
+  const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+    const fileName = basename(path);
+    let localFilePath = path;
 
-    volumeCmds.push(
-      ...getESp12Volume(),
-      ...essResources,
+    if (resourceFileOverrides[fileName]) {
+      localFilePath = resourceFileOverrides[fileName];
+      log.info(`'${fileName}' resource overridden with: ${localFilePath}`);
+      delete resourceFileOverrides[fileName];
+    }
 
-      '--volume',
-      `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
+    acc.push('--volume', `${localFilePath}:${SERVERLESS_CONFIG_PATH}${fileName}`);
 
-      '--volume',
-      `${ESS_JWKS_PATH}:${ESS_CONFIG_PATH}secrets/jwks.json:z`
+    return acc;
+  }, []);
+
+  if (Object.keys(resourceFileOverrides).length > 0) {
+    throw new Error(
+      `Unsupported ES serverless --resources value(s):\n  ${Object.values(
+        resourceFileOverrides
+      ).join('  \n')}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
+        basename(filePath)
+      ).join(' | ')}`
     );
   }
+
+  volumeCmds.push(
+    ...getESp12Volume(),
+    ...serverlessResources,
+
+    '--volume',
+    `${
+      ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
+    }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
+
+    '--volume',
+    `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`
+  );
 
   return volumeCmds;
 }
@@ -517,11 +569,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 /**
  * Resolve the Serverless ES image based on defaults and CLI options
  */
-function getServerlessImage(options: ServerlessOptions) {
+function getServerlessImage({ image, tag }: ImageOptions) {
   return resolveDockerImage({
-    ...options,
-    repo: SERVERLESS_REPO,
-    defaultImg: SERVERLESS_IMG,
+    image,
+    tag,
+    repo: ES_SERVERLESS_REPO_ELASTICSEARCH,
+    defaultImg: ES_SERVERLESS_DEFAULT_IMAGE,
   });
 }
 
@@ -565,7 +618,10 @@ function getESClient(clientOptions: ClientOptions): Client {
  * Runs an ES Serverless Cluster through Docker
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
-  const image = getServerlessImage(options);
+  const image = getServerlessImage({
+    image: options.image,
+    tag: options.tag,
+  });
   await setupDocker({ log, image, options });
 
   const volumeCmd = await setupServerlessVolumes(log, options);
@@ -577,13 +633,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         ...node,
         image,
         params: node.params.concat(
-          resolveEsArgs(
-            DEFAULT_SERVERLESS_ESARGS.concat(
-              node.esArgs ?? [],
-              options.ssl ? SERVERLESS_SSL_ESARGS : []
-            ),
-            options
-          ),
+          resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
           i === 0 ? portCmd : [],
           volumeCmd
         ),
@@ -593,21 +643,21 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   );
 
   log.success(`Serverless ES cluster running.
-      Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
+  Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
+    SYSTEM_INDICES_SUPERUSER
+  )} and password ${chalk.bold.magenta(ELASTIC_SERVERLESS_SUPERUSER_PASSWORD)}
+  Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
 
   if (options.ssl) {
-    log.success(`SSL and Security have been enabled for ES.
-      Login through your browser with username ${chalk.bold.cyan(
-        ELASTIC_SERVERLESS_SUPERUSER
-      )} or ${chalk.bold.cyan(SYSTEM_INDICES_SUPERUSER)} and password ${chalk.bold.magenta(
-      ELASTIC_SERVERLESS_SUPERUSER_PASSWORD
-    )}.
+    log.warning(`SSL has been enabled for ES. Kibana should be started with the SSL flag so that it can authenticate with ES.
+  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
     `);
+  }
 
-    log.warning(`Kibana should be started with the SSL flag so that it can authenticate with ES.
-      See packages/kbn-es/src/ess_resources/README.md for additional information on authentication.
-    `);
+  if (!options.skipTeardown) {
+    // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
+    process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
   }
 
   if (options.waitForReady) {
@@ -620,9 +670,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
     const client = getESClient({
       node: esNodeUrl,
+      auth: { bearer: kibanaDevServiceAccount.token },
       ...(options.ssl
         ? {
-            auth: { bearer: kibanaDevServiceAccount.token },
             tls: {
               ca: [fs.readFileSync(CA_CERT_PATH)],
               // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
@@ -636,15 +686,19 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
           }
         : {}),
     });
-    await waitUntilClusterReady({ client, log });
-    log.success('ES is ready');
+    await waitUntilClusterReady({ client, expectedStatus: 'green', log });
   }
 
   if (!options.background) {
-    // The ESS cluster has to be started detached, so we attach a logger afterwards for output
+    // The serverless cluster has to be started detached, so we attach a logger afterwards for output
     await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
       // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
       stdio: ['ignore', 'inherit', 'inherit'],
+    }).catch(() => {
+      /**
+       * docker logs will throw errors when the nodes are killed through SIGINT
+       * and the entrypoint doesn't exit normally, so we silence the errors.
+       */
     });
   }
 
@@ -680,8 +734,13 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
 /**
  * Resolve the Elasticsearch image based on defaults and CLI options
  */
-function getDockerImage(options: DockerOptions) {
-  return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
+function getDockerImage({ image, tag }: ImageOptions) {
+  return resolveDockerImage({
+    image,
+    tag,
+    repo: DOCKER_REPO,
+    defaultImg: DOCKER_IMG,
+  });
 }
 
 /**
@@ -707,14 +766,17 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
   let image;
 
   if (!options.dockerCmd) {
-    image = getDockerImage(options);
+    image = getDockerImage({
+      image: options.image,
+      tag: options.tag,
+    });
     await setupDocker({ log, image, options });
   }
 
   const dockerCmd = resolveDockerCmd(options, image);
 
   log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
-  return await execa('docker', dockerCmd, {
+  await execa('docker', dockerCmd, {
     // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
     stdio: ['ignore', 'inherit', 'inherit'],
   });

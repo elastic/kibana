@@ -173,6 +173,12 @@ describe('useDiscoverHistogram', () => {
         'totalHitsResult',
       ]);
     });
+
+    it('should return the isChartLoading params for text based languages', async () => {
+      const { hook } = await renderUseDiscoverHistogram({ isPlainRecord: true });
+      const isChartLoading = hook.result.current.isChartLoading;
+      expect(isChartLoading).toBe(false);
+    });
   });
 
   describe('state', () => {
@@ -389,6 +395,26 @@ describe('useDiscoverHistogram', () => {
         recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       expect(mockCheckHitCount).not.toHaveBeenCalled();
+    });
+
+    it('should set isChartLoading to true for fetch start', async () => {
+      const fetch$ = new Subject<{
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
+        searchSessionId: string;
+      }>();
+      const stateContainer = getStateContainer();
+      stateContainer.dataState.fetch$ = fetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer, isPlainRecord: true });
+      act(() => {
+        fetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
+      });
+      expect(hook.result.current.isChartLoading).toBe(true);
     });
   });
 

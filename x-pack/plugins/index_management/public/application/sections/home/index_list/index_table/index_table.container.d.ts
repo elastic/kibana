@@ -9,7 +9,6 @@ import { ScopedHistory } from '@kbn/core/public';
 
 interface IndexTableProps {
   history: ScopedHistory;
-  openDetailPanel?: (indexName: string) => void;
 }
 
 export declare const IndexTable: React.FunctionComponent<IndexTableProps>;

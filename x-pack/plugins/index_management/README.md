@@ -49,11 +49,34 @@ POST %25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7
 }
 ```
 
+Create a data stream configured with data stream lifecyle.
+
+```
+PUT _index_template/my-index-template
+{
+  "index_patterns": ["my-data-stream*"],
+  "data_stream": { },
+  "priority": 500,
+  "template": {
+    "lifecycle": {
+      "data_retention": "7d"
+    }
+  },
+  "_meta": {
+    "description": "Template with data stream lifecycle"
+  }
+}
+```
+
+```
+PUT _data_stream/my-data-stream
+```
+
 ## Index templates tab
 
 ### Quick steps for testing
 
-**Legacy index templates** are only shown in the UI on stateful *and* if a user has existing legacy index templates. You can test this functionality by creating one in Console:
+**Legacy index templates** are only shown in the UI on stateful _and_ if a user has existing legacy index templates. You can test this functionality by creating one in Console:
 
 ```
 PUT _template/template_1
@@ -67,6 +90,7 @@ On serverless, Elasticsearch does not support legacy index templates and therefo
 To test **Cloud-managed templates**:
 
 1. Add `cluster.metadata.managed_index_templates` setting via Dev Tools:
+
 ```
 PUT /_cluster/settings
 {
@@ -77,6 +101,7 @@ PUT /_cluster/settings
 ```
 
 2. Create a template with the format: `.cloud-<template_name>` via Dev Tools.
+
 ```
 PUT _template/.cloud-example
 {

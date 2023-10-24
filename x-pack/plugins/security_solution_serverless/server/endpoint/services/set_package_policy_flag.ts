@@ -60,30 +60,44 @@ async function processBatch(
     return;
   }
 
-  const updatedEndpointPackages = endpointPackagesResult.items.map((endpointPackage) => ({
-    ...endpointPackage,
-    inputs: endpointPackage.inputs.map((input) => {
-      const config = input?.config || {};
-      const policy = config.policy || {};
-      const policyValue = policy?.value || {};
-      const meta = policyValue?.meta || {};
-      return {
-        ...input,
-        config: {
-          ...config,
-          policy: {
-            ...policy,
-            value: {
-              ...policyValue,
-              meta: {
-                ...meta,
-                serverless: true,
+  const updatedEndpointPackages = endpointPackagesResult.items
+    .filter(
+      (endpointPackage) =>
+        !(
+          endpointPackage?.inputs.every(
+            (input) => input.config?.policy?.value?.meta?.serverless ?? false
+          ) ?? false
+        )
+    )
+    .map((endpointPackage) => ({
+      ...endpointPackage,
+      inputs: endpointPackage.inputs.map((input) => {
+        const config = input?.config || {};
+        const policy = config.policy || {};
+        const policyValue = policy?.value || {};
+        const meta = policyValue?.meta || {};
+        return {
+          ...input,
+          config: {
+            ...config,
+            policy: {
+              ...policy,
+              value: {
+                ...policyValue,
+                meta: {
+                  ...meta,
+                  serverless: true,
+                },
               },
             },
           },
-        },
-      };
-    }),
-  }));
+        };
+      }),
+    }));
+
+  if (updatedEndpointPackages.length === 0) {
+    return;
+  }
+
   await packagePolicyService.bulkUpdate(soClient, esClient, updatedEndpointPackages);
 }

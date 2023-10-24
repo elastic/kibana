@@ -36,11 +36,13 @@ export function getHelp({
   usage,
   flagHelp,
   defaultLogLevel,
+  examples,
 }: {
   description?: string;
   usage?: string;
   flagHelp?: string;
   defaultLogLevel?: string;
+  examples?: string;
 }) {
   const optionHelp = joinAndTrimLines(
     dedent(flagHelp || ''),
@@ -48,13 +50,17 @@ export function getHelp({
     GLOBAL_FLAGS
   );
 
+  const examplesHelp = examples ? joinAndTrimLines('Examples:', examples) : '';
+
   return `
   ${dedent(usage || '') || DEFAULT_GLOBAL_USAGE}
 
   ${indent(dedent(description || 'Runs a dev task'), 2)}
 
   Options:
-    ${indent(optionHelp, 4)}\n\n`;
+    ${indent(optionHelp, 4)}
+${examplesHelp ? `\n  ${indent(examplesHelp, 4)}` : ''}
+`;
 }
 
 export function getCommandLevelHelp({

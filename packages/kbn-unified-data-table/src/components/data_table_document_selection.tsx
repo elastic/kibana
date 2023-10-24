@@ -14,15 +14,21 @@ import {
   EuiContextMenuPanel,
   EuiCopy,
   EuiDataGridCellValueElementProps,
+  EuiNotificationBadge,
   EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { UnifiedDataTableContext } from '../table_context';
 
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
+  const { euiTheme } = useEuiTheme();
   const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
     useContext(UnifiedDataTableContext);
   const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
@@ -46,20 +52,33 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   }, [expanded, doc, setCellProps, isDarkMode]);
 
   return (
-    <EuiCheckbox
-      id={doc.id}
-      aria-label={toggleDocumentSelectionLabel}
-      checked={checked}
-      data-test-subj={`dscGridSelectDoc-${doc.id}`}
-      onChange={() => {
-        if (checked) {
-          const newSelection = selectedDocs.filter((docId) => docId !== doc.id);
-          setSelectedDocs(newSelection);
-        } else {
-          setSelectedDocs([...selectedDocs, doc.id]);
-        }
-      }}
-    />
+    <EuiFlexGroup
+      responsive={false}
+      direction="column"
+      justifyContent="center"
+      className="unifiedDataTable__rowControl"
+      css={css`
+        padding-block: ${euiTheme.size.xs}; // to have the same height as "openDetails" control
+        padding-left: ${euiTheme.size.xs}; // space between controls
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiCheckbox
+          id={doc.id}
+          aria-label={toggleDocumentSelectionLabel}
+          checked={checked}
+          data-test-subj={`dscGridSelectDoc-${doc.id}`}
+          onChange={() => {
+            if (checked) {
+              const newSelection = selectedDocs.filter((docId) => docId !== doc.id);
+              setSelectedDocs(newSelection);
+            } else {
+              setSelectedDocs([...selectedDocs, doc.id]);
+            }
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -178,11 +197,18 @@ export function DataTableDocumentToolbarBtn({
             'euiDataGrid__controlBtn--active': isFilterActive,
           })}
         >
-          <FormattedMessage
-            id="unifiedDataTable.selectedDocumentsNumber"
-            defaultMessage="{nr} documents selected"
-            values={{ nr: selectedDocs.length }}
-          />
+          <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="unifiedDataTable.selectedRowsButtonLabel"
+                defaultMessage="Selected"
+                description="Selected documents"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge color="subdued">{selectedDocs.length}</EuiNotificationBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiButtonEmpty>
       }
     >

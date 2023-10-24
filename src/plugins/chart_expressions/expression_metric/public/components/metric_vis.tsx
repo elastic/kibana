@@ -134,10 +134,7 @@ export const MetricVis = ({
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
-        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-        window.requestAnimationFrame(() => {
-          renderComplete();
-        });
+        renderComplete();
       }
     },
     [renderComplete]
@@ -184,7 +181,7 @@ export const MetricVis = ({
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
-      title,
+      title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
       extra: (
@@ -306,6 +303,7 @@ export const MetricVis = ({
       >
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
+            locale={i18n.getLocale()}
             theme={[
               {
                 background: { color: 'transparent' },

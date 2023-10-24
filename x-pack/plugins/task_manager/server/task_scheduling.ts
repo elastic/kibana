@@ -152,13 +152,20 @@ export class TaskScheduling {
     return await this.store.bulkSchedule(modifiedTasks);
   }
 
-  public async bulkDisable(taskIds: string[]) {
+  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !!task.enabled,
-      map: (task) => ({ ...task, enabled: false }),
+      map: (task) => ({
+        ...task,
+        enabled: false,
+        ...((Array.isArray(clearStateIdsOrBoolean) && clearStateIdsOrBoolean.includes(task.id)) ||
+        clearStateIdsOrBoolean === true
+          ? { state: {} }
+          : {}),
+      }),
       validate: false,
     });
   }
@@ -175,6 +182,23 @@ export class TaskScheduling {
         }
         return { ...task, enabled: true };
       },
+      validate: false,
+    });
+  }
+
+  public async bulkUpdateState(
+    taskIds: string[],
+    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state']
+  ) {
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: () => true,
+      map: (task) => ({
+        ...task,
+        state: stateMapFn(task.state, task.id),
+      }),
       validate: false,
     });
   }

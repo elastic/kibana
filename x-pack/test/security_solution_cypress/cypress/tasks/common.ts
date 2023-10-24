@@ -10,6 +10,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 import { deleteAllDocuments } from './api_calls/elasticsearch';
+import { DEFAULT_ALERTS_INDEX_PATTERN } from './api_calls/alerts';
 
 const primaryButton = 0;
 
@@ -92,8 +93,9 @@ export const resetRulesTableState = () => {
 
 export const cleanKibana = () => {
   resetRulesTableState();
+  deletePrebuiltRulesAssets();
   deleteAlertsAndRules();
-  deleteCases();
+  deleteAllCasesItems();
   deleteTimelines();
 };
 
@@ -135,7 +137,7 @@ export const deleteAlertsAndRules = () => {
     },
   });
 
-  deleteAllDocuments('.lists-*,.items-*,.alerts-security.alerts-*');
+  deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
 };
 
 export const deleteTimelines = () => {
@@ -168,8 +170,8 @@ export const deleteAlertsIndex = () => {
   });
 };
 
-export const deleteCases = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+export const deleteAllCasesItems = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
@@ -178,8 +180,34 @@ export const deleteCases = () => {
         bool: {
           filter: [
             {
-              match: {
-                type: 'cases',
+              bool: {
+                should: [
+                  {
+                    term: {
+                      type: 'cases',
+                    },
+                  },
+                  {
+                    term: {
+                      type: 'cases-configure',
+                    },
+                  },
+                  {
+                    term: {
+                      type: 'cases-comments',
+                    },
+                  },
+                  {
+                    term: {
+                      type: 'cases-user-action',
+                    },
+                  },
+                  {
+                    term: {
+                      type: 'cases-connector-mappings',
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -190,7 +218,7 @@ export const deleteCases = () => {
 };
 
 export const deleteConnectors = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,

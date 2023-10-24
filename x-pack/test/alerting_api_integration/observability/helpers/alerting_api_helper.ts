@@ -6,7 +6,7 @@
  */
 
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
-import { ThresholdParams } from '@kbn/observability-plugin/common/threshold_rule/types';
+import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import type { SuperTest, Test } from 'supertest';
 
 export async function createIndexConnector({

@@ -3,32 +3,6 @@
   max-width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: $euiBorderRadius;
-
-  .euiDataGrid__controls {
-    border: none;
-    border-bottom: $euiBorderThin;
-  }
-
-  .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
-    border-left: none;
-    padding: 0;
-  }
-
-  .euiDataGridRowCell.euiDataGridRowCell--lastColumn {
-    border-right: none;
-  }
-
-  .unifiedDataTable__table .euiDataGridRowCell:first-of-type,
-  .unifiedDataTable__table .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
-    border-left: none;
-    border-right: none;
-  }
-
-  .euiDataGridRowCell:last-of-type,
-  .euiDataGridHeaderCell:last-of-type {
-    border-right: none;
-  }
 }
 
 .unifiedDataTable__cellValue {
@@ -48,29 +22,44 @@
   font-size: $euiFontSizeS;
 }
 
-.euiDataGridRowCell__definedHeight {
-  white-space: pre-wrap;
-}
-
 .unifiedDataTable__inner {
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   height: 100%;
+
+  .euiDataGrid__content {
+    background: transparent;
+  }
+
+  .euiDataGrid__controls {
+    border-top: $euiBorderThin;
+  }
+
+  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+    border-bottom: $euiBorderThin;
+  }
+
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover .euiDataGridRowCell__actions--overlay {
+    background-color: tintOrShade($euiColorLightShade, 50%, 0);
+  }
+
+  .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight {
+    background-color: transparent; // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
+  }
 }
 
 .unifiedDataTable__table {
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-.unifiedDataTable__footer {
-  flex-shrink: 0;
-  background-color: $euiColorLightShade;
-  padding: $euiSize / 2 $euiSize;
-  margin-top: $euiSize / 4;
-  text-align: center;
 }
 
 .unifiedDataTable__flyoutHeader {
@@ -118,7 +107,35 @@
   @include euiTextTruncate;
 }
 
+.unifiedDataTable__rowControl {
+  // fine-tuning the vertical alignment with the text for any row height setting
+  margin-top: -3px;
+  .euiDataGridRowCell__defaultHeight & { // "Single line" row height setting
+    margin-top: 0;
+  }
+}
+
+.unifiedDataTable__descriptionList {
+  // force the content truncation when "Single line" row height setting is active
+  .euiDataGridRowCell__defaultHeight & {
+    -webkit-line-clamp: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+.unifiedDataTable__descriptionListTitle {
+  margin-inline: 0 0;
+  padding-inline: 0;
+  background: transparent;
+  font-weight: $euiFontWeightBold;
+}
+
 .unifiedDataTable__descriptionListDescription {
+  margin-inline: $euiSizeS $euiSizeS;
+  padding-inline: 0;
   word-break: break-all;
   white-space: normal;
 

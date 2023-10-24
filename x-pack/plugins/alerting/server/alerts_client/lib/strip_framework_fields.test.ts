@@ -16,12 +16,28 @@ describe('stripFrameworkFields', () => {
     expect(stripFrameworkFields(payload)).toEqual(payload);
   });
 
+  test('should do nothing if flattened payload has no framework fields', () => {
+    const payload = { field1: 'test', 'kibana.alert.not_a_framework_field': 2 };
+    expect(stripFrameworkFields(payload)).toEqual(payload);
+  });
+
   test(`should allow fields from the allowlist`, () => {
     const payload = {
       field1: 'test',
       kibana: {
         alert: { not_a_framework_field: 2, reason: 'because i said so', workflow_status: 'custom' },
       },
+      tags: ['taggity-tag'],
+    };
+    expect(stripFrameworkFields(payload)).toEqual(payload);
+  });
+
+  test(`should allow fields from the allowlist in flattened payload`, () => {
+    const payload = {
+      field1: 'test',
+      'kibana.alert.not_a_framework_field': 2,
+      'kibana.alert.reason': 'because i said so',
+      'kibana.alert.workflow_status': 'custom',
       tags: ['taggity-tag'],
     };
     expect(stripFrameworkFields(payload)).toEqual(payload);
@@ -93,6 +109,46 @@ describe('stripFrameworkFields', () => {
           },
         },
       },
+    });
+  });
+
+  test(`should strip flattened fields that the framework controls`, () => {
+    const payload = {
+      field1: 'test',
+      field2: [],
+      'kibana.alert.action_group': 'invalid action group',
+      'kibana.alert.not_a_framework_field1': 2,
+      'kibana.alert.not_a_framework_field2': [],
+      'kibana.alert.not_a_framework_field3.abc': 'xyz',
+      'kibana.alert.instance.id': 'A',
+      'kibana.alert.duration.us': '23543543534',
+      'kibana.alert.case_ids': ['abcdefg'],
+      'kibana.alert.start': 'datestring',
+      'kibana.alert.status': 'bad',
+      'kibana.alert.end': 'datestring',
+      'kibana.alert.flapping': true,
+      'kibana.alert.flapping_history': [true],
+      'kibana.alert.maintenance_window_ids': ['xyz'],
+      'kibana.alert.rule.category': 'My test rule',
+      'kibana.alert.rule.consumer': 'bar',
+      'kibana.alert.rule.execution.uuid': '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      'kibana.alert.rule.name': 'rule-name',
+      'kibana.alert.rule.parameters': {
+        bar: true,
+      },
+      'kibana.alert.rule.producer': 'alerts',
+      'kibana.alert.rule.revision': 0,
+      'kibana.alert.rule.rule_type_id': 'test.rule-type',
+      'kibana.alert.rule.tags': ['rule-', '-tags'],
+      'kibana.alert.rule.uuid': '1',
+      'kibana.alert.uuid': 'uuid',
+    };
+    expect(stripFrameworkFields(payload)).toEqual({
+      field1: 'test',
+      field2: [],
+      'kibana.alert.not_a_framework_field1': 2,
+      'kibana.alert.not_a_framework_field2': [],
+      'kibana.alert.not_a_framework_field3.abc': 'xyz',
     });
   });
 });

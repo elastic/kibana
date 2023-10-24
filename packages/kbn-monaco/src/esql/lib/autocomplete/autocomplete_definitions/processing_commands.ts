@@ -62,6 +62,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     documentation: {
       value: buildDocumentation('eval columns = fieldSpecification ( `,` fieldSpecification )*', [
         '… | eval a = b * c',
+        '… | eval then = 1 year + 2 weeks',
       ]),
     },
     sortText: 'B',

@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core-http-browser",
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/fleet-plugin",
+    "@kbn/io-ts-utils",
+    "@kbn/xstate-utils"
+  ]
+}

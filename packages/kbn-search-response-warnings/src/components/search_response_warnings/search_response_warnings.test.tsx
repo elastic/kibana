@@ -9,12 +9,9 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchResponseWarnings } from './search_response_warnings';
-import { searchResponseWarningsMock } from '../../__mocks__/search_response_warnings';
+import { searchResponseIncompleteWarningLocalCluster } from '../../__mocks__/search_response_warnings';
 
-const interceptedWarnings = searchResponseWarningsMock.map((originalWarning, index) => ({
-  originalWarning,
-  action: originalWarning.type === 'shard_failure' ? <button>{`test${index}`}</button> : undefined,
-}));
+const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
 
 describe('SearchResponseWarnings', () => {
   it('renders "callout" correctly', () => {

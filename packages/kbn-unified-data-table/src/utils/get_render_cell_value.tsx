@@ -25,6 +25,7 @@ import type {
   DataTableRecord,
   EsHitRecord,
   ShouldShowFieldInTableHandler,
+  FormattedHit,
 } from '@kbn/discover-utils/types';
 import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
@@ -33,21 +34,31 @@ import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 
-export const getRenderCellValueFn =
-  (
-    dataView: DataView,
-    rows: DataTableRecord[] | undefined,
-    useNewFieldsApi: boolean,
-    shouldShowFieldHandler: ShouldShowFieldInTableHandler,
-    closePopover: () => void,
-    fieldFormats: FieldFormatsStart,
-    maxEntries: number,
-    externalCustomRenderers?: Record<
-      string,
-      (props: EuiDataGridCellValueElementProps) => React.ReactNode
-    >
-  ) =>
-  ({
+export const getRenderCellValueFn = ({
+  dataView,
+  rows,
+  useNewFieldsApi,
+  shouldShowFieldHandler,
+  closePopover,
+  fieldFormats,
+  maxEntries,
+  externalCustomRenderers,
+  isPlainRecord,
+}: {
+  dataView: DataView;
+  rows: DataTableRecord[] | undefined;
+  useNewFieldsApi: boolean;
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  closePopover: () => void;
+  fieldFormats: FieldFormatsStart;
+  maxEntries: number;
+  externalCustomRenderers?: Record<
+    string,
+    (props: EuiDataGridCellValueElementProps) => React.ReactNode
+  >;
+  isPlainRecord?: boolean;
+}) => {
+  return ({
     rowIndex,
     columnId,
     isDetails,
@@ -122,7 +133,7 @@ export const getRenderCellValueFn =
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
-      const pairs = useTopLevelObjectColumns
+      const pairs: FormattedHit = useTopLevelObjectColumns
         ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
             0,
             maxEntries
@@ -135,15 +146,22 @@ export const getRenderCellValueFn =
           compressed
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([key, value]) => (
-            <Fragment key={key}>
-              <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription
-                className="unifiedDataTable__descriptionListDescription"
-                dangerouslySetInnerHTML={{ __html: value }}
-              />
-            </Fragment>
-          ))}
+          {pairs.map(([fieldDisplayName, value, fieldName]) => {
+            // temporary solution for text based mode. As there are a lot of unsupported fields we want to
+            // hide the empty one from the Document view
+            if (isPlainRecord && fieldName && row.flattened[fieldName] === null) return null;
+            return (
+              <Fragment key={fieldDisplayName}>
+                <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+                  {fieldDisplayName}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription
+                  className="unifiedDataTable__descriptionListDescription"
+                  dangerouslySetInnerHTML={{ __html: value }}
+                />
+              </Fragment>
+            );
+          })}
         </EuiDescriptionList>
       );
     }
@@ -159,6 +177,7 @@ export const getRenderCellValueFn =
       />
     );
   };
+};
 
 /**
  * Helper function to show top level objects
@@ -270,8 +289,8 @@ function getTopLevelObjectPairs(
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
   const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
-  const highlightPairs: Array<[string, string]> = [];
-  const sourcePairs: Array<[string, string]> = [];
+  const highlightPairs: FormattedHit = [];
+  const sourcePairs: FormattedHit = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
     const subField = dataView.getFieldByName(key);
     const displayKey = dataView.fields.getByName
@@ -291,10 +310,10 @@ function getTopLevelObjectPairs(
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
       if (shouldShowFieldHandler(displayKey)) {
-        pairs.push([displayKey, formatted]);
+        pairs.push([displayKey, formatted, key]);
       }
     } else {
-      pairs.push([key, formatted]);
+      pairs.push([key, formatted, key]);
     }
   });
   return [...highlightPairs, ...sourcePairs];

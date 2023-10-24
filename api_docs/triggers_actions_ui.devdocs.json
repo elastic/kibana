@@ -1214,16 +1214,10 @@
         "label": "loadRuleAggregations",
         "description": [],
         "signature": [
-          "({\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n}: ",
+          "({\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  filterConsumers,\n}: ",
           "LoadRuleAggregationsProps",
           ") => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleAggregationFormattedResult",
-            "text": "RuleAggregationFormattedResult"
-          },
+          "AggregateRulesResponse",
           ">"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
@@ -1235,7 +1229,7 @@
             "id": "def-public.loadRuleAggregations.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n}",
+            "label": "{\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  filterConsumers,\n}",
             "description": [],
             "signature": [
               "LoadRuleAggregationsProps"
@@ -1792,6 +1786,25 @@
             ]
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.useBulkUntrackAlerts",
+        "type": "Function",
+        "tags": [],
+        "label": "useBulkUntrackAlerts",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseMutationResult",
+          "<string, string, { indices: string[]; alertUuids: string[]; }, unknown>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/use_bulk_untrack_alerts.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2950,7 +2963,7 @@
             "description": [],
             "signature": [
               "BasicFields",
-              " & { \"@timestamp\"?: string[] | undefined; \"event.action\"?: string[] | undefined; tags?: string[] | undefined; kibana?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.case_ids\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.flapping\"?: string[] | undefined; \"kibana.alert.maintenance_window_ids\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_tags\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.suppression.docs_count\"?: string[] | undefined; \"kibana.alert.suppression.end\"?: string[] | undefined; \"kibana.alert.suppression.terms\"?: string[] | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.start\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.context\"?: string[] | undefined; \"kibana.alert.evaluation.values\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert.rule.threat.framework\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.id\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.name\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.reference\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
+              " & { \"@timestamp\"?: string[] | undefined; \"event.action\"?: string[] | undefined; tags?: string[] | undefined; kibana?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.case_ids\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.flapping\"?: string[] | undefined; \"kibana.alert.maintenance_window_ids\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_tags\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.suppression.docs_count\"?: string[] | undefined; \"kibana.alert.suppression.end\"?: string[] | undefined; \"kibana.alert.suppression.terms\"?: string[] | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.start\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.context\"?: string[] | undefined; \"kibana.alert.evaluation.values\"?: string[] | undefined; \"kibana.alert.group\"?: string[] | undefined; \"kibana.alert.group.field\"?: string[] | undefined; \"kibana.alert.group.value\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert.rule.threat.framework\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.id\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.name\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.reference\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -3083,6 +3096,17 @@
             "signature": [
               "string[] | undefined"
             ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertStatus.tracked",
+            "type": "boolean",
+            "tags": [],
+            "label": "tracked",
+            "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4529,7 +4553,7 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"producer\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -5599,13 +5623,23 @@
             "label": "alertsTableConfigurationRegistry",
             "description": [],
             "signature": [
-              "{ get: (id: string) => ",
+              "{ update: (id: string, objectType: ",
+              "AlertsTableConfigurationRegistryWithActions",
+              ") => ",
               "AlertsTableConfigurationRegistry",
-              "; list: () => ",
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              "; get: (id: string) => ",
               "AlertsTableConfigurationRegistry",
-              "[]; register: (objectType: ",
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              "; list: () => (",
               "AlertsTableConfigurationRegistry",
-              ") => void; has: (id: string) => boolean; }"
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              ")[]; register: (objectType: ",
+              "AlertsTableConfigurationRegistry",
+              ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6006,13 +6040,23 @@
         "label": "AlertsTableConfigurationRegistryContract",
         "description": [],
         "signature": [
-          "{ get: (id: string) => ",
+          "{ update: (id: string, objectType: ",
+          "AlertsTableConfigurationRegistryWithActions",
+          ") => ",
           "AlertsTableConfigurationRegistry",
-          "; list: () => ",
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          "; get: (id: string) => ",
           "AlertsTableConfigurationRegistry",
-          "[]; register: (objectType: ",
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          "; list: () => (",
           "AlertsTableConfigurationRegistry",
-          ") => void; has: (id: string) => boolean; }"
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          ")[]; register: (objectType: ",
+          "AlertsTableConfigurationRegistry",
+          ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6041,7 +6085,7 @@
           },
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",
-          "[]; deletedEventIds: string[]; disabledCellActions: string[]; flyoutSize?: \"m\" | \"s\" | \"l\" | undefined; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
+          "[]; deletedEventIds: string[]; disabledCellActions: string[]; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
           "EuiDataGridControlColumn",
           "[]; showExpandToDetails: boolean; showAlertStatusWithFlapping?: boolean | undefined; trailingControlColumns: ",
           "EuiDataGridControlColumn",
@@ -6057,7 +6101,15 @@
           "EuiDataGridToolBarVisibilityOptions",
           " | undefined; shouldHighlightRow?: ((alert: ",
           "EcsFieldsResponse",
-          ") => boolean) | undefined; } & Partial<Pick<",
+          ") => boolean) | undefined; featureIds?: ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.AlertConsumers",
+            "text": "AlertConsumers"
+          },
+          "[] | undefined; } & Partial<Pick<",
           "EuiDataGridProps",
           ", \"gridStyle\" | \"rowHeightsOptions\">>"
         ],
@@ -6238,6 +6290,21 @@
             "text": "SanitizedRule"
           },
           "<Params>, \"alertTypeId\"> & { ruleTypeId: string; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleCreationValidConsumer",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleCreationValidConsumer",
+        "description": [],
+        "signature": [
+          "\"logs\" | \"infrastructure\" | \"stackAlerts\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -7320,10 +7387,7 @@
           "label": "alertsTableConfigurationRegistry",
           "description": [],
           "signature": [
-            "TypeRegistry",
-            "<",
-            "AlertsTableConfigurationRegistry",
-            ">"
+            "AlertTableConfigRegistry"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -7398,10 +7462,7 @@
           "label": "alertsTableConfigurationRegistry",
           "description": [],
           "signature": [
-            "TypeRegistry",
-            "<",
-            "AlertsTableConfigurationRegistry",
-            ">"
+            "AlertTableConfigRegistry"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -9019,7 +9080,7 @@
         "label": "isGroupAggregation",
         "description": [],
         "signature": [
-          "(termField?: string | undefined) => boolean"
+          "(termField?: string | string[] | undefined) => boolean"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
         "deprecated": false,
@@ -9028,12 +9089,12 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-common.isGroupAggregation.$1",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "termField",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[] | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
@@ -9256,12 +9317,12 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-common.BuildAggregationOpts.termField",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "termField",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[] | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,

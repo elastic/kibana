@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PanelPaddingSize } from '@elastic/eui';
 import { EuiPopover, EuiIcon, type IconType, type IconColor, type IconSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
@@ -16,20 +15,18 @@ export const Popover = ({
   icon,
   iconColor,
   iconSize,
-  panelPaddingSize,
   ...props
 }: {
   children: React.ReactNode;
   icon: IconType;
   iconColor?: IconColor;
   iconSize?: IconSize;
-  panelPaddingSize?: PanelPaddingSize;
   'data-test-subj'?: string;
 }) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   return (
     <EuiPopover
-      panelPaddingSize={panelPaddingSize ?? 's'}
+      panelPaddingSize="s"
       button={
         <EuiIcon
           data-test-subj={props['data-test-subj']}

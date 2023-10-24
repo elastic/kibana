@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -22,13 +26,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const find = getService('find');
 
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('Case View', () => {
+  describe('Case View', function () {
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
+    after(async () => {
+      await svlCases.api.deleteAllCaseItems();
+      await svlCommonPage.forceLogout();
+    });
+
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
@@ -264,7 +279,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.testResources.removeKibanaSampleData('logs');
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('adds lens visualization in description', async () => {
@@ -309,11 +324,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('initially renders user actions list correctly', async () => {
-        expect(testSubjects.missingOrFail('cases-show-more-user-actions'));
+        await testSubjects.missingOrFail('cases-show-more-user-actions');
 
         const userActionsLists = await find.allByCssSelector(
           '[data-test-subj="user-actions-list"]'
@@ -329,7 +344,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           totalUpdates: 4,
         });
 
-        expect(testSubjects.missingOrFail('user-actions-loading'));
+        await testSubjects.missingOrFail('user-actions-loading');
 
         await header.waitUntilLoadingHasFinished();
 
@@ -337,7 +352,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(testSubjects.existOrFail('cases-show-more-user-actions'));
+        await testSubjects.existOrFail('cases-show-more-user-actions');
 
         const userActionsLists = await find.allByCssSelector(
           '[data-test-subj="user-actions-list"]'
@@ -421,12 +436,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('should set the cases title', async () => {
-        svlCommonNavigation.breadcrumbs.expectExists();
-        svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
+        await svlCommonNavigation.breadcrumbs.expectExists();
+        await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
       });
     });
 
@@ -439,6 +454,101 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const reporterText = await reporter.getVisibleText();
 
         expect(reporterText).to.be('elastic_serverless');
+      });
+    });
+
+    describe('customFields', () => {
+      const customFields = [
+        {
+          key: 'valid_key_1',
+          label: 'Summary',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+        {
+          key: 'valid_key_2',
+          label: 'Sync',
+          type: CustomFieldTypes.TOGGLE,
+          required: true,
+        },
+      ];
+
+      before(async () => {
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        await cases.api.createConfigWithCustomFields({ customFields, owner });
+        await cases.api.createCase({
+          customFields: [
+            {
+              key: 'valid_key_1',
+              type: CustomFieldTypes.TEXT,
+              value: 'this is a text field value',
+            },
+            {
+              key: 'valid_key_2',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+          owner,
+        });
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      afterEach(async () => {
+        await svlCases.api.deleteAllCaseItems();
+      });
+
+      it('updates a custom field correctly', async () => {
+        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        expect(await textField.getVisibleText()).equal('this is a text field value');
+
+        const toggle = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        );
+        expect(await toggle.getAttribute('aria-checked')).equal('true');
+
+        await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
+
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-text-custom-field-form-field-${customFields[0].key}`
+          );
+        });
+
+        const inputField = await testSubjects.find(
+          `case-text-custom-field-form-field-${customFields[0].key}`
+        );
+
+        await inputField.type(' edited!!');
+
+        await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('update toast exist', async () => {
+          return await testSubjects.exists('toastCloseButton');
+        });
+
+        await testSubjects.click('toastCloseButton');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await toggle.click();
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
+
+        expect(await toggle.getAttribute('aria-checked')).equal('false');
+
+        // validate user action
+        const userActions = await find.allByCssSelector(
+          '[data-test-subj*="customFields-update-action"]'
+        );
+
+        expect(userActions).length(2);
       });
     });
   });

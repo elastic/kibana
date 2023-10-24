@@ -46,6 +46,27 @@ import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
 import { PolicyEndpointCount } from './components/policy_endpoint_count';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
+export const policyListErrorMessage = i18n.translate(
+  'xpack.securitySolution.policy.list.errorMessage',
+  {
+    defaultMessage: 'Error while retrieving list of policies',
+  }
+);
+
+const policyListErrorToastTitle = i18n.translate(
+  'xpack.securitySolution.policy.list.errorMessage.toast.title',
+  {
+    defaultMessage: 'Failed to retrieve policy list',
+  }
+);
+
+const policyListErrorToastText = i18n.translate(
+  'xpack.securitySolution.policyList.packageVersionError',
+  {
+    defaultMessage: 'Error retrieving the endpoint package version',
+  }
+);
+
 export const PolicyList = memo(() => {
   const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
   const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
@@ -63,6 +84,9 @@ export const PolicyList = memo(() => {
   } = useGetEndpointSpecificPolicies({
     page: pagination.page,
     perPage: pagination.pageSize,
+    onError: (err) => {
+      toasts.addDanger({ title: policyListErrorToastTitle, text: err.message });
+    },
   });
 
   const { data: outdatedManifestsCountResponse, isLoading: isOutdatedManifestsCountLoading } =
@@ -73,16 +97,20 @@ export const PolicyList = memo(() => {
     useGetEndpointSecurityPackage({
       customQueryOptions: {
         onError: (err) => {
-          toasts.addDanger(
-            i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
-              defaultMessage: 'Error retrieving the endpoint package version',
-            })
-          );
+          toasts.addDanger({
+            title: policyListErrorToastText,
+            text: err.message,
+          });
         },
       },
     });
 
   const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
+
+  const shouldShowOnboarding = useMemo(
+    () => !policyIsFetching && totalItemCount === 0 && !error,
+    [policyIsFetching, totalItemCount, error]
+  );
 
   const policyListPath = useMemo(() => getPoliciesPath(search), [search]);
 
@@ -172,9 +200,9 @@ export const PolicyList = memo(() => {
         ];
       }
 
-      const parsedDate = moment(version, 'YYYY-MM-DD');
+      const parsedDate = moment.utc(version, 'YYYY-MM-DD');
 
-      if (parsedDate < moment().subtract(18, 'months')) {
+      if (parsedDate < moment.utc().subtract(18, 'months')) {
         return [
           'danger',
           parsedDate.format('MMMM DD, YYYY'),
@@ -184,7 +212,7 @@ export const PolicyList = memo(() => {
         ];
       }
 
-      if (parsedDate > moment().subtract(1, 'month')) {
+      if (parsedDate > moment.utc().subtract(1, 'month')) {
         return ['success', parsedDate.format('MMMM DD, YYYY')];
       }
 
@@ -365,14 +393,10 @@ export const PolicyList = memo(() => {
     };
   }, [totalItemCount, pageSizeOptions, pagination.page, pagination.pageSize]);
 
-  const policyListErrorMessage = i18n.translate('xpack.securitySolution.policy.list.errorMessage', {
-    defaultMessage: 'Error while retrieving list of policies',
-  });
-
   return (
     <AdministrationListPage
       data-test-subj="policyListPage"
-      hideHeader={totalItemCount === 0}
+      hideHeader={shouldShowOnboarding}
       title={i18n.translate('xpack.securitySolution.policy.list.title', {
         defaultMessage: 'Policies',
       })}
@@ -381,7 +405,7 @@ export const PolicyList = memo(() => {
           'Use policies to customize endpoint and cloud workload protections and other configurations',
       })}
     >
-      {totalItemCount > 0 ? (
+      {!shouldShowOnboarding ? (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             <FormattedMessage

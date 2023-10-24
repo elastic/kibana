@@ -39,7 +39,7 @@ import {
   DataPublicPluginStart,
   IEsSearchRequest,
   IEsSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   QueryState,
   SearchSessionState,
 } from '@kbn/data-plugin/public';
@@ -706,7 +706,7 @@ function doSearch(
   return lastValueFrom(
     data.search.search(req, { sessionId }).pipe(
       tap((res) => {
-        if (isCompleteResponse(res)) {
+        if (!isRunningResponse(res)) {
           const avgResult: number | undefined = res.rawResponse.aggregations
             ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
               res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value

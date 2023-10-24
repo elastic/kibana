@@ -236,6 +236,9 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeAddPanel();
+
+    // close "Added successfully" toast
+    await this.common.clearAllToasts();
     return embeddableName;
   }
 

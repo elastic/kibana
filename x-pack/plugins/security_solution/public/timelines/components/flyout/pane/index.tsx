@@ -42,12 +42,12 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
       <EuiPortal insert={{ sibling: !visible ? ref?.current : null, position: 'after' }}>
         <div
           aria-label={i18n.TIMELINE_DESCRIPTION}
-          className="euiFlyout"
           data-test-subj="timeline-flyout"
           css={css`
             min-width: 150px;
-            height: 100%;
-            top: 0;
+            height: inherit;
+            bottom: 0;
+            top: var(--euiFixedHeadersOffset, 0);
             left: 0;
             background: ${useEuiBackgroundColor('plain')};
             position: fixed;

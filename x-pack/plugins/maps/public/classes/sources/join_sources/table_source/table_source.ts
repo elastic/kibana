@@ -139,14 +139,6 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return false;
   }
 
-  createField({ fieldName }: { fieldName: string }): IField {
-    const field = this.getFieldByName(fieldName);
-    if (!field) {
-      throw new Error(`Cannot find field for ${fieldName}`);
-    }
-    return field;
-  }
-
   async getBoundsForFilters(
     boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void

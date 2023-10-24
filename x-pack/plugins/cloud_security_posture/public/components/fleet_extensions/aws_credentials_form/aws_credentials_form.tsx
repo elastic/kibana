@@ -44,8 +44,8 @@ interface AWSSetupInfoContentProps {
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
-      <EuiHorizontalRule margin="xxl" />
-      <EuiTitle size="s">
+      <EuiHorizontalRule margin="xl" />
+      <EuiTitle size="xs">
         <h2>
           <FormattedMessage
             id="xpack.csp.awsIntegration.setupInfoContentTitle"
@@ -103,6 +103,7 @@ interface Props {
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
 }
 
 const CloudFormationSetup = ({
@@ -133,6 +134,12 @@ const CloudFormationSetup = ({
             list-style: auto;
           `}
         >
+          <li>
+            <FormattedMessage
+              id="xpack.csp.awsIntegration.cloudFormationSetupStep.hostRequirement"
+              defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
+            />
+          </li>
           {accountType === AWS_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
@@ -209,6 +216,7 @@ export const AwsCredentialsForm = ({
   packageInfo,
   onChange,
   setIsValid,
+  disabled,
 }: Props) => {
   const {
     awsCredentialsType,
@@ -232,6 +240,7 @@ export const AwsCredentialsForm = ({
       <AWSSetupInfoContent integrationLink={integrationLink} />
       <EuiSpacer size="l" />
       <RadioGroup
+        disabled={disabled}
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}

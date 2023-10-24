@@ -190,6 +190,7 @@ describe('EphemeralTaskLifecycle', () => {
             task: taskManagerMock.createTask(),
             result: TaskRunResult.Success,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );

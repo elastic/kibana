@@ -22,6 +22,13 @@ export function createTestConfig(options: CreateTestConfigOptions) {
 
       pageObjects,
       services,
+      esTestCluster: {
+        ...svlSharedConfig.get('esTestCluster'),
+        serverArgs: [
+          ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          ...(options.esServerArgs ?? []),
+        ],
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
@@ -61,6 +68,21 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         },
         indexManagement: {
           pathname: '/app/management/data/index_management',
+        },
+        connectors: {
+          pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
+        },
+        settings: {
+          pathname: '/app/management/kibana/settings',
+        },
+        login: {
+          pathname: '/login',
+        },
+        reportingManagement: {
+          pathname: '/app/management/insightsAndAlerting/reporting',
+        },
+        securitySolution: {
+          pathname: '/app/security',
         },
       },
       // choose where screenshots should be saved

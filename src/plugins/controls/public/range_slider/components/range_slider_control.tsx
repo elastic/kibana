@@ -11,18 +11,16 @@ import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 're
 
 import { EuiRangeTick, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
 
-import { pluginServices } from '../../services';
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { ControlError } from '../../control_group/component/control_error_component';
 
 import './range_slider.scss';
+import { MIN_POPOVER_WIDTH } from '../../constants';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const RangeSliderControl: FC = () => {
   /** Controls Services Context */
-  const {
-    dataViews: { get: getDataViewById },
-  } = pluginServices.getServices();
   const rangeSlider = useRangeSlider();
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -43,8 +41,8 @@ export const RangeSliderControl: FC = () => {
 
   // React component state
   const [displayedValue, setDisplayedValue] = useState<RangeValue>(value ?? ['', '']);
-  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
 
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
   const debouncedOnChange = useMemo(
     () =>
       debounce((newRange: RangeValue) => {
@@ -52,22 +50,6 @@ export const RangeSliderControl: FC = () => {
       }, 750),
     [rangeSlider.dispatch]
   );
-
-  /**
-   * derive field formatter from fieldSpec and dataViewId
-   */
-  useEffect(() => {
-    (async () => {
-      if (!dataViewId || !fieldSpec) return;
-      // dataViews are cached, and should always be available without having to hit ES.
-      const dataView = await getDataViewById(dataViewId);
-      setFieldFormatter(
-        () =>
-          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-          ((toFormat: string) => toFormat)
-      );
-    })();
-  }, [fieldSpec, dataViewId, getDataViewById]);
 
   /**
    * This will recalculate the displayed min/max of the range slider to allow for selections smaller
@@ -153,6 +135,9 @@ export const RangeSliderControl: FC = () => {
         min={displayedMin}
         max={displayedMax}
         isLoading={isLoading}
+        inputPopoverProps={{
+          panelMinWidth: MIN_POPOVER_WIDTH,
+        }}
         onMouseUp={() => {
           // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
           // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to

@@ -10,10 +10,11 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
+  BaseFlameGraph,
   ProfilingStatusResponse,
   StackTraceResponse,
-} from '@kbn/profiling-data-access-plugin/common/stack_traces';
+} from '@kbn/profiling-utils';
 import { withProfilingSpan } from './with_profiling_span';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
@@ -39,6 +40,10 @@ export interface ProfilingESClient {
   }): Promise<StackTraceResponse>;
   profilingStatus(): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
+  profilingFlamegraph({}: {
+    query: QueryDslQueryContainer;
+    sampleSize: number;
+  }): Promise<BaseFlameGraph>;
 }
 
 export function createProfilingEsClient({
@@ -120,6 +125,27 @@ export function createProfilingEsClient({
     },
     getEsClient() {
       return esClient;
+    },
+    profilingFlamegraph({ query, sampleSize }) {
+      const controller = new AbortController();
+
+      const promise = withProfilingSpan('_profiling/flamegraph', () => {
+        return esClient.transport.request(
+          {
+            method: 'POST',
+            path: encodeURI('/_profiling/flamegraph'),
+            body: {
+              query,
+              sample_size: sampleSize,
+            },
+          },
+          {
+            signal: controller.signal,
+            meta: true,
+          }
+        );
+      });
+      return unwrapEsResponse(promise) as Promise<BaseFlameGraph>;
     },
   };
 }

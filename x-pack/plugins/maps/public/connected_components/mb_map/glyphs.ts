@@ -56,7 +56,7 @@ export function testOnlyClearCanAccessEmsFontsPromise() {
 }
 
 export function getKibanaFontsGlyphUrl(): string {
-  return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
+  return getHttp().basePath.prepend(`${FONTS_API_PATH}/{fontstack}/{range}`);
 }
 
 export function getGlyphs(): { glyphUrlTemplate: string; isEmsFont: boolean } {

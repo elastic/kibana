@@ -185,7 +185,7 @@ describe('TelemetryService', () => {
   });
 
   describe('#reportAssetDetailsFlyoutViewed', () => {
-    it('should report asset details viewed with properties', async () => {
+    it('should report asset details viewed in flyout with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
       const telemetry = service.start();
@@ -203,6 +203,32 @@ describe('TelemetryService', () => {
           componentName: 'infraAssetDetailsFlyout',
           assetType: 'host',
           tabId: 'overview',
+        }
+      );
+    });
+  });
+
+  describe('#reportAssetDetailsPageViewed', () => {
+    it('should report asset details viewed in full page with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportAssetDetailsPageViewed({
+        componentName: 'infraAssetDetailsPage',
+        assetType: 'host',
+        tabId: 'overview',
+        integrations: ['nginx'],
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED,
+        {
+          componentName: 'infraAssetDetailsPage',
+          assetType: 'host',
+          tabId: 'overview',
+          integrations: ['nginx'],
         }
       );
     });

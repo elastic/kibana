@@ -118,21 +118,55 @@ const assetDetailsFlyoutViewed: InfraTelemetryEvent = {
     componentName: {
       type: 'keyword',
       _meta: {
-        description: 'Hostname for the clicked host.',
+        description: 'Name of the parent react component for the clicked asset.',
         optional: false,
       },
     },
     assetType: {
       type: 'keyword',
       _meta: {
-        description: 'Cloud provider for the clicked host.',
+        description: 'Asset type for the clicked asset.',
         optional: false,
       },
     },
     tabId: {
       type: 'keyword',
       _meta: {
-        description: 'Cloud provider for the clicked host.',
+        description: 'Tab id for the clicked asset.',
+        optional: true,
+      },
+    },
+  },
+};
+
+const assetDetailsPageViewed: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED,
+  schema: {
+    componentName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of the parent react component for the clicked asset.',
+        optional: false,
+      },
+    },
+    assetType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Asset type for the clicked asset.',
+        optional: false,
+      },
+    },
+    tabId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Tab id for the clicked asset.',
+        optional: true,
+      },
+    },
+    integrations: {
+      type: 'pass_through',
+      _meta: {
+        description: 'Integrations enabled for the displayed asset.',
         optional: true,
       },
     },
@@ -141,6 +175,7 @@ const assetDetailsFlyoutViewed: InfraTelemetryEvent = {
 
 export const infraTelemetryEvents = [
   assetDetailsFlyoutViewed,
+  assetDetailsPageViewed,
   hostsViewQuerySubmittedEvent,
   hostsEntryClickedEvent,
   hostFlyoutRemoveFilter,

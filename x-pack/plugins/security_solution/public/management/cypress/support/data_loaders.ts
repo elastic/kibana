@@ -9,6 +9,14 @@
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
+import type { KbnClient } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { KibanaKnownUserAccounts } from '../common/constants';
+import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
+import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
+import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
+import type { LoadedRoleAndUser } from '../../../../scripts/endpoint/common/role_and_user_loader';
+import { EndpointSecurityTestRolesLoader } from '../../../../scripts/endpoint/common/role_and_user_loader';
 import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
 import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
 import {
@@ -22,39 +30,89 @@ import type {
   CreateAndEnrollEndpointHostOptions,
   CreateAndEnrollEndpointHostResponse,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
+import {
+  createAndEnrollEndpointHost,
+  destroyEndpointHost,
+  startEndpointHost,
+  stopEndpointHost,
+  VAGRANT_CWD,
+} from '../../../../scripts/endpoint/common/endpoint_host_services';
 import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import {
   deleteIndexedEndpointPolicyResponse,
   indexEndpointPolicyResponse,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
-import type { IndexEndpointHostsCyTaskOptions } from '../types';
 import type {
-  IndexedEndpointRuleAlerts,
+  IndexEndpointHostsCyTaskOptions,
+  LoadUserAndRoleCyTaskOptions,
+  CreateUserAndRoleCyTaskOptions,
+} from '../types';
+import type {
   DeletedIndexedEndpointRuleAlerts,
+  IndexedEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
-import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
-import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import {
-  indexFleetEndpointPolicy,
-  deleteIndexedFleetEndpointPolicies,
-} from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
-import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
-import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
 import {
   deleteIndexedEndpointRuleAlerts,
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
+import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
+import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
+import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
+import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
-  startEndpointHost,
-  createAndEnrollEndpointHost,
-  destroyEndpointHost,
-  stopEndpointHost,
-  VAGRANT_CWD,
-} from '../../../../scripts/endpoint/common/endpoint_host_services';
+  deleteIndexedFleetEndpointPolicies,
+  indexFleetEndpointPolicy,
+} from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
+
+/**
+ * Test Role/User loader for cypress. Checks to see if running in serverless and handles it as appropriate
+ */
+class TestRoleAndUserLoader extends EndpointSecurityTestRolesLoader {
+  constructor(
+    protected readonly kbnClient: KbnClient,
+    protected readonly logger: ToolingLog,
+    private readonly isServerless: boolean
+  ) {
+    super(kbnClient, logger);
+  }
+
+  async load(
+    name: EndpointSecurityRoleNames | KibanaKnownUserAccounts
+  ): Promise<LoadedRoleAndUser> {
+    // If its a known system account, then just exit here and use the default `changeme` password
+    if (KIBANA_KNOWN_DEFAULT_ACCOUNTS[name as KibanaKnownUserAccounts]) {
+      return {
+        role: name,
+        username: name,
+        password: 'changeme',
+      };
+    }
+
+    if (this.isServerless) {
+      // If the username is not one that we support in serverless, then throw an error.
+      if (!SECURITY_SERVERLESS_ROLE_NAMES[name as keyof typeof SECURITY_SERVERLESS_ROLE_NAMES]) {
+        throw new Error(
+          `username [${name}] is not valid when running in serverless. Valid values are: ${Object.keys(
+            SECURITY_SERVERLESS_ROLE_NAMES
+          ).join(', ')}`
+        );
+      }
+
+      // Roles/users for serverless will be already present in the env, so just return the defaults creds
+      return {
+        role: name,
+        username: name,
+        password: 'changeme',
+      };
+    }
+
+    return super.load(name as EndpointSecurityRoleNames);
+  }
+}
 
 /**
  * Cypress plugin for adding data loading related `task`s
@@ -68,7 +126,8 @@ export const dataLoaders = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
-  // FIXME: investigate if we can create a `ToolingLog` that writes output to cypress and pass that to the stack services
+  // Env. variable is set by `cypress_serverless.config.ts`
+  const isServerless = config.env.IS_SERVERLESS;
 
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
@@ -80,6 +139,12 @@ export const dataLoaders = (
     esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
   });
+
+  const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
+    ({ kbnClient, log }) => {
+      return new TestRoleAndUserLoader(kbnClient, log, isServerless);
+    }
+  );
 
   on('task', {
     indexFleetEndpointPolicy: async ({
@@ -118,7 +183,7 @@ export const dataLoaders = (
     },
 
     indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
-      const { kbnClient, esClient } = await stackServicesPromise;
+      const { kbnClient, esClient, log } = await stackServicesPromise;
       const {
         count: numHosts,
         version,
@@ -129,7 +194,7 @@ export const dataLoaders = (
         alertIds,
       } = options;
 
-      return cyLoadEndpointDataHandler(esClient, kbnClient, {
+      return cyLoadEndpointDataHandler(esClient, kbnClient, log, {
         numHosts,
         version,
         os,
@@ -201,6 +266,23 @@ export const dataLoaders = (
       const { esClient } = await stackServicesPromise;
       return deleteAllEndpointData(esClient, endpointAgentIds);
     },
+
+    /**
+     * Loads a user/role into Kibana. Used from `login()` task.
+     * @param name
+     */
+    loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
+      return (await roleAndUserLoaderPromise).load(name);
+    },
+
+    /**
+     * Creates a new Role/User
+     */
+    createUserAndRole: async ({
+      role,
+    }: CreateUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
+      return (await roleAndUserLoaderPromise).create(role);
+    },
   });
 };
 
@@ -234,9 +316,14 @@ export const dataLoadersForRealEndpoints = (
     fleetServerContainerId = data?.fleetServerContainerId;
   });
 
-  on('after:run', () => {
+  on('after:run', async () => {
+    const { log } = await stackServicesPromise;
     if (fleetServerContainerId) {
-      execa.sync('docker', ['kill', fleetServerContainerId]);
+      try {
+        execa.sync('docker', ['kill', fleetServerContainerId]);
+      } catch (error) {
+        log.error(error);
+      }
     }
   });
 

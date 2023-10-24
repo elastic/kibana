@@ -7,18 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
-import { groupStackFrameMetadataByStackTrace } from '@kbn/profiling-data-access-plugin/common/profiling';
 import {
   getFieldNameForTopNType,
+  groupStackFrameMetadataByStackTrace,
+  ProfilingESField,
   TopNType,
-} from '@kbn/profiling-data-access-plugin/common/stack_traces';
-import { getRoutePaths, INDEX_EVENTS } from '../../common';
+} from '@kbn/profiling-utils';
 import { RouteRegisterParameters } from '.';
+import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
 import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
-import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';

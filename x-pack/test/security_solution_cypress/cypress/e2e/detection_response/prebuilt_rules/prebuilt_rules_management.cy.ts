@@ -40,8 +40,9 @@ import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
 } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 
 const rules = Array.from(Array(5)).map((_, i) => {
   return createRuleAssetSavedObject({
@@ -50,8 +51,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -61,8 +61,8 @@ describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
     preventPrebuiltRulesPackageInstallation();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createAndInstallMockedPrebuiltRules({ rules });
+    visit(RULES_MANAGEMENT_URL);
+    createAndInstallMockedPrebuiltRules(rules);
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();
     disableAutoRefresh();

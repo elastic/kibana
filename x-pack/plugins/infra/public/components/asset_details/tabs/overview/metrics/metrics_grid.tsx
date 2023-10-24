@@ -4,77 +4,64 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-
-import { EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { assetDetailsDashboards } from '../../../../../common/visualizations';
-import { ChartGrid, Section } from './metrics_charts_section';
-import { MetricsSectionTitle, NginxMetricsSectionTitle } from '../../../components/section_titles';
+import {
+  type XYConfig,
+  XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
+} from '../../../../../common/visualizations';
+import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
+import { Chart } from './chart';
 
 interface Props {
   assetName: string;
   dateRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
+  filterFieldName: string;
+  charts: Array<XYConfig & { dependsOn?: string[] }>;
+  ['data-test-subj']: string;
 }
 
-const { host, nginx } = assetDetailsDashboards;
-
-export const MetricsGrid = React.memo(
-  ({ assetName, metricsDataView, logsDataView, dateRange: timeRange }: Props) => {
-    return (
-      <>
-        <Section title={MetricsSectionTitle}>
-          <ChartGrid
-            assetName={assetName}
-            timeRange={timeRange}
-            charts={host.hostMetricChartsFullPage}
-            metricsDataView={metricsDataView}
-            logsDataView={logsDataView}
-            data-test-subj="infraAssetDetailsMetricsChart"
-          />
-        </Section>
-        <EuiSpacer size="s" />
-        <Section dependsOn={['nginx.stubstatus', 'nginx.access']} title={NginxMetricsSectionTitle}>
-          <ChartGrid
-            assetName={assetName}
-            timeRange={timeRange}
-            charts={[
-              ...nginx.nginxStubstatusCharts.map((chart) => ({
-                ...chart,
-                dependsOn: ['nginx.stubstatus'],
-              })),
-              ...nginx.nginxAccessCharts.map((chart) => ({
-                ...chart,
-                dependsOn: ['nginx.access'],
-              })),
-            ]}
-            metricsDataView={metricsDataView}
-            logsDataView={logsDataView}
-            data-test-subj="infraAssetDetailsNginxMetricsChart"
-          />
-        </Section>
-      </>
-    );
-  }
-);
-
-export const MetricsGridCompact = ({
+export const MetricsGrid = ({
   assetName,
   metricsDataView,
   logsDataView,
-  dateRange: timeRange,
-}: Props) => (
-  <Section title={MetricsSectionTitle}>
-    <ChartGrid
-      assetName={assetName}
-      timeRange={timeRange}
-      charts={host.hostMetricFlyoutCharts}
-      metricsDataView={metricsDataView}
-      logsDataView={logsDataView}
-      data-test-subj="infraAssetDetailsMetricsChart"
-    />
-  </Section>
-);
+  dateRange,
+  filterFieldName,
+  charts,
+  ...props
+}: Props) => {
+  const { metadata } = useMetadataStateProviderContext();
+
+  const chartsToRender = useMemo(
+    () =>
+      charts.filter(
+        (c) =>
+          !c.dependsOn ||
+          c.dependsOn.every((d) => (metadata?.features ?? []).some((f) => d === f.name))
+      ),
+    [charts, metadata?.features]
+  );
+
+  return (
+    <EuiFlexGrid columns={2} gutterSize="s" data-test-subj={`${props['data-test-subj']}Grid`}>
+      {chartsToRender.map((chartProp, index) => (
+        <EuiFlexItem key={index} grow={false}>
+          <Chart
+            {...chartProp}
+            assetName={assetName}
+            dateRange={dateRange}
+            filterFieldName={filterFieldName}
+            logsDataView={logsDataView}
+            metricsDataView={metricsDataView}
+            data-test-subj={props['data-test-subj']}
+            visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
+  );
+};

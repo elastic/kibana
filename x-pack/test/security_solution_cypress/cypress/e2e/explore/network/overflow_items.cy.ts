@@ -14,7 +14,8 @@ import {
   SHOW_TOP_FIELD,
 } from '../../../screens/network/flows';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { mouseoverOnToOverflowItem, openHoverActions } from '../../../tasks/network/flows';
 
 import { NETWORK_URL } from '../../../urls/navigation';
@@ -23,7 +24,8 @@ const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165692
-describe('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// Tracked by https://github.com/elastic/security-team/issues/7696
+describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   context('Network stats and tables', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'network' });
@@ -31,7 +33,7 @@ describe('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'
 
     beforeEach(() => {
       login();
-      visit(NETWORK_URL);
+      visitWithTimeRange(NETWORK_URL);
       cy.get(DESTINATION_DOMAIN).should('not.exist');
       cy.get(FILTER_IN).should('not.exist');
       cy.get(FILTER_OUT).should('not.exist');

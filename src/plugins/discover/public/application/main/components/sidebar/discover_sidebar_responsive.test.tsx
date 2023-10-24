@@ -13,7 +13,7 @@ import { EuiProgress } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
@@ -37,6 +37,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { SearchBarCustomization } from '../../../../customizations';
+import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -168,6 +169,8 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
     onDataViewCreated: jest.fn(),
+    unifiedFieldListSidebarContainerApi: null,
+    setUnifiedFieldListSidebarContainerApi: jest.fn(),
   };
 }
 
@@ -199,19 +202,30 @@ async function mountComponent(
   mockedServices.data.query.getState = jest.fn().mockImplementation(() => appState.getState());
 
   await act(async () => {
-    comp = await mountWithIntl(
+    const SidebarWrapper = () => {
+      const [api, setApi] = useState<UnifiedFieldListSidebarContainerApi | null>(null);
+      return (
+        <DiscoverSidebarResponsive
+          {...props}
+          unifiedFieldListSidebarContainerApi={api}
+          setUnifiedFieldListSidebarContainerApi={setApi}
+        />
+      );
+    };
+
+    comp = mountWithIntl(
       <KibanaContextProvider services={mockedServices}>
         <DiscoverAppStateProvider value={appState}>
-          <DiscoverSidebarResponsive {...props} />
+          <SidebarWrapper />
         </DiscoverAppStateProvider>
       </KibanaContextProvider>
     );
     // wait for lazy modules
     await new Promise((resolve) => setTimeout(resolve, 0));
-    await comp.update();
+    comp.update();
   });
 
-  await comp!.update();
+  comp!.update();
 
   return comp!;
 }
@@ -251,7 +265,7 @@ describe('discover responsive sidebar', function () {
     await act(async () => {
       // wait for lazy modules
       await new Promise((resolve) => setTimeout(resolve, 0));
-      await compLoadingExistence.update();
+      compLoadingExistence.update();
     });
 
     expect(
@@ -273,11 +287,11 @@ describe('discover responsive sidebar', function () {
         indexPatternTitle: 'test-loaded',
         existingFieldNames: Object.keys(mockfieldCounts),
       });
-      await compLoadingExistence.update();
+      compLoadingExistence.update();
     });
 
     await act(async () => {
-      await compLoadingExistence.update();
+      compLoadingExistence.update();
     });
 
     expect(
@@ -419,11 +433,11 @@ describe('discover responsive sidebar', function () {
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
       const button = findTestSubject(availableFields, 'field-extension-showDetails');
-      await button.simulate('click');
-      await comp.update();
+      button.simulate('click');
+      comp.update();
     });
 
-    await comp.update();
+    comp.update();
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
   });
@@ -432,11 +446,11 @@ describe('discover responsive sidebar', function () {
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
       const button = findTestSubject(availableFields, 'field-extension-showDetails');
-      await button.simulate('click');
-      await comp.update();
+      button.simulate('click');
+      comp.update();
     });
 
-    await comp.update();
+    comp.update();
     findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
@@ -450,7 +464,7 @@ describe('discover responsive sidebar', function () {
     );
 
     await act(async () => {
-      await findTestSubject(comp, 'fieldListFiltersFieldSearch').simulate('change', {
+      findTestSubject(comp, 'fieldListFiltersFieldSearch').simulate('change', {
         target: { value: 'bytes' },
       });
     });
@@ -471,16 +485,16 @@ describe('discover responsive sidebar', function () {
     );
 
     await act(async () => {
-      await findTestSubject(comp, 'fieldListFiltersFieldTypeFilterToggle').simulate('click');
+      findTestSubject(comp, 'fieldListFiltersFieldTypeFilterToggle').simulate('click');
     });
 
-    await comp.update();
+    comp.update();
 
     await act(async () => {
-      await findTestSubject(comp, 'typeFilter-number').simulate('click');
+      findTestSubject(comp, 'typeFilter-number').simulate('click');
     });
 
-    await comp.update();
+    comp.update();
 
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('2');
     expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
@@ -519,7 +533,7 @@ describe('discover responsive sidebar', function () {
 
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
-      await compInTextBasedMode.update();
+      compInTextBasedMode.update();
     });
 
     expect(findTestSubject(compInTextBasedMode, 'indexPattern-add-field_btn').length).toBe(0);
@@ -619,7 +633,7 @@ describe('discover responsive sidebar', function () {
     );
     const addFieldButton = findTestSubject(comp, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(1);
-    await addFieldButton.simulate('click');
+    addFieldButton.simulate('click');
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
@@ -630,10 +644,10 @@ describe('discover responsive sidebar', function () {
     await act(async () => {
       findTestSubject(availableFields, 'field-bytes').simulate('click');
     });
-    await comp.update();
+    comp.update();
     const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
     expect(editFieldButton.length).toBe(1);
-    await editFieldButton.simulate('click');
+    editFieldButton.simulate('click');
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
@@ -662,12 +676,12 @@ describe('discover responsive sidebar', function () {
     // open flyout
     await act(async () => {
       compWithPicker.find('.unifiedFieldListSidebar__mobileButton').last().simulate('click');
-      await compWithPicker.update();
+      compWithPicker.update();
     });
 
-    await compWithPicker.update();
+    compWithPicker.update();
     // open data view picker
-    await findTestSubject(compWithPicker, 'dataView-switch-link').simulate('click');
+    findTestSubject(compWithPicker, 'dataView-switch-link').simulate('click');
     expect(findTestSubject(compWithPicker, 'changeDataViewPopover').length).toBe(1);
     // check "Add a field"
     const addFieldButtonInDataViewPicker = findTestSubject(
@@ -678,7 +692,7 @@ describe('discover responsive sidebar', function () {
     // click "Create a data view"
     const createDataViewButton = findTestSubject(compWithPicker, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(1);
-    await createDataViewButton.simulate('click');
+    createDataViewButton.simulate('click');
     expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
   });
 
@@ -697,10 +711,10 @@ describe('discover responsive sidebar', function () {
         .find('.unifiedFieldListSidebar__mobileButton')
         .last()
         .simulate('click');
-      await compWithPickerInViewerMode.update();
+      compWithPickerInViewerMode.update();
     });
 
-    await compWithPickerInViewerMode.update();
+    compWithPickerInViewerMode.update();
     // open data view picker
     findTestSubject(compWithPickerInViewerMode, 'dataView-switch-link').simulate('click');
     expect(findTestSubject(compWithPickerInViewerMode, 'changeDataViewPopover').length).toBe(1);
@@ -724,10 +738,10 @@ describe('discover responsive sidebar', function () {
 
       await act(async () => {
         comp.find('.unifiedFieldListSidebar__mobileButton').last().simulate('click');
-        await comp.update();
+        comp.update();
       });
 
-      await comp.update();
+      comp.update();
 
       expect(comp.find('[data-test-subj="custom-data-view-picker"]').exists()).toBe(false);
     });
@@ -741,12 +755,21 @@ describe('discover responsive sidebar', function () {
 
       await act(async () => {
         comp.find('.unifiedFieldListSidebar__mobileButton').last().simulate('click');
-        await comp.update();
+        comp.update();
       });
 
-      await comp.update();
+      comp.update();
 
       expect(comp.find('[data-test-subj="custom-data-view-picker"]').exists()).toBe(true);
+    });
+
+    it('should allow to toggle sidebar', async function () {
+      const comp = await mountComponent(props);
+      expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
+      findTestSubject(comp, 'unifiedFieldListSidebar__toggle-collapse').simulate('click');
+      expect(findTestSubject(comp, 'fieldList').exists()).toBe(false);
+      findTestSubject(comp, 'unifiedFieldListSidebar__toggle-expand').simulate('click');
+      expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
     });
   });
 });
