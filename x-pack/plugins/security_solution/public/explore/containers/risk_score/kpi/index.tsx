@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 
 import {
   getHostRiskIndex,
@@ -106,6 +106,7 @@ export const useRiskScoreKpi = ({
     isDeprecated,
     isAuthorized,
     isDeprecatedLoading,
+    featureEnabled,
   ]);
 
   const refetchAll = useCallback(() => {
@@ -139,7 +140,3 @@ export const useRiskScoreKpi = ({
 
   return { error, severityCount, loading, isModuleDisabled, refetch: refetchAll, inspect };
 };
-function useCallback(arg0: () => void, arg1: any[]) {
-  throw new Error('Function not implemented.');
-}
-
