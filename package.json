@@ -1469,7 +1469,6 @@
     "cypress-real-events": "^1.10.3",
     "cypress-recurse": "^1.35.2",
     "date-fns": "^2.29.3",
-    "datemath-parser": "^1.0.6",
     "debug": "^2.6.9",
     "delete-empty": "^2.0.0",
     "dependency-check": "^4.1.0",

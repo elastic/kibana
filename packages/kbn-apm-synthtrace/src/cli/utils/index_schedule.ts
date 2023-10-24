@@ -8,7 +8,7 @@
 
 import moment, { Moment } from 'moment';
 import { isNumber, isString, castArray, range, random } from 'lodash';
-import parser from 'datemath-parser';
+import datemath from '@elastic/datemath';
 import { PassThrough, Readable, Writable } from 'stream';
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { isGeneratorObject } from 'util/types';
@@ -49,6 +49,8 @@ export const EventsPerCycleTransitionDefRT = rt.intersection([
   }),
 ]);
 
+export const EventsPerCycleRT = rt.union([rt.number, EventsPerCycleTransitionDefRT]);
+
 type EventsPerCycle =
   | number
   | {
@@ -56,15 +58,24 @@ type EventsPerCycle =
       end: number;
       method: TransitionMethod;
     };
+const PartialScheduleBaseRT = rt.partial({
+  eventsPerCycle: EventsPerCycleRT,
+  interval: rt.number,
+  delayInMinutes: rt.number,
+  delayEveryMinutes: rt.number,
+  randomness: rt.number,
+});
 
-interface ParsedSchedule {
-  scenario: string;
-  start: number;
-  end: number | boolean;
-  interval?: number;
-  eventsPerCycle: EventsPerCycle;
-  randomness?: number;
-}
+export const ParsedScheduleRT = rt.intersection([
+  rt.type({
+    scenario: rt.string,
+    start: rt.number,
+    end: rt.union([rt.boolean, rt.number]),
+  }),
+  PartialScheduleBaseRT,
+]);
+
+export type ParsedSchedule = rt.TypeOf<typeof ParsedScheduleRT>;
 
 export interface Config {
   schedule: Schedule[];
@@ -72,18 +83,29 @@ export interface Config {
 
 const DEFAULT_INTERVAL = 60000;
 
-const parseSchedule = (now: Moment) => (schedule: Schedule) => {
-  const startTs = isNumber(schedule.start)
-    ? schedule.start
-    : parser.parse(schedule.start, now.valueOf(), false);
-
-  const endTs = isNumber(schedule.end)
-    ? schedule.end
-    : isString(schedule.end)
-    ? parser.parse(schedule.end, now.valueOf(), false)
-    : false;
-  return { ...schedule, start: startTs, end: endTs };
-};
+const parseSchedule =
+  (now: Moment) =>
+  (schedule: Schedule): ParsedSchedule => {
+    const startTs = isNumber(schedule.start)
+      ? schedule.start
+      : datemath
+          .parse(schedule.start, {
+            roundUp: false,
+            momentInstance: moment,
+          })!
+          .valueOf();
+    const endTs = isNumber(schedule.end)
+      ? schedule.end
+      : isString(schedule.end)
+      ? datemath
+          .parse(schedule.end, {
+            roundUp: false,
+            momentInstance: moment,
+          })!
+          .valueOf()
+      : false;
+    return { ...schedule, start: startTs, end: endTs };
+  };
 
 interface Point {
   x: number;
