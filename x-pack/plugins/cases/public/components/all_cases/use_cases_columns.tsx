@@ -247,8 +247,7 @@ export const useCasesColumns = ({
     width: '100px',
   });
 
-  // FIXME: rethink [0]
-  if (filterStatus[0] === CaseStatuses.closed) {
+  if (filterStatus.includes(CaseStatuses.closed)) {
     columns.push({
       field: 'closedAt',
       name: i18n.CLOSED_ON,

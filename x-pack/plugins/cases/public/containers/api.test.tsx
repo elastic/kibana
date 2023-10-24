@@ -229,8 +229,8 @@ describe('Cases API', () => {
           assignees: ['123'],
           reporters: [{ username: 'username', full_name: null, email: null }],
           tags,
-          status: CaseStatuses.open,
-          severity: CaseSeverity.HIGH,
+          status: [CaseStatuses.open],
+          severity: [CaseSeverity.HIGH],
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
           category: [],
@@ -260,7 +260,7 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          severity: CaseSeverity.HIGH,
+          severity: [CaseSeverity.HIGH],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -281,7 +281,7 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          severity: 'all',
+          severity: ['all'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -301,7 +301,7 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          status: CaseStatuses.open,
+          status: [CaseStatuses.open],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -322,7 +322,7 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          status: 'all',
+          status: ['all'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -409,7 +409,7 @@ describe('Cases API', () => {
           assignees: ['123'],
           reporters: [{ username: undefined, full_name: undefined, email: undefined }],
           tags: weirdTags,
-          status: CaseStatuses.open,
+          status: [CaseStatuses.open],
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
         },

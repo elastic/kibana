@@ -96,7 +96,7 @@ describe('AllCasesListGeneric', () => {
   };
 
   const defaultColumnArgs = {
-    filterStatus: CaseStatuses.open,
+    filterStatus: [CaseStatuses.open],
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     isSelectorView: false,

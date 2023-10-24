@@ -23,7 +23,7 @@ import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 describe('useCasesColumns ', () => {
   let appMockRender: AppMockRenderer;
   const useCasesColumnsProps: GetCasesColumn = {
-    filterStatus: CaseStatuses.open,
+    filterStatus: [CaseStatuses.open],
     userProfiles: userProfilesMap,
     isSelectorView: false,
     showSolutionColumn: true,
@@ -465,7 +465,7 @@ describe('useCasesColumns ', () => {
     appMockRender = createAppMockRenderer();
 
     const { result } = renderHook(
-      () => useCasesColumns({ ...useCasesColumnsProps, filterStatus: CaseStatuses.closed }),
+      () => useCasesColumns({ ...useCasesColumnsProps, filterStatus: [CaseStatuses.closed] }),
       {
         wrapper: appMockRender.AppWrapper,
       }

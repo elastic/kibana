@@ -91,7 +91,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('takes into account input filter options', () => {
-    const existingLocalStorageValues = { owner: ['foobar'], status: CaseStatuses.open };
+    const existingLocalStorageValues = { owner: ['foobar'], status: [CaseStatuses.open] };
 
     const { result } = renderHook(() => useAllCasesState(false, existingLocalStorageValues), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
