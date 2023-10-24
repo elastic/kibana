@@ -2997,5 +2997,223 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rule.timeline_id).to.eql(timelineId);
       expect(rule.timeline_title).to.eql(timelineTitle);
     });
+
+    describe('legacy investigation fields', () => {
+      beforeEach(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        );
+      });
+
+      it('should export rules with legacy investigation_fields and migrate field', async () => {
+        const { body } = await postBulkAction()
+          .send({ query: '', action: BulkActionType.export })
+          .expect(200)
+          .expect('Content-Type', 'application/ndjson')
+          .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
+          .parse(binaryToString);
+
+        const [rule1, rule2, rule3, exportDetailsJson] = body.toString().split(/\n/);
+
+        const ruleWithLegacyInvestigationField = removeServerGeneratedProperties(JSON.parse(rule1));
+        expect(ruleWithLegacyInvestigationField.investigation_fields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+
+        const ruleWithLegacyInvestigationFieldEmptyArray = removeServerGeneratedProperties(
+          JSON.parse(rule2)
+        );
+        expect(ruleWithLegacyInvestigationFieldEmptyArray.investigation_fields).to.eql(undefined);
+
+        const ruleWithInvestigationField = removeServerGeneratedProperties(JSON.parse(rule3));
+        expect(ruleWithInvestigationField.investigation_fields).to.eql({
+          field_names: ['host.name'],
+        });
+
+        const exportDetails = JSON.parse(exportDetailsJson);
+        expect(exportDetails).to.eql({
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
+          exported_count: 3,
+          exported_rules_count: 3,
+          missing_exception_list_item_count: 0,
+          missing_exception_list_items: [],
+          missing_exception_lists: [],
+          missing_exception_lists_count: 0,
+          missing_rules: [],
+          missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 0,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
+        });
+      });
+
+      it('should delete rules', async () => {
+        const ruleIdWithLegacyInvestigationField = '2297be91-894c-4831-830f-b424a0ec84f0';
+        const ruleIdWithLegacyInvestigationFieldEmptyArray = '2297be91-894c-4831-830f-b424a0ec5678';
+        const ruleIdWithInvestigationField = '2297be91-894c-4831-830f-b424a0ec9102';
+
+        const { body } = await postBulkAction()
+          .send({ query: '', action: BulkActionType.delete })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
+
+        // Check that the deleted rule is returned with the response
+        const names = body.attributes.results.deleted.map(
+          (returnedRule: RuleResponse) => returnedRule.name
+        );
+        expect(names.includes('Test investigation fields')).to.eql(true);
+        expect(names.includes('Test investigation fields empty array')).to.eql(true);
+        expect(names.includes('Test investigation fields object')).to.eql(true);
+
+        // Check that the updates have been persisted
+        await fetchRule(ruleIdWithLegacyInvestigationField).expect(404);
+        await fetchRule(ruleIdWithLegacyInvestigationFieldEmptyArray).expect(404);
+        await fetchRule(ruleIdWithInvestigationField).expect(404);
+      });
+
+      it('should enable rules with legacy investigation fields', async () => {
+        const ruleIdWithLegacyInvestigationField = '2297be91-894c-4831-830f-b424a0ec84f0';
+        const ruleIdWithLegacyInvestigationFieldEmptyArray = '2297be91-894c-4831-830f-b424a0ec5678';
+        const ruleIdWithInvestigationField = '2297be91-894c-4831-830f-b424a0ec9102';
+
+        const { body } = await postBulkAction()
+          .send({ query: '', action: BulkActionType.enable })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
+
+        // Check that the updated rule is returned with the response
+        expect(
+          body.attributes.results.updated.every(
+            (returnedRule: RuleResponse) => returnedRule.enabled
+          )
+        ).to.eql(true);
+
+        // Check that the updates have been persisted
+        const { body: ruleBody } = await fetchRule(ruleIdWithLegacyInvestigationField).expect(200);
+        expect(ruleBody.enabled).to.eql(true);
+        const { body: ruleBody2 } = await fetchRule(
+          ruleIdWithLegacyInvestigationFieldEmptyArray
+        ).expect(200);
+        expect(ruleBody2.enabled).to.eql(true);
+        const { body: ruleBody3 } = await fetchRule(ruleIdWithInvestigationField).expect(200);
+        expect(ruleBody3.enabled).to.eql(true);
+      });
+
+      it('should disable rules with legacy investigation fields', async () => {
+        const ruleIdWithLegacyInvestigationField = '2297be91-894c-4831-830f-b424a0ec84f0';
+        const ruleIdWithLegacyInvestigationFieldEmptyArray = '2297be91-894c-4831-830f-b424a0ec5678';
+        const ruleIdWithInvestigationField = '2297be91-894c-4831-830f-b424a0ec9102';
+        const { body } = await postBulkAction()
+          .send({ query: '', action: BulkActionType.disable })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
+
+        // Check that the updated rule is returned with the response
+        expect(
+          body.attributes.results.updated.every(
+            (returnedRule: RuleResponse) => returnedRule.enabled === false
+          )
+        ).to.eql(true);
+
+        // Check that the updates have been persisted
+        const { body: ruleBody } = await fetchRule(ruleIdWithLegacyInvestigationField).expect(200);
+        expect(ruleBody.enabled).to.eql(false);
+        const { body: ruleBody2 } = await fetchRule(
+          ruleIdWithLegacyInvestigationFieldEmptyArray
+        ).expect(200);
+        expect(ruleBody2.enabled).to.eql(false);
+        const { body: ruleBody3 } = await fetchRule(ruleIdWithInvestigationField).expect(200);
+        expect(ruleBody3.enabled).to.eql(false);
+      });
+
+      it('should duplicate rules with legacy investigation fields', async () => {
+        const { body } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkActionType.duplicate,
+            duplicate: { include_exceptions: false, include_expired_exceptions: false },
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
+
+        // Check that the duplicated rule is returned with the response
+        const names = body.attributes.results.created.map(
+          (returnedRule: RuleResponse) => returnedRule.name
+        );
+        expect(names.includes('Test investigation fields [Duplicate]')).to.eql(true);
+        expect(names.includes('Test investigation fields empty array [Duplicate]')).to.eql(true);
+        expect(names.includes('Test investigation fields object [Duplicate]')).to.eql(true);
+
+        // Check that the updates have been persisted
+        const { body: rulesResponse } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .expect(200);
+
+        expect(rulesResponse.total).to.eql(6);
+      });
+
+      it('should edit rules with legacy investigation fields', async () => {
+        const ruleIdWithLegacyInvestigationField = '2297be91-894c-4831-830f-b424a0ec84f0';
+        const ruleIdWithLegacyInvestigationFieldEmptyArray = '2297be91-894c-4831-830f-b424a0ec5678';
+        const ruleIdWithInvestigationField = '2297be91-894c-4831-830f-b424a0ec9102';
+
+        const { body: setTagsBody } = await postBulkAction().send({
+          query: '',
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
+            {
+              type: BulkActionEditType.set_tags,
+              value: ['reset-tag'],
+            },
+          ],
+        });
+        expect(setTagsBody.attributes.summary).to.eql({
+          failed: 0,
+          skipped: 0,
+          succeeded: 3,
+          total: 3,
+        });
+
+        // Check that the updates have been persisted
+        const { body: setTagsRuleLegacyInvestigationField } = await fetchRule(
+          ruleIdWithLegacyInvestigationField
+        ).expect(200);
+        expect(setTagsRuleLegacyInvestigationField.tags).to.eql(['reset-tag']);
+        expect(setTagsRuleLegacyInvestigationField.investigation_fields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+
+        const { body: setTagsRuleLegacyInvestigationFieldEmptyArray } = await fetchRule(
+          ruleIdWithLegacyInvestigationFieldEmptyArray
+        ).expect(200);
+        expect(setTagsRuleLegacyInvestigationFieldEmptyArray.tags).to.eql(['reset-tag']);
+        expect(setTagsRuleLegacyInvestigationFieldEmptyArray.investigation_fields).to.eql(
+          undefined
+        );
+
+        const { body: setTagsRuleInvestigationField } = await fetchRule(
+          ruleIdWithInvestigationField
+        ).expect(200);
+        expect(setTagsRuleInvestigationField.tags).to.eql(['reset-tag']);
+        expect(setTagsRuleInvestigationField.investigation_fields).to.eql({
+          field_names: ['host.name'],
+        });
+      });
+    });
   });
 };

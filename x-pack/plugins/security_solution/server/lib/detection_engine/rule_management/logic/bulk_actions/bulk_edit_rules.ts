@@ -13,6 +13,7 @@ import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import { enrichFilterWithRuleTypeMapping } from '../search/enrich_filter_with_rule_type_mappings';
 import type { RuleAlertType } from '../../../rule_schema';
+import { migrateInvestigationFields } from '../../utils/utils';
 
 import { ruleParamsModifier } from './rule_params_modifier';
 import { splitBulkEditActions } from './split_bulk_edit_actions';
@@ -47,13 +48,17 @@ export const bulkEditRules = async ({
     ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
     operations,
     paramsModifier: async (ruleParams: RuleAlertType['params']) => {
+      const migratedRuleParams = {
+        ...ruleParams,
+        investigationFields: migrateInvestigationFields(ruleParams.investigationFields),
+      };
       await validateBulkEditRule({
         mlAuthz,
-        ruleType: ruleParams.type,
+        ruleType: migratedRuleParams.type,
         edit: actions,
-        immutable: ruleParams.immutable,
+        immutable: migratedRuleParams.immutable,
       });
-      return ruleParamsModifier(ruleParams, paramsActions);
+      return ruleParamsModifier(migratedRuleParams, paramsActions);
     },
   });
 
