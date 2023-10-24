@@ -43,7 +43,7 @@ import {
 describe(
   'Entity analytics management page',
   {
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     before(() => {
