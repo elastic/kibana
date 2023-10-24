@@ -19,8 +19,11 @@ import {
   WarningHandlerCallback,
 } from './types';
 import { extractWarnings } from './extract_warnings';
-import { ViewWarningButton } from './components/view_warning_button';
-import { getWarningsDescription, getWarningsTitle, viewDetailsLabel } from './components/search_response_warnings/i18n_utils';
+import {
+  getWarningsDescription,
+  getWarningsTitle,
+  viewDetailsLabel,
+} from './components/search_response_warnings/i18n_utils';
 
 interface Services {
   i18n: I18nStart;
@@ -78,20 +81,18 @@ export function handleWarnings({
   services.notifications.toasts.addWarning({
     title: getWarningsTitle([incompleteWarning]),
     text: toMountPoint(
-        <>
-          <EuiText size="s">
-            {getWarningsDescription([incompleteWarning])}
-          </EuiText>
-          <EuiButtonEmpty
-            color="primary"
-            flush="left"
-            onClick={() => {
-              incompleteWarning.openInInspector();
-            }}
-          >
-            {viewDetailsLabel}
-          </EuiButtonEmpty>
-        </>,
+      <>
+        <EuiText size="s">{getWarningsDescription([incompleteWarning])}</EuiText>
+        <EuiButtonEmpty
+          color="primary"
+          flush="left"
+          onClick={() => {
+            incompleteWarning.openInInspector();
+          }}
+        >
+          {viewDetailsLabel}
+        </EuiButtonEmpty>
+      </>,
       { theme: services.theme, i18n: services.i18n }
     ),
   });
