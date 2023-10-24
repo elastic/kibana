@@ -8,7 +8,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { validateSystemActions } from '../../../../lib/validate_system_actions';
+import { validateSystemActionsWithRuleTypeId } from '../../../../lib/validate_system_actions';
 import { parseDuration } from '../../../../../common/parse_duration';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
@@ -80,8 +80,7 @@ export async function createRule<Params extends RuleParams = never>(
     throw Boom.badRequest(`Error validating create data - ${error.message}`);
   }
 
-  await validateSystemActions({
-    actionsClient,
+  validateSystemActionsWithRuleTypeId({
     connectorAdapterRegistry: context.connectorAdapterRegistry,
     systemActions,
   });
