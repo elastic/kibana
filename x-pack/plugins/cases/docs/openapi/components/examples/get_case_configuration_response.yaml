@@ -1,0 +1,25 @@
+summary: Get the case configuration.
+value:
+  - id: 856ee650-6c82-11ee-a20a-6164169afa58
+    closure_type: close-by-user
+    customFields:
+      - key: d312efda-ec2b-42ec-9e2c-84981795c581
+        label: my-text-field
+        required: false
+        type: text
+    owner: cases
+    created_at: 2023-06-01T17:07:17.767Z
+    created_by:
+      username: elastic
+      email: null
+      full_name: null
+    updated_at: null
+    updated_by: null
+    connector:
+      id: none
+      name: none
+      type: .none
+      fields: null
+    mappings: []
+    version: WzUxLDRd
+    error: null
