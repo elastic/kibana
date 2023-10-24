@@ -44,12 +44,9 @@ export function InitialSetupPanel({
         <EuiSpacer size="s" />
 
         <EuiText color="subdued" size="s">
-          <p>
-            {i18n.translate('xpack.observabilityAiAssistant.initialSetupPanel.title', {
-              defaultMessage:
-                'Start your Al experience with Elastic by completing the steps below.',
-            })}
-          </p>
+          {i18n.translate('xpack.observabilityAiAssistant.initialSetupPanel.title', {
+            defaultMessage: 'Start your Al experience with Elastic by completing the steps below.',
+          })}
         </EuiText>
 
         <EuiSpacer size="l" />
@@ -65,8 +62,8 @@ export function InitialSetupPanel({
                 }
               )}
               description={
-                <EuiText size="s">
-                  <p>
+                <>
+                  <EuiText size="s">
                     {i18n.translate(
                       'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.description.paragraph1',
                       {
@@ -74,16 +71,16 @@ export function InitialSetupPanel({
                           'We recommend you enable the knowledge base for a better experience. It will provide the assistant with the ability to learn from your interaction with it.',
                       }
                     )}
-                  </p>
-                  <p>
+                  </EuiText>
+                  <EuiText size="s">
                     {i18n.translate(
                       'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.description.paragraph2',
                       {
                         defaultMessage: 'This step is optional, you can always do it later.',
                       }
                     )}
-                  </p>
-                </EuiText>
+                  </EuiText>
+                </>
               }
               footer={
                 knowledgeBase.status.value?.ready ? (
@@ -138,17 +135,17 @@ export function InitialSetupPanel({
               )}
               description={
                 !connectors.connectors?.length ? (
-                  <EuiText size="s">
-                    <p>
+                  <>
+                    <EuiText size="s">
                       {i18n.translate(
                         'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.description1',
                         {
                           defaultMessage: 'Set up an OpenAI connector with your AI provider.',
                         }
                       )}
-                    </p>
+                    </EuiText>
 
-                    <p>
+                    <EuiText size="s">
                       {i18n.translate(
                         'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.description2',
                         {
@@ -169,18 +166,16 @@ export function InitialSetupPanel({
                         iconType="iInCircle"
                         size="s"
                       />
-                    </p>
-                  </EuiText>
+                    </EuiText>
+                  </>
                 ) : connectors.connectors.length && !connectors.selectedConnector ? (
                   <EuiText size="s">
-                    <p>
-                      {i18n.translate(
-                        'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.description',
-                        {
-                          defaultMessage: 'Please select a provider.',
-                        }
-                      )}
-                    </p>
+                    {i18n.translate(
+                      'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.description',
+                      {
+                        defaultMessage: 'Please select a provider.',
+                      }
+                    )}
                   </EuiText>
                 ) : (
                   ''
@@ -212,12 +207,10 @@ export function InitialSetupPanel({
         <EuiSpacer size="xxl" />
 
         <EuiText color="subdued" size="s">
-          <p>
-            {i18n.translate('xpack.observabilityAiAssistant.initialSetupPanel.disclaimer', {
-              defaultMessage:
-                'The AI provider that is configured may collect telemetry when using the Elastic AI Assistant. Contact your AI provider for information on how data is collected.',
-            })}
-          </p>
+          {i18n.translate('xpack.observabilityAiAssistant.initialSetupPanel.disclaimer', {
+            defaultMessage:
+              'The AI provider that is configured may collect telemetry when using the Elastic AI Assistant. Contact your AI provider for information on how data is collected.',
+          })}
         </EuiText>
       </EuiPanel>
     </>

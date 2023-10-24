@@ -26,6 +26,7 @@
     "@kbn/securitysolution-io-ts-alerting-types",
     "@kbn/tooling-log",
     "@kbn/rule-data-utils",
-    "@kbn/securitysolution-list-constants"
+    "@kbn/securitysolution-list-constants",
+    "@kbn/core-saved-objects-server"
   ]
 }
