@@ -117,7 +117,7 @@ describe('SyncJobsViewLogic', () => {
           syncJobsPagination: {
             pageIndex: 2,
             pageSize: 20,
-          totalItemCount: 50,
+            totalItemCount: 50,
           },
           syncJobsStatus: Status.SUCCESS,
         });
