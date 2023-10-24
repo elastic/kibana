@@ -11,25 +11,25 @@ import { i18n } from '@kbn/i18n';
 import { FilteringPolicy, FilteringRuleRule } from '..';
 
 const filteringRuleStringMap: Record<FilteringRuleRule, string> = {
-  contains: i18n.translate('xpack.enterpriseSearch.content.filteringRules.rules.contains', {
+  contains: i18n.translate('searchConnectors.content.filteringRules.rules.contains', {
     defaultMessage: 'Contains',
   }),
-  ends_with: i18n.translate('xpack.enterpriseSearch.content.filteringRules.rules.endsWith', {
+  ends_with: i18n.translate('searchConnectors.content.filteringRules.rules.endsWith', {
     defaultMessage: 'Ends with',
   }),
-  equals: i18n.translate('xpack.enterpriseSearch.content.filteringRules.rules.equals', {
+  equals: i18n.translate('searchConnectors.content.filteringRules.rules.equals', {
     defaultMessage: 'Equals',
   }),
-  ['>']: i18n.translate('xpack.enterpriseSearch.content.filteringRules.rules.greaterThan', {
+  ['>']: i18n.translate('searchConnectors.content.filteringRules.rules.greaterThan', {
     defaultMessage: 'Greater than',
   }),
-  ['<']: i18n.translate('xpack.enterpriseSearch.content.filteringRules.rules.lessThan', {
+  ['<']: i18n.translate('searchConnectors.content.filteringRules.rules.lessThan', {
     defaultMessage: 'Less than',
   }),
-  regex: i18n.translate('xpack.enterpriseSearch.content.filteringRules.rules.regEx', {
+  regex: i18n.translate('searchConnectors.content.filteringRules.rules.regEx', {
     defaultMessage: 'Regular expression',
   }),
-  starts_with: i18n.translate('xpack.enterpriseSearch.content.filteringRules.rules.startsWith', {
+  starts_with: i18n.translate('searchConnectors.content.filteringRules.rules.startsWith', {
     defaultMessage: 'Starts with',
   }),
 };
@@ -39,10 +39,10 @@ export function filteringRuleToText(filteringRule: FilteringRuleRule): string {
 }
 
 const filteringPolicyStringMap: Record<FilteringPolicy, string> = {
-  exclude: i18n.translate('xpack.enterpriseSearch.content.filteringRules.policy.exclude', {
+  exclude: i18n.translate('searchConnectors.content.filteringRules.policy.exclude', {
     defaultMessage: 'Exclude',
   }),
-  include: i18n.translate('xpack.enterpriseSearch.content.filteringRules.policy.include', {
+  include: i18n.translate('searchConnectors.content.filteringRules.policy.include', {
     defaultMessage: 'Include',
   }),
 };

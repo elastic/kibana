@@ -93,13 +93,6 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
     features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled
   );
   const [isEditing, setIsEditing] = useState(false);
-  const [editingConfig, setEditingConfig] = useState<ConfigView>(
-    sortAndFilterConnectorConfiguration(configuration, isNative)
-  );
-
-  useEffect(() => {
-    setEditingConfig(sortAndFilterConnectorConfiguration(configuration, isNative));
-  }, [configuration, isEditing, isNative]);
 
   useEffect(() => {
     setIsEditing(false);
