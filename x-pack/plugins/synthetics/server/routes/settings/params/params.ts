@@ -7,10 +7,10 @@
 
 import { IKibanaResponse } from '@kbn/core/server';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsParamType } from '../../../common/types/saved_objects';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../common/runtime_types';
+import { SyntheticsRestApiRouteFactory } from '../../types';
+import { syntheticsParamType } from '../../../../common/types/saved_objects';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
 type SyntheticsParamsResponse =
   | IKibanaResponse<SyntheticsParams[]>

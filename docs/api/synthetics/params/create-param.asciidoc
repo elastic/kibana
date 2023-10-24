@@ -1,0 +1,68 @@
+[[create-parameter-api]]
+== Create Parameter API
+++++
+<titleabbrev>Create Parameter</titleabbrev>
+++++
+
+Creates a parameter with the following schema.
+
+=== {api-request-title}
+
+`POST <your-api-host>/api/synthetics/parameters`
+
+=== {api-prereq-title}
+
+To use this API, you must have appropriate permissions for creating parameters.
+
+[[parameter-create-request-body]]
+==== Request body
+
+The request body should contain the following attributes:
+
+`key`::
+(Required, string) The key of the parameter.
+
+`value`::
+(Required, string) The value associated with the parameter.
+
+`description`::
+(Optional, string) A description of the parameter.
+
+`tags`::
+(Optional, array of strings) An array of tags to categorize the parameter.
+
+`share_across_spaces`::
+(Optional, boolean) Whether the parameter should be shared across spaces.
+
+[[parameter-create-example]]
+==== Example
+
+Here is an example of a POST request to create a parameter:
+
+[source,sh]
+--------------------------------------------------
+POST /api/synthetics/parameters
+{
+  "key": "api_key",
+  "value": "your-api-key-value",
+  "description": "API Key for authentication",
+  "tags": ["authentication", "security"],
+  "share_across_spaces": true
+}
+--------------------------------------------------
+
+The API returns the created parameter as follows:
+
+[source,json]
+--------------------------------------------------
+{
+  "id": "unique-parameter-id",
+  "key": "api_key",
+  "value": "your-api-key-value",
+  "description": "API Key for authentication",
+  "tags": ["authentication", "security"],
+  "share_across_spaces": true
+}
+--------------------------------------------------
+
+This example provides documentation for creating a parameter using the specified schema and includes an example of a POST request and the expected response. You can replace `<your-api-host>` with the actual host where your API is available.

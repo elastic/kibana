@@ -1,0 +1,12 @@
+[[synthetics-apis]]
+== Synthetics APIs
+
+The following APIs are available for Synthetics.
+
+* <<create-parameter-api, Create Parameter API>> to create a parameter.
+
+* <<delete-parameters-by-ids-api, Delete Parameter API>> to delete a parameter.
+
+
+include::params/create-param.asciidoc[leveloffset=+1]
+include::params/delete-param.asciidoc[leveloffset=+1]

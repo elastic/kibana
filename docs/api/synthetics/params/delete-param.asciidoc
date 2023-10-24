@@ -1,0 +1,35 @@
+[[delete-parameters-by-ids-api]]
+== Delete Parameters by IDs API
+++++
+<titleabbrev>Delete Parameters</titleabbrev>
+++++
+
+Deletes a list of parameters based on their IDs.
+
+=== {api-request-title}
+
+`DELETE <your-api-host>/api/synthetics/parameters`
+
+=== {api-prereq-title}
+
+To use this API, you must have appropriate permissions for deleting parameters.
+
+[[parameters-delete-query-params]]
+==== Query Parameters
+
+`ids`::
+(Required, string) A comma-separated list of parameter IDs to be deleted.
+
+[[parameters-delete-example]]
+==== Example
+
+Here is an example of a DELETE request to delete a list of parameters by their IDs:
+
+[source,sh]
+--------------------------------------------------
+DELETE /api/synthetics/parameters?ids=param_id1,param_id2,param_id3
+--------------------------------------------------
+
+The API does not return a response body for the deletion request, but it will return an appropriate status code upon successful deletion.
+
+This API allows you to delete multiple parameters by specifying their IDs in the `ids` query parameter. Please replace `<your-api-host>` with the actual host where your API is available and provide a valid list of parameter IDs in the query parameter.

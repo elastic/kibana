@@ -1,0 +1,69 @@
+[[edit-parameter-by-id-api]]
+== Edit Parameter by ID API
+++++
+<titleabbrev>Edit Parameter</titleabbrev>
+++++
+
+Edits a parameter with the specified ID.
+
+=== {api-request-title}
+
+`PUT <your-api-host>/api/synthetics/parameters/{paramId}`
+
+=== {api-prereq-title}
+
+To use this API, you must have appropriate permissions for editing parameters.
+
+[[parameter-edit-path-params]]
+==== Path Parameters
+
+`paramId`::
+(Required, string) The unique identifier of the parameter to be edited.
+
+[[parameter-edit-request-body]]
+==== Request body
+
+The request body should contain the following attributes:
+
+`key`::
+(Optional, string) The key of the parameter.
+
+`value`::
+(Optional, string) The updated value associated with the parameter.
+
+`description`::
+(Optional, string) The updated description of the parameter.
+
+`tags`::
+(Optional, array of strings) An array of updated tags to categorize the parameter.
+
+[[parameter-edit-example]]
+==== Example
+
+Here is an example of a PUT request to edit a parameter by its ID:
+
+[source,sh]
+--------------------------------------------------
+PUT /api/synthetics/parameters/param_id1
+{
+  "key": "updated_api_key",
+  "value": "updated-api-key-value",
+  "description": "Updated API Key for authentication",
+  "tags": ["authentication", "security", "updated"]
+}
+--------------------------------------------------
+
+The API returns the updated parameter as follows:
+
+[source,json]
+--------------------------------------------------
+{
+  "id": "param_id1",
+  "key": "updated_api_key",
+  "value": "updated-api-key-value",
+  "description": "Updated API Key for authentication",
+  "tags": ["authentication", "security", "updated"]
+}
+--------------------------------------------------
+
+This example provides documentation for editing a parameter by its ID using the specified schema and includes an example of a PUT request and the expected response. You can replace `<your-api-host>` with the actual host where your API is available and use a valid `paramId` in the URL path.
