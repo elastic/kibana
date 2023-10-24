@@ -12,9 +12,10 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { ReloadContextProvider } from '../hooks/use_reload';
-import type {
-  ChangePointAnnotation,
-  ChangePointDetectionRequestParams,
+import {
+  type ChangePointAnnotation,
+  ChangePointDetectionControlsContextProvider,
+  type ChangePointDetectionRequestParams,
 } from '../components/change_point_detection/change_point_detection_context';
 import type {
   EmbeddableChangePointChartInput,
@@ -82,22 +83,24 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
   return (
     <ReloadContextProvider reload$={resultObservable$}>
       <DataSourceContextProvider dataViewId={input.dataViewId}>
-        <FilterQueryContextProvider timeRange={input.timeRange}>
-          <ChartGridEmbeddableWrapper
-            timeRange={input.timeRange}
-            fn={input.fn}
-            metricField={input.metricField}
-            splitField={input.splitField}
-            maxSeriesToPlot={input.maxSeriesToPlot}
-            dataViewId={input.dataViewId}
-            partitions={input.partitions}
-            onLoading={onLoading}
-            onRenderComplete={onRenderComplete}
-            onError={onError}
-            onChange={input.onChange}
-            emptyState={input.emptyState}
-          />
-        </FilterQueryContextProvider>
+        <ChangePointDetectionControlsContextProvider>
+          <FilterQueryContextProvider timeRange={input.timeRange}>
+            <ChartGridEmbeddableWrapper
+              timeRange={input.timeRange}
+              fn={input.fn}
+              metricField={input.metricField}
+              splitField={input.splitField}
+              maxSeriesToPlot={input.maxSeriesToPlot}
+              dataViewId={input.dataViewId}
+              partitions={input.partitions}
+              onLoading={onLoading}
+              onRenderComplete={onRenderComplete}
+              onError={onError}
+              onChange={input.onChange}
+              emptyState={input.emptyState}
+            />
+          </FilterQueryContextProvider>
+        </ChangePointDetectionControlsContextProvider>
       </DataSourceContextProvider>
     </ReloadContextProvider>
   );

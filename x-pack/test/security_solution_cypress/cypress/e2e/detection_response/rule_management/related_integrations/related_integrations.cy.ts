@@ -45,8 +45,7 @@ import {
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Related integrations', { tags: ['@ess', '@serverless'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
   const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [

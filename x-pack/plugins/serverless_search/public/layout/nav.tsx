@@ -31,52 +31,50 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'search_getting_started',
-          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-            defaultMessage: 'Getting started',
-          }),
-          link: 'serverlessElasticsearch',
-        },
-        {
           id: 'dev_tools',
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          isGroupTitle: true,
+          link: 'dev_tools:console',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+          },
         },
-        { link: 'dev_tools:console' },
-        { link: 'dev_tools:searchprofiler' },
         {
           id: 'explore',
           title: i18n.translate('xpack.serverlessSearch.nav.explore', {
             defaultMessage: 'Explore',
           }),
-          isGroupTitle: true,
-        },
-        {
-          link: 'discover',
-        },
-        {
-          link: 'dashboards',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-          },
-        },
-        {
-          link: 'visualize',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
-          },
-        },
-        {
-          link: 'management:triggersActions',
-          title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
-            defaultMessage: 'Alerts',
-          }),
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
+            },
+            {
+              link: 'visualize',
+              title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
+                defaultMessage: 'Visualizations',
+              }),
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return (
+                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
+                  pathNameSerialized.startsWith(prepend('/app/maps'))
+                );
+              },
+            },
+            {
+              link: 'management:triggersActions',
+              title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
+                defaultMessage: 'Alerts',
+              }),
+            },
+          ],
         },
 
         {
@@ -84,38 +82,51 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessSearch.nav.content', {
             defaultMessage: 'Content',
           }),
-          isGroupTitle: true,
+          children: [
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
+                defaultMessage: 'Index Management',
+              }),
+              link: 'management:index_management',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
+                defaultMessage: 'Pipelines',
+              }),
+              link: 'management:ingest_pipelines',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+          ],
         },
-        {
-          title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
-            defaultMessage: 'Index Management',
-          }),
-          link: 'management:index_management',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
-        },
-        {
-          title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
-            defaultMessage: 'Pipelines',
-          }),
-          link: 'management:ingest_pipelines',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
-        },
-
         {
           id: 'security',
           title: i18n.translate('xpack.serverlessSearch.nav.security', {
             defaultMessage: 'Security',
           }),
-          isGroupTitle: true,
-        },
-        {
-          link: 'management:api_keys',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+          children: [
+            {
+              link: 'management:api_keys',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+          ],
         },
       ],
     },
   ],
   footer: [
+    {
+      type: 'navItem',
+      id: 'search_getting_started',
+      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+        defaultMessage: 'Get started',
+      }),
+      icon: 'launch',
+      link: 'serverlessElasticsearch',
+    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',

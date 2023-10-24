@@ -14,13 +14,14 @@ import { TabSwitcherProvider } from './hooks/use_tab_switcher';
 import { DataViewsProvider } from './hooks/use_data_views';
 
 const ContentTemplate = ({
-  header,
+  tabs,
+  links,
   renderMode,
 }: ContentTemplateProps & { renderMode: RenderMode }) => {
   return renderMode.mode === 'flyout' ? (
-    <Flyout header={header} closeFlyout={renderMode.closeFlyout} />
+    <Flyout tabs={tabs} links={links} closeFlyout={renderMode.closeFlyout!} />
   ) : (
-    <Page header={header} />
+    <Page tabs={tabs} links={links} />
   );
 };
 
@@ -32,10 +33,10 @@ export const AssetDetails = ({
   ...props
 }: AssetDetailsProps) => {
   return (
-    <ContextProviders props={{ ...props, renderMode }}>
+    <ContextProviders {...props} renderMode={renderMode}>
       <TabSwitcherProvider defaultActiveTabId={tabs[0]?.id}>
         <DataViewsProvider metricAlias={metricAlias}>
-          <ContentTemplate header={{ tabs, links }} renderMode={renderMode} />
+          <ContentTemplate tabs={tabs} links={links} renderMode={renderMode} />
         </DataViewsProvider>
       </TabSwitcherProvider>
     </ContextProviders>
