@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointPageUtils } from './page_utils';
 import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
@@ -17,9 +16,11 @@ import { EndpointPolicyPageProvider } from './policy_page';
 import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { FleetIntegrations } from './fleet_integrations_page';
 import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
+import { pageObjects as serverlessFunctionalPageObjects } from '../../../test_serverless/functional/page_objects';
 
 export const pageObjects = {
-  ...xpackFunctionalPageObjects,
+  ...serverlessFunctionalPageObjects, // contains x-pack page objects and serverless specific page objects as well
+
   endpoint: EndpointPageProvider,
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
