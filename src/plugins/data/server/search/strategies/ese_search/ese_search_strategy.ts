@@ -47,7 +47,11 @@ export const enhancedEsSearchStrategyProvider = (
       const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
       await client.asyncSearch.delete({ id });
     } catch (e) {
-      throw getKbnServerError(e);
+      // eslint-disable-next-line no-console
+      console.error('async cancel exception', e);
+      // This exception might bring down the Kibana server instance, the question is also why it needs to be an
+      // Exception, since in the given case it's just, the search has already been deleted, no harm is done
+      // throw getKbnServerError(e);
     }
   }
 
