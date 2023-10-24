@@ -70,6 +70,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchLandingPage.apiKeys.expectRoleDescriptorsEditorToExist();
         await pageObjects.svlSearchLandingPage.apiKeys.createApiKeySubmitAndSuccess();
       });
+      it('shows server error with invalid API key data', async () => {
+        await pageObjects.svlSearchLandingPage.apiKeys.openCreateFlyout();
+        await pageObjects.svlSearchLandingPage.apiKeys.setApiKeyName('test-roles-api-key');
+        await pageObjects.svlSearchLandingPage.apiKeys.createApiKeyToggleRoleDescriptorsSwitch();
+        await pageObjects.svlSearchLandingPage.apiKeys.setRoleDescriptorsValue(
+          '{"invalid": "role"}'
+        );
+        await pageObjects.svlSearchLandingPage.apiKeys.createApiKeySubmitAndError();
+        await pageObjects.svlSearchLandingPage.apiKeys.createApiKeyCancel();
+      });
     });
   });
 }
