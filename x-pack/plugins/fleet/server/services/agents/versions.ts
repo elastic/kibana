@@ -75,9 +75,8 @@ export const getAvailableVersions = async ({
 
     return availableVersions;
   } catch (e) {
-    if (e.code === 'ENOENT' && !config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
-      // If the file does not exist, return the current version
-      return [kibanaVersion];
+    if (e.code === 'ENOENT') {
+      return config?.internal?.onlyAllowAgentUpgradeToKnownVersions ? [] : [kibanaVersion];
     }
     throw e;
   }
