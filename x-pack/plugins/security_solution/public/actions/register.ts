@@ -38,6 +38,7 @@ import type {
 } from './types';
 import { enhanceActionWithTelemetry } from './telemetry';
 import { registerDiscoverHistogramActions } from './discover_in_timeline/vis_apply_filter';
+import { createFilterInLensAction } from './filter/lens/filter_in';
 
 export const registerUIActions = (
   store: SecurityAppStore,
@@ -58,6 +59,9 @@ const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartS
 
   const copyToClipboardAction = createCopyToClipboardLensAction({ order: 2 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
+
+  const filterInAction = createFilterInLensAction({ store, order: 0, services });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInAction);
 };
 
 const registerDiscoverCellActions = (store: SecurityAppStore, services: StartServices) => {
