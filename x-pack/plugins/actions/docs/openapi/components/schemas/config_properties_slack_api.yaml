@@ -1,0 +1,24 @@
+title: Connector request properties for a Slack connector
+description: Defines properties for connectors when type is `.slack_api`.
+type: object
+properties:
+  allowedChannels:
+    type: array
+    description: A list of valid Slack channel identifiers.
+    items:
+      type: object
+      required:
+        - id
+        - name
+      maxItems: 25
+      properties:
+        id:
+          type: string
+          description: The Slack channel ID.
+          example: C123ABC456
+          minLength: 1
+        name:
+          type: string
+          description: The Slack channel name.
+          # TBD: Is this used to communicate with Slack or only for display purposes in Elastic?
+          minLength: 1

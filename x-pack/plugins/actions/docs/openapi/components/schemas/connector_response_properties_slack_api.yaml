@@ -7,6 +7,8 @@ required:
   - is_preconfigured
   - name
 properties:
+  config:
+    $ref: 'config_properties_slack_api.yaml'
   connector_type_id:
     type: string
     description: The type of connector.
