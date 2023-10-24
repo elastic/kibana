@@ -322,6 +322,7 @@ class DocLinks {
     this.workplaceSearchDropbox = '';
     this.workplaceSearchExternalSharePointOnline = '';
     this.workplaceSearchExternalIdentities = '';
+    this.workplaceSearchGatedFormBlog = '';
     this.workplaceSearchGatedFormDataUse = '';
     this.workplaceSearchGatedFormPrivacyStatement = '';
     this.workplaceSearchGatedFormTermsOfService = '';
