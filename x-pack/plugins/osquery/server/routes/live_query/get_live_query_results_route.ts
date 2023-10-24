@@ -92,7 +92,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
                 ),
                 sort: [
                   {
-                    direction: (request.query.sortOrder as Direction) ?? Direction.desc,
+                    direction: request.query.sortOrder ?? Direction.desc,
                     field: request.query.sort ?? '@timestamp',
                   },
                 ],
