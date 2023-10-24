@@ -40,24 +40,21 @@ export function AssetsInventoryPage() {
   useEffect(() => {
     async function retrieve() {
       setIsLoading(true);
-      const { hosts } = await services.assetManager.publicAssetsClient.getHosts({
+      const result = await services.assetManager.publicAssetsClient.getHosts({
         from: start,
         to: end,
         filters,
       });
-      setHosts(hosts);
+      setHosts(result.hosts);
       setIsLoading(false);
     }
     retrieve();
   }, [services, filters, start, end]);
 
-  const onTimeChange = useCallback(
-    ({ start, end }: OnTimeChangeProps) => {
-      setStart(start);
-      setEnd(end);
-    },
-    [start, end]
-  );
+  const onTimeChange = useCallback((update: OnTimeChangeProps) => {
+    setStart(update.start);
+    setEnd(update.end);
+  }, []);
 
   return (
     <ObservabilityPageTemplate
@@ -75,9 +72,8 @@ export function AssetsInventoryPage() {
       <EuiFlexGroup>
         <EuiFlexItem>
           <SearchBar
-            onSubmit={(filters) => {
-              console.log('incoming filters', filters);
-              setFilters(filters);
+            onSubmit={(submittedFilters) => {
+              setFilters(submittedFilters);
             }}
           />
         </EuiFlexItem>
