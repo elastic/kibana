@@ -47,9 +47,9 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText color="subdued">
-          {i18n.translate('xpack.serverlessSearch.connectors.config.linkToElasticTitle', {
+          {i18n.translate('xpack.serverlessSearch.connectors.config.linkToElasticDescription', {
             defaultMessage:
-              'You need to run the connector code on your own infrastructure     and link it to your Elasticsearch instance. You have two options:',
+              'You need to run the connector code on your own infrastructure and link it to your Elasticsearch instance. You have two options:',
           })}
         </EuiText>
       </EuiFlexItem>

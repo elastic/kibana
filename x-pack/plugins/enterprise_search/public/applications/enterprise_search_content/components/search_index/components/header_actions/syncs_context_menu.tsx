@@ -125,9 +125,10 @@ export const SyncsContextMenu: React.FC = () => {
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
                 'data-test-subj':
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-                disabled:
+                disabled: Boolean(
                   ingestionStatus === IngestionStatus.INCOMPLETE ||
-                  connector?.configuration.use_document_level_security?.value,
+                    connector?.configuration.use_document_level_security?.value
+                ),
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
                   defaultMessage: 'Access Control',
