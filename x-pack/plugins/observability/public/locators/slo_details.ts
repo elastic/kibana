@@ -7,7 +7,6 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import { sloDetailsLocatorID } from '../../common';
 import { SLOS_PATH } from '../../common/locators/paths';
 
@@ -21,7 +20,7 @@ export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetails
 
   public readonly getLocation = async ({ sloId, instanceId }: SloDetailsLocatorParams) => {
     const queryParams =
-      !!instanceId && instanceId !== ALL_VALUE ? `?instanceId=${encodeURI(instanceId)}` : '';
+      !!instanceId && instanceId !== '*' ? `?instanceId=${encodeURI(instanceId)}` : '';
     const path = !!sloId ? `${SLOS_PATH}/${encodeURI(sloId)}${queryParams}` : SLOS_PATH;
 
     return {

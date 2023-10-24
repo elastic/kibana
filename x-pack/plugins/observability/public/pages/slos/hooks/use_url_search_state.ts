@@ -8,7 +8,7 @@
 import { useHistory } from 'react-router-dom';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
-import { SortField } from '../components/slo_list_search_bar';
+import type { SortField } from '../components/slo_list_search_bar';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
 
