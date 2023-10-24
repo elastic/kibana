@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { ApplicationStart } from '@kbn/core/public';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import { IEsError } from './types';
 import { getRootCause } from './utils';
@@ -20,7 +20,7 @@ export class EsError extends KbnError {
   constructor(protected readonly err: IEsError) {
     super(
       `EsError: ${
-        getRootCause(err)?.reason ||
+        getRootCause(err?.attributes?.error)?.reason ||
         i18n.translate('data.esError.unknownRootCause', { defaultMessage: 'unknown' })
       }`
     );
@@ -28,18 +28,20 @@ export class EsError extends KbnError {
   }
 
   public getErrorMessage(application: ApplicationStart) {
-    const rootCause = getRootCause(this.err)?.reason;
-    const topLevelCause = this.attributes?.reason;
+    if (!this.attributes?.error) {
+      return null;
+    }
+
+    const rootCause = getRootCause(this.attributes.error)?.reason;
+    const topLevelCause = this.attributes.error.reason;
     const cause = rootCause ?? topLevelCause;
 
     return (
       <>
         <EuiSpacer size="s" />
-        {cause ? (
-          <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
-            {cause}
-          </EuiCodeBlock>
-        ) : null}
+        <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
+          {cause}
+        </EuiCodeBlock>
       </>
     );
   }

@@ -43,11 +43,15 @@ export const postActionsConnectorExecuteRoute = (
         const actions = (await context.elasticAssistant).actions;
         // if not langchain, call execute action directly and return the response:
         if (!request.body.assistantLangChain) {
+          logger.debug('Executing via actions framework directly, assistantLangChain: false');
           const result = await executeAction({ actions, request, connectorId });
           return response.ok({
             body: result,
           });
         }
+
+        // TODO: Add `traceId` to actions request when calling via langchain
+        logger.debug('Executing via langchain, assistantLangChain: true');
 
         // get a scoped esClient for assistant memory
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;

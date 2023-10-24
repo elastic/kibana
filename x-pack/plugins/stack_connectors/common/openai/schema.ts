@@ -85,7 +85,7 @@ export const RunActionResponseSchema = schema.object(
           message: schema.object(
             {
               role: schema.string(),
-              content: schema.string(),
+              content: schema.maybe(schema.string()),
             },
             { unknowns: 'ignore' }
           ),

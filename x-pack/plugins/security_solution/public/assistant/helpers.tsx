@@ -49,7 +49,13 @@ export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetails
   return getFieldsAsCsv(allFields);
 };
 
-const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = ['kql', 'dsl', 'eql'];
+const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = [
+  'kql',
+  'dsl',
+  'eql',
+  'esql',
+  'sql', // Models often put the code block language as sql, for esql, so adding this as a fallback
+];
 
 /**
  * Returns message contents with replacements applied.

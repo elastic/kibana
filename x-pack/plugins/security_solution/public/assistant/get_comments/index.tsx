@@ -17,6 +17,8 @@ import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
+import { customCodeBlockLanguagePlugin } from './custom_codeblock/custom_codeblock_markdown_plugin';
+import { CustomCodeBlock } from './custom_codeblock/custom_code_block';
 
 export const getComments = ({
   amendMessage,

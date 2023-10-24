@@ -126,7 +126,7 @@ export const fetchConnectorExecuteAction = async ({
     };
   } catch (error) {
     return {
-      response: API_ERROR,
+      response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
       isError: true,
       isStream: false,
     };
