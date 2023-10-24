@@ -13,15 +13,36 @@ categories.
 
 ### Adding new items to the navigation
 
-For adding a new item to the navigation all you have to do is edit the `cards_navigation/src/consts.tsx`
-file and add two things:
+There are two distinctive ways of adding items to the navigation;
 
-* Add the app id into the `appIds` enum (make sure that the app_id value matches the one from the plugin)
-* Add a new entry to the `appDefinitions` object. In here you can specify the category where you want it to be, icon and description.
+- to add navigation items that would be visible across all consumers of this package all you have to do is;
+
+  * edit the `cards_navigation/src/types.tsx` file and add the app id into the `appIds` enum (make sure that the app_id value matches the one from the plugin)
+  * edit the `cards_navigation/src/const.tsx`, add a new entry to the `appDefinitions` object. In here you can specify the category where you want it to be, icon and description.
+
+- To add a localized navigation item that would only exist within the context of usage for this component, an "extend card navigation" definition can be passed in like so; 
+
+  ```typescript
+  <CardsNavigation
+    sections={sections}
+    appBasePath={appBasePath}
+    extendedCardNavigationDefinitions={{
+      visualize: {
+        category: 'content',
+        description: 'create different visualizations based on your data.'
+        icon: 'visualizeApp',
+      },
+    }}
+  />
+  ```
+
+  In the example above assuming the key `visualize` is a valid registered management app ID, this definition would show up as a navigation card under the predefined category `content`. It's also worth pointing out that there's also 
+  an opt out functionality that allows one to provide definitions that don't map to management app, and requires that the property `skipValidation` be passed and set to true, in this case the responsibility is on the 
+  user passing the defintion to also provide the `href` that the card will link to, and it's `title`.
 
 ### Removing an item from the navigation
 
-If an item needs to be hidden from the navigation you can specify that by using the `hideLinksTo` prop:
+If an item needs to be hidden from the navigation you can specify that by using the `hideLinksTo` prop like so:
 
 ```typescript
 <CardsNavigation

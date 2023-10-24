@@ -13,6 +13,7 @@ export const CURRENT_CONNECTORS_JOB_INDEX = '.elastic-connectors-sync-jobs-v1';
 export const CONNECTORS_VERSION = 1;
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
 
+export * from './components';
 export * from './connectors';
 export * from './lib';
 export * from './types';

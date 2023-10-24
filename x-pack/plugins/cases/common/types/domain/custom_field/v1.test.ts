@@ -15,7 +15,7 @@ describe('CaseCustomFieldRt', () => {
       {
         key: 'string_custom_field_1',
         type: 'text',
-        value: ['this is a text field value'],
+        value: 'this is a text field value',
       },
     ],
     [
@@ -55,7 +55,7 @@ describe('CaseCustomFieldRt', () => {
     const query = CaseCustomFieldRt.decode({
       key: 'text_custom_field_1',
       type: 'text',
-      value: [1],
+      value: 1,
     });
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value 1 supplied');

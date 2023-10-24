@@ -20,9 +20,19 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/168340
+describe.skip(
   'Automated Response Actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  {
+    tags: [
+      '@ess',
+      '@serverless',
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      '@brokenInServerless',
+    ],
+  },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
@@ -66,7 +76,8 @@ describe(
       disableExpandableFlyoutAdvancedSettings();
     });
 
-    describe('From alerts', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168427
+    describe.skip('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
@@ -83,7 +94,7 @@ describe(
         }
       });
 
-      it.skip('should have generated endpoint and rule', () => {
+      it('should have generated endpoint and rule', () => {
         loadPage(APP_ENDPOINTS_PATH);
         cy.contains(createdHost.hostname).should('exist');
 
