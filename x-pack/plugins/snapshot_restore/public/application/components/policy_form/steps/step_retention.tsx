@@ -102,6 +102,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               }}
               data-test-subj="expireAfterValueInput"
               min={0}
+              aria-label="Expiration time input"
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -116,6 +117,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="expireAfterUnitSelect"
+              aria-label="Expiration time units selection"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
