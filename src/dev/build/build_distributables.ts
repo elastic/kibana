@@ -114,7 +114,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.AssertPathLength);
     await run(Tasks.AssertNoUUID);
   }
-
+  // control w/ --skip-cdn-assets
   if (options.createCdnAssets) {
     await run(Tasks.CreateCdnAssets);
   }
