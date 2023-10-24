@@ -146,7 +146,7 @@ export class RemoteClustersFormField extends PureComponent {
           aria-label={i18n.translate(
             'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterSelectAriaLabel',
             {
-              defaultMessage: 'Remote cluster',
+              defaultMessage: 'Remote cluster selection',
             }
           )}
         />
