@@ -102,6 +102,9 @@ export const createLogExplorerProfileCustomizations =
         openItem: { disabled: true },
         saveItem: { disabled: true },
       },
+      defaultBadges: {
+        unsavedChangesBadge: { disabled: true },
+      },
     });
 
     /**

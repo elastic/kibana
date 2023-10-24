@@ -35,13 +35,12 @@ export const getTopNavBadges = ({
       state: stateContainer,
     });
 
-  const badges: TopNavMenuBadgeProps[] = [];
+  const defaultBadges = topNavCustomization?.defaultBadges;
+  const entries = [...(topNavCustomization?.getBadges?.() ?? [])];
 
-  // TODO: make it customizable
-
-  if (hasUnsavedChanges) {
-    badges.push(
-      getTopNavUnsavedChangesBadge({
+  if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
+    entries.push({
+      data: getTopNavUnsavedChangesBadge({
         onRevert: stateContainer.actions.undoSavedSearchChanges,
         onSave: async () => {
           await saveSearch();
@@ -49,9 +48,10 @@ export const getTopNavBadges = ({
         onSaveAs: async () => {
           await saveSearch(true);
         },
-      })
-    );
+      }),
+      order: defaultBadges?.unsavedChangesBadge?.order ?? 100,
+    });
   }
 
-  return badges;
+  return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
 };
