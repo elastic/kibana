@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { filter, mergeMap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 
 import type {
@@ -59,7 +59,7 @@ export class AnalyticsService {
       .pipe(
         filter(({ allowLogin }) => allowLogin),
         throttleTime(5000),
-        mergeMap(async () => {
+        switchMap(async () => {
           try {
             await AnalyticsService.recordAuthTypeAnalytics(http);
           } catch {

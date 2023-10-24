@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { merge, mergeMap, Subject, Subscription } from 'rxjs';
+import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
 import React, { createContext, useContext } from 'react';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
@@ -208,7 +208,7 @@ export class OptionsListEmbeddable
               a.existsSelected === b.existsSelected &&
               isEqual(a.selectedOptions, b.selectedOptions)
           ),
-          mergeMap(async ({ selectedOptions: newSelectedOptions }) => {
+          tap(({ selectedOptions: newSelectedOptions }) => {
             if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
               this.dispatch.clearValidAndInvalidSelections({});
             } else {
@@ -227,6 +227,8 @@ export class OptionsListEmbeddable
                 invalidSelections: newInvalidSelections,
               });
             }
+          }),
+          switchMap(async () => {
             const newFilters = await this.buildFilter();
             this.dispatch.publishFilters(newFilters);
           })

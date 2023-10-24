@@ -10,7 +10,7 @@ import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { mergeMap } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { useSavedSearchInitial } from '../services/discover_state_provider';
 import type { DiscoverStateContainer } from '../services/discover_state';
 import { getValidViewMode } from '../utils/get_valid_view_mode';
@@ -54,7 +54,7 @@ export function useTextBasedQueryLanguage({
   useEffect(() => {
     const subscription = stateContainer.dataState.data$.documents$
       .pipe(
-        mergeMap(async (next) => {
+        switchMap(async (next) => {
           const { query, recordRawType } = next;
           if (!query || next.fetchStatus === FetchStatus.ERROR) {
             return;

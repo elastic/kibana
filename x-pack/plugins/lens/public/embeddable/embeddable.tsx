@@ -32,7 +32,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
-import { merge, mergeMap, Subscription } from 'rxjs';
+import { merge, Subscription, switchMap } from 'rxjs';
 import { toExpression } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
@@ -546,7 +546,7 @@ export class Embeddable
       merge(searchContext$, attributesOrSavedObjectId$)
         .pipe(
           debounceTime(0),
-          mergeMap(async ({ trigger, input }) => {
+          switchMap(async ({ trigger, input }) => {
             if (trigger === 'attributesOrSavedObjectId') {
               await this.initializeSavedVis(input);
             }

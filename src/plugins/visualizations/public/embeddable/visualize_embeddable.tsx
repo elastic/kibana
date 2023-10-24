@@ -497,7 +497,7 @@ export class VisualizeEmbeddable
                 };
               }
 
-              getUiActions().getTrigger(triggerId).exec(context);
+              await getUiActions().getTrigger(triggerId).exec(context);
             }
           })
         )

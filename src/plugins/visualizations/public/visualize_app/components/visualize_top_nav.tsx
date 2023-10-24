@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { mergeMap } from 'rxjs';
+import { switchMap } from 'rxjs';
 import type {
   VisualizeServices,
   VisualizeAppState,
@@ -237,7 +237,7 @@ const TopNav = ({
   useEffect(() => {
     const stateContainerSubscription = stateContainer.state$
       .pipe(
-        mergeMap(async ({ dataView }) => {
+        switchMap(async ({ dataView }) => {
           if (
             dataView &&
             visInstance.vis.data.indexPattern &&
@@ -261,7 +261,7 @@ const TopNav = ({
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
       .pipe(
-        mergeMap(async (done) => {
+        switchMap(async (done) => {
           try {
             await doReload();
           } finally {

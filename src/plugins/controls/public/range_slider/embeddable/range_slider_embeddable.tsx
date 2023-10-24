@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash';
 import { batch } from 'react-redux';
 import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { Subscription, lastValueFrom, mergeMap } from 'rxjs';
+import { Subscription, lastValueFrom, switchMap } from 'rxjs';
 import { distinctUntilChanged, skip, map } from 'rxjs/operators';
 
 import {
@@ -170,7 +170,7 @@ export class RangeSliderEmbeddable
     this.subscriptions.add(
       dataFetchPipe
         .pipe(
-          mergeMap(async (changes) => {
+          switchMap(async (changes) => {
             try {
               await this.runRangeSliderQuery();
               await this.buildFilter();
@@ -188,7 +188,7 @@ export class RangeSliderEmbeddable
         .pipe(
           distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', ''])),
           skip(1), // skip the first input update because initial filters will be built by initialize.
-          mergeMap(this.buildFilter)
+          switchMap(this.buildFilter)
         )
         .subscribe()
     );
