@@ -54,20 +54,19 @@ import type { AiopsLicense } from '../../types';
 
 import { fetchSignificantCategories } from './queries/fetch_significant_categories';
 import { fetchSignificantTermPValues } from './queries/fetch_significant_term_p_values';
-import { fetchIndexInfo } from './queries/fetch_index_info';
 import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { fetchTerms2CategoriesCounts } from './queries/fetch_terms_2_categories_counts';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
 import { getSignificantItemGroups } from './queries/get_significant_item_groups';
 import { logRateAnalysisResponseStreamFactory } from './response_stream/log_rate_analysis_response_stream';
-
-// Overall progress is a float from 0 to 1.
-const LOADED_FIELD_CANDIDATES = 0.2;
-const PROGRESS_STEP_P_VALUES = 0.5;
-const PROGRESS_STEP_GROUPING = 0.1;
-const PROGRESS_STEP_HISTOGRAMS = 0.1;
-const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
+import {
+  LOADED_FIELD_CANDIDATES,
+  PROGRESS_STEP_P_VALUES,
+  PROGRESS_STEP_GROUPING,
+  PROGRESS_STEP_HISTOGRAMS,
+  PROGRESS_STEP_HISTOGRAMS_GROUPS,
+} from './response_stream/constants';
 
 export function routeHandlerFactory<T extends ApiVersion>(
   version: T,
@@ -104,6 +103,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
         abortSignal,
         end,
         endWithUpdatedLoadingState,
+        indexInfoHandler,
         isRunning,
         loaded,
         logDebugMessage,
@@ -114,6 +114,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
         responseWithHeaders,
         shouldStop,
       } = logRateAnalysisResponseStreamFactory<T>(
+        client,
         request.body,
         request.events,
         request.headers,
@@ -123,6 +124,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
       async function runAnalysis() {
         try {
           logDebugMessage('Starting analysis.');
+          logDebugMessage(`Sample probability: ${sampleProbability}`);
 
           isRunning(true);
           overridesHandler();
@@ -130,81 +132,14 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
 
-          const fieldCandidates: string[] = [];
-          let fieldCandidatesCount = fieldCandidates.length;
+          const indexInfo = await indexInfoHandler();
 
-          const textFieldCandidates: string[] = [];
-
-          let totalDocCount = 0;
-
-          if (!request.body.overrides?.remainingFieldCandidates) {
-            logDebugMessage('Fetch index information.');
-            push(
-              updateLoadingStateAction({
-                ccsWarning: false,
-                loaded: loaded(),
-                loadingState: i18n.translate(
-                  'xpack.aiops.logRateAnalysis.loadingState.loadingIndexInformation',
-                  {
-                    defaultMessage: 'Loading index information.',
-                  }
-                ),
-              })
-            );
-
-            try {
-              const indexInfo = await fetchIndexInfo(
-                client,
-                request.body,
-                ['message', 'error.message'],
-                abortSignal
-              );
-
-              fieldCandidates.push(...indexInfo.fieldCandidates);
-              fieldCandidatesCount = fieldCandidates.length;
-              textFieldCandidates.push(...indexInfo.textFieldCandidates);
-              totalDocCount = indexInfo.totalDocCount;
-            } catch (e) {
-              if (!isRequestAbortedError(e)) {
-                logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
-                pushError(`Failed to fetch index information.`);
-              }
-              end();
-              return;
-            }
-
-            logDebugMessage(`Total document count: ${totalDocCount}`);
-            logDebugMessage(`Sample probability: ${sampleProbability}`);
-
-            loaded(LOADED_FIELD_CANDIDATES, false);
-
-            pushPingWithTimeout();
-
-            push(
-              updateLoadingStateAction({
-                ccsWarning: false,
-                loaded: loaded(),
-                loadingState: i18n.translate(
-                  'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldCandidates',
-                  {
-                    defaultMessage:
-                      'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
-                    values: {
-                      fieldCandidatesCount,
-                    },
-                  }
-                ),
-              })
-            );
-
-            if (fieldCandidatesCount === 0) {
-              endWithUpdatedLoadingState();
-            } else if (shouldStop()) {
-              logDebugMessage('shouldStop after fetching field candidates.');
-              end();
-              return;
-            }
+          if (!indexInfo) {
+            return;
           }
+
+          const { fieldCandidates, textFieldCandidates } = indexInfo;
+          let { fieldCandidatesCount } = indexInfo;
 
           // Step 2: Significant Categories and Items
 

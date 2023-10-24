@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { streamFactory } from '@kbn/ml-response-stream/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import {
   addErrorAction,
@@ -23,6 +24,7 @@ import type {
 } from '../../../../common/api/log_rate_analysis/schema';
 
 import { loadedFactory } from './loaded';
+import { indexInfoHandlerFactory } from './index_info_handler';
 import { overridesHandlerFactory } from './overrides_handler';
 import type { LogDebugMessage, StreamState } from './types';
 
@@ -36,6 +38,7 @@ const getDefaultStreamState = (): StreamState => ({
 });
 
 export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
+  client: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema<T>,
   events: KibanaRequestEvents,
   headers: Headers,
@@ -131,12 +134,29 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
   }
 
   const loaded = loadedFactory(state);
+
+  const indexInfoHandler = indexInfoHandlerFactory(
+    client,
+    abortSignal,
+    params,
+    logger,
+    logDebugMessage,
+    end,
+    endWithUpdatedLoadingState,
+    push,
+    pushPingWithTimeout,
+    pushError,
+    loaded,
+    shouldStop
+  );
+
   const overridesHandler = overridesHandlerFactory(params, logDebugMessage, push, loaded);
 
   return {
     abortSignal,
     end,
     endWithUpdatedLoadingState,
+    indexInfoHandler,
     isRunning,
     loaded,
     logDebugMessage,
