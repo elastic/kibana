@@ -20,7 +20,8 @@ import { ensurePreconfiguredPackagesAndPolicies } from '.';
 import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
-import { migrateLegacyDataViews, setupFleet } from './setup';
+import { ensureFleetManagedDataViews, setupFleet } from './setup';
+import { getFleetManagedDataViewDefinitions } from './epm/kibana/index_pattern/install';
 
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
@@ -31,11 +32,7 @@ jest.mock('./download_source');
 jest.mock('./epm/packages');
 jest.mock('./managed_package_policies');
 jest.mock('./setup/upgrade_package_install_version');
-jest.mock('./epm/elasticsearch/template/install', () => {
-  return {
-    ...jest.requireActual('./epm/elasticsearch/template/install'),
-  };
-});
+jest.mock('./epm/kibana/index_pattern/install');
 
 const mockedMethodThrowsError = (mockFn: jest.Mock) =>
   mockFn.mockImplementation(() => {
@@ -70,12 +67,14 @@ describe('setupFleet', () => {
 
     (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
 
+    (getFleetManagedDataViewDefinitions as jest.Mock).mockReturnValueOnce([]);
+
     soClient.find.mockResolvedValue({ saved_objects: [] } as any);
     soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     appContextService.stop();
   });
 
@@ -148,13 +147,75 @@ describe('setupFleet', () => {
   });
 });
 
-describe('migrateLegacyDataViews', () => {
+describe('ensureFleetManagedDataViews', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockLogger: MockedLogger;
 
   beforeEach(() => {
     mockSavedObjectsClient = savedObjectsClientMock.create();
     mockLogger = loggingSystemMock.createLogger();
+  });
+
+  it('creates data views when they do not exist', async () => {
+    mockSavedObjectsClient.get.mockImplementation((type, id) => {
+      return Promise.reject(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
+    });
+
+    (getFleetManagedDataViewDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'logs-*',
+        type: 'index-pattern',
+        typeMigrationVersion: '8.0.0',
+        attributes: {
+          title: 'logs-*',
+          name: 'logs-*',
+          timeFieldName: '@timestamp',
+          allowNoIndex: true,
+        },
+      },
+      {
+        id: 'metrics-*',
+        type: 'index-pattern',
+        typeMigrationVersion: '8.0.0',
+        attributes: {
+          title: 'metrics-*',
+          name: 'metrics-*',
+          timeFieldName: '@timestamp',
+          allowNoIndex: true,
+        },
+      },
+    ]);
+
+    await ensureFleetManagedDataViews({
+      savedObjectsClient: mockSavedObjectsClient,
+      logger: mockLogger,
+    });
+
+    expect(mockSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+      {
+        id: 'logs-*',
+        type: 'index-pattern',
+        typeMigrationVersion: '8.0.0',
+        attributes: {
+          title: 'logs-*',
+          name: 'logs-*',
+          timeFieldName: '@timestamp',
+          allowNoIndex: true,
+        },
+      },
+      {
+        id: 'metrics-*',
+        type: 'index-pattern',
+        typeMigrationVersion: '8.0.0',
+        attributes: {
+          title: 'metrics-*',
+          name: 'metrics-*',
+          timeFieldName: '@timestamp',
+          allowNoIndex: true,
+        },
+      },
+    ]);
   });
 
   it('finds and updates existing data views to use new name/title values', async () => {
@@ -192,7 +253,32 @@ describe('migrateLegacyDataViews', () => {
       );
     });
 
-    await migrateLegacyDataViews({
+    (getFleetManagedDataViewDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'logs-*',
+        type: 'index-pattern',
+        typeMigrationVersion: '8.0.0',
+        attributes: {
+          title: 'logs-*',
+          name: 'logs-*',
+          timeFieldName: '@timestamp',
+          allowNoIndex: true,
+        },
+      },
+      {
+        id: 'metrics-*',
+        type: 'index-pattern',
+        typeMigrationVersion: '8.0.0',
+        attributes: {
+          title: 'metrics-*',
+          name: 'metrics-*',
+          timeFieldName: '@timestamp',
+          allowNoIndex: true,
+        },
+      },
+    ]);
+
+    await ensureFleetManagedDataViews({
       savedObjectsClient: mockSavedObjectsClient,
       logger: mockLogger,
     });
@@ -201,12 +287,12 @@ describe('migrateLegacyDataViews', () => {
     expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
       'index-pattern',
       'logs-*',
-      expect.objectContaining({ title: 'logs-*,*:logs-*', name: 'Logs' })
+      expect.objectContaining({ name: 'logs-*' })
     );
     expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
       'index-pattern',
       'metrics-*',
-      expect.objectContaining({ title: 'metrics-*,*:metrics-*', name: 'Metrics' })
+      expect.objectContaining({ name: 'metrics-*' })
     );
   });
 });

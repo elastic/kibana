@@ -68,8 +68,7 @@ describe('installKibanaSavedObjects', () => {
       kibanaAssets: [asset],
     });
 
-    // `import` is called twice per iteration, so 2 attempts x 2 import calls = 4 total calls
-    expect(mockImporter.import).toHaveBeenCalledTimes(4);
+    expect(mockImporter.import).toHaveBeenCalledTimes(2);
   });
 
   it('should give up after 50 retries on conflict errors', async () => {
@@ -86,18 +85,14 @@ describe('installKibanaSavedObjects', () => {
       })
     ).rejects.toEqual(expect.any(Error));
 
-    // `import` is called twice per retry due to the separation of index pattern imports, so 51 attemps x 2 = 102 calls
-    expect(mockImporter.import).toHaveBeenCalledTimes(102);
+    expect(mockImporter.import).toHaveBeenCalledTimes(51);
   });
   it('should not retry errors that arent conflict errors', async () => {
     const asset = createAsset({ attributes: { hello: 'world' } });
     const errorResponse = createImportResponse([createImportError(asset, 'something_bad')]);
     const successResponse = createImportResponse([], [createImportSuccess(asset)]);
 
-    mockImporter.import
-      .mockResolvedValueOnce(successResponse)
-      .mockResolvedValueOnce(errorResponse)
-      .mockResolvedValueOnce(successResponse);
+    mockImporter.import.mockResolvedValueOnce(errorResponse).mockResolvedValueOnce(successResponse);
 
     expect(
       installKibanaSavedObjects({
@@ -124,7 +119,7 @@ describe('installKibanaSavedObjects', () => {
       kibanaAssets: [asset],
     });
 
-    expect(mockImporter.import).toHaveBeenCalledTimes(2);
+    expect(mockImporter.import).toHaveBeenCalledTimes(1);
     expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(1);
   });
 });

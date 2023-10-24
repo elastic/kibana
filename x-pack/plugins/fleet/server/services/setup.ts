@@ -198,8 +198,8 @@ async function createSetupSideEffects(
     formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));
   }
 
-  logger.debug('Migrating legacy data views');
-  await migrateLegacyDataViews({ savedObjectsClient: soClient, logger });
+  logger.debug('Creating Fleet managed data views');
+  await ensureFleetManagedDataViews({ savedObjectsClient: soClient, logger });
 
   logger.info('Fleet setup completed');
 
@@ -347,20 +347,21 @@ export async function ensureFleetDirectories() {
  * Find preexisting fleet-managed data views like `logs-*` and `metrics-*` and update their `title` and `name` attributes
  * as needed based on the newer values. See https://github.com/elastic/kibana/issues/120340.
  */
-export async function migrateLegacyDataViews({
+export async function ensureFleetManagedDataViews({
   savedObjectsClient,
   logger,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
 }) {
-  const indexPatternSavedObjects = getFleetManagedDataViewDefinitions();
+  const dataViewDefinitions = getFleetManagedDataViewDefinitions();
 
   const existingDataViews = [];
+  const nonExistingDataViews = [];
 
   // TODO - Might be worth refactoring this to a `bulkGet` or `find` instead, though Fleet only manages
-  // two dataviews right now so the gains are currently negligible.
-  for (const dataView of indexPatternSavedObjects) {
+  // two dat views right now so the gains are currently negligible.
+  for (const dataView of dataViewDefinitions) {
     try {
       const existingDataView = await savedObjectsClient.get<DataViewSavedObjectAttrs>(
         KibanaSavedObjectType.indexPattern,
@@ -370,15 +371,19 @@ export async function migrateLegacyDataViews({
 
       existingDataViews.push(existingDataView);
     } catch (error) {
-      // If an existing data view is not found, ignore the erorr
+      // If an existing data view is not found, ignore the error
       if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
         throw error;
       }
+
+      // If we got not found error, we'll need to create this data view later
+      nonExistingDataViews.push(dataView);
     }
   }
 
+  // If the name or title of a managed data view has changed since it was created, detect this and perform an update
   for (const existingDataView of existingDataViews) {
-    const matchingDataView = indexPatternSavedObjects.find(({ id }) => id === existingDataView.id)!;
+    const matchingDataView = dataViewDefinitions.find(({ id }) => id === existingDataView.id)!;
 
     // If a data view with the given ID already exists, we need to make sure it has the right `title` and `name`.
     const shouldUpdateTitle =
@@ -396,7 +401,7 @@ export async function migrateLegacyDataViews({
 
     if (!isEmpty(updateAttributes)) {
       logger.info(
-        `Found outdated data view with id: ${matchingDataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
+        `Found outdated Fleet managed data view with id: ${matchingDataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
       );
 
       await savedObjectsClient.update(
@@ -405,5 +410,11 @@ export async function migrateLegacyDataViews({
         updateAttributes
       );
     }
+  }
+
+  // Then, create any nonexisting managed data views
+  if (nonExistingDataViews.length > 0) {
+    logger.debug(`Creating ${nonExistingDataViews.length} Fleet managed data views.`);
+    await savedObjectsClient.bulkCreate<DataViewSavedObjectAttrs>(nonExistingDataViews);
   }
 }

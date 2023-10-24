@@ -14,17 +14,20 @@ const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
 export const indexPatternTypes = Object.values(dataTypes);
 
+/**
+ * Fleet currently maintains two `managed` data views for Logs and Metrics.
+ * Each data view defines a pattern, e.g. `logs-*` and includes cross-cluster
+ * search support as well.
+ */
 export function getFleetManagedDataViewDefinitions() {
   return Object.entries(dataTypes).map(([name, indexPatternType]) => ({
-    // Add an additional CCR compatible index pattern to the end of each pattern
-    // e.g. `logs-*,*:logs-*`
     id: `${indexPatternType}-*`,
     type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
     // workaround until https://github.com/elastic/kibana/issues/164454 is fixed
     typeMigrationVersion: '8.0.0',
     attributes: {
-      title: `${indexPatternType}-*,*:${indexPatternType}-*`,
-      name,
+      title: `${indexPatternType}-*`,
+      name: `${indexPatternType}-*`,
       timeFieldName: '@timestamp',
       allowNoIndex: true,
     },

@@ -305,13 +305,6 @@ export async function installKibanaSavedObjects({
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
-  // Index patterns (now called "data views") have their own import logic, so separate by type here.
-  // We have to use a type assertion because `partition` doesn't support multi-typed arrays via multiple generics.
-  const [indexPatternSavedObjects, nonIndexPatternSavedObjects] = partition<any>(
-    toBeSavedObjects,
-    ({ type }) => type === KibanaSavedObjectType.indexPattern
-  );
-
   let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
   if (toBeSavedObjects.length === 0) {
@@ -322,56 +315,13 @@ export async function installKibanaSavedObjects({
       errors: importErrors = [],
       success,
     } = await retryImportOnConflictError(async () => {
-      // Create index pattern saved objects with `overwrite: false` as we can't blow
-      // away users' scripted fields or runtime fields. This will cause this import to throw
-      // a saved object conflict error if the index pattern has already been created, but we
-      // swallow that error below.
-      const indexPatternResults = await savedObjectsImporter.import({
-        overwrite: false,
-        readStream: createListStream(indexPatternSavedObjects),
-        createNewCopies: false,
-        refresh: false,
-        managed: true,
-      });
-
-      // Create non-index-pattern saved objects with `overwrite: true`.
-      // These imports can also be retried by the wrapping `retryImportOnConflictError` helper, while
-      // index pattern creation/update won't be retried on a conflict error.
-      const nonIndexPatternResults = await savedObjectsImporter.import({
+      return savedObjectsImporter.import({
         overwrite: true,
-        readStream: createListStream(nonIndexPatternSavedObjects),
+        readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
         refresh: false,
         managed: true,
       });
-
-      // We still want to report index pattern imports in the case they do succeeed, though this will
-      // only be the case on the very first integration installation in the cluster. Why don't we install
-      // these data views separately as part of Fleet setup?
-      const successResults = [
-        ...(indexPatternResults.successResults ?? []),
-        ...(nonIndexPatternResults.successResults ?? []),
-      ];
-
-      const errors = [
-        // Ignore conflict errors for index patterns, as they're expected when the index pattern
-        // already exists and we're passing `overwrite: false` above.
-        ...(indexPatternResults.errors?.filter((e) => !isImportConflictError(e)) ?? []),
-        ...(nonIndexPatternResults.errors ?? []),
-      ];
-
-      const importSuccess = indexPatternResults.success && nonIndexPatternResults.success;
-
-      const warnings = [...indexPatternResults.warnings, ...nonIndexPatternResults.warnings];
-
-      // Combine the results of the separate import processes and generate a single overall results object to return
-      return {
-        successResults,
-        successCount: successResults.length,
-        errors,
-        success: importSuccess,
-        warnings,
-      };
     });
 
     if (success) {
