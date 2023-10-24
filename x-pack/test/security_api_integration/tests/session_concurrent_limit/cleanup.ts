@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esDeleteAllIndices('.kibana_security_session*');
     });
 
-    it.skip('should properly clean up sessions that exceeded concurrent session limit', async function () {
+    it('should properly clean up sessions that exceeded concurrent session limit', async function () {
       this.timeout(100000);
 
       log.debug(`Log in as ${testUser.username} 3 times with a 0.5s delay.`);
@@ -195,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookie(basicSessionCookieThree, testUser.username, basicProvider);
     });
 
-    it.skip('should properly clean up sessions that exceeded concurrent session limit even for multiple providers', async function () {
+    it('should properly clean up sessions that exceeded concurrent session limit even for multiple providers', async function () {
       this.timeout(100000);
 
       log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 0.5s delay.`);
@@ -228,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookie(samlSessionCookieThree, 'a@b.c', samlProvider);
     });
 
-    it.skip('should properly clean up sessions that exceeded concurrent session limit when legacy sessions are present', async function () {
+    it('should properly clean up sessions that exceeded concurrent session limit when legacy sessions are present', async function () {
       this.timeout(100000);
 
       log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 0.5s delay.`);
@@ -295,7 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookieInvalid(samlSessionCookieThree);
     });
 
-    it.skip('should not clean up session if the limit is not exceeded', async function () {
+    it('should not clean up session if the limit is not exceeded', async function () {
       this.timeout(100000);
 
       log.debug(`Log in as ${testUser.username} 2 times with a 0.5s delay.`);
@@ -318,7 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
     });
 
-    it.skip('should not clean up sessions of the anonymous users', async function () {
+    it('should not clean up sessions of the anonymous users', async function () {
       this.timeout(100000);
 
       log.debug(`Log in as anonymous_user 3 times.`);
