@@ -16,11 +16,11 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import {
-  createMetricThresholdExecutor,
+  createCustomThresholdExecutor,
   FIRED_ACTIONS,
-  MetricThresholdAlertContext,
   NO_DATA_ACTIONS,
 } from './custom_threshold_executor';
+import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -1750,7 +1750,7 @@ const mockLibs: any = {
   },
 };
 
-const executor = createMetricThresholdExecutor(mockLibs);
+const executor = createCustomThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createRuleExecutorServices();
 const mockedIndex = {
@@ -1768,7 +1768,7 @@ const mockedSearchSource = {
   getField: jest.fn(() => mockedDataView),
 } as any as ISearchSource;
 const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, MetricThresholdAlertContext, string> = {
+  LifecycleAlertServices<AlertState, CustomThresholdAlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
   searchSourceClient: {

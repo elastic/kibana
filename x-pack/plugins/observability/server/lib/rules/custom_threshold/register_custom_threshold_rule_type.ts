@@ -17,7 +17,6 @@ import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plu
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { searchConfigurationSchema } from './types';
 import {
   AlertsLocatorParams,
   observabilityFeatureId,
@@ -41,7 +40,7 @@ import {
 } from './messages';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import {
-  createMetricThresholdExecutor,
+  createCustomThresholdExecutor,
   FIRED_ACTIONS,
   NO_DATA_ACTIONS,
 } from './custom_threshold_executor';
@@ -54,6 +53,16 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   useEcs: true,
   useLegacyAlerts: false,
 };
+
+export const searchConfigurationSchema = schema.object({
+  index: schema.string(),
+  query: schema.object({
+    language: schema.string({
+      validate: validateKQLStringFilter,
+    }),
+    query: schema.string(),
+  }),
+});
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
 
@@ -142,7 +151,7 @@ export function thresholdRuleType(
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(
-      createMetricThresholdExecutor({ alertsLocator, basePath, logger, config })
+      createCustomThresholdExecutor({ alertsLocator, basePath, logger, config })
     ),
     doesSetRecoveryContext: true,
     actionVariables: {

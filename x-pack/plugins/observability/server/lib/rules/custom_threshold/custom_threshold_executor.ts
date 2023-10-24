@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash';
-import { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_ACTION_GROUP,
@@ -15,20 +14,24 @@ import {
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import {
-  ActionGroupIdsOf,
-  AlertInstanceState as AlertState,
-  RecoveredActionGroup,
-} from '@kbn/alerting-plugin/common';
-import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { AlertsLocatorParams, getAlertUrl, TimeUnitChar } from '../../../../common';
 import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { ObservabilityConfig } from '../../..';
-import { AlertStates, searchConfigurationSchema } from './types';
-
+import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID } from './constants';
+import {
+  AlertStates,
+  CustomThresholdRuleParams,
+  CustomThresholdRuleTypeState,
+  CustomThresholdAlertState,
+  CustomThresholdAlertContext,
+  CustomThresholdSpecificActionGroups,
+  CustomThresholdAlertFactory,
+  CustomThresholdActionGroup,
+} from './types';
 import {
   buildFiredAlertReason,
   buildNoDataAlertReason,
@@ -36,7 +39,6 @@ import {
 } from './messages';
 import {
   createScopedLogger,
-  AdditionalContext,
   getContextForRecoveredAlerts,
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
@@ -49,57 +51,7 @@ import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
-export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
-export type MetricThresholdRuleParams = Record<string, any>;
-export type MetricThresholdRuleTypeState = RuleTypeState & {
-  lastRunTimestamp?: number;
-  missingGroups?: Array<string | MissingGroupsRecord>;
-  groupBy?: string | string[];
-  searchConfiguration?: SearchConfigurationType;
-};
-export type MetricThresholdAlertState = AlertState; // no specific instance state used
-
-export interface MetricThresholdAlertContext extends Record<string, unknown> {
-  alertDetailsUrl: string;
-  group?: object;
-  reason?: string;
-  timestamp: string; // ISO string
-  value?: Array<number | null> | null;
-}
-
-export const FIRED_ACTIONS_ID = 'custom_threshold.fired';
-export const NO_DATA_ACTIONS_ID = 'custom_threshold.nodata';
-
-type MetricThresholdActionGroup =
-  | typeof FIRED_ACTIONS_ID
-  | typeof NO_DATA_ACTIONS_ID
-  | typeof RecoveredActionGroup.id;
-
-type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof NO_DATA_ACTIONS
->;
-
-type MetricThresholdAlert = Alert<
-  MetricThresholdAlertState,
-  MetricThresholdAlertContext,
-  MetricThresholdAllowedActionGroups
->;
-
-export type Group = Array<{
-  field: string;
-  value: string;
-}>;
-
-type MetricThresholdAlertFactory = (
-  id: string,
-  reason: string,
-  actionGroup: MetricThresholdActionGroup,
-  additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>,
-  group?: Group
-) => MetricThresholdAlert;
-
-export const createMetricThresholdExecutor = ({
+export const createCustomThresholdExecutor = ({
   alertsLocator,
   basePath,
   logger,
@@ -110,11 +62,11 @@ export const createMetricThresholdExecutor = ({
   config: ObservabilityConfig;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }): LifecycleRuleExecutor<
-  MetricThresholdRuleParams,
-  MetricThresholdRuleTypeState,
-  MetricThresholdAlertState,
-  MetricThresholdAlertContext,
-  MetricThresholdAllowedActionGroups
+  CustomThresholdRuleParams,
+  CustomThresholdRuleTypeState,
+  CustomThresholdAlertState,
+  CustomThresholdAlertContext,
+  CustomThresholdSpecificActionGroups
 > =>
   async function (options) {
     const startTime = Date.now();
@@ -146,7 +98,7 @@ export const createMetricThresholdExecutor = ({
       searchSourceClient,
     } = services;
 
-    const alertFactory: MetricThresholdAlertFactory = (
+    const alertFactory: CustomThresholdAlertFactory = (
       id,
       reason,
       actionGroup,
@@ -279,7 +231,7 @@ export const createMetricThresholdExecutor = ({
 
       if (reason) {
         const timestamp = startedAt.toISOString();
-        const actionGroupId: MetricThresholdActionGroup =
+        const actionGroupId: CustomThresholdActionGroup =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
