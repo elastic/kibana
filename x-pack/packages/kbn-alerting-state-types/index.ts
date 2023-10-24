@@ -15,6 +15,7 @@ export { ActionsCompletion, ruleParamsSchema } from './src/rule_task_instance';
 
 export type {
   LatestTaskStateSchema as RuleTaskState,
+  LatestAdHocTaskStateSchema as AdHocRuleTaskState,
   MutableLatestTaskStateSchema as MutableRuleTaskState,
   LatestRawAlertInstanceSchema as RawAlertInstance,
   LatestAlertInstanceMetaSchema as AlertInstanceMeta,

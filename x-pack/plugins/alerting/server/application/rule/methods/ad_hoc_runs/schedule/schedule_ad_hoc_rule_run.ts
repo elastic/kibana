@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
+import { flatten } from 'lodash';
 import Boom from '@hapi/boom';
-import { asyncForEach } from '@kbn/std';
 import { parseDuration } from '@kbn/actions-plugin/server/lib/parse_date';
-import { Rule } from '../../../../../types';
-import { RulesClientContext } from '../../../../../rules_client';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { RuleAttributes } from '../../../../../data/rule/types';
+import { findRulesSo } from '../../../../../data/rule';
+import {
+  alertingAuthorizationFilterOpts,
+  RULE_TYPE_CHECKS_CONCURRENCY,
+} from '../../../../../rules_client/common/constants';
+import { convertRuleIdsToKueryNode } from '../../../../../lib';
+import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../../rules_client';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../../rules_client/common/audit_events';
 import type { ScheduleAdHocRuleRunOptions } from './types';
@@ -32,63 +40,99 @@ export async function scheduleAdHocRuleRun(
     throw Boom.badRequest(`Invalid intervalDuration - ${options.intervalDuration}`);
   }
 
-  // Verify rule IDs are valid
-  const bulkGetResult = await context.unsecuredSavedObjectsClient.bulkGet<Rule>(
-    options.ruleIds.map((id: string) => ({ id, type: 'alert' }))
-  );
-  // Audit log the GET
-  bulkGetResult.saved_objects.forEach(({ id }) => {
-    context.auditLogger?.log(
-      ruleAuditEvent({
-        action: RuleAuditAction.GET,
-        savedObject: { type: 'alert', id },
-      })
+  const kueryNodeFilter = convertRuleIdsToKueryNode(options.ruleIds);
+  let authorizationTuple;
+  try {
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
+      AlertingAuthorizationEntity.Rule,
+      alertingAuthorizationFilterOpts
     );
-  });
-  // Throw if errors getting any rule
-  for (const rule of bulkGetResult.saved_objects) {
-    if (rule.error) {
-      throw Boom.badRequest(
-        `Failed to load rule ${rule.id} (${rule.error.statusCode}): ${rule.error.message}`
-      );
-    }
-  }
-
-  asyncForEach(bulkGetResult.saved_objects, async (rule) => {
-    // Verify we have access to schedule an ad hoc run for each rule
-    try {
-      await context.authorization.ensureAuthorized({
-        ruleTypeId: rule.attributes.alertTypeId,
-        consumer: rule.attributes.consumer,
-        operation: ReadOperations.ScheduleAdHocRuleRun,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    } catch (error) {
-      context.auditLogger?.log(
-        ruleAuditEvent({
-          action: RuleAuditAction.SCHEDULE_AD_HOC_RULE_RUN,
-          savedObject: { type: 'alert', id: rule.id },
-          error,
-        })
-      );
-      throw error;
-    }
-  });
-
-  bulkGetResult.saved_objects.forEach((rule) => {
+  } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.SCHEDULE_AD_HOC_RULE_RUN,
-        outcome: 'unknown',
-        savedObject: { type: 'alert', id: rule.id },
+        error,
       })
     );
-    context.ruleTypeRegistry.ensureRuleTypeEnabled(rule.attributes.alertTypeId);
+    throw error;
+  }
+  const { filter: authorizationFilter } = authorizationTuple;
+  const kueryNodeFilterWithAuth =
+    authorizationFilter && kueryNodeFilter
+      ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+      : kueryNodeFilter;
+
+  const { aggregations } = await findRulesSo<RuleBulkOperationAggregation>({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsFindOptions: {
+      filter: kueryNodeFilterWithAuth,
+      page: 1,
+      perPage: 0,
+      aggs: {
+        alertTypeId: {
+          multi_terms: {
+            terms: [
+              { field: 'alert.attributes.alertTypeId' },
+              { field: 'alert.attributes.consumer' },
+            ],
+          },
+        },
+      },
+    },
   });
 
-  return await context.adHocRuleRunClient.queue({
-    ...options,
-    spaceId: context.spaceId,
-    unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
-  });
+  const buckets = aggregations?.alertTypeId.buckets;
+
+  if (buckets === undefined || !buckets.length) {
+    throw Boom.badRequest(
+      `No rules matching ids ${options.ruleIds} found to schedule ad hoc rule run`
+    );
+  }
+
+  await pMap(
+    buckets,
+    async ({ key: [ruleType, consumer] }) => {
+      context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+
+      try {
+        await context.authorization.ensureAuthorized({
+          ruleTypeId: ruleType,
+          consumer,
+          operation: ReadOperations.ScheduleAdHocRuleRun,
+          entity: AlertingAuthorizationEntity.Rule,
+        });
+      } catch (error) {
+        context.auditLogger?.log(
+          ruleAuditEvent({
+            action: RuleAuditAction.SCHEDULE_AD_HOC_RULE_RUN,
+            error,
+          })
+        );
+        throw error;
+      }
+    },
+    { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+  );
+
+  const rulesFinder =
+    await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
+      {
+        filter: kueryNodeFilterWithAuth,
+        type: 'alert',
+        perPage: 100,
+        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+      }
+    );
+
+  const scheduleResponses = [];
+  for await (const response of rulesFinder.find()) {
+    const scheduleResponse = await context.adHocRuleRunClient.bulkQueue(
+      context.unsecuredSavedObjectsClient,
+      response.saved_objects,
+      options
+    );
+    scheduleResponses.push([...scheduleResponse]);
+  }
+
+  return flatten(scheduleResponses);
 }

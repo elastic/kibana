@@ -10,6 +10,7 @@ import {
   ISavedObjectsRepository,
   Logger,
   SavedObjectsClientContract,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import {
   RunContext,
@@ -17,21 +18,18 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { ScheduleAdHocRuleRunOptions } from '../application/rule/methods/ad_hoc_runs/schedule/types';
+import { RuleAttributes } from '../data/rule/types';
 import { AlertingPluginsStart } from '../plugin';
+import { TaskRunnerFactory } from '../task_runner';
 import { AdHocRuleRunParams } from '../types';
-import { AdHocTaskRunnerFactory } from './ad_hoc_task_runner_factory';
 
 interface ConstructorOpts {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
-  adHocTaskRunnerFactory: AdHocTaskRunnerFactory;
+  taskRunnerFactory: TaskRunnerFactory;
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>;
 }
 
-type QueueOpts = ScheduleAdHocRuleRunOptions & {
-  spaceId: string;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-};
 export class AdHocRuleRunClient {
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
@@ -64,7 +62,7 @@ export class AdHocRuleRunClient {
     opts.taskManager.registerTaskDefinitions({
       [this.adHocRuleRunTaskType]: {
         title: 'Alerting Ad Hoc Rule Run',
-        createTaskRunner: (context: RunContext) => opts.adHocTaskRunnerFactory.create(context),
+        createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
   }
@@ -87,25 +85,38 @@ export class AdHocRuleRunClient {
     }
   }
 
-  public async queue({
-    ruleIds,
-    spaceId,
-    intervalStart,
-    intervalDuration,
-    intervalEnd,
-    unsecuredSavedObjectsClient,
-  }: QueueOpts) {
+  public async bulkQueue(
+    unsecuredSavedObjectsClient: SavedObjectsClientContract,
+    rules: Array<SavedObjectsFindResult<RuleAttributes>>,
+    queueOptions: ScheduleAdHocRuleRunOptions
+  ) {
     const bulkResponse = await unsecuredSavedObjectsClient.bulkCreate(
-      ruleIds.map((ruleId: string) => ({
+      rules.map((ruleSO: SavedObjectsFindResult<RuleAttributes>) => ({
         type: 'ad_hoc_rule_run_params',
         attributes: {
           createdAt: Date.now(),
-          ruleId,
-          spaceId,
+          rule: {
+            name: ruleSO.attributes.name,
+            tags: ruleSO.attributes.tags,
+            alertTypeId: ruleSO.attributes.alertTypeId,
+            consumer: ruleSO.attributes.consumer,
+            schedule: ruleSO.attributes.schedule,
+            params: ruleSO.attributes.params,
+            createdBy: ruleSO.attributes.createdBy,
+            updatedBy: ruleSO.attributes.updatedBy,
+            createdAt: ruleSO.attributes.createdAt,
+            updatedAt: ruleSO.attributes.updatedAt,
+            apiKeyOwner: ruleSO.attributes.apiKeyOwner,
+            apiKeyCreatedByUser: ruleSO.attributes.apiKeyCreatedByUser,
+            throttle: ruleSO.attributes.throttle,
+            notifyWhen: ruleSO.attributes.notifyWhen,
+            revision: ruleSO.attributes.revision,
+          },
+          apiKeyToUse: ruleSO.attributes.apiKey,
           enabled: true,
-          intervalStart,
-          intervalDuration,
-          ...(intervalEnd ? { intervalEnd } : {}),
+          intervalStart: queueOptions.intervalStart,
+          intervalDuration: queueOptions.intervalDuration,
+          ...(queueOptions.intervalEnd ? { intervalEnd: queueOptions.intervalEnd } : {}),
         },
       }))
     );
@@ -113,7 +124,7 @@ export class AdHocRuleRunClient {
     this.logger.info(`queue ${JSON.stringify(bulkResponse)}`);
     // TODO retry errors
     return bulkResponse.saved_objects.map((so, index) => ({
-      ruleId: ruleIds[index],
+      ruleId: rules[index].id,
       adHocRunId: so.error ? null : so.id,
     }));
   }

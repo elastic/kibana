@@ -192,4 +192,10 @@ export function setupSavedObjects(
     type: 'api_key_pending_invalidation',
     attributesToEncrypt: new Set(['apiKeyId']),
   });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: 'ad_hoc_rule_run_params',
+    attributesToEncrypt: new Set(['apiKeyToUse']),
+  });
 }

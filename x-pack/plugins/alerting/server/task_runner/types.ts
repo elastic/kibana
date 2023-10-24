@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  ElasticsearchServiceStart,
+  ExecutionContextStart,
+  IBasePath,
+  KibanaRequest,
+  Logger,
+  SavedObjectsServiceStart,
+  UiSettingsServiceStart,
+} from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IAlertsClient } from '../alerts_client/types';
 import { Alert } from '../alert';
-import { TaskRunnerContext } from './task_runner_factory';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -25,9 +39,19 @@ import {
   RuleAlertData,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
+import {
+  RawRule,
+  RulesClientApi,
+  CombinedSummarizedAlerts,
+  MaintenanceWindowClientApi,
+  RulesSettingsClientApi,
+  RuleTypeRegistry,
+  SpaceIdToNamespaceFunction,
+} from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { AlertsService } from '../alerts_service';
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -108,3 +132,31 @@ export type Executable<
       summarizedAlerts: CombinedSummarizedAlerts;
     }
 );
+
+export interface TaskRunnerContext {
+  logger: Logger;
+  data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
+  share: SharePluginStart;
+  savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
+  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
+  actionsPlugin: ActionsPluginStartContract;
+  eventLogger: IEventLogger;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  executionContext: ExecutionContextStart;
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  basePathService: IBasePath;
+  ruleTypeRegistry: RuleTypeRegistry;
+  alertsService: AlertsService | null;
+  kibanaBaseUrl: string | undefined;
+  supportsEphemeralTasks: boolean;
+  maxEphemeralActionsPerRule: number;
+  maxAlerts: number;
+  actionsConfigMap: ActionsConfigMap;
+  cancelAlertsOnRuleTimeout: boolean;
+  usageCounter?: UsageCounter;
+  getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
+  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
+}

@@ -19,6 +19,7 @@ const latest = v1;
  */
 const latestTaskStateSchema = latest.versionDefinition.schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
+export type LatestAdHocTaskStateSchema = TypeOf<typeof latest.adHocTaskStateSchema>;
 export type LatestRawAlertInstanceSchema = TypeOf<typeof latest.rawAlertInstanceSchema>;
 export type LatestAlertInstanceMetaSchema = TypeOf<typeof latest.metaSchema>;
 export type LatestAlertInstanceStateSchema = TypeOf<typeof latest.alertStateSchema>;
