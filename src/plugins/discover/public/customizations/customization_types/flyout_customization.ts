@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import React, { ComponentType } from 'react';
+
 export interface FlyoutDefaultActionItem {
   disabled?: boolean;
 }
@@ -21,10 +25,23 @@ export interface FlyoutActionItem {
   enabled: boolean;
 }
 
+export interface FlyoutContentActions {
+  setFilter?: DocViewFilterFn;
+  addColumn: (column: string) => void;
+  removeColumn: (column: string) => void;
+}
+
+export interface FlyoutContentProps {
+  actions: FlyoutContentActions;
+  doc: DataTableRecord;
+  renderDefaultContent: () => React.ReactNode;
+}
+
 export interface FlyoutCustomization {
   id: 'flyout';
   actions: {
     defaultActions?: FlyoutDefaultActions;
     getActionItems?: () => FlyoutActionItem[];
   };
+  Content?: ComponentType<FlyoutContentProps>;
 }
