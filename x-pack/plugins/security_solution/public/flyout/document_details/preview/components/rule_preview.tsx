@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React, { memo, useState, useEffect } from 'react';
-import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel, EuiDescriptionList } from '@elastic/eui';
-import type { EuiDescriptionListProps } from '@elastic/eui';
+import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
@@ -20,7 +19,6 @@ import { RuleScheduleSection } from '../../../../detection_engine/rule_managemen
 import { RuleDefinitionSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_definition_section';
 import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
 import { castRuleAsRuleResponse } from '../../../../detection_engine/rule_details_ui/pages/rule_details/cast_rule_as_rule_response';
-import { DESCRIPTION_LIST_COLUMN_WIDTHS } from '../../../../detection_engine/rule_management/components/rule_details/constants';
 import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 import { FlyoutError } from '../../../shared/components/flyout_error';
 import {
@@ -31,18 +29,6 @@ import {
   RULE_PREVIEW_ACTIONS_TEST_ID,
   RULE_PREVIEW_LOADING_TEST_ID,
 } from './test_ids';
-
-const descriptionRenderer = (items: EuiDescriptionListProps['listItems']) => {
-  return (
-    <EuiDescriptionList
-      className={panelViewStyle}
-      listItems={items}
-      columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-      rowGutterSize="s"
-      data-test-subj="listItemColumnStepRuleDescription"
-    />
-  );
-};
 
 const panelViewStyle = css`
   dt {
@@ -88,6 +74,7 @@ export const RulePreview: React.FC = memo(() => {
     >
       <RulePreviewTitle rule={rule} isSuppressed={!isExistingRule} />
       <EuiHorizontalRule margin="s" />
+      <EuiSpacer size="s" />
       <ExpandableSection
         title={
           <FormattedMessage
@@ -102,9 +89,11 @@ export const RulePreview: React.FC = memo(() => {
         <EuiSpacer size="s" />
         <RuleAboutSection
           rule={castRuleAsRuleResponse(rule)}
-          itemRenderer={descriptionRenderer}
           hideName
           hideDescription
+          type="row"
+          rowGutterSize="s"
+          className={panelViewStyle}
         />
       </ExpandableSection>
       <EuiHorizontalRule margin="l" />
@@ -120,7 +109,9 @@ export const RulePreview: React.FC = memo(() => {
       >
         <RuleDefinitionSection
           rule={castRuleAsRuleResponse(rule)}
-          itemRenderer={descriptionRenderer}
+          type="row"
+          rowGutterSize="s"
+          className={panelViewStyle}
         />
       </ExpandableSection>
       <EuiHorizontalRule margin="l" />
@@ -136,7 +127,9 @@ export const RulePreview: React.FC = memo(() => {
       >
         <RuleScheduleSection
           rule={castRuleAsRuleResponse(rule)}
-          itemRenderer={descriptionRenderer}
+          type="row"
+          rowGutterSize="s"
+          className={panelViewStyle}
         />
       </ExpandableSection>
       <EuiHorizontalRule margin="l" />
