@@ -51,7 +51,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
 
   describe('Custom query rule', () => {
     // FLAKY: https://github.com/elastic/kibana/issues/169154
-    describe.skip('from legacy risk scores', () => {
+    describe.only('from legacy risk scores', () => {
       beforeEach(() => {
         disableExpandableFlyout();
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -85,9 +85,9 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
         cy.get(ENRICHED_DATA_ROW).contains('Critical').should('not.exist');
         cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL).should('not.exist');
 
-        closeAlertFlyout();
         cy.task('esArchiverUnload', 'risk_hosts');
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts_updated' });
+        closeAlertFlyout();
         expandFirstAlert();
         cy.get(ENRICHED_DATA_ROW).contains('Critical');
         cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL);
