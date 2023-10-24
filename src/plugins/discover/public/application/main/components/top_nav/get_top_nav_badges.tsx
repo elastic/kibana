@@ -42,7 +42,7 @@ export const getTopNavBadges = ({
   if (hasUnsavedChanges) {
     badges.push(
       getTopNavUnsavedChangesBadge({
-        onReset: stateContainer.actions.undoSavedSearchChanges,
+        onRevert: stateContainer.actions.undoSavedSearchChanges,
         onSave: async () => {
           await saveSearch();
         },

@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 enum ProcessingType {
-  resetting = 'resetting',
+  reverting = 'reverting',
   saving = 'saving',
   savingAs = 'savingAs',
 }
@@ -27,7 +27,7 @@ enum ProcessingType {
  * Props for UnsavedChangesBadge
  */
 export interface UnsavedChangesBadgeProps {
-  onReset: () => Promise<unknown>;
+  onRevert: () => Promise<unknown>;
   onSave?: () => Promise<unknown>;
   onSaveAs?: () => Promise<unknown>;
   badgeText: string;
@@ -36,14 +36,14 @@ export interface UnsavedChangesBadgeProps {
 /**
  * Badge component. It opens a menu panel with actions once pressed.
  * @param badgeText
- * @param onReset
+ * @param onRevert
  * @param onSave
  * @param onSaveAs
  * @constructor
  */
 export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
   badgeText,
-  onReset,
+  onRevert,
   onSave,
   onSaveAs,
 }) => {
@@ -81,7 +81,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
   const disabled = Boolean(processingType);
   const isSaving = processingType === ProcessingType.saving;
   const isSavingAs = processingType === ProcessingType.savingAs;
-  const isResetting = processingType === ProcessingType.resetting;
+  const isReverting = processingType === ProcessingType.reverting;
 
   const items = [
     ...(onSave
@@ -127,15 +127,15 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
         ]
       : []),
     <EuiContextMenuItem
-      data-test-subj="resetUnsavedChangesButton"
-      key="reset"
+      data-test-subj="revertUnsavedChangesButton"
+      key="revert"
       icon="editorUndo"
       disabled={disabled}
       onClick={async () => {
-        await handleMenuItem(ProcessingType.resetting, onReset);
+        await handleMenuItem(ProcessingType.reverting, onRevert);
       }}
     >
-      {isResetting
+      {isReverting
         ? i18n.translate('unsavedChangesBadge.contextMenu.revertingChangesButtonStatus', {
             defaultMessage: 'Reverting changes...',
           })

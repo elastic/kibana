@@ -13,9 +13,9 @@ import { UnsavedChangesBadge } from './unsaved_changes_badge';
 
 describe('<UnsavedChangesBadge />', () => {
   test('should render correctly', async () => {
-    const onReset = jest.fn();
+    const onRevert = jest.fn();
     const { getByTestId, queryByTestId } = render(
-      <UnsavedChangesBadge badgeText="test" onReset={onReset} />
+      <UnsavedChangesBadge badgeText="test" onRevert={onRevert} />
     );
     expect(getByTestId('unsavedChangesBadge')).toBeInTheDocument();
 
@@ -23,24 +23,29 @@ describe('<UnsavedChangesBadge />', () => {
     await waitFor(() => {
       return Boolean(queryByTestId('unsavedChangesBadgeMenuPanel'));
     });
-    expect(queryByTestId('resetUnsavedChangesButton')).toBeInTheDocument();
+    expect(queryByTestId('revertUnsavedChangesButton')).toBeInTheDocument();
     expect(queryByTestId('saveUnsavedChangesButton')).not.toBeInTheDocument();
     expect(queryByTestId('saveUnsavedChangesAsButton')).not.toBeInTheDocument();
 
-    expect(onReset).not.toHaveBeenCalled();
+    expect(onRevert).not.toHaveBeenCalled();
 
     act(() => {
-      getByTestId('resetUnsavedChangesButton').click();
+      getByTestId('revertUnsavedChangesButton').click();
     });
-    expect(onReset).toHaveBeenCalled();
+    expect(onRevert).toHaveBeenCalled();
   });
 
   test('should show all menu items', async () => {
-    const onReset = jest.fn().mockResolvedValue(true);
+    const onRevert = jest.fn().mockResolvedValue(true);
     const onSave = jest.fn().mockResolvedValue(true);
     const onSaveAs = jest.fn().mockResolvedValue(true);
     const { getByTestId, queryByTestId, container } = render(
-      <UnsavedChangesBadge badgeText="test" onReset={onReset} onSave={onSave} onSaveAs={onSaveAs} />
+      <UnsavedChangesBadge
+        badgeText="test"
+        onRevert={onRevert}
+        onSave={onSave}
+        onSaveAs={onSaveAs}
+      />
     );
 
     expect(container).toMatchSnapshot();
@@ -49,7 +54,7 @@ describe('<UnsavedChangesBadge />', () => {
     await waitFor(() => {
       return Boolean(queryByTestId('unsavedChangesBadgeMenuPanel'));
     });
-    expect(queryByTestId('resetUnsavedChangesButton')).toBeInTheDocument();
+    expect(queryByTestId('revertUnsavedChangesButton')).toBeInTheDocument();
     expect(queryByTestId('saveUnsavedChangesButton')).toBeInTheDocument();
     expect(queryByTestId('saveUnsavedChangesAsButton')).toBeInTheDocument();
 
@@ -57,11 +62,16 @@ describe('<UnsavedChangesBadge />', () => {
   });
 
   test('should call callbacks', async () => {
-    const onReset = jest.fn().mockResolvedValue(true);
+    const onRevert = jest.fn().mockResolvedValue(true);
     const onSave = jest.fn().mockResolvedValue(true);
     const onSaveAs = jest.fn().mockResolvedValue(true);
     const { getByTestId, queryByTestId } = render(
-      <UnsavedChangesBadge badgeText="test" onReset={onReset} onSave={onSave} onSaveAs={onSaveAs} />
+      <UnsavedChangesBadge
+        badgeText="test"
+        onRevert={onRevert}
+        onSave={onSave}
+        onSaveAs={onSaveAs}
+      />
     );
     act(() => {
       getByTestId('unsavedChangesBadge').click();

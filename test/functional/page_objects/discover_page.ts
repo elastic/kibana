@@ -174,7 +174,7 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('popover is open', async () => {
       return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
     });
-    await this.testSubjects.click('resetUnsavedChangesButton');
+    await this.testSubjects.click('revertUnsavedChangesButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 

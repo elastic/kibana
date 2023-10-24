@@ -84,7 +84,7 @@ exports[`<UnsavedChangesBadge /> should show all menu items 2`] = `
     </button>
     <button
       class="euiContextMenuItem euiContextMenuItem--small"
-      data-test-subj="resetUnsavedChangesButton"
+      data-test-subj="revertUnsavedChangesButton"
       type="button"
     >
       <span

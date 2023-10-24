@@ -18,19 +18,19 @@ import {
  * Params for getTopNavUnsavedChangesBadge
  */
 export interface TopNavUnsavedChangesBadgeParams {
-  onReset: UnsavedChangesBadgeProps['onReset'];
+  onRevert: UnsavedChangesBadgeProps['onRevert'];
   onSave?: UnsavedChangesBadgeProps['onSave'];
   onSaveAs?: UnsavedChangesBadgeProps['onSaveAs'];
 }
 
 /**
  * Returns a badge object suitable for the top nav `badges` prop
- * @param onReset
+ * @param onRevert
  * @param onSave
  * @param onSaveAs
  */
 export const getTopNavUnsavedChangesBadge = ({
-  onReset,
+  onRevert,
   onSave,
   onSaveAs,
 }: TopNavUnsavedChangesBadgeParams): TopNavMenuBadgeProps => {
@@ -41,7 +41,7 @@ export const getTopNavUnsavedChangesBadge = ({
     renderCustomBadge: ({ badgeText }) => (
       <UnsavedChangesBadge
         badgeText={badgeText}
-        onReset={onReset}
+        onRevert={onRevert}
         onSave={onSave}
         onSaveAs={onSaveAs}
       />

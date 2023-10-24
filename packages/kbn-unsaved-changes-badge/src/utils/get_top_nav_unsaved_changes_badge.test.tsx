@@ -12,8 +12,8 @@ import { getTopNavUnsavedChangesBadge } from './get_top_nav_unsaved_changes_badg
 
 describe('getTopNavUnsavedChangesBadge()', () => {
   test('should work correctly', async () => {
-    const onReset = jest.fn().mockResolvedValue(true);
-    const badge = getTopNavUnsavedChangesBadge({ onReset });
+    const onRevert = jest.fn().mockResolvedValue(true);
+    const badge = getTopNavUnsavedChangesBadge({ onRevert });
     const { container, getByTestId, queryByTestId } = render(
       badge.renderCustomBadge!({ badgeText: badge.badgeText })
     );
@@ -21,7 +21,7 @@ describe('getTopNavUnsavedChangesBadge()', () => {
 
     getByTestId('unsavedChangesBadge').click();
     await waitFor(() => {
-      return Boolean(queryByTestId('resetUnsavedChangesButton'));
+      return Boolean(queryByTestId('revertUnsavedChangesButton'));
     });
 
     expect(screen.getByTestId('unsavedChangesBadgeMenuPanel')).toMatchSnapshot();
