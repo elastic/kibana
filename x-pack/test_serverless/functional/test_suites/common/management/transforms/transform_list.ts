@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders the transform list', async () => {
       await transform.testExecution.logTestStep('should load the Transform list page');
-      await pageObjects.common.navigateToApp('management/data/transform');
+      await transform.navigation.navigateTo();
       await transform.management.assertTransformListPageExists();
 
       const url = await browser.getCurrentUrl();
