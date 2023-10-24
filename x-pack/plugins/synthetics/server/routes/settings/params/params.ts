@@ -5,30 +5,51 @@
  * 2.0.
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
-import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import { SavedObject, SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
-type SyntheticsParamsResponse =
-  | IKibanaResponse<SyntheticsParams[]>
-  | IKibanaResponse<SyntheticsParamsReadonly[]>;
+const RequestParamsSchema = schema.object({
+  id: schema.maybe(schema.string()),
+});
+
+type RequestParams = TypeOf<typeof RequestParamsSchema>;
+
 export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsParamsResponse
+  SyntheticsParams[] | SyntheticsParamsReadonly[] | SyntheticsParams | SyntheticsParamsReadonly,
+  RequestParams
 > = () => ({
   method: 'GET',
-  path: SYNTHETICS_API_URLS.PARAMS,
+  path: SYNTHETICS_API_URLS.PARAMS + '/{id?}',
   validate: {},
+  validation: {
+    request: {
+      params: RequestParamsSchema,
+    },
+  },
   handler: async ({ savedObjectsClient, request, response, server, spaceId }) => {
     try {
+      const { id: paramId } = request.params;
+
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const canSave =
         (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;
 
       if (canSave) {
+        if (paramId) {
+          const savedObject =
+            await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsParams>(
+              syntheticsParamType,
+              paramId,
+              { namespace: spaceId }
+            );
+          return toClientResponse(savedObject);
+        }
+
         const finder =
           await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>(
             {
@@ -43,25 +64,21 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           hits.push(...result.saved_objects);
         }
 
-        return response.ok({
-          body: hits.map(({ id, attributes, namespaces }) => ({
-            ...attributes,
-            id,
-            namespaces,
-          })),
-        });
+        return hits.map((savedObject) => toClientResponse(savedObject));
       } else {
+        if (paramId) {
+          const savedObject = await savedObjectsClient.get<SyntheticsParamsReadonly>(
+            syntheticsParamType,
+            paramId
+          );
+          return toClientResponse(savedObject);
+        }
+
         const data = await savedObjectsClient.find<SyntheticsParamsReadonly>({
           type: syntheticsParamType,
           perPage: 10000,
         });
-        return response.ok({
-          body: data.saved_objects.map(({ id, attributes, namespaces }) => ({
-            ...attributes,
-            namespaces,
-            id,
-          })),
-        });
+        return data.saved_objects.map((savedObject) => toClientResponse(savedObject));
       }
     } catch (error) {
       if (error.output?.statusCode === 404) {
@@ -72,3 +89,14 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     }
   },
 });
+
+const toClientResponse = (
+  savedObject: SavedObject<SyntheticsParams | SyntheticsParamsReadonly>
+) => {
+  const { id, attributes, namespaces } = savedObject;
+  return {
+    ...attributes,
+    id,
+    namespaces,
+  };
+};
