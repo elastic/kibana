@@ -44,7 +44,7 @@ import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';
-import { useGetUserProfiles } from '../../containers/detection_engine/alerts/use_get_user_profiles';
+import { useGetUserProfiles } from '../../containers/detection_engine/user_profiles/use_get_user_profiles';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`

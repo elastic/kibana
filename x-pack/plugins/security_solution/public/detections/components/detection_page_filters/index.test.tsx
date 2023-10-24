@@ -43,7 +43,7 @@ const mockUserProfiles = [
     data: {},
   },
 ];
-jest.mock('../../containers/detection_engine/alerts/use_suggest_users', () => {
+jest.mock('../../containers/detection_engine/user_profiles/use_suggest_users', () => {
   return {
     useSuggestUsers: () => ({
       loading: false,

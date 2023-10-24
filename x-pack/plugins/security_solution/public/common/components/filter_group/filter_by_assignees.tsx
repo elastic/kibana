@@ -13,7 +13,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { EuiFilterButton } from '@elastic/eui';
-import { useSuggestUsers } from '../../../detections/containers/detection_engine/alerts/use_suggest_users';
+import { useSuggestUsers } from '../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
 import { TEST_IDS } from './constants';
 
 export interface FilterByAssigneesPopoverProps {

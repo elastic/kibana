@@ -18,14 +18,14 @@ import {
 } from './test_ids';
 import { Assignees } from './assignees';
 
-import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/alerts/use_get_user_profiles';
-import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
+import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
+import { useSuggestUsers } from '../../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
 import type { SetAlertAssigneesFunc } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_get_user_profiles');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_suggest_users');
+jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles');
+jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_suggest_users');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
 
 const mockUserProfiles: UserProfileWithAvatar[] = [

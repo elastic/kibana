@@ -6,13 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+
+import { mockUserProfiles } from './mock';
 import { useGetUserProfiles } from './use_get_user_profiles';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import { mockUserProfiles } from './mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_app_toasts');

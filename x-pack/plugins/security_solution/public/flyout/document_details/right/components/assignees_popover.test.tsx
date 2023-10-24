@@ -12,10 +12,10 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ASSIGNEES_ADD_BUTTON_TEST_ID } from './test_ids';
 import { AssigneesPopover } from './assignees_popover';
 
-import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
+import { useSuggestUsers } from '../../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_suggest_users');
+jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_suggest_users');
 
 const mockUserProfiles: UserProfileWithAvatar[] = [
   {
