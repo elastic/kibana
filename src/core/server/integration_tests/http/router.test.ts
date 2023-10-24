@@ -703,7 +703,14 @@ describe('Handler', () => {
         Array [
           "400 Bad Request",
           Object {
+            "error": Object {
+              "message": "[request query.page]: expected value of type [number] but got [string]",
+            },
             "http": Object {
+              "request": Object {
+                "method": "get",
+                "path": "/",
+              },
               "response": Object {
                 "status_code": 400,
               },
