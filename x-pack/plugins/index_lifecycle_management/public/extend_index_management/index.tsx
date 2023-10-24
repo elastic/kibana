@@ -226,12 +226,4 @@ export const addAllExtensions = (
   extensionsService.addBanner(ilmBannerExtension);
   extensionsService.addSummary(IndexLifecycleSummary);
   extensionsService.addFilter(ilmFilterExtension);
-  extensionsService.addIndexDetailsTab({
-    id: 'testTab',
-    name: 'Test tab',
-    renderTabContent: (indexName, index) => {
-      return <pre>{JSON.stringify(index, null, 2)}</pre>;
-    },
-    order: 11,
-  });
 };
