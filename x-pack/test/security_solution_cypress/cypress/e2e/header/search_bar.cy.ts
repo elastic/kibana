@@ -6,7 +6,7 @@
  */
 
 import { login } from '../../tasks/login';
-import { visit, visitWithTimeRange } from '../../tasks/navigation';
+import { visitWithTimeRange } from '../../tasks/navigation';
 import {
   openAddFilterPopover,
   fillAddFilterForm,
