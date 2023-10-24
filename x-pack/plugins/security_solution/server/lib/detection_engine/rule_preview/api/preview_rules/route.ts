@@ -284,6 +284,10 @@ export const previewRulesRoute = async (
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
+                getTimeRange: () => {
+                  const date = startedAt.toISOString();
+                  return { dateStart: date, dateEnd: date };
+                },
               })) as { state: TState });
 
               const errors = loggedStatusChanges
@@ -421,7 +425,7 @@ export const previewRulesRoute = async (
               );
               break;
             case 'esql':
-              if (config.experimentalFeatures.esqlRulesDisabled) {
+              if (!config.settings.ESQLEnabled || config.experimentalFeatures.esqlRulesDisabled) {
                 throw Error('ES|QL rule type is not supported');
               }
               const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));

@@ -444,6 +444,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         value: 50,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: false,
         depends_on: [],
@@ -730,7 +745,6 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: ['advanced'],
         validations: [],
         value: 3,
-        display_value: 3,
       },
       use_text_extraction_service: {
         default_value: null,
@@ -743,7 +757,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
-        ui_restrictions: [],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: false,
       },
@@ -776,13 +790,111 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      use_domain_wide_delegation_for_sync: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.useDomainWideDelegation.label',
+          {
+            defaultMessage: 'Use domain-wide delegation for data sync',
+          }
+        ),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.useDomainWideDelegation.tooltip',
+          {
+            defaultMessage:
+              'Enable domain-wide delegation to automatically sync content from all shared and personal drives in the Google workspace. This eliminates the need to manually share Google Drive data with your service account, though it may increase sync time. If disabled, only items and folders manually shared with the service account will be synced. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      google_workspace_admin_email_for_data_sync: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmailDataSync.label',
+          {
+            defaultMessage: 'Google Workspace admin email',
+          }
+        ),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmailDataSync.tooltip',
+          {
+            defaultMessage:
+              'Provide the admin email to be used with domain-wide delegation for data sync. This email enables the connector to utilize the Admin Directory API for listing organization users. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [
+          {
+            type: 'regex',
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
+        ],
+        value: '',
+      },
+      google_workspace_email_for_shared_drives_sync: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceEmailSharedDrivesSync.label',
+          {
+            defaultMessage: 'Google Workspace email for syncing shared drives',
+          }
+        ),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceEmailSharedDrivesSync.tooltip',
+          {
+            defaultMessage:
+              'Provide the Google Workspace user email for discovery and syncing of shared drives. Only the shared drives this user has access to will be synced.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [
+          {
+            type: 'regex',
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
+        ],
+        value: '',
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 2,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
@@ -798,6 +910,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             field: 'use_document_level_security',
             value: true,
           },
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: false,
+          },
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
@@ -805,7 +921,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           { defaultMessage: 'Google Workspace admin email' }
         ),
         options: [],
-        order: 3,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -833,7 +949,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Maximum concurrent HTTP requests',
         }),
         options: [],
-        order: 4,
+        order: 7,
         required: false,
         sensitive: false,
         tooltip: i18n.translate('searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.tooltip', {
@@ -856,12 +972,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 5,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
-        ui_restrictions: [],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: false,
       },
@@ -1101,6 +1217,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         value: 100,
+      },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
       },
       use_text_extraction_service: {
         default_value: false,
@@ -1742,6 +1873,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: [],
         validations: [],
         value: '',
+      },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
       },
     },
     features: {
@@ -2450,6 +2596,56 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      enumerate_all_sites: {
+        default_value: true,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesLabel',
+          { defaultMessage: 'Enumerate all sites?' }
+        ),
+        options: [],
+        order: 6,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesTooltip',
+          {
+            defaultMessage:
+              'If enabled, sites will be fetched in bulk, then filtered down to the configured list of sites. This is efficient when syncing many sites. If disabled, each configured site will be fetched with an individual request. This is efficient when syncing fewer sites.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_subsites: {
+        default_value: false,
+        depends_on: [{ field: 'enumerate_all_sites', value: false }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesLabel',
+          {
+            defaultMessage: 'Fetch sub-sites of configured sites?',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesTooltip',
+          {
+            defaultMessage:
+              'Whether subsites of the configured site(s) should be automatically fetched.',
           }
         ),
         type: FieldType.BOOLEAN,

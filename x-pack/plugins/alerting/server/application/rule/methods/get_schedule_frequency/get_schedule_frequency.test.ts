@@ -185,53 +185,55 @@ describe('validateScheduleLimit', () => {
     jest.clearAllMocks();
   });
 
-  test('should not throw if the updated interval does not exceed limits', () => {
-    return expect(
-      validateScheduleLimit({
+  test('should not return anything if the updated interval does not exceed limits', async () => {
+    expect(
+      await validateScheduleLimit({
         context,
         updatedInterval: ['1m', '1m'],
       })
-    ).resolves.toBe(undefined);
+    ).toBeNull();
   });
 
-  test('should throw if the updated interval exceeds limits', () => {
-    return expect(
-      validateScheduleLimit({
+  test('should return interval if the updated interval exceeds limits', async () => {
+    expect(
+      await validateScheduleLimit({
         context,
         updatedInterval: ['1m', '1m', '1m', '2m'],
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Run limit reached: The rule has 3.5 runs per minute; there are only 3 runs per minute available."`
-    );
+    ).toEqual({
+      interval: 3.5,
+      intervalAvailable: 3,
+    });
   });
 
-  test('should not throw if previous interval was modified to be under the limit', () => {
+  test('should not return anything if previous interval was modified to be under the limit', async () => {
     internalSavedObjectsRepository.find.mockResolvedValue(
       getMockAggregationResult([{ interval: '1m', count: 6 }])
     );
 
-    return expect(
-      validateScheduleLimit({
+    expect(
+      await validateScheduleLimit({
         context,
         prevInterval: ['1m', '1m'],
         updatedInterval: ['2m', '2m'],
       })
-    ).resolves.toBe(undefined);
+    ).toBeNull();
   });
 
-  test('should throw if the previous interval was modified to exceed the limit', () => {
+  test('should return interval if the previous interval was modified to exceed the limit', async () => {
     internalSavedObjectsRepository.find.mockResolvedValue(
       getMockAggregationResult([{ interval: '1m', count: 5 }])
     );
 
-    return expect(
-      validateScheduleLimit({
+    expect(
+      await validateScheduleLimit({
         context,
         prevInterval: ['1m'],
         updatedInterval: ['30s'],
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Run limit reached: The rule has 2 runs per minute; there are only 1 runs per minute available."`
-    );
+    ).toEqual({
+      interval: 2,
+      intervalAvailable: 0,
+    });
   });
 });

@@ -14,6 +14,7 @@ import type {
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { getServicesMock } from '../../mocks/src/jest';
 import { NavigationProvider } from '../services';
@@ -81,9 +82,11 @@ describe('<DefaultNavigation />', () => {
       ];
 
       const { findAllByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -108,10 +111,12 @@ describe('<DefaultNavigation />', () => {
                 "href": "http://foo",
                 "id": "item1",
                 "isActive": false,
+                "isGroup": false,
                 "path": Array [
                   "group1",
                   "item1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "Item 1",
               },
               Object {
@@ -120,10 +125,12 @@ describe('<DefaultNavigation />', () => {
                 "href": "http://foo",
                 "id": "item2",
                 "isActive": false,
+                "isGroup": false,
                 "path": Array [
                   "group1",
                   "item2",
                 ],
+                "sideNavStatus": "visible",
                 "title": "Item 2",
               },
               Object {
@@ -134,11 +141,13 @@ describe('<DefaultNavigation />', () => {
                     "href": "http://foo",
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "group1",
                       "group1A",
                       "item1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Group 1A Item 1",
                   },
                   Object {
@@ -149,12 +158,14 @@ describe('<DefaultNavigation />', () => {
                         "href": "http://foo",
                         "id": "item1",
                         "isActive": false,
+                        "isGroup": false,
                         "path": Array [
                           "group1",
                           "group1A",
                           "group1A_1",
                           "item1",
                         ],
+                        "sideNavStatus": "visible",
                         "title": "Group 1A_1 Item 1",
                       },
                     ],
@@ -162,11 +173,13 @@ describe('<DefaultNavigation />', () => {
                     "href": undefined,
                     "id": "group1A_1",
                     "isActive": false,
+                    "isGroup": true,
                     "path": Array [
                       "group1",
                       "group1A",
                       "group1A_1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Group1A_1",
                   },
                 ],
@@ -174,10 +187,12 @@ describe('<DefaultNavigation />', () => {
                 "href": undefined,
                 "id": "group1A",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "group1",
                   "group1A",
                 ],
+                "sideNavStatus": "visible",
                 "title": "Group1A",
               },
             ],
@@ -185,9 +200,11 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "group1",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "group1",
             ],
+            "sideNavStatus": "visible",
             "title": "",
             "type": "navGroup",
           },
@@ -238,6 +255,149 @@ describe('<DefaultNavigation />', () => {
       ];
 
       render(
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTreeGenerated] = lastCall;
+
+      expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item1",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item1",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Title from deeplink",
+                  },
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item2",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item2",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Overwrite deeplink title",
+                  },
+                ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1",
+                "isActive": false,
+                "isGroup": true,
+                "path": Array [
+                  "root",
+                  "group1",
+                ],
+                "sideNavStatus": "visible",
+                "title": "",
+              },
+            ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "root",
+            "isActive": false,
+            "isGroup": true,
+            "path": Array [
+              "root",
+            ],
+            "sideNavStatus": "visible",
+            "title": "",
+            "type": "navGroup",
+          },
+        ]
+      `);
+    });
+
+    test("shouldn't render hidden deeplink", async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        ...navLinksMock,
+        {
+          id: 'item1',
+          title: 'Item 1',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+        {
+          id: 'item',
+          title: 'Item 2',
+          hidden: true,
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const onProjectNavigationChange = jest.fn();
+
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          children: [
+            {
+              id: 'group1',
+              children: [
+                {
+                  id: 'item1',
+                  link: 'item1',
+                },
+                {
+                  id: 'item2',
+                  link: 'item2', // this should be hidden from sidenav
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      const { queryByTestId } = render(
         <NavigationProvider
           {...services}
           navLinks$={navLinks$}
@@ -268,47 +428,32 @@ describe('<DefaultNavigation />', () => {
                       "baseUrl": "",
                       "href": "",
                       "id": "item1",
-                      "title": "Title from deeplink",
+                      "title": "Item 1",
                       "url": "",
                     },
                     "href": undefined,
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "root",
                       "group1",
                       "item1",
                     ],
-                    "title": "Title from deeplink",
-                  },
-                  Object {
-                    "children": undefined,
-                    "deepLink": Object {
-                      "baseUrl": "",
-                      "href": "",
-                      "id": "item1",
-                      "title": "Title from deeplink",
-                      "url": "",
-                    },
-                    "href": undefined,
-                    "id": "item2",
-                    "isActive": false,
-                    "path": Array [
-                      "root",
-                      "group1",
-                      "item2",
-                    ],
-                    "title": "Overwrite deeplink title",
+                    "sideNavStatus": "visible",
+                    "title": "Item 1",
                   },
                 ],
                 "deepLink": undefined,
                 "href": undefined,
                 "id": "group1",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "root",
                   "group1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "",
               },
             ],
@@ -316,14 +461,19 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "root",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "root",
             ],
+            "sideNavStatus": "visible",
             "title": "",
             "type": "navGroup",
           },
         ]
       `);
+
+      expect(await queryByTestId(/nav-item-deepLinkId-item1/)).not.toBeNull();
+      expect(await queryByTestId(/nav-item-deepLinkId-item2/)).toBeNull();
     });
 
     test('should allow href for absolute links', async () => {
@@ -349,9 +499,11 @@ describe('<DefaultNavigation />', () => {
       ];
 
       render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -375,11 +527,13 @@ describe('<DefaultNavigation />', () => {
                     "href": "https://example.com",
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "root",
                       "group1",
                       "item1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Absolute link",
                   },
                 ],
@@ -387,10 +541,12 @@ describe('<DefaultNavigation />', () => {
                 "href": undefined,
                 "id": "group1",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "root",
                   "group1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "",
               },
             ],
@@ -398,9 +554,11 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "root",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "root",
             ],
+            "sideNavStatus": "visible",
             "title": "",
             "type": "navGroup",
           },
@@ -439,9 +597,11 @@ describe('<DefaultNavigation />', () => {
 
       const expectToThrow = () => {
         render(
-          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-            <DefaultNavigation navigationTree={{ body: navigationBody }} />
-          </NavigationProvider>
+          <EuiThemeProvider>
+            <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+              <DefaultNavigation navigationTree={{ body: navigationBody }} />
+            </NavigationProvider>
+          </EuiThemeProvider>
         );
       };
 
@@ -464,9 +624,11 @@ describe('<DefaultNavigation />', () => {
       ];
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -532,9 +694,11 @@ describe('<DefaultNavigation />', () => {
       const getActiveNodes$ = () => activeNodes$;
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} navLinks$={navLinks$} activeNodes$={getActiveNodes$()}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} navLinks$={navLinks$} activeNodes$={getActiveNodes$()}>
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -590,14 +754,16 @@ describe('<DefaultNavigation />', () => {
       };
 
       const { findByTestId } = render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          activeNodes$={getActiveNodes$()}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            activeNodes$={getActiveNodes$()}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -653,13 +819,15 @@ describe('<DefaultNavigation />', () => {
       ];
 
       render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <DefaultNavigation projectNavigationTree={projectNavigationTree} />
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <DefaultNavigation projectNavigationTree={projectNavigationTree} />
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -682,9 +850,11 @@ describe('<DefaultNavigation />', () => {
     describe('cloud links', () => {
       test('render the cloud link', async () => {
         const { findByTestId } = render(
-          <NavigationProvider {...services}>
-            <DefaultNavigation projectNavigationTree={[]} />
-          </NavigationProvider>
+          <EuiThemeProvider>
+            <NavigationProvider {...services}>
+              <DefaultNavigation projectNavigationTree={[]} />
+            </NavigationProvider>
+          </EuiThemeProvider>
         );
 
         expect(
