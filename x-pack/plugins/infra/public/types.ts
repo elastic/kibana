@@ -102,8 +102,8 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   kibanaVersion?: string;
-  isCloudEnabled: boolean;
-  isServerlessEnabled: boolean;
+  isCloudEnv: boolean;
+  isServerlessEnv: boolean;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   ml: MlPluginStart;
