@@ -28,10 +28,9 @@ const DEFAULT_VALUES = {
   syncJobsData: undefined,
   syncJobsLoading: true,
   syncJobsPagination: {
-    from: 0,
-    has_more_hits_than_total: false,
-    size: 10,
-    total: 0,
+    pageIndex: 0,
+    pageSize: 10,
+    totalItemCount: 0,
   },
   syncJobsStatus: Status.IDLE,
 };
@@ -116,10 +115,9 @@ describe('SyncJobsViewLogic', () => {
           },
           syncJobsLoading: false,
           syncJobsPagination: {
-            from: 40,
-            has_more_hits_than_total: false,
-            size: 20,
-            total: 50,
+            pageIndex: 2,
+            pageSize: 20,
+          totalItemCount: 50,
           },
           syncJobsStatus: Status.SUCCESS,
         });
@@ -176,10 +174,9 @@ describe('SyncJobsViewLogic', () => {
           },
           syncJobsLoading: false,
           syncJobsPagination: {
-            from: 40,
-            has_more_hits_than_total: false,
-            size: 20,
-            total: 50,
+            pageIndex: 2,
+            pageSize: 20,
+            totalItemCount: 50,
           },
           syncJobsStatus: Status.SUCCESS,
         });

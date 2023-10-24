@@ -37,7 +37,7 @@ export const SyncJobs: React.FC = () => {
         connectorId,
         from: pagination.pageIndex * (pagination.pageSize || 0),
         size: pagination.pageSize ?? 10,
-        type: selectedSyncJobCategory,
+        type: selectedSyncJobCategory as 'access_control' | 'content',
       });
     }
   }, [connectorId, selectedSyncJobCategory, type]);
