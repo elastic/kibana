@@ -22,11 +22,6 @@ const getTableColumnsLocalStorageKey = (appId: string) => {
 export function useCasesColumnsSelection() {
   const { appId } = useCasesContext();
   const casesColumnsConfig = useCasesColumnsConfiguration();
-  const defaultSelectedColumns = mergeSelectedColumnsWithConfiguration({
-    selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
-    casesColumnsConfig,
-  });
-
   const [selectedColumns, setSelectedColumns] = useLocalStorage<CasesColumnSelection[]>(
     getTableColumnsLocalStorageKey(appId)
   );
@@ -37,7 +32,10 @@ export function useCasesColumnsSelection() {
           selectedColumns,
           casesColumnsConfig,
         })
-      : defaultSelectedColumns,
+      : mergeSelectedColumnsWithConfiguration({
+          selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
+          casesColumnsConfig,
+        }),
     setSelectedColumns,
   };
 }

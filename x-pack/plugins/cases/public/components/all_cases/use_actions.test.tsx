@@ -43,7 +43,6 @@ describe('useActions', () => {
           "align": "right",
           "name": "Actions",
           "render": [Function],
-          "shouldDisplay": true,
         },
       }
     `);
@@ -395,7 +394,6 @@ describe('useActions', () => {
           "align": "right",
           "name": "Actions",
           "render": [Function],
-          "shouldDisplay": false,
         }
       `);
     });
