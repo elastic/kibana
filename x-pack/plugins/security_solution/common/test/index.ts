@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type serverlessRoleDefinitions from '@kbn/es/src/serverless_resources/security_roles.json';
+import serverlessRoleDefinitions from '@kbn/es/src/serverless_resources/security_roles.json';
 import type essRoleDefinitions from './ess_roles.json';
 
 type ServerlessSecurityRoleName = keyof typeof serverlessRoleDefinitions;
 type EssSecurityRoleName = keyof typeof essRoleDefinitions;
+
+export const KNOWN_SERVERLESS_ROLES = Object.keys(serverlessRoleDefinitions);
+
 export type SecurityRoleName = ServerlessSecurityRoleName | EssSecurityRoleName;
 
 export enum ROLES {
@@ -21,7 +24,7 @@ export enum ROLES {
   soc_manager = 'soc_manager',
   detections_admin = 'detections_admin',
   platform_engineer = 'platform_engineer',
-  // ESS roles below
+  // ESS roles
   hunter = 'hunter',
   hunter_no_actions = 'hunter_no_actions',
 }

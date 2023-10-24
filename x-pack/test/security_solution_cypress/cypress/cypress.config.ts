@@ -25,6 +25,7 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
   e2e: {
+    supportFile: 'cypress/support/ess_e2e.ts',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],

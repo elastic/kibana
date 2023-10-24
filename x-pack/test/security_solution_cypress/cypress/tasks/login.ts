@@ -10,9 +10,10 @@ import type { UrlObject } from 'url';
 import Url from 'url';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
 import { Role } from '@kbn/security-plugin/common';
-import serverlessRoleDefinitions from '@kbn/es/src/serverless_resources/security_roles.json';
-import essRoleDefinitions from '@kbn/security-solution-plugin/common/test/ess_roles.json';
-import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import {
+  SecurityRoleName,
+  KNOWN_SERVERLESS_ROLES,
+} from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
 import { rootRequest } from './common';
 
@@ -134,38 +135,19 @@ export const constructUrlWithUser = (user: User, route: string) => {
 };
 
 /**
- * Authenticates with a predefined role.
- *
- * It takes into account ESS and Serverless differences. Serverless already has specific roles and we can't
- * add new ones while ESS allows to freely add new roles. As we reuse tests between ESS and Serverless it's
- * essential to have the same predefined roles. Supported roles set is limited, see `SecurityRoleName`.
+ * Authenticates with a predefined role
  *
  * @param role role name
  */
 const loginWithRole = (role: SecurityRoleName) => {
-  const password = 'changeme';
-
-  if (!Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
-    const roleDefinition =
-      serverlessRoleDefinitions[role as keyof typeof serverlessRoleDefinitions] ??
-      essRoleDefinitions[role as keyof typeof essRoleDefinitions];
-
-    if (!roleDefinition) {
-      throw new Error(
-        `Unable to find role definition "${role}" in @kbn/security-solution-plugin/common/test/ess_roles.json.`
-      );
-    }
-
-    createRole({ name: role, ...roleDefinition });
-
-    const username = role;
-
-    createUser(username, password, [role]);
-  } else {
-    if (!(role in serverlessRoleDefinitions)) {
-      throw new Error(`An attempt to log in with unsupported by Serverless role "${role}".`);
-    }
+  if (
+    (Cypress.env(IS_SERVERLESS) || Cypress.env(CLOUD_SERVERLESS)) &&
+    !KNOWN_SERVERLESS_ROLES.includes(role)
+  ) {
+    throw new Error(`An attempt to log in with unsupported by Serverless role "${role}".`);
   }
+
+  const password = 'changeme';
 
   cy.log(`origin: ${Cypress.config().baseUrl}`);
   cy.session(role, () => {
