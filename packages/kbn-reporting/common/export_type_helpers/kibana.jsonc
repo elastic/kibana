@@ -1,0 +1,12 @@
+{
+    "type": "shared-server",
+    "id": "@kbn/reporting-common-export-types-helpers",
+    "owner": "@elastic/appex-sharedux",
+    "plugin": {
+      "server": true,
+      "browser": true,
+      "requiredBundles": ["kibanaUtils"],
+      "extraPublicDirs": ["common"]
+    }
+  }
+  

@@ -15,8 +15,11 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/reporting-common",
+    "@kbn/i18n",
     "@kbn/screenshotting-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/logging",
+    "@kbn/core",
   ]
 }

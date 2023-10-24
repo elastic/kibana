@@ -5248,6 +5248,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-common-export-types-helpers@link:packages/kbn-reporting/common/export_type_helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-common@link:packages/kbn-reporting/common":
   version "0.0.0"
   uid ""

@@ -34,17 +34,3 @@ export type {
 } from './url';
 export { ExportType } from './export_type';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
-export {
-  getCustomLogo,
-  decryptJobHeaders,
-  getFieldFormats,
-  setFieldFormats,
-  generatePdfObservable,
-  generatePdfObservableV2,
-  getFullRedirectAppUrl,
-  validateUrls,
-  getFullUrls,
-  getAbsoluteUrlFactory,
-  generatePngObservable,
-  buildKibanaPath,
-} from './export_type_helpers';

@@ -595,6 +595,7 @@
     "@kbn/repo-info": "link:packages/kbn-repo-info",
     "@kbn/repo-packages": "link:packages/kbn-repo-packages",
     "@kbn/reporting-common": "link:packages/kbn-reporting/common",
+    "@kbn/reporting-common-export-types-helpers": "link:packages/kbn-reporting/common/export_type_helpers",
     "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
     "@kbn/reporting-export-types-csv": "link:packages/kbn-reporting/export_types/csv",
     "@kbn/reporting-export-types-deprecated": "link:packages/kbn-reporting/export_types/deprecated",
