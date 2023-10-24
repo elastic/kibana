@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getNewRule } from '../../../objects/rule';
-import { ALERTS_COUNT, SELECTED_ALERTS } from '../../../screens/alerts';
+import {
+  ALERTS_COUNT,
+  CLOSE_ALERT_BTN,
+  CLOSE_SELECTED_ALERTS_BTN,
+  MARK_ALERT_ACKNOWLEDGED_BTN,
+  OPEN_ALERT_BTN,
+  SELECTED_ALERTS,
+  TAKE_ACTION_POPOVER_BTN,
+} from '../../../screens/alerts';
 
 import {
   selectNumberOfAlerts,
@@ -20,6 +29,7 @@ import {
   goToOpenedAlerts,
   openAlerts,
   openFirstAlert,
+  expandFirstAlertActions,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
@@ -35,197 +45,231 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
   });
 
-  context('Opening alerts', () => {
+  context('User can crud', () => {
+    context('Opening alerts', () => {
+      beforeEach(() => {
+        login();
+        deleteAlertsAndRules();
+        createRule(getNewRule());
+        visit(ALERTS_URL);
+        waitForAlertsToPopulate();
+        selectNumberOfAlerts(3);
+        cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
+        closeAlerts();
+        waitForAlerts();
+      });
+
+      after(() => {
+        cy.task('esArchiverUnload', 'auditbeat_big');
+      });
+
+      it('can mark a closed alert as open', () => {
+        waitForAlertsToPopulate();
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .then((numberOfOpenedAlertsText) => {
+            const numberOfOpenedAlerts = parseInt(numberOfOpenedAlertsText, 10);
+            goToClosedAlerts();
+            waitForAlerts();
+            cy.get(ALERTS_COUNT)
+              .invoke('text')
+              .then((alertNumberString) => {
+                const numberOfAlerts = alertNumberString.split(' ')[0];
+                const numberOfAlertsToBeOpened = 1;
+
+                openFirstAlert();
+                waitForAlerts();
+
+                const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
+                cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
+
+                goToOpenedAlerts();
+                waitForAlerts();
+
+                cy.get(ALERTS_COUNT).contains(`${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`);
+              });
+          });
+      });
+
+      it('can bulk open alerts', () => {
+        waitForAlertsToPopulate();
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .then((numberOfOpenedAlertsText) => {
+            const numberOfOpenedAlerts = parseInt(numberOfOpenedAlertsText, 10);
+            goToClosedAlerts();
+            waitForAlerts();
+            cy.get(ALERTS_COUNT)
+              .invoke('text')
+              .then((alertNumberString) => {
+                const numberOfAlerts = alertNumberString.split(' ')[0];
+                const numberOfAlertsToBeOpened = 2;
+                const numberOfAlertsToBeSelected = 2;
+
+                selectNumberOfAlerts(numberOfAlertsToBeSelected);
+                cy.get(SELECTED_ALERTS).should(
+                  'have.text',
+                  `Selected ${numberOfAlertsToBeSelected} alerts`
+                );
+
+                openAlerts();
+                waitForAlerts();
+
+                const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
+                cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
+
+                goToOpenedAlerts();
+                waitForAlerts();
+
+                cy.get(ALERTS_COUNT).contains(`${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`);
+              });
+          });
+      });
+    });
+
+    context('Marking alerts as acknowledged', () => {
+      beforeEach(() => {
+        login();
+        deleteAlertsAndRules();
+        createRule(getNewRule());
+        visit(ALERTS_URL);
+        waitForAlertsToPopulate();
+      });
+
+      it('can mark alert as acknowledged', () => {
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .then((alertNumberString) => {
+            const numberOfAlerts = alertNumberString.split(' ')[0];
+            const numberOfAlertsToBeMarkedAcknowledged = 1;
+
+            markAcknowledgedFirstAlert();
+            waitForAlerts();
+            const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
+            cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
+
+            goToAcknowledgedAlerts();
+            waitForAlerts();
+
+            cy.get(ALERTS_COUNT).contains(`${numberOfAlertsToBeMarkedAcknowledged}`);
+          });
+      });
+
+      it('can bulk mark alerts as acknowledged', () => {
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .then((alertNumberString) => {
+            const numberOfAlerts = alertNumberString.split(' ')[0];
+            const numberOfAlertsToBeMarkedAcknowledged = 2;
+            const numberOfAlertsToBeSelected = 2;
+
+            selectNumberOfAlerts(numberOfAlertsToBeSelected);
+
+            markAlertsAcknowledged();
+            waitForAlerts();
+            const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
+            cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
+
+            goToAcknowledgedAlerts();
+            waitForAlerts();
+
+            cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeMarkedAcknowledged);
+          });
+      });
+    });
+
+    context('Closing alerts', () => {
+      beforeEach(() => {
+        login();
+        deleteAlertsAndRules();
+        createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
+        visit(ALERTS_URL);
+        waitForAlertsToPopulate();
+      });
+      it('can close an alert', () => {
+        const numberOfAlertsToBeClosed = 1;
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .then((alertNumberString) => {
+            const numberOfAlerts = alertNumberString.split(' ')[0];
+            cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
+
+            selectNumberOfAlerts(numberOfAlertsToBeClosed);
+
+            cy.get(SELECTED_ALERTS).should(
+              'have.text',
+              `Selected ${numberOfAlertsToBeClosed} alert`
+            );
+
+            closeFirstAlert();
+            waitForAlerts();
+
+            const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
+            cy.get(ALERTS_COUNT).contains(expectedNumberOfAlertsAfterClosing);
+
+            goToClosedAlerts();
+            waitForAlerts();
+
+            cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeClosed);
+          });
+      });
+
+      it('can bulk close alerts', () => {
+        const numberOfAlertsToBeClosed = 2;
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .then((alertNumberString) => {
+            const numberOfAlerts = alertNumberString.split(' ')[0];
+            cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
+
+            selectNumberOfAlerts(numberOfAlertsToBeClosed);
+
+            cy.get(SELECTED_ALERTS).should(
+              'have.text',
+              `Selected ${numberOfAlertsToBeClosed} alerts`
+            );
+
+            closeAlerts();
+            waitForAlerts();
+
+            const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
+            cy.get(ALERTS_COUNT).contains(expectedNumberOfAlertsAfterClosing);
+
+            goToClosedAlerts();
+            waitForAlerts();
+
+            cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeClosed);
+          });
+      });
+    });
+  });
+
+  context('User is readonly', () => {
     beforeEach(() => {
-      login();
+      login(ROLES.reader);
       deleteAlertsAndRules();
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      selectNumberOfAlerts(3);
-      cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
-      closeAlerts();
-      waitForAlerts();
     });
 
     after(() => {
       cy.task('esArchiverUnload', 'auditbeat_big');
     });
 
-    it('can mark a closed alert as open', () => {
-      waitForAlertsToPopulate();
-      cy.get(ALERTS_COUNT)
-        .invoke('text')
-        .then((numberOfOpenedAlertsText) => {
-          const numberOfOpenedAlerts = parseInt(numberOfOpenedAlertsText, 10);
-          goToClosedAlerts();
-          waitForAlerts();
-          cy.get(ALERTS_COUNT)
-            .invoke('text')
-            .then((alertNumberString) => {
-              const numberOfAlerts = alertNumberString.split(' ')[0];
-              const numberOfAlertsToBeOpened = 1;
-
-              openFirstAlert();
-              waitForAlerts();
-
-              const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
-              cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
-
-              goToOpenedAlerts();
-              waitForAlerts();
-
-              cy.get(ALERTS_COUNT).contains(`${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`);
-            });
-        });
+    it('should not allow users to change a single alert status', () => {
+      expandFirstAlertActions();
+      cy.get(CLOSE_ALERT_BTN).should('not.exist');
+      cy.get(OPEN_ALERT_BTN).should('not.exist');
+      cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('not.exist');
     });
 
-    it('can bulk open alerts', () => {
-      waitForAlertsToPopulate();
-      cy.get(ALERTS_COUNT)
-        .invoke('text')
-        .then((numberOfOpenedAlertsText) => {
-          const numberOfOpenedAlerts = parseInt(numberOfOpenedAlertsText, 10);
-          goToClosedAlerts();
-          waitForAlerts();
-          cy.get(ALERTS_COUNT)
-            .invoke('text')
-            .then((alertNumberString) => {
-              const numberOfAlerts = alertNumberString.split(' ')[0];
-              const numberOfAlertsToBeOpened = 2;
-              const numberOfAlertsToBeSelected = 2;
+    it('should not allow users to bulk change the alert status', () => {
+      cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
+      cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
 
-              selectNumberOfAlerts(numberOfAlertsToBeSelected);
-              cy.get(SELECTED_ALERTS).should(
-                'have.text',
-                `Selected ${numberOfAlertsToBeSelected} alerts`
-              );
-
-              openAlerts();
-              waitForAlerts();
-
-              const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
-              cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
-
-              goToOpenedAlerts();
-              waitForAlerts();
-
-              cy.get(ALERTS_COUNT).contains(`${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`);
-            });
-        });
-    });
-  });
-
-  context('Marking alerts as acknowledged', () => {
-    beforeEach(() => {
-      login();
-      deleteAlertsAndRules();
-      createRule(getNewRule());
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-
-    it('can mark alert as acknowledged', () => {
-      cy.get(ALERTS_COUNT)
-        .invoke('text')
-        .then((alertNumberString) => {
-          const numberOfAlerts = alertNumberString.split(' ')[0];
-          const numberOfAlertsToBeMarkedAcknowledged = 1;
-
-          markAcknowledgedFirstAlert();
-          waitForAlerts();
-          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
-          cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
-
-          goToAcknowledgedAlerts();
-          waitForAlerts();
-
-          cy.get(ALERTS_COUNT).contains(`${numberOfAlertsToBeMarkedAcknowledged}`);
-        });
-    });
-
-    it('can bulk mark alerts as acknowledged', () => {
-      cy.get(ALERTS_COUNT)
-        .invoke('text')
-        .then((alertNumberString) => {
-          const numberOfAlerts = alertNumberString.split(' ')[0];
-          const numberOfAlertsToBeMarkedAcknowledged = 2;
-          const numberOfAlertsToBeSelected = 2;
-
-          selectNumberOfAlerts(numberOfAlertsToBeSelected);
-
-          markAlertsAcknowledged();
-          waitForAlerts();
-          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
-          cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
-
-          goToAcknowledgedAlerts();
-          waitForAlerts();
-
-          cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeMarkedAcknowledged);
-        });
-    });
-  });
-
-  context('Closing alerts', () => {
-    beforeEach(() => {
-      login();
-      deleteAlertsAndRules();
-      createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-    it('can close an alert', () => {
-      const numberOfAlertsToBeClosed = 1;
-      cy.get(ALERTS_COUNT)
-        .invoke('text')
-        .then((alertNumberString) => {
-          const numberOfAlerts = alertNumberString.split(' ')[0];
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
-
-          selectNumberOfAlerts(numberOfAlertsToBeClosed);
-
-          cy.get(SELECTED_ALERTS).should('have.text', `Selected ${numberOfAlertsToBeClosed} alert`);
-
-          closeFirstAlert();
-          waitForAlerts();
-
-          const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(ALERTS_COUNT).contains(expectedNumberOfAlertsAfterClosing);
-
-          goToClosedAlerts();
-          waitForAlerts();
-
-          cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeClosed);
-        });
-    });
-
-    it('can bulk close alerts', () => {
-      const numberOfAlertsToBeClosed = 2;
-      cy.get(ALERTS_COUNT)
-        .invoke('text')
-        .then((alertNumberString) => {
-          const numberOfAlerts = alertNumberString.split(' ')[0];
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
-
-          selectNumberOfAlerts(numberOfAlertsToBeClosed);
-
-          cy.get(SELECTED_ALERTS).should(
-            'have.text',
-            `Selected ${numberOfAlertsToBeClosed} alerts`
-          );
-
-          closeAlerts();
-          waitForAlerts();
-
-          const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(ALERTS_COUNT).contains(expectedNumberOfAlertsAfterClosing);
-
-          goToClosedAlerts();
-          waitForAlerts();
-
-          cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeClosed);
-        });
+      cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
+      cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('not.exist');
     });
   });
 });
