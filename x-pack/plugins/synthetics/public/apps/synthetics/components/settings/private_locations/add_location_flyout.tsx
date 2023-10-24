@@ -26,7 +26,7 @@ import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LocationForm } from './location_form';
 import { ManageEmptyState } from './manage_empty_state';
 
-type NewLocation = Omit<PrivateLocation, 'id'>;
+export type NewLocation = Omit<PrivateLocation, 'id'>;
 
 export const AddLocationFlyout = ({
   onSubmit,

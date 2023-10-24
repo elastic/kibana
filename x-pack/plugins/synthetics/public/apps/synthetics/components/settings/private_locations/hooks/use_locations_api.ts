@@ -8,6 +8,7 @@
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { NewLocation } from '../add_location_flyout';
 import { getServiceLocations } from '../../../../state/service_locations';
 import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
 import {
@@ -18,7 +19,7 @@ import {
 import { PrivateLocation } from '../../../../../../../common/runtime_types';
 
 export const usePrivateLocationsAPI = () => {
-  const [formData, setFormData] = useState<PrivateLocation>();
+  const [formData, setFormData] = useState<NewLocation>();
   const [deleteId, setDeleteId] = useState<string>();
   const [privateLocations, setPrivateLocations] = useState<PrivateLocation[]>([]);
 
@@ -43,7 +44,7 @@ export const usePrivateLocationsAPI = () => {
     }
   }, [formData]);
 
-  const onSubmit = (data: PrivateLocation) => {
+  const onSubmit = (data: NewLocation) => {
     setFormData(data);
   };
 
