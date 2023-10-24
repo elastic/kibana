@@ -20,7 +20,7 @@ import {
   deleteRuleById,
   ApmAlertFields,
 } from '../alerts/helpers/alerting_api_helper';
-import { waitForActiveRule } from '../alerts/helpers/wait_for_rule_status';
+import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
 import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 
 type TransactionsGroupsMainStatistics =

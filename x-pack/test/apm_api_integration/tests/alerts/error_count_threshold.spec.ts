@@ -26,7 +26,7 @@ import {
 import { cleanupAllState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
-import { waitForActiveRule } from './helpers/wait_for_rule_status';
+import { waitForActiveRule } from './helpers/wait_for_active_rule';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

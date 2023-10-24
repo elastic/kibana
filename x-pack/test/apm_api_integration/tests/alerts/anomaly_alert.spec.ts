@@ -14,7 +14,7 @@ import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { createApmRule, deleteApmRules } from './helpers/alerting_api_helper';
-import { waitForActiveRule } from './helpers/wait_for_rule_status';
+import { waitForActiveRule } from './helpers/wait_for_active_rule';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
