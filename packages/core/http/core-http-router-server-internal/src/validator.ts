@@ -7,6 +7,7 @@
  */
 
 import { Stream } from 'stream';
+import { isObjectLike } from 'lodash';
 import { ValidationError, Type, schema, isConfigSchema } from '@kbn/config-schema';
 import type {
   RouteValidationSpec,
@@ -26,6 +27,8 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
     ? T['type']
     : undefined
 >;
+
+const NON_DOTTED_ALPHANUM_REGEXP = /[^a-zA-Z\d\._\-\s]/;
 
 /**
  * Route validator class to define the validation logic for each new route.
@@ -113,6 +116,36 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   private safetyPrechecks<T>(data: T, namespace?: string): T {
     // We can add any pre-validation safety logic in here
+
+    // For objects or arrays
+    if (isObjectLike(data)) {
+      if (Array.isArray(data)) {
+        return data.map((item) => this.safetyPrechecks(item, namespace)) as unknown as T;
+      }
+
+      const safetyRecordSchema = schema.recordOf(
+        schema.string({
+          validate: (key) => {
+            if (NON_DOTTED_ALPHANUM_REGEXP.test(key)) {
+              return 'Code injection attempt identified';
+            }
+          },
+        }),
+        // Recursively iterate
+        schema.any({
+          validate: (item) => {
+            try {
+              this.safetyPrechecks(item, namespace);
+            } catch (err) {
+              return err.message;
+            }
+          },
+        })
+      );
+
+      return safetyRecordSchema.validate(data, {}, namespace) as T;
+    }
+
     return data;
   }
 
