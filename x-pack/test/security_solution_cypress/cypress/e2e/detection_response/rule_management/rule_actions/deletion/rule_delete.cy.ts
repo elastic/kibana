@@ -12,6 +12,7 @@ import { RULE_SWITCH } from '../../../../../screens/alerts_detection_rules';
 
 import {
   deleteFirstRule,
+  disableAutoRefresh,
   getRulesManagementTableRows,
   selectRulesByName,
 } from '../../../../../tasks/alerts_detection_rules';
@@ -33,6 +34,7 @@ describe('Rule deletion', { tags: ['@ess', '@serverless'] }, () => {
     createRule(testRules[2]);
     login();
     visitRulesManagementTable();
+    disableAutoRefresh();
   });
 
   it('User can delete an individual rule', () => {

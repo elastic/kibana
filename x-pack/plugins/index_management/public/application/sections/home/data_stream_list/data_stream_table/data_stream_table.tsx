@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { useAppContext } from '../../../../app_context';
 import { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
@@ -46,6 +47,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 }) => {
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
+  const { config } = useAppContext();
 
   const columns: Array<EuiBasicTableColumn<DataStream>> = [];
 
@@ -99,16 +101,18 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             }),
     });
 
-    columns.push({
-      field: 'storageSizeBytes',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
-        defaultMessage: 'Storage size',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
-        dataStream.storageSize,
-    });
+    if (config.enableDataStreamsStorageColumn) {
+      columns.push({
+        field: 'storageSizeBytes',
+        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
+          defaultMessage: 'Storage size',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+          dataStream.storageSize,
+      });
+    }
   }
 
   columns.push({
