@@ -21,8 +21,9 @@ describe('<UnsavedChangesBadge />', () => {
 
     getByTestId('unsavedChangesBadge').click();
     await waitFor(() => {
-      return Boolean(queryByTestId('resetUnsavedChangesMenuItem'));
+      return Boolean(queryByTestId('unsavedChangesBadgeMenuPanel'));
     });
+    expect(queryByTestId('resetUnsavedChangesMenuItem')).toBeInTheDocument();
     expect(queryByTestId('saveUnsavedChangesMenuItem')).not.toBeInTheDocument();
     expect(queryByTestId('saveUnsavedChangesAsMenuItem')).not.toBeInTheDocument();
 
@@ -46,8 +47,9 @@ describe('<UnsavedChangesBadge />', () => {
 
     getByTestId('unsavedChangesBadge').click();
     await waitFor(() => {
-      return Boolean(queryByTestId('resetUnsavedChangesMenuItem'));
+      return Boolean(queryByTestId('unsavedChangesBadgeMenuPanel'));
     });
+    expect(queryByTestId('resetUnsavedChangesMenuItem')).toBeInTheDocument();
     expect(queryByTestId('saveUnsavedChangesMenuItem')).toBeInTheDocument();
     expect(queryByTestId('saveUnsavedChangesAsMenuItem')).toBeInTheDocument();
 
@@ -65,7 +67,7 @@ describe('<UnsavedChangesBadge />', () => {
       getByTestId('unsavedChangesBadge').click();
     });
     await waitFor(() => {
-      return Boolean(queryByTestId('resetUnsavedChangesMenuItem'));
+      return Boolean(queryByTestId('unsavedChangesBadgeMenuPanel'));
     });
 
     expect(onSave).not.toHaveBeenCalled();
