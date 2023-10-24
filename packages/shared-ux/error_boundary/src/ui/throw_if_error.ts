@@ -15,7 +15,7 @@ import { FC } from 'react';
  *
  * @public
  */
-export const KibanaRecallError: FC<{ error: Error | null }> = ({ error }) => {
+export const ThrowIfError: FC<{ error: Error | null }> = ({ error }) => {
   if (error) {
     throw error;
   }

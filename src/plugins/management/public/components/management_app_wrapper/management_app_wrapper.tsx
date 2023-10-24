@@ -11,7 +11,7 @@ import React, { createRef, Component } from 'react';
 import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { KibanaRecallError } from '@kbn/shared-ux-error-boundary';
+import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
 
@@ -78,7 +78,7 @@ export class ManagementAppWrapper extends Component<
   render() {
     return (
       <>
-        <KibanaRecallError error={this.state.error} />
+        <ThrowIfError error={this.state.error} />
         <div
           // The following classes are a stop-gap for this element that wraps children of KibanaPageTemplate
           className={classNames('euiPageContentBody', APP_WRAPPER_CLASS)}
