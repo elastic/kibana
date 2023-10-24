@@ -168,7 +168,8 @@ export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
  * Cases UI Constants
  */
 
-// The name comes from the cases columns configuration
+// We just need the default ids(field) and isChecked.
+// The name comes from the cases columns configuration.
 export const DEFAULT_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
   { field: 'title', name: '', isChecked: true },
   { field: 'assignees', name: '', isChecked: true },
@@ -186,7 +187,6 @@ export const DEFAULT_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
   { field: 'actions', name: '', isChecked: true },
 ];
 
-// The name comes from the cases columns configuration
 export const SELECTOR_VIEW_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
   { field: 'title', name: '', isChecked: true },
   { field: 'category', name: '', isChecked: true },

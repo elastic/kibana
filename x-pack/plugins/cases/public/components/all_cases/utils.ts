@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ParsedUrlQueryParams, PartialQueryParams } from '../../../common/ui/types';
+import { difference } from 'lodash';
+import type {
+  CasesColumnSelection,
+  ParsedUrlQueryParams,
+  PartialQueryParams,
+} from '../../../common/ui/types';
+import type { CasesColumnsConfiguration } from './use_cases_columns_configuration';
 
 export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): PartialQueryParams => {
   const urlParams: PartialQueryParams = {
@@ -27,4 +33,53 @@ export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): Part
   }
 
   return urlParams;
+};
+
+export const mergeSelectedColumnsWithConfiguration = ({
+  selectedColumns,
+  casesColumnsConfig,
+}: {
+  selectedColumns: CasesColumnSelection[];
+  casesColumnsConfig: CasesColumnsConfiguration;
+}): CasesColumnSelection[] => {
+  // selectedColumns is the master
+  // iterate over selectedColumns
+  //   filter out those not in the configuration
+  //   filter out those that !canDisplay
+  //   add columnName
+  // add missing fields/columns from configuration
+
+  const result = selectedColumns.reduce((accumulator, { field, isChecked }) => {
+    if (
+      field in casesColumnsConfig &&
+      casesColumnsConfig[field].field !== '' &&
+      casesColumnsConfig[field].canDisplay
+    ) {
+      accumulator.push({
+        field: casesColumnsConfig[field].field,
+        name: casesColumnsConfig[field].name,
+        isChecked,
+      });
+    }
+    return accumulator;
+  }, [] as CasesColumnSelection[]);
+
+  // This will include any new customFields and/or changes to the case attributes
+  const missingColumns = difference(
+    Object.keys(casesColumnsConfig),
+    selectedColumns.map(({ field }) => field)
+  );
+
+  missingColumns.forEach((field) => {
+    // can be an empty string
+    if (casesColumnsConfig[field].field) {
+      result.push({
+        field: casesColumnsConfig[field].field,
+        name: casesColumnsConfig[field].name,
+        isChecked: false,
+      });
+    }
+  });
+
+  return result;
 };

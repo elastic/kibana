@@ -69,7 +69,7 @@ export const ColumnsPopover: React.FC<Props> = ({
         <EuiButtonEmpty
           aria-label="Columns"
           className="columns"
-          data-test-subj="show-field-browser"
+          data-test-subj="column-selection-popover"
           iconType="indexOpen"
           iconSide="left"
           onClick={togglePopover}
@@ -102,6 +102,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                         <EuiSwitch
                           label={name}
                           checked={isChecked}
+                          data-test-subj={`column-selection-switch-${field}`}
                           onChange={(e) => toggleColumn({ field, isChecked: e.target.checked })}
                           compressed
                         />

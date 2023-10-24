@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { parseUrlQueryParams } from './utils';
+import type { CasesColumnsConfiguration } from './use_cases_columns_configuration';
+import type { CasesColumnSelection } from '../../containers/types';
+
+import { mergeSelectedColumnsWithConfiguration, parseUrlQueryParams } from './utils';
 import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 
 const DEFAULT_STRING_QUERY_PARAMS = {
@@ -66,6 +69,65 @@ describe('utils', () => {
           foo: 'bar',
         })
       ).toStrictEqual(DEFAULT_QUERY_PARAMS);
+    });
+  });
+
+  describe('mergeSelectedColumnsWithConfiguration', () => {
+    const mockConfiguration: CasesColumnsConfiguration = {
+      foo: { field: 'foo', name: 'foo', canDisplay: true },
+      bar: { field: 'bar', name: 'bar', canDisplay: true },
+    };
+    const mockSelectedColumns: CasesColumnSelection[] = [
+      { field: 'foo', name: 'foo', isChecked: true },
+      { field: 'bar', name: 'bar', isChecked: true },
+    ];
+
+    it('does not return selectedColumns without a matching configuration', () => {
+      expect(
+        mergeSelectedColumnsWithConfiguration({
+          selectedColumns: [
+            ...mockSelectedColumns,
+            { field: 'foobar', name: 'foobar', isChecked: true },
+          ],
+          casesColumnsConfig: mockConfiguration,
+        })
+      ).toStrictEqual(mockSelectedColumns);
+    });
+
+    it('does not return selectedColumns with canDisplay value false in configuration', () => {
+      expect(
+        mergeSelectedColumnsWithConfiguration({
+          selectedColumns: mockSelectedColumns,
+          casesColumnsConfig: {
+            ...mockConfiguration,
+            bar: { ...mockConfiguration.bar, canDisplay: false },
+          },
+        })
+      ).toStrictEqual([mockSelectedColumns[0]]);
+    });
+
+    it('does not return selectedColumns without a field in the configuration', () => {
+      expect(
+        mergeSelectedColumnsWithConfiguration({
+          selectedColumns: mockSelectedColumns,
+          casesColumnsConfig: {
+            ...mockConfiguration,
+            bar: { ...mockConfiguration.bar, field: '' },
+          },
+        })
+      ).toStrictEqual([mockSelectedColumns[0]]);
+    });
+
+    it('result contains columns missing in the selectedColumns with isChecked false', () => {
+      expect(
+        mergeSelectedColumnsWithConfiguration({
+          selectedColumns: [],
+          casesColumnsConfig: mockConfiguration,
+        })
+      ).toStrictEqual([
+        { field: 'foo', name: 'foo', isChecked: false },
+        { field: 'bar', name: 'bar', isChecked: false },
+      ]);
     });
   });
 });
