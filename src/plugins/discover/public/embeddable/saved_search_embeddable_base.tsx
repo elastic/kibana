@@ -10,7 +10,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
-import { type SearchResponseWarning, SearchResponseWarningsBadge } from '@kbn/search-response-warnings';
+import {
+  type SearchResponseWarning,
+  SearchResponseWarningsBadge,
+} from '@kbn/search-response-warnings';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 
 const containerStyles = css`

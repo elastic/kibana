@@ -9,13 +9,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import {
-  EuiButton,
-  EuiIcon,
-  EuiPopover,
-  useEuiTheme,
-  useEuiFontSize,
-} from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiPopover, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 import { SearchResponseWarningsBadgePopoverContent } from './badge_popover_content';
 import type { SearchResponseWarning } from '../../types';
 
@@ -74,7 +68,7 @@ export const SearchResponseWarningsBadge = (props: Props) => {
     >
       <SearchResponseWarningsBadgePopoverContent
         onViewDetailsClick={() => {
-          setIsPopoverOpen(false)
+          setIsPopoverOpen(false);
         }}
         visualizationLabel={props.visualizationLabel}
         warnings={props.warnings}
