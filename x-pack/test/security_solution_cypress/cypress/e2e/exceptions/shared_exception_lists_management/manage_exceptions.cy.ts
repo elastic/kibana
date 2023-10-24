@@ -38,6 +38,7 @@ import {
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
 import { visitRuleDetailsPage } from '../../../tasks/rule_details';
+import { deleteExceptionLists } from '../../../tasks/common';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165795
@@ -46,7 +47,7 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
-      cy.task('esArchiverResetKibana');
+      deleteExceptionLists();
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
       createRule(getNewRule()).as('createdRule');
 
