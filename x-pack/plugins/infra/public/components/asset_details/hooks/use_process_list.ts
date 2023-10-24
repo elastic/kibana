@@ -10,11 +10,11 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
+import { Subject } from 'rxjs';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../common/http_api';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useSourceContext } from '../../../containers/metrics_source';
-import { useRequestObservable } from './use_request_observable';
 
 export interface SortBy {
   name: string;
@@ -25,9 +25,9 @@ export function useProcessList(
   hostTerm: Record<string, string>,
   to: number,
   sortBy: SortBy,
-  searchFilter: object
+  searchFilter: object,
+  request$?: Subject<() => Promise<unknown>>
 ) {
-  const { request$ } = useRequestObservable();
   const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern().title;
 
@@ -63,7 +63,11 @@ export function useProcessList(
   );
 
   useEffect(() => {
-    request$.next(makeRequest);
+    if (request$) {
+      request$.next(makeRequest);
+    } else {
+      makeRequest();
+    }
   }, [makeRequest, request$]);
 
   return {

@@ -28,13 +28,15 @@ import { createFormatter } from '../../../../../common/formatters';
 import { MetricsExplorerAggregation } from '../../../../../common/http_api';
 import { Process } from './types';
 import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
+import { useRequestObservable } from '../../hooks/use_request_observable';
 
 interface Props {
   command: string;
 }
 
 export const ProcessRowCharts = ({ command }: Props) => {
-  const { loading, error, response } = useProcessListRowChart(command);
+  const { request$ } = useRequestObservable();
+  const { loading, error, response } = useProcessListRowChart(command, request$);
 
   const isLoading = loading || !response;
 

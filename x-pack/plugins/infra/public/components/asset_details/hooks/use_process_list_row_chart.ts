@@ -9,6 +9,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect, useState } from 'react';
+import { Subject } from 'rxjs';
 import {
   ProcessListAPIChartResponse,
   ProcessListAPIChartResponseRT,
@@ -16,10 +17,11 @@ import {
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useProcessListContext } from './use_process_list';
-import { useRequestObservable } from './use_request_observable';
 
-export function useProcessListRowChart(command: string) {
-  const { request$ } = useRequestObservable();
+export function useProcessListRowChart(
+  command: string,
+  request$?: Subject<() => Promise<unknown>>
+) {
   const [inErrorState, setInErrorState] = useState(false);
   const decodeResponse = (response: any) => {
     return pipe(
@@ -48,7 +50,11 @@ export function useProcessListRowChart(command: string) {
   useEffect(() => setInErrorState(false), [loading]);
 
   useEffect(() => {
-    request$.next(makeRequest);
+    if (request$) {
+      request$.next(makeRequest);
+    } else {
+      makeRequest();
+    }
   }, [makeRequest, request$]);
 
   return {

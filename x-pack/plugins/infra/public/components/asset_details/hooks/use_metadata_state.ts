@@ -12,10 +12,12 @@ import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
 import { useDatePickerContext } from './use_date_picker';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
+import { useRequestObservable } from './use_request_observable';
 
 export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'assetId' | 'assetType'>;
 
 export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderProps) {
+  const { request$ } = useRequestObservable();
   const [, setUrlState] = useAssetDetailsUrlState();
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const { sourceId } = useSourceContext();
@@ -25,6 +27,7 @@ export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderP
     assetType,
     sourceId,
     timeRange: getDateRangeInTimestamp(),
+    request$,
   });
 
   const refresh = useCallback(() => {
