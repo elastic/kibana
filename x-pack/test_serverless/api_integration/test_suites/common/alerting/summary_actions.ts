@@ -466,6 +466,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(resp2.hits.hits.length).to.be(1);
 
+      resp.hits.hits.sort((a, b) => b._source.new - a._source.new);
+
       const document = resp.hits.hits[0];
       expect(document._source).to.eql({
         all: '1',

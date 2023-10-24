@@ -254,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(resp2.hits.hits.length).to.be(2);
 
-      const document2 = resp2.hits.hits[1];
+      const document2 = resp2.hits.hits.find((hit) => hit._source.ruleName === 'def');
       expect(document2._source).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
