@@ -61,7 +61,7 @@ export const SearchResponseWarningsBadgePopoverContent = (props: Props) => {
               if (props.warnings.length > 1) {
                 setOpenPanel(VIEW_DETAILS_PANEL_ID);
               } else {
-                props?.onViewDetailsClick();
+                props.onViewDetailsClick?.();
                 props.warnings[0].openInInspector();
               }
             }}
