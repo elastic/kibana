@@ -8,8 +8,6 @@
 import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import styled, { createGlobalStyle, css } from 'styled-components';
 
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
-
 export const SecuritySolutionAppWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -87,11 +85,6 @@ export const AppGlobalStyle = createGlobalStyle<{
     .withHoverActions__popover[data-popover-open] {
       visibility: hidden !important;
     }
-  }
-
-  /* applies a "toggled" button style to the Full Screen button */
-  .${FULL_SCREEN_TOGGLED_CLASS_NAME} {
-    ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
   /*
