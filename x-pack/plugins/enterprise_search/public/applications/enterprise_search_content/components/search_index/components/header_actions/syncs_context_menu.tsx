@@ -27,7 +27,6 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
 import { IngestionStatus } from '../../../../types';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
-import { ConnectorConfigurationLogic } from '../../connector/connector_configuration_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncsContextMenu: React.FC = () => {
@@ -44,7 +43,7 @@ export const SyncsContextMenu: React.FC = () => {
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
-  const { configState } = useValues(ConnectorConfigurationLogic);
+  const { connector } = useValues(IndexViewLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -128,7 +127,7 @@ export const SyncsContextMenu: React.FC = () => {
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
                 disabled:
                   ingestionStatus === IngestionStatus.INCOMPLETE ||
-                  !configState.use_document_level_security?.value,
+                  connector?.configuration.use_document_level_security?.value,
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
                   defaultMessage: 'Access Control',
