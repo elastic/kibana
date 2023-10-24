@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import { isSignificantTerm, type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -18,6 +18,9 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
 import type { GroupTableItem, TableItemAction } from './types';
+
+const isLogPattern = (tableItem: SignificantTerm | GroupTableItem) =>
+  isSignificantTerm(tableItem) && tableItem.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN;
 
 const viewInLogPatternAnalysisMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInLogPatternAnalysis',
@@ -88,13 +91,15 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
         : viewInLogPatternAnalysisMessage;
 
       const clickHandler = async () => {
-        const openInLogPatternAnalysisUrl = await generateLogPatternAnalysisUrl(tableItem);
-        if (typeof openInLogPatternAnalysisUrl === 'string') {
-          await application.navigateToUrl(openInLogPatternAnalysisUrl);
+        if (!isLogPattern(tableItem)) {
+          const openInLogPatternAnalysisUrl = await generateLogPatternAnalysisUrl(tableItem);
+          if (typeof openInLogPatternAnalysisUrl === 'string') {
+            await application.navigateToUrl(openInLogPatternAnalysisUrl);
+          }
         }
       };
 
-      const isDisabled = logPatternAnalysisUrlError !== undefined;
+      const isDisabled = logPatternAnalysisUrlError !== undefined || isLogPattern(tableItem);
 
       return (
         <TableActionButton
@@ -102,7 +107,17 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
           iconType="logstashQueue"
           isDisabled={isDisabled}
           label={viewInLogPatternAnalysisMessage}
-          tooltipText={message}
+          tooltipText={
+            !isLogPattern(tableItem)
+              ? message
+              : i18n.translate(
+                  'xpack.aiops.logRateAnalysis.resultsTable.logPatternLinkNotAvailableTooltipMessage',
+                  {
+                    defaultMessage:
+                      'This link is not available if the table item is a log pattern itself.',
+                  }
+                )
+          }
           onClick={clickHandler}
         />
       );

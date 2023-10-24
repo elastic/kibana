@@ -1902,6 +1902,22 @@
           "MlPutTrainedModelRequest",
           "): Promise<",
           "MlTrainedModelConfig",
+          ">; getELSER(params?: ",
+          {
+            "pluginId": "@kbn/ml-trained-models-utils",
+            "scope": "common",
+            "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+            "section": "def-common.GetElserOptions",
+            "text": "GetElserOptions"
+          },
+          " | undefined): Promise<",
+          {
+            "pluginId": "@kbn/ml-trained-models-utils",
+            "scope": "common",
+            "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+            "section": "def-common.ModelDefinitionResponse",
+            "text": "ModelDefinitionResponse"
+          },
           ">; }"
         ],
         "path": "x-pack/plugins/ml/server/shared.ts",

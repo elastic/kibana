@@ -53,7 +53,7 @@ export default function updateWithCircuitBreakerTests({ getService }: FtrProvide
         .expect(400);
 
       expect(body.message).eql(
-        'Error validating update data - Run limit reached: The rule has 12 runs per minute; there are only 7 runs per minute available.'
+        `Error validating circuit breaker - Rule 'abc' cannot be updated. The maximum number of runs per minute would be exceeded. - The rule has 12 runs per minute; there are only 4 runs per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.`
       );
     });
 

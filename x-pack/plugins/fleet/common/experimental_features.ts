@@ -11,7 +11,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * A list of allowed values that can be used in `xpack.fleet.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
-export const allowedExperimentalValues = Object.freeze({
+export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>({
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
   showDevtoolsRequest: true,
@@ -23,12 +23,12 @@ export const allowedExperimentalValues = Object.freeze({
   agentTamperProtectionEnabled: true,
   secretsStorage: true,
   kafkaOutput: true,
+  outputSecretsStorage: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
-const FleetInvalidExperimentalValue = class extends Error {};
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
@@ -36,18 +36,14 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * which should be a string of values delimited by a comma (`,`)
  *
  * @param configValue
- * @throws FleetInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
-  const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
+  const enabledFeatures: Mutable<ExperimentalFeatures> = {};
 
   for (const value of configValue) {
-    if (!isValidExperimentalValue(value)) {
-      throw new FleetInvalidExperimentalValue(`[${value}] is not a supported experimental feature`);
+    if (isValidExperimentalValue(value)) {
+      enabledFeatures[value] = true;
     }
-
-    // @ts-expect-error ts upgrade v4.7.4
-    enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
   return {
@@ -57,7 +53,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
 };
 
 export const isValidExperimentalValue = (value: string) => {
-  return allowedKeys.includes(value as keyof ExperimentalFeatures);
+  return allowedKeys.includes(value);
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];

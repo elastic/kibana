@@ -19,80 +19,77 @@ import { login } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
-describe(
-  'Endpoint generated alerts',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
-  () => {
-    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
-    let createdHost: CreateAndEnrollEndpointHostResponse;
+// FIXME: Flaky. Needs fixing (security team issue #7763)
+describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
 
-    before(() => {
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, 'alerts test').then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
+  before(() => {
+    getEndpointIntegrationVersion().then((version) => {
+      createAgentPolicyTask(version, 'alerts test').then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
 
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
-            });
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
           });
         });
       });
     });
+  });
 
-    after(() => {
-      if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost);
-      }
+  after(() => {
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost);
+    }
 
-      if (indexedPolicy) {
-        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-      }
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
 
-      if (createdHost) {
-        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
-      }
-    });
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
+  });
 
-    beforeEach(() => {
-      login();
-    });
+  beforeEach(() => {
+    login();
+  });
 
-    it('should create a Detection Engine alert from an endpoint alert', () => {
-      // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
-      const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
-        .toString(16)
-        .substring(2)}`;
+  it('should create a Detection Engine alert from an endpoint alert', () => {
+    // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
+    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
+      .toString(16)
+      .substring(2)}`;
 
-      // Send `execute` command that triggers malicious behaviour using the `execute` response action
-      request<ResponseActionApiResponse>({
-        method: 'POST',
-        url: EXECUTE_ROUTE,
-        body: {
-          endpoint_ids: [createdHost.agentId],
-          parameters: {
-            command: executeMaliciousCommand,
-          },
+    // Send `execute` command that triggers malicious behaviour using the `execute` response action
+    request<ResponseActionApiResponse>({
+      method: 'POST',
+      url: EXECUTE_ROUTE,
+      body: {
+        endpoint_ids: [createdHost.agentId],
+        parameters: {
+          command: executeMaliciousCommand,
         },
+      },
+    })
+      .then((response) => waitForActionToComplete(response.body.data.id))
+      .then(() => {
+        return waitForEndpointAlerts(createdHost.agentId, [
+          {
+            term: { 'process.group_leader.args': executeMaliciousCommand },
+          },
+        ]);
       })
-        .then((response) => waitForActionToComplete(response.body.data.id))
-        .then(() => {
-          return waitForEndpointAlerts(createdHost.agentId, [
-            {
-              term: { 'process.group_leader.args': executeMaliciousCommand },
-            },
-          ]);
-        })
-        .then(() => {
-          return navigateToAlertsList(
-            `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
-          );
-        });
+      .then(() => {
+        return navigateToAlertsList(
+          `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
+        );
+      });
 
-      getAlertsTableRows().should('have.length.greaterThan', 0);
-    });
-  }
-);
+    getAlertsTableRows().should('have.length.greaterThan', 0);
+  });
+});

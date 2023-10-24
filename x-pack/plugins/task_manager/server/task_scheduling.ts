@@ -186,6 +186,23 @@ export class TaskScheduling {
     });
   }
 
+  public async bulkUpdateState(
+    taskIds: string[],
+    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state']
+  ) {
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: () => true,
+      map: (task) => ({
+        ...task,
+        state: stateMapFn(task.state, task.id),
+      }),
+      validate: false,
+    });
+  }
+
   /**
    * Bulk updates schedules for tasks by ids.
    * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,

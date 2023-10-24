@@ -21,7 +21,7 @@ import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-describe('When accessing Endpoint Response Console', { tags: '@ess' }, () => {
+describe('When accessing Endpoint Response Console', { tags: ['@ess', '@serverless'] }, () => {
   const performResponderSanityChecks = () => {
     openResponderActionLogFlyout();
     // Ensure the popover in the action log date quick select picker is accessible
@@ -30,7 +30,8 @@ describe('When accessing Endpoint Response Console', { tags: '@ess' }, () => {
     closeResponderActionLogFlyout();
 
     // Global kibana nav bar should remain accessible
-    cy.getByTestSubj('toggleNavButton').should('be.visible');
+    // (the login user button seems to be common in both ESS and serverless)
+    cy.getByTestSubj('userMenuButton').should('be.visible');
 
     closeResponder();
   };

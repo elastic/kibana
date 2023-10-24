@@ -7,7 +7,8 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { Subscription, distinctUntilChanged, skip } from 'rxjs';
+import { unmountComponentAtNode } from 'react-dom';
+import { Subscription, distinctUntilChanged, skip, switchMap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -48,6 +49,7 @@ export class LinksEmbeddable
   public readonly type = CONTENT_ID;
   deferEmbeddableLoad = true;
 
+  private domNode?: HTMLElement;
   private isDestroyed?: boolean;
   private subscriptions: Subscription = new Subscription();
 
@@ -104,8 +106,12 @@ export class LinksEmbeddable
     // By-value panels should update the componentState when input changes
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged(deepEqual), skip(1))
-        .subscribe(async () => await this.initializeSavedLinks())
+        .pipe(
+          distinctUntilChanged(deepEqual),
+          skip(1),
+          switchMap(async () => await this.initializeSavedLinks())
+        )
+        .subscribe()
     );
   }
 
@@ -129,6 +135,14 @@ export class LinksEmbeddable
     });
   }
 
+  public onRender() {
+    this.renderComplete.dispatchComplete();
+  }
+
+  public onLoading() {
+    this.renderComplete.dispatchInProgress();
+  }
+
   public inputIsRefType(
     input: LinksByValueInput | LinksByReferenceInput
   ): input is LinksByReferenceInput {
@@ -150,7 +164,9 @@ export class LinksEmbeddable
     if (this.isDestroyed) return;
     // By-reference embeddable panels are reloaded when changed, so update the componentState
     this.initializeSavedLinks();
-    this.render();
+    if (this.domNode) {
+      this.render(this.domNode);
+    }
   }
 
   public destroy() {
@@ -158,10 +174,18 @@ export class LinksEmbeddable
     super.destroy();
     this.subscriptions.unsubscribe();
     this.cleanupStateTools();
+    if (this.domNode) {
+      unmountComponentAtNode(this.domNode);
+    }
   }
 
-  public render() {
+  public render(domNode: HTMLElement) {
+    this.domNode = domNode;
     if (this.isDestroyed) return;
+    super.render(domNode);
+
+    this.domNode.setAttribute('data-shared-item', '');
+
     return (
       <LinksContext.Provider value={this}>
         <LinksComponent />

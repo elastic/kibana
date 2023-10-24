@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import SlackParamsFields from './slack_params';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import userEvent from '@testing-library/user-event';
 
 interface Result {
   isLoading: boolean;
@@ -19,23 +21,20 @@ interface Result {
 
 const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 
-const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(
-  jest.fn<Result, [UseSubActionParams<unknown>]>(() => ({
-    isLoading: false,
-    response: {
-      channels: [
-        {
-          id: 'id',
-          name: 'general',
-          is_channel: true,
-          is_archived: false,
-          is_private: true,
-        },
-      ],
+const mockUseValidChanelId = jest.fn().mockImplementation(() => ({
+  isLoading: false,
+  response: {
+    channel: {
+      id: 'id',
+      name: 'general',
+      is_channel: true,
+      is_archived: false,
+      is_private: true,
     },
-    error: null,
-  }))
-);
+  },
+  error: null,
+}));
+const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(mockUseValidChanelId);
 
 const mockToasts = { danger: jest.fn(), warning: jest.fn() };
 jest.mock(triggersActionsPath, () => {
@@ -51,6 +50,23 @@ jest.mock(triggersActionsPath, () => {
 });
 
 describe('SlackParamsFields renders', () => {
+  beforeEach(() => {
+    mockUseSubAction.mockClear();
+    mockUseValidChanelId.mockClear();
+    mockUseValidChanelId.mockImplementation(() => ({
+      isLoading: false,
+      response: {
+        channel: {
+          id: 'id',
+          name: 'general',
+          is_channel: true,
+          is_archived: false,
+          is_private: true,
+        },
+      },
+      error: null,
+    }));
+  });
   test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message', () => {
     const editAction = jest.fn();
     const { rerender } = render(
@@ -89,7 +105,7 @@ describe('SlackParamsFields renders', () => {
     );
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
-      { channels: ['general'], text: 'some different default message' },
+      { channels: ['general'], channelIds: [], text: 'some different default message' },
       0
     );
   });
@@ -155,17 +171,24 @@ describe('SlackParamsFields renders', () => {
     expect(screen.getByTestId('webApiTextArea')).toHaveValue('some text');
   });
 
-  test('all params fields is rendered for getChannels call', async () => {
+  test('Show the Channel label when using the old attribute "channels" in subActionParams', async () => {
+    const mockEditFunc = jest.fn();
     const WrappedComponent = () => {
       return (
         <IntlProvider locale="en">
           <SlackParamsFields
             actionParams={{
               subAction: 'postMessage',
-              subActionParams: { channels: [], text: 'some text' },
+              subActionParams: { channels: ['old channel name'], text: 'some text' },
             }}
+            actionConnector={
+              {
+                id: 'connector-id',
+                config: {},
+              } as ActionConnector
+            }
             errors={{ message: [] }}
-            editAction={() => {}}
+            editAction={mockEditFunc}
             index={0}
             defaultMessage="default message"
             messageVariables={[]}
@@ -175,14 +198,188 @@ describe('SlackParamsFields renders', () => {
     };
     const { getByTestId } = render(<WrappedComponent />);
 
-    getByTestId('slackChannelsComboBox').click();
-    getByTestId('comboBoxSearchInput').focus();
+    expect(screen.findByText('Channel')).toBeTruthy();
+    expect(screen.getByTestId('slackApiChannelId')).toBeInTheDocument();
+    expect(getByTestId('slackApiChannelId')).toHaveValue('old channel name');
+  });
 
-    const options = getByTestId(
-      'comboBoxOptionsList slackChannelsComboBox-optionsList'
-    ).querySelectorAll('.euiComboBoxOption__content');
-    expect(options).toHaveLength(1);
-    expect(options[0].textContent).toBe('general');
+  test('Show the Channel ID label when using the new attribute "channelIds" in subActionParams', async () => {
+    const mockEditFunc = jest.fn();
+    const WrappedComponent: React.FunctionComponent = () => {
+      return (
+        <IntlProvider locale="en">
+          <SlackParamsFields
+            actionParams={{
+              subAction: 'postMessage',
+              subActionParams: { channelIds: ['channel-id-xxx'], text: 'some text' },
+            }}
+            actionConnector={
+              {
+                id: 'connector-id',
+                config: {},
+              } as ActionConnector
+            }
+            errors={{ message: [] }}
+            editAction={mockEditFunc}
+            index={0}
+            defaultMessage="default message"
+            messageVariables={[]}
+          />
+        </IntlProvider>
+      );
+    };
+    const { getByTestId } = render(<WrappedComponent />);
+
+    expect(screen.findByText('Channel ID')).toBeTruthy();
+    expect(screen.getByTestId('slackApiChannelId')).toBeInTheDocument();
+    expect(getByTestId('slackApiChannelId')).toHaveValue('channel-id-xxx');
+  });
+
+  test('Channel id subActionParams should be validated', async () => {
+    const mockEditFunc = jest.fn();
+    mockUseValidChanelId.mockImplementation(() => ({
+      isLoading: false,
+      response: {
+        channel: {
+          id: 'new-channel-id',
+          name: 'new channel id',
+          is_channel: true,
+          is_archived: false,
+          is_private: true,
+        },
+      },
+      error: null,
+    }));
+    const WrappedComponent = () => {
+      return (
+        <IntlProvider locale="en">
+          <SlackParamsFields
+            actionParams={{
+              subAction: 'postMessage',
+              subActionParams: { channelIds: ['new-channel-id'], text: 'some text' },
+            }}
+            actionConnector={
+              {
+                id: 'connector-id',
+                config: {},
+              } as ActionConnector
+            }
+            errors={{ message: [] }}
+            editAction={mockEditFunc}
+            index={0}
+            defaultMessage="default message"
+            messageVariables={[]}
+          />
+        </IntlProvider>
+      );
+    };
+    const { getByTestId } = render(<WrappedComponent />);
+
+    act(() => {
+      getByTestId('slackApiChannelId').click();
+      userEvent.clear(getByTestId('slackApiChannelId'));
+      fireEvent.change(getByTestId('slackApiChannelId'), {
+        target: { value: 'new-channel-id' },
+      });
+      userEvent.tab();
+    });
+
+    await waitFor(() => {
+      expect(mockEditFunc).toBeCalledWith(
+        'subActionParams',
+        { channelIds: ['new-channel-id'], channels: undefined, text: 'some text' },
+        0
+      );
+      expect(mockUseSubAction).toBeCalledWith({
+        connectorId: 'connector-id',
+        disabled: false,
+        subAction: 'validChannelId',
+        subActionParams: {
+          channelId: 'new-channel-id',
+        },
+      });
+    });
+  });
+
+  test('Channel id work with combobox when allowedChannels pass in the config attributes', async () => {
+    const mockEditFunc = jest.fn();
+    const WrappedComponent = () => {
+      return (
+        <IntlProvider locale="en">
+          <SlackParamsFields
+            actionParams={{
+              subAction: 'postMessage',
+              subActionParams: { channelIds: ['channel-id-1'], text: 'some text' },
+            }}
+            actionConnector={
+              {
+                id: 'connector-id',
+                config: {
+                  allowedChannels: [
+                    {
+                      id: 'channel-id-1',
+                      name: 'channel 1',
+                    },
+                    {
+                      id: 'channel-id-2',
+                      name: 'channel 2',
+                    },
+                    {
+                      id: 'channel-id-3',
+                      name: 'channel 3',
+                    },
+                  ],
+                },
+              } as unknown as ActionConnector
+            }
+            errors={{ message: [] }}
+            editAction={mockEditFunc}
+            index={0}
+            defaultMessage="default message"
+            messageVariables={[]}
+          />
+        </IntlProvider>
+      );
+    };
+    const { getByTestId } = render(<WrappedComponent />);
+
+    expect(screen.findByText('Channel ID')).toBeTruthy();
+    expect(getByTestId('slackChannelsComboBox')).toBeInTheDocument();
+    expect(getByTestId('slackChannelsComboBox').textContent).toBe('channel-id-1 - channel 1');
+
+    act(() => {
+      const combobox = getByTestId('slackChannelsComboBox');
+      const inputCombobox = within(combobox).getByTestId('comboBoxSearchInput');
+      inputCombobox.click();
+    });
+
+    await waitFor(() => {
+      // const popOverElement = within(baseElement).getByTestId('slackChannelsComboBox-optionsList');
+      expect(screen.getByTestId('channel-id-1')).toBeInTheDocument();
+      expect(screen.getByTestId('channel-id-2')).toBeInTheDocument();
+      expect(screen.getByTestId('channel-id-3')).toBeInTheDocument();
+    });
+
+    act(() => {
+      screen.getByTestId('channel-id-3').click();
+    });
+
+    await waitFor(() => {
+      expect(
+        within(getByTestId('slackChannelsComboBox')).getByText('channel-id-3 - channel 3')
+      ).toBeInTheDocument();
+      expect(mockEditFunc).toBeCalledWith(
+        'subActionParams',
+        { channelIds: ['channel-id-3'], channels: undefined, text: 'some text' },
+        0
+      );
+      expect(mockUseSubAction).toBeCalledWith({
+        connectorId: 'connector-id',
+        disabled: false,
+        subAction: 'validChannelId',
+        subActionParams: { channelId: '' },
+      });
+    });
   });
 
   test('show error message when no channel is selected', async () => {

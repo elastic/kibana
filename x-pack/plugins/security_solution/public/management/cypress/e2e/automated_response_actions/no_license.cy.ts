@@ -19,7 +19,7 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
   describe('User cannot use endpoint action in form', () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
-    before(() => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_access);
     });
 

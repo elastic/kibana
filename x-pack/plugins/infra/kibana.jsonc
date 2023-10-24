@@ -15,6 +15,7 @@
       "charts",
       "data",
       "dataViews",
+      "dataViewEditor",
       "discover",
       "embeddable",
       "features",
@@ -44,7 +45,8 @@
       "kibanaReact",
       "ml",
       "embeddable",
-      "controls"
+      "controls",
+      "advancedSettings"
     ]
   }
 }

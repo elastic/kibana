@@ -57,7 +57,6 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -222,27 +221,7 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
-              "colorMapping": Object {
-                "assignmentMode": "auto",
-                "assignments": Array [],
-                "colorMode": Object {
-                  "type": "categorical",
-                },
-                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
-                "specialAssignments": Array [
-                  Object {
-                    "color": Object {
-                      "colorIndex": 1,
-                      "paletteId": "neutral",
-                      "type": "categorical",
-                    },
-                    "rule": Object {
-                      "type": "other",
-                    },
-                    "touched": false,
-                  },
-                ],
-              },
+              "colorMapping": undefined,
               "layerId": "l1",
               "layerType": "data",
               "palette": undefined,
@@ -460,6 +439,11 @@ describe('xy_visualization', () => {
           annotations: [], // different from the persisted group
         },
         {
+          cachedMetadata: {
+            title: 'Local title',
+            description: '',
+            tags: [],
+          },
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
           persistanceType: 'linked',
@@ -501,6 +485,7 @@ describe('xy_visualization', () => {
         {
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          cachedMetadata: persistedAnnotationLayers[1].cachedMetadata,
           annotationGroupId: annotationGroupId2,
           ignoreGlobalFilters: persistedAnnotationLayers[1].ignoreGlobalFilters,
           annotations: persistedAnnotationLayers[1].annotations,
@@ -3718,6 +3703,12 @@ describe('xy_visualization', () => {
           layerId: 'layer-id',
           layerType: 'annotations',
           persistanceType: 'linked',
+          // stores "cached" or "local" metadata
+          cachedMetadata: {
+            description: 'some description',
+            tags: [],
+            title: 'My saved object title',
+          },
           annotations: layers[0].annotations,
           ignoreGlobalFilters: layers[0].ignoreGlobalFilters,
         },
@@ -3726,6 +3717,11 @@ describe('xy_visualization', () => {
           layerId: 'layer-id2',
           layerType: 'annotations',
           persistanceType: 'linked',
+          cachedMetadata: {
+            description: 'some description',
+            tags: [],
+            title: 'My saved object title',
+          },
           annotations: layers[1].annotations,
           ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
         },

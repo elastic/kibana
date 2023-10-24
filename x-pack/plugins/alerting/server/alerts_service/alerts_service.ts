@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, omit } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
@@ -40,10 +40,12 @@ import {
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
+  InstallShutdownError,
 } from './lib';
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
+import { setAlertsToUntracked, SetAlertsToUntrackedOpts } from './lib/set_alerts_to_untracked';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -274,7 +276,7 @@ export class AlertsService implements IAlertsService {
     // check whether this context has been registered before
     if (this.registeredContexts.has(context)) {
       const registeredOptions = this.registeredContexts.get(context);
-      if (!isEqual(opts, registeredOptions)) {
+      if (!isEqual(omit(opts, 'shouldWrite'), omit(registeredOptions, 'shouldWrite'))) {
         throw new Error(`${context} has already been registered with different options`);
       }
       this.options.logger.debug(`Resources for context "${context}" have already been registered.`);
@@ -356,9 +358,14 @@ export class AlertsService implements IAlertsService {
       this.isInitializing = false;
       return successResult();
     } catch (err) {
-      this.options.logger.error(
-        `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
-      );
+      if (err instanceof InstallShutdownError) {
+        this.options.logger.debug(err.message);
+      } else {
+        this.options.logger.error(
+          `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
+        );
+      }
+
       this.initialized = false;
       this.isInitializing = false;
       return errorResult(err.message);
@@ -457,5 +464,13 @@ export class AlertsService implements IAlertsService {
         timeoutMs,
       });
     }
+  }
+
+  public async setAlertsToUntracked(opts: SetAlertsToUntrackedOpts) {
+    return setAlertsToUntracked({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...opts,
+    });
   }
 }

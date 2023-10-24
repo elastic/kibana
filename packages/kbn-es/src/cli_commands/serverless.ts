@@ -35,6 +35,7 @@ export const serverless: Command = {
       --basePath          Path to the directory where the ES cluster will store data
       --clean             Remove existing file system object store before running
       --kill              Kill running ES serverless nodes if detected on startup
+      --host              Publish ES docker container on additional host IP
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Enable HTTP SSL on the ES cluster
       --skipTeardown      If this process exits, leave the ES cluster running in the background
@@ -72,7 +73,7 @@ export const serverless: Command = {
         files: 'F',
       },
 
-      string: ['tag', 'image', 'basePath', 'resources'],
+      string: ['tag', 'image', 'basePath', 'resources', 'host'],
       boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
       default: defaults,

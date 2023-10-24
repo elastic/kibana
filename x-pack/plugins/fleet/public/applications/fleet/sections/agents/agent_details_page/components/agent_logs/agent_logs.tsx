@@ -17,6 +17,7 @@ import {
   EuiSuperDatePicker,
   EuiFilterGroup,
   EuiPanel,
+  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiLink,
@@ -117,8 +118,9 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application, http } = useStartServices();
+    const { data, application, http, cloud } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
+    const isLogsUIAvailable = !cloud?.isServerlessEnabled;
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
     const getDateRangeTimestamps = useCallback(
@@ -238,6 +240,15 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       [http.basePath, state.start, state.end, logStreamQuery]
     );
 
+    const viewInDiscoverUrl = useMemo(() => {
+      const index = 'logs-*';
+      const datasetQuery = 'data_stream.dataset:elastic_agent';
+      const agentIdQuery = `elastic_agent.id:${agent.id}`;
+      return http.basePath.prepend(
+        `/app/discover#/?_a=(index:'${index}',query:(language:kuery,query:'${datasetQuery}%20AND%20${agentIdQuery}'))`
+      );
+    }, [http.basePath, agent.id]);
+
     const agentVersion = agent.local_metadata?.elastic?.agent?.version;
     const isLogFeatureAvailable = useMemo(() => {
       if (!agentVersion) {
@@ -342,12 +353,30 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
             </DatePickerFlexItem>
             <EuiFlexItem grow={false}>
               <RedirectAppLinks application={application}>
-                <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
-                  <FormattedMessage
-                    id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-                    defaultMessage="Open in Logs"
-                  />
-                </EuiButtonEmpty>
+                {isLogsUIAvailable ? (
+                  <EuiButtonEmpty
+                    href={viewInLogsUrl}
+                    iconType="popout"
+                    flush="both"
+                    data-test-subj="viewInLogsBtn"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentLogs.openInLogsUiLinkText"
+                      defaultMessage="Open in Logs"
+                    />
+                  </EuiButtonEmpty>
+                ) : (
+                  <EuiButton
+                    href={viewInDiscoverUrl}
+                    iconType="popout"
+                    data-test-subj="viewInDiscoverBtn"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
+                      defaultMessage="Open in Discover"
+                    />
+                  </EuiButton>
+                )}
               </RedirectAppLinks>
             </EuiFlexItem>
           </EuiFlexGroup>

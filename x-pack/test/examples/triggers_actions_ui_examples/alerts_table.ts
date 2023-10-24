@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await waitAndClickByTestId('close');
 
       const headers = await find.allByCssSelector('.euiDataGridHeaderCell');
-      expect(headers.length).to.be(6);
+      expect(headers.length).to.be(7);
     });
 
     it('should take into account the column type when sorting', async () => {
@@ -169,18 +169,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const $ = await euiDataGridRow.parseDomContent();
         rows.push({
           status: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="event.action"] .euiDataGridRowCell__truncate')
+            .find('[data-gridcell-column-id="event.action"] .euiDataGridRowCell__content')
             .text(),
           lastUpdated: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="@timestamp"] .euiDataGridRowCell__truncate')
+            .find('[data-gridcell-column-id="@timestamp"] .euiDataGridRowCell__content')
             .text(),
           duration: $.findTestSubjects('dataGridRowCell')
             .find(
-              '[data-gridcell-column-id="kibana.alert.duration.us"] .euiDataGridRowCell__truncate'
+              '[data-gridcell-column-id="kibana.alert.duration.us"] [data-datagrid-cellcontent]'
             )
             .text(),
           reason: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="kibana.alert.reason"] .euiDataGridRowCell__truncate')
+            .find('[data-gridcell-column-id="kibana.alert.reason"] [data-datagrid-cellcontent]')
             .text(),
         });
       }

@@ -42,12 +42,13 @@ import { unsnoozeRuleRoute } from './unsnooze_rule';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './bulk_enable_rules';
-import { bulkDisableRulesRoute } from './bulk_disable_rules';
+import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
 import { cloneRuleRoute } from './clone_rule';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
-import { getRuleTagsRoute } from './get_rule_tags';
+import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
 import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
+import { bulkUntrackAlertRoute } from './rule/apis/bulk_untrack';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
 import { getMaintenanceWindowRoute } from './maintenance_window/apis/get/get_maintenance_window_route';
@@ -61,6 +62,8 @@ import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggest
 import { registerFieldsRoute } from './suggestions/fields_rules';
 import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
+import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
+import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -131,4 +134,7 @@ export function defineRoutes(opts: RouteOptions) {
   registerFieldsRoute(router, licenseState);
   bulkGetMaintenanceWindowRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
+  bulkUntrackAlertRoute(router, licenseState);
+  getQueryDelaySettingsRoute(router, licenseState);
+  updateQueryDelaySettingsRoute(router, licenseState);
 }

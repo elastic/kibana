@@ -18,7 +18,9 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { useAppContext } from '../../../../app_context';
 import { DataStream } from '../../../../../../common/types';
+import { getLifecycleValue } from '../../../../lib/data_streams';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
@@ -34,6 +36,8 @@ interface Props {
   filters?: string;
 }
 
+const INFINITE_AS_ICON = true;
+
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
   reload,
@@ -43,6 +47,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 }) => {
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
+  const { config } = useAppContext();
 
   const columns: Array<EuiBasicTableColumn<DataStream>> = [];
 
@@ -96,16 +101,18 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             }),
     });
 
-    columns.push({
-      field: 'storageSizeBytes',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
-        defaultMessage: 'Storage size',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
-        dataStream.storageSize,
-    });
+    if (config.enableDataStreamsStorageColumn) {
+      columns.push({
+        field: 'storageSizeBytes',
+        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
+          defaultMessage: 'Storage size',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+          dataStream.storageSize,
+      });
+    }
   }
 
   columns.push({
@@ -144,7 +151,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle']) => lifecycle?.data_retention,
+    render: (lifecycle: DataStream['lifecycle']) => getLifecycleValue(lifecycle, INFINITE_AS_ICON),
   });
 
   columns.push({

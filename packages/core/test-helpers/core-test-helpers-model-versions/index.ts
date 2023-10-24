@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { createModelVersionTestBed } from './src/test_bed';
-
-export type {
-  ModelVersionTestBed,
-  ModelVersionTestKit,
-  ModelVersionTestkitOptions,
-  SavedObjectTestkitDefinition,
-} from './src/types';
+export {
+  createModelVersionTestBed,
+  type ModelVersionTestBed,
+  type ModelVersionTestKit,
+  type ModelVersionTestkitOptions,
+  type SavedObjectTestkitDefinition,
+} from './src/test_bed';
+export {
+  createModelVersionTestMigrator,
+  type ModelVersionTestMigrator,
+} from './src/model_version_tester';
