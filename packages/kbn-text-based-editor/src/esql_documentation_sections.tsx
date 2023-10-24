@@ -53,6 +53,7 @@ export const sourceCommands = {
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from.markdown',
             {
@@ -197,6 +198,7 @@ export const processingCommands = {
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dissect.markdown',
             {
@@ -260,6 +262,7 @@ FROM employees
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich.markdown',
             {
@@ -353,6 +356,7 @@ FROM employees
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok.markdown',
             {
@@ -2866,6 +2870,7 @@ NOTE: There isn’t yet a \`COUNT(*)\`. Please count a single valued field if yo
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countDistinctFunction.markdown',
             {
