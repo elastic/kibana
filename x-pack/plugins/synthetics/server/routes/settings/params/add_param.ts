@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { IKibanaResponse } from '@kbn/core/server';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import {
   SyntheticsParamRequest,
@@ -26,7 +25,7 @@ const ParamsObjectSchema = schema.object({
   share_across_spaces: schema.maybe(schema.boolean()),
 });
 
-export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
+export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<SyntheticsParams> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PARAMS,
   validate: {},
@@ -36,12 +35,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
     },
   },
   writeAccess: true,
-  handler: async ({
-    request,
-    response,
-    server,
-    savedObjectsClient,
-  }): Promise<IKibanaResponse<SyntheticsParams>> => {
+  handler: async ({ request, response, server, savedObjectsClient }) => {
     try {
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
