@@ -39,20 +39,22 @@ export const CreateCdnAssets: Task = {
       const manifest = Jsonc.parse(readFileSync(path, 'utf8')) as any;
       if (manifest?.plugin?.id) {
         const pluginRoot = resolve(dirname(path));
-        const pluginAssets = resolve(pluginRoot, 'assets');
-        const pluginBundles = resolve(pluginRoot, 'target', 'public');
-        const dest = resolve(plugin, manifest.plugin.id, '1.0.0');
+
         try {
-          await access(pluginAssets);
-          await copyAll(pluginAssets, dest);
+          const assetsSource = resolve(pluginRoot, 'assets');
+          const assetsDest = resolve(plugin, manifest.plugin.id, 'assets');
+          await access(assetsSource);
+          await copyAll(assetsSource, assetsDest);
         } catch (e) {
           // assets are optional
           if (!(e.code === 'ENOENT' && e.syscall === 'access')) throw e;
         }
 
         try {
-          await access(pluginBundles);
-          await copyAll(pluginBundles, dest);
+          const bundlesSource = resolve(pluginRoot, 'target', 'public');
+          const bundlesDest = resolve(plugin, manifest.plugin.id, '1.0.0');
+          await access(bundlesSource);
+          await copyAll(bundlesSource, bundlesDest);
         } catch (e) {
           // bundles are optional
           if (!(e.code === 'ENOENT' && e.syscall === 'access')) throw e;
