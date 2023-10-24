@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { ViewDetailsPopover } from './view_details_popover';
-import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
+import { getNonSuccessfulClusters } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
@@ -18,9 +18,7 @@ interface Props {
 }
 
 export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
-  if (!props.warnings.length) {
-    return null;
-  }
+  const nonSuccessfulClusters = getNonSuccessfulClusters(props.warnings);
 
   return (
     <EuiEmptyPrompt
@@ -34,18 +32,15 @@ export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
         </h2>
       }
       body={
-        <EuiText textAlign="left" size="s" grow={false}>
-          <strong>{getWarningsTitle(props.warnings)}</strong>
-          <p>
-            {getWarningsDescription(
-              props.warnings,
-              i18n.translate('searchResponseWarnings.description.pageLabel', {
-                defaultMessage: 'page',
-              })
-            )}
-          </p>
-          <ViewDetailsPopover warnings={props.warnings} />
-        </EuiText>
+        i18n.translate('searchResponseWarnings.emptyPromptBody', {
+          defaultMessage: '{nonSuccessfulClustersCount} {nonSuccessfulClustersCount, plural, one {cluster} other {clusters}} had issues returning data. This might result in incomplete data.',
+          values: {
+            nonSuccessfulClustersCount: nonSuccessfulClusters.size,
+          }
+        })
+      }
+      actions={
+        <ViewDetailsPopover warnings={props.warnings} />
       }
     />
   );

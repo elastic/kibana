@@ -13,7 +13,7 @@ export const viewDetailsLabel = i18n.translate('searchResponseWarnings.viewDetai
   description: 'View warning details button label',
 });
 
-function getNonSuccessfulClusters(warnings: SearchResponseWarning[]) {
+export function getNonSuccessfulClusters(warnings: SearchResponseWarning[]) {
   const nonSuccessfulClusters = new Set<string>();
   warnings.forEach((warning) => {
     Object.keys(warning.clusters).forEach((clusterName) => {
