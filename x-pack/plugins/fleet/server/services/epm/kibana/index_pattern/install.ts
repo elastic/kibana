@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
+
+import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { appContextService } from '../../..';
@@ -19,7 +21,10 @@ export const indexPatternTypes = Object.values(dataTypes);
  * Each data view defines a pattern, e.g. `logs-*` and includes cross-cluster
  * search support as well.
  */
-export function getFleetManagedDataViewDefinitions() {
+export function getFleetManagedDataViewDefinitions(): Array<
+  // Make id required
+  SavedObjectsBulkCreateObject<DataViewSavedObjectAttrs> & { id: string }
+> {
   return Object.entries(dataTypes).map(([name, indexPatternType]) => ({
     id: `${indexPatternType}-*`,
     type: INDEX_PATTERN_SAVED_OBJECT_TYPE,

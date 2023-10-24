@@ -7,6 +7,8 @@
 
 import fs from 'fs/promises';
 
+import pRetry from 'p-retry';
+
 import { compact, isEmpty } from 'lodash';
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
@@ -404,10 +406,22 @@ export async function ensureFleetManagedDataViews({
         `Found outdated Fleet managed data view with id: ${matchingDataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
       );
 
-      await savedObjectsClient.update(
-        KibanaSavedObjectType.indexPattern,
-        matchingDataView.id,
-        updateAttributes
+      await pRetry(
+        () =>
+          savedObjectsClient.update(
+            KibanaSavedObjectType.indexPattern,
+            matchingDataView.id,
+            updateAttributes
+          ),
+        {
+          retries: 3,
+          onFailedAttempt: (error: Error) => {
+            // If the error is a non-conflict, throw it and stop retrying
+            if (!SavedObjectsErrorHelpers.isConflictError(error)) {
+              throw error;
+            }
+          },
+        }
       );
     }
   }
@@ -416,5 +430,16 @@ export async function ensureFleetManagedDataViews({
   if (nonExistingDataViews.length > 0) {
     logger.debug(`Creating ${nonExistingDataViews.length} Fleet managed data views.`);
     await savedObjectsClient.bulkCreate<DataViewSavedObjectAttrs>(nonExistingDataViews);
+  }
+
+  // Make sure data views are available globally
+  try {
+    await savedObjectsClient.updateObjectsSpaces(
+      dataViewDefinitions.map(({ id, type }) => ({ id, type })),
+      ['*'],
+      []
+    );
+  } catch (error) {
+    logger.error('Error making Fleet managed data view available in all spaces', error);
   }
 }

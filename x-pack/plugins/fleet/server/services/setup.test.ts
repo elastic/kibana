@@ -216,6 +216,22 @@ describe('ensureFleetManagedDataViews', () => {
         },
       },
     ]);
+
+    expect(mockSavedObjectsClient.updateObjectsSpaces).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsClient.updateObjectsSpaces).toHaveBeenCalledWith(
+      [
+        {
+          id: 'logs-*',
+          type: 'index-pattern',
+        },
+        {
+          id: 'metrics-*',
+          type: 'index-pattern',
+        },
+      ],
+      ['*'],
+      []
+    );
   });
 
   it('finds and updates existing data views to use new name/title values', async () => {
