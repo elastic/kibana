@@ -58,13 +58,13 @@ export const getAgentUsage = async (
   };
 };
 
+export interface AgentPerVersion {
+  version: string;
+  count: number;
+}
+
 export interface AgentData {
-  agents_per_version: Array<
-    {
-      version: string;
-      count: number;
-    } & AgentStatus
-  >;
+  agents_per_version: Array<AgentPerVersion & AgentStatus>;
   agent_checkin_status: {
     error: number;
     degraded: number;

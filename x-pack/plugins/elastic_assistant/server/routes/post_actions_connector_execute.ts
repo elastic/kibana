@@ -7,6 +7,7 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
@@ -16,6 +17,7 @@ import {
   PostActionsConnectorExecutePathParams,
 } from '../schemas/post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 
 export const postActionsConnectorExecuteRoute = (
@@ -40,6 +42,18 @@ export const postActionsConnectorExecuteRoute = (
         // get the actions plugin start contract from the request context:
         const actions = (await context.elasticAssistant).actions;
 
+        // if not langchain, call execute action directly and return the response:
+        if (!request.body.assistantLangChain) {
+          logger.debug('Executing via actions framework directly, assistantLangChain: false');
+          const result = await executeAction({ actions, request, connectorId });
+          return response.ok({
+            body: result,
+          });
+        }
+
+        // TODO: Add `traceId` to actions request when calling via langchain
+        logger.debug('Executing via langchain, assistantLangChain: true');
+
         // get a scoped esClient for assistant memory
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -58,6 +72,7 @@ export const postActionsConnectorExecuteRoute = (
           logger,
           request,
           elserId,
+          kbResource: ESQL_RESOURCE,
         });
 
         return response.ok({

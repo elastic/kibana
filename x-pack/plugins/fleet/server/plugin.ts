@@ -130,6 +130,8 @@ import { FleetActionsClient, type FleetActionsClientInterface } from './services
 import type { FilesClientFactory } from './services/files/types';
 import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
+import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
+import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -167,6 +169,7 @@ export interface FleetAppContext {
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
+  kibanaInstanceId: PluginInitializerContext['env']['instanceUuid'];
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -251,6 +254,7 @@ export class FleetPlugin
   private isProductionMode: FleetAppContext['isProductionMode'];
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'];
   private httpSetup?: HttpServiceSetup;
   private securitySetup!: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
@@ -259,6 +263,7 @@ export class FleetPlugin
   private bulkActionsResolver?: BulkActionsResolver;
   private fleetUsageSender?: FleetUsageSender;
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
+  private fleetMetricsTask?: FleetMetricsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -270,6 +275,7 @@ export class FleetPlugin
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
+    this.kibanaInstanceId = this.initializerContext.env.instanceUuid;
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
@@ -440,6 +446,10 @@ export class FleetPlugin
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
+    const fetchAgents = async (abortController: AbortController) =>
+      await fetchAgentMetrics(core, abortController);
+    this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);
+
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
     // Only some endpoints require superuser so we pass a raw IRouter here
@@ -490,6 +500,7 @@ export class FleetPlugin
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
+      kibanaInstanceId: this.kibanaInstanceId,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
@@ -504,6 +515,7 @@ export class FleetPlugin
     this.fleetUsageSender?.start(plugins.taskManager);
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
     startFleetUsageLogger(plugins.taskManager);
+    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
 
     const logger = appContextService.getLogger();
 
