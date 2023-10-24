@@ -31,4 +31,4 @@ export const getCreateCaseUrl = (search?: string | null) =>
   `/create${appendSearch(search ?? undefined)}`;
 
 export const getConfigureCasesUrl = (search?: string) =>
-  `/settings${appendSearch(search ?? undefined)}`;
+  `/configure${appendSearch(search ?? undefined)}`;
