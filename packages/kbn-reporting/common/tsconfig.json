@@ -9,7 +9,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx", "export_type_helpers/tsconfig.json",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"

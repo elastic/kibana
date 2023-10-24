@@ -9,7 +9,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx", "../common/build_kibana_path.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
