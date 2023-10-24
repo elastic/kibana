@@ -8,46 +8,25 @@
 import { EuiButton, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, Fragment, useCallback, useEffect, useRef } from 'react';
+import React, { type FC, Fragment } from 'react';
 
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
-  onCloseModal: () => void;
+  createNewDataView: () => void;
+  canEditDataView: boolean;
 }
 
 const fixedPageSize: number = 8;
 
-export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected, onCloseModal }) => {
-  const { contentManagement, uiSettings, dataViewEditor } = useAppDependencies();
-
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
-  const closeDataViewEditor = useRef<() => void | undefined>();
-
-  const createNewDataView = useCallback(() => {
-    onCloseModal();
-    closeDataViewEditor.current = dataViewEditor?.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onSearchSelected(dataView.id, 'index-pattern');
-        }
-      },
-
-      allowAdHocDataView: true,
-    });
-  }, [dataViewEditor, onCloseModal, onSearchSelected]);
-
-  useEffect(function cleanUpFlyout() {
-    return () => {
-      // Close the editor when unmounting
-      if (closeDataViewEditor.current) {
-        closeDataViewEditor.current();
-      }
-    };
-  }, []);
+export const SearchSelection: FC<SearchSelectionProps> = ({
+  onSearchSelected,
+  createNewDataView,
+  canEditDataView,
+}) => {
+  const { contentManagement, uiSettings } = useAppDependencies();
 
   return (
     <>
@@ -103,7 +82,6 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected, on
           {canEditDataView ? (
             <EuiButton
               onClick={createNewDataView}
-              fill
               iconType="plusInCircle"
               data-test-subj="newDataViewButton"
               disabled={!canEditDataView}

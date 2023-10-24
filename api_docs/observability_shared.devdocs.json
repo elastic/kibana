@@ -3654,6 +3654,36 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.LOG_EXPLORER_FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "LOG_EXPLORER_FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/explorer-feedback\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.LOGS_ONBOARDING_FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_ONBOARDING_FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/logs-onboarding-feedback\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.METRIC_CGROUP_MEMORY_LIMIT_BYTES",
         "type": "string",
         "tags": [],

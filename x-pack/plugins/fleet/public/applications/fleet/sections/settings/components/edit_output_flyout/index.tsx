@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 
 import { ExperimentalFeaturesService } from '../../../../../../services';
 

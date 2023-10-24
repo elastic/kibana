@@ -75,7 +75,10 @@ const ALL_SPACES_PROHIBITED_TOOLTIP = (
     )}
     content={i18n.translate(
       'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.allSpacesProhibitedTooltipContent',
-      { defaultMessage: 'A copy of this saved object exists in at least one other space.' }
+      {
+        defaultMessage:
+          'A copy of this saved object or a related object exists in at least one other space.',
+      }
     )}
     position="left"
     type="iInCircle"

@@ -13,6 +13,9 @@ disabled:
   - x-pack/test/functional_with_es_ssl/config.base.ts
   - x-pack/test/api_integration/config.ts
   - x-pack/test/fleet_api_integration/config.base.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.ts
+  - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
+
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -112,6 +115,7 @@ enabled:
   - test/functional/apps/discover/group1/config.ts
   - test/functional/apps/discover/group2/config.ts
   - test/functional/apps/discover/group3/config.ts
+  - test/functional/apps/discover/group4/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
@@ -219,14 +223,9 @@ enabled:
   - x-pack/test/cloud_security_posture_api/config.ts
   - x-pack/test/detection_engine_api_integration/basic/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group1/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/group2/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/group3/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group4/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group5/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group6/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/group7/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/group8/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/group9/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/rule_execution_logic/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/prebuilt_rules/config.ts
@@ -337,7 +336,6 @@ enabled:
   - x-pack/test/monitoring_api_integration/config.ts
   - x-pack/test/observability_api_integration/basic/config.ts
   - x-pack/test/observability_api_integration/trial/config.ts
-  - x-pack/test/observability_api_integration/apis/config.ts
   - x-pack/test/observability_functional/with_rac_write.config.ts
   - x-pack/test/observability_onboarding_api_integration/basic/config.ts
   - x-pack/test/observability_onboarding_api_integration/cloud/config.ts
@@ -412,15 +410,23 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group4.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group4.ts
   - x-pack/performance/journeys/ecommerce_dashboard.ts
   - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys/flight_dashboard.ts
@@ -440,3 +446,19 @@ enabled:
   - x-pack/performance/journeys/apm_service_inventory.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
+
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/date_numeric_types/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/date_numeric_types/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/keyword_text_long/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/keyword_text_long/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips_text_array/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips_text_array/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts
+
+
+
+
+

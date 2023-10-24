@@ -25,8 +25,14 @@ const hasActiveModifierKey = (event: React.MouseEvent): boolean => {
 };
 
 export const DeploymentDetails = ({ closeModal }: { closeModal?: () => void }) => {
-  const { cloudId, elasticsearchUrl, managementUrl, learnMoreUrl, navigateToUrl } =
-    useDeploymentDetails();
+  const {
+    cloudId,
+    elasticsearchUrl,
+    managementUrl,
+    apiKeysLearnMoreUrl,
+    cloudIdLearnMoreUrl,
+    navigateToUrl,
+  } = useDeploymentDetails();
   const isInsideModal = !!closeModal;
 
   if (!cloudId) {
@@ -39,7 +45,7 @@ export const DeploymentDetails = ({ closeModal }: { closeModal?: () => void }) =
       {elasticsearchUrl && <DeploymentDetailsEsInput elasticsearchUrl={elasticsearchUrl} />}
 
       {/* Cloud ID */}
-      <DeploymentDetailsCloudIdInput cloudId={cloudId} />
+      <DeploymentDetailsCloudIdInput cloudId={cloudId} learnMoreUrl={cloudIdLearnMoreUrl} />
 
       <EuiSpacer size="m" />
 
@@ -67,7 +73,7 @@ export const DeploymentDetails = ({ closeModal }: { closeModal?: () => void }) =
           </EuiFlexItem>
           {!isInsideModal && (
             <EuiFlexItem grow={false}>
-              <EuiLink external href={learnMoreUrl} target="_blank">
+              <EuiLink external href={apiKeysLearnMoreUrl} target="_blank">
                 {i18n.translate('cloud.deploymentDetails.learnMoreButtonLabel', {
                   defaultMessage: 'Learn more',
                 })}

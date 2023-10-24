@@ -19,6 +19,9 @@ export const useStyles = () => {
   `;
 
   const gridStyle = css`
+    & .euiDataGrid__content {
+      background: transparent;
+    }
     & .euiDataGridHeaderCell__icon {
       display: none;
     }
@@ -43,14 +46,15 @@ export const useStyles = () => {
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
     }
-    & .euiDataGridRowCell__expandActions > [data-test-subj='euiDataGridCellExpandButton'] {
+    & .euiDataGridRowCell__actions > [data-test-subj='euiDataGridCellExpandButton'] {
       display: none;
     }
-    & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
+    & .euiDataGridRowCell__actions--overlay {
       padding: 0;
     }
 
-    & .euiDataGridRowCell__expandFlex {
+    & .euiDataGridRowCell__contentWrapper {
+      display: flex;
       align-items: center;
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
