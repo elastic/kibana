@@ -11,7 +11,7 @@ import type { InternalApplicationStart } from '@kbn/core-application-browser-int
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 
 /** @internal */
-export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
+export interface InternalCoreStart extends Omit<CoreStart, 'application' | 'plugins'> {
   application: InternalApplicationStart;
   injectedMetadata: InternalInjectedMetadataStart;
 }
