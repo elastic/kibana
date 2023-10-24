@@ -224,7 +224,6 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
           maxWidth={600}
         >
           {view === 'json' ? (
-            // The CSS override for the EuiCodeEditor requires a parent .application css class
             <div className="application">
               <EuiText color="subdued">
                 <FormattedMessage
