@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { concatMap, delay, Observable, of, share } from 'rxjs';
+import { delay, Observable, share } from 'rxjs';
 
 export interface PromptObservableState {
   chunks: Chunk[];
@@ -52,65 +52,62 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
             observer.next({ chunks: [], loading: true });
 
             const decoder = new TextDecoder();
-
+            let prev = '';
             const chunks: Chunk[] = [];
 
-            let prev: string = '';
-
             function read() {
-              reader?.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-                try {
-                  if (done) {
-                    observer.next({
-                      chunks,
-                      message: getMessageFromChunks(chunks),
-                      loading: false,
-                    });
-                    observer.complete();
-                    return;
-                  }
+              reader
+                ?.read()
+                .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+                  try {
+                    if (done) {
+                      observer.next({
+                        chunks,
+                        message: getMessageFromChunks(chunks),
+                        loading: false,
+                      });
+                      observer.complete();
+                      return;
+                    }
 
-                  let lines: string[] = (prev + decoder.decode(value)).split('\n');
+                    const lines: string[] = (prev + decoder.decode(value)).split('\n');
+                    const lastLine: string = lines.pop() || '';
+                    const isPartialChunk: boolean = !!lastLine && lastLine !== 'data: [DONE]';
 
-                  const lastLine: string = lines[lines.length - 1];
+                    if (isPartialChunk) {
+                      prev = lastLine;
+                    } else {
+                      prev = '';
+                    }
 
-                  const isPartialChunk: boolean = !!lastLine && lastLine !== 'data: [DONE]';
+                    const nextChunks: Chunk[] = lines
+                      .map((str) => str.substr(6))
+                      .filter((str) => !!str && str !== '[DONE]')
+                      .map((line) => JSON.parse(line));
 
-                  if (isPartialChunk) {
-                    prev = lastLine;
-                    lines.pop();
-                  } else {
-                    prev = '';
-                  }
-
-                  lines = lines
-                    .map((str) => str.substr(6))
-                    .filter((str) => !!str && str !== '[DONE]');
-
-                  const nextChunks: Chunk[] = lines.map((line) => JSON.parse(line));
-
-                  nextChunks.forEach((chunk) => {
-                    chunks.push(chunk);
+                    chunks.push(...nextChunks);
                     observer.next({
                       chunks,
                       message: getMessageFromChunks(chunks),
                       loading: true,
                     });
-                  });
-                } catch (err) {
+                  } catch (err) {
+                    observer.error(err);
+                    return;
+                  }
+                  read();
+                })
+                .catch((err) => {
                   observer.error(err);
-                  return;
-                }
-                read();
-              });
+                });
             }
 
             read();
 
             return () => {
-              reader.cancel();
+              reader?.cancel();
             };
-          }).pipe(concatMap((value) => of(value).pipe(delay(50))))
+          }).pipe(delay(50))
         : new Observable<PromptObservableState>(),
     [content, reader]
   );
@@ -137,13 +134,13 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
 
   useEffect(() => {
     const newSubscription = observer$.pipe(share()).subscribe({
-      next: ({ message, loading: isLoading }) => {
+      next: (all) => {
+        const { message, loading: isLoading } = all;
         setLoading(isLoading);
         setPendingMessage(message);
       },
       complete: () => {
         setComplete(true);
-        setLoading(false);
       },
       error: (err) => {
         setError(err.message);
@@ -162,9 +159,5 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
 };
 
 function getMessageFromChunks(chunks: Chunk[]) {
-  let message = '';
-  chunks.forEach((chunk) => {
-    message += chunk.choices[0]?.delta.content ?? '';
-  });
-  return message;
+  return chunks.map((chunk) => chunk.choices[0]?.delta.content ?? '').join('');
 }
