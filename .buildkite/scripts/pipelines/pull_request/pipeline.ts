@@ -164,6 +164,13 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml'));
     }
 
+    if (
+      GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cypress_burn.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps

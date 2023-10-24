@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { usageTracker } from '../data_loaders/usage_tracker';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
@@ -15,67 +16,76 @@ import {
   METADATA_UNITED_TRANSFORM,
 } from '../constants';
 
-export async function waitForMetadataTransformsReady(esClient: Client): Promise<void> {
-  await waitFor(() => areMetadataTransformsReady(esClient));
-}
-
-export async function stopMetadataTransforms(esClient: Client): Promise<void> {
-  const transformIds = await getMetadataTransformIds(esClient);
-
-  await Promise.all(
-    transformIds.map((transformId) =>
-      esClient.transform.stopTransform({
-        transform_id: transformId,
-        force: true,
-        wait_for_completion: true,
-        allow_no_match: true,
-      })
-    )
-  );
-}
-
-export async function startMetadataTransforms(
-  esClient: Client,
-  // agentIds to wait for
-  agentIds: string[]
-): Promise<void> {
-  const transformIds = await getMetadataTransformIds(esClient);
-  const currentTransformId = transformIds.find((transformId) =>
-    transformId.startsWith(metadataTransformPrefix)
-  );
-  const unitedTransformId = transformIds.find((transformId) =>
-    transformId.startsWith(METADATA_UNITED_TRANSFORM)
-  );
-  if (!currentTransformId || !unitedTransformId) {
-    // eslint-disable-next-line no-console
-    console.warn('metadata transforms not found, skipping transform start');
-    return;
+export const waitForMetadataTransformsReady = usageTracker.track(
+  'waitForMetadataTransformsReady',
+  async (esClient: Client): Promise<void> => {
+    await waitFor(() => areMetadataTransformsReady(esClient));
   }
+);
 
-  try {
-    await esClient.transform.startTransform({
-      transform_id: currentTransformId,
-    });
-  } catch (err) {
-    // ignore if transform already started
-    if (err.statusCode !== 409) {
-      throw err;
+export const stopMetadataTransforms = usageTracker.track(
+  'stopMetadataTransforms',
+  async (esClient: Client): Promise<void> => {
+    const transformIds = await getMetadataTransformIds(esClient);
+
+    await Promise.all(
+      transformIds.map((transformId) =>
+        esClient.transform.stopTransform({
+          transform_id: transformId,
+          force: true,
+          wait_for_completion: true,
+          allow_no_match: true,
+        })
+      )
+    );
+  }
+);
+
+export const startMetadataTransforms = usageTracker.track(
+  'startMetadataTransforms',
+  async (
+    esClient: Client,
+    // agentIds to wait for
+    agentIds: string[]
+  ): Promise<void> => {
+    const transformIds = await getMetadataTransformIds(esClient);
+    const currentTransformId = transformIds.find((transformId) =>
+      transformId.startsWith(metadataTransformPrefix)
+    );
+    const unitedTransformId = transformIds.find((transformId) =>
+      transformId.startsWith(METADATA_UNITED_TRANSFORM)
+    );
+    if (!currentTransformId || !unitedTransformId) {
+      // eslint-disable-next-line no-console
+      console.warn('metadata transforms not found, skipping transform start');
+      return;
+    }
+
+    try {
+      await esClient.transform.startTransform({
+        transform_id: currentTransformId,
+      });
+    } catch (err) {
+      // ignore if transform already started
+      if (err.statusCode !== 409) {
+        throw err;
+      }
+    }
+
+    await waitForCurrentMetdataDocs(esClient, agentIds);
+
+    try {
+      await esClient.transform.startTransform({
+        transform_id: unitedTransformId,
+      });
+    } catch (err) {
+      // ignore if transform already started
+      if (err.statusCode !== 409) {
+        throw err;
+      }
     }
   }
-
-  await waitForCurrentMetdataDocs(esClient, agentIds);
-
-  try {
-    await esClient.transform.startTransform({
-      transform_id: unitedTransformId,
-    });
-  } catch (err) {
-    // ignore if transform already started
-    if (err.statusCode !== 409) {
-      throw err;
-    }
-  }
-}
+);
 
 async function getMetadataTransformStats(
   esClient: Client
