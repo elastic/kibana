@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
-import { type SearchResponseWarning, SearchResponseWarnings } from '@kbn/search-response-warnings';
+import { type SearchResponseWarning, SearchResponseWarningsBadge } from '@kbn/search-response-warnings';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 
 const containerStyles = css`
@@ -71,10 +72,11 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
 
       {Boolean(interceptedWarnings?.length) && (
         <div>
-          <SearchResponseWarnings
-            variant="badge"
-            interceptedWarnings={interceptedWarnings}
-            data-test-subj="savedSearchEmbeddableWarningsCallout"
+          <SearchResponseWarningsBadge
+            visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
+              defaultMessage: 'table',
+            })}
+            warnings={interceptedWarnings}
           />
         </div>
       )}

@@ -9,8 +9,7 @@
 export type { SearchResponseWarning, WarningHandlerCallback } from './src/types';
 
 export {
-  SearchResponseWarnings,
-  type SearchResponseWarningsProps,
+  SearchResponseWarningsBadge,
   SearchResponseWarningsCallout,
   SearchResponseWarningsEmptyPrompt,
 } from './src/components/search_response_warnings';
