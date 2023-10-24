@@ -44,7 +44,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     } else if (cache === 'no-store') {
       request = this.http.get<T>(url, { query, version });
     } else {
-      debugger;
       request = this.staleWhileRevalidateCache
         .cachedFetch({
           url: format({

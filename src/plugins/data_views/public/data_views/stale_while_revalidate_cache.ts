@@ -23,7 +23,7 @@ export class StaleWhileRevalidateCache {
 
   private async openCache() {
     try {
-      return await caches.open(this.cacheName);
+      return await caches?.open(this.cacheName);
     } catch (e) {
       this.onOpenCacheError(e);
     }
