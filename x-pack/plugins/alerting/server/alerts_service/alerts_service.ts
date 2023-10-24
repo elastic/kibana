@@ -40,6 +40,7 @@ import {
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
+  InstallShutdownError,
 } from './lib';
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
@@ -357,9 +358,14 @@ export class AlertsService implements IAlertsService {
       this.isInitializing = false;
       return successResult();
     } catch (err) {
-      this.options.logger.error(
-        `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
-      );
+      if (err instanceof InstallShutdownError) {
+        this.options.logger.debug(err.message);
+      } else {
+        this.options.logger.error(
+          `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
+        );
+      }
+
       this.initialized = false;
       this.isInitializing = false;
       return errorResult(err.message);
