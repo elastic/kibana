@@ -59,8 +59,6 @@ import { NOTES_BUTTON_CLASS_NAME } from '../properties/helpers';
 import { getFormattedFields } from '../body/renderers/formatted_field_udt';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
-import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
-import { RowRendererId } from '../../../../../common/api/timeline';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, progressStyle } from './styles';
 import type { NotesMap } from './render_custom_body';
@@ -170,7 +168,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   const {
     timeline: {
       eventIdToNoteIds,
-      excludedRowRendererIds,
       loadingEventIds,
       selectedEventIds,
       filterManager,
@@ -291,7 +288,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   );
 
   const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
     if (
       expandedDetail[TimelineTabs.query]?.panelView &&
       timelineId === TimelineId.active &&
@@ -300,6 +296,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       activeTimeline.toggleExpandedDetail({});
     }
     setExpandedDoc(undefined);
+    onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
   }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
   const onSetExpandedDoc = useCallback(
@@ -311,10 +308,10 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           handleOnEventDetailPanelOpened(timelineDoc);
         }
       } else {
-        setExpandedDoc(undefined);
+        handleOnPanelClosed();
       }
     },
-    [discoverGridRows, handleOnEventDetailPanelOpened]
+    [discoverGridRows, handleOnEventDetailPanelOpened, handleOnPanelClosed]
   );
 
   const leadingControlColumns = useMemo(
@@ -408,19 +405,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     },
     [dispatch, timelineId]
   );
-
-  // Row renderers
-  const enabledRowRenderers = useMemo(() => {
-    if (
-      excludedRowRendererIds &&
-      excludedRowRendererIds.length === Object.keys(RowRendererId).length
-    )
-      return [plainRowRenderer];
-
-    if (!excludedRowRendererIds) return rowRenderers;
-
-    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-  }, [excludedRowRendererIds, rowRenderers]);
 
   // The custom row details is actually a trailing control column cell with
   // a hidden header. This is important for accessibility and markup reasons
