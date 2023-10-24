@@ -14,6 +14,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getDataStreamDetailsLink } from '../../../../../services/routing';
 import { getTemplateDetailsLink } from '../../../../../..';
 import { useLoadDataStream } from '../../../../../services/api';
 import { useAppContext } from '../../../../../app_context';
@@ -48,14 +49,31 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
     </EuiFlexGroup>
   );
   let contentRight: ReactNode = (
-    <EuiButton
-      size="s"
-      {...reactRouterNavigate(history, getTemplateDetailsLink(dataStream?.indexTemplateName ?? ''))}
-    >
-      {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.templateLinkLabel', {
-        defaultMessage: 'See template',
-      })}
-    </EuiButton>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiButton
+          size="s"
+          {...reactRouterNavigate(history, getDataStreamDetailsLink(dataStream?.name ?? ''))}
+        >
+          {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.dataStreamLinkLabel', {
+            defaultMessage: 'See details',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiButton
+          size="s"
+          {...reactRouterNavigate(
+            history,
+            getTemplateDetailsLink(dataStream?.indexTemplateName ?? '')
+          )}
+        >
+          {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.templateLinkLabel', {
+            defaultMessage: 'Related template',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   if (isLoading) {
