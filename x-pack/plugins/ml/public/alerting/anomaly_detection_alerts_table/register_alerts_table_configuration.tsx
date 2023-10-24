@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { type TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type {
+  AlertsTableConfigurationRegistry,
+  RenderCustomActionsRowArgs,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -27,6 +31,7 @@ import {
   ALERT_ANOMALY_TIMESTAMP,
 } from '../../../common/constants/alerts';
 import { getAlertFormatters, getRenderCellValue } from './render_cell_value';
+import { AlertActions } from './alert_actions';
 
 export function registerAlertsTableConfiguration(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -114,34 +119,27 @@ export function registerAlertsTableConfiguration(
   const config: AlertsTableConfigurationRegistry = {
     id: ML_ALERTS_CONFIG_ID,
     columns,
-    // cases: { featureId: 'cases', owner: ['observability'] },
     useInternalFlyout: getAlertFlyout(columns, getAlertFormatters(fieldFormats)),
     getRenderCellValue: getRenderCellValue(fieldFormats),
     sort,
-    // useActionsColumn: () => ({
-    //   renderCustomActionsRow: ({
-    //     alert,
-    //     id,
-    //     setFlyoutAlert,
-    //     refresh,
-    //   }: RenderCustomActionsRowArgs) => {
-    //     return null;
-    //     return (
-    //       <AlertActions
-    //         config={config}
-    //         data={Object.entries(alert).reduce<AlertActionsProps['data']>(
-    //           (acc, [field, value]) => [...acc, { field, value: value as string[] }],
-    //           []
-    //         )}
-    //         ecsData={{ _id: alert._id, _index: alert._index }}
-    //         id={id}
-    //         observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-    //         setFlyoutAlert={setFlyoutAlert}
-    //         refresh={refresh}
-    //       />
-    //     );
-    //   },
-    // }),
+    useActionsColumn: () => ({
+      renderCustomActionsRow: ({
+        alert,
+        id,
+        setFlyoutAlert,
+        refresh,
+      }: RenderCustomActionsRowArgs) => {
+        return (
+          <AlertActions
+            alert={alert}
+            ecsData={{ _id: alert._id, _index: alert._index }}
+            id={id}
+            setFlyoutAlert={setFlyoutAlert}
+            refresh={refresh}
+          />
+        );
+      },
+    }),
   };
 
   triggersActionsUi.alertsTableConfigurationRegistry.register(config);
