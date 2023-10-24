@@ -690,12 +690,14 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
+    const soDeleteResult = this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+
     await deleteOutputSecrets({
       esClient: appContextService.getInternalUserESClient(),
       output: originalOutput,
     });
 
-    return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    return soDeleteResult;
   }
 
   public async update(
