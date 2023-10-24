@@ -191,7 +191,7 @@ describe('MaintenanceWindowCallout', () => {
     );
 
     expect(
-      await findByText('Maintenance window is running for Observability and Management rules')
+      await findByText('Maintenance window is running for Observability and Stack rules')
     ).toBeInTheDocument();
   });
 
