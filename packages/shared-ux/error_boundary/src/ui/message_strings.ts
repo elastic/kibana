@@ -30,7 +30,7 @@ export const errorMessageStrings = {
           }),
         componentName: (errorComponentName: string) =>
           i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details', {
-            defaultMessage: 'An error occurred in {name}:',
+            defaultMessage: 'The above error occurred in {name}:',
             values: { name: errorComponentName },
           }),
         closeButton: () =>
