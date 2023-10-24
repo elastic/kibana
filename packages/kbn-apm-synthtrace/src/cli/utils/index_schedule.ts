@@ -216,7 +216,8 @@ export async function createEvents(
         const eventTimestamp = moment(
           random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval)
         );
-        return generate({ range: timerange(eventTimestamp, end) });
+        const endTs = end === false ? moment() : end;
+        return generate({ range: timerange(eventTimestamp, endTs) });
       })
       .flat();
 

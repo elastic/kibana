@@ -38,7 +38,7 @@ function getDateFrom(date: DateLike, now: Date): Date {
   return date.toDate();
 }
 
-export function timerange(from: DateLike, to: DateLike | false) {
+export function timerange(from: DateLike, to: DateLike) {
   const now = new Date();
   return new Timerange(getDateFrom(from, now), getDateFrom(to, now));
 }
