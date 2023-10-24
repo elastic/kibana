@@ -7,18 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEqual, uniqWith } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isEsError } from '@kbn/data-plugin/public';
-import type { IEsError, Reason } from '@kbn/data-plugin/public';
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { RemovableUserMessage } from '../types';
 
-type ErrorCause = Required<IEsError>['attributes'];
-
 interface RequestError extends Error {
-  body?: { attributes?: { error: { caused_by: ErrorCause } } };
+  body?: { attributes?: { error: { caused_by: estypes.ErrorCause } } };
 }
 
 interface ReasonDescription {
@@ -62,7 +60,7 @@ function getNestedErrorClauseWithContext({
   caused_by: causedBy,
   lang,
   script,
-}: Reason): ReasonDescription[] {
+}: estypes.ErrorCause): ReasonDescription[] {
   if (!causedBy) {
     // scripted fields error has changed with no particular hint about painless in it,
     // so it tries to lookup in the message for the script word
@@ -83,12 +81,12 @@ function getNestedErrorClauseWithContext({
   return [{ ...payload, context: { type, reason } }];
 }
 
-function getNestedErrorClause(e: ErrorCause | Reason): ReasonDescription[] {
+function getNestedErrorClause(e: estypes.ErrorCause): ReasonDescription[] {
   const { type, reason = '', caused_by: causedBy } = e;
   // Painless scripts errors are nested within the failed_shards property
   if ('failed_shards' in e) {
     if (e.failed_shards) {
-      return e.failed_shards.flatMap((shardCause) =>
+      return (e.failed_shards as estypes.ShardFailure[]).flatMap((shardCause) =>
         getNestedErrorClauseWithContext(shardCause.reason)
       );
     }
@@ -101,13 +99,15 @@ function getNestedErrorClause(e: ErrorCause | Reason): ReasonDescription[] {
 
 function getErrorSources(e: Error) {
   if (isRequestError(e)) {
-    return getNestedErrorClause(e.body!.attributes!.error as ErrorCause);
+    return getNestedErrorClause(e.body!.attributes!.error as estypes.ErrorCause);
   }
   if (isEsError(e)) {
-    if (e.attributes?.reason) {
-      return getNestedErrorClause(e.attributes);
+    if (e.attributes?.error?.reason) {
+      return getNestedErrorClause(e.attributes.error);
     }
-    return getNestedErrorClause(e.attributes?.caused_by as ErrorCause);
+    if (e.attributes?.error?.caused_by) {
+      return getNestedErrorClause(e.attributes.error.caused_by);
+    }
   }
   return [];
 }
