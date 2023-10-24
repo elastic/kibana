@@ -20,7 +20,7 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsPrivateLocations | PrivateLocation
 > = () => ({
   method: 'GET',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id?}',
   validate: {},
   validation: {
     request: {
