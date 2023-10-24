@@ -160,7 +160,7 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
     },
   });
 
-  const indexTemplateMappings: IndexTemplateMappings = { properties };
+  const indexTemplateMappings: IndexTemplateMappings = { properties: properties };
   if (dynamicTemplates.length > 0) {
     indexTemplateMappings.dynamic_templates = dynamicTemplates;
   }
@@ -191,6 +191,36 @@ function _generateMappings(
 } {
   let hasNonDynamicTemplateMappings = false;
   const props: Properties = {};
+
+  function addParentObjectAsStaticProperty(pathMatch: string) {
+    let parentPath = pathMatch.replace(/\.\*$/, '');
+    let parentParts = parentPath.split('.');
+
+    interface Property {
+      type: string,
+      dynamic: boolean,
+      properties?: Properties,
+    }
+    let parent : Property = {
+      type: 'object',
+      dynamic: true,
+    }
+
+    props[parentParts[0]] = parent;
+    hasNonDynamicTemplateMappings = true;
+
+    if (parentParts.length > 1) {
+      for (var part of parentParts.slice(1)) {
+        let next : Property = {
+          type: 'object',
+          dynamic: true,
+        }
+        parent.properties = ({[part]: next})
+        parent = next;
+      }
+    }
+  }
+  
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
   if (fields) {
@@ -235,6 +265,10 @@ function _generateMappings(
               properties: dynProperties,
               runtimeProperties: fieldProps,
             });
+
+            // Add the parent object as static property, this is needed for
+            // index templates not using `"dynamic": true`.
+            addParentObjectAsStaticProperty(pathMatch);
           }
           return;
         }
@@ -333,6 +367,10 @@ function _generateMappings(
             matchingType,
             properties: dynProperties,
           });
+
+          // Add the parent object as static property, this is needed for
+          // index templates not using `"dynamic": true`.
+          addParentObjectAsStaticProperty(pathMatch);
         }
       } else {
         let fieldProps = getDefaultProperties(field);
