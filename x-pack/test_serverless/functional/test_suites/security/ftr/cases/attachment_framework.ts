@@ -26,8 +26,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.login();
-        await svlSecNavigation.navigateToLandingPage();
-        await common.navigateToUrl('security', '/dashboards');
+        await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('createDashboardButton', async () => {
@@ -88,7 +87,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           owner: 'securitySolution',
         });
 
-        await common.navigateToUrl('security', '/dashboards');
+        await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
 
         if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {

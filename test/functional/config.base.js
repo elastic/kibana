@@ -92,9 +92,6 @@ export default async function ({ readConfigFile }) {
       observabilityCases: {
         pathname: '/app/observability/cases',
       },
-      security: {
-        pathname: '/app/security',
-      },
       fleet: {
         pathname: '/app/fleet',
       },
