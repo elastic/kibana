@@ -7,5 +7,10 @@ The following APIs are available for Synthetics.
 
 * <<delete-private-location-api, Delete Private Location API>> to delete a private location
 
+* <<get-private-locations-api, Get Private Locations API>> to get a list of private locations
+
+
 include::private-locations/create-private-location.asciidoc[leveloffset=+1]
 include::private-locations/delete-private-location.asciidoc[leveloffset=+1]
+include::private-locations/get-private-locations.asciidoc[leveloffset=+1]
+

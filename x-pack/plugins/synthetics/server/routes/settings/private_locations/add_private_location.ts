@@ -59,6 +59,15 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       });
     }
 
+    // return if name is already taken
+    if (locations.find((loc) => loc.label === location.label)) {
+      return response.badRequest({
+        body: {
+          message: `Private location with label ${location.label} already exists`,
+        },
+      });
+    }
+
     const existingLocations = locations.filter((loc) => loc.id !== location.agentPolicyId);
     const formattedLocation = toSavedObjectContract({
       ...location,

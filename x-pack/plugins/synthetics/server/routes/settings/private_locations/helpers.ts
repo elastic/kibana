@@ -16,21 +16,19 @@ export const toClientContract = (
   attributes: SyntheticsPrivateLocationsAttributes,
   agentPolicies?: AgentPolicyInfo[]
 ): SyntheticsPrivateLocations => {
-  return {
-    locations: attributes.locations.map((location) => {
-      const agPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
-      return {
-        label: location.label,
-        id: location.id,
-        agentPolicyId: location.agentPolicyId,
-        isServiceManaged: false,
-        isInvalid: !Boolean(agPolicy),
-        tags: location.tags,
-        geo: location.geo,
-        namespace: agPolicy?.namespace,
-      };
-    }),
-  };
+  return attributes.locations.map((location) => {
+    const agPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
+    return {
+      label: location.label,
+      id: location.id,
+      agentPolicyId: location.agentPolicyId,
+      isServiceManaged: false,
+      isInvalid: !Boolean(agPolicy),
+      tags: location.tags,
+      geo: location.geo,
+      namespace: agPolicy?.namespace,
+    };
+  });
 };
 
 export const toSavedObjectContract = (location: PrivateLocation): PrivateLocationAttributes => {
