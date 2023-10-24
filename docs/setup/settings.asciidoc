@@ -605,6 +605,7 @@ Set this value to false to disable the Remote Clusters UI.
 *Default: `true`*
 
 `xpack.rollup.ui.enabled`::
+deprecated:[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html\[downsampling\] instead.']
 Set this value to false to disable the Rollup Jobs UI. *Default: true*
 
 `xpack.snapshot_restore.ui.enabled`::
