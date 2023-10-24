@@ -144,19 +144,20 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel('editRuleSettingsLink').click();
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.getBySel('edit-rule-actions-tab').click();
-    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
-      cy.contains(packName);
-      cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
-      cy.contains('SELECT * FROM memory_info;');
-      cy.contains('SELECT * FROM system_info;');
-    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
+      .within(() => {
+        cy.contains(packName);
+        cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
+        cy.contains('SELECT * FROM memory_info;');
+        cy.contains('SELECT * FROM system_info;');
+      })
+      .clickOutside();
+
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
       cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
       cy.contains('Days of uptime');
     });
-    // leave some time to make sure the data from the form get populated to the rules form
-    cy.wait(4000);
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
     cy.contains('Save changes').click();
     cy.wait('@saveRuleMultiQuery').should(({ request }) => {
