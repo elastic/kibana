@@ -13,7 +13,6 @@ import {
   mockSignalIndex,
   mockUserPrivilege,
   mockHostIsolation,
-  mockUserProfiles,
 } from './mock';
 import {
   fetchQueryAlerts,
@@ -23,7 +22,6 @@ import {
   createHostIsolation,
   updateAlertStatusByQuery,
   updateAlertStatusByIds,
-  suggestUsers,
 } from './api';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -264,30 +262,6 @@ describe('Detections Alerts API', () => {
         caseIds: ['88c04a90-b19c-11eb-b838-bf3c7840b969'],
       });
       expect(hostIsolationResponse).toEqual(mockHostIsolation);
-    });
-  });
-
-  describe('suggestUsers', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockUserProfiles);
-    });
-
-    test('check parameter url', async () => {
-      await suggestUsers({ searchTerm: 'name1' });
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/signals/suggest_users',
-        expect.objectContaining({
-          method: 'GET',
-          version: '2023-10-31',
-          query: { searchTerm: 'name1' },
-        })
-      );
-    });
-
-    test('happy path', async () => {
-      const alertsResp = await suggestUsers({ searchTerm: '' });
-      expect(alertsResp).toEqual(mockUserProfiles);
     });
   });
 });
