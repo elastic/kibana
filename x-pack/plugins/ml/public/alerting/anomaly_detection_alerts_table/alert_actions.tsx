@@ -19,6 +19,7 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
+  ALERT_RULE_NAME,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -26,7 +27,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 import { type Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 
 export interface AlertActionsProps {
@@ -63,28 +64,22 @@ export function AlertActions({
     ? prepend(`/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`)
     : null;
 
-  const data = useMemo(() => {
-    return Object.entries(alert).reduce<TimelineNonEcsData[]>(
-      (acc, [field, value]) => [...acc, { field, value: value as string[] }],
-      []
-    );
-  }, [alert]);
-
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
       ? [
           {
-            alertId: ecsData?._id ?? '',
+            alertId: alertId ?? '',
             index: ecsData?._index ?? '',
             type: AttachmentType.alert,
-            rule: cases?.helpers.getRuleIdFromEvent({
-              ecs: ecsData,
-              data,
-            })!,
+            rule: {
+              id: ruleId,
+              name: alert[ALERT_RULE_NAME]![0],
+            },
+            owner: PLUGIN_ID,
           },
         ]
       : [];
-  }, [ecsData, cases, data]);
+  }, [alert, alertId, ecsData?._id, ecsData?._index, ruleId]);
 
   const isActiveAlert = useMemo(() => alert[ALERT_STATUS]![0] === ALERT_STATUS_ACTIVE, [alert]);
 
