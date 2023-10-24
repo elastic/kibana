@@ -26,43 +26,48 @@ interface ManagementRouterProps {
 export const ManagementRouter = memo(
   ({ history, setBreadcrumbs, onAppMounted, sections, theme$ }: ManagementRouterProps) => {
     return (
-      <Router history={history}>
-        <Routes>
-          {sections.map((section) =>
-            section.getAppsEnabled().map((app) => (
+      <KibanaErrorBoundaryProvider>
+        <KibanaErrorBoundary>
+          <Router history={history}>
+            <Routes>
+              {sections.map((section) =>
+                section
+                  .getAppsEnabled()
+                  .map((app) => (
+                    <Route
+                      path={`${app.basePath}`}
+                      component={() => (
+                        <ManagementAppWrapper
+                          app={app}
+                          setBreadcrumbs={setBreadcrumbs}
+                          onAppMounted={onAppMounted}
+                          history={history}
+                          theme$={theme$}
+                        />
+                      )}
+                    />
+                  ))
+              )}
+              {sections.map((section) =>
+                section
+                  .getAppsEnabled()
+                  .filter((app) => app.redirectFrom)
+                  .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+              )}
+
               <Route
-                path={`${app.basePath}`}
+                path={'/'}
                 component={() => (
-                  <KibanaErrorBoundaryProvider>
-                    <KibanaErrorBoundary>
-                      <ManagementAppWrapper
-                        app={app}
-                        setBreadcrumbs={setBreadcrumbs}
-                        onAppMounted={onAppMounted}
-                        history={history}
-                        theme$={theme$}
-                      />
-                    </KibanaErrorBoundary>
-                  </KibanaErrorBoundaryProvider>
+                  <ManagementLandingPage
+                    setBreadcrumbs={setBreadcrumbs}
+                    onAppMounted={onAppMounted}
+                  />
                 )}
               />
-            ))
-          )}
-          {sections.map((section) =>
-            section
-              .getAppsEnabled()
-              .filter((app) => app.redirectFrom)
-              .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
-          )}
-
-          <Route
-            path={'/'}
-            component={() => (
-              <ManagementLandingPage setBreadcrumbs={setBreadcrumbs} onAppMounted={onAppMounted} />
-            )}
-          />
-        </Routes>
-      </Router>
+            </Routes>
+          </Router>
+        </KibanaErrorBoundary>
+      </KibanaErrorBoundaryProvider>
     );
   }
 );
