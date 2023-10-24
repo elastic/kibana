@@ -10,6 +10,7 @@ properties:
       - $ref: 'run_connector_params_documents.yaml'
       - $ref: 'run_connector_params_message_email.yaml'
       - $ref: 'run_connector_params_message_serverlog.yaml'
+      - $ref: 'run_connector_params_message_slack.yaml'
       - $ref: 'run_connector_params_trigger_pagerduty.yaml'
       - title: Subaction parameters
         description: Test an action that involves a subaction.

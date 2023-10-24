@@ -587,6 +587,13 @@ the security incident. The IPs are added as observables to the security incident
 (Required, string) The message to log.
 =====
 
+.Slack connectors
+[%collapsible%open]
+=====
+`message`::
+(Required, string) The Slack message text, which cannot contain Markdown, images, or other advanced formatting.
+=====
+
 .{swimlane} connectors
 [%collapsible%open]
 =====
