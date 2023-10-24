@@ -81,6 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -89,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -112,6 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -121,6 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -235,6 +239,44 @@ export default ({ getService }: FtrProviderContext) => {
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
+
+      describe('legacy investigation fields', () => {
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+          );
+        });
+
+        it('should show "legacy_investigation_fields" to be greater than 0 when a rule has "investigation_fields" set to array or empty array', async () => {
+          await retry.try(async () => {
+            const stats = await getStats(supertest, log);
+            const expected: RulesTypeUsage = {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+              query: {
+                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+                alerts: 0,
+                enabled: 0,
+                disabled: 3,
+                legacy_investigation_fields: 2,
+              },
+              custom_total: {
+                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+                alerts: 0,
+                enabled: 0,
+                disabled: 3,
+                legacy_investigation_fields: 2,
+              },
+            };
+            expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
+          });
+        });
+      });
     });
 
     describe('"eql" rule type', () => {
@@ -283,6 +325,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -292,6 +335,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -428,6 +472,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -436,6 +481,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -465,6 +511,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -474,6 +521,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -629,6 +677,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -637,6 +686,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -657,6 +707,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -665,6 +716,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -787,6 +839,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -795,6 +848,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -833,6 +887,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
@@ -842,6 +897,7 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 0,
               legacy_notifications_disabled: 0,
               legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
           expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
@@ -1016,6 +1072,7 @@ export default ({ getService }: FtrProviderContext) => {
             legacy_notifications_disabled: 0,
             notifications_enabled: 0,
             notifications_disabled: 0,
+            legacy_investigation_fields: 0,
           });
         });
       });
@@ -1046,6 +1103,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_legacy_notification: false,
             has_notification: false,
+            has_legacy_investigation_field: false,
           });
         });
       });
@@ -1083,6 +1141,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_notification: true,
             has_legacy_notification: false,
+            has_legacy_investigation_field: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1135,6 +1194,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_notification: true,
             has_legacy_notification: false,
+            has_legacy_investigation_field: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1187,6 +1247,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_notification: false,
             has_legacy_notification: true,
+            has_legacy_investigation_field: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1239,6 +1300,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_notification: false,
             has_legacy_notification: true,
+            has_legacy_investigation_field: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
