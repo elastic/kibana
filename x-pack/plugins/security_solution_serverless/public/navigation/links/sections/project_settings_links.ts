@@ -19,7 +19,7 @@ export const createProjectSettingsLinksFromManage = (manageLink: LinkItem): Link
     ? [
         {
           ...entityAnalyticsLink,
-          sideNavDisabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). Is is displayed in the management cards landing.
+          sideNavDisabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). It is displayed in the management cards landing.
         },
       ]
     : [];
@@ -47,13 +47,13 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
     title: i18n.MAPS_TITLE,
     description: i18n.MAPS_DESCRIPTION,
     landingIcon: 'graphApp',
-    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). Is is displayed in the management cards landing.
+    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). It is displayed in the management cards landing.
   },
   {
     id: ExternalPageName.visualize,
     title: i18n.VISUALIZE_TITLE,
     description: i18n.VISUALIZE_DESCRIPTION,
     landingIcon: 'visualizeApp',
-    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). Is is displayed in the management cards landing.
+    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). It is displayed in the management cards landing.
   },
 ];
