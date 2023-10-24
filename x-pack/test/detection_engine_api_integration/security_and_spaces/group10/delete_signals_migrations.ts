@@ -15,7 +15,7 @@ import {
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteAllAlerts, getIndexNameFromLoad, waitFor } from '../../utils';
-import { createUserAndRole } from '../../../common/services/security_solution';
+import { createRoleAndUser } from '../../../common/services/security_solution';
 
 interface CreateResponse {
   index: string;
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(getService, ROLES.t1_analyst);
+      await createRoleAndUser(getService, ROLES.t1_analyst);
 
       const { body } = await supertestWithoutAuth
         .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)

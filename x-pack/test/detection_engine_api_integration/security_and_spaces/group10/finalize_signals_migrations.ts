@@ -21,7 +21,7 @@ import {
   getIndexNameFromLoad,
   waitFor,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { createRoleAndUser, deleteRoleAndUser } from '../../../common/services/security_solution';
 
 interface StatusResponse {
   index: string;
@@ -269,7 +269,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(getService, ROLES.t1_analyst);
+      await createRoleAndUser(getService, ROLES.t1_analyst);
 
       const { body } = await supertestWithoutAuth
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
@@ -286,7 +286,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(finalizeResponse.completed).not.to.eql(true);
       expect(finalizeResponse.error.message).to.match(/^security_exception/);
       expect(finalizeResponse.error.status_code).to.eql(403);
-      await deleteUserAndRole(getService, ROLES.t1_analyst);
+      await deleteRoleAndUser(getService, ROLES.t1_analyst);
     });
   });
 };

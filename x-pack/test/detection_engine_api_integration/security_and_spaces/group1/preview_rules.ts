@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/co
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllRules, getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { createRoleAndUser, deleteRoleAndUser } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -88,11 +88,11 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await createRoleAndUser(getService, role);
         });
 
         afterEach(async () => {
-          await deleteUserAndRole(getService, role);
+          await deleteRoleAndUser(getService, role);
         });
 
         it('should NOT be able to preview a rule', async () => {
@@ -109,11 +109,11 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.hunter;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await createRoleAndUser(getService, role);
         });
 
         afterEach(async () => {
-          await deleteUserAndRole(getService, role);
+          await deleteRoleAndUser(getService, role);
         });
 
         it('should return with an error about not having correct permissions', async () => {

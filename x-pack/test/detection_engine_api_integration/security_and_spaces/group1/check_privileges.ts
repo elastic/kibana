@@ -19,7 +19,7 @@ import {
   getThresholdRuleForSignalTesting,
   deleteAllAlerts,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { createRoleAndUser, deleteRoleAndUser } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleForSignalTesting(index),
             query: 'process.executable: "/usr/bin/sudo"',
           };
-          await createUserAndRole(getService, ROLES.detections_admin);
+          await createRoleAndUser(getService, ROLES.detections_admin);
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
             user: ROLES.detections_admin,
             pass: 'changeme',
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
             `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
           );
 
-          await deleteUserAndRole(getService, ROLES.detections_admin);
+          await deleteRoleAndUser(getService, ROLES.detections_admin);
         });
       });
 
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 700,
             },
           };
-          await createUserAndRole(getService, ROLES.detections_admin);
+          await createRoleAndUser(getService, ROLES.detections_admin);
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
             user: ROLES.detections_admin,
             pass: 'changeme',
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
             `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
           );
 
-          await deleteUserAndRole(getService, ROLES.detections_admin);
+          await deleteRoleAndUser(getService, ROLES.detections_admin);
         });
       });
     });

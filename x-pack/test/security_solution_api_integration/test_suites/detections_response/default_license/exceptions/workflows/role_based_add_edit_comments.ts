@@ -20,8 +20,8 @@ import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/c
 import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 import {
-  createUserAndRole,
-  deleteUserAndRole,
+  createRoleAndUser,
+  deleteRoleAndUser,
 } from '../../../../../../common/services/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -36,13 +36,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Rule Exceptions', () => {
       beforeEach(async () => {
-        await createUserAndRole(getService, detectionAdmin);
-        await createUserAndRole(getService, socManager);
+        await createRoleAndUser(getService, detectionAdmin);
+        await createRoleAndUser(getService, socManager);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(getService, detectionAdmin);
-        await deleteUserAndRole(getService, socManager);
+        await deleteRoleAndUser(getService, detectionAdmin);
+        await deleteRoleAndUser(getService, socManager);
         await deleteAllExceptions(supertest, log);
       });
 
@@ -143,13 +143,13 @@ export default ({ getService }: FtrProviderContext) => {
     });
     describe('Endpoint Exceptions', () => {
       beforeEach(async () => {
-        await createUserAndRole(getService, detectionAdmin);
-        await createUserAndRole(getService, socManager);
+        await createRoleAndUser(getService, detectionAdmin);
+        await createRoleAndUser(getService, socManager);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(getService, detectionAdmin);
-        await deleteUserAndRole(getService, socManager);
+        await deleteRoleAndUser(getService, detectionAdmin);
+        await deleteRoleAndUser(getService, socManager);
         await deleteAllExceptions(supertest, log);
       });
 
