@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePreviewPanelContext } from '../context';
 import { RenderRuleName } from '../../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
@@ -21,23 +21,25 @@ export const RulePreviewFooter: React.FC = memo(() => {
 
   return ruleId ? (
     <EuiFlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <RenderRuleName
-            contextId={scopeId}
-            eventId={eventId}
-            fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
-            fieldType={'string'}
-            isAggregatable={false}
-            isDraggable={false}
-            linkValue={ruleId}
-            value={i18n.translate('xpack.securitySolution.flyout.preview.rule.viewDetailsLabel', {
-              defaultMessage: 'Show rule details',
-            })}
-            openInNewTab
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiPanel hasShadow={false} color="transparent">
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <RenderRuleName
+              contextId={scopeId}
+              eventId={eventId}
+              fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
+              fieldType={'string'}
+              isAggregatable={false}
+              isDraggable={false}
+              linkValue={ruleId}
+              value={i18n.translate('xpack.securitySolution.flyout.preview.rule.viewDetailsLabel', {
+                defaultMessage: 'Show rule details',
+              })}
+              openInNewTab
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </EuiFlyoutFooter>
   ) : null;
 });

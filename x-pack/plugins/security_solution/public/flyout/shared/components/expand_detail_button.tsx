@@ -12,28 +12,19 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { COLLAPSE_DETAILS_BUTTON_TEST_ID, EXPAND_DETAILS_BUTTON_TEST_ID } from './test_ids';
-import { LeftPanelKey } from '../../left';
-import { useRightPanelContext } from '../context';
 
+export interface ExpandDetailButtonProps {
+  /**
+   * Expand left panel call back
+   */
+  expandDetails: () => void;
+}
 /**
  * Button displayed in the top left corner of the panel, to expand the left section of the document details expandable flyout
  */
-export const ExpandDetailButton: FC = memo(() => {
-  const { closeLeftPanel, openLeftPanel, panels } = useExpandableFlyoutContext();
+export const ExpandDetailButton: FC<ExpandDetailButtonProps> = memo(({ expandDetails }) => {
+  const { closeLeftPanel, panels } = useExpandableFlyoutContext();
   const isExpanded: boolean = panels.left != null;
-
-  const { eventId, indexName, scopeId } = useRightPanelContext();
-
-  const expandDetails = useCallback(() => {
-    openLeftPanel({
-      id: LeftPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
 
@@ -42,6 +33,7 @@ export const ExpandDetailButton: FC = memo(() => {
       iconSide="left"
       onClick={collapseDetails}
       iconType="arrowEnd"
+      size="s"
       data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
       aria-label={i18n.translate(
         'xpack.securitySolution.flyout.right.header.collapseDetailButtonAriaLabel',
@@ -60,6 +52,7 @@ export const ExpandDetailButton: FC = memo(() => {
       iconSide="left"
       onClick={expandDetails}
       iconType="arrowStart"
+      size="s"
       data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
       aria-label={i18n.translate(
         'xpack.securitySolution.flyout.right.header.expandDetailButtonAriaLabel',

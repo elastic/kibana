@@ -8,6 +8,8 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
 import { useRightPanelContext } from './context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
@@ -45,16 +47,24 @@ export const PanelFooter: FC = () => {
   );
 
   return (
-    <FlyoutFooter
-      detailsData={dataFormattedForFieldBrowser}
-      detailsEcsData={dataAsNestedObject}
-      handleOnEventClosed={closeFlyout}
-      isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-      isReadOnly={false}
-      loadingEventDetails={false}
-      onAddIsolationStatusClick={showHostIsolationPanelCallback}
-      scopeId={scopeId}
-      refetchFlyoutData={refetchFlyoutData}
-    />
+    <EuiPanel
+      hasShadow={false}
+      borderRadius="none"
+      css={css`
+        background-color: rgb(241, 244, 250);
+      `}
+    >
+      <FlyoutFooter
+        detailsData={dataFormattedForFieldBrowser}
+        detailsEcsData={dataAsNestedObject}
+        handleOnEventClosed={closeFlyout}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        isReadOnly={false}
+        loadingEventDetails={false}
+        onAddIsolationStatusClick={showHostIsolationPanelCallback}
+        scopeId={scopeId}
+        refetchFlyoutData={refetchFlyoutData}
+      />
+    </EuiPanel>
   );
 };
