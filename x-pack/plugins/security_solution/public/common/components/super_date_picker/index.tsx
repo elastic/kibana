@@ -52,6 +52,7 @@ interface Range {
 
 export interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
+  /** Indicates that the range has changed which fires additional actions */
   hasRangeChanged: boolean;
   kql?: inputsModel.GlobalKqlQuery | undefined;
   timelineId?: string;
