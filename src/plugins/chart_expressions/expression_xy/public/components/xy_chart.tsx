@@ -50,7 +50,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { ChartDimensionOptions, getOverridesFor } from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -144,6 +144,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderComplete: () => void;
   uiState?: PersistedState;
   timeFormat: string;
+  setDimensions: (dimensions: ChartDimensionOptions) => void;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -197,6 +198,7 @@ export function XYChart({
   onClickMultiValue,
   layerCellValueActions,
   onSelectRange,
+  setDimensions,
   interactive = true,
   syncColors,
   syncTooltips,
@@ -292,6 +294,20 @@ export function XYChart({
   );
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
+
+  const onWillRender = useCallback(() => {
+    // requestAnimationFrame(() => {
+    setDimensions({
+      aspectRatio: isHorizontalChart(dataLayers)
+        ? { x: 9, y: 16 }
+        : {
+            x: 16,
+            y: 9,
+          },
+    });
+    // });
+  }, [dataLayers, setDimensions]);
+
   const formattedDatatables = useMemo(
     () =>
       getFormattedTablesByLayers(dataLayers, formatFactory, splitColumnAccessor, splitRowAccessor),
@@ -784,6 +800,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
+            onWillRender={onWillRender}
             onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },

@@ -26,7 +26,12 @@ import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  ChartDimensionOptions,
+  DimensionsEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
@@ -215,6 +220,10 @@ export const getXyChartRenderer = ({
     const onClickMultiValue = (data: MultiFilterEvent['data']) => {
       handlers.event({ name: 'multiFilter', data });
     };
+    const setDimensions = (data: ChartDimensionOptions) => {
+      const event: DimensionsEvent = { name: 'dimensions', data };
+      handlers.event(event);
+    };
 
     const layerCellValueActions = await getLayerCellValueActions(
       getDataLayers(config.args.layers),
@@ -277,6 +286,7 @@ export const getXyChartRenderer = ({
               syncCursor={config.syncCursor}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
+              setDimensions={setDimensions}
             />
           </div>
         </I18nProvider>
