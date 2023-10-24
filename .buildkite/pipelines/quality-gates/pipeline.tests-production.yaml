@@ -3,7 +3,7 @@
 # A failure in this pipeline build will prevent further progression to the subsequent stage.
 
 steps:
-  - label: ":pipeline::kibana::seedling: Trigger SLO check"
+  - label: ":kibana: Trigger SLO check"
     trigger: "serverless-quality-gates" # https://buildkite.com/elastic/serverless-quality-gates
     build:
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
@@ -13,7 +13,7 @@ steps:
         CHECK_SLO_TAG: kibana
     soft_fail: true
 
-  - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
+  - label: ":rocket: Trigger control-plane e2e tests"
     if: build.env("ENVIRONMENT") == "production-canary"
     trigger: "ess-k8s-production-e2e-tests" # https://buildkite.com/elastic/ess-k8s-production-e2e-tests
     build:
@@ -25,3 +25,6 @@ steps:
   - label: ":cookie: 24h bake time before continuing promotion"
     if: build.env("ENVIRONMENT") == "production-canary"
     command: "sleep 86400"
+    agents:
+      # How long can this agent live for in minutes - 25 hours
+      instanceMaxAge: 1500
