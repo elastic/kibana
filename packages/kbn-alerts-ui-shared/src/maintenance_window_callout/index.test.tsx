@@ -134,6 +134,67 @@ describe('MaintenanceWindowCallout', () => {
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
+  it('should be visible if there is a "running" maintenance window that matches the specified category', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['observability']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('Maintenance window is running for Observability rules')
+    ).toBeInTheDocument();
+  });
+
+  it('should NOT be visible if there is a "running" maintenance window that does not match the specified category', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { container } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['securitySolution']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should only display the specified categories in the callout title for a maintenance window that matches muliple categories', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability', 'securitySolution', 'management'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['observability', 'management']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('Maintenance window is running for Observability and Management rules')
+    ).toBeInTheDocument();
+  });
+
   it('should see an error toast if there was an error while fetching maintenance windows', async () => {
     const createReactQueryWrapper = () => {
       const queryClient = new QueryClient({
