@@ -22,6 +22,7 @@ import * as resourceNotFoundException from '../../../common/search/test_data/res
 import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
 import { UI_SETTINGS } from '../../../common';
+import type { IEsError } from '../errors';
 
 jest.mock('./utils', () => {
   const originalModule = jest.requireActual('./utils');
@@ -151,7 +152,9 @@ describe('SearchInterceptor', () => {
         new PainlessError({
           statusCode: 400,
           message: 'search_phase_execution_exception',
-          attributes: searchPhaseException.error,
+          attributes: {
+            error: searchPhaseException.error,
+          },
         })
       );
       expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
@@ -1452,10 +1455,12 @@ describe('SearchInterceptor', () => {
       });
 
       test('Should throw Painless error on server error with OSS format', async () => {
-        const mockResponse: any = {
+        const mockResponse: IEsError = {
           statusCode: 400,
           message: 'search_phase_execution_exception',
-          attributes: searchPhaseException.error,
+          attributes: {
+            error: searchPhaseException.error,
+          },
         };
         fetchMock.mockRejectedValueOnce(mockResponse);
         const mockRequest: IEsSearchRequest = {
@@ -1466,10 +1471,12 @@ describe('SearchInterceptor', () => {
       });
 
       test('Should throw ES error on ES server error', async () => {
-        const mockResponse: any = {
+        const mockResponse: IEsError = {
           statusCode: 400,
           message: 'resource_not_found_exception',
-          attributes: resourceNotFoundException.error,
+          attributes: {
+            error: resourceNotFoundException.error,
+          },
         };
         fetchMock.mockRejectedValueOnce(mockResponse);
         const mockRequest: IEsSearchRequest = {
