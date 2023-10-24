@@ -8,6 +8,8 @@ import moment from 'moment';
 import {
   ConfigKey,
   HTTPFields,
+  PrivateLocation,
+  ServiceLocation,
   SyntheticsParams,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -68,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
-      expect(apiResponse.body.locations).eql([
+      const testLocations: Array<PrivateLocation | ServiceLocation> = [
         {
           id: 'localhost',
           label: 'Local Synthetics Service',
@@ -79,7 +81,6 @@ export default function ({ getService }: FtrProviderContext) {
           isInvalid: false,
         },
         {
-          concurrentMonitors: 1,
           id: testFleetPolicyID,
           isInvalid: false,
           isServiceManaged: false,
@@ -91,7 +92,9 @@ export default function ({ getService }: FtrProviderContext) {
           agentPolicyId: testFleetPolicyID,
           namespace: 'default',
         },
-      ]);
+      ];
+
+      expect(apiResponse.body.locations).eql(testLocations);
     });
 
     it('adds a monitor in private location', async () => {

@@ -7,7 +7,12 @@
 import moment from 'moment';
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  ConfigKey,
+  HTTPFields,
+  PrivateLocation,
+  ServiceLocation,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';
@@ -60,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
-      expect(apiResponse.body.locations).eql([
+      const testResponse: Array<PrivateLocation | ServiceLocation> = [
         {
           id: 'localhost',
           label: 'Local Synthetics Service',
@@ -71,7 +76,6 @@ export default function ({ getService }: FtrProviderContext) {
           isInvalid: false,
         },
         {
-          concurrentMonitors: 1,
           id: testFleetPolicyID,
           isServiceManaged: false,
           isInvalid: false,
@@ -83,7 +87,9 @@ export default function ({ getService }: FtrProviderContext) {
           agentPolicyId: testFleetPolicyID,
           namespace: 'default',
         },
-      ]);
+      ];
+
+      expect(apiResponse.body.locations).eql(testResponse);
     });
 
     it('does not add a monitor if there is an error in creating integration', async () => {
