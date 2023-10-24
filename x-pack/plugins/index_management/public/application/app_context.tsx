@@ -53,6 +53,8 @@ export interface AppDependencies {
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
+    editableIndexSettings: 'all' | 'limited';
+    enableDataStreamsStorageColumn: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];

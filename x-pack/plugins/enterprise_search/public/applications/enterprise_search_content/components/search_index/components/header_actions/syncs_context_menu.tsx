@@ -43,6 +43,7 @@ export const SyncsContextMenu: React.FC = () => {
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
+  const { connector } = useValues(IndexViewLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -124,7 +125,10 @@ export const SyncsContextMenu: React.FC = () => {
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
                 'data-test-subj':
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
+                disabled: Boolean(
+                  ingestionStatus === IngestionStatus.INCOMPLETE ||
+                    connector?.configuration.use_document_level_security?.value
+                ),
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
                   defaultMessage: 'Access Control',

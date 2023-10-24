@@ -38,7 +38,7 @@ const TitleWithTooltip = ({
   tooltipTestSubj?: string;
 }) => {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <SectionTitle title={title} data-test-subj={dataTestSubject} />
       </EuiFlexItem>

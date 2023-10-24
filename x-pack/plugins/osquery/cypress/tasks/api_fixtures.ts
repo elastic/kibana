@@ -138,10 +138,6 @@ export const loadLiveQuery = (
   }).then((response) => response.body.data);
 
 export const loadRule = (includeResponseActions = false) => {
-  cy.login('elastic');
-  cy.visit('/app/security/rules');
-  cy.getBySel('globalLoadingIndicator').should('exist');
-  cy.getBySel('globalLoadingIndicator').should('not.exist');
   cy.login(ServerlessRoleName.SOC_MANAGER);
 
   return request<RuleResponse>({

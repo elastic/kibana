@@ -9,6 +9,7 @@ import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 import * as i18n from '../translations';
+import { INTERNAL_API_VERSION } from '../helpers';
 
 export const MAPPINGS_API_ROUTE = '/internal/ecs_data_quality_dashboard/mappings';
 
@@ -29,6 +30,7 @@ export async function fetchMappings({
       {
         method: 'GET',
         signal: abortController.signal,
+        version: INTERNAL_API_VERSION,
       }
     );
   } catch (e) {
