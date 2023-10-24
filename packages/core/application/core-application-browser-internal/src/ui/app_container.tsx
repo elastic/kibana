@@ -9,7 +9,7 @@
 import './app_container.scss';
 
 import { Observable } from 'rxjs';
-import React, { FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
+import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -22,11 +22,7 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
-import {
-  KibanaErrorBoundary,
-  KibanaErrorBoundaryProvider,
-  KibanaRecallError,
-} from '@kbn/shared-ux-error-boundary';
+import { KibanaRecallError } from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -120,16 +116,14 @@ export const AppContainer: FC<Props> = ({
   ]);
 
   return (
-    <KibanaErrorBoundaryProvider>
-      <KibanaErrorBoundary>
-        <KibanaRecallError error={error} />
-        {appNotFound && <AppNotFound />}
-        {showSpinner && !appNotFound && (
-          <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
-        )}
-        <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
-      </KibanaErrorBoundary>
-    </KibanaErrorBoundaryProvider>
+    <Fragment>
+      <KibanaRecallError error={error} />
+      {appNotFound && <AppNotFound />}
+      {showSpinner && !appNotFound && (
+        <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
+      )}
+      <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
+    </Fragment>
   );
 };
 
