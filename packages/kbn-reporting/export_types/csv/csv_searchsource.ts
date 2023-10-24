@@ -16,15 +16,17 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_ENTERPRISE,
+  CancellationToken,
+} from '@kbn/reporting-common';
+import { Writable } from 'stream';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
   ExportType,
   decryptJobHeaders,
   getFieldFormats,
-  CancellationToken,
-} from '@kbn/reporting-common';
-import { Writable } from 'stream';
-import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+} from '@kbn/reporting-common-export-types-helpers';
 import type { JobParamsCSV, TaskPayloadCSV } from './types';
 
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;

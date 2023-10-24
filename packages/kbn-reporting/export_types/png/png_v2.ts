@@ -10,8 +10,6 @@ import apm from 'elastic-apm-node';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
-  decryptJobHeaders,
-  ExportType,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -21,8 +19,6 @@ import {
   PNG_JOB_TYPE_V2,
   REPORTING_TRANSACTION_TYPE,
   TaskRunResult,
-  getFullRedirectAppUrl,
-  generatePngObservable,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
@@ -41,6 +37,12 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
+import {
+  decryptJobHeaders,
+  ExportType,
+  getFullRedirectAppUrl,
+  generatePngObservable,
+} from '@kbn/reporting-common-export-types-helpers';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {

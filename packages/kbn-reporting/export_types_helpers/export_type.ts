@@ -25,7 +25,12 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { IClusterClient } from '@kbn/core-elasticsearch-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import { CreateJobFn, ReportingConfigType, ReportingServerInfo, RunTaskFn } from './types';
+import {
+  CreateJobFn,
+  ReportingConfigType,
+  ReportingServerInfo,
+  RunTaskFn,
+} from '@kbn/reporting-common/types';
 
 export interface BaseExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;

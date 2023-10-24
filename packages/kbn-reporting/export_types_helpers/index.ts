@@ -18,3 +18,5 @@ export { generatePngObservable } from './generate_png';
 export { generatePdfObservableV2 } from './generate_pdf_v2';
 export { buildKibanaPath } from './v2/build_kibana_path';
 export { cryptoFactory } from './crypto';
+export { ExportType } from './export_type';
+export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';

@@ -9,10 +9,6 @@
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
-  decryptJobHeaders,
-  ExportType,
-  generatePdfObservable,
-  getCustomLogo,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -22,8 +18,6 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
   TaskRunResult,
-  validateUrls,
-  getFullUrls,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import apm from 'elastic-apm-node';
@@ -32,6 +26,14 @@ import { fromEventPattern, lastValueFrom, Observable, of, throwError } from 'rxj
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { BaseParams, TaskPayloadPDF } from '@kbn/reporting-common/types';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import {
+  decryptJobHeaders,
+  ExportType,
+  generatePdfObservable,
+  getCustomLogo,
+  getFullUrls,
+  validateUrls,
+} from '@kbn/reporting-common-export-types-helpers';
 
 interface BaseParamsPDF {
   layout: LayoutParams;

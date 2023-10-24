@@ -6,27 +6,30 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
-import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import { Writable } from 'stream';
 import {
+  CancellationToken,
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+  JobParamsDownloadCSV,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
+  ReportingRequestHandlerContext,
+  TaskRunResult,
+} from '@kbn/reporting-common';
+import { Writable } from 'stream';
+import {
   ExportType,
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
-  JobParamsDownloadCSV,
-  ReportingRequestHandlerContext,
   getFieldFormats,
-} from '@kbn/reporting-common';
+} from '@kbn/reporting-common-export-types-helpers';
 
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceImmediateExportTypeStartDeps extends BaseExportTypeStartDeps {

@@ -35,7 +35,6 @@
     "requiredBundles": [
       "kibanaReact",
       "discover",
-      "kibanaUtils"
     ]
   }
 }

@@ -31,5 +31,3 @@ export type {
   IlmPolicyStatusResponse,
   ManagementLinkFn,
 } from './url';
-export { ExportType } from './export_type';
-export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
