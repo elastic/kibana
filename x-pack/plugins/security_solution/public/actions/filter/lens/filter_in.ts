@@ -64,7 +64,7 @@ export const createFilterInLensAction = ({
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
-      console.log("!!! META: ", data[0]?.columnMeta);
+      console.log('!!! META: ', data[0]?.columnMeta);
       const rawValue = data[0]?.value;
       const value = filterOutNullableValues(valueToArray(rawValue));
 
