@@ -242,7 +242,7 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     getPanelTitle(contextMenu: WebElementWrapper) {
-      return contextMenu.findByClassName('euiContextMenuPanelTitle');
+      return contextMenu.findByClassName('euiContextMenuPanel__title');
     },
 
     async getDatasetSelectorButtonText() {
