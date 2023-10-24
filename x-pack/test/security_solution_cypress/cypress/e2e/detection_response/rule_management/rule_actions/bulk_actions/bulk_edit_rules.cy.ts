@@ -118,16 +118,12 @@ const defaultRuleData = {
 };
 
 describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
   beforeEach(() => {
     login();
+    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
-    cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
     createRule(
       getEqlRule({ ...defaultRuleData, rule_id: '2', name: 'New EQL Rule', enabled: false })
@@ -682,12 +678,10 @@ describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () =
   });
   beforeEach(() => {
     login();
+    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
-    cy.task('esArchiverResetKibana');
-
     createRule(
       getEsqlRule({
         tags: ['test-default-tag-1', 'test-default-tag-2'],
