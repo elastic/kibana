@@ -5,54 +5,34 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import type SuperTest from 'supertest';
 
-export async function waitForRuleStatus({
+export async function waitForActiveRule({
   ruleId,
-  expectedStatus,
   supertest,
+  logger,
 }: {
   ruleId: string;
-  expectedStatus: string;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
+  logger?: ToolingLog;
 }): Promise<Record<string, any>> {
   return pRetry(
     async () => {
       const response = await supertest.get(`/api/alerting/rule/${ruleId}`);
       const status = response.body?.execution_status?.status;
+      const expectedStatus = 'active';
 
       if (status !== expectedStatus) {
-        throw new Error(`waitForStatus(${expectedStatus}): got ${status}`);
+        if (logger) {
+          logger.info(`Expected: ${expectedStatus}: got ${status}`);
+        }
+        throw new Error(`Expected: ${expectedStatus}: got ${status}`);
       }
+
       return status;
     },
     { retries: 10 }
-  );
-}
-
-export function waitFor<T>({
-  expectation,
-  fn,
-  debug = false,
-}: {
-  expectation: T;
-  fn: () => Promise<T>;
-  debug?: boolean;
-}) {
-  return pRetry(
-    async () => {
-      const actual = await fn();
-      if (debug) {
-        // eslint-disable-next-line no-console
-        console.log('Waiting for', expectation, 'got', actual);
-      }
-
-      if (!isEqual(actual, expectation)) {
-        throw new Error(`Expected ${actual} to be ${expectation}`);
-      }
-    },
-    { retries: 5 }
   );
 }

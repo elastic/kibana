@@ -14,7 +14,7 @@ import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { createApmRule, deleteApmRules } from './helpers/alerting_api_helper';
-import { waitForRuleStatus } from './helpers/wait_for_rule_status';
+import { waitForActiveRule } from './helpers/wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         await synthtraceEsClient.index(events);
 
-        await createAndRunApmMlJobs({ es, ml, environments: ['production'] });
+        await createAndRunApmMlJobs({ es, ml, environments: ['production'], logger });
       });
 
       after(async () => {
@@ -73,8 +73,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           await synthtraceEsClient.clean();
           await deleteApmRules(supertest);
           await ml.cleanMlIndices();
+          logger.info('Completed cleaned up');
         } catch (e) {
-          logger.info('Could not delete rule by id', e);
+          logger.info('Could not cleanup', e);
         }
       }
 
@@ -93,18 +94,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ruleTypeId: ApmRuleType.Anomaly,
           });
 
-          const ruleId = createdRule.id;
-
-          if (!ruleId) {
-            throw new Error('Rule id is undefined');
-          }
-
-          const ruleStatus = await waitForRuleStatus({
-            ruleId,
-            expectedStatus: 'active',
+          const ruleStatus = await waitForActiveRule({
+            ruleId: createdRule.id,
             supertest,
+            logger,
           });
-
           expect(ruleStatus).to.be('active');
         });
       });

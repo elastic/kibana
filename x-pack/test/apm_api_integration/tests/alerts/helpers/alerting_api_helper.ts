@@ -39,7 +39,7 @@ export async function createApmRule<T extends ApmRuleType>({
         params,
         consumer: 'apm',
         schedule: {
-          interval: '1m',
+          interval: '5s',
         },
         tags: ['apm'],
         name,
