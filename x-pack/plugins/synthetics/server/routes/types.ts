@@ -101,7 +101,12 @@ export interface RouteContext<
   spaceId: string;
 }
 
-export type SyntheticsRouteHandler<ClientContract, Query, Params, Body> = ({
+export type SyntheticsRouteHandler<
+  ClientContract,
+  Params = Record<string, any>,
+  Query = Record<string, any>,
+  Body = Record<string, any>
+> = ({
   uptimeEsClient,
   context,
   request,
@@ -109,4 +114,4 @@ export type SyntheticsRouteHandler<ClientContract, Query, Params, Body> = ({
   server,
   savedObjectsClient,
   subject: Subject,
-}: RouteContext<Query, Params, Body>) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
+}: RouteContext<Params, Query, Body>) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
