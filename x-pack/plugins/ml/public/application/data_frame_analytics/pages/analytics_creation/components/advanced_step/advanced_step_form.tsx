@@ -248,6 +248,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     randomizeSeed,
     softTreeDepthLimit,
     softTreeDepthTolerance,
+    useEstimatedMml,
   ]);
 
   const outlierDetectionAdvancedConfig = (

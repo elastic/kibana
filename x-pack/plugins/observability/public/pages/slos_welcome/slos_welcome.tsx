@@ -40,8 +40,8 @@ export function SlosWelcomePage() {
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
-  const { isLoading, sloList } = useFetchSloList();
-  const { total } = sloList || { total: 0 };
+  const { isLoading, data: sloList } = useFetchSloList();
+  const { total } = sloList ?? { total: 0 };
 
   const hasRequiredWritePrivileges = !!globalDiagnosis?.userPrivileges.write.has_all_requested;
   const hasRequiredReadPrivileges = !!globalDiagnosis?.userPrivileges.read.has_all_requested;

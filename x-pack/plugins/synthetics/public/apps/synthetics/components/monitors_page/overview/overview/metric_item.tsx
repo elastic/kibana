@@ -120,6 +120,7 @@ export const MetricItem = ({
               }
             }}
             baseTheme={DARK_THEME}
+            locale={i18n.getLocale()}
           />
           <Metric
             id={`${monitor.configId}-${monitor.location?.id}`}
@@ -148,7 +149,7 @@ export const MetricItem = ({
                       <EuiFlexItem grow={false} component="span">
                         <EuiIconTip
                           title={i18n.translate('xpack.synthetics.overview.duration.description', {
-                            defaultMessage: 'Median duration of last 24 checks',
+                            defaultMessage: 'Median duration of last 50 checks',
                           })}
                           content={i18n.translate(
                             'xpack.synthetics.overview.duration.description.values',

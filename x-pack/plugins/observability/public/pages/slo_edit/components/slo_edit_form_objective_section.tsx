@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCallOut,
   EuiFieldNumber,
   EuiFlexGrid,
   EuiFlexItem,
@@ -20,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { TimeWindow } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   BUDGETING_METHOD_OPTIONS,
   CALENDARALIGNED_TIMEWINDOW_OPTIONS,
@@ -42,6 +44,7 @@ export function SloEditFormObjectiveSection() {
   const timeWindowTypeSelect = useGeneratedHtmlId({ prefix: 'timeWindowTypeSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
   const timeWindowType = watch('timeWindow.type');
+  const indicator = watch('indicator.type');
 
   const [timeWindowTypeState, setTimeWindowTypeState] = useState<TimeWindow | undefined>(
     defaultValues?.timeWindow?.type
@@ -169,6 +172,19 @@ export function SloEditFormObjectiveSection() {
       </EuiFlexGrid>
 
       <EuiSpacer size="l" />
+      {indicator === 'sli.metric.timeslice' && (
+        <EuiFlexItem>
+          <EuiCallOut color="warning">
+            <p>
+              <FormattedMessage
+                id="xpack.observability.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
+                defaultMessage="The timeslice metric requires the budgeting method to be set to 'Timeslices' due to the nature of the statistical aggregations. The 'timeslice target' is also ignored in favor of the 'threshold' set in the metric definition above. The 'timeslice window' will set the size of the window the aggregation is performed on."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </EuiFlexItem>
+      )}
 
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
@@ -198,6 +214,7 @@ export function SloEditFormObjectiveSection() {
               render={({ field: { ref, ...field } }) => (
                 <EuiSelect
                   {...field}
+                  disabled={indicator === 'sli.metric.timeslice'}
                   required
                   id={budgetingSelect}
                   data-test-subj="sloFormBudgetingMethodSelect"

@@ -72,6 +72,7 @@ export const createConfiguration = async (
 
   const { body: configuration } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
     .set(headers)
     .send(req)
     .expect(expectedHttpCode);

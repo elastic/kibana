@@ -28,6 +28,7 @@ export const request = async <T = unknown>({
   configurationUtilities,
   headers,
   sslOverrides,
+  timeout,
   ...config
 }: {
   axios: AxiosInstance;
@@ -37,15 +38,22 @@ export const request = async <T = unknown>({
   data?: T;
   configurationUtilities: ActionsConfigurationUtilities;
   headers?: Record<string, AxiosHeaderValue>;
+  timeout?: number;
   sslOverrides?: SSLSettings;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
+  if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
+    throw new Error(
+      `Do not use "baseURL" in the creation of your axios instance because you will mostly break proxy`
+    );
+  }
   const { httpAgent, httpsAgent } = getCustomAgents(
     configurationUtilities,
     logger,
     url,
     sslOverrides
   );
-  const { maxContentLength, timeout } = configurationUtilities.getResponseSettings();
+  const { maxContentLength, timeout: settingsTimeout } =
+    configurationUtilities.getResponseSettings();
 
   return await axios(url, {
     ...config,
@@ -57,7 +65,7 @@ export const request = async <T = unknown>({
     httpsAgent,
     proxy: false,
     maxContentLength,
-    timeout,
+    timeout: Math.max(settingsTimeout, timeout ?? 0),
   });
 };
 

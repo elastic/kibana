@@ -56,6 +56,8 @@ spec:
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: BUILD_AND_READ
         security-engineering-productivity:
           access_level: BUILD_AND_READ
         fleet:
