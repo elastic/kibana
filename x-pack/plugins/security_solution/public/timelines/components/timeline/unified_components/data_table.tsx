@@ -525,10 +525,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   }, [fetchedPage, onChangePage]);
 
   const additionalControls = useMemo(
-    () => (
-      <ToolbarAdditionalControls timelineId={timelineId} columns={columns} updatedAt={updatedAt} />
-    ),
-    [columns, timelineId, updatedAt]
+    () => <ToolbarAdditionalControls timelineId={timelineId} updatedAt={updatedAt} />,
+    [timelineId, updatedAt]
   );
 
   const [notesMap, setNotesMap] = useState<NotesMap>({});

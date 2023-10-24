@@ -6,21 +6,14 @@
  */
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../common/constants';
+import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../../common/components/exit_full_screen';
 import { isActiveTimeline } from '../../../../helpers';
-import { timelineActions } from '../../../store/timeline';
-import { useKibana } from '../../../../common/lib/kibana';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../common/containers/use_full_screen';
-import { useFieldBrowserOptions } from '../../fields_browser';
 import { StatefulRowRenderersBrowser } from '../../row_renderers_browser';
 import { FixedWidthLastUpdatedContainer } from './last_updated';
 import * as i18n from './translations';
@@ -38,26 +31,11 @@ export const isFullScreen = ({
 
 interface Props {
   timelineId: string;
-  columns: ColumnHeaderOptions[];
   updatedAt: number;
 }
 
-export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({
-  columns,
-  timelineId,
-  updatedAt,
-}) => {
-  const dispatch = useDispatch();
-  const {
-    services: { triggersActionsUi },
-  } = useKibana();
+export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId, updatedAt }) => {
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
-
-  const defaultColumns = useMemo(() => {
-    return columns.map((c) => c.id);
-  }, [columns]);
-  const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
-
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
 
   const toggleFullScreen = useCallback(() => {
@@ -83,27 +61,6 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({
     [globalFullScreen, timelineFullScreen, timelineId]
   );
 
-  const fieldBrowserOptions = useFieldBrowserOptions({
-    sourcererScope: SourcererScopeName.timeline,
-    upsertColumn: (columnR: ColumnHeaderOptions, indexR: number) =>
-      dispatch(timelineActions.upsertColumn({ column: columnR, id: timelineId, index: indexR })),
-    removeColumn: (columnId: string) =>
-      dispatch(timelineActions.removeColumn({ columnId, id: timelineId })),
-  });
-
-  const onResetColumns = useCallback(() => {
-    dispatch(timelineActions.updateColumns({ id: timelineId, columns }));
-  }, [columns, dispatch, timelineId]);
-
-  /*
-  {triggersActionsUi.getFieldBrowser({
-        browserFields,
-        columnIds: defaultColumns ?? [],
-        onResetColumns,
-        onToggleColumn,
-        options: fieldBrowserOptions,
-      })}*/
-
   return (
     <>
       {' '}
@@ -121,7 +78,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({
                 ? i18n.EXIT_FULL_SCREEN
                 : i18n.FULL_SCREEN
             }
-            className={`${fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}`}
+            className={`${fullScreen ? EXIT_FULL_SCREEN_CLASS_NAME : ''}`}
             color={fullScreen ? 'ghost' : 'primary'}
             data-test-subj={
               // a full screen button gets created for timeline and for the host page
