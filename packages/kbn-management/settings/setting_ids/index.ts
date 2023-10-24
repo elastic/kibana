@@ -163,6 +163,8 @@ export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipRepu
 export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableCcsWarning';
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
+export const SECURITY_SOLUTION_USE_DISCOVER_COMPONENTS_IN_TIMELINE =
+  'securitySolution:useDiscoverComponentsInTimeline';
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
