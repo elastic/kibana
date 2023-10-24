@@ -7,12 +7,14 @@
  */
 
 import { getWarningsTitle, getWarningsDescription } from './i18n_utils';
+import type { SearchResponseWarning } from '../../types';
 
 describe('getWarningsTitle', () => {
   test('Should show title for single non-successful cluster', () => {
     const warnings = [
       {
         type: 'incomplete',
+        requestName: 'My request',
         clusters: {
           remote1: {
             status: 'partial',
@@ -21,7 +23,7 @@ describe('getWarningsTitle', () => {
           },
         },
         openInInspector: () => {},
-      },
+      } as SearchResponseWarning,
     ];
     expect(getWarningsTitle(warnings)).toEqual('Problem with 1 cluster');
   });
@@ -30,6 +32,7 @@ describe('getWarningsTitle', () => {
     const warnings = [
       {
         type: 'incomplete',
+        requestName: 'My request',
         clusters: {
           remote1: {
             status: 'partial',
@@ -43,7 +46,7 @@ describe('getWarningsTitle', () => {
           },
         },
         openInInspector: () => {},
-      },
+      } as SearchResponseWarning,
     ];
     expect(getWarningsTitle(warnings)).toEqual('Problem with 2 clusters');
   });
@@ -52,6 +55,7 @@ describe('getWarningsTitle', () => {
     const warnings = [
       {
         type: 'incomplete',
+        requestName: 'My request',
         clusters: {
           remote1: {
             status: 'partial',
@@ -60,9 +64,10 @@ describe('getWarningsTitle', () => {
           },
         },
         openInInspector: () => {},
-      },
+      } as SearchResponseWarning,
       {
         type: 'incomplete',
+        requestName: 'My request',
         clusters: {
           remote1: {
             status: 'partial',
@@ -71,7 +76,7 @@ describe('getWarningsTitle', () => {
           },
         },
         openInInspector: () => {},
-      },
+      } as SearchResponseWarning,
     ];
     expect(getWarningsTitle(warnings)).toEqual('Problem with 1 cluster in 2 requests');
   });
@@ -82,6 +87,7 @@ describe('getWarningsDescription', () => {
     const warnings = [
       {
         type: 'incomplete',
+        requestName: 'My request',
         clusters: {
           remote1: {
             status: 'partial',
@@ -90,7 +96,7 @@ describe('getWarningsDescription', () => {
           },
         },
         openInInspector: () => {},
-      },
+      } as SearchResponseWarning,
     ];
     expect(getWarningsDescription(warnings)).toEqual(
       'This cluster had issues returning data. This might result in an incomplete visualization.'
@@ -101,6 +107,7 @@ describe('getWarningsDescription', () => {
     const warnings = [
       {
         type: 'incomplete',
+        requestName: 'My request',
         clusters: {
           remote1: {
             status: 'partial',
@@ -114,7 +121,7 @@ describe('getWarningsDescription', () => {
           },
         },
         openInInspector: () => {},
-      },
+      } as SearchResponseWarning,
     ];
     expect(getWarningsDescription(warnings)).toEqual(
       'These clusters had issues returning data. This might result in an incomplete visualization.'
@@ -125,6 +132,7 @@ describe('getWarningsDescription', () => {
     const warnings = [
       {
         type: 'incomplete',
+        requestName: 'My request',
         clusters: {
           remote1: {
             status: 'partial',
@@ -133,7 +141,7 @@ describe('getWarningsDescription', () => {
           },
         },
         openInInspector: () => {},
-      },
+      } as SearchResponseWarning,
     ];
     expect(getWarningsDescription(warnings, 'table')).toEqual(
       'This cluster had issues returning data. This might result in an incomplete table.'

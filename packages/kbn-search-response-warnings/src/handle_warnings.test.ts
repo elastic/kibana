@@ -25,6 +25,7 @@ describe('handleWarnings', () => {
       request: {} as unknown as estypes.SearchRequest,
       requestAdapter: {} as unknown as RequestAdapter,
       requestId: '1234',
+      requestName: 'My request',
       response: {
         timed_out: false,
         _shards: {
@@ -48,6 +49,7 @@ describe('handleWarnings', () => {
       request: {} as unknown as estypes.SearchRequest,
       requestAdapter: {} as unknown as RequestAdapter,
       requestId: '1234',
+      requestName: 'My request',
       response: {
         took: 999,
         timed_out: true,
@@ -72,6 +74,7 @@ describe('handleWarnings', () => {
       request: {} as unknown as estypes.SearchRequest,
       requestAdapter: {} as unknown as RequestAdapter,
       requestId: '1234',
+      requestName: 'My request',
       response: {
         took: 999,
         timed_out: true,
@@ -97,6 +100,7 @@ describe('handleWarnings', () => {
       request: {} as unknown as estypes.SearchRequest,
       requestAdapter: {} as unknown as RequestAdapter,
       requestId: '1234',
+      requestName: 'My request',
       response: {
         took: 999,
         timed_out: true,

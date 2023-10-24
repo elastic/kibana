@@ -30,7 +30,7 @@ export const ViewDetailsPopover = (props: Props) => {
 
   if (props.warnings.length === 1) {
     return (
-      <EuiLink color="primary" size="s" onClick={props.warnings[0].openInInspector}>
+      <EuiLink color="primary" onClick={props.warnings[0].openInInspector}>
         {viewDetailsLabel}
       </EuiLink>
     );
@@ -55,7 +55,7 @@ export const ViewDetailsPopover = (props: Props) => {
     <EuiPopover
       id="ViewDetailsPopover"
       button={
-        <EuiLink color="primary" size="s" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <EuiLink color="primary" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
           <>
             {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
           </>

@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '../../types';
 
 export const viewDetailsLabel = i18n.translate('searchResponseWarnings.viewDetailsButtonLabel', {
   defaultMessage: 'View details',
