@@ -44,7 +44,7 @@ exports[`getTopNavUnsavedChangesBadge() should work correctly 2`] = `
   <div>
     <button
       class="euiContextMenuItem euiContextMenuItem--small"
-      data-test-subj="resetUnsavedChangesMenuItem"
+      data-test-subj="resetUnsavedChangesButton"
       type="button"
     >
       <span

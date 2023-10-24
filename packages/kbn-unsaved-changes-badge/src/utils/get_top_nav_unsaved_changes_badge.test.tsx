@@ -21,7 +21,7 @@ describe('getTopNavUnsavedChangesBadge()', () => {
 
     getByTestId('unsavedChangesBadge').click();
     await waitFor(() => {
-      return Boolean(queryByTestId('resetUnsavedChangesMenuItem'));
+      return Boolean(queryByTestId('resetUnsavedChangesButton'));
     });
 
     expect(screen.getByTestId('unsavedChangesBadgeMenuPanel')).toMatchSnapshot();

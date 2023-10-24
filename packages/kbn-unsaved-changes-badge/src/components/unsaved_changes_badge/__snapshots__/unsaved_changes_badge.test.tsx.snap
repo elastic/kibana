@@ -44,7 +44,7 @@ exports[`<UnsavedChangesBadge /> should show all menu items 2`] = `
   <div>
     <button
       class="euiContextMenuItem euiContextMenuItem--small"
-      data-test-subj="saveUnsavedChangesMenuItem"
+      data-test-subj="saveUnsavedChangesButton"
       type="button"
     >
       <span
@@ -64,7 +64,7 @@ exports[`<UnsavedChangesBadge /> should show all menu items 2`] = `
     </button>
     <button
       class="euiContextMenuItem euiContextMenuItem--small"
-      data-test-subj="saveUnsavedChangesAsMenuItem"
+      data-test-subj="saveUnsavedChangesAsButton"
       type="button"
     >
       <span
@@ -84,7 +84,7 @@ exports[`<UnsavedChangesBadge /> should show all menu items 2`] = `
     </button>
     <button
       class="euiContextMenuItem euiContextMenuItem--small"
-      data-test-subj="resetUnsavedChangesMenuItem"
+      data-test-subj="resetUnsavedChangesButton"
       type="button"
     >
       <span

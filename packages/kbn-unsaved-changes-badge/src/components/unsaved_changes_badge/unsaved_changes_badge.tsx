@@ -23,6 +23,9 @@ enum ProcessingType {
   savingAs = 'savingAs',
 }
 
+/**
+ * Props for UnsavedChangesBadge
+ */
 export interface UnsavedChangesBadgeProps {
   onReset: () => Promise<unknown>;
   onSave?: () => Promise<unknown>;
@@ -30,6 +33,14 @@ export interface UnsavedChangesBadgeProps {
   badgeText: string;
 }
 
+/**
+ * Badge component. It opens a menu panel with actions once pressed.
+ * @param badgeText
+ * @param onReset
+ * @param onSave
+ * @param onSaveAs
+ * @constructor
+ */
 export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
   badgeText,
   onReset,
@@ -76,7 +87,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
     ...(onSave
       ? [
           <EuiContextMenuItem
-            data-test-subj="saveUnsavedChangesMenuItem"
+            data-test-subj="saveUnsavedChangesButton"
             key="save"
             icon="save"
             disabled={disabled}
@@ -97,7 +108,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
     ...(onSaveAs
       ? [
           <EuiContextMenuItem
-            data-test-subj="saveUnsavedChangesAsMenuItem"
+            data-test-subj="saveUnsavedChangesAsButton"
             key="saveAs"
             icon="save"
             disabled={disabled}
@@ -116,7 +127,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
         ]
       : []),
     <EuiContextMenuItem
-      data-test-subj="resetUnsavedChangesMenuItem"
+      data-test-subj="resetUnsavedChangesButton"
       key="reset"
       icon="editorUndo"
       disabled={disabled}

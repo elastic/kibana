@@ -14,12 +14,21 @@ import {
   type UnsavedChangesBadgeProps,
 } from '../components/unsaved_changes_badge';
 
+/**
+ * Params for getTopNavUnsavedChangesBadge
+ */
 export interface TopNavUnsavedChangesBadgeParams {
   onReset: UnsavedChangesBadgeProps['onReset'];
   onSave?: UnsavedChangesBadgeProps['onSave'];
   onSaveAs?: UnsavedChangesBadgeProps['onSaveAs'];
 }
 
+/**
+ * Returns a badge object suitable for the top nav `badges` prop
+ * @param onReset
+ * @param onSave
+ * @param onSaveAs
+ */
 export const getTopNavUnsavedChangesBadge = ({
   onReset,
   onSave,
