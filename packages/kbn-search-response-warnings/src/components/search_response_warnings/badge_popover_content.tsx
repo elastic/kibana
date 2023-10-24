@@ -28,46 +28,48 @@ interface Props {
 
 export const SearchResponseWarningsBadgePopoverContent = (props: Props) => {
   const [openPanel, setOpenPanel] = useState(WARNING_PANEL_ID);
-  return openPanel === VIEW_DETAILS_PANEL_ID
-    ? <EuiContextMenuPanel
-        items={props.warnings.map(warning => {
-          return (
-            <EuiContextMenuItem
-              key={warning.requestName}
-              onClick={() => {
-                props.onViewDetailsClick?.();
-                warning.openInInspector();
-              }}
-            >
-              {warning.requestName}
-            </EuiContextMenuItem>
-          );
-        })}
-        onClose={() => {
-          setOpenPanel(WARNING_PANEL_ID);
-        }}
-        title={viewDetailsLabel}
-      />
-    : <EuiContextMenuPanel title={getWarningsTitle(props.warnings)}>
-        <EuiPanel color="transparent" paddingSize="s">
-          <EuiText size="s">
-            {getWarningsDescription(props.warnings, props.visualizationLabel)}
-          </EuiText>
-          <EuiButtonEmpty
-            color="primary"
-            iconSide={props.warnings.length > 1 ? "right" : undefined}
-            iconType={props.warnings.length > 1 ? "arrowRight" : undefined}
+  return openPanel === VIEW_DETAILS_PANEL_ID ? (
+    <EuiContextMenuPanel
+      items={props.warnings.map((warning) => {
+        return (
+          <EuiContextMenuItem
+            key={warning.requestName}
             onClick={() => {
-              if (props.warnings.length > 1) {
-                setOpenPanel(VIEW_DETAILS_PANEL_ID);
-              } else {
-                props.onViewDetailsClick?.();
-                props.warnings[0].openInInspector();
-              }
+              props.onViewDetailsClick?.();
+              warning.openInInspector();
             }}
           >
-            {viewDetailsLabel}
-          </EuiButtonEmpty>
-        </EuiPanel>
-      </EuiContextMenuPanel>;
+            {warning.requestName}
+          </EuiContextMenuItem>
+        );
+      })}
+      onClose={() => {
+        setOpenPanel(WARNING_PANEL_ID);
+      }}
+      title={viewDetailsLabel}
+    />
+  ) : (
+    <EuiContextMenuPanel title={getWarningsTitle(props.warnings)}>
+      <EuiPanel color="transparent" paddingSize="s">
+        <EuiText size="s">
+          {getWarningsDescription(props.warnings, props.visualizationLabel)}
+        </EuiText>
+        <EuiButtonEmpty
+          color="primary"
+          iconSide={props.warnings.length > 1 ? 'right' : undefined}
+          iconType={props.warnings.length > 1 ? 'arrowRight' : undefined}
+          onClick={() => {
+            if (props.warnings.length > 1) {
+              setOpenPanel(VIEW_DETAILS_PANEL_ID);
+            } else {
+              props.onViewDetailsClick?.();
+              props.warnings[0].openInInspector();
+            }
+          }}
+        >
+          {viewDetailsLabel}
+        </EuiButtonEmpty>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  );
 };
