@@ -18,5 +18,6 @@
     "@kbn/reporting-common",
     "@kbn/licensing-plugin",
     "@kbn/screenshotting-plugin",
+    "@kbn/reporting-common-export-types-helpers",
   ]
 }

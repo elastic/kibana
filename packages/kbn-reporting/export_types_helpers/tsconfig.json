@@ -22,5 +22,15 @@
     "@kbn/logging",
     "@kbn/core",
     "@kbn/reporting-common",
+    "@kbn/core-http-server",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-plugins-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/licensing-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-http-router-server-internal",
   ]
 }
