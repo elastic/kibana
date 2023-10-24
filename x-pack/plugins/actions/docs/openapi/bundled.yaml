@@ -9,8 +9,10 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: https://{kibanaUrl}
+    variables:
+      kibanaUrl:
+        default: localhost:5601
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -59,10 +61,6 @@ paths:
                   $ref: '#/components/examples/create_xmatters_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector/{connectorId}:
     get:
       summary: Retrieves a connector by ID.
@@ -85,8 +83,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a connector.
       operationId: deleteConnector
@@ -102,8 +98,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: createConnectorId
@@ -140,8 +134,6 @@ paths:
                   $ref: '#/components/examples/create_index_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: updateConnector
@@ -172,10 +164,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector/{connectorId}/_execute:
     post:
       summary: Runs a connector.
@@ -246,10 +234,6 @@ paths:
                   $ref: '#/components/examples/run_swimlane_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connectors:
     get:
       summary: Retrieves all connectors.
@@ -270,10 +254,6 @@ paths:
                   $ref: '#/components/examples/get_connectors_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -337,10 +317,6 @@ paths:
                   $ref: '#/components/examples/get_connector_types_generativeai_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector:
     post:
       summary: Creates a connector.
@@ -385,10 +361,6 @@ paths:
                   $ref: '#/components/examples/create_xmatters_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector/{connectorId}:
     get:
       summary: Retrieves a connector by ID.
@@ -414,8 +386,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a connector.
       operationId: deleteConnectorWithSpaceId
@@ -434,8 +404,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: createConnectorIdWithSpaceId
@@ -474,8 +442,6 @@ paths:
                   $ref: '#/components/examples/create_index_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: updateConnectorWithSpaceId
@@ -509,10 +475,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connectors:
     get:
       summary: Retrieves all connectors.
@@ -537,10 +499,6 @@ paths:
                   $ref: '#/components/examples/get_connectors_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -604,10 +562,6 @@ paths:
                   $ref: '#/components/examples/get_connector_types_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector/{connectorId}/_execute:
     post:
       summary: Runs a connector.
@@ -679,10 +633,6 @@ paths:
                   $ref: '#/components/examples/run_swimlane_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/action/{actionId}:
     delete:
       summary: Deletes a connector.
@@ -701,8 +651,6 @@ paths:
           description: Indicates a successful call.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves a connector by ID.
       operationId: legacyGetConnector
@@ -718,8 +666,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: legacyUpdateConnector
@@ -754,10 +700,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions:
     get:
       summary: Retrieves all connectors.
@@ -779,8 +721,6 @@ paths:
                   $ref: '#/components/schemas/action_response_properties'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: legacyCreateConnector
@@ -817,10 +757,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/list_action_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -864,10 +800,6 @@ paths:
                       description: The name of the connector type.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/action/{actionId}/_execute:
     post:
       summary: Runs a connector.
@@ -918,10 +850,6 @@ paths:
                     description: The status of the action.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:

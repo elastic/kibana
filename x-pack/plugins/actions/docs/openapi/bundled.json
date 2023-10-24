@@ -14,8 +14,12 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601",
-      "description": "local"
+      "url": "https://{kibanaUrl}",
+      "variables": {
+        "kibanaUrl": {
+          "default": "localhost:5601"
+        }
+      }
     }
   ],
   "security": [
@@ -97,18 +101,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/actions/connector/{connectorId}": {
       "get": {
@@ -144,12 +138,7 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes a connector.",
@@ -175,12 +164,7 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Creates a connector.",
@@ -237,12 +221,7 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for a connector.",
@@ -293,18 +272,8 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/actions/connector/{connectorId}/_execute": {
       "post": {
@@ -414,18 +383,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/actions/connectors": {
       "get": {
@@ -456,18 +415,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/actions/connector_types": {
       "get": {
@@ -556,18 +505,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/connector": {
       "post": {
@@ -637,18 +576,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/connector/{connectorId}": {
       "get": {
@@ -688,12 +617,7 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes a connector.",
@@ -723,12 +647,7 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Creates a connector.",
@@ -789,12 +708,7 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for a connector.",
@@ -849,18 +763,8 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/connectors": {
       "get": {
@@ -897,18 +801,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/connector_types": {
       "get": {
@@ -997,18 +891,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/connector/{connectorId}/_execute": {
       "post": {
@@ -1121,18 +1005,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/action/{actionId}": {
       "delete": {
@@ -1161,12 +1035,7 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Retrieves a connector by ID.",
@@ -1191,12 +1060,7 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for a connector.",
@@ -1250,18 +1114,8 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions": {
       "get": {
@@ -1294,12 +1148,7 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Creates a connector.",
@@ -1353,18 +1202,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/list_action_types": {
       "get": {
@@ -1426,18 +1265,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/action/{actionId}/_execute": {
       "post": {
@@ -1519,18 +1348,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     }
   },
   "components": {

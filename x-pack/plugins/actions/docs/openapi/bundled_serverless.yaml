@@ -9,8 +9,10 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: https://{kibanaUrl}
+    variables:
+      kibanaUrl:
+        default: localhost:5601
 security:
   - apiKeyAuth: []
 tags:
@@ -58,10 +60,6 @@ paths:
                   $ref: '#/components/examples/create_xmatters_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector/{connectorId}:
     get:
       summary: Retrieves a connector by ID.
@@ -84,8 +82,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a connector.
       operationId: deleteConnector
@@ -101,8 +97,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: createConnectorId
@@ -139,8 +133,6 @@ paths:
                   $ref: '#/components/examples/create_index_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: updateConnector
@@ -171,10 +163,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connectors:
     get:
       summary: Retrieves all connectors.
@@ -195,10 +183,6 @@ paths:
                   $ref: '#/components/examples/get_connectors_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -262,10 +246,6 @@ paths:
                   $ref: '#/components/examples/get_connector_types_generativeai_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     apiKeyAuth:

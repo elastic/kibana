@@ -69,7 +69,3 @@ post:
               $ref: '../components/examples/run_swimlane_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601
