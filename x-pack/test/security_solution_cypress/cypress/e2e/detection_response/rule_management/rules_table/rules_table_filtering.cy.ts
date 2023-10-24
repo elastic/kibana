@@ -39,7 +39,6 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
   });
 
   describe('Last response filter', () => {

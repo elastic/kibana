@@ -80,7 +80,6 @@ describe('Detection rules, bulk edit of rule actions', { tags: ['@ess', '@server
     login();
     deleteAlertsAndRules();
     deleteConnectors();
-    cy.task('esArchiverResetKibana');
 
     createSlackConnector().then(({ body }) => {
       const actions: RuleActionArray = [

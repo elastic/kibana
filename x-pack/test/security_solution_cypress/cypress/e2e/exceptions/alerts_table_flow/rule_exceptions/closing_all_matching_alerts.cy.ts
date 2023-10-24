@@ -33,7 +33,6 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
 
   beforeEach(() => {
     cy.task('esArchiverUnload', 'exceptions');
-    cy.task('esArchiverResetKibana');
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
 

@@ -51,7 +51,6 @@ describe.skip(
 
     beforeEach(() => {
       cy.task('esArchiverUnload', 'endpoint');
-      cy.task('esArchiverResetKibana');
       login();
       deleteAlertsAndRules();
 

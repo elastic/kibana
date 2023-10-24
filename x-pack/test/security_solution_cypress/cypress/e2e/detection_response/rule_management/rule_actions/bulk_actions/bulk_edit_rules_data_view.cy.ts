@@ -39,7 +39,7 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteDataView, postDataView } from '../../../../../tasks/common';
 
 import {
   getEqlRule,
@@ -101,13 +101,8 @@ describe(
       enabled: false,
     });
 
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
       login();
 
       postDataView(DATA_VIEW_ID);
@@ -130,6 +125,10 @@ describe(
         TESTED_TERMS_RULE_DATA.name,
         TESTED_CUSTOM_QUERY_RULE_DATA_2.name,
       ]);
+    });
+
+    afterEach(() => {
+      deleteDataView(DATA_VIEW_ID);
     });
 
     it('Add index patterns to custom rules with configured data view: all rules are skipped', () => {
@@ -257,14 +256,9 @@ describe(
       rule_id: '2',
     });
 
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
 
       postDataView(DATA_VIEW_ID);
 
@@ -275,6 +269,10 @@ describe(
       disableAutoRefresh();
 
       expectManagementTableRules(['with dataview', 'no data view']);
+    });
+
+    afterEach(() => {
+      deleteDataView(DATA_VIEW_ID);
     });
 
     it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {
