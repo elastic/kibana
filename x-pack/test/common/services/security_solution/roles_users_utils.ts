@@ -16,7 +16,6 @@ import {
   socManagerUser,
   platformEngineerUser,
   detectionsAdminUser,
-  readerUser,
   t1AnalystRole,
   t2AnalystRole,
   t3AnalystRole,
@@ -26,7 +25,6 @@ import {
   socManagerRole,
   platformEngineerRole,
   detectionsAdminRole,
-  readerRole,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/scripts/roles_users';
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
@@ -77,8 +75,6 @@ export const createUserAndRole = async (
         platformEngineerUser,
         getService
       );
-    case ROLES.reader:
-      return postRoleAndUser(ROLES.reader, readerRole, readerUser, getService);
     default:
       return assertUnreachable(role);
   }
