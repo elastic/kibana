@@ -24,7 +24,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from './use_date_picker';
 
 export type RequestState = 'running' | 'done';
-const DEBOUNCE_TS = 1000;
+const WAIT_TS = 1000;
 
 export const useLoadingState = () => {
   const { autoRefreshTick$, autoRefreshConfig$ } = useDatePickerContext();
@@ -48,7 +48,7 @@ export const useLoadingState = () => {
         // Skip values emitted by subject$ until the first state equals 0.
         skipUntil(requestsCount$.current.pipe(first((state) => state === 0))),
         // Wait for a specified period of idle time before emitting a value.
-        debounceTime(DEBOUNCE_TS),
+        debounceTime(WAIT_TS),
         // Emit the first value where state equals 0.
         first((state) => state === 0)
       ),
@@ -73,8 +73,8 @@ export const useLoadingState = () => {
         map((status) => (status === 'done' ? -1 : 1)),
         tap((value) => {
           // Update the number of running requests
-          // http.getLoadingCount$ will count all http requests on the page
-          // here we're limiting the scope to the http requests that happen in the Asset Details context.
+          // NOTE: We could use the http.getLoadingCount$ instead, to count the number of HTTP requests.
+          // However, it would consider the whole page, and here we're limiting the scope to the http requests that happen in the Asset Details context.
           requestsCount$.current.next(requestsCount$.current.getValue() + value);
         }),
         // Concatenate with loadingCounter$ observable
@@ -83,11 +83,11 @@ export const useLoadingState = () => {
             skipUntil(isAutoRefreshEnabled$()),
             distinctUntilChanged(),
             // Small window for requests to be considered in the auto-refresh cycle
-            debounceTime(DEBOUNCE_TS),
+            debounceTime(WAIT_TS),
             tap((runningRequestsCount) => {
               if (runningRequestsCount > 0) {
                 // isAutoRefreshRequestPending$.current.next is only set to false in the autoRefreshTick$ subscription
-                // which will allow us to control when a new request can
+                // which will allow us to control when new requests can be made.
                 isAutoRefreshRequestPending$.current.next(true);
               }
             })
@@ -112,9 +112,9 @@ export const useLoadingState = () => {
         skipUntil(isAutoRefreshEnabled$()),
         concatMap(() =>
           // Wait until queries using data.search complete before processing the next tick
-          // data.search in the context of the Asset Details is used by Lens
+          // data.search in the context of the Asset Details is used by Lens.
           waitUntilNextSessionCompletes$(search.session, {
-            waitForIdle: DEBOUNCE_TS,
+            waitForIdle: WAIT_TS,
           }).pipe(tap(() => updateSearchSessionId()))
         )
       )

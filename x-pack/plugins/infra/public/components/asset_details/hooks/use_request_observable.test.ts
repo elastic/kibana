@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useRequestObservable } from './use_request_observable';
 import { type RequestState, useLoadingStateContext } from './use_loading_state';
-import { useDatePickerContext, UseDateRangeProviderProps } from './use_date_picker';
+import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('./use_loading_state');
@@ -47,7 +47,7 @@ describe('useRequestObservable', () => {
     } as unknown as ReturnType<typeof useDatePickerContext>);
   };
 
-  beforeAll(() => {
+  beforeEach(() => {
     mockDatePickerContext();
     mockUseLoadingStateContextMock();
   });
@@ -61,6 +61,8 @@ describe('useRequestObservable', () => {
 
     act(() => {
       result.current.request$.next(() => Promise.resolve());
+
+      jest.runOnlyPendingTimers();
     });
 
     await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('running'));
@@ -71,11 +73,11 @@ describe('useRequestObservable', () => {
   });
 
   it('should be able to make new requests if isAutoRefreshRequestPending is false', async () => {
-    isAutoRefreshRequestPendingMock$.next(false);
-
     const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
+      isAutoRefreshRequestPendingMock$.next(false);
+      // simulating requests
       result.current.request$.next(() => Promise.resolve());
     });
 
@@ -92,8 +94,11 @@ describe('useRequestObservable', () => {
 
     act(() => {
       isAutoRefreshRequestPendingMock$.next(false);
+      // simulating requests
       result.current.request$.next(() => Promise.resolve());
+
       isAutoRefreshRequestPendingMock$.next(true);
+      // simulating requests
       result.current.request$.next(() => Promise.resolve());
     });
 
@@ -110,6 +115,8 @@ describe('useRequestObservable', () => {
 
     act(() => {
       autoRefreshConfig$.next({ isPaused: true, interval: 5000 });
+
+      // simulating requests
       result.current.request$.next(() => Promise.resolve());
       result.current.request$.next(() => Promise.resolve());
       result.current.request$.next(() => Promise.resolve());
@@ -129,6 +136,7 @@ describe('useRequestObservable', () => {
 
     act(() => {
       autoRefreshConfig$.next({ isPaused: true, interval: 5000 });
+      // simulating requests
       result.current.request$.next(() => Promise.reject());
     });
 
