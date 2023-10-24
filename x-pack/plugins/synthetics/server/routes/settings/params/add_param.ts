@@ -18,17 +18,22 @@ import {
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
+const ParamsObjectSchema = schema.object({
+  key: schema.string(),
+  value: schema.string(),
+  description: schema.maybe(schema.string()),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
+  share_across_spaces: schema.maybe(schema.boolean()),
+});
+
 export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PARAMS,
-  validate: {
-    body: schema.object({
-      key: schema.string(),
-      value: schema.string(),
-      description: schema.maybe(schema.string()),
-      tags: schema.maybe(schema.arrayOf(schema.string())),
-      share_across_spaces: schema.maybe(schema.boolean()),
-    }),
+  validate: {},
+  validation: {
+    request: {
+      body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
+    },
   },
   writeAccess: true,
   handler: async ({
@@ -55,16 +60,14 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
           initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
         }
       );
-      return response.ok({
-        body: {
-          id,
-          description,
-          key,
-          namespaces,
-          tags,
-          value: data.value,
-        },
-      });
+      return {
+        id,
+        description,
+        key,
+        namespaces,
+        tags,
+        value: data.value,
+      };
     } catch (error) {
       if (error.output?.statusCode === 404) {
         const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
