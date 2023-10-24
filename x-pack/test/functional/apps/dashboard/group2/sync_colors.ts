@@ -57,6 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickCreateDashboardPrompt();
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchDataPanelIndexPattern('logstash-*');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
