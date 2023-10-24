@@ -7,17 +7,19 @@
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { EcsError } from '@kbn/ecs';
-import { validateAgents, validateEndpointLicense } from './validate';
+import { validateAgents, validateAlertError, validateEndpointLicense } from './validate';
 import type { LicenseService } from '../../../../../common/license/license';
 
 export const addErrorsToActionIfAny = ({
   agents,
   licenseService,
   minimumLicenseRequired = 'basic',
+  error,
 }: {
   agents: string[];
   licenseService: LicenseService;
   minimumLicenseRequired: LicenseType;
+  error?: string;
 }):
   | {
       error: {
@@ -28,7 +30,8 @@ export const addErrorsToActionIfAny = ({
   | undefined => {
   const licenseError = validateEndpointLicense(licenseService, minimumLicenseRequired);
   const agentsError = validateAgents(agents);
-  const alertActionError = licenseError || agentsError;
+  const actionError = validateAlertError(error);
+  const alertActionError = licenseError || agentsError || actionError;
 
   if (alertActionError) {
     return {

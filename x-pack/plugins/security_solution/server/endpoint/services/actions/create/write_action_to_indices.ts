@@ -71,6 +71,7 @@ export const writeActionToIndices = async ({
       agents,
       licenseService,
       minimumLicenseRequired,
+      error: payload.error,
     }),
     ...addRuleInfoToAction(payload),
   };

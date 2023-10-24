@@ -41,10 +41,20 @@ export type EndpointResponseActionAlerts = Record<
       name: string;
     };
     alert: AlertWithAgent;
-    pids?: Record<
+    foundFields?: Record<
       string,
       {
         alertIds: string[];
+        agentId: string;
+        hosts: Record<string, { name: string }>;
+        parameters: Record<string, unknown>;
+      }
+    >;
+    notFoundFields?: Record<
+      string,
+      {
+        alertIds: string[];
+        error: string;
         agentId: string;
         hosts: Record<string, { name: string }>;
         parameters: Record<string, unknown>;

@@ -23,6 +23,12 @@ export const validateAgents = (agents: string[]) => {
   }
 };
 
+export const validateAlertError = (field?: string) => {
+  if (field) {
+    return FIELD_NOT_EXIST(field);
+  }
+};
+
 export const LICENSE_TOO_LOW = i18n.translate(
   'xpack.securitySolution.responseActionsList.error.licenseTooLow',
   {
@@ -36,3 +42,9 @@ export const HOST_NOT_ENROLLED = i18n.translate(
     defaultMessage: 'The host does not have Elastic Defend integration installed',
   }
 );
+
+export const FIELD_NOT_EXIST = (field: string) =>
+  i18n.translate('xpack.securitySolution.responseActionsList.error.licenseTooLow', {
+    defaultMessage: 'The action was called with a non-existing event field name: {field}',
+    values: { field },
+  });
