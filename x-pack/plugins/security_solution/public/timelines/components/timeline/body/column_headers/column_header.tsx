@@ -42,7 +42,7 @@ const ContextMenu = styled(EuiContextMenu)`
 `;
 
 const PopoverContainer = styled.div<{ $width: number }>`
-  & .euiPopover__anchor {
+  & .euiPopover {
     padding-right: 8px;
     width: ${({ $width }) => $width}px;
   }

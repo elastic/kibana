@@ -86,7 +86,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.visit(FLEET_AGENT_POLICIES);
         cy.contains(AGENT_POLICY_NAME).click();
         cy.get('.euiTableCellContent')
-          .get('.euiPopover__anchor')
+          .get('.euiPopover')
           .get(`[aria-label="Open"]`)
           .first()
           .click();
