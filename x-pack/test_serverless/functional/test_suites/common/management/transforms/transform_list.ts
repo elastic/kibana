@@ -18,6 +18,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await security.testUser.setRoles(['transform_user']);
       await pageObjects.svlCommonPage.login();
+
+      // For this test to work, make sure there are no pre-existing transform present.
+      // For example, solutions might set up transforms automatically.
+      await transform.api.cleanTransformIndices();
     });
 
     it('renders the transform list', async () => {
