@@ -305,8 +305,8 @@ describe('Discover flyout', function () {
             <button data-test-subj="addColumn" onClick={() => actions.addColumn('message')} />
             <button data-test-subj="removeColumn" onClick={() => actions.removeColumn('message')} />
             <button
-              data-test-subj="setFilter"
-              onClick={() => actions.setFilter?.('_exists_', 'message', '+')}
+              data-test-subj="addFilter"
+              onClick={() => actions.addFilter?.('_exists_', 'message', '+')}
             />
           </>
         );
@@ -315,7 +315,7 @@ describe('Discover flyout', function () {
 
         findTestSubject(component, 'addColumn').simulate('click');
         findTestSubject(component, 'removeColumn').simulate('click');
-        findTestSubject(component, 'setFilter').simulate('click');
+        findTestSubject(component, 'addFilter').simulate('click');
 
         expect(props.onAddColumn).toHaveBeenCalled();
         expect(props.onRemoveColumn).toHaveBeenCalled();
