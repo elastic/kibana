@@ -14,8 +14,9 @@ import { execSync } from 'child_process';
 import { basename, dirname, resolve } from 'path';
 import { writeFileSync } from 'fs';
 import { MigrationInfoRecord, MigrationSnapshot } from './types';
+import { downloadFile } from './util/download_file';
 
-const SO_MIGRATIONS_SNAPSHOT_FOLDER = 'kibana-so-types-snapshots';
+const SO_MIGRATIONS_BUCKET_PREFIX = 'https://storage.googleapis.com/kibana-so-types-snapshots';
 
 interface CompareSnapshotsParameters {
   from: string;
@@ -99,25 +100,26 @@ function isFilePath(str: string) {
   return existsSync(str);
 }
 
-async function downloadToTemp(googleCloudUrl: string): Promise<string> {
+async function downloadToTemp(googleCloudUrl: string, log: ToolingLog): Promise<string> {
   const fileName = basename(googleCloudUrl);
   const filePath = resolve(os.tmpdir(), fileName);
 
   if (existsSync(filePath)) {
+    log.info('Snapshot already exists at: ' + filePath);
     return filePath;
   } else {
-    execSync(`gsutil cp ${googleCloudUrl} ${filePath}`);
+    log.info('Downloading snapshot from: ' + googleCloudUrl);
+    await downloadFile(googleCloudUrl, filePath);
+    log.info('File downloaded: ' + filePath);
     return filePath;
   }
 }
 
 async function downloadSnapshot(commitHash: string, log: ToolingLog): Promise<string> {
   const fullCommitHash = expandCommitHash(commitHash);
-  const googleCloudUrl = `gs://${SO_MIGRATIONS_SNAPSHOT_FOLDER}/${fullCommitHash}.json`;
+  const googleCloudUrl = `${SO_MIGRATIONS_BUCKET_PREFIX}/${fullCommitHash}.json`;
 
-  log.info('Downloading snapshot from: ' + googleCloudUrl);
-  const filePath = await downloadToTemp(googleCloudUrl);
-  log.info('Downloaded snapshot to: ' + filePath);
+  const filePath = await downloadToTemp(googleCloudUrl, log);
 
   return filePath;
 }
