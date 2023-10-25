@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import React, { type ComponentType } from 'react';
@@ -33,6 +34,7 @@ export interface FlyoutContentActions {
 
 export interface FlyoutContentProps {
   actions: FlyoutContentActions;
+  dataView: DataView;
   doc: DataTableRecord;
   renderDefaultContent: () => React.ReactNode;
 }

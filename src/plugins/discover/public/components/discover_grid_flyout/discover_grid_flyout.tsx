@@ -179,6 +179,7 @@ export function DiscoverGridFlyout({
   const bodyContent = flyoutCustomization?.Content ? (
     <flyoutCustomization.Content
       actions={contentActions}
+      dataView={dataView}
       doc={actualHit}
       renderDefaultContent={renderDefaultContent}
     />

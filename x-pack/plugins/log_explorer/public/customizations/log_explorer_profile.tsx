@@ -14,8 +14,9 @@ import { LogExplorerStateContainer } from '../components/log_explorer';
 import { LogExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
-const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
+const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
+const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
@@ -114,6 +115,15 @@ export const createLogExplorerProfileCustomizations =
           viewSingleDocument: { disabled: true },
           viewSurroundingDocument: { disabled: true },
         },
+      },
+      Content: (props) => {
+        const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+
+        return (
+          <KibanaContextProviderForPlugin>
+            <LazyCustomFlyoutContent {...props} />
+          </KibanaContextProviderForPlugin>
+        );
       },
     });
 
