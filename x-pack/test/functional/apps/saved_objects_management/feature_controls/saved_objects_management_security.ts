@@ -77,6 +77,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
+            'logs-*',
+            'metrics-*',
             'logstash-*',
             'A Pie',
             'A Dashboard',
