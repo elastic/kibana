@@ -109,6 +109,7 @@ exports[`Table should render conflicting type 1`] = `
 <span>
   text, long
   <span>
+     
     <EuiBadge
       color="warning"
       iconOnClick={[Function]}
