@@ -59,6 +59,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'ml:anomalyDetection',
       });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Jobs',
+      });
+      await testSubjects.click('mlCreateNewJobButton');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'AIOps',
+        'Anomaly Detection',
+        'Create job',
+      ]);
 
       // navigate to a different section
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
@@ -108,7 +117,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'observability-overview:cases',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Create New Case']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Create']);
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
 
@@ -117,7 +126,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'observability-overview:cases',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Configure Cases']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Settings']);
     });
   });
 }

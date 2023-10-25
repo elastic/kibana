@@ -223,7 +223,12 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const projectNavigation = this.projectNavigation.start({ application, navLinks, http });
+    const projectNavigation = this.projectNavigation.start({
+      application,
+      navLinks,
+      http,
+      chromeBreadcrumbs$: breadcrumbs$,
+    });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
