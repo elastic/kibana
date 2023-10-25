@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
   DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_DEFAULT_FREQUENCY,
@@ -35,9 +36,10 @@ import {
   getThresholdRuleForSignalTesting,
   getLegacyActionSO,
   getSimpleRuleWithoutRuleId,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
   getRuleSOById,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../utils';
 import {
   getActionsWithFrequencies,
@@ -51,7 +53,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
 
   describe('update_rules', () => {
     describe('update rules', () => {
@@ -915,24 +916,35 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('legacy investigation fields', () => {
-      before(async () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await createSignalsIndex(supertest, log);
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
         );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
       });
 
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
-        );
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
       });
 
       it('errors if sending legacy investigation fields type', async () => {
         const updatedRule = {
-          ...getSimpleRuleUpdate(RULE_WITH_LEGACY_INVESTIGATION_FIELD),
+          ...getSimpleRuleUpdate(ruleWithLegacyInvestigationField.params.ruleId),
           investigation_fields: ['foo'],
         };
 
@@ -950,7 +962,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('unsets legacy investigation fields when field not specified for update', async () => {
         // rule_id of a rule with legacy investigation fields set
-        const updatedRule = getSimpleRuleUpdate(RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY);
+        const updatedRule = getSimpleRuleUpdate(ruleWithLegacyInvestigationField.params.ruleId);
 
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
@@ -961,7 +973,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql(undefined);
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
@@ -978,7 +990,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('updates a rule with legacy investigation fields', async () => {
         // rule_id of a rule with legacy investigation fields set
         const updatedRule = {
-          ...getSimpleRuleUpdate(RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY),
+          ...getSimpleRuleUpdate(ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId),
           investigation_fields: {
             field_names: ['foo'],
           },
@@ -996,7 +1008,7 @@ export default ({ getService }: FtrProviderContext) => {
           field_names: ['foo'],
         });
 
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should

@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -26,9 +27,9 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getLegacyActionSO,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
-  RULE_WITH_INVESTIGATION_FIELD,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -36,7 +37,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
 
   describe('delete_rules_bulk', () => {
     describe('deprecations', () => {
@@ -451,16 +451,30 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('legacy investigation fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
       beforeEach(async () => {
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
         );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
       });
 
       afterEach(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
-        );
+        await deleteAllRules(supertest, log);
       });
 
       it('DELETE - should delete a single rule with investigation field', async () => {
@@ -470,9 +484,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send([
-            { rule_id: RULE_WITH_INVESTIGATION_FIELD },
-            { rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY },
-            { rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD },
+            { rule_id: 'rule-with-investigation-field' },
+            { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
+            { rule_id: ruleWithLegacyInvestigationField.params.ruleId },
           ])
           .expect(200);
         const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
@@ -490,9 +504,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send([
-            { rule_id: RULE_WITH_INVESTIGATION_FIELD },
-            { rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY },
-            { rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD },
+            { rule_id: 'rule-with-investigation-field' },
+            { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
+            { rule_id: ruleWithLegacyInvestigationField.params.ruleId },
           ])
           .expect(200);
         const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);

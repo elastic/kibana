@@ -80,7 +80,7 @@ import { transformFromAlertThrottle, transformToActionFrequency } from './rule_a
 import {
   convertAlertSuppressionToCamel,
   convertAlertSuppressionToSnake,
-  migrateInvestigationFields,
+  migrateLegacyInvestigationFields,
 } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
@@ -446,7 +446,7 @@ export const convertPatchAPIToInternalSchema = (
       description: nextParams.description ?? existingParams.description,
       ruleId: existingParams.ruleId,
       falsePositives: nextParams.false_positives ?? existingParams.falsePositives,
-      investigationFields: migrateInvestigationFields(
+      investigationFields: migrateLegacyInvestigationFields(
         nextParams.investigation_fields ?? existingParams.investigationFields
       ),
       from: nextParams.from ?? existingParams.from,
@@ -667,7 +667,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
     timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
-    investigation_fields: migrateInvestigationFields(params.investigationFields),
+    investigation_fields: migrateLegacyInvestigationFields(params.investigationFields),
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,

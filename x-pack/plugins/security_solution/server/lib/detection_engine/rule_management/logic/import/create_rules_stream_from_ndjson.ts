@@ -104,7 +104,7 @@ export const sortImports = (): Transform => {
   );
 };
 
-export const migrateInvestigationFields = (): Transform => {
+export const migrateLegacyInvestigationFields = (): Transform => {
   return createMapStream<RuleToImport | RulesObjectsExportResultDetails>((obj) => {
     if (obj != null && 'investigation_fields' in obj && Array.isArray(obj.investigation_fields)) {
       if (obj.investigation_fields.length) {
@@ -131,7 +131,7 @@ export const createRulesAndExceptionsStreamFromNdJson = (ruleLimit: number) => {
     createSplitStream('\n'),
     parseNdjsonStrings(),
     filterExportedCounts(),
-    migrateInvestigationFields(),
+    migrateLegacyInvestigationFields(),
     sortImports(),
     validateRulesStream(),
     createRulesLimitStream(ruleLimit),

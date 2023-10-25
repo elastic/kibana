@@ -26,7 +26,7 @@ import {
   getInvalidConnectors,
   swapActionIds,
   migrateLegacyActionsIds,
-  migrateInvestigationFields,
+  migrateLegacyInvestigationFields,
 } from './utils';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import type { PartialFilter } from '../../types';
@@ -1261,29 +1261,29 @@ describe('utils', () => {
     });
   });
 
-  describe('migrateInvestigationFields', () => {
+  describe('migrateLegacyInvestigationFields', () => {
     test('should return undefined if value not set', () => {
-      const result = migrateInvestigationFields(undefined);
+      const result = migrateLegacyInvestigationFields(undefined);
       expect(result).toEqual(undefined);
     });
 
     test('should migrate array to object', () => {
-      const result = migrateInvestigationFields(['foo']);
+      const result = migrateLegacyInvestigationFields(['foo']);
       expect(result).toEqual({ field_names: ['foo'] });
     });
 
     test('should migrate empty array to undefined', () => {
-      const result = migrateInvestigationFields([]);
+      const result = migrateLegacyInvestigationFields([]);
       expect(result).toEqual(undefined);
     });
 
     test('should migrate array with empty string to undefined', () => {
-      const result = migrateInvestigationFields(['']);
+      const result = migrateLegacyInvestigationFields(['']);
       expect(result).toEqual(undefined);
     });
 
     test('should not migrate if already intended type', () => {
-      const result = migrateInvestigationFields({ field_names: ['foo'] });
+      const result = migrateLegacyInvestigationFields({ field_names: ['foo'] });
       expect(result).toEqual({ field_names: ['foo'] });
     });
   });

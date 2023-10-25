@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '@kbn/security-solution-plugin/common/constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -23,10 +25,10 @@ import {
   createRule,
   createLegacyRuleAction,
   getLegacyActionSO,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
   getRuleSOById,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
-  RULE_WITH_INVESTIGATION_FIELD,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  getRuleSavedObjectWithLegacyInvestigationFields,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -34,7 +36,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
 
   describe('patch_rules_bulk', () => {
     describe('deprecations', () => {
@@ -506,19 +507,25 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('legacy investigation fields', () => {
-      before(async () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await createSignalsIndex(supertest, log);
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
         );
       });
 
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
-        );
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
       });
 
       it('errors if trying to patch investigation fields using legacy format', async () => {
@@ -528,7 +535,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('elastic-api-version', '2023-10-31')
           .send([
             {
-              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+              rule_id: ruleWithLegacyInvestigationField.params.ruleId,
               name: 'some other name',
               investigation_fields: ['foobar'],
             },
@@ -546,7 +553,9 @@ export default ({ getService }: FtrProviderContext) => {
           .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .send([{ rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD, name: 'some other name' }])
+          .send([
+            { rule_id: ruleWithLegacyInvestigationField.params.ruleId, name: 'some other name' },
+          ])
           .expect(200);
 
         const bodyToCompareLegacyField = removeServerGeneratedProperties(body[0]);
@@ -554,7 +563,7 @@ export default ({ getService }: FtrProviderContext) => {
           field_names: ['client.address', 'agent.name'],
         });
         expect(bodyToCompareLegacyField.name).to.eql('some other name');
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
@@ -578,7 +587,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('elastic-api-version', '2023-10-31')
           .send([
             {
-              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+              rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId,
               name: 'some other name 2',
             },
           ])
@@ -587,7 +596,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompareLegacyFieldEmptyArray = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompareLegacyFieldEmptyArray.investigation_fields).to.eql(undefined);
         expect(bodyToCompareLegacyFieldEmptyArray.name).to.eql('some other name 2');
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
@@ -602,6 +611,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch a rule with an investigation field', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          investigation_fields: {
+            field_names: ['host.name'],
+          },
+        });
+
         // patch a simple rule's name
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
@@ -609,7 +625,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('elastic-api-version', '2023-10-31')
           .send([
             {
-              rule_id: RULE_WITH_INVESTIGATION_FIELD,
+              rule_id: 'rule-1',
               name: 'some other name 3',
             },
           ])
@@ -620,7 +636,7 @@ export default ({ getService }: FtrProviderContext) => {
           field_names: ['host.name'],
         });
         expect(bodyToCompare.name).to.eql('some other name 3');
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should

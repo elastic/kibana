@@ -116,17 +116,7 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   };
 };
 
-// Testing edge case, where if hook does not find the rule and turns to the alert document,
-// the alert document could still have an unmigrated, legacy version of investigation_fields.
-// We are not looking to do any migrations to these legacy fields in the alert document, so need
-// to transform it on read in this case.
-export const migrateRuleLegacyInvestigationFields = (rule: Rule): Rule => {
-  if (!rule) return rule;
-
-  return { ...rule, investigation_fields: migrateInvestigationFields(rule.investigation_fields) };
-};
-
-export const migrateInvestigationFields = (
+export const migrateLegacyInvestigationFields = (
   investigationFields: InvestigationFieldsCombined | undefined
 ): InvestigationFields | undefined => {
   if (investigationFields && Array.isArray(investigationFields)) {
@@ -134,6 +124,19 @@ export const migrateInvestigationFields = (
   }
 
   return investigationFields;
+};
+
+// Testing edge case, where if hook does not find the rule and turns to the alert document,
+// the alert document could still have an unmigrated, legacy version of investigation_fields.
+// We are not looking to do any migrations to these legacy fields in the alert document, so need
+// to transform it on read in this case.
+export const migrateRuleWithLegacyInvestigationFields = (rule: Rule): Rule => {
+  if (!rule) return rule;
+
+  return {
+    ...rule,
+    investigation_fields: migrateLegacyInvestigationFields(rule.investigation_fields),
+  };
 };
 
 /**
@@ -160,8 +163,8 @@ export const transformRuleFromAlertHit = (
       ...expandedRuleWithParams?.kibana?.alert?.rule?.parameters,
     };
     delete expandedRule.parameters;
-    return migrateRuleLegacyInvestigationFields(expandedRule as Rule);
+    return migrateRuleWithLegacyInvestigationFields(expandedRule as Rule);
   }
 
-  return migrateRuleLegacyInvestigationFields(rule);
+  return migrateRuleWithLegacyInvestigationFields(rule);
 };

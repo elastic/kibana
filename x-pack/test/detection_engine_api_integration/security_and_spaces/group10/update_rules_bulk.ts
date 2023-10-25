@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_BULK_UPDATE,
@@ -32,9 +33,9 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleWithoutRuleId,
   getSimpleRuleOutputWithoutRuleId,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
-  RULE_WITH_INVESTIGATION_FIELD,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../utils';
 import { removeUUIDFromActions } from '../../utils/remove_uuid_from_actions';
 import {
@@ -48,7 +49,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
 
   describe('update_rules_bulk', () => {
     describe('deprecations', () => {
@@ -809,19 +809,30 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('legacy investigation fields', () => {
-      before(async () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await createSignalsIndex(supertest, log);
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
         );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
       });
 
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
-        );
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
       });
 
       it('errors if trying to update investigation fields using legacy format', async () => {
@@ -834,7 +845,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               ...getSimpleRule(),
               name: 'New name',
-              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+              rule_id: ruleWithLegacyInvestigationField.params.ruleId,
               investigation_fields: ['client.foo'],
             },
           ])
@@ -855,12 +866,12 @@ export default ({ getService }: FtrProviderContext) => {
             {
               ...getSimpleRule(),
               name: 'New name - used to have legacy investigation fields',
-              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+              rule_id: ruleWithLegacyInvestigationField.params.ruleId,
             },
             {
               ...getSimpleRule(),
               name: 'New name - used to have legacy investigation fields, empty array',
-              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+              rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId,
               investigation_fields: {
                 field_names: ['foo'],
               },
@@ -868,7 +879,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               ...getSimpleRule(),
               name: 'New name - never had legacy investigation fields',
-              rule_id: RULE_WITH_INVESTIGATION_FIELD,
+              rule_id: 'rule-with-investigation-field',
               investigation_fields: {
                 field_names: ['bar'],
               },

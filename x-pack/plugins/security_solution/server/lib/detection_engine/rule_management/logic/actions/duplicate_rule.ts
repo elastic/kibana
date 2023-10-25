@@ -12,7 +12,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
-import { migrateInvestigationFields } from '../../utils/utils';
+import { migrateLegacyInvestigationFields } from '../../utils/utils';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -52,7 +52,7 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
       exceptionsList: [],
       // Don't want to create any more instances of rules with legacy
       // investigation field, so migrating data here.
-      investigationFields: migrateInvestigationFields(rule.params.investigationFields),
+      investigationFields: migrateLegacyInvestigationFields(rule.params.investigationFields),
     },
     schedule: rule.schedule,
     enabled: false,

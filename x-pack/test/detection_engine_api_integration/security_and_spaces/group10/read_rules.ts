@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
   DETECTION_ENGINE_RULES_URL,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
@@ -24,10 +25,10 @@ import {
   getWebHookAction,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
-  RULE_WITH_INVESTIGATION_FIELD,
   getRuleSOById,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -35,7 +36,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
 
   describe('read_rules', () => {
     describe('reading rules', () => {
@@ -274,24 +274,37 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('investigation_fields', () => {
-      before(async () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await createSignalsIndex(supertest, log);
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
         );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
       });
 
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
-        );
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
       });
 
       it('should be able to read a rule with a legacy investigation field', async () => {
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${RULE_WITH_LEGACY_INVESTIGATION_FIELD}`)
+          .get(
+            `${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleWithLegacyInvestigationField.params.ruleId}`
+          )
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send()
@@ -301,7 +314,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare.investigation_fields).to.eql({
           field_names: ['client.address', 'agent.name'],
         });
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
@@ -318,7 +331,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to read a rule with a legacy investigation field - empty array', async () => {
         const { body } = await supertest
           .get(
-            `${DETECTION_ENGINE_RULES_URL}?rule_id=${RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY}`
+            `${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId}`
           )
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
@@ -327,7 +340,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql(undefined);
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
@@ -343,7 +356,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('does not migrate investigation fields when intended object type', async () => {
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${RULE_WITH_INVESTIGATION_FIELD}`)
+          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-with-investigation-field`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send()
@@ -351,7 +364,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql({ field_names: ['host.name'] });
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should

@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CreateExceptionListSchema,
@@ -15,7 +16,6 @@ import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 import {
   getRule,
   createRule,
@@ -25,6 +25,8 @@ import {
   createExceptionList,
   deleteAllAlerts,
   getRuleSOById,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
 } from '../../../utils';
 import {
   deleteAllExceptions,
@@ -51,14 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const config = getService('config');
-  const esArchiver = getService('esArchiver');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
-  // TODO: add a new service
-  const isServerless = config.get('serverless');
-  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
-  const pathToLegacyInvestigationFieldsRules = dataPathBuilder.getPath(
-    'security_solution/legacy_investigation_fields'
-  );
 
   describe('@serverless @ess create_rule_exception_route', () => {
     before(async () => {
@@ -260,21 +255,23 @@ export default ({ getService }: FtrProviderContext) => {
     // TODO: When available this tag should be @skipInServerless
     // This use case is not relevant to serverless.
     describe('@brokenInServerless legacy investigation_fields', () => {
-      before(async () => {
-        await esArchiver.load(pathToLegacyInvestigationFieldsRules);
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
       });
 
-      after(async () => {
-        await esArchiver.unload(pathToLegacyInvestigationFieldsRules);
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
       });
 
       it('creates and associates a `rule_default` exception list to a rule with a legacy investigation_field', async () => {
-        const RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID = '9095ee90-b075-11ec-bb3f-1f063f8e1234';
-
         await supertest
-          .post(
-            `${DETECTION_ENGINE_RULES_URL}/${RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID}/exceptions`
-          )
+          .post(`${DETECTION_ENGINE_RULES_URL}/${ruleWithLegacyInvestigationField.id}/exceptions`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -282,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        /*
+        /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change will
@@ -293,7 +290,7 @@ export default ({ getService }: FtrProviderContext) => {
           hits: {
             hits: [{ _source: ruleSO }],
           },
-        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID);
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
         expect(
           ruleSO?.alert.params.exceptionsList.some((list) => list.type === 'rule_default')
         ).to.eql(true);

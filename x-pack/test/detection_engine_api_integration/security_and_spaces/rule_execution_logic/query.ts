@@ -20,6 +20,8 @@ import {
   ALERT_LAST_DETECTED,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -56,9 +58,9 @@ import {
   getSimpleRule,
   previewRule,
   setSignalStatus,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
   getRuleSOById,
-  RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataGeneratorFactory } from '../../utils/data_generator';
@@ -2275,16 +2277,17 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('legacy investigation_fields', () => {
-      before(async () => {
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
         );
       });
 
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
-        );
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate signals with name_override field', async () => {
@@ -2302,12 +2305,14 @@ export default ({ getService }: FtrProviderContext) => {
           hits: {
             hits: [{ _source: ruleSO }],
           },
-        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID);
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
         expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
 
         // fetch rule for format needed to pass into
         const { body: ruleBody } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${RULE_WITH_LEGACY_INVESTIGATION_FIELD}`)
+          .get(
+            `${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleWithLegacyInvestigationField.params.ruleId}`
+          )
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .expect(200);
