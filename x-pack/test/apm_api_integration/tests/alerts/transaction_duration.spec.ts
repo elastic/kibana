@@ -26,7 +26,7 @@ import {
 } from './helpers/alerting_api_helper';
 import { cleanupAllState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
-import { waitForRuleStatus } from './helpers/wait_for_rule_status';
+import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -122,11 +122,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForRuleStatus({
-          ruleId,
-          expectedStatus: 'active',
-          supertest,
-        });
+        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
         expect(ruleStatus).to.be('active');
       });
 
@@ -243,11 +239,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForRuleStatus({
-          ruleId,
-          expectedStatus: 'active',
-          supertest,
-        });
+        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
         expect(ruleStatus).to.be('active');
       });
 

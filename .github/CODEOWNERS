@@ -226,6 +226,8 @@ test/plugin_functional/plugins/core_plugin_b @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_chromeless @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_deep_links @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_deprecations @elastic/kibana-core
+test/plugin_functional/plugins/core_dynamic_resolving_a @elastic/kibana-core
+test/plugin_functional/plugins/core_dynamic_resolving_b @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_execution_context @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
 test/node_roles_functional/plugins/core_plugin_initializer_context @elastic/kibana-core
@@ -235,6 +237,8 @@ packages/core/plugins/core-plugins-base-server-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
+packages/core/plugins/core-plugins-contracts-browser @elastic/kibana-core
+packages/core/plugins/core-plugins-contracts-server @elastic/kibana-core
 packages/core/plugins/core-plugins-server @elastic/kibana-core
 packages/core/plugins/core-plugins-server-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-server-mocks @elastic/kibana-core
@@ -672,7 +676,6 @@ examples/share_examples @elastic/appex-sharedux
 src/plugins/share @elastic/appex-sharedux
 packages/kbn-shared-svg @elastic/apm-ui
 packages/shared-ux/avatar/solution @elastic/appex-sharedux
-packages/shared-ux/avatar/user_profile/impl @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/impl @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/mocks @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/types @elastic/appex-sharedux
@@ -1453,6 +1456,10 @@ packages/react @elastic/appex-sharedux
 /x-pack/plugins/ml/common/openapi             @elastic/platform-docs
 /packages/core/saved-objects/docs/openapi     @elastic/platform-docs
 /plugins/data_views/docs/openapi              @elastic/platform-docs
+
+# Plugin manifests
+/src/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

@@ -39,7 +39,7 @@ export async function createApmRule<T extends ApmRuleType>({
         params,
         consumer: 'apm',
         schedule: {
-          interval: '1m',
+          interval: '5s',
         },
         tags: ['apm'],
         name,
@@ -154,9 +154,7 @@ export async function deleteApmRules(supertest: SuperTest<Test>) {
   );
 
   return Promise.all(
-    res.body.data.map(async (rule: any) => {
-      await supertest.delete(`/api/alerting/rule/${rule.id}`).set('kbn-xsrf', 'foo');
-    })
+    res.body.data.map((rule: any) => deleteRuleById({ supertest, ruleId: rule.id }))
   );
 }
 

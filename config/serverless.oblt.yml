@@ -3,7 +3,7 @@
 ## Disable plugins
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
-xpack.infra.enabled: false
+xpack.infra.enabled: true
 xpack.securitySolution.enabled: false
 xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
@@ -61,8 +61,8 @@ xpack.fleet.packages:
 ## Disable APM UI components and API calls
 xpack.apm.featureFlags.agentConfigurationAvailable: false
 xpack.apm.featureFlags.configurableIndicesAvailable: false
-xpack.apm.featureFlags.infrastructureTabAvailable: false
-xpack.apm.featureFlags.infraUiAvailable: false
+xpack.apm.featureFlags.infrastructureTabAvailable: true
+xpack.apm.featureFlags.infraUiAvailable: true
 xpack.apm.featureFlags.migrationToFleetAvailable: false
 xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false

@@ -113,7 +113,6 @@ export function AlertsOverview() {
               featureIds={[AlertConsumers.APM, AlertConsumers.OBSERVABILITY]}
               query={esQuery}
               showAlertStatusWithFlapping
-              showExpandToDetails={false}
             />
           )}
         </EuiFlexItem>

@@ -3171,6 +3171,21 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.EuiThemeSize",
+        "type": "Type",
+        "tags": [],
+        "label": "EuiThemeSize",
+        "description": [],
+        "signature": [
+          "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | \"xxl\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.NodeDefinitionWithChildren",
         "type": "Type",
         "tags": [],
