@@ -52,6 +52,7 @@ export class Plugin implements InfraClientPluginClass {
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
   private kibanaVersion: string;
+  private isServerlessEnv: boolean;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
@@ -63,6 +64,7 @@ export class Plugin implements InfraClientPluginClass {
       : undefined;
     this.telemetry = new TelemetryService();
     this.kibanaVersion = context.env.packageInfo.version;
+    this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -304,9 +306,11 @@ export class Plugin implements InfraClientPluginClass {
         const [coreStart, plugins, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/metrics_app');
 
+        const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
+        const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
         return renderApp(
           coreStart,
-          { ...plugins, kibanaVersion: this.kibanaVersion },
+          { ...plugins, kibanaVersion: this.kibanaVersion, isCloudEnv, isServerlessEnv },
           pluginStart,
           this.config,
           params
