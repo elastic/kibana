@@ -24,7 +24,7 @@ import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { RecoveredActionGroup, RuleActionTypes, RuleSystemAction } from '../../../../../common';
+import { RecoveredActionGroup, RuleActionTypes } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
