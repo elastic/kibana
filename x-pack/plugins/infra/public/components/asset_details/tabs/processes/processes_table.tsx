@@ -245,18 +245,7 @@ interface TableBodyProps {
 
 const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
   <>
-    {[
-      {
-        command: 'test',
-        cpu: null,
-        memory: null,
-        startTime: 1,
-        state: 'Running',
-        pid: 1,
-        user: 'test',
-      },
-      ...items,
-    ].map((item, i) => {
+    {items.map((item, i) => {
       const cells = columns.map((column) => (
         <EuiTableRowCell
           key={`${String(column.field)}-${i}`}
