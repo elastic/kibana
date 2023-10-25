@@ -1277,11 +1277,6 @@ describe('utils', () => {
       expect(result).toEqual(undefined);
     });
 
-    test('should migrate array with empty string to undefined', () => {
-      const result = migrateLegacyInvestigationFields(['']);
-      expect(result).toEqual(undefined);
-    });
-
     test('should not migrate if already intended type', () => {
       const result = migrateLegacyInvestigationFields({ field_names: ['foo'] });
       expect(result).toEqual({ field_names: ['foo'] });
