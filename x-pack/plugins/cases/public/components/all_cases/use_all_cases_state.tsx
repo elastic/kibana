@@ -124,8 +124,6 @@ const getFilterOptions = (
     localStorageFilterOptions?.status ??
     DEFAULT_FILTER_OPTIONS.status;
 
-  console.log({ getFilterOptionsDEFAULT: DEFAULT_FILTER_OPTIONS.status });
-
   return {
     ...filterOptions,
     ...params,

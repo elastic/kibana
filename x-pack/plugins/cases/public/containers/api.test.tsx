@@ -248,8 +248,8 @@ describe('Cases API', () => {
           tags: ['coke', 'pepsi'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          status: CaseStatuses.open,
-          severity: CaseSeverity.HIGH,
+          status: [CaseStatuses.open],
+          severity: [CaseSeverity.HIGH],
           owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
@@ -271,7 +271,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          severity: CaseSeverity.HIGH,
+          severity: [CaseSeverity.HIGH],
         },
         signal: abortCtrl.signal,
       });
@@ -312,7 +312,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          status: CaseStatuses.open,
+          status: [CaseStatuses.open],
         },
         signal: abortCtrl.signal,
       });

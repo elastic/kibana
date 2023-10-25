@@ -274,16 +274,16 @@ export const getCases = async ({
   signal,
 }: FetchCasesProps): Promise<CasesFindResponseUI> => {
   const query = {
-    // ...removeOptionFromFilter({
-    //   filterKey: 'status',
-    //   filterOptions: filterOptions.status,
-    //   optionToBeRemoved: StatusAll,
-    // }),
-    // ...removeOptionFromFilter({
-    //   filterKey: 'severity',
-    //   filterOptions: filterOptions.severity,
-    //   optionToBeRemoved: SeverityAll,
-    // }),
+    ...removeOptionFromFilter({
+      filterKey: 'status',
+      filterOptions: filterOptions.status,
+      optionToBeRemoved: StatusAll,
+    }),
+    ...removeOptionFromFilter({
+      filterKey: 'severity',
+      filterOptions: filterOptions.severity,
+      optionToBeRemoved: SeverityAll,
+    }),
     ...constructAssigneesFilter(filterOptions.assignees),
     ...constructReportersFilter(filterOptions.reporters),
     ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),

@@ -684,7 +684,7 @@ describe('AllCasesListGeneric', () => {
   });
 
   describe('Solutions', () => {
-    it.only('should set the owner to all available solutions when deselecting all solutions', async () => {
+    it('should set the owner to all available solutions when deselecting all solutions', async () => {
       const { getByTestId } = render(
         <TestProviders owner={[]}>
           <AllCasesList />
@@ -706,55 +706,55 @@ describe('AllCasesListGeneric', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
-      // userEvent.click(getByTestId('solution-filter-popover-button'));
+      userEvent.click(getByTestId('solution-filter-popover-button'));
 
-      // await waitForEuiPopoverOpen();
+      await waitForEuiPopoverOpen();
 
-      // userEvent.click(
-      //   getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
-      //   undefined,
-      //   {
-      //     skipPointerEventsCheck: true,
-      //   }
-      // );
+      userEvent.click(
+        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
 
-      // expect(useGetCasesMock).toBeCalledWith({
-      //   filterOptions: {
-      //     search: '',
-      //     searchFields: [],
-      //     severity: [],
-      //     reporters: [],
-      //     status: [],
-      //     tags: [],
-      //     assignees: [],
-      //     owner: ['securitySolution'],
-      //     category: [],
-      //   },
-      //   queryParams: DEFAULT_QUERY_PARAMS,
-      // });
+      expect(useGetCasesMock).toBeCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: [],
+          reporters: [],
+          status: [],
+          tags: [],
+          assignees: [],
+          owner: ['securitySolution'],
+          category: [],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+      });
 
-      // userEvent.click(
-      //   getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
-      //   undefined,
-      //   {
-      //     skipPointerEventsCheck: true,
-      //   }
-      // );
+      userEvent.click(
+        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
 
-      // expect(useGetCasesMock).toHaveBeenLastCalledWith({
-      //   filterOptions: {
-      //     search: '',
-      //     searchFields: [],
-      //     severity: ['all'],
-      //     reporters: [],
-      //     status: ['all'],
-      //     tags: [],
-      //     assignees: [],
-      //     owner: ['securitySolution', 'observability'],
-      //     category: [],
-      //   },
-      //   queryParams: DEFAULT_QUERY_PARAMS,
-      // });
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: ['all'],
+          reporters: [],
+          status: ['all'],
+          tags: [],
+          assignees: [],
+          owner: ['securitySolution', 'observability'],
+          category: [],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+      });
     });
 
     it('should hide the solutions filter if the owner is provided', async () => {
