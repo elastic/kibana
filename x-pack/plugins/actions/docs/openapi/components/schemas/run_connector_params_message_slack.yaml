@@ -1,5 +1,7 @@
 title: Slack connector parameters
-description: Test an action that sends a message when the connector uses a Slack webhook URL.
+description: >
+  Test an action that sends a message to Slack.
+  It is applicable only when the connector type is `.slack`.
 type: object
 required:
   - message

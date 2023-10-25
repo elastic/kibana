@@ -1,6 +1,8 @@
 title: The validChannelId subaction
 type: object
-description: The `validChannelId` subaction for Slack connectors.
+description: >
+  Validates a Slack channel identifier.
+  It is applicable only when the connector type is `.slack_api`.
 required:
   - subAction
   - subActionParams

@@ -26,6 +26,7 @@ properties:
           - $ref: 'run_connector_subaction_issue.yaml'
           - $ref: 'run_connector_subaction_issues.yaml'
           - $ref: 'run_connector_subaction_issuetypes.yaml'
+          - $ref: 'run_connector_subaction_postmessage.yaml'
           - $ref: 'run_connector_subaction_pushtoservice.yaml'
           - $ref: 'run_connector_subaction_validchannelid.yaml'
         discriminator:
