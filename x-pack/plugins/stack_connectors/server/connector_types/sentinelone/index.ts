@@ -6,6 +6,7 @@
  */
 
 import {
+  ExecutorParams,
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -22,7 +23,8 @@ import { renderParameterTemplates } from './render';
 
 export const getSentinelOneConnectorType = (): SubActionConnectorType<
   SentinelOneConfig,
-  SentinelOneSecrets
+  SentinelOneSecrets,
+  ExecutorParams
 > => ({
   id: SENTINELONE_CONNECTOR_ID,
   name: SENTINELONE_TITLE,
@@ -35,4 +37,19 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
+  getKibanaPrivileges: (options) => {
+    const subAction = options?.params?.subAction;
+
+    if (!subAction) {
+      return [];
+    }
+
+    switch (subAction) {
+      case 'isolateAgent':
+      case 'releaseAgent':
+        return ['api:securitySolution-writeHostIsolationRelease'];
+      default:
+        return ['denied-access'];
+    }
+  },
 });

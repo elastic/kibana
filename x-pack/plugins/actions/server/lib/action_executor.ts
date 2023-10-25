@@ -581,12 +581,21 @@ const ensureAuthorizedToExecute = async ({
   authorization,
 }: EnsureAuthorizedToExecuteOpts) => {
   try {
-    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
-      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
-        actionTypeId,
-        params
-      );
+    const additionalPrivileges: string[] = [];
+    const actionType = actionTypeRegistry.get(actionTypeId);
 
+    if (actionType.getKibanaPrivileges) {
+      additionalPrivileges.push(...actionType.getKibanaPrivileges(params));
+    }
+
+    // FIXME:PT If the above method gets exposed to all Connectors, then this code below can be removed
+    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
+      additionalPrivileges.push(
+        ...actionTypeRegistry.getSystemActionKibanaPrivileges(actionTypeId, params)
+      );
+    }
+
+    if (additionalPrivileges.length) {
       await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
     }
   } catch (error) {

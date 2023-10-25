@@ -165,14 +165,15 @@ export class ActionTypeRegistry {
       );
     }
 
-    if (!actionType.isSystemActionType && actionType.getKibanaPrivileges) {
-      throw new Error(
-        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
-          defaultMessage:
-            'Kibana privilege authorization is only supported for system action types',
-        })
-      );
-    }
+    // TODO:PT cleanup --- Let's allow `getKibanaPrivileges()` for all
+    // if (!actionType.isSystemActionType && actionType.getKibanaPrivileges) {
+    //   throw new Error(
+    //     i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
+    //       defaultMessage:
+    //         'Kibana privilege authorization is only supported for system action types',
+    //     })
+    //   );
+    // }
 
     const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
       actionTypeId: actionType.id,

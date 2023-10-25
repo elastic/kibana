@@ -69,7 +69,11 @@ export type Validators<Config, Secrets> = Array<
   ConfigValidator<Config> | SecretsValidator<Secrets>
 >;
 
-export interface SubActionConnectorType<Config, Secrets> {
+export interface SubActionConnectorType<
+  Config,
+  Secrets,
+  Params extends ActionTypeParams = ActionTypeParams
+> {
   id: string;
   name: string;
   minimumLicenseRequired: LicenseType;
@@ -81,6 +85,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
+  getKibanaPrivileges?: (args?: { params?: Params }) => string[];
 }
 
 export interface ExecutorParams extends ActionTypeParams {
