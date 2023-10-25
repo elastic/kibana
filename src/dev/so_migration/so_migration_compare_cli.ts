@@ -42,7 +42,7 @@ run(
       help: `
         --from            The source snapshot to compare from. Can be a full hash, filename or url.
         --to              The target snapshot to compare to. Can be a full hash, filename or url.
-        --outputPath      The path to write the comparison report to. Defaults to stdout.
+        --outputPath      The path to write the comparison report to. If omitted, raw JSON will be output to stdout.
       `,
     },
   }

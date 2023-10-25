@@ -49,7 +49,11 @@ async function compareSnapshots({
     log.info(`Output written to: ${outputPath}`);
   } else {
     log.info(`Snapshots compared: ${from} <=> ${to}`);
-    log.info(result);
+    log.info(
+      `Emitting result to STDOUT... (Enable '--silent' or '--quiet' to disable non-parseable output)`
+    );
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(result, null, 2));
   }
 
   return result;
@@ -99,9 +103,12 @@ async function downloadToTemp(googleCloudUrl: string): Promise<string> {
   const fileName = basename(googleCloudUrl);
   const filePath = resolve(os.tmpdir(), fileName);
 
-  execSync(`gsutil cp ${googleCloudUrl} ${filePath}`);
-
-  return filePath;
+  if (existsSync(filePath)) {
+    return filePath;
+  } else {
+    execSync(`gsutil cp ${googleCloudUrl} ${filePath}`);
+    return filePath;
+  }
 }
 
 async function downloadSnapshot(commitHash: string, log: ToolingLog): Promise<string> {
