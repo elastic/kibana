@@ -14,8 +14,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601",
-      "description": "local"
+      "url": "/"
     }
   ],
   "security": [
@@ -112,18 +111,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_bulk_create": {
       "post": {
@@ -180,18 +169,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_bulk_delete": {
       "post": {
@@ -249,18 +228,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_bulk_get": {
       "post": {
@@ -309,18 +278,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_bulk_resolve": {
       "post": {
@@ -370,18 +329,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_bulk_update": {
       "post": {
@@ -430,18 +379,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_export": {
       "post": {
@@ -530,18 +469,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_find": {
       "get": {
@@ -708,18 +637,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_import": {
       "post": {
@@ -831,18 +750,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/_resolve_import_errors": {
       "post": {
@@ -1001,18 +910,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/saved_objects/{type}": {
       "post": {
@@ -1084,12 +983,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/api/saved_objects/{type}/{id}": {
       "get": {
@@ -1128,12 +1022,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Create Kibana saved objects.",
@@ -1268,12 +1157,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/api/saved_objects/resolve/{type}/{id}": {
       "get": {
@@ -1313,18 +1197,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     }
   },
   "components": {

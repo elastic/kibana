@@ -9,8 +9,7 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: /
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -83,10 +82,6 @@ paths:
             application/json:
               schema:
                 type: object
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_bulk_create:
     post:
       summary: Create multiple Kibana saved objects.
@@ -122,10 +117,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_bulk_delete:
     post:
       summary: Remove multiple Kibana saved objects.
@@ -165,10 +156,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_bulk_get:
     post:
       summary: Retrieve multiple Kibana saved objects by identifier.
@@ -199,10 +186,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_bulk_resolve:
     post:
       summary: Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist.
@@ -236,10 +219,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_bulk_update:
     post:
       summary: Update the attributes for multiple Kibana saved objects.
@@ -271,10 +250,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_export:
     post:
       summary: Retrieve sets of saved objects that you want to import into Kibana.
@@ -336,10 +311,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_find:
     get:
       summary: Retrieve a paginated set of Kibana saved objects.
@@ -441,10 +412,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_import:
     post:
       summary: Create sets of Kibana saved objects from a file created by the export API.
@@ -531,10 +498,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/_resolve_import_errors:
     post:
       summary: Resolve errors from the Import objects API.
@@ -658,10 +621,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/{type}:
     post:
       summary: Create Kibana saved objects with randomly generated identifiers.
@@ -705,8 +664,6 @@ paths:
             application/json:
               schema:
                 type: object
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/{type}/{id}:
     get:
       summary: Retrieve a single Kibana saved object by identifier.
@@ -730,8 +687,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Create Kibana saved objects.
       operationId: createSavedObjectId
@@ -810,8 +765,6 @@ paths:
             application/json:
               schema:
                 type: object
-    servers:
-      - url: https://localhost:5601
   /api/saved_objects/resolve/{type}/{id}:
     get:
       summary: Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists.
@@ -837,10 +790,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
