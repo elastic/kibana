@@ -39,6 +39,7 @@ export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
         },
       })}
       actions={<ViewDetailsPopover warnings={props.warnings} />}
+      data-test-subj="searchResponseWarningsEmptyPrompt"
     />
   );
 };
