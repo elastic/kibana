@@ -61,7 +61,7 @@ export const syncGlobalQueryStateWithUrl = (
 
   // if there weren't any initial state in url,
   // then put _g key into url
-  if (!initialStateFromUrl) {
+  if (!initialStateFromUrl || !hasInheritedQueryFromUrl) {
     kbnUrlStateStorage.set<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY, initialState, {
       replace: true,
     });

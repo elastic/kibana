@@ -165,4 +165,12 @@ describe('sync_query_state_with_url', () => {
     expect(spy).not.toBeCalled();
     stop();
   });
+
+  test('an empty global state in URL should be overwritten by the filterManager global filter if given', () => {
+    history.push('/#?_g=()');
+    filterManager.setFilters([gF]);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    expect(kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g')?.filters).toHaveLength(1);
+    stop();
+  });
 });
