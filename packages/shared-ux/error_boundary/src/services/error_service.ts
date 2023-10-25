@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { ThrowIfError } from '../..';
 
 const MATCH_CHUNK_LOADERROR = /ChunkLoadError/;
 
@@ -47,7 +48,8 @@ export class KibanaErrorService {
         if (stackLines[i].match(errorIndicator)) {
           // extract the name of the bad component
           errorComponentName = stackLines[i].replace(errorIndicator, '$1');
-          if (errorComponentName) {
+          // If the component is the utility for throwing errors, skip
+          if (errorComponentName && errorComponentName !== ThrowIfError.name) {
             break;
           }
         }
