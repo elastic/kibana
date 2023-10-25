@@ -6045,6 +6045,37 @@
           }
         }
       },
+      "run_connector_subaction_validchannelid": {
+        "title": "The validChannelId subaction",
+        "type": "object",
+        "description": "The `validChannelId` subaction for Slack connectors.",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "validChannelId"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "required": [
+              "channelId"
+            ],
+            "properties": {
+              "channelId": {
+                "type": "string",
+                "description": "The Slack channel identifier.",
+                "example": "C123ABC456"
+              }
+            }
+          }
+        }
+      },
       "run_connector_request": {
         "title": "Run connector request body properties",
         "description": "The properties vary depending on the connector type.",
@@ -6112,6 +6143,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/run_connector_subaction_pushtoservice"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_validchannelid"
                   }
                 ],
                 "discriminator": {

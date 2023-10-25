@@ -1,0 +1,21 @@
+title: The validChannelId subaction
+type: object
+description: The `validChannelId` subaction for Slack connectors.
+required:
+  - subAction
+  - subActionParams
+properties:
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - validChannelId
+  subActionParams:
+    type: object
+    required:
+      - channelId
+    properties:
+      channelId:
+        type: string
+        description: The Slack channel identifier.
+        example: C123ABC456
