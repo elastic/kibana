@@ -155,6 +155,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('filter by multiple status', async () => {});
+
       it('filters by severity', async () => {
         await createCase(supertest, postCaseReq);
         const theCase = await createCase(supertest, postCaseReq);
@@ -193,6 +195,8 @@ export default ({ getService }: FtrProviderContext): void => {
           cases: [],
         });
       });
+
+      it('filters by multiple severities', async () => {});
 
       it('filters by a single category', async () => {
         await createCase(supertest, postCaseReq);

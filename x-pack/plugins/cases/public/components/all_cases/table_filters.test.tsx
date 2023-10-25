@@ -79,7 +79,7 @@ describe('CasesTableFilters ', () => {
     await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('case-severity-filter-high'));
 
-    expect(onFilterChanged).toBeCalledWith({ severity: 'high' });
+    expect(onFilterChanged).toBeCalledWith({ severity: ['high'] });
   });
 
   it('should call onFilterChange when selected tags change', async () => {
@@ -139,7 +139,7 @@ describe('CasesTableFilters ', () => {
     await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('case-status-filter-closed'));
 
-    expect(onFilterChanged).toBeCalledWith({ status: CaseStatuses.closed });
+    expect(onFilterChanged).toBeCalledWith({ status: [CaseStatuses.closed] });
   });
 
   it('should remove tag from selected tags when tag no longer exists', () => {

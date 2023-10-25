@@ -95,7 +95,9 @@ const parseURLWithFilterOptions = (search: string) => {
   const parsedUrlParams: { [key in string]: string[] | string | null } = {};
   urlParams.forEach((_, key) => {
     if (paramKeysWithTypeArray.includes(key)) {
-      parsedUrlParams[key] = urlParams.getAll(key)[0].split(',');
+      const values = urlParams.getAll(key);
+      const isEmpty = !values[0];
+      parsedUrlParams[key] = isEmpty ? [] : values;
     } else {
       parsedUrlParams[key] = urlParams.get(key);
     }
@@ -115,11 +117,14 @@ const getFilterOptions = (
     urlParams?.severity ??
     localStorageFilterOptions?.severity ??
     DEFAULT_FILTER_OPTIONS.severity;
+
   const status =
     params?.status ??
     urlParams?.status ??
     localStorageFilterOptions?.status ??
     DEFAULT_FILTER_OPTIONS.status;
+
+  console.log({ getFilterOptionsDEFAULT: DEFAULT_FILTER_OPTIONS.status });
 
   return {
     ...filterOptions,

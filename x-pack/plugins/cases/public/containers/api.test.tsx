@@ -426,7 +426,7 @@ describe('Cases API', () => {
           tags: ['(', '"double"'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          status: CaseStatuses.open,
+          status: [CaseStatuses.open],
           owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,

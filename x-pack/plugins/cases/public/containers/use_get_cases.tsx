@@ -17,7 +17,7 @@ import type { ServerError } from '../types';
 
 const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
 
-export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+const DEFAULT_FILTER_OPTIONS_: FilterOptions = {
   search: '',
   searchFields: DEFAULT_SEARCH_FIELDS,
   severity: [SeverityAll],
@@ -28,6 +28,10 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   owner: [],
   category: [],
 };
+
+export const DEFAULT_FILTER_OPTIONS = Object.freeze(DEFAULT_FILTER_OPTIONS_);
+
+console.log({ ...DEFAULT_FILTER_OPTIONS });
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: DEFAULT_TABLE_ACTIVE_PAGE,
