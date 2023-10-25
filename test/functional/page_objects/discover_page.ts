@@ -219,6 +219,10 @@ export class DiscoverPageObject extends FtrService {
     await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
   }
 
+  public async clearBreakdownField() {
+    await this.comboBox.clear('unifiedHistogramBreakdownFieldSelector');
+  }
+
   public async chooseLensChart(chart: string) {
     await this.comboBox.set('unifiedHistogramSuggestionSelector', chart);
   }

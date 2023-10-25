@@ -77,10 +77,10 @@ export function updateSavedSearch({
       savedSearch.viewMode = state.viewMode;
     }
 
-    if (typeof state.breakdownField !== 'undefined') {
+    if (state.breakdownField) {
       savedSearch.breakdownField = state.breakdownField;
-    } else if (savedSearch.breakdownField) {
-      savedSearch.breakdownField = '';
+    } else {
+      savedSearch.breakdownField = undefined;
     }
 
     if (state.hideAggregatedPreview) {

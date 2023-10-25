@@ -135,5 +135,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       await dataGrid.checkCurrentRowsPerPageToBe(100);
     });
+
+    it('should hide the badge once user manually reverts changes', async () => {
+      await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      // changes to columns
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes', 'extension']);
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      // test changes to breakdown field
+      await PageObjects.discover.chooseBreakdownField('_index');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.clearBreakdownField();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+    });
   });
 }
