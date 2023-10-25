@@ -250,7 +250,10 @@ describe.skip('AddComment ', () => {
   });
 });
 
-describe('draft comment ', () => {
+// Depends on useCreateAttachmentsMock.mockImplementation
+// in describe.skip('AddComment')
+// https://github.com/elastic/kibana/issues/169875
+describe.skip('draft comment ', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
