@@ -57,7 +57,7 @@ export const epicPersistNote = (
     mergeMap(([result, recentTimeline, recentNotes, allTimelineQuery]) => {
       const noteIdRedux = action.payload.noteId;
       const response: ResponseNote = get('data.persistNote', result);
-      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [EMPTY];
 
       if (allTimelineQuery.refetch != null) {
         (allTimelineQuery.refetch as inputsModel.Refetch)();

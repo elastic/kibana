@@ -50,7 +50,7 @@ export const epicPersistTimelineFavorite = (
     mergeMap(([result, recentTimelines, allTimelineQuery]) => {
       const savedTimeline = recentTimelines[action.payload.id];
       const response: ResponseFavoriteTimeline = get('data.persistFavorite', result);
-      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [EMPTY];
 
       if (allTimelineQuery.refetch != null) {
         (allTimelineQuery.refetch as inputsModel.Refetch)();

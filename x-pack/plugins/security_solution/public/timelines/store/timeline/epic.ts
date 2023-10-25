@@ -216,7 +216,7 @@ export const createTimelineEpic =
                     }),
                   ];
                 }
-                const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+                const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [EMPTY];
 
                 if (allTimelineQuery.refetch != null) {
                   (allTimelineQuery.refetch as inputsModel.Refetch)();
