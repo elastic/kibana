@@ -72,6 +72,9 @@ import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fl
 
 const fleetGenerator = new FleetAgentGenerator();
 const CURRENT_USERNAME = userInfo().username.toLowerCase();
+const DEFAULT_AGENT_POLICY_NAME = `${CURRENT_USERNAME} test policy`;
+/** A Fleet agent policy that includes integrations that don't actually require an agent to run on a host. Example: SenttinelOne */
+export const DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME = `${CURRENT_USERNAME} - agentless integrations`;
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -578,7 +581,10 @@ interface EnrollHostVmWithFleetOptions {
 }
 
 /**
- * Installs the Elastic agent on the provided Host VM and enrolls with it Fleet
+ * Installs the Elastic agent on the provided Host VM and enrolls with it Fleet.
+ *
+ * NOTE: this method assumes that FLeet-Server is already setup and running.
+ *
  * @param hostVm
  * @param kbnClient
  * @param log
@@ -669,6 +675,7 @@ export const enrollHostVmWithFleet = async ({
 interface GetOrCreateDefaultAgentPolicyOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
+  policyName?: string;
 }
 
 /**
@@ -676,14 +683,15 @@ interface GetOrCreateDefaultAgentPolicyOptions {
  * policy already exists, then it will be reused.
  * @param kbnClient
  * @param log
+ * @param policyName
  */
 export const getOrCreateDefaultAgentPolicy = async ({
   kbnClient,
   log,
+  policyName = DEFAULT_AGENT_POLICY_NAME,
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
-  const agentPolicyName = `${CURRENT_USERNAME} test policy`;
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${agentPolicyName}"`,
+    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
   });
 
   if (existingPolicy.items[0]) {
@@ -696,8 +704,8 @@ export const getOrCreateDefaultAgentPolicy = async ({
   log.info(`Creating new default test/dev Fleet agent policy`);
 
   const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name: agentPolicyName,
-    description: `Policy created by security solution tooling`,
+    name: policyName,
+    description: `Policy created by security solution tooling: ${__filename}`,
     namespace: 'default',
     monitoring_enabled: ['logs', 'metrics'],
   };
@@ -793,7 +801,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
   agentPolicyId,
   consoleUrl,
   apiToken,
-  integrationPolicyName = `SentinelOne policy (${Math.random().toString().substring(3)})`,
+  integrationPolicyName = `SentinelOne policy (${Math.random().toString().substring(2, 6)})`,
   force = false,
 }: AddSentinelOneIntegrationToAgentPolicyOptions): Promise<PackagePolicy> => {
   // If `force` is `false and agent policy already has a SentinelOne integration, exit here
