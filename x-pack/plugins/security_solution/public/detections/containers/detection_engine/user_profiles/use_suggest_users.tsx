@@ -7,20 +7,20 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useEffect, useState } from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { USER_PROFILES_FAILURE } from './translations';
 
-interface GetUserProfilesReturn {
+import { suggestUsers } from './api';
+import { USER_PROFILES_FAILURE } from './translations';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+
+interface SuggestUsersReturn {
   loading: boolean;
   userProfiles: UserProfileWithAvatar[];
 }
 
-export const useGetUserProfiles = (userIds: string[]): GetUserProfilesReturn => {
+export const useSuggestUsers = (searchTerm: string): SuggestUsersReturn => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfileWithAvatar[]>([]);
   const { addError } = useAppToasts();
-  const userProfiles = useKibana().services.security.userProfiles;
 
   useEffect(() => {
     // isMounted tracks if a component is mounted before changing state
@@ -28,15 +28,9 @@ export const useGetUserProfiles = (userIds: string[]): GetUserProfilesReturn => 
     setLoading(true);
     const fetchData = async () => {
       try {
-        const profiles =
-          userIds.length > 0
-            ? await userProfiles.bulkGet({
-                uids: new Set(userIds),
-                dataPath: 'avatar',
-              })
-            : [];
+        const usersResponse = await suggestUsers({ searchTerm });
         if (isMounted) {
-          setUsers(profiles);
+          setUsers(usersResponse);
         }
       } catch (error) {
         addError(error.message, { title: USER_PROFILES_FAILURE });
@@ -50,6 +44,6 @@ export const useGetUserProfiles = (userIds: string[]): GetUserProfilesReturn => 
       // updates to show component is unmounted
       isMounted = false;
     };
-  }, [addError, userProfiles, userIds]);
+  }, [addError, searchTerm]);
   return { loading, userProfiles: users };
 };

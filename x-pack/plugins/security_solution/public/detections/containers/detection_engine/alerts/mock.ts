@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
 import type { AlertSearchResponse, AlertsIndex, Privilege, CasesFromAlertsResponse } from './types';
 
@@ -1334,9 +1333,4 @@ export const mockHostIsolation: HostIsolationResponse = {
 export const mockCaseIdsFromAlertId: CasesFromAlertsResponse = [
   { id: '818601a0-b26b-11eb-8759-6b318e8cf4bc', title: 'Case 1' },
   { id: '8a774850-b26b-11eb-8759-6b318e8cf4bc', title: 'Case 2' },
-];
-
-export const mockUserProfiles: UserProfileWithAvatar[] = [
-  { uid: 'user-id-1', enabled: true, user: { username: 'user1' }, data: {} },
-  { uid: 'user-id-2', enabled: true, user: { username: 'user2' }, data: {} },
 ];

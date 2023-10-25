@@ -7,19 +7,21 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useEffect, useState } from 'react';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { suggestUsers } from './api';
-import { USER_PROFILES_FAILURE } from './translations';
 
-interface SuggestUsersReturn {
+import { USER_PROFILES_FAILURE } from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+
+interface GetUserProfilesReturn {
   loading: boolean;
   userProfiles: UserProfileWithAvatar[];
 }
 
-export const useSuggestUsers = (searchTerm: string): SuggestUsersReturn => {
+export const useGetUserProfiles = (userIds: string[]): GetUserProfilesReturn => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfileWithAvatar[]>([]);
   const { addError } = useAppToasts();
+  const userProfiles = useKibana().services.security.userProfiles;
 
   useEffect(() => {
     // isMounted tracks if a component is mounted before changing state
@@ -27,9 +29,15 @@ export const useSuggestUsers = (searchTerm: string): SuggestUsersReturn => {
     setLoading(true);
     const fetchData = async () => {
       try {
-        const usersResponse = await suggestUsers({ searchTerm });
+        const profiles =
+          userIds.length > 0
+            ? await userProfiles.bulkGet({
+                uids: new Set(userIds),
+                dataPath: 'avatar',
+              })
+            : [];
         if (isMounted) {
-          setUsers(usersResponse);
+          setUsers(profiles);
         }
       } catch (error) {
         addError(error.message, { title: USER_PROFILES_FAILURE });
@@ -43,6 +51,6 @@ export const useSuggestUsers = (searchTerm: string): SuggestUsersReturn => {
       // updates to show component is unmounted
       isMounted = false;
     };
-  }, [addError, searchTerm]);
+  }, [addError, userProfiles, userIds]);
   return { loading, userProfiles: users };
 };

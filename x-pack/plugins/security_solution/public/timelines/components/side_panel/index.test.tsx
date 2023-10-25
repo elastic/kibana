@@ -30,13 +30,16 @@ jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_get_user_profiles', () => {
-  return {
-    useGetUserProfiles: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
-  };
-});
+jest.mock(
+  '../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles',
+  () => {
+    return {
+      useGetUserProfiles: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
+    };
+  }
+);
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_suggest_users', () => {
+jest.mock('../../../detections/containers/detection_engine/user_profiles/use_suggest_users', () => {
   return {
     useSuggestUsers: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
   };

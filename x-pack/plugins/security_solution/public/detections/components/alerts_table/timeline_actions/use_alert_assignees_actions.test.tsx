@@ -16,13 +16,13 @@ import React from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
-import { useGetUserProfiles } from '../../../containers/detection_engine/alerts/use_get_user_profiles';
-import { useSuggestUsers } from '../../../containers/detection_engine/alerts/use_suggest_users';
+import { useGetUserProfiles } from '../../../containers/detection_engine/user_profiles/use_get_user_profiles';
+import { useSuggestUsers } from '../../../containers/detection_engine/user_profiles/use_suggest_users';
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
-jest.mock('../../../containers/detection_engine/alerts/use_get_user_profiles');
-jest.mock('../../../containers/detection_engine/alerts/use_suggest_users');
+jest.mock('../../../containers/detection_engine/user_profiles/use_get_user_profiles');
+jest.mock('../../../containers/detection_engine/user_profiles/use_suggest_users');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },

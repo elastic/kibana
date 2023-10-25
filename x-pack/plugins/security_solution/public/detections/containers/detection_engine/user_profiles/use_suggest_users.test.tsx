@@ -7,10 +7,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useSuggestUsers } from './use_suggest_users';
+
 import * as api from './api';
+import { mockUserProfiles } from './mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import { mockUserProfiles } from './mock';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
