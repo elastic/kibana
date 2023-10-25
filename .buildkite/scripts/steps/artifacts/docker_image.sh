@@ -13,7 +13,8 @@ else
   KIBANA_IMAGE_TAG="pr-$BUILDKITE_PULL_REQUEST-$GIT_ABBREV_COMMIT"
 fi
 
-KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:$KIBANA_IMAGE_TAG"
+KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
+KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
@@ -51,14 +52,21 @@ echo "--- Push images"
 docker image push "$KIBANA_IMAGE-arm64"
 docker image push "$KIBANA_IMAGE-amd64"
 
-echo "--- Create manifest"
+echo "--- Create and push manifests"
 docker manifest create \
   "$KIBANA_IMAGE" \
   --amend "$KIBANA_IMAGE-arm64" \
   --amend "$KIBANA_IMAGE-amd64"
-
-echo "--- Push manifest"
 docker manifest push "$KIBANA_IMAGE"
+
+if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  docker manifest create \
+    "$KIBANA_BASE_IMAGE:latest" \
+    --amend "$KIBANA_IMAGE-arm64" \
+    --amend "$KIBANA_IMAGE-amd64"
+  docker manifest push "$KIBANA_BASE_IMAGE:latest"
+fi
+
 docker logout docker.elastic.co
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
@@ -96,7 +104,6 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
   cat << EOF | buildkite-agent pipeline upload
 steps:
   - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
-    async: true
     branches: main
     trigger: gpctl-promote-with-e2e-tests
     build:
