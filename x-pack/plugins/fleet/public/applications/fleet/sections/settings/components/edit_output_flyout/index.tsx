@@ -51,6 +51,7 @@ import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placehold
 import { useOutputForm } from './use_output_form';
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 import { AdvancedOptionsSection } from './advanced_options_section';
+import { OutputFormRemoteEsSection } from './output_form_remote_es';
 
 export interface EditOutputFlyoutProps {
   output?: Output;
@@ -236,53 +237,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderRemoteElasticsearchSection = () => {
-    return (
-      <>
-        <MultiRowInput
-          data-test-subj="settingsOutputsFlyout.hostUrlInput"
-          label={i18n.translate('xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputLabel', {
-            defaultMessage: 'Hosts',
-          })}
-          placeholder={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputPlaceholder',
-            {
-              defaultMessage: 'Specify host URL',
-            }
-          )}
-          {...inputs.elasticsearchUrlInput.props}
-          isUrl
-        />
-        <EuiSpacer size="m" />
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
-              defaultMessage="Service Token"
-            />
-          }
-          helpText={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.serviceTokenHelpText"
-              defaultMessage="Generate a service token in your remote cluster."
-            />
-          }
-          {...inputs.serviceTokenInput.formRowProps}
-        >
-          <EuiFieldText
-            fullWidth
-            {...inputs.serviceTokenInput.props}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
-              {
-                defaultMessage: 'Specify service token',
-              }
-            )}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-      </>
-    );
+    if (isRemoteESOutputEnabled) {
+      return <OutputFormRemoteEsSection inputs={inputs} />;
+    }
+    return null;
   };
 
   const renderKafkaSection = () => {
