@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import expect from 'expect';
-// import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets, deleteAllRules } from '../../utils';
 import { getInstalledRules } from '../../utils/prebuilt_rules/get_installed_rules';
