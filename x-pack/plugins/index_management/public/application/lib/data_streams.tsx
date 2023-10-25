@@ -92,6 +92,15 @@ export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) =>
   );
 };
 
+export const isDataStreamFullyManagedByDSL = (dataStream?: DataStream | null) => {
+  return (
+    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle' &&
+    dataStream?.indices?.every(
+      (index) => index.managedBy.toLowerCase() === 'data stream lifecycle'
+    )
+  );
+};
+
 export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {
   if (dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle') {
     const ilmIndices = dataStream?.indices?.filter(

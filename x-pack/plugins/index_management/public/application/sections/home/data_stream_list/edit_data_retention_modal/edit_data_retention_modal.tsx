@@ -17,9 +17,9 @@ import {
   EuiSpacer,
   EuiLink,
   EuiText,
-  EuiBadge,
   EuiCallOut,
 } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -35,6 +35,8 @@ import {
   NumericField,
 } from '../../../../../shared_imports';
 
+import { reactRouterNavigate } from '../../../../../shared_imports';
+import { getIndexListUri } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
 import { isDataStreamUnmanaged, isDSLWithILMIndices } from '../../../../lib/data_streams';
@@ -44,6 +46,7 @@ import { updateDataRetention } from '../../../../services/api';
 
 interface Props {
   dataStream: DataStream;
+  ilmPolicyName?: string;
   ilmPolicyLink: string;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
@@ -150,8 +153,71 @@ const configurationFormSchema: FormSchema = {
   },
 };
 
+interface MixedIndicesCalloutProps {
+  dslWithIlmIndices: {
+    ilmIndices: Array<{ name: string}>;
+    dslIndices: Array<{ name: string}>;
+  };
+  history: ScopedHistory;
+  ilmPolicyLink: string;
+  ilmPolicyName?: string;
+  dataStreamName: string;
+}
+
+const MixedIndicesCallout = ({ dslWithIlmIndices, ilmPolicyLink, ilmPolicyName, dataStreamName, history }: MixedIndicesCalloutProps) => {
+  const MAX_VISIBLE_INDICES = 3;
+  const visibleIndices = dslWithIlmIndices.ilmIndices.slice(0, MAX_VISIBLE_INDICES);
+
+  return (
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMTitle',
+        { defaultMessage: 'Some indices are managed by ILM' }
+      )}
+      color="warning"
+      iconType="warning"
+      data-test-subj="someIndicesAreManagedByILMCallout"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
+          defaultMessage="The following indices are managed by ILM: {managedByILM} {hasManyIndices, plural, one {and {remainingIndices} more} other { } } ({viewAllIndicesLink}). Updating data retention will not affect these indices, instead you will have to update the {ilmPolicyLink} policy."
+          values={{
+            managedByILM: (
+              <strong>
+                {visibleIndices.map((index) => index.name).join(', ')}
+              </strong>
+            ),
+            remainingIndices: dslWithIlmIndices.ilmIndices.length - MAX_VISIBLE_INDICES,
+            hasManyIndices: dslWithIlmIndices.ilmIndices.length > MAX_VISIBLE_INDICES ? 1 : 0,
+            ilmPolicyLink: (
+              <EuiLink href={ilmPolicyLink}>
+                {ilmPolicyName}
+              </EuiLink>
+            ),
+            viewAllIndicesLink: (
+              <EuiLink
+                {...reactRouterNavigate(
+                  history,
+                  getIndexListUri(`data_stream="${dataStreamName}"`, true)
+                )}
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.viewAllIndices"
+                  defaultMessage="view all indices"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiCallOut>
+  );
+};
+
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   dataStream,
+  ilmPolicyName,
   ilmPolicyLink,
   onClose,
 }) => {
@@ -160,6 +226,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const dataStreamManagedBy = dataStream?.nextGenerationManagedBy;
   const hasIlmPolicyWithDeletePhase = dataStream?.hasIlmPolicyWithDeletePhase;
 
+  const { history } = useAppContext();
   const dslWithIlmIndices = isDSLWithILMIndices(dataStream);
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
@@ -222,55 +289,20 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
               defaultMessage="Edit data retention"
-            />{' '}
-            <EuiBadge color="hollow">
-              <EuiText size="xs">
-                {i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.techPreviewLabel',
-                  {
-                    defaultMessage: 'Technical preview',
-                  }
-                )}
-              </EuiText>
-            </EuiBadge>
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
           {dslWithIlmIndices && (
             <>
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMTitle',
-                  { defaultMessage: 'Some indices are managed by ILM' }
-                )}
-                color="warning"
-                iconType="warning"
-                data-test-subj="someIndicesAreManagedByILMCallout"
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
-                    defaultMessage="The following indices are managed by ILM: {managedByILM}. Updating data retention will not affect these indices, instead you will have to update the {ilmPolicyLink}."
-                    values={{
-                      managedByILM: (
-                        <strong>
-                          {dslWithIlmIndices.ilmIndices.map((index) => index.name).join(', ')}
-                        </strong>
-                      ),
-                      ilmPolicyLink: (
-                        <EuiLink href={ilmPolicyLink}>
-                          <FormattedMessage
-                            id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMLink"
-                            defaultMessage="ILM policy"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiCallOut>
-
+              <MixedIndicesCallout
+                dslWithIlmIndices={dslWithIlmIndices}
+                history={history}
+                ilmPolicyLink={ilmPolicyLink}
+                ilmPolicyName={ilmPolicyName}
+                dataStreamName={dataStreamName}
+              />
               <EuiSpacer />
             </>
           )}
@@ -303,7 +335,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               <EuiCallOut
                 title={i18n.translate(
                   'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.hasIlmPolicyWithDeletePhaseTitle',
-                  { defaultMessage: 'This data stream is managed by an ILM policy' }
+                  { defaultMessage: 'Some indices are managed by ILM' }
                 )}
                 color="warning"
                 iconType="warning"
@@ -312,7 +344,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                 <p>
                   <FormattedMessage
                     id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.hasIlmPolicyWithDeletePhaseBody"
-                    defaultMessage="Keeping data indefinitely is disabled because this data stream is managed by an ILM policy with a delete phase."
+                    defaultMessage="Keeping data indefinitely is disabled because some indices from this data stream are managed by an ILM policy with a delete phase."
                   />
                 </p>
               </EuiCallOut>

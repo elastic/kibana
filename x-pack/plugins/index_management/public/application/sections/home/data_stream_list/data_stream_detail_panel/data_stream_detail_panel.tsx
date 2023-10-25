@@ -41,7 +41,7 @@ import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
-import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
+import { isDataStreamFullyManagedByILM, isDataStreamFullyManagedByDSL } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
@@ -102,6 +102,16 @@ interface Props {
   onClose: (shouldReload?: boolean) => void;
 }
 
+const ConditionalWrap = ({
+  condition,
+  wrap,
+  children,
+}: {
+  condition: boolean;
+  wrap: (wrappedChildren: React.ReactNode) => JSX.Element;
+  children: JSX.Element;
+}): JSX.Element => (condition ? wrap(children) : children);
+
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,
@@ -114,6 +124,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, dataStream?.ilmPolicyName);
   const { history } = useAppContext();
+  let indicesLink;
 
   let content;
 
@@ -159,12 +170,21 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
             defaultMessage: `The index lifecycle policy that manages the data in the data stream.`,
           }),
-          content: ilmPolicyLink ? (
-            <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
-              {ilmPolicyName}
-            </EuiLink>
-          ) : (
-            ilmPolicyName
+          content: (
+            <ConditionalWrap
+              condition={isDataStreamFullyManagedByDSL(dataStream)}
+              wrap={children => <s>{children}</s>}
+            >
+              <>
+                {ilmPolicyLink ? (
+                  <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
+                    {ilmPolicyName}
+                  </EuiLink>
+                ) : (
+                  ilmPolicyName
+                )}
+              </>
+            </ConditionalWrap>
           ),
           dataTestSubj: 'ilmPolicyDetail',
         });
@@ -172,6 +192,17 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
       return managementDetails;
     };
+
+    indicesLink = (
+      <EuiLink
+        {...reactRouterNavigate(
+          history,
+            getIndexListUri(`data_stream="${dataStreamName}"`, true)
+        )}
+      >
+        {indices.length}
+      </EuiLink>
+    );
 
     const defaultDetails = [
       {
@@ -219,16 +250,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesToolTip', {
           defaultMessage: `The data stream's current backing indices.`,
         }),
-        content: (
-          <EuiLink
-            {...reactRouterNavigate(
-              history,
-              getIndexListUri(`data_stream="${dataStreamName}"`, true)
-            )}
-          >
-            {indices.length}
-          </EuiLink>
-        ),
+        content: indicesLink,
         dataTestSubj: 'indicesDetail',
       },
       {
@@ -276,7 +298,14 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
           defaultMessage: 'The amount of time to retain the data in the data stream.',
         }),
-        content: getLifecycleValue(lifecycle),
+        content: (
+          <ConditionalWrap
+            condition={isDataStreamFullyManagedByILM(dataStream)}
+            wrap={children => <s>{children}</s>}
+          >
+            <>{getLifecycleValue(lifecycle)}</>
+          </ConditionalWrap>
+        ),
         dataTestSubj: 'dataRetentionDetail',
       },
     ];
@@ -293,8 +322,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMTitle',
                 { defaultMessage: 'This data stream is fully managed by ILM' }
               )}
-              color="warning"
-              iconType="warning"
+              iconType="pin"
               data-test-subj="dsIsFullyManagedByILM"
             >
               <p>
@@ -414,6 +442,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               setIsEditingDataRetention(false);
             }
           }}
+          ilmPolicyName={dataStream?.ilmPolicyName}
           ilmPolicyLink={ilmPolicyLink}
           dataStream={dataStream}
         />
