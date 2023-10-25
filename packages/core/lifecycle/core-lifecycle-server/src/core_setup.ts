@@ -24,6 +24,7 @@ import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { CoreUsageDataSetup } from '@kbn/core-usage-data-server';
 import { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
 import { UserSettingsServiceSetup } from '@kbn/core-user-settings-server';
+import { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
 import { CoreStart } from './core_start';
 
 /**
@@ -73,6 +74,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** @internal {@link CoreUsageDataSetup} */
   coreUsageData: CoreUsageDataSetup;
+  /** {@link PluginsServiceSetup} */
+  plugins: PluginsServiceSetup;
 }
 
 /**

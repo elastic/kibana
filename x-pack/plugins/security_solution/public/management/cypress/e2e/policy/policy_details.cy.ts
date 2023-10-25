@@ -19,7 +19,14 @@ import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/c
 describe(
   'Policy Details',
   {
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    tags: [
+      '@ess',
+      '@serverless',
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      '@brokenInServerless',
+    ],
     env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
@@ -203,7 +210,7 @@ describe(
           const oneWeekAgo = moment.utc().subtract(1, 'weeks');
 
           beforeEach(() => {
-            login(ROLE.endpoint_security_policy_management_read);
+            login(ROLE.t3_analyst);
             disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {
@@ -251,7 +258,7 @@ describe(
           const oneWeekAgo = moment.utc().subtract(1, 'weeks');
 
           beforeEach(() => {
-            login(ROLE.endpoint_security_policy_management_read);
+            login(ROLE.t3_analyst);
             disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {

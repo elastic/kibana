@@ -63,6 +63,15 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           link: 'observability-overview:cases',
+          renderAs: 'item',
+          children: [
+            {
+              link: 'observability-overview:cases_configure',
+            },
+            {
+              link: 'observability-overview:cases_create',
+            },
+          ],
         },
         {
           link: 'observability-overview:slos',
@@ -70,15 +79,29 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'aiops',
           title: 'AIOps',
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
+          spaceBefore: null,
           children: [
             {
               title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
                 defaultMessage: 'Anomaly detection',
               }),
               link: 'ml:anomalyDetection',
+              renderAs: 'item',
+              children: [
+                {
+                  link: 'ml:singleMetricViewer',
+                },
+                {
+                  link: 'ml:anomalyExplorer',
+                },
+                {
+                  link: 'ml:settings',
+                },
+              ],
             },
             {
               title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
@@ -107,14 +130,11 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          id: 'groups-spacer-1',
-          isGroupTitle: true,
-        },
-        {
           id: 'apm',
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
@@ -145,6 +165,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
+          renderAs: 'accordion',
           accordionProps: {
             arrowProps: { css: { display: 'none' } },
           },
@@ -163,10 +184,6 @@ const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
-        {
-          id: 'groups-spacer-2',
-          isGroupTitle: true,
-        },
       ],
     },
   ],
@@ -174,10 +191,9 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-        defaultMessage: 'Get Started',
+        defaultMessage: 'Get started',
       }),
       link: 'observabilityOnboarding',
-      isGroupTitle: true,
       icon: 'launch',
     },
     {
