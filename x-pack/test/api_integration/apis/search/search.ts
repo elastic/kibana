@@ -411,7 +411,11 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(400);
-        verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
+
+        expect(resp.body.statusCode).to.be(400);
+        expect(resp.body.message).to.include.string('illegal_argument_exception');
+        expect(resp.body).to.have.property('attributes');
+        expect(resp.body.attributes).to.have.property('root_cause');
       });
 
       it('should delete an in-progress search', async function () {

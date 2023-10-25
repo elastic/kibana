@@ -12,6 +12,10 @@ properties:
     example: 2022-03-24T02:31:03.210Z
   created_by:
     type: object
+    required:
+      - email
+      - full_name
+      - username
     properties:
       $ref: 'user_properties.yaml'
   id:
@@ -29,6 +33,10 @@ properties:
     nullable: true
   pushed_by:
     type: object
+    required:
+      - email
+      - full_name
+      - username
     properties:
       $ref: 'user_properties.yaml'
     nullable: true
@@ -47,6 +55,10 @@ properties:
     example: null
   updated_by:
     type: object
+    required:
+      - email
+      - full_name
+      - username
     properties:
       $ref: 'user_properties.yaml'
   version:
