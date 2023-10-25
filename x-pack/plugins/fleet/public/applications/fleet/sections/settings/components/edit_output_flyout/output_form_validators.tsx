@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+const toSecretValidator =
+  (validator: (value: string) => string[] | undefined) =>
+  (value: string | { id: string } | undefined) => {
+    if (!value || typeof value === 'object') {
+      return undefined;
+    }
+
+    return validator(value);
+  };
+
 export function validateKafkaHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
@@ -237,6 +247,8 @@ export function validateKafkaPassword(value: string) {
   }
 }
 
+export const validateKafkaPasswordSecret = toSecretValidator(validateKafkaPassword);
+
 export function validateCATrustedFingerPrint(value: string) {
   if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
     return [
@@ -277,6 +289,8 @@ export function validateSSLKey(value: string) {
     ];
   }
 }
+
+export const validateSSLKeySecret = toSecretValidator(validateSSLKey);
 
 export function validateKafkaDefaultTopic(value: string) {
   if (!value || value === '') {
