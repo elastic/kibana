@@ -147,12 +147,14 @@ const nodeToEuiCollapsibleNavProps = (
     closePanel,
     isSideNavCollapsed,
     treeDepth,
+    itemsState,
   }: {
     navigateToUrl: NavigateToUrlFn;
     openPanel: PanelContext['open'];
     closePanel: PanelContext['close'];
     isSideNavCollapsed: boolean;
     treeDepth: number;
+    itemsState: AccordionItemsState;
   }
 ): {
   items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps>;
@@ -171,7 +173,11 @@ const nodeToEuiCollapsibleNavProps = (
     spaceBefore: _spaceBefore,
   } = navNode;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
-  const isSelected = hasChildren && !isItem ? false : isActive;
+
+  const isAccordion = hasChildren && !isItem;
+  const isAccordionExpanded = (itemsState[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED) === false;
+  const isSelected = isAccordion && isAccordionExpanded ? false : isActive;
+
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
@@ -218,6 +224,7 @@ const nodeToEuiCollapsibleNavProps = (
             closePanel,
             isSideNavCollapsed,
             treeDepth: treeDepth + 1,
+            itemsState,
           })
         )
         .filter(({ isVisible }) => isVisible)
@@ -284,8 +291,8 @@ const nodeToEuiCollapsibleNavProps = (
 const DEFAULT_IS_COLLAPSED = true;
 const DEFAULT_IS_COLLAPSIBLE = true;
 
-interface AccordionItemState {
-  [key: string]: {
+interface AccordionItemsState {
+  [navNodeId: string]: {
     isCollapsible: boolean;
     isCollapsed: boolean;
     // We want to auto expand the group automatically if the node is active (URL match)
@@ -319,8 +326,8 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
     return byId;
   }, [navNode]);
 
-  const [subItemsState, setSubItemsState] = useState<AccordionItemState>(() => {
-    return Object.entries(navNodesById).reduce<AccordionItemState>((acc, [_id, node]) => {
+  const [itemsState, setItemsState] = useState<AccordionItemsState>(() => {
+    return Object.entries(navNodesById).reduce<AccordionItemsState>((acc, [_id, node]) => {
       if (node.children) {
         acc[_id] = {
           isCollapsed: !node.isActive ?? DEFAULT_IS_COLLAPSED,
@@ -335,7 +342,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
   const [subItems, setSubItems] = useState<EuiCollapsibleNavSubItemProps[] | undefined>();
 
   const toggleAccordion = useCallback((id: string) => {
-    setSubItemsState((prev) => {
+    setItemsState((prev) => {
       const prevValue = prev[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED;
       return {
         ...prev,
@@ -353,8 +360,8 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
       id: string,
       _accordionProps?: Partial<EuiAccordionProps>
     ): Partial<EuiAccordionProps> | undefined => {
-      const isCollapsed = subItemsState[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED;
-      const isCollapsible = subItemsState[id]?.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE;
+      const isCollapsed = itemsState[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED;
+      const isCollapsible = itemsState[id]?.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE;
 
       let forceState: EuiAccordionProps['forceState'] = isCollapsed ? 'closed' : 'open';
       if (!isCollapsible) forceState = 'open'; // Allways open if the accordion is not collapsible
@@ -375,7 +382,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
 
       return updated;
     },
-    [subItemsState, toggleAccordion]
+    [itemsState, toggleAccordion]
   );
 
   const { items, isVisible } = useMemo(() => {
@@ -385,8 +392,9 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
       closePanel,
       isSideNavCollapsed,
       treeDepth: 0,
+      itemsState,
     });
-  }, [closePanel, isSideNavCollapsed, navNode, navigateToUrl, openPanel]);
+  }, [closePanel, isSideNavCollapsed, navNode, navigateToUrl, openPanel, itemsState]);
 
   const [props] = items;
   const { items: accordionItems } = props;
@@ -400,8 +408,8 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
    * "isActive" state of the navNode.
    */
   useEffect(() => {
-    setSubItemsState((prev) => {
-      return Object.entries(navNodesById).reduce<AccordionItemState>((acc, [_id, node]) => {
+    setItemsState((prev) => {
+      return Object.entries(navNodesById).reduce<AccordionItemsState>((acc, [_id, node]) => {
         if (node.children && (!prev[_id] || prev[_id].doCollapseFromActiveState)) {
           acc[_id] = {
             isCollapsed: !node.isActive ?? DEFAULT_IS_COLLAPSED,

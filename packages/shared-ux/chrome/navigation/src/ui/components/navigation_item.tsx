@@ -74,12 +74,15 @@ function NavigationItemComp<
 
   if (isRootLevel) {
     const href = getNavigationNodeHref(navNode);
+    const isSelected = navNode.isActive ?? false;
+
     return (
       <EuiCollapsibleNavItem
         id={navNode.id}
         title={navNode.title}
         icon={navNode.icon}
         iconProps={{ size: 'm' }}
+        isSelected={isSelected}
         data-test-subj={`nav-item-${navNode.id}`}
         linkProps={{
           href,
