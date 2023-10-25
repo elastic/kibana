@@ -44,6 +44,8 @@ xpack.index_management.enableLegacyTemplates: false
 xpack.index_management.enableIndexStats: false
 # Only limited index settings can be edited
 xpack.index_management.editableIndexSettings: limited
+# Disable Storage size column in the Data streams table from Index Management UI
+xpack.index_management.enableDataStreamsStorageColumn: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
