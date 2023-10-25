@@ -22,7 +22,7 @@ image::images/esql-demo.gif[A short video demo of {esql}]
 Here is what you can expect: 
 
 * *Easy start:* To begin using {esql} in Discover, select “Try {esql}” from the data-view picker.
-* *Efficient and easy query building:* ES|QL in Discover offers auto-complete and in-app documentation, making it easy to craft powerful queries right from the query bar. 
+* *Efficient and easy query building:* {esql} in Discover offers auto-complete and in-app documentation, making it easy to craft powerful queries right from the query bar. 
 * *Comprehensive and powerful data exploration:* Conduct ad-hoc data exploration within Discover. Create aggregations, transform data, enrich datasets, and more directly from the query builder. Results are presented in a tabular format or as visualizations. It depends on the query you are executing. 
 * *Contextual Visualizations:* When writing ES|QL queries in Discover, you’ll receive visual representations powered by the Lens suggestion engine. Your query’s nature determines the type of visualization you get, for example whether it’s a Metric, Histogram Heatmap, and so on. 
 * *Enrichment:* Use the enrich command to enhance your query dataset with fields from another dataset, complete with in-context suggestions for the selected policy (such as hinting the matching field and enriched columns).
