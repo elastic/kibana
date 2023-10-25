@@ -8,6 +8,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
+import { css } from '@emotion/css';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -26,12 +27,14 @@ import { nodePathToString, isAbsoluteLink, getNavigationNodeHref } from '../../u
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
+const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
+const DEFAULT_IS_COLLAPSED = true;
+const DEFAULT_IS_COLLAPSIBLE = true;
+
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
   Boolean(navNode.deepLink) || Boolean(navNode.href);
 
 const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNode.children?.length);
-
-const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
 
 /**
  * Predicate to determine if a node should be visible in the main side nav.
@@ -288,9 +291,6 @@ const nodeToEuiCollapsibleNavProps = (
   return { items, isVisible };
 };
 
-const DEFAULT_IS_COLLAPSED = true;
-const DEFAULT_IS_COLLAPSIBLE = true;
-
 interface AccordionItemsState {
   [navNodeId: string]: {
     isCollapsible: boolean;
@@ -453,6 +453,15 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
   return (
     <EuiCollapsibleNavItem
       {...props}
+      // We add this css to prevent showing the outline when the page load when the
+      // accordion is auto-expanded if one of its children is active
+      className={css`
+        .euiAccordion__childWrapper,
+        .euiAccordion__children,
+        .euiCollapsibleNavAccordion__children {
+          outline: none;
+        }
+      `}
       items={subItems}
       accordionProps={setAccordionProps(navNode.id)}
     />
