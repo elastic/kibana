@@ -12,10 +12,7 @@ tags:
   - name: connectors
     description: Connector APIs enable you to create and manage connectors.
 servers:
-  - url: https://{kibanaUrl}
-    variables:
-      kibanaUrl:
-        default: localhost:5601
+  - url: /
 paths:
   '/api/actions/connector':
     $ref: 'paths/api@actions@connector.yaml'
