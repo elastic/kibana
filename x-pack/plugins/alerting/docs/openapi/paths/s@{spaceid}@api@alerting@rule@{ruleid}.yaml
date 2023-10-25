@@ -35,6 +35,8 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+  servers:
+    - url: https://localhost:5601
 
 delete:
   summary: Deletes a rule.
@@ -65,6 +67,8 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+  servers:
+    - url: https://localhost:5601
 
 post:
   summary: Creates a rule with a specific rule identifier.
@@ -130,6 +134,8 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+  servers:
+    - url: https://localhost:5601
 
 put:
   summary: Updates the attributes for a rule.
@@ -182,3 +188,7 @@ put:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

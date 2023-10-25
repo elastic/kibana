@@ -9,7 +9,8 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: /
+  - url: http://localhost:5601
+    description: local
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -67,6 +68,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}:
     get:
       summary: Retrieves a rule by its identifier.
@@ -100,6 +105,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
     delete:
       summary: Deletes a rule.
       operationId: deleteRule
@@ -126,6 +133,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
     post:
       summary: Creates a rule with a specific rule identifier.
       operationId: createRuleId
@@ -183,6 +192,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a rule.
       operationId: updateRule
@@ -225,6 +236,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_disable:
     post:
       summary: Disables a rule.
@@ -252,6 +267,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_enable:
     post:
       summary: Enables a rule.
@@ -279,6 +298,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rules/_find:
     get:
       summary: Retrieves information about rules.
@@ -392,6 +415,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/_health:
     get:
       summary: Retrieves the health status of the alerting framework.
@@ -477,6 +504,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule_types:
     get:
       summary: Retrieves a list of rule types.
@@ -662,6 +691,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all:
     post:
       summary: Mutes all alerts.
@@ -683,6 +714,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all:
     post:
       summary: Unmutes all alerts.
@@ -704,6 +739,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key:
     post:
       summary: Updates the API key for a rule.
@@ -724,6 +763,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute:
     post:
       summary: Mutes an alert.
@@ -746,6 +789,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute:
     post:
       summary: Unmutes an alert.
@@ -768,6 +815,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}:
     delete:
       summary: Permanently removes an alert.
@@ -796,6 +847,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
     get:
       summary: Retrieves an alert by its identifier.
       operationId: legacyGetAlert
@@ -825,6 +878,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
     post:
       summary: Create an alert.
       operationId: legacyCreateAlert
@@ -934,6 +989,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
     put:
       summary: Updates the attributes for an alert.
       operationId: legacyUpdateAlert
@@ -1032,6 +1089,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_disable:
     post:
       summary: Disables an alert.
@@ -1059,6 +1120,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_enable:
     post:
       summary: Enables an alert.
@@ -1086,6 +1151,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_mute_all:
     post:
       summary: Mutes all alert instances.
@@ -1113,6 +1182,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all:
     post:
       summary: Unmutes all alert instances.
@@ -1140,6 +1213,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/_find:
     get:
       summary: Retrieves a paginated set of alerts.
@@ -1249,6 +1326,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/_health:
     get:
       summary: Retrieves the health status of the alerting framework.
@@ -1331,6 +1412,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/list_alert_types:
     get:
       summary: Retrieves a list of alert types.
@@ -1433,6 +1516,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute:
     post:
       summary: Mutes an alert instance.
@@ -1467,6 +1552,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute:
     post:
       summary: Unmutes an alert instance.
@@ -1501,6 +1590,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:

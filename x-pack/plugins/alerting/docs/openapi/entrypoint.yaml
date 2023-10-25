@@ -12,7 +12,8 @@ tags:
   - name: alerting
     description: Alerting APIs enable you to create and manage rules and alerts.
 servers:
-  - url: /
+  - url: 'http://localhost:5601'
+    description: local
 paths:
   '/s/{spaceId}/api/alerting/rule':
     $ref: 'paths/s@{spaceid}@api@alerting@rule.yaml'
