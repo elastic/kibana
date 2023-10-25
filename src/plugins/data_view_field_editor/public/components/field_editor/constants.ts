@@ -38,6 +38,10 @@ export const RUNTIME_FIELD_OPTIONS_PRIMITIVE: Array<EuiComboBoxOptionOption<Runt
     label: 'Geo point',
     value: 'geo_point',
   },
+  {
+    label: 'Geo shape',
+    value: 'geo_shape',
+  },
 ];
 
 export const RUNTIME_FIELD_OPTIONS = [
