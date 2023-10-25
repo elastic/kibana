@@ -9,7 +9,7 @@ The following APIs are available for Synthetics.
 
 * <<edit-parameter-by-id-api, Edit Parameter API>> to edit a parameter.
 
-* <<delete-parameters-by-ids-api, Delete Parameter API>> to delete a parameter.
+* <<delete-parameters-api, Delete Parameter API>> to delete a parameter.
 
 
 include::params/add-param.asciidoc[leveloffset=+1]

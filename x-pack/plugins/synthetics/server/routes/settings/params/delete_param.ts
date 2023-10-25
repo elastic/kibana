@@ -12,13 +12,21 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { DeleteParamsResponse } from '../../../../common/runtime_types';
 
-export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
+export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
+  DeleteParamsResponse[],
+  unknown,
+  unknown,
+  { ids: string[] }
+> = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.PARAMS,
-  validate: {
-    query: schema.object({
-      ids: schema.string(),
-    }),
+  validate: {},
+  validation: {
+    request: {
+      body: schema.object({
+        ids: schema.arrayOf(schema.string()),
+      }),
+    },
   },
   writeAccess: true,
   handler: async ({
@@ -26,15 +34,12 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => 
     request,
     response,
   }): Promise<IKibanaResponse<DeleteParamsResponse[]>> => {
-    const { ids } = request.query as { ids: string };
-    const parsedIds = JSON.parse(ids) as string[];
+    const { ids } = request.body;
 
     const result = await savedObjectsClient.bulkDelete(
-      parsedIds.map((id) => ({ type: syntheticsParamType, id })),
+      ids.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
-    return response.ok({
-      body: result.statuses.map(({ id, success }) => ({ id, deleted: success })),
-    });
+    return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
   },
 });

@@ -45,6 +45,6 @@ export const editGlobalParam = async ({
   );
 
 export const deleteGlobalParams = async (ids: string[]): Promise<DeleteParamsResponse[]> =>
-  apiService.delete(SYNTHETICS_API_URLS.PARAMS, {
-    ids: JSON.stringify(ids),
+  apiService.delete(SYNTHETICS_API_URLS.PARAMS, undefined, {
+    ids,
   });

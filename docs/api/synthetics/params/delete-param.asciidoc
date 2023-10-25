@@ -1,35 +1,49 @@
-[[delete-parameters-by-ids-api]]
-== Delete Parameters by IDs API
+[[delete-parameters-api]]
+== Delete Parameters API
 ++++
 <titleabbrev>Delete Parameters</titleabbrev>
 ++++
 
-Deletes a list of parameters based on their IDs.
+Deletes one or more parameters from the system.
 
 === {api-request-title}
 
-`DELETE <your-api-host>/api/synthetics/parameters`
+`DELETE <your-api-host>/api/synthetics/params`
 
 === {api-prereq-title}
 
 To use this API, you must have appropriate permissions for deleting parameters.
 
-[[parameters-delete-query-params]]
-==== Query Parameters
+[[parameters-delete-request-body]]
+==== Request Body
+
+The request body should contain an array of parameter IDs that you want to delete.
 
 `ids`::
-(Required, string) A comma-separated list of parameter IDs to be deleted.
+(Required, array of strings) An array of parameter IDs to delete.
 
-[[parameters-delete-example]]
-==== Example
+[[parameters-delete-response-example]]
+==== Response Example
 
-Here is an example of a DELETE request to delete a list of parameters by their IDs:
+The API response includes information about the deleted parameters, where each entry in the response array contains the following attributes:
 
-[source,sh]
+- `id` (string): The unique identifier of the deleted parameter.
+- `deleted` (boolean): Indicates whether the parameter was successfully deleted (`true` if deleted, `false` if not).
+
+Here's an example response for deleting multiple parameters:
+
+[source,json]
 --------------------------------------------------
-DELETE /api/synthetics/parameters?ids=param_id1,param_id2,param_id3
+[
+  {
+    "id": "param1-id",
+    "deleted": true
+  },
+  {
+    "id": "param2-id",
+    "deleted": true
+  }
+]
 --------------------------------------------------
 
-The API does not return a response body for the deletion request, but it will return an appropriate status code upon successful deletion.
-
-This API allows you to delete multiple parameters by specifying their IDs in the `ids` query parameter. Please replace `<your-api-host>` with the actual host where your API is available and provide a valid list of parameter IDs in the query parameter.
+This API allows you to delete one or more parameters by specifying their IDs in the request body. The response array provides information about the success of the deletion process for each parameter. You can replace `<your-api-host>` with the actual host where your API is available.
