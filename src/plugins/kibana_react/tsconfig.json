@@ -23,6 +23,7 @@
     "@kbn/core-theme-browser",
     "@kbn/react-kibana-context-common",
     "@kbn/react-kibana-context-styled",
+    "@kbn/core-analytics-browser",
   ],
   "exclude": [
     "target/**/*",

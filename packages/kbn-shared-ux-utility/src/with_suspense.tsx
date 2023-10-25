@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { Suspense, ComponentType, ReactElement, Ref } from 'react';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import React, { ComponentType, ReactElement, Ref, Suspense } from 'react';
 
 import { Fallback } from './fallback';
 
+interface ExtendedDeps {
+  analytics?: AnalyticsServiceStart;
+}
+
 /**
- * A HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors.
+ * A HOC which supplies React.Suspense with a fallback component, and a `KibanaErrorBoundary` to contain errors.
  * @param Component A component deferred by `React.lazy`
  * @param fallback A fallback component to render while things load; default is `Fallback` from SharedUX.
  */
@@ -20,8 +25,8 @@ export const withSuspense = <P extends {}, R = {}>(
   Component: ComponentType<P>,
   fallback: ReactElement | null = <Fallback />
 ) =>
-  React.forwardRef((props: P, ref: Ref<R>) => (
-    <KibanaErrorBoundaryProvider>
+  React.forwardRef((props: P & ExtendedDeps, ref: Ref<R>) => (
+    <KibanaErrorBoundaryProvider analytics={props.analytics}>
       <KibanaErrorBoundary>
         <Suspense fallback={fallback}>
           <Component {...props} ref={ref} />
