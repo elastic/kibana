@@ -4,14 +4,12 @@ The resources in this directory are used for seeding Elasticsearch Serverless im
 
 ## Roles
 
-Roles defined in `roles.yml` is a combination of roles from `project-controller` like [security roles](https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml).
+Roles defined in `roles.yml` intended to mock a Serverless deployment.
 
-### Why `roles.json` is here?
+### Why `security_roles.json` is here?
 
-`security_roles.json` is a subset of defined in `roles.yml` roles defined in a JSON format and extended with necessary fields
-to be compatible with `/api/security/role/{roleName}` endpoint. Cypress (and not only) tests use the roles to test behavior under specific roles. For example Security Solution reuses tests between ESS and Serverless and having the same roles is crucial here. Ideally it should be an automated process to transform
-`project-controller` roles into `roles.yml` and `security_roles.json` but it's not done yet. This way it's logical to have
-dependent files next to each other.
+`security_roles.json` is a subset of defined in `roles.yml` roles in a JSON format and extended with necessary fields
+to be compatible with `/api/security/role/{roleName}` endpoint. It's consumed by test environments like Cypress to be able to run different scenarios.
 
 ## Users
 
