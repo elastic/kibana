@@ -6,7 +6,7 @@
  */
 
 import { parseUrlQueryParams } from './utils';
-import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
+import { DEFAULT_QUERY_PARAMS } from '../../containers/constants';
 
 const DEFAULT_STRING_QUERY_PARAMS = {
   ...DEFAULT_QUERY_PARAMS,

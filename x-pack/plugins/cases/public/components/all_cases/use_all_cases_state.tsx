@@ -20,7 +20,7 @@ import type {
   ParsedUrlQueryParams,
 } from '../../../common/ui/types';
 
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/constants';
 import { parseUrlQueryParams } from './utils';
 import { stringifyToURL, parseURL } from '../utils';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';

@@ -249,8 +249,7 @@ const removeOptionFromFilter = ({
     index > -1
       ? [...filterOptions.slice(0, index), ...filterOptions.slice(index + 1, filterOptions.length)]
       : filterOptions;
-  const output = resultingFilterOptions.length === 0 ? {} : { [filterKey]: resultingFilterOptions };
-  return output;
+  return resultingFilterOptions.length === 0 ? {} : { [filterKey]: resultingFilterOptions };
 };
 
 export const getCases = async ({

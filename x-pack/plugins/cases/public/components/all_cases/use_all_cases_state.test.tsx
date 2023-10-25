@@ -15,8 +15,12 @@ import {
   getQueryParamsLocalStorageKey,
   getFilterOptionsLocalStorageKey,
 } from './use_all_cases_state';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
-import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
+import {
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_QUERY_PARAMS,
+  DEFAULT_TABLE_ACTIVE_PAGE,
+  DEFAULT_TABLE_LIMIT,
+} from '../../containers/constants';
 import { CaseStatuses } from '../../../common/types/domain';
 import { SortFieldCase } from '../../containers/types';
 import { stringifyToURL } from '../utils';

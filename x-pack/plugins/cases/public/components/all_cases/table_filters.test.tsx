@@ -22,7 +22,7 @@ import {
 } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
+import { DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
 import { CasesTableFilters } from './table_filters';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
