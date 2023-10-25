@@ -72,6 +72,7 @@ interface GroupingArgs<T> {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  title?: string;
 }
 
 /**
@@ -85,6 +86,7 @@ interface GroupingArgs<T> {
  * @param onGroupChange callback executed when selected group is changed, used for tracking
  * @param onOptionsChange callback executed when grouping options are changed, used for consumer grouping selector
  * @param tracker telemetry handler
+ * @param title title of the grouping selector component
  * @returns {@link Grouping} the grouping constructor { getGrouping, groupSelector, pagination, selectedGroups }
  */
 export const useGrouping = <T,>({
@@ -96,6 +98,7 @@ export const useGrouping = <T,>({
   onGroupChange,
   onOptionsChange,
   tracker,
+  title,
 }: GroupingArgs<T>): Grouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
   const { activeGroups: selectedGroups } = useMemo(
@@ -125,6 +128,7 @@ export const useGrouping = <T,>({
     onGroupChange,
     onOptionsChange,
     tracker,
+    title,
   });
 
   const getGrouping = useCallback(

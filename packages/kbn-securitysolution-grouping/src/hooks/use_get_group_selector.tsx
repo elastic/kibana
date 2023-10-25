@@ -30,6 +30,7 @@ export interface UseGetGroupSelectorArgs {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  title?: string;
 }
 
 interface UseGetGroupSelectorStateless
@@ -84,6 +85,7 @@ export const useGetGroupSelector = ({
   onGroupChange,
   onOptionsChange,
   tracker,
+  title,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroups: selectedGroups, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
@@ -188,6 +190,7 @@ export const useGetGroupSelector = ({
         fields,
         maxGroupingLevels,
         options,
+        title,
       }}
     />
   );
