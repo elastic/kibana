@@ -53,6 +53,7 @@ const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}
 
 // FLAKY: https://github.com/elastic/kibana/issues/168505
 // FLAKY: https://github.com/elastic/kibana/issues/168506
+// FLAKY: https://github.com/elastic/kibana/issues/168507
 describe.skip('AddComment ', () => {
   let appMockRender: AppMockRenderer;
 
