@@ -46,6 +46,12 @@ viewer:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
   run_as: []
 
@@ -108,6 +114,12 @@ editor:
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
   run_as: []
 
@@ -148,6 +160,12 @@ t1_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 t2_analyst:
@@ -189,6 +207,12 @@ t2_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 t3_analyst:
@@ -246,6 +270,12 @@ t3_analyst:
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 threat_intelligence_analyst:
@@ -290,6 +320,12 @@ threat_intelligence_analyst:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 rule_author:
@@ -348,6 +384,12 @@ rule_author:
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 soc_manager:
@@ -410,6 +452,12 @@ soc_manager:
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_indexPatterns.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 detections_admin:
@@ -455,6 +503,12 @@ detections_admin:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 platform_engineer:
@@ -500,6 +554,12 @@ platform_engineer:
         - feature_fleetv2.all
         - feature_osquery.all
         - feature_indexPatterns.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 endpoint_operations_analyst:
@@ -556,6 +616,12 @@ endpoint_operations_analyst:
         - feature_osquery.all
         - feature_fleet.all
         - feature_fleetv2.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 endpoint_policy_manager:
@@ -609,4 +675,10 @@ endpoint_policy_manager:
         - feature_osquery.all
         - feature_fleet.all
         - feature_fleetv2.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
