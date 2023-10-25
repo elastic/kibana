@@ -16,9 +16,8 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { Group } from './custom_threshold_executor';
 import { ObservabilityConfig } from '../../..';
-import { AlertExecutionDetails } from './types';
+import { AlertExecutionDetails, Group } from './types';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
