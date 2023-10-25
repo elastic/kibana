@@ -73,7 +73,8 @@
     "@kbn/metrics-data-access-plugin",
     "@kbn/expressions-plugin",
     "@kbn/chart-icons",
-    "@kbn/advanced-settings-plugin"
+    "@kbn/advanced-settings-plugin",
+    "@kbn/cloud-plugin"
   ],
   "exclude": ["target/**/*"]
 }
