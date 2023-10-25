@@ -39,5 +39,3 @@ The API does not return a response body for deletion, but it will return an appr
 This API will delete the private location with the specified `locationId`.
 
 Location cannot be deleted if it has associated monitors in use. You must delete all monitors associated with the location before deleting the location.
-
-Please replace `<your-api-host>` with the actual host where your API is available and use a valid `locationId` in the DELETE request.

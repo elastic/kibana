@@ -71,3 +71,5 @@ The API returns the created private location as follows:
   }
 }
 --------------------------------------------------
+
+If the `agentPolicyId` is already used by an existing private location, or if the `label` already exists, the API will return a `400 Bad Request` response with a corresponding error message.
