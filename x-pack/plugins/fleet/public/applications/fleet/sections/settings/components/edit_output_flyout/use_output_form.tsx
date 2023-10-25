@@ -124,6 +124,30 @@ export interface OutputFormInputsType {
   kafkaSslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
 }
 
+function extractKafkaOutputSecrets(
+  inputs: Pick<
+    OutputFormInputsType,
+    | 'kafkaSslKeyInput'
+    | 'kafkaSslKeySecretInput'
+    | 'kafkaAuthPasswordInput'
+    | 'kafkaAuthPasswordSecretInput'
+  >
+): KafkaOutput['secrets'] | null {
+  const secrets: KafkaOutput['secrets'] = {};
+
+  if (!inputs.kafkaSslKeyInput.value && inputs.kafkaSslKeySecretInput.value) {
+    secrets.ssl = {
+      key: inputs.kafkaSslKeySecretInput.value,
+    };
+  }
+
+  if (!inputs.kafkaAuthPasswordInput.value && inputs.kafkaAuthPasswordSecretInput.value) {
+    secrets.password = inputs.kafkaAuthPasswordSecretInput.value;
+  }
+
+  return Object.keys(secrets).length ? secrets : null;
+}
+
 export function useOutputForm(onSucess: () => void, output?: Output) {
   const fleetStatus = useFleetStatus();
 
@@ -664,21 +688,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               (val) => val !== ''
             ).length;
 
-            const maybeSecrets = (() => {
-              const secrets: KafkaOutput['secrets'] = {};
-
-              if (!kafkaSslKeyInput.value && kafkaSslKeySecretInput.value) {
-                secrets.ssl = {
-                  key: kafkaSslKeySecretInput.value,
-                };
-              }
-
-              if (!kafkaAuthPasswordInput.value && kafkaAuthPasswordSecretInput.value) {
-                secrets.password = kafkaAuthPasswordSecretInput.value;
-              }
-
-              return Object.keys(secrets).length ? secrets : undefined;
-            })();
+            const maybeSecrets = extractKafkaOutputSecrets({
+              kafkaSslKeyInput,
+              kafkaSslKeySecretInput,
+              kafkaAuthPasswordInput,
+              kafkaAuthPasswordSecretInput,
+            });
 
             return {
               name: nameInput.value,
@@ -878,8 +893,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     additionalYamlConfigInput.value,
     kafkaAuthMethodInput.value,
     kafkaSslCertificateInput.value,
-    kafkaSslKeyInput.value,
-    kafkaSslKeySecretInput.value,
+    kafkaSslKeyInput,
+    kafkaSslKeySecretInput,
     kafkaVerificationModeInput.value,
     kafkaClientIdInput.value,
     kafkaVersionInput.value,
@@ -888,8 +903,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaCompressionLevelInput.value,
     kafkaConnectionTypeInput.value,
     kafkaAuthUsernameInput.value,
-    kafkaAuthPasswordInput.value,
-    kafkaAuthPasswordSecretInput.value,
+    kafkaAuthPasswordInput,
+    kafkaAuthPasswordSecretInput,
     kafkaSaslMechanismInput.value,
     kafkaPartitionTypeInput.value,
     kafkaPartitionTypeRandomInput.value,
