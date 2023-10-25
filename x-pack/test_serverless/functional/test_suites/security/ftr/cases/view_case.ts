@@ -18,6 +18,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createOneCaseBeforeDeleteAllAfter,
   createAndNavigateToCase,
+  navigateToCasesApp,
 } from '../../../../../shared/lib/cases/helpers';
 
 const owner = SECURITY_SOLUTION_OWNER;
@@ -473,7 +474,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async () => {
-        await testSubjects.click('solutionSideNavItemLink-cases');
+        await navigateToCasesApp(getPageObject, getService, owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({
           customFields: [
