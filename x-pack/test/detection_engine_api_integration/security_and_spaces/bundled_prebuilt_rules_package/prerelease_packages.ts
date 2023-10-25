@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from 'expect';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+// import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets, deleteAllRules } from '../../utils';
 import { getInstalledRules } from '../../utils/prebuilt_rules/get_installed_rules';
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await installPrebuiltRules(es, supertest);
 
       // Refresh ES indices to avoid race conditions between write and reading of indeces
-      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+      // await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify that status is updated after package installation
       const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
