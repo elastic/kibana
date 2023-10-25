@@ -58,7 +58,6 @@ import {
   type SeriesType,
   type PersistedState,
   visualizationTypes,
-  SeriesTypesByOrientation,
 } from './types';
 import {
   getPersistableState,
@@ -967,17 +966,6 @@ export const getXyVisualization = ({
 
   getVisualizationInfo(state, frame) {
     return getVisualizationInfo(state, frame, paletteService, fieldFormats);
-  },
-
-  getDisplayOptions(state) {
-    const chartType = getChartType(state);
-    if (!chartType) {
-      return {};
-    }
-    return {
-      aspectRatio:
-        SeriesTypesByOrientation[chartType] === 'vertical' ? { x: 16, y: 9 } : { x: 9, y: 16 },
-    };
   },
 });
 

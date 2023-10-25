@@ -1293,7 +1293,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /**
    * Gets custom display options for showing the visualization.
    */
-  getDisplayOptions?: (state: T, datasourceLayers: DatasourceLayers) => VisualizationDisplayOptions;
+  getDisplayOptions?: () => VisualizationDisplayOptions;
 
   /**
    * Get RenderEventCounters events for telemetry
