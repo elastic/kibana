@@ -115,44 +115,66 @@ export function DiscoverGridFlyout({
     savedSearchId,
   });
 
-  const addColumn = (columnName: string) => {
-    onAddColumn(columnName);
-    services.toastNotifications.addSuccess(
-      i18n.translate('discover.grid.flyout.toastColumnAdded', {
-        defaultMessage: `Column '{columnName}' was added`,
-        values: { columnName },
-      })
-    );
-  };
-
-  const removeColumn = (columnName: string) => {
-    onRemoveColumn(columnName);
-    services.toastNotifications.addSuccess(
-      i18n.translate('discover.grid.flyout.toastColumnRemoved', {
-        defaultMessage: `Column '{columnName}' was removed`,
-        values: { columnName },
-      })
-    );
-  };
-
-  const renderDefaultContent = () => (
-    <UnifiedDocViewer
-      columns={columns}
-      columnTypes={columnTypes}
-      dataView={dataView}
-      filter={onFilter}
-      hit={actualHit}
-      onAddColumn={addColumn}
-      onRemoveColumn={removeColumn}
-      textBasedHits={isPlainRecord ? hits : undefined}
-    />
+  const addColumn = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      services.toastNotifications.addSuccess(
+        i18n.translate('discover.grid.flyout.toastColumnAdded', {
+          defaultMessage: `Column '{columnName}' was added`,
+          values: { columnName },
+        })
+      );
+    },
+    [onAddColumn, services.toastNotifications]
   );
 
-  const contentActions = {
-    setFilter: onFilter,
-    addColumn,
-    removeColumn,
-  };
+  const removeColumn = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      services.toastNotifications.addSuccess(
+        i18n.translate('discover.grid.flyout.toastColumnRemoved', {
+          defaultMessage: `Column '{columnName}' was removed`,
+          values: { columnName },
+        })
+      );
+    },
+    [onRemoveColumn, services.toastNotifications]
+  );
+
+  const renderDefaultContent = useCallback(
+    () => (
+      <UnifiedDocViewer
+        columns={columns}
+        columnTypes={columnTypes}
+        dataView={dataView}
+        filter={onFilter}
+        hit={actualHit}
+        onAddColumn={addColumn}
+        onRemoveColumn={removeColumn}
+        textBasedHits={isPlainRecord ? hits : undefined}
+      />
+    ),
+    [
+      actualHit,
+      addColumn,
+      columns,
+      columnTypes,
+      dataView,
+      hits,
+      isPlainRecord,
+      onFilter,
+      removeColumn,
+    ]
+  );
+
+  const contentActions = useMemo(
+    () => ({
+      addFilter: onFilter,
+      addColumn,
+      removeColumn,
+    }),
+    [onFilter, addColumn, removeColumn]
+  );
 
   const bodyContent = flyoutCustomization?.Content ? (
     <flyoutCustomization.Content
