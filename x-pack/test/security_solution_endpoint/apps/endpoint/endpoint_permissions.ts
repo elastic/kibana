@@ -19,7 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('Endpoint permissions:', () => {
+  describe('@ess Endpoint permissions:', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {

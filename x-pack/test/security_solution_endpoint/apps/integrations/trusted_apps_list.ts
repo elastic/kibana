@@ -15,7 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('When on the Trusted Apps list', function () {
+  describe('@ess When on the Trusted Apps list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();

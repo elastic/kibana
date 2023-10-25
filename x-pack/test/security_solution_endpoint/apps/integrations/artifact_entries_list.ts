@@ -51,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  describe('For each artifact list under management', function () {
+  describe('@ess For each artifact list under management', function () {
     this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;

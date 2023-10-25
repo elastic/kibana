@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // The source of the data for these tests have changed and need to be updated
   // There are currently tests in the security_solution application being maintained
-  describe.skip('security solution endpoint telemetry', () => {
+  describe.skip('@ess security solution endpoint telemetry', () => {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });

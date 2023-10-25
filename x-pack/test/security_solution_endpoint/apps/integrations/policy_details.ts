@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  describe('@ess When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     const formTestSubjects = getPolicySettingsFormTestSubjects();
 
