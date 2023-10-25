@@ -28,7 +28,6 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
 import { IngestionStatus } from '../../../../types';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
-import { ConnectorConfigurationLogic } from '../../connector/connector_configuration_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncsContextMenu: React.FC = () => {
@@ -48,6 +47,7 @@ export const SyncsContextMenu: React.FC = () => {
   const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
   const { configState } = useValues(ConnectorConfigurationLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
+  const { connector } = useValues(IndexViewLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -81,9 +81,10 @@ export const SyncsContextMenu: React.FC = () => {
 
   const isEnterpriseSearchNotAvailable =
     config.host && config.canDeployEntSearch && errorConnectingMessage;
-  const isSyncsDisabled =
+  const isSyncsDisabled = Boolean(
     (connector?.is_native && isEnterpriseSearchNotAvailable) ||
-    ingestionStatus === IngestionStatus.INCOMPLETE;
+      ingestionStatus === IngestionStatus.INCOMPLETE
+  );
 
   const panels: EuiContextMenuProps['panels'] = [
     {
@@ -135,7 +136,9 @@ export const SyncsContextMenu: React.FC = () => {
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
                 'data-test-subj':
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-                disabled: isSyncsDisabled || !configState.use_document_level_security?.value,
+                disabled: Boolean(
+                  isSyncsDisabled || !configState.use_document_level_security?.value
+                ),
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
                   defaultMessage: 'Access Control',
@@ -150,8 +153,9 @@ export const SyncsContextMenu: React.FC = () => {
         {
           // @ts-ignore - data-* attributes are applied but doesn't exist on types
           'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-cancelSync`,
-          disabled:
-            (isCanceling && ingestionStatus !== IngestionStatus.ERROR) || status === Status.LOADING,
+          disabled: Boolean(
+            (isCanceling && ingestionStatus !== IngestionStatus.ERROR) || status === Status.LOADING
+          ),
           icon: <EuiIcon type="cross" size="m" color="danger" />,
           name: (
             <EuiText color="danger" size="s">

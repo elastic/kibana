@@ -570,6 +570,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnshareduxerrorboundary",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/shared-ux-error-boundary'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbnrison",
             "type": "string",
             "tags": [],
