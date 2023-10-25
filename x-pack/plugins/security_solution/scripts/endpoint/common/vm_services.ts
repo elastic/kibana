@@ -8,8 +8,12 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import chalk from 'chalk';
+import { userInfo } from 'os';
+import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
+
+const baseGenerator = new BaseDataGenerator();
 
 interface BaseVmCreateOptions {
   name: string;
@@ -118,4 +122,40 @@ export const createMultipassHostVmClient = (
     mount,
     unmount,
   };
+};
+
+/**
+ * Generates a unique Virtual Machine name using the current user's `username`
+ * @param identifier
+ */
+export const generateVmName = (identifier: string = baseGenerator.randomUser()): string => {
+  return `${userInfo().username.toLowerCase().replaceAll('.', '-')}-${identifier
+    .toLowerCase()
+    .replace('.', '-')}-${Math.random().toString().substring(2, 6)}`;
+};
+
+/**
+ * Checks if the count of VM running under Multipass is greater than the `threshold` passed on
+ * input and if so, it will return a message indicate so. Useful to remind users of the amount of
+ * VM currently running.
+ * @param threshold
+ */
+export const getMultipassVmCountNotice = async (threshold: number = 1): Promise<string> => {
+  const response = await execa.command(`multipass list --format=json`);
+
+  const output: { list: Array<{ ipv4: string; name: string; release: string; state: string }> } =
+    JSON.parse(response.stdout);
+
+  if (output.list.length > threshold) {
+    return `-----------------------------------------------------------------
+${chalk.red('NOTE:')} ${chalk.bold(
+      chalk.cyan(`You currently have ${chalk.red(output.list.length)} VMs running.`)
+    )} Remember to delete those
+      no longer being used.
+      View running VMs: ${chalk.bold('multipass list')}
+  -----------------------------------------------------------------
+`;
+  }
+
+  return '';
 };

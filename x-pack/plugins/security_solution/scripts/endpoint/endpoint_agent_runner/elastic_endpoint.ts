@@ -6,8 +6,8 @@
  */
 
 import { userInfo } from 'os';
-import execa from 'execa';
 import chalk from 'chalk';
+import { getMultipassVmCountNotice } from '../common/vm_services';
 import { createAndEnrollEndpointHost } from '../common/endpoint_host_services';
 import {
   addEndpointIntegrationToAgentPolicy,
@@ -68,7 +68,9 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
         Elastic Agent Version: ${version}
 
         Shell access: ${chalk.bold(`multipass shell ${vmName}`)}
-        Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
+        Delete VM:    ${chalk.bold(
+          `multipass delete -p ${vmName}${await getMultipassVmCountNotice()}`
+        )}
     `);
     }
   } catch (error) {
@@ -89,26 +91,4 @@ const getOrCreateAgentPolicyId = async (): Promise<string> => {
   await addEndpointIntegrationToAgentPolicy({ kbnClient, log, agentPolicyId: agentPolicy.id });
 
   return agentPolicy.id;
-};
-
-const getVmCountNotice = async (threshold: number = 1): Promise<string> => {
-  const response = await execa.command(`multipass list --format=json`);
-
-  const output: { list: Array<{ ipv4: string; name: string; release: string; state: string }> } =
-    JSON.parse(response.stdout);
-
-  if (output.list.length > threshold) {
-    return `
-
------------------------------------------------------------------
-${chalk.red('NOTE:')} ${chalk.bold(
-      `You currently have ${output.list.length} VMs running.`
-    )} Remember to delete those
-      no longer being used.
-      View running VMs: ${chalk.bold('multipass list')}
-  -----------------------------------------------------------------
-`;
-  }
-
-  return '';
 };
