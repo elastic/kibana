@@ -11,6 +11,11 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  fetchAgentPolicyEnrollmentKey,
+  fetchFleetServerUrl,
+  unEnrollFleetAgent,
+} from '../../../../scripts/endpoint/common/fleet_services';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
 import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
@@ -29,8 +34,11 @@ import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common
 import type {
   CreateAndEnrollEndpointHostOptions,
   CreateAndEnrollEndpointHostResponse,
+  CreateEndpointHostResponse,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import {
+  enrollHostWithFleet,
+  createEndpointHost,
   createAndEnrollEndpointHost,
   destroyEndpointHost,
   startEndpointHost,
@@ -328,7 +336,7 @@ export const dataLoadersForRealEndpoints = (
   });
 
   on('task', {
-    createEndpointHost: async (
+    createAndEnrollEndpointHost: async (
       options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostResponse> => {
       const { kbnClient, log } = await stackServicesPromise;
@@ -365,6 +373,50 @@ export const dataLoadersForRealEndpoints = (
       };
 
       return attemptCreateEndpointHost();
+    },
+
+    createEndpointHost: async (
+      options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
+    ): Promise<CreateEndpointHostResponse> => {
+      const { log } = await stackServicesPromise;
+
+      return createEndpointHost({
+        useClosestVersionMatch: true,
+        ...options,
+        log,
+      });
+    },
+
+    enrollHostWithFleet: async (options: {
+      agentPolicyId: string;
+      hostname: string;
+      vmDirName: string;
+    }) => {
+      const { kbnClient, log } = await stackServicesPromise;
+      const [fleetServerUrl, enrollmentToken] = await Promise.all([
+        fetchFleetServerUrl(kbnClient),
+
+        fetchAgentPolicyEnrollmentKey(kbnClient, options.agentPolicyId),
+      ]);
+
+      const { agentId } = await enrollHostWithFleet({
+        kbnClient,
+        log,
+        fleetServerUrl: fleetServerUrl as string,
+        enrollmentToken: enrollmentToken as string,
+        vmName: options.hostname,
+        vmDirName: options.vmDirName, // getVmDirNameFromAgentDownloadUrl(agentDownloadUrl),
+      });
+
+      return waitForEndpointToStreamData(kbnClient, agentId, 360000).then(() => ({
+        hostname: options.hostname,
+        agentId,
+      }));
+    },
+
+    unEnrollFleetAgent: async (agentId: string) => {
+      const { kbnClient } = await stackServicesPromise;
+      return unEnrollFleetAgent(kbnClient, agentId, true);
     },
 
     destroyEndpointHost: async (

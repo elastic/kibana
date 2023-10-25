@@ -8,12 +8,12 @@
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 // only used in "real" endpoint tests not in mocked ones
-export const createEndpointHost = (
+export const createAndEnrollEndpointHost = (
   agentPolicyId: string,
   timeout?: number
 ): Cypress.Chainable<CreateAndEnrollEndpointHostResponse> => {
   return cy.task(
-    'createEndpointHost',
+    'createAndEnrollEndpointHost',
     {
       agentPolicyId,
     },

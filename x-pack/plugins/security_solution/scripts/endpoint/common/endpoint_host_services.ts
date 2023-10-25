@@ -22,12 +22,9 @@ import {
 
 export const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
 
-export interface CreateAndEnrollEndpointHostOptions
+export interface CreateEndpointHostOptions
   extends Pick<CreateMultipassVmOptions, 'disk' | 'cpus' | 'memory'> {
-  kbnClient: KbnClient;
   log: ToolingLog;
-  /** The fleet Agent Policy ID to use for enrolling the agent */
-  agentPolicyId: string;
   /** version of the Agent to install. Defaults to stack version */
   version?: string;
   /** The name for the host. Will also be the name of the VM */
@@ -38,18 +35,27 @@ export interface CreateAndEnrollEndpointHostOptions
   useCache?: boolean;
 }
 
+export interface CreateEndpointHostResponse {
+  vmName: string;
+  vmDirName: string;
+}
+
+export type CreateAndEnrollEndpointHostOptions = CreateEndpointHostOptions & {
+  kbnClient: KbnClient;
+  /** The fleet Agent Policy ID to use for enrolling the agent */
+  agentPolicyId: string;
+};
+
 export interface CreateAndEnrollEndpointHostResponse {
   hostname: string;
   agentId: string;
 }
 
 /**
- * Creates a new virtual machine (host) and enrolls that with Fleet
+ * Creates a new virtual machine (host)
  */
-export const createAndEnrollEndpointHost = async ({
-  kbnClient,
+export const createEndpointHost = async ({
   log,
-  agentPolicyId,
   cpus,
   disk,
   memory,
@@ -57,7 +63,7 @@ export const createAndEnrollEndpointHost = async ({
   version = kibanaPackageJson.version,
   useClosestVersionMatch = false,
   useCache = true,
-}: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
+}: CreateEndpointHostOptions): Promise<CreateEndpointHostResponse> => {
   let cacheCleanupPromise: ReturnType<typeof cleanupDownloads> = Promise.resolve({
     deleted: [],
   });
@@ -82,7 +88,7 @@ export const createAndEnrollEndpointHost = async ({
     return { url };
   });
 
-  const [vm, fleetServerUrl, enrollmentToken] = await Promise.all([
+  const [vm] = await Promise.all([
     process.env.CI
       ? createVagrantVm({
           vmName,
@@ -95,10 +101,6 @@ export const createAndEnrollEndpointHost = async ({
           cpus,
           memory,
         }),
-
-    fetchFleetServerUrl(kbnClient),
-
-    fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId),
   ]);
 
   if (!process.env.CI) {
@@ -107,6 +109,66 @@ export const createAndEnrollEndpointHost = async ({
 
   // Some validations before we proceed
   assert(agentDownload.url, 'Missing agent download URL');
+
+  await setupAgentPackage({
+    log,
+    vmName: vm.vmName,
+    agentDownloadUrl: agentDownload.url,
+    cachedAgentDownload: agentDownload.cache,
+  });
+
+  await cacheCleanupPromise.then((results) => {
+    if (results.deleted.length > 0) {
+      log.verbose(`Agent Downloads cache directory was cleaned up and the following ${
+        results.deleted.length
+      } were deleted:
+${results.deleted.join('\n')}
+`);
+    }
+  });
+
+  return {
+    vmName: vm.vmName,
+    vmDirName: getVmDirNameFromAgentDownloadUrl(agentDownload.url),
+  };
+};
+
+export const getVmDirNameFromAgentDownloadUrl = (agentDownloadUrl: string): string =>
+  agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1).replace(/\.tar\.gz$/, '');
+
+/**
+ * Creates a new virtual machine (host) and enrolls that with Fleet
+ */
+export const createAndEnrollEndpointHost = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  cpus,
+  disk,
+  memory,
+  hostname,
+  version = kibanaPackageJson.version,
+  useClosestVersionMatch = false,
+  useCache = true,
+}: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
+  const [vm, fleetServerUrl, enrollmentToken] = await Promise.all([
+    createEndpointHost({
+      log,
+      cpus,
+      disk,
+      memory,
+      hostname,
+      version,
+      useClosestVersionMatch,
+      useCache,
+    }),
+
+    fetchFleetServerUrl(kbnClient),
+
+    fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId),
+  ]);
+
+  // Some validations before we proceed
   assert(fleetServerUrl, 'Fleet server URL not set');
   assert(enrollmentToken, `No enrollment token for agent policy id [${agentPolicyId}]`);
 
@@ -118,20 +180,9 @@ export const createAndEnrollEndpointHost = async ({
     kbnClient,
     log,
     fleetServerUrl,
-    agentDownloadUrl: agentDownload.url,
-    cachedAgentDownload: agentDownload.cache,
     enrollmentToken,
     vmName: vm.vmName,
-  });
-
-  await cacheCleanupPromise.then((results) => {
-    if (results.deleted.length > 0) {
-      log.verbose(`Agent Downloads cache directory was cleaned up and the following ${
-        results.deleted.length
-      } were deleted:
-${results.deleted.join('\n')}
-`);
-    }
+    vmDirName: vm.vmDirName,
   });
 
   return {
@@ -223,10 +274,10 @@ const createMultipassVm = async ({
   vmName,
   disk = '8G',
   cpus = 1,
-  memory = '1G',
+  memory = '2G',
 }: CreateMultipassVmOptions): Promise<CreateVmResponse> => {
   await execa.command(
-    `multipass launch --name ${vmName} --disk ${disk} --cpus ${cpus} --memory ${memory}`
+    `multipass launch jammy --name ${vmName} --disk ${disk} --cpus ${cpus} --memory ${memory}`
   );
 
   return {
@@ -246,27 +297,20 @@ export const deleteMultipassVm = async (vmName: string): Promise<void> => {
   }
 };
 
-interface EnrollHostWithFleetOptions {
-  kbnClient: KbnClient;
+interface SetupAgentPackageOptions {
   log: ToolingLog;
   vmName: string;
   agentDownloadUrl: string;
   cachedAgentDownload?: DownloadedAgentInfo;
-  fleetServerUrl: string;
-  enrollmentToken: string;
 }
 
-const enrollHostWithFleet = async ({
-  kbnClient,
+const setupAgentPackage = async ({
   log,
-  vmName,
-  fleetServerUrl,
   agentDownloadUrl,
+  vmName,
   cachedAgentDownload,
-  enrollmentToken,
-}: EnrollHostWithFleetOptions): Promise<{ agentId: string }> => {
+}: SetupAgentPackageOptions) => {
   const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
-  const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
 
   if (cachedAgentDownload) {
     log.verbose(
@@ -295,7 +339,25 @@ const enrollHostWithFleet = async ({
       await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
     }
   }
+};
 
+export interface EnrollHostWithFleetOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  vmName: string;
+  vmDirName: string;
+  fleetServerUrl: string;
+  enrollmentToken: string;
+}
+
+export const enrollHostWithFleet = async ({
+  kbnClient,
+  log,
+  vmName,
+  vmDirName,
+  fleetServerUrl,
+  enrollmentToken,
+}: EnrollHostWithFleetOptions): Promise<{ agentId: string }> => {
   const agentInstallArguments = [
     'sudo',
 

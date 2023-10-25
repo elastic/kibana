@@ -40,6 +40,7 @@ import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
 registerCypressGrep();
 
 const ENDPOINT_HOST_SESSION_NAME = 'endpointHost';
+const ENDPOINT_AGENT_SESSION_NAME = 'endpointAgent';
 
 export interface EndpointHostSession {
   indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -117,43 +118,70 @@ Cypress.Commands.add(
 
 Cypress.on('uncaught:exception', () => false);
 
-Cypress.Commands.add('createEndpointHost', () =>
-  cy.dataSession(
-    ENDPOINT_HOST_SESSION_NAME,
-    () => {
-      let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-      let policy: PolicyData;
-      let createdHost: CreateAndEnrollEndpointHostResponse;
+Cypress.Commands.add('createEndpointHost', () => {
+  return cy
+    .dataSession({
+      name: ENDPOINT_HOST_SESSION_NAME,
+      setup: () => cy.task('createEndpointHost', {}, { timeout: 30 * 60 * 1000 }),
+      validate: true,
+      shareAcrossSpecs: Cypress.config('isInteractive'),
+    })
+    .then((endpointHostData) =>
+      cy.dataSession({
+        name: ENDPOINT_AGENT_SESSION_NAME,
+        onInvalidated: (value) => {
+          console.error('value', value);
 
-      return getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version).then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
+          return cy.task('unEnrollFleetAgent', value.createdHost.agentId);
+        },
+        setup: () => {
+          let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+          let policy: PolicyData;
+          let createdHost: CreateAndEnrollEndpointHostResponse;
 
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
+          return getEndpointIntegrationVersion().then((version) =>
+            createAgentPolicyTask(version).then((data) => {
+              indexedPolicy = data;
+              policy = indexedPolicy.integrationPolicies[0];
 
-              return {
-                indexedPolicy,
-                policy,
-                createdHost,
-              };
-            });
-          });
-        })
-      );
-    },
-    true // don't invalidate the session when the test rerenders
-  )
-);
+              return enableAllPolicyProtections(policy.id).then(() => {
+                // Create and enroll a new Endpoint host
+                return cy
+                  .task(
+                    'enrollHostWithFleet',
+                    {
+                      agentPolicyId: policy.policy_id,
+                      hostname: endpointHostData.vmName,
+                      vmDirName: endpointHostData.vmDirName,
+                    },
+                    { timeout: 900000 } // 15 minutes, since setup can take 10 minutes and more. Task will time out if is not resolved within this time.
+                  )
+                  .then(({ agentId }) => ({
+                    indexedPolicy,
+                    policy,
+                    createdHost: {
+                      agentId,
+                      hostname: endpointHostData.vmName,
+                    },
+                  }));
+              });
+            })
+          );
+        },
+        validate: true, // don't invalidate the session when the test rerenders
+      })
+    );
+});
 
 Cypress.Commands.add('removeEndpointHost', () => {
   cy.getCreatedHostData().then((endpointHost) => {
     if (endpointHost) {
       if (endpointHost.createdHost) {
-        cy.task('destroyEndpointHost', endpointHost.createdHost);
+        if (!Cypress.config('isInteractive')) {
+          cy.task('destroyEndpointHost', endpointHost.createdHost);
+        } else {
+          cy.task('unEnrollFleetAgent', endpointHost.createdHost.agentId);
+        }
       }
 
       if (endpointHost.indexedPolicy) {
@@ -168,7 +196,7 @@ Cypress.Commands.add('removeEndpointHost', () => {
 });
 
 Cypress.Commands.add('getCreatedHostData', () =>
-  Cypress.getDataSession(ENDPOINT_HOST_SESSION_NAME)
+  Cypress.getDataSession(ENDPOINT_AGENT_SESSION_NAME)
 );
 
 // Login as a SOC Manager to properly initialize Security Solution App

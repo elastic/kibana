@@ -20,7 +20,7 @@ import {
 
 import { login } from '../../tasks/login';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
-import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { createAndEnrollEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
 describe('Uninstall agent from host', { tags: ['@ess'] }, () => {
@@ -63,7 +63,7 @@ describe('Uninstall agent from host', { tags: ['@ess'] }, () => {
 
     beforeEach(() => {
       // Create and enroll a new Endpoint host
-      return createEndpointHost(policy.policy_id).then((host) => {
+      return createAndEnrollEndpointHost(policy.policy_id).then((host) => {
         createdHost = host as CreateAndEnrollEndpointHostResponse;
       });
     });
@@ -95,9 +95,11 @@ describe('Uninstall agent from host', { tags: ['@ess'] }, () => {
 
     beforeEach(() => {
       // Create and enroll a new Endpoint host
-      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
-        createdHost = host as CreateAndEnrollEndpointHostResponse;
-      });
+      return createAndEnrollEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then(
+        (host) => {
+          createdHost = host as CreateAndEnrollEndpointHostResponse;
+        }
+      );
     });
 
     afterEach(() => {
