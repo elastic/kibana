@@ -56,7 +56,7 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
         scale: 'ratio',
       };
     },
-    getDefaultLabel: (column, indexPattern, columns) => {
+    getDefaultLabel: (column, columns, indexPattern) => {
       return 'normalize_by_unit';
     },
     toExpression: (layer, columnId) => {

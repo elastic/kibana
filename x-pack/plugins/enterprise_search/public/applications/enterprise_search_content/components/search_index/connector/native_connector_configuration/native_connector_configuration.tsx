@@ -122,6 +122,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 {
                   children: (
                     <NativeConnectorConfigurationConfig
+                      connector={index.connector}
                       nativeConnector={nativeConnector}
                       status={index.connector.status}
                     />
