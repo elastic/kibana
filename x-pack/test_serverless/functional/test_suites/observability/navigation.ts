@@ -59,6 +59,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'ml:anomalyDetection',
       });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Jobs',
+      });
+      await testSubjects.click('mlCreateNewJobButton');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'AIOps',
+        'Anomaly Detection',
+        'Create job',
+      ]);
 
       // navigate to a different section
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
@@ -118,6 +127,21 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'observability-overview:cases',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Settings']);
+    });
+
+    it('navigates to integrations', async () => {
+      await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'integrations' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Integrations',
+        'Browse integrations',
+      ]);
+    });
+
+    it('navigates to fleet', async () => {
+      await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'fleet' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Fleet', 'Agents']);
     });
   });
 }

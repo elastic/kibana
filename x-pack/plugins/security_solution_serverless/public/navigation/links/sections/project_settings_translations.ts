@@ -38,15 +38,28 @@ export const CLOUD_BILLING_TITLE = i18n.translate(
   }
 );
 
-export const CLOUD_MAPS_TITLE = i18n.translate(
+export const MAPS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectSettings.maps.title',
   {
     defaultMessage: 'Maps',
   }
 );
-export const CLOUD_VISUALIZE_TITLE = i18n.translate(
+export const MAPS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.projectSettings.maps.description',
+  {
+    defaultMessage:
+      'Analyze geospatial data and identify geo patterns in multiple layers and indices.',
+  }
+);
+export const VISUALIZE_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectSettings.visualize.title',
   {
     defaultMessage: 'Visualize library',
+  }
+);
+export const VISUALIZE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.projectSettings.visualize.description',
+  {
+    defaultMessage: 'Manage visualization library. Create, edit, and share visualizations.',
   }
 );
