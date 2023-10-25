@@ -51,7 +51,10 @@ const EmptyChartPlaceholder = ({ metricName }: { metricName: string }) => (
     message={
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <FormattedMessage id="charts.noDataLabel" defaultMessage="No results found" />
+          <FormattedMessage
+            id="xpack.infra.metrics.nodeDetails.processes.charts.noDataLabel"
+            defaultMessage="No results found"
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <MetricNotAvailableExplanationTooltip metricName={metricName} />
