@@ -64,13 +64,13 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         title={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.serviceTokenCalloutText"
-            defaultMessage="Generate a service token in the remote cluster with this API call and copy the value."
+            defaultMessage="Generate a service token by running this API request in the Remote Kibana Console and copy the response value"
           />
         }
         data-test-subj="serviceTokenCallout"
       >
         <EuiCodeBlock isCopyable={true}>
-          {`curl -XPOST 'https://REMOTE_KIBANA_HOST:PORT/api/fleet/service_tokens?remote=true' -H 'kbn-xsrf: remote-es' -u USER:PASSWORD`}
+          {`POST kbn:/api/fleet/service_tokens?remote=true`}
         </EuiCodeBlock>
       </EuiCallOut>
       <EuiSpacer size="m" />
