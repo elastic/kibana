@@ -110,10 +110,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('viewWarningBtn');
       });
 
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('viewWarningBtn');
-      await openShardModalButton.click();
-
       // request
       await retry.try(async () => {
         await testSubjects.click('inspectorRequestDetailRequest');
