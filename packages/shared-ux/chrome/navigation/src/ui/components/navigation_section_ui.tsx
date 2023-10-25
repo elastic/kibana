@@ -7,7 +7,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-
+import classNames from 'classnames';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -359,9 +359,14 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
       let forceState: EuiAccordionProps['forceState'] = isCollapsed ? 'closed' : 'open';
       if (!isCollapsible) forceState = 'open'; // Allways open if the accordion is not collapsible
 
+      const arrowProps: EuiAccordionProps['arrowProps'] = {
+        css: isCollapsible ? undefined : { display: 'none' },
+        'data-test-subj': classNames(`accordionArrow`, `accordionArrow-${id}`),
+      };
+
       const updated: Partial<EuiAccordionProps> = {
         ..._accordionProps,
-        ...(!isCollapsible && { arrowProps: { css: { display: 'none' } } }),
+        arrowProps,
         forceState,
         onToggle: () => {
           toggleAccordion(id);
