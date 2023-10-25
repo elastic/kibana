@@ -467,7 +467,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(resp2.hits.hits.length).to.be(1);
 
-      const document = resp.hits.hits[0];
+      const document = resp.hits.hits[1];
       expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
@@ -478,7 +478,7 @@ export default function ({ getService }: FtrProviderContext) {
         recoveredIds: '[]',
       });
 
-      const document1 = resp.hits.hits[1];
+      const document1 = resp.hits.hits[0];
       expect(omit(document1, '_source.date')._source).to.eql({
         all: '1',
         new: '0',
