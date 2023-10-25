@@ -177,7 +177,8 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Global packs', { tags: ['@ess', '@serverless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169688
+  describe.skip('Global packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       navigateTo('/app/osquery/packs');
