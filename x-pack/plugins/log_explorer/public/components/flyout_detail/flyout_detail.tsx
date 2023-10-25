@@ -23,31 +23,29 @@ export function FlyoutDetail({
   const { hasTimestamp, hasLogLevel, hasMessage, hasBadges, hasFlyoutHeader } =
     getFlyoutRenderFlags(parsedDoc);
 
-  return (
-    hasFlyoutHeader && (
-      <EuiFlexGroup wrap direction="column" gutterSize="m" data-test-subj="logExplorerFlyoutDetail">
-        <EuiFlexItem grow={false}>
-          {hasBadges && (
-            <EuiFlexGroup wrap responsive={false} gutterSize="m">
-              {hasLogLevel && (
-                <EuiFlexItem grow={false}>
-                  <LogLevel level={parsedDoc.level} />
-                </EuiFlexItem>
-              )}
-              {hasTimestamp && (
-                <EuiFlexItem grow={false}>
-                  <Timestamp timestamp={parsedDoc.timestamp} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-        {hasMessage && (
-          <EuiFlexItem grow={false}>
-            <Message message={parsedDoc.message} />
-          </EuiFlexItem>
+  return hasFlyoutHeader ? (
+    <EuiFlexGroup wrap direction="column" gutterSize="m" data-test-subj="logExplorerFlyoutDetail">
+      <EuiFlexItem grow={false}>
+        {hasBadges && (
+          <EuiFlexGroup wrap responsive={false} gutterSize="m">
+            {hasLogLevel && (
+              <EuiFlexItem grow={false}>
+                <LogLevel level={parsedDoc.level} />
+              </EuiFlexItem>
+            )}
+            {hasTimestamp && (
+              <EuiFlexItem grow={false}>
+                <Timestamp timestamp={parsedDoc.timestamp} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         )}
-      </EuiFlexGroup>
-    )
-  );
+      </EuiFlexItem>
+      {hasMessage && (
+        <EuiFlexItem grow={false}>
+          <Message message={parsedDoc.message} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  ) : null;
 }
