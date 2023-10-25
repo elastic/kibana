@@ -2290,7 +2290,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should generate signals with name_override field', async () => {
+      it('should generate alerts when rule includes legacy investigation_fields', async () => {
         // enable rule
         await supertest
           .post(DETECTION_ENGINE_RULES_BULK_ACTION)

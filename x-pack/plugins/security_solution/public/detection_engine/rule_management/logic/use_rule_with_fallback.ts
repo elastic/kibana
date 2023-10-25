@@ -116,6 +116,15 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   };
 };
 
+/**
+ * In 8.10.x investigation_fields is mapped as alert, moving forward, it will be mapped
+ * as an object. This util is being used for the use case where a rule is deleted and the
+ * hook falls back to using the alert document to retrieve rule information. In this scenario
+ * we are going to return undefined if field is in legacy format to avoid any possible complexity
+ * in the UI for such flows. See PR 169061
+ * @param investigationFields InvestigationFieldsCombined | undefined
+ * @returns InvestigationFields | undefined
+ */
 export const migrateLegacyInvestigationFields = (
   investigationFields: InvestigationFieldsCombined | undefined
 ): InvestigationFields | undefined => {
@@ -126,10 +135,15 @@ export const migrateLegacyInvestigationFields = (
   return investigationFields;
 };
 
-// Testing edge case, where if hook does not find the rule and turns to the alert document,
-// the alert document could still have an unmigrated, legacy version of investigation_fields.
-// We are not looking to do any migrations to these legacy fields in the alert document, so need
-// to transform it on read in this case.
+/**
+ * In 8.10.x investigation_fields is mapped as alert, moving forward, it will be mapped
+ * as an object. This util is being used for the use case where a rule is deleted and the
+ * hook falls back to using the alert document to retrieve rule information. In this scenario
+ * we are going to return undefined if field is in legacy format to avoid any possible complexity
+ * in the UI for such flows. See PR 169061
+ * @param rule Rule
+ * @returns Rule
+ */
 export const migrateRuleWithLegacyInvestigationFields = (rule: Rule): Rule => {
   if (!rule) return rule;
 

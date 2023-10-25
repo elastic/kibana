@@ -3031,7 +3031,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should export rules with legacy investigation_fields and migrate field', async () => {
+      it('should export rules with legacy investigation_fields and migrate field in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.export })
           .expect(200)
@@ -3060,6 +3060,19 @@ export default ({ getService }: FtrProviderContext): void => {
           field_names: ['host.name'],
         });
 
+        /**
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should not include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, rule1.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+        expect(ruleSO?.alert?.enabled).to.eql(true);
+
         const exportDetails = JSON.parse(exportDetailsJson);
         expect(exportDetails).to.eql({
           exported_exception_list_count: 0,
@@ -3080,7 +3093,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should delete rules with investigation fields', async () => {
+      it('should delete rules with investigation fields and migrate rules in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.delete })
           .expect(200);
@@ -3094,6 +3107,15 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(names.includes('Test investigation fields')).to.eql(true);
         expect(names.includes('Test investigation fields empty array')).to.eql(true);
         expect(names.includes('Test investigation fields object')).to.eql(true);
+
+        const ruleWithLegacyField = body.attributes.results.deleted.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.rule_id === ruleWithLegacyInvestigationField.params.ruleId
+        );
+
+        expect(ruleWithLegacyField.investigation_fields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
 
         // Check that the updates have been persisted
         await fetchRule(ruleWithLegacyInvestigationField.params.ruleId).expect(404);
