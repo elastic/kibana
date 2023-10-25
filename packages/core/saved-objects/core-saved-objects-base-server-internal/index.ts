@@ -68,5 +68,4 @@ export {
   buildModelVersionTransformFn,
   aggregateMappingAdditions,
   convertModelVersionBackwardConversionSchema,
-  mergeTransformFunctions,
 } from './src/model_version';
