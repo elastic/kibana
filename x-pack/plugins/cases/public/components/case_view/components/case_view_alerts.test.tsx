@@ -53,7 +53,6 @@ describe('CaseUI View Page activity tab', () => {
             values: ['alert-id-1'],
           },
         },
-        showExpandToDetails: true,
         showAlertStatusWithFlapping: false,
       });
     });
@@ -82,7 +81,6 @@ describe('CaseUI View Page activity tab', () => {
             values: ['alert-id-1'],
           },
         },
-        showExpandToDetails: false,
         showAlertStatusWithFlapping: true,
       });
     });

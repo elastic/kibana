@@ -255,6 +255,35 @@ describe('Data Streams tab', () => {
       ]);
     });
 
+    test('hides Storage size column from stats if enableDataStreamsStorageColumn===false', async () => {
+      testBed = await setup(httpSetup, {
+        config: {
+          enableDataStreamsStorageColumn: false,
+        },
+      });
+
+      const { actions, component, table } = testBed;
+
+      await act(async () => {
+        actions.goToDataStreamsList();
+      });
+
+      component.update();
+
+      // Switching the stats on
+      await act(async () => {
+        actions.clickIncludeStatsSwitch();
+      });
+      component.update();
+
+      // The table renders with the stats columns except the Storage size column
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7d', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7d', 'Delete'],
+      ]);
+    });
+
     test('clicking the indices count navigates to the backing indices', async () => {
       const { table, actions } = testBed;
       await actions.clickIndicesAt(0);
