@@ -30,7 +30,12 @@ describe('SearchResponseWarningsBadgePopoverContent', () => {
           openInInspector: mockOpenInInspector,
         } as SearchResponseWarning,
       ];
-      render(<SearchResponseWarningsBadgePopoverContent onViewDetailsClick={mockOnViewDetailsClick} warnings={warnings} />);
+      render(
+        <SearchResponseWarningsBadgePopoverContent
+          onViewDetailsClick={mockOnViewDetailsClick}
+          warnings={warnings}
+        />
+      );
       const viewDetailsButton = screen.getByRole('button');
       fireEvent.click(viewDetailsButton);
       expect(mockOpenInInspector).toHaveBeenCalled();
@@ -69,7 +74,12 @@ describe('SearchResponseWarningsBadgePopoverContent', () => {
           openInInspector: request2MockOpenInInspector,
         } as SearchResponseWarning,
       ];
-      render(<SearchResponseWarningsBadgePopoverContent onViewDetailsClick={mockOnViewDetailsClick} warnings={warnings} />);
+      render(
+        <SearchResponseWarningsBadgePopoverContent
+          onViewDetailsClick={mockOnViewDetailsClick}
+          warnings={warnings}
+        />
+      );
       const viewDetailsButton = screen.getByRole('button');
       fireEvent.click(viewDetailsButton);
       expect(request1MockOpenInInspector).not.toHaveBeenCalled();
