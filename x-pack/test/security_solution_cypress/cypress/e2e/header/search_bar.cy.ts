@@ -23,8 +23,7 @@ import { getHostIpFilter } from '../../objects/filter';
 import { hostsUrl } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165637
-describe('SearchBar', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visit(hostsUrl('allHosts'));
