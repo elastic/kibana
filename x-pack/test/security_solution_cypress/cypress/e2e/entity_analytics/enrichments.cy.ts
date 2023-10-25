@@ -36,8 +36,7 @@ import { enableRiskEngine } from '../../tasks/entity_analytics';
 const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverUnload', 'risk_scores_new');

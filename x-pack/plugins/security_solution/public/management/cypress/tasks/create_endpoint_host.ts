@@ -17,6 +17,6 @@ export const createEndpointHost = (
     {
       agentPolicyId,
     },
-    { timeout: timeout ?? 20 * 60 * 1000 } // 20 minutes, since setup can take 10 minutes and more. Task will time out if is not resolved within this time.
+    { timeout: timeout ?? 30 * 60 * 1000 }
   );
 };

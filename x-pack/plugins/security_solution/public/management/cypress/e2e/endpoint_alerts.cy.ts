@@ -19,44 +19,41 @@ import { login, ROLE } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
-describe(
-  'Endpoint generated alerts',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
-  () => {
-    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
-    let createdHost: CreateAndEnrollEndpointHostResponse;
+describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
 
-    beforeEach(() => {
+  beforeEach(() => {
       login(ROLE.soc_manager);
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, 'alerts test').then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
+    getEndpointIntegrationVersion().then((version) => {
+      createAgentPolicyTask(version, 'alerts test').then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
 
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
-            });
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
           });
         });
       });
     });
+  });
 
-    afterEach(() => {
-      if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost);
-      }
+  afterEach(() => {
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost);
+    }
 
-      if (indexedPolicy) {
-        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-      }
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
 
-      if (createdHost) {
-        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
-      }
-    });
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
+  });
 
     it('should create a Detection Engine alert from an endpoint alert', () => {
       // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)

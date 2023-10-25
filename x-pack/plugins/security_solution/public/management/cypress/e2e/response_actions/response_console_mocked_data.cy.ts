@@ -24,12 +24,12 @@ import {
 } from '../../tasks/isolate';
 import { login } from '../../tasks/login';
 
-describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
 
-  describe('`isolate` command', { tags: ['@brokenInServerless'] }, () => {
+  describe('`isolate` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let isolateRequestResponse: ActionDetails;
@@ -71,7 +71,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('`release` command', { tags: ['@brokenInServerless'] }, () => {
+  describe('`release` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let releaseRequestResponse: ActionDetails;
