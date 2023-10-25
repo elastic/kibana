@@ -271,7 +271,9 @@ describe('rules_list component empty', () => {
   it('renders MaintenanceWindowCallout if one exists', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
     renderWithProviders(<RulesList />);
-    expect(await screen.findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(
+      await screen.findByText('One or more maintenance windows are running')
+    ).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
