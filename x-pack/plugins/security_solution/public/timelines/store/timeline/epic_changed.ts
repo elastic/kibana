@@ -8,7 +8,7 @@
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
-import { filter, map, takeWhile } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import {
   applyKqlFilterQuery,
@@ -75,7 +75,6 @@ export const createTimelineChangedEpic = (): Epic<Action, Action> => (action$) =
         id: get('payload.id', action) as string,
         changed: true,
       })
-    ),
-    takeWhile((action) => action.type !== setChanged.type)
+    )
   );
 };
