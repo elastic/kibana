@@ -55,8 +55,7 @@ export function buildBreadcrumbs({
     return [homeBreadcrumb, ...navBreadcrumbs, ...projectBreadcrumbs.breadcrumbs];
   }
 
-  // otherwise try to merge chrome breadcrumbs with nav breadcrumbs using deeplinkid
-  // TODO also consider merging just based on href?
+  // otherwise try to merge legacy breadcrumbs with navigational project breadcrumbs using deeplinkid
   let chromeBreadcrumbStartIndex = -1;
   let navBreadcrumbEndIndex = -1;
   navBreadcrumbsLoop: for (let i = navBreadcrumbs.length - 1; i >= 0; i--) {

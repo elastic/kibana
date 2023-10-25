@@ -116,8 +116,8 @@ export const defaultNavigation: MlNodeDefinition = {
           link: 'ml:indexDataVisualizer',
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return (
-              pathNameSerialized.includes(prepend('datavisualizer')) ||
-              pathNameSerialized.includes(prepend('jobs/new_job/datavisualizer'))
+              pathNameSerialized.includes(prepend('/app/ml/datavisualizer')) ||
+              pathNameSerialized.includes(prepend('/app/ml/jobs/new_job/datavisualizer'))
             );
           },
         },
