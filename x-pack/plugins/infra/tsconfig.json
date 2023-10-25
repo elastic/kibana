@@ -72,7 +72,8 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/metrics-data-access-plugin",
     "@kbn/expressions-plugin",
-    "@kbn/advanced-settings-plugin"
+    "@kbn/advanced-settings-plugin",
+    "@kbn/cloud-plugin"
   ],
   "exclude": ["target/**/*"]
 }

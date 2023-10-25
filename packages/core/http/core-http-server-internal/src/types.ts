@@ -25,6 +25,7 @@ export interface InternalHttpServicePreboot
     InternalHttpServiceSetup,
     | 'auth'
     | 'csp'
+    | 'staticAssets'
     | 'basePath'
     | 'externalUrl'
     | 'registerStaticDir'
@@ -45,6 +46,7 @@ export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
+  staticAssets: HttpServerSetup['staticAssets'];
   externalUrl: ExternalUrlConfig;
   createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
     path: string,
