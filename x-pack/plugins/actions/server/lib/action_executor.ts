@@ -354,22 +354,9 @@ export class ActionExecutor {
           };
 
           if (result.data instanceof Readable) {
-            let body: string;
-            if (!(validatedParams as { subActionParams: { body: string } }).subActionParams?.body) {
-              // TODO: Remove in part 2 of streaming work for security solution
-              // tracked here: https://github.com/elastic/security-team/issues/7363
-              // `stream` is a temporary parameter while the feature is developed behind a feature flagr
-              const { stream: _, ...rest } = (
-                validatedParams as { subActionParams: { [a: string]: string } }
-              ).subActionParams;
-              body = JSON.stringify(rest);
-            } else {
-              body = (validatedParams as { subActionParams: { body: string } }).subActionParams
-                .body;
-            }
             getTokenCountFromOpenAIStream({
               responseStream: result.data.pipe(new PassThrough()),
-              body,
+              body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
             })
               .then(({ total, prompt, completion }) => {
                 event.kibana!.action!.execution!.gen_ai!.usage = {

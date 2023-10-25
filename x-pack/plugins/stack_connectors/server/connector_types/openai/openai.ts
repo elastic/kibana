@@ -187,21 +187,20 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * Sends the stringified input to the runApi method. Returns the trimmed completion from the response.
    * @param body An object containing array of message objects, and possible other OpenAI properties
    */
-  public async invokeAI(
-    params: InvokeAIActionParams
-  ): Promise<InvokeAIActionResponse | RunActionResponse> {
-    // TODO: Remove in part 2 of streaming work for security solution
-    // tracked here: https://github.com/elastic/security-team/issues/7363
-    // `stream` is a temporary parameter while the feature is developed behind a feature flag
-    // why not call stream directly from the securit solution api? because the body has no validation
-    const { stream = false, ...body } = params;
-    const res = await this.streamApi({ body: JSON.stringify(body), stream });
+  public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
+    const res = await this.runApi({ body: JSON.stringify(body) });
 
-    // TODO: Remove in part 2 of streaming work for security solution
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();
       return { message: result, usage: res.usage };
     }
-    return res;
+
+    return {
+      message:
+        'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.',
+      ...(res.usage
+        ? { usage: res.usage }
+        : { usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } }),
+    };
   }
 }
