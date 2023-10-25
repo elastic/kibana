@@ -73,16 +73,12 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
 
       {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
 
-      {Boolean(interceptedWarnings?.length) && (
-        <div>
-          <SearchResponseWarningsBadge
-            visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
-              defaultMessage: 'table',
-            })}
-            warnings={interceptedWarnings}
-          />
-        </div>
-      )}
+      <SearchResponseWarningsBadge
+        visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
+          defaultMessage: 'table',
+        })}
+        warnings={interceptedWarnings ?? []}
+      />
     </EuiFlexGroup>
   );
 };

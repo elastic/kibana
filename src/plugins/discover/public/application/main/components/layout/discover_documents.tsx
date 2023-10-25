@@ -281,7 +281,7 @@ function DiscoverDocumentsComponent({
           visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
             defaultMessage: 'table',
           })}
-          warnings={documentState.interceptedWarnings}
+          warnings={documentState.interceptedWarnings ?? []}
         />
       </>
     ),
