@@ -27,13 +27,6 @@ export const SearchResponseWarningsBadge = (props: Props) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const buttonLabel = i18n.translate('searchResponseWarnings.badgeButtonLabel', {
-    defaultMessage: '{warningCount} {warningCount, plural, one {warning} other {warnings}}',
-    values: {
-      warningCount: props.warnings.length,
-    },
-  });
-
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -44,7 +37,12 @@ export const SearchResponseWarningsBadge = (props: Props) => {
           color="warning"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           data-test-subj="searchResponseWarningsBadgeToogleButton"
-          title={buttonLabel}
+          title={i18n.translate('searchResponseWarnings.badgeButtonLabel', {
+            defaultMessage: '{warningCount} {warningCount, plural, one {warning} other {warnings}}',
+            values: {
+              warningCount: props.warnings.length,
+            },
+          })}
           css={css`
             block-size: ${euiTheme.size.l};
             font-size: ${xsFontSize};
