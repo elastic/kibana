@@ -37,7 +37,7 @@ describe('ViewDetailsPopover', () => {
   });
 
   describe('multiple warnings', () => {
-    test('Clicking "view details" should open popover with buttons to view details for each warning', () => {
+    test('Clicking "view details" should open popover with button to view details for each warning', () => {
       request1MockOpenInInspector = jest.fn();
       request2MockOpenInInspector = jest.fn();
       const warnings = [
