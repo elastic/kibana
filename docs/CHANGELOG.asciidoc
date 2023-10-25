@@ -101,7 +101,7 @@ Breaking changes can prevent your application from optimal operation and perform
 [%collapsible]
 ====
 *Details*  +
-TSVB has been updated to use the most recent version of Less (from v2.7.3 to v4.2.0), which could result in markdowns displaying incorrect styling. For more information, refer to {kibana-pull}167831[#167831]
+TSVB has been updated to use the most recent version of Less (from v2.7.3 to v4.2.0), which could result in markdowns displaying incorrect styling. For more information, refer to {kibana-pull}167831[#167831].
 ====
 
 [[release-notes-7.17.14]]
@@ -706,7 +706,7 @@ Security::
 
 For information about the features introduced in 7.17.0, refer to <<whats-new,What's new in 7.17>>.
 
-////
+/////
 [[release-notes-7.16.3]]
 == {kib} 7.16.3
 
