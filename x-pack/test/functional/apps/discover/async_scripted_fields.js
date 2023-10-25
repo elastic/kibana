@@ -74,7 +74,6 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('logsta*');
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.try(async function () {
         await testSubjects.existOrFail('searchResponseWarningsEmptyPrompt');
@@ -100,9 +99,8 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addSavedSearch('search with warning');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.tryForTime(20000, async function () {
-        // wait for shards failed message
-        await testSubjects.existOrFail('savedSearchEmbeddableWarningsCallout_trigger');
+      await retry.try(async function () {
+        await testSubjects.existOrFail('searchResponseWarningsBadgeToogleButton');
       });
     });
 
