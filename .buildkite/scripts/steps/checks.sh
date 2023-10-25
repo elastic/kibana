@@ -22,5 +22,6 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/steps/checks/test_hardening.sh
 .buildkite/scripts/steps/checks/ftr_configs.sh
 .buildkite/scripts/steps/checks/saved_objects_compat_changes.sh
+.buildkite/scripts/steps/checks/saved_objects_definition_change.sh
 .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
 .buildkite/scripts/steps/checks/yarn_deduplicate.sh
