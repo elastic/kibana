@@ -6,18 +6,15 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { RouteRegisterParameters } from '.';
-import { getRoutePaths } from '../../common';
-import { enableResourceManagement, setMaximumBuckets } from '../lib/setup/cluster_settings';
-import {
-  createCollectorPackagePolicy,
-  createSymbolizerPackagePolicy,
-  removeProfilingFromApmPackagePolicy,
-} from '../lib/setup/fleet_policies';
-import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
-import { setSecurityRole } from '../lib/setup/security_role';
-import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { getClient } from './compat';
+import { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common/setup';
+import { RouteRegisterParameters } from '..';
+import { getRoutePaths } from '../../../common';
+import { getCloudSetupInstructions } from './get_cloud_setup_instructions';
+import { handleRouteHandlerError } from '../../utils/handle_route_error_handler';
+import { getClient } from '../compat';
+import { setupCloud } from './setup_cloud';
+import { setupSelfManaged } from './setup_self_managed';
+import { getSelfManagedInstructions } from './get_self_managed_instructions';
 
 export function registerSetupRoute({
   router,
@@ -55,7 +52,7 @@ export function registerSetupRoute({
       }
     }
   );
-  // Set up Elasticsearch and Fleet for Universal Profiling
+
   router.post(
     {
       path: paths.HasSetupESResources,
@@ -64,19 +61,6 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const isCloudEnabled = dependencies.setup.cloud.isCloudEnabled;
-
-        if (!isCloudEnabled) {
-          const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
-          logger.error(msg);
-          return response.custom({
-            statusCode: 500,
-            body: {
-              message: msg,
-            },
-          });
-        }
-
         const esClient = await getClient(context);
         const core = await context.core;
         const clientWithDefaultAuth = createProfilingEsClient({
@@ -90,45 +74,59 @@ export function registerSetupRoute({
           useDefaultAuth: false,
         });
 
-        const commonParams = {
+        const commonSetupParams: ProfilingSetupOptions = {
           client: clientWithDefaultAuth,
+          clientWithProfilingAuth,
           logger,
-          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
           spaceId:
             dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
-          isCloudEnabled,
         };
 
-        const setupState = await dependencies.start.profilingDataAccess.services.getSetupState(
-          commonParams,
-          clientWithProfilingAuth
-        );
+        const { type, setupState } =
+          await dependencies.start.profilingDataAccess.services.getSetupState({
+            esClient,
+            soClient: core.savedObjects.client,
+            spaceId:
+              dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+          });
 
-        const executeAdminFunctions = [
-          ...(setupState.resource_management.enabled ? [] : [enableResourceManagement]),
-          ...(setupState.permissions.configured ? [] : [setSecurityRole]),
-          ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
-        ];
+        const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
+        if (isCloudEnabled && type === 'cloud') {
+          if (!dependencies.start.fleet) {
+            const msg = `Elastic Fleet is required to set up Universal Profiling on Cloud`;
+            logger.error(msg);
+            return response.custom({
+              statusCode: 500,
+              body: { message: msg },
+            });
+          }
+          logger.debug('Setting up Universal Profiling on Cloud');
 
-        const executeViewerFunctions = [
-          ...(setupState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
-          ...(setupState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
-          ...(setupState.policies.apm.profilingEnabled
-            ? [removeProfilingFromApmPackagePolicy]
-            : []),
-        ];
+          await setupCloud({
+            setupState,
+            setupParams: {
+              ...commonSetupParams,
+              packagePolicyClient: dependencies.start.fleet.packagePolicyService,
+              isCloudEnabled,
+              config: dependencies.config,
+            },
+          });
 
-        if (!executeAdminFunctions.length && !executeViewerFunctions.length) {
-          return response.ok();
+          logger.debug('[DONE] Setting up Universal Profiling on Cloud');
+        } else {
+          logger.debug('Setting up self-managed Universal Profiling');
+
+          await setupSelfManaged({
+            setupState,
+            setupParams: commonSetupParams,
+          });
+
+          logger.debug('[DONE] Setting up self-managed Universal Profiling');
         }
 
-        const setupParams = {
-          ...commonParams,
-          config: dependencies.config,
-        };
-        await Promise.all(executeAdminFunctions.map((fn) => fn(setupParams)));
-        await Promise.all(executeViewerFunctions.map((fn) => fn(setupParams)));
+        // Wait until Profiling ES plugin creates all resources
+        await clientWithDefaultAuth.profilingStatus({ waitForResourcesCreated: true });
 
         if (dependencies.telemetryUsageCounter) {
           dependencies.telemetryUsageCounter.incrementCounter({
@@ -166,16 +164,30 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const apmServerHost = dependencies.setup.cloud?.apm?.url;
         const stackVersion = dependencies.stackVersion;
-        const setupInstructions = await getSetupInstructions({
-          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
-          soClient: (await context.core).savedObjects.client,
-          apmServerHost,
-          stackVersion,
-        });
+        const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
+        if (isCloudEnabled) {
+          if (!dependencies.start.fleet) {
+            const msg = `Elastic Fleet is required to set up Universal Profiling on Cloud`;
+            logger.error(msg);
+            return response.custom({
+              statusCode: 500,
+              body: { message: msg },
+            });
+          }
 
-        return response.ok({ body: setupInstructions });
+          const apmServerHost = dependencies.setup.cloud?.apm?.url;
+          const setupInstructions = await getCloudSetupInstructions({
+            packagePolicyClient: dependencies.start.fleet?.packagePolicyService,
+            soClient: (await context.core).savedObjects.client,
+            apmServerHost,
+            stackVersion,
+          });
+
+          return response.ok({ body: setupInstructions });
+        }
+
+        return response.ok({ body: getSelfManagedInstructions({ stackVersion }) });
       } catch (error) {
         return handleRouteHandlerError({
           error,

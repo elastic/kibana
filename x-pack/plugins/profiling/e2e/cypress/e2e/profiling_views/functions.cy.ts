@@ -10,7 +10,7 @@ import {
   profilingPerCoreWatt,
 } from '@kbn/observability-plugin/common';
 
-describe.skip('Functions page', () => {
+describe('Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
 
