@@ -6,16 +6,46 @@
  */
 
 import { resolve } from 'path';
+import path from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { defineDockerServersConfig } from '@kbn/test';
 import { pageObjects } from './page_objects';
+
+const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
 
+  const registryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
+  // mount the config file for the package registry as well as
+  // the directories containing additional packages into the container
+  const volumes = {
+    // src : dest
+    './apis/fixtures/package_registry_config.yml': '/package-registry/config.yml',
+    './apis/fixtures/test_packages': '/packages/test-packages',
+    './apis/fixtures/package_verification/packages/zips': '/packages/signed-test-packages',
+  };
+  const dockerArgs: string[] = Object.entries(volumes).flatMap(([src, dest]) => [
+    '-v',
+    `${getFullPath(src)}:${dest}`,
+  ]);
+
   return {
     ...xpackFunctionalConfig.getAll(),
+    dockerServers: defineDockerServersConfig({
+      registry: {
+        enabled: !!registryPort,
+        image: registryPort,
+        portInContainer: 8080,
+        port: registryPort,
+        args: dockerArgs,
+        waitForLogLine: 'package manifests loaded',
+        waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
+      },
+    }),
     pageObjects,
     testFiles: [resolve(__dirname, './pages')],
     junit: {
