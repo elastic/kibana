@@ -8,7 +8,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 import type { WebElementWrapper } from '../../functional/services/lib/web_element_wrapper';
