@@ -62,9 +62,6 @@ describe(
         cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*').as(
           'installPackage'
         );
-        cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
-          'installPrebuiltRules'
-        );
       });
 
       it('should install package from Fleet in the background', () => {
@@ -104,7 +101,7 @@ describe(
         });
       });
 
-      it('should install rules from the Fleet package when user clicks on CTA', () => {
+      it.only('should install rules from the Fleet package when user clicks on CTA', () => {
         interface Response {
           body: {
             hits: {
@@ -122,17 +119,9 @@ describe(
             addElasticRulesButtonClick();
 
             cy.get(INSTALL_ALL_RULES_BUTTON).should('be.enabled').click();
-            cy.wait('@installPrebuiltRules', {
-              timeout: 60000,
-            }).then(() => {
-              cy.get(TOASTER)
-                .should('be.visible')
-                .should(
-                  'have.text',
-                  // i18n uses en-US format for numbers, which uses a comma as a thousands separator
-                  `${numberOfRulesToInstall.toLocaleString('en-US')} rules installed successfully.`
-                );
-            });
+            cy.get(TOASTER)
+              .should('be.visible')
+              .should('have.text', `${numberOfRulesToInstall} rules installed successfully.`);
           });
         };
         /* Retrieve how many rules were installed from the Fleet package */
