@@ -18,6 +18,9 @@ interface IEditIndexPatternState {
   fieldTypes?: string[];
 }
 
+// query param to store app state at
+export const APP_STATE_STORAGE_KEY = '_a';
+
 /**
  * Create state container with sync config for tab navigation specific for edit_index_pattern page
  */
@@ -29,8 +32,6 @@ export function createEditIndexPatternPageStateContainer({
   useHashedUrl: boolean;
 }) {
   const history = createHashHistory();
-  // query param to store app state at
-  const stateStorageKey = '_a';
   // default app state, when there is no initial state in the url
   const defaultState = {
     tab: defaultTab,
@@ -40,7 +41,7 @@ export function createEditIndexPatternPageStateContainer({
     history,
   });
   // extract starting app state from URL and use it as starting app state in state container
-  const initialStateFromUrl = kbnUrlStateStorage.get<IEditIndexPatternState>(stateStorageKey);
+  const initialStateFromUrl = kbnUrlStateStorage.get<IEditIndexPatternState>(APP_STATE_STORAGE_KEY);
   const stateContainer = createStateContainer(
     {
       ...defaultState,
@@ -60,7 +61,7 @@ export function createEditIndexPatternPageStateContainer({
   );
 
   const { start, stop } = syncState({
-    storageKey: stateStorageKey,
+    storageKey: APP_STATE_STORAGE_KEY,
     stateContainer: {
       ...stateContainer,
       // state syncing utility requires state containers to handle "null"
@@ -70,7 +71,7 @@ export function createEditIndexPatternPageStateContainer({
   });
 
   // makes sure initial url is the same as initial state (this is not really required)
-  kbnUrlStateStorage.set(stateStorageKey, stateContainer.getState(), { replace: true });
+  kbnUrlStateStorage.set(APP_STATE_STORAGE_KEY, stateContainer.getState(), { replace: true });
 
   return {
     startSyncingState: start,

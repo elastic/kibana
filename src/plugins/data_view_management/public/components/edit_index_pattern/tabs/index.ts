@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Tabs } from './tabs';
+export { Tabs, type TabsApi } from './tabs';

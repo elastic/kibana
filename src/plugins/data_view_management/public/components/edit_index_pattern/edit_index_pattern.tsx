@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -29,11 +29,13 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { Tabs } from './tabs';
+import { Tabs, type TabsApi } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
+import { APP_STATE_STORAGE_KEY } from './edit_index_pattern_state_container';
 
 const codeStyle = {
   marginLeft: '8px',
@@ -91,6 +93,20 @@ export const EditIndexPattern = withRouter(
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
     const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+    const [tabsApi, setTabsApi] = useState<TabsApi | null>(null);
+    const conflictFieldsUrl = useMemo(() => {
+      return setStateToKbnUrl(
+        APP_STATE_STORAGE_KEY,
+        {
+          fieldTypes: ['conflict'],
+          tab: 'indexedFields',
+        },
+        undefined,
+        application.getUrlForApp('management', {
+          path: `/kibana/dataViews/dataView/${encodeURIComponent(indexPattern.id!)}`,
+        })
+      );
+    }, [application, indexPattern.id]);
 
     useEffect(() => {
       savedObjectsManagement.getAllowedTypes().then((resp) => {
@@ -269,26 +285,33 @@ export const EditIndexPattern = withRouter(
               <EuiSpacer />
               <EuiCallOut title={mappingConflictHeader} color="warning" iconType="warning">
                 <p>{mappingConflictLabel}</p>
-                <EuiLink
-                  href={application.getUrlForApp('management', {
-                    path: `/kibana/dataViews/dataView/${encodeURIComponent(
-                      indexPattern.id!
-                    )}#/?_a=(fieldTypes:!(conflict),tab:indexedFields)`,
-                  })}
-                >
-                  {i18n.translate(
-                    'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
-                    {
-                      defaultMessage: 'View fields',
-                    }
-                  )}
-                </EuiLink>
+                {
+                  // eslint-disable-next-line @elastic/eui/href-or-on-click
+                  <EuiLink
+                    href={conflictFieldsUrl}
+                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      tabsApi?.updateTab({ id: 'indexedFields' });
+                      tabsApi?.updateFieldTypeFilter(['conflict']);
+                      tabsApi?.updateFieldFilter('');
+                    }}
+                  >
+                    {i18n.translate(
+                      'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
+                      {
+                        defaultMessage: 'View fields',
+                      }
+                    )}
+                  </EuiLink>
+                }
               </EuiCallOut>
             </>
           )}
         </IndexHeader>
         <EuiSpacer size="xl" />
         <Tabs
+          ref={setTabsApi}
           indexPattern={indexPattern}
           saveIndexPattern={dataViews.updateSavedObject.bind(dataViews)}
           fields={fields}
