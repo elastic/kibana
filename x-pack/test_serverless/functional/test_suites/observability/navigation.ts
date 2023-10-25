@@ -15,7 +15,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   describe('navigation', function () {
     before(async () => {
