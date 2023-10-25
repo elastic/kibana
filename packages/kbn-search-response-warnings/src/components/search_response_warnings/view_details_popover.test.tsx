@@ -14,7 +14,7 @@ import type { SearchResponseWarning } from '../../types';
 describe('ViewDetailsPopover', () => {
   describe('single warning', () => {
     test('Clicking "view details" should open warning details', () => {
-      mockOpenInInspector = jest.fn();
+      const mockOpenInInspector = jest.fn();
       const warnings = [
         {
           type: 'incomplete',
@@ -38,8 +38,8 @@ describe('ViewDetailsPopover', () => {
 
   describe('multiple warnings', () => {
     test('Clicking "view details" should open popover with button to view details for each warning', () => {
-      request1MockOpenInInspector = jest.fn();
-      request2MockOpenInInspector = jest.fn();
+      const request1MockOpenInInspector = jest.fn();
+      const request2MockOpenInInspector = jest.fn();
       const warnings = [
         {
           type: 'incomplete',
