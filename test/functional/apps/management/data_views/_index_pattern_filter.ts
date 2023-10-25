@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('should filter indexed fields', async function () {
+    it('should filter indexed fields by type', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
@@ -78,6 +78,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               bytes: {
                 type: 'keyword',
               },
+              bytes_test: {
+                type: 'long',
+              },
             },
           },
         },
@@ -87,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         index: additionalIndexWithWrongMapping,
         body: {
           bytes: 'wrong_value',
+          bytes_test: 500,
         },
         refresh: 'wait_for',
       });
@@ -106,6 +110,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '',
         '_source',
         'text',
+      ]);
+
+      await PageObjects.settings.filterField('by');
+
+      expect(await PageObjects.settings.getFieldTypes()).to.eql([
+        'keyword, long\nConflict',
+        'long',
       ]);
 
       await testSubjects.click('viewDataViewMappingConflictsButton');

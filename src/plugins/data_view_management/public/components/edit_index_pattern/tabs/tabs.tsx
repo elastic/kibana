@@ -215,7 +215,7 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const updateFieldFilter = useCallback(
     (newFieldFilter: string) => {
-      syncingStateFunc?.setCurrentFieldFilter?.(newFieldFilter);
+      syncingStateFunc?.setCurrentFieldFilter?.(newFieldFilter || undefined);
     },
     [syncingStateFunc]
   );
