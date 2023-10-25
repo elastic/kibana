@@ -261,13 +261,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onEditAction, setColumnConfig, columnConfig, isInteractive]
   );
 
-  const isNumericMap: Record<string, boolean> = useMemo(() => {
-    const numericMap: Record<string, boolean> = {};
-    for (const column of firstLocalTable.columns) {
-      numericMap[column.id] = column.meta.type === 'number';
-    }
-    return numericMap;
-  }, [firstLocalTable]);
+  const isNumericMap: Record<string, boolean> = useMemo(
+    () =>
+      firstLocalTable.columns.reduce<Record<string, boolean>>(
+        (map, column) => ({
+          ...map,
+          [column.id]: column.meta.type === 'number',
+        }),
+        {}
+      ),
+    [firstLocalTable]
+  );
 
   const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
     const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
