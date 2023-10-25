@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'dashboard',
   ]);
+  const deployment = getService('deployment');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -85,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             rule_id: { type: 'text' },
             rule_name: { type: 'text' },
             alert_id: { type: 'text' },
-            context_message: { type: 'text' },
+            context_link: { type: 'text' },
           },
         },
       },
@@ -173,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "rule_id": "{{rule.id}}",
       "rule_name": "{{rule.name}}",
       "alert_id": "{{alert.id}}",
-      "context_message": "{{context.message}}"
+      "context_link": "{{context.link}}"
     }`);
   };
 
@@ -193,6 +194,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('queryFormType_searchSource');
     await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const getResultsLink = async () => {
+    // getting the link
+    await dataGrid.clickRowToggle();
+    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_link-value');
+    const contextMessage = await contextMessageElement.getVisibleText();
+
+    return contextMessage;
+  };
+
+  const openAlertResults = async (value: string, type: 'id' | 'name' = 'name') => {
+    await PageObjects.common.navigateToApp('discover');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.discover.clickNewSearchButton(); // reset params
+
+    await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+
+    let ruleId: string;
+    if (type === 'name') {
+      const [{ id }] = await getAlertsByName(value);
+      ruleId = id;
+    } else {
+      ruleId = value;
+    }
+
+    await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
+    await PageObjects.discover.waitUntilSearchingHasFinished();
+
+    const link = await getResultsLink();
+    await filterBar.removeFilter('rule_id'); // clear filter bar
+
+    // follow url provided by alert to see documents triggered the alert
+    const baseUrl = deployment.getHostPort();
+    await browser.navigateTo(baseUrl + link);
+    await PageObjects.discover.waitUntilSearchingHasFinished();
   };
 
   const openAlertRuleInManagement = async (ruleName: string) => {
@@ -240,6 +277,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(queryString).to.be.equal('message:msg-1');
     expect(hasFilter).to.be.equal(true);
     expect(await dataGrid.getDocCount()).to.be(1);
+  };
+
+  const checkInitialDataViewState = async (dataView: string) => {
+    // validate prev field filter
+    await testSubjects.existOrFail(`field-message-showDetails`); // still exists
+
+    // validate prev title
+    await PageObjects.discover.clickIndexPatternActions();
+    await testSubjects.click('indexPattern-manage-field');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    const titleElem = await testSubjects.find('createIndexPatternTitleInput');
+    expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
   const checkUpdatedDataViewState = async (dataView: string) => {
@@ -341,12 +391,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      clickViewInApp(RULE_NAME);
+      await openAlertRuleInManagement(RULE_NAME);
+      await testSubjects.click('ruleDetails-viewInApp');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
     });
 
-    it('should display actual state after rule params update on clicking viewInApp link', async () => {
+    it('should navigate to alert results via link provided in notification', async () => {
+      await openAlertResults(RULE_NAME);
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+    });
+
+    it('should display prev rule state after params update on clicking prev generated link', async () => {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
@@ -359,6 +416,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('saveEditedRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      await openAlertResults(RULE_NAME);
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+    });
+
+    it('should display actual state after rule params update on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
       const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
@@ -367,7 +429,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkUpdatedRuleParamsState();
     });
 
-    it('should display actual data view state after update on clicking viewInApp link', async () => {
+    it('should display prev data view state after update on clicking prev generated link', async () => {
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
         `/kibana/dataViews/dataView/${sourceDataViewId}`,
@@ -392,12 +454,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      await openAlertResults(RULE_NAME);
+
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+      await checkInitialDataViewState(SOURCE_DATA_VIEW);
+    });
+
+    it('should display actual data view state after update on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
       await checkUpdatedRuleParamsState();
       await checkUpdatedDataViewState('search-s*');
     });
 
-    it('should navigate to alert results via view in app link using adhoc data view', async () => {
+    it('should navigate to alert results via link provided in notification using adhoc data view', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.createAdHocDataView('search-source-', true);
@@ -412,6 +481,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('saveRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      await openAlertResults(ADHOC_RULE_NAME);
+
+      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+      expect(selectedDataView).to.be.equal('search-source-*');
+
+      const documentCell = await dataGrid.getCellElement(0, 3);
+      const firstRowContent = await documentCell.getVisibleText();
+      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
+
+      expect(await dataGrid.getDocCount()).to.be(5);
+    });
+
+    it('should navigate to alert results via view in app link using adhoc data view', async () => {
       // navigate to discover using view in app link
       await clickViewInApp(ADHOC_RULE_NAME);
 
@@ -423,10 +505,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
     });
 
-    it('should not display results after data view removal on clicking viewInApp link', async () => {
+    it('should display results after data view removal on clicking prev generated link', async () => {
       await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
       await deleteDataView(sourceDataViewId);
 
+      await openAlertResults(RULE_NAME);
+
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+      await checkInitialDataViewState(SOURCE_DATA_VIEW);
+    });
+
+    it('should not display results after data view removal on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
       expect(await toasts.getToastCount()).to.be.equal(1);
@@ -434,6 +523,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(content).to.equal(
         `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
       );
+    });
+
+    it('should display results after rule removal on following generated link', async () => {
+      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+      const [{ id: firstAlertId }] = await getAlertsByName(RULE_NAME);
+      await deleteAlerts([firstAlertId]);
+
+      await openAlertResults(firstAlertId, 'id');
+
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+      await checkInitialDataViewState(SOURCE_DATA_VIEW);
     });
 
     it('should check that there are no errors detected after an alert is created', async () => {
