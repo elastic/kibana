@@ -14,13 +14,11 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/apis/create';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib';
-import { AsApiContract } from '../../../lib';
 import {
   RuleActionTypes,
   RuleDefaultAction,
   RuleSystemAction,
   SanitizedRule,
-  SanitizedRuleResponse,
 } from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
@@ -120,7 +118,7 @@ describe('createRuleRoute', () => {
     ],
   };
 
-  const createResult: AsApiContract<SanitizedRuleResponse<{ bar: boolean }>> = {
+  const createResult = {
     ...ruleToCreate,
     mute_all: mockedAlert.muteAll,
     created_by: mockedAlert.createdBy,
