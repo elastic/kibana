@@ -195,6 +195,12 @@ function _generateMappings(
   const props: Properties = {};
 
   function addParentObjectAsStaticProperty(field : Field) {
+    // Don't add intermediary objects for wildcard names, as it will
+    // be added for its parent object.
+    if (field.name.includes('*')) {
+      return;
+    }
+
     let fieldProps = {
       type: 'object',
       dynamic: true,
@@ -202,6 +208,17 @@ function _generateMappings(
 
     props[field.name] = fieldProps;
     hasNonDynamicTemplateMappings = true;
+  }
+
+  function addDynamicMappingWithIntermediaryObjects(path: string, pathMatch: string, matchingType: string, dynProperties: Properties, fieldProps?: Properties) {
+    ctx.addDynamicMapping({
+      path,
+      pathMatch,
+      matchingType,
+      properties: dynProperties,
+      runtimeProperties: fieldProps,
+    });
+    hasDynamicTemplateMappings = true;
   }
 
   // TODO: this can happen when the fields property in fields.yml is present but empty
@@ -241,20 +258,17 @@ function _generateMappings(
           const fieldProps = generateRuntimeFieldProps(_field);
 
           if (dynProperties && matchingType) {
-            ctx.addDynamicMapping({
+            addDynamicMappingWithIntermediaryObjects(
               path,
               pathMatch,
               matchingType,
-              properties: dynProperties,
-              runtimeProperties: fieldProps,
-            });
-            hasDynamicTemplateMappings = true;
+              dynProperties,
+              fieldProps,
+            );
 
             // Add the parent object as static property, this is needed for
             // index templates not using `"dynamic": true`.
-            if (!field.name.includes('*')) {
-              addParentObjectAsStaticProperty(field);
-            }
+            addParentObjectAsStaticProperty(field);
           }
           return;
         }
@@ -347,19 +361,16 @@ function _generateMappings(
         }
 
         if (dynProperties && matchingType) {
-          ctx.addDynamicMapping({
+          addDynamicMappingWithIntermediaryObjects(
             path,
             pathMatch,
             matchingType,
-            properties: dynProperties,
-          });
-          hasDynamicTemplateMappings = true;
+            dynProperties,
+          );
 
           // Add the parent object as static property, this is needed for
           // index templates not using `"dynamic": true`.
-          if (!field.name.includes('*')) {
-            addParentObjectAsStaticProperty(field);
-          }
+          addParentObjectAsStaticProperty(field);
         }
       } else {
         let fieldProps = getDefaultProperties(field);
