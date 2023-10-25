@@ -38,6 +38,7 @@ const navigationTree: NavigationTreeDefinition = {
           renderAs: 'item',
           children: [
             {
+              // This is to show "discover" breadcrumbs when navigating from "log explorer" to "discover"
               link: 'discover',
               sideNavStatus: 'hidden',
             },
