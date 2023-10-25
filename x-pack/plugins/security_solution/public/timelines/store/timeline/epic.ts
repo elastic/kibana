@@ -141,7 +141,6 @@ export const createTimelineEpic =
             return true;
           }
         }),
-        debounceTime(500),
         mergeMap(([action]) => {
           dispatcherTimelinePersistQueue.next({ action });
           return EMPTY;
