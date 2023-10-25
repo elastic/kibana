@@ -53,7 +53,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
         />
       )}
       {apiKey ? (
-        <EuiPanel className="apiKeySuccessPanel">
+        <EuiPanel className="apiKeySuccessPanel" data-test-subj="api-key-create-success-panel">
           <EuiStep
             css={css`
               .euiStep__content {
@@ -74,7 +74,9 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               })}
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiCodeBlock isCopyable>{JSON.stringify(apiKey, undefined, 2)}</EuiCodeBlock>
+            <EuiCodeBlock isCopyable data-test-subj="api-key-created-key-codeblock">
+              {JSON.stringify(apiKey, undefined, 2)}
+            </EuiCodeBlock>
           </EuiStep>
         </EuiPanel>
       ) : (
@@ -104,6 +106,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                       size="s"
                       fill
                       onClick={() => setIsFlyoutOpen(true)}
+                      data-test-subj="new-api-key-button"
                     >
                       <EuiText size="s">
                         {i18n.translate('xpack.serverlessSearch.apiKey.newButtonLabel', {
@@ -120,6 +123,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                       size="s"
                       href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
                       target="_blank"
+                      data-test-subj="manage-api-keys-button"
                     >
                       {i18n.translate('xpack.serverlessSearch.apiKey.manageLabel', {
                         defaultMessage: 'Manage',
@@ -142,7 +146,10 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                         defaultMessage="You have {number} active keys."
                         values={{
                           number: (
-                            <EuiBadge color={data.apiKeys.length > 0 ? 'success' : 'warning'}>
+                            <EuiBadge
+                              color={data.apiKeys.length > 0 ? 'success' : 'warning'}
+                              data-test-subj="api-keys-count-badge"
+                            >
                               {data.apiKeys.length}
                             </EuiBadge>
                           ),
