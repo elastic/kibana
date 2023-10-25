@@ -108,7 +108,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'observability-overview:cases',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Create New Case']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Create']);
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
 
@@ -117,7 +117,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'observability-overview:cases',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Configure Cases']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Settings']);
     });
   });
 }

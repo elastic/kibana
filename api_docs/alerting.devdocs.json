@@ -929,6 +929,46 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.InstallShutdownError",
+        "type": "Class",
+        "tags": [],
+        "label": "InstallShutdownError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.InstallShutdownError",
+            "text": "InstallShutdownError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/install_with_timeout.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.InstallShutdownError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/install_with_timeout.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
