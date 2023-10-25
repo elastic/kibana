@@ -8,21 +8,24 @@
 
 import { execSync } from 'child_process';
 import { Octokit } from '@octokit/rest';
-import { getGithubClient } from '#pipeline-utils';
+import { readFileSync } from 'fs';
+import { getGithubClient, BuildkiteClient } from '#pipeline-utils';
 
 const kibanaDir = execSync('git rev-parse --show-toplevel').toString().trim();
 
-const exec = (command: string) =>
+const exec = (command: string, opts: any = {}) =>
   execSync(command, { encoding: 'utf-8', cwd: kibanaDir }).toString().trim();
 
 const octokit = getGithubClient();
 
 async function main() {
+  // Current commit info
   const previousSha = await getCurrentQARelease();
   const previousCommit = await shaToCommit(previousSha);
   const previousCommitInfo = getReadableInfoOfCommit(previousCommit);
   await addBuildkiteInfoSection(toCommitInfoHtml('Current commit:', previousCommitInfo));
 
+  // Target commit info
   const selectedSha = exec('buildkite-agent meta-data get "commit-sha"');
   const selectedCommit = await shaToCommit(selectedSha);
   const selectedCommitInfo = getReadableInfoOfCommit(selectedCommit);
@@ -34,6 +37,13 @@ async function main() {
   await addBuildkiteInfoSection(
     `<div><a href="${selectedBuildUrl}">Buildkite build #${selectedBuildNumber} </a></div>`
   );
+  // Buildkite build info
+  const buildkiteBuild = await getBuildkiteBuild(selectedSha);
+  await addBuildkiteInfoSection(toBuildkiteBuildInfoHtml(buildkiteBuild));
+
+  // Save Object migration comparison
+  const comparisonResult = compareSOSnapshots(previousSha, selectedSha);
+  await addBuildkiteInfoSection(toSOComparisonBlockHtml(comparisonResult));
 }
 
 async function getCurrentQARelease() {
@@ -85,14 +95,24 @@ async function getBuildkiteBuild(commitSha: string) {
       'X-GitHub-Api-Version': '2022-11-28',
     },
   });
-  const buildkiteURL = commit.data.statuses.find(
+  const buildkiteStatus = commit.data.statuses.find(
     (e: { context: string; target_url: string }) =>
       e.context === 'buildkite/on-merge' && e.target_url
-  ).target_url;
+  );
 
+  const buildkiteURL = buildkiteStatus.target_url;
   const buildkiteBuildNumber = buildkiteURL.match(/builds\/([0-9]+)/)?.[1];
+  const state = buildkiteStatus.state as 'failure' | 'pending' | 'success';
+  const stateEmoji =
+    {
+      failure: '❌',
+      pending: '🌕',
+      success: '✅',
+    }[state] || '❓';
 
   return {
+    success: state === 'success',
+    stateEmoji,
     url: buildkiteURL,
     buildNumber: buildkiteBuildNumber,
   };
@@ -100,8 +120,24 @@ async function getBuildkiteBuild(commitSha: string) {
 
 async function addBuildkiteInfoSection(html: string) {
   execSync(`buildkite-agent annotate --append --style 'info' --context 'commit-info'`, {
-    input: html,
+    input: html + '<br />',
   });
+}
+
+function compareSOSnapshots(previousSha: string, selectedSha: string) {
+  const command = `node scripts/snapshot_plugin_types compare ${previousSha} ${selectedSha}`;
+  exec(`${command} --outputPath 'so_comparison.json'`);
+
+  const soComparisonResult = JSON.parse(readFileSync('so_comparison.json').toString());
+
+  const buildkite = new BuildkiteClient();
+  buildkite.uploadArtifacts('so_comparison.json');
+
+  return {
+    hasChanges: soComparisonResult.hasChanges,
+    changed: soComparisonResult.changed,
+    command,
+  };
 }
 
 function toCommitInfoHtml(
@@ -119,6 +155,29 @@ function toCommitInfoHtml(
 <div><h3>${sectionTitle}</h3></div>
 <div><a href="${commitInfo.link}">${commitInfo.sha}</a> by ${commitInfo.author} on ${commitInfo.date}</div>
 <div><small>(${commitInfo.title})</small></div>
+</div>`;
+}
+
+function toBuildkiteBuildInfoHtml({
+  url,
+  stateEmoji,
+  buildNumber,
+}: Awaited<ReturnType<typeof getBuildkiteBuild>>): string {
+  return `<div>
+<a href="${url}">[${stateEmoji}] Buildkite build #${buildNumber}</a>
+</div>`;
+}
+
+function toSOComparisonBlockHtml(comparisonResult: {
+  hasChanges: any;
+  changed: any;
+  command: string;
+}): string {
+  return `<div>
+<h3>Plugin Saved Object migration changes: ${comparisonResult.hasChanges}</h3>
+<div>Changed plugins: ${comparisonResult.changed.join(', ')}</div>
+<i>Find detailed info in the archived artifacts, or run the command yourself: </i>
+<pre>${comparisonResult.command}</pre>
 </div>`;
 }
 
