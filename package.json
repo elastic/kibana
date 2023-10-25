@@ -684,7 +684,6 @@
     "@kbn/share-plugin": "link:src/plugins/share",
     "@kbn/shared-svg": "link:packages/kbn-shared-svg",
     "@kbn/shared-ux-avatar-solution": "link:packages/shared-ux/avatar/solution",
-    "@kbn/shared-ux-avatar-user-profile-components": "link:packages/shared-ux/avatar/user_profile/impl",
     "@kbn/shared-ux-button-exit-full-screen": "link:packages/shared-ux/button/exit_full_screen/impl",
     "@kbn/shared-ux-button-exit-full-screen-mocks": "link:packages/shared-ux/button/exit_full_screen/mocks",
     "@kbn/shared-ux-button-exit-full-screen-types": "link:packages/shared-ux/button/exit_full_screen/types",

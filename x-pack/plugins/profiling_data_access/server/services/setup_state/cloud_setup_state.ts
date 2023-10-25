@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { RecursivePartial } from '@elastic/eui';
+import { ProfilingCloudSetupOptions } from '../../../common';
+import { CloudSetupState, createDefaultCloudSetupState } from '../../../common/cloud_setup';
 import {
   validateMaximumBuckets,
   validateResourceManagement,
@@ -15,21 +18,14 @@ import {
   validateSymbolizerPackagePolicy,
 } from '../../../common/fleet_policies';
 import { hasProfilingData } from '../../../common/has_profiling_data';
-import { ProfilingESClient } from '../../../common/profiling_es_client';
 import { validateSecurityRole } from '../../../common/security_role';
-import {
-  ProfilingSetupOptions,
-  createDefaultSetupState,
-  mergePartialSetupStates,
-} from '../../../common/setup';
-import { RegisterServicesParams } from '../register_services';
+import { mergePartialSetupStates } from '../../../common/setup';
 
-export async function getSetupState(
-  options: ProfilingSetupOptions,
-  clientWithProfilingAuth: ProfilingESClient
-) {
-  const state = createDefaultSetupState();
-  state.cloud.available = options.isCloudEnabled;
+export async function cloudSetupState(
+  params: ProfilingCloudSetupOptions
+): Promise<CloudSetupState> {
+  const state = createDefaultCloudSetupState();
+  state.cloud.available = params.isCloudEnabled;
 
   const verifyFunctions = [
     validateMaximumBuckets,
@@ -38,19 +34,12 @@ export async function getSetupState(
     validateCollectorPackagePolicy,
     validateSymbolizerPackagePolicy,
     validateProfilingInApmPackagePolicy,
+    hasProfilingData,
   ];
 
-  const partialStates = await Promise.all([
-    ...verifyFunctions.map((fn) => fn(options)),
-    hasProfilingData({
-      ...options,
-      client: clientWithProfilingAuth,
-    }),
-  ]);
+  const partialStates = (await Promise.all(verifyFunctions.map((fn) => fn(params)))) as Array<
+    RecursivePartial<CloudSetupState>
+  >;
 
   return mergePartialSetupStates(state, partialStates);
-}
-
-export function createGetSetupState(params: RegisterServicesParams) {
-  return getSetupState;
 }

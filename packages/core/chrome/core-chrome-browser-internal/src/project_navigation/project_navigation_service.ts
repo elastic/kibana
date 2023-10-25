@@ -12,6 +12,7 @@ import {
   ChromeProjectNavigation,
   SideNavComponent,
   ChromeProjectBreadcrumb,
+  ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
@@ -29,15 +30,15 @@ import {
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
-import classnames from 'classnames';
 
-import { createHomeBreadcrumb } from './home_breadcrumbs';
 import { findActiveNodes, flattenNav, stripQueryParams } from './utils';
+import { buildBreadcrumbs } from './breadcrumbs';
 
 interface StartDeps {
   application: InternalApplicationStart;
   navLinks: ChromeNavLinks;
   http: HttpStart;
+  chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
 }
 
 export class ProjectNavigationService {
@@ -60,7 +61,7 @@ export class ProjectNavigationService {
   private http?: HttpStart;
   private unlistenHistory?: () => void;
 
-  public start({ application, navLinks, http }: StartDeps) {
+  public start({ application, navLinks, http, chromeBreadcrumbs$ }: StartDeps) {
     this.application = application;
     this.http = http;
     this.onHistoryLocationChange(application.history.location);
@@ -136,33 +137,15 @@ export class ProjectNavigationService {
           this.projectBreadcrumbs$,
           this.activeNodes$,
           this.projectHome$.pipe(map((homeHref) => homeHref ?? '/')),
+          chromeBreadcrumbs$,
         ]).pipe(
-          map(([breadcrumbs, activeNodes, homeHref]) => {
-            const homeBreadcrumb = createHomeBreadcrumb({
+          map(([projectBreadcrumbs, activeNodes, homeHref, chromeBreadcrumbs]) => {
+            return buildBreadcrumbs({
               homeHref: this.http?.basePath.prepend?.(homeHref) ?? homeHref,
+              projectBreadcrumbs,
+              activeNodes,
+              chromeBreadcrumbs,
             });
-
-            if (breadcrumbs.params.absolute) {
-              return [homeBreadcrumb, ...breadcrumbs.breadcrumbs];
-            } else {
-              // breadcrumbs take the first active path
-              const activePath: ChromeProjectNavigationNode[] = activeNodes[0] ?? [];
-              const navBreadcrumbs = activePath
-                .filter((n) => Boolean(n.title) && n.breadcrumbStatus !== 'hidden')
-                .map(
-                  (node): ChromeProjectBreadcrumb => ({
-                    href: node.deepLink?.url ?? node.href,
-                    text: node.title,
-                    'data-test-subj': classnames({
-                      [`breadcrumb-deepLinkId-${node.deepLink?.id}`]: !!node.deepLink,
-                    }),
-                  })
-                );
-
-              const result = [homeBreadcrumb, ...navBreadcrumbs, ...breadcrumbs.breadcrumbs];
-
-              return result;
-            }
           })
         );
       },
