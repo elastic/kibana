@@ -193,6 +193,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     // TODO: Remove in part 2 of streaming work for security solution
     // tracked here: https://github.com/elastic/security-team/issues/7363
     // `stream` is a temporary parameter while the feature is developed behind a feature flag
+    // why not call stream directly from the securit solution api? because the body has no validation
     const { stream = false, ...body } = params;
     const res = await this.streamApi({ body: JSON.stringify(body), stream });
 

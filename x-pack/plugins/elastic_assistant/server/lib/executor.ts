@@ -28,10 +28,21 @@ export const executeAction = async ({
   connectorId,
 }: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
+
+  console.log('one');
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
-    params: request.body.params,
+    params: {
+      ...request.body.params,
+      subActionParams:
+        // TODO: Remove in part 2 of streaming work for security solution
+        // tracked here: https://github.com/elastic/security-team/issues/7363
+        request.body.params.subAction === 'invokeAI'
+          ? request.body.params.subActionParams
+          : { body: JSON.stringify(request.body.params.subActionParams), stream: true },
+    },
   });
+  console.log('two', actionResult);
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
     return {
@@ -42,5 +53,7 @@ export const executeAction = async ({
   }
   const readable = get('data', actionResult);
 
-  return (readable as Readable).pipe(new PassThrough()) as Readable;
+  console.log('typeof', typeof readable);
+  console.log('three', readable);
+  return (readable as Readable).pipe(new PassThrough());
 };

@@ -57,13 +57,21 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
   const isStream = true;
-  const requestBody = {
-    params: {
-      subActionParams: { ...body, stream: isStream },
-      subAction: 'invokeAI',
-    },
-    assistantLangChain,
-  };
+  const requestBody = isStream
+    ? {
+        params: {
+          subActionParams: body,
+          subAction: 'stream',
+        },
+        assistantLangChain,
+      }
+    : {
+        params: {
+          subActionParams: body,
+          subAction: 'invokeAI',
+        },
+        assistantLangChain,
+      };
 
   try {
     if (isStream) {
@@ -94,6 +102,9 @@ export const fetchConnectorExecuteAction = async ({
       };
     }
 
+    // TODO: Remove in part 2 of streaming work for security solution
+    // tracked here: https://github.com/elastic/security-team/issues/7363
+    // This is a temporary code to support the non-streaming API
     const response = await http.fetch<{
       connector_id: string;
       status: string;
