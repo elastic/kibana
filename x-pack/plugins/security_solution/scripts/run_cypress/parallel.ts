@@ -319,7 +319,7 @@ ${JSON.stringify(
                   ? []
                   : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
-              inspect: argv.inspect
+              inspect: argv.inspect,
             });
 
             await providers.loadAll();
