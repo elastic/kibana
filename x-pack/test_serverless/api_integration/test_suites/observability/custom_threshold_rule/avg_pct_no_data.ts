@@ -125,6 +125,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(executionStatus).to.be('active');
       });
 
+      it('should find the created rule with correct information about the consumer', async () => {
+        const match = await alertingApi.findRule(ruleId);
+        expect(match).not.to.be(undefined);
+        expect(match.consumer).to.be('observability');
+      });
+
       it('should set correct information in the alert document', async () => {
         const resp = await alertingApi.waitForAlertInIndex({
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,

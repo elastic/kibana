@@ -104,8 +104,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const createdRule = await alertingApi.findRule(ruleId);
-        expect(createdRule.consumer).to.be('observability');
+        const match = await alertingApi.findRule(ruleId);
+        expect(match).not.to.be(undefined);
+        expect(match.consumer).to.be('observability');
       });
     });
   });

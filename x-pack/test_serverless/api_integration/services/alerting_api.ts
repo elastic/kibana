@@ -146,10 +146,10 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         throw new Error(`'ruleId' is undefined`);
       }
       const response = await supertest
-        .get(`/api/alerting/rule/${ruleId}`)
+        .get('/api/alerting/rules/_find')
         .set('kbn-xsrf', 'foo')
         .set('x-elastic-internal-origin', 'foo');
-      return response.body || {};
+      return response.body.data.find((obj: any) => obj.id === ruleId);
     },
   };
 }

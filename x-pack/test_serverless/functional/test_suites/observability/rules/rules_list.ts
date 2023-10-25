@@ -113,9 +113,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await refreshRulesList();
       const searchResults = await svlTriggersActionsUI.getRulesList();
       expect(searchResults.length).toEqual(1);
+      expect(searchResults[0].name).toEqual('ES QueryElasticsearch query');
     });
 
-    it('should create an ES Query rule but not display it when consumer is alert', async () => {
+    it('should create an ES Query rule but not display it when consumer is alerts', async () => {
       const esQuery = await createEsQueryRule({
         supertest,
         name: 'ES Query',
@@ -136,6 +137,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await refreshRulesList();
       await testSubjects.missingOrFail('rule-row');
+    });
+
+    it('should create and display an APM latency rule', async () => {
+      const apmLatency = await createLatencyThresholdRule({ supertest, name: 'Apm latency' });
+      ruleIdList = [apmLatency.id];
+
+      await refreshRulesList();
+      const searchResults = await svlTriggersActionsUI.getRulesList();
+      expect(searchResults.length).toEqual(1);
+      expect(searchResults[0].name).toEqual('Apm latencyLatency threshold');
     });
 
     it('should display rules in alphabetical order', async () => {
