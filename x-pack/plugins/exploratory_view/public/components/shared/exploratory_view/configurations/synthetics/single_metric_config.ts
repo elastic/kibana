@@ -17,8 +17,7 @@ import { FieldLabels, FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 
 export const FINAL_SUMMARY_KQL =
-  'summary: * and (summary.final_attempt: true or not summary.final_attempt)';
-
+  'summary: * and (summary.final_attempt: true or not summary.final_attempt: *)';
 export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'line',
