@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { XJson } from '@kbn/es-ui-shared-plugin/public';
-const { collapseLiteralStrings, expandLiteralStrings } = XJson;
-
-export { XJsonMode } from '@kbn/ace';
-export { collapseLiteralStrings, expandLiteralStrings };
+require('../../../../../src/setup_node_env');
+require('./sentinelone_host').cli();

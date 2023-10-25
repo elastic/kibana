@@ -14,7 +14,9 @@ import { SettingsStorage } from './settings_storage';
 
 export interface DownloadedAgentInfo {
   filename: string;
+  /** The local directory where downloads are stored */
   directory: string;
+  /** The full local file path and name */
   fullFilePath: string;
 }
 
@@ -179,6 +181,10 @@ const handleProcessInterruptions = async <T>(
 
 const agentDownloadsClient = new AgentDownloadStorage();
 
+export interface DownloadAndStoreAgentResponse extends DownloadedAgentInfo {
+  url: string;
+}
+
 /**
  * Downloads the agent file provided via the input URL to a local folder on disk. If the file
  * already exists on disk, then no download is actually done - the information about the cached
@@ -187,7 +193,7 @@ const agentDownloadsClient = new AgentDownloadStorage();
  */
 export const downloadAndStoreAgent = async (
   agentDownloadUrl: string
-): Promise<DownloadedAgentInfo & { url: string }> => {
+): Promise<DownloadAndStoreAgentResponse> => {
   const downloadedAgent = await agentDownloadsClient.downloadAndStore(agentDownloadUrl);
 
   return {
