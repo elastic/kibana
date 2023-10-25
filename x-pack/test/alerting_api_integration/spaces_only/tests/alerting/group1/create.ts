@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
-import { RawRule, RuleActionTypes } from '@kbn/alerting-plugin/server/types';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
@@ -16,7 +16,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   TaskManagerDoc,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -163,7 +163,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 actionTypeId: 'test.system-action',
                 uuid: '123',
                 params: {},
-                type: RuleActionTypes.SYSTEM,
               },
             ],
           })
@@ -199,7 +198,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             connector_type_id: 'test.system-action',
             params: {},
             uuid: '123',
-            type: RuleActionTypes.SYSTEM,
           },
         ],
         enabled: true,
@@ -260,7 +258,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           actionTypeId: 'test.system-action',
           params: {},
           uuid: '123',
-          type: RuleActionTypes.SYSTEM,
         },
       ]);
 
@@ -447,7 +444,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(403);
       expect(response.body).to.eql({
         error: 'Forbidden',
-        message: getConsumerUnauthorizedErrorMessage(
+        message: getUnauthorizedErrorMessage(
           'create',
           'test.noop',
           'some consumer patrick invented'
@@ -473,7 +470,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         actionTypeId: 'test.system-action',
         uuid: '123',
         params: {},
-        type: RuleActionTypes.SYSTEM,
       };
 
       it('should create a rule with a system action correctly', async () => {
@@ -496,7 +492,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             connector_type_id: 'test.system-action',
             params: {},
             uuid: '123',
-            type: RuleActionTypes.SYSTEM,
           },
         ]);
 
@@ -517,7 +512,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             actionTypeId: 'test.system-action',
             params: {},
             uuid: '123',
-            type: RuleActionTypes.SYSTEM,
           },
         ]);
 
