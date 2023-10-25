@@ -287,3 +287,13 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   id: string;
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
+
+export const updateRowHeight = actionCreator<{
+  id: string;
+  rowHeight: number;
+}>('UPDATE_ROW_HEIGHT');
+
+export const updateSampleSize = actionCreator<{
+  id: string;
+  sampleSize: number;
+}>('UPDATE_SAMPLE_SIZE');

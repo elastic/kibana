@@ -136,6 +136,10 @@ export interface TimelineModel {
   /* discover saved search Id */
   savedSearchId: string | null;
   isDiscoverSavedSearchLoaded?: boolean;
+  /* row height, used only by unified data table */
+  rowHeight?: number;
+  /* sample size, total record number stored in in memory EuiDataGrid */
+  sampleSize: number;
 }
 
 export type SubsetTimelineModel = Readonly<

@@ -136,7 +136,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
   const [fetchedPage, setFechedPage] = useState<number>(0);
-  const [sampleSize, setSampleSize] = useState<number>(SAMPLE_SIZE_SETTING);
+  // const [sampleSize, setSampleSize] = useState<number>(SAMPLE_SIZE_SETTING);
   const { browserFields, runtimeMappings, sourcererDataView } = useSourcererDataView(
     SourcererScopeName.timeline
   );
@@ -171,6 +171,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       filterManager,
       pinnedEventIds,
       excludedRowRendererIds,
+      rowHeight,
+      sampleSize,
     } = timelineDefaults,
   } = useSelector((state: State) => timelineBodySelector(state, timelineId));
 
@@ -535,9 +537,24 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 
   const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
 
-  const onUpdateSampleSize = useCallback((newSampleSize: number) => {
-    setSampleSize(newSampleSize);
-  }, []);
+  const onUpdateSampleSize = useCallback(
+    (newSampleSize: number) => {
+      if (newSampleSize !== sampleSize) {
+        dispatch(timelineActions.updateSampleSize({ id: timelineId, sampleSize: newSampleSize }));
+        refetch();
+      }
+    },
+    [dispatch, sampleSize, timelineId, refetch]
+  );
+
+  const onUpdateRowHeight = useCallback(
+    (newRowHeight: number) => {
+      if (newRowHeight !== rowHeight) {
+        dispatch(timelineActions.updateRowHeight({ id: timelineId, rowHeight: newRowHeight }));
+      }
+    },
+    [dispatch, rowHeight, timelineId]
+  );
 
   if (!dataView) {
     return null;
@@ -577,7 +594,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
             onSetColumns={onSetColumns}
             onSort={!isTextBasedQuery ? onSort : undefined}
             rows={discoverGridRows}
-            sampleSizeState={sampleSize}
+            sampleSizeState={sampleSize || 500}
             onUpdateSampleSize={onUpdateSampleSize}
             setExpandedDoc={onSetExpandedDoc}
             settings={tableSettings}
@@ -585,10 +602,10 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
             isSortEnabled={true}
             sort={sortingColumns}
             rowHeightState={3}
-            onUpdateRowHeight={() => {}}
             isPlainRecord={isTextBasedQuery}
             rowsPerPageState={itemsPerPage}
             onUpdateRowsPerPage={onChangeItemsPerPage}
+            onUpdateRowHeight={onUpdateRowHeight}
             onFieldEdited={() => refetch()}
             cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
             services={{

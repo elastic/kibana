@@ -68,6 +68,8 @@ import {
   updateKqlMode,
   updateProviders,
   updateRange,
+  updateRowHeight,
+  updateSampleSize,
   updateSort,
   upsertColumn,
   updateDataView,
@@ -118,6 +120,8 @@ const timelineActionsType = [
   updateColumns.type,
   updateSort.type,
   updateRange.type,
+  updateRowHeight.type,
+  updateSampleSize.type,
   upsertColumn.type,
 
   updateSavedSearchId.type,

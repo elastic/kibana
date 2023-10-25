@@ -73,6 +73,10 @@ export interface DataTableModel extends DataTableModelSettings {
   viewMode: ViewSelection;
   /* custom filters applicable to */
   additionalFilters: Record<AlertPageFilterType, boolean>;
+  /* row height, used only by unified data table */
+  rowHeight?: number;
+  /* sample size, total record number stored in in memory EuiDataGrid */
+  sampleSize?: number;
 }
 
 export type SubsetDataTableModel = Readonly<

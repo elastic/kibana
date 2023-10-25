@@ -36,6 +36,8 @@ import {
   updateKqlMode,
   updateProviders,
   updateRange,
+  updateRowHeight,
+  updateSampleSize,
   updateTimeline,
   updateGraphEventId,
   updateTitleAndDescription,
@@ -560,6 +562,26 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         isDiscoverSavedSearchLoaded,
+      },
+    },
+  }))
+  .case(updateSampleSize, (state, { id, sampleSize }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        sampleSize,
+      },
+    },
+  }))
+  .case(updateRowHeight, (state, { id, rowHeight }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        rowHeight,
       },
     },
   }))

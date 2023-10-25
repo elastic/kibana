@@ -67,7 +67,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
-import { SAMPLE_SIZE_SETTING, UnifiedTimelineComponent } from '../unified_components';
+import { UnifiedTimelineComponent } from '../unified_components';
 import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../../common/constants';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
@@ -214,11 +214,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const currentTimeline = useDeepEqualSelector((state) =>
+
+  const { sampleSize, filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? TimelineId.active)
   );
 
-  const activeFilterManager = currentTimeline.filterManager;
   const filterManager = useMemo(
     () => activeFilterManager ?? new FilterManager(uiSettings),
     [activeFilterManager, uiSettings]
@@ -302,8 +302,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [dispatch, filterManager, timelineId]);
 
   const limit = useMemo(
-    () => (useDiscoverComponentsInTimeline ? SAMPLE_SIZE_SETTING : itemsPerPage),
-    [itemsPerPage, useDiscoverComponentsInTimeline]
+    () => (useDiscoverComponentsInTimeline ? sampleSize : itemsPerPage),
+    [itemsPerPage, useDiscoverComponentsInTimeline, sampleSize]
   );
 
   const [
