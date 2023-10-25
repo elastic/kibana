@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from 'expect';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+// import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   deleteAllRules,
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         overrideExistingPackage: true,
       });
 
-      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+      // await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify that status is updated after package installation
       const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
