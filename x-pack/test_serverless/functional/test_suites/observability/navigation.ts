@@ -15,6 +15,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('navigation', function () {
     before(async () => {
@@ -127,6 +128,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'observability-overview:cases',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Settings']);
+    });
+
+    it('navigates to alerts app', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:alerts',
+      });
+      await testSubjects.click('manageRulesPageButton');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:alerts',
+      });
     });
 
     it('navigates to integrations', async () => {
