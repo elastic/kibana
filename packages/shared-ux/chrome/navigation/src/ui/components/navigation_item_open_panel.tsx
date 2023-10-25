@@ -65,6 +65,15 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
     getStyles(euiTheme)
   );
 
+  const dataTestSubj = classNames(`nav-item`, `nav-item-${id}`, {
+    [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+    [`nav-item-id-${id}`]: id,
+    [`nav-item-isActive`]: isActive,
+  });
+  const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${id}`, {
+    [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
+  });
+
   const onLinkClick = useCallback(
     (e: React.MouseEvent) => {
       if (!href) {
@@ -97,7 +106,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
             className={itemClassNames}
             color="text"
             size="s"
-            data-test-subj={`sideNavItemLink-${id}`}
+            data-test-subj={dataTestSubj}
           />
         </EuiListGroup>
       </EuiFlexItem>
@@ -113,7 +122,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle panel navigation',
             })}
-            data-test-subj={`panelOpener-${id}`}
+            data-test-subj={buttonDataTestSubj}
           />
         </EuiFlexItem>
       )}
