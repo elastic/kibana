@@ -6,6 +6,7 @@
  */
 
 import { Asset } from '../../common/types_api';
+import { GetContainersOptions } from './accessors/containers/get_containers';
 import { getHosts, GetHostsOptions } from './accessors/hosts/get_hosts';
 import { getServices, GetServicesOptions } from './accessors/services/get_services';
 import { AssetClientBaseOptions, AssetClientOptionsWithInjectedValues } from './asset_client_types';
@@ -28,5 +29,10 @@ export class AssetClient {
   async getServices(options: GetServicesOptions): Promise<{ services: Asset[] }> {
     const withInjected = this.injectOptions(options);
     return await getServices(withInjected);
+  }
+
+  async getContainers(options: GetContainersOptions): Promise<{ containers: Asset[] }> {
+    const withInjected = this.injectOptions(options);
+    return await this.getContainers(withInjected);
   }
 }
