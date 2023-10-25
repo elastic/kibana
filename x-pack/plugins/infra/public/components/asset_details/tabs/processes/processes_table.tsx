@@ -38,7 +38,7 @@ import { ProcessRow } from './process_row';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
-import { CpuNotAvailableExplanationTooltip } from '../../components/cpu_not_available_explanation';
+import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
 
 interface TableProps {
@@ -245,7 +245,18 @@ interface TableBodyProps {
 
 const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
   <>
-    {items.map((item, i) => {
+    {[
+      {
+        command: 'test',
+        cpu: null,
+        memory: null,
+        startTime: 1,
+        state: 'Running',
+        pid: 1,
+        user: 'test',
+      },
+      ...items,
+    ].map((item, i) => {
       const cells = columns.map((column) => (
         <EuiTableRowCell
           key={`${String(column.field)}-${i}`}
@@ -279,6 +290,10 @@ const RuntimeCell = ({ startTime, currentTime }: { startTime: number; currentTim
 
   return <>{`${runtimeDisplayHours}${runtimeDisplayMinutes}${runtimeDisplaySeconds}`}</>;
 };
+
+const columnLabelCPU = i18n.translate('xpack.infra.metrics.nodeDetails.processes.columnLabelCPU', {
+  defaultMessage: 'CPU',
+});
 
 const columns: Array<{
   field: keyof Process;
@@ -321,16 +336,14 @@ const columns: Array<{
   },
   {
     field: 'cpu',
-    name: i18n.translate('xpack.infra.metrics.nodeDetails.processes.columnLabelCPU', {
-      defaultMessage: 'CPU',
-    }),
+    name: columnLabelCPU,
     sortable: true,
     render: (value: number | null) =>
       value === null ? (
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem grow={false}>{NOT_AVAILABLE_LABEL}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <CpuNotAvailableExplanationTooltip />
+            <MetricNotAvailableExplanationTooltip metricName={columnLabelCPU} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
@@ -343,7 +356,21 @@ const columns: Array<{
       defaultMessage: 'Mem.',
     }),
     sortable: true,
-    render: (value: number) => FORMATTERS.percent(value),
+    render: (value: number | null) =>
+      value === null ? (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>{NOT_AVAILABLE_LABEL}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <MetricNotAvailableExplanationTooltip
+              metricName={i18n.translate('xpack.infra.metrics.nodeDetails.processes.memory', {
+                defaultMessage: 'memory',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        FORMATTERS.percent(value)
+      ),
   },
 ];
 

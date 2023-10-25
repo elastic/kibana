@@ -11,7 +11,7 @@ import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react'
 import { Popover } from '../tabs/common/popover';
 import { useDateRangeProviderContext } from '../hooks/use_date_range';
 
-export const CpuNotAvailableExplanationTooltip = () => {
+export const MetricNotAvailableExplanationTooltip = ({ metricName }: { metricName: string }) => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const dateFromRange = new Date(getDateRangeInTimestamp().to);
 
@@ -20,13 +20,13 @@ export const CpuNotAvailableExplanationTooltip = () => {
       iconSize="s"
       iconColor="subdued"
       icon="questionInCircle"
-      data-test-subj="infraAssetDetailsCpuNotAvailablePopoverButton"
+      data-test-subj="infraAssetDetailsMetricNotAvailablePopoverButton"
     >
       <EuiText size="xs" color="subdued">
         <p>
           <FormattedMessage
-            id="xpack.infra.assetDetails.processes.tooltip.cpuNotAvailableTitle"
-            defaultMessage="No CPU value detected for the 1 minute preceding {date} @ {time}."
+            id="xpack.infra.assetDetails.processes.tooltip.metricNotAvailableTitle"
+            defaultMessage="No {metric} value detected for the 1 minute preceding {date} @ {time}."
             values={{
               date: (
                 <FormattedDate value={dateFromRange} month="short" day="numeric" year="numeric" />
@@ -40,12 +40,13 @@ export const CpuNotAvailableExplanationTooltip = () => {
                   second="2-digit"
                 />
               ),
+              metric: metricName,
             }}
           />
         </p>
         <p>
           <FormattedMessage
-            id="xpack.infra.assetDetails.processes.tooltip.cpuNotAvailableActionText"
+            id="xpack.infra.assetDetails.processes.tooltip.metricNotAvailableActionText"
             defaultMessage="Try changing the selected time period or check the data collection method for this host."
           />
         </p>
