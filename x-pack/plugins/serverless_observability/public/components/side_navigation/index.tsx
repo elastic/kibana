@@ -28,7 +28,6 @@ const navigationTree: NavigationTreeDefinition = {
       accordionProps: {
         arrowProps: { css: { display: 'none' } },
       },
-      breadcrumbStatus: 'hidden',
       children: [
         {
           title: i18n.translate('xpack.serverlessObservability.nav.logExplorer', {
@@ -212,7 +211,6 @@ const navigationTree: NavigationTreeDefinition = {
         defaultMessage: 'Project settings',
       }),
       icon: 'gear',
-      breadcrumbStatus: 'hidden',
       children: [
         {
           link: 'management',

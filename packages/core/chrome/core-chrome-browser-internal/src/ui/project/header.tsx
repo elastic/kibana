@@ -8,7 +8,6 @@
 
 import {
   EuiHeader,
-  EuiHeaderLink,
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
@@ -36,7 +35,7 @@ import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime, Observable, of } from 'rxjs';
 import { useHeaderActionMenuMounter } from '../header/header_action_menu';
-import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
+import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
@@ -62,12 +61,6 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       top: 2px;
     `,
   },
-  projectName: {
-    link: css`
-      /* TODO: make header layout more flexible? */
-      max-width: 320px;
-    `,
-  },
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
@@ -76,11 +69,6 @@ const headerStrings = {
   logo: {
     ariaLabel: i18n.translate('core.ui.primaryNav.goToHome.ariaLabel', {
       defaultMessage: 'Go to home page',
-    }),
-  },
-  cloud: {
-    linkToProjects: i18n.translate('core.ui.primaryNav.cloud.linkToProjects', {
-      defaultMessage: 'Projects',
     }),
   },
   nav: {
@@ -101,8 +89,6 @@ export interface Props {
   helpSupportUrl$: Observable<string>;
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
-  projectsUrl$: Observable<string | undefined>;
-  projectName$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -177,8 +163,6 @@ export const ProjectHeader = ({
   ...observables
 }: Props) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
-  const projectsUrl = useObservable(observables.projectsUrl$);
-  const projectName = useObservable(observables.projectName$);
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
@@ -216,18 +200,8 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>
-                <EuiHeaderLink
-                  href={projectsUrl}
-                  data-test-subj={'projectsLink'}
-                  css={headerCss.projectName.link}
-                >
-                  {projectName ?? headerStrings.cloud.linkToProjects}
-                </EuiHeaderLink>
-              </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem>
                 <RedirectAppLinks coreStart={{ application }}>
-                  <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
                 </RedirectAppLinks>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

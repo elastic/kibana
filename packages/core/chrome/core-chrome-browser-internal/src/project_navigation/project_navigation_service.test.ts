@@ -86,12 +86,35 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "breadcrumb-home",
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanel
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "text": "Project",
         },
         Object {
           "deepLinkId": "navItem1",
@@ -125,12 +148,35 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "breadcrumb-home",
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanel
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "text": "Project",
         },
         Object {
           "href": "/custom1",
@@ -158,12 +204,35 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "breadcrumb-home",
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanel
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "text": "Project",
         },
         Object {
           "deepLinkId": "navItem1",
