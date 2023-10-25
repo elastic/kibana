@@ -65,6 +65,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/ml-chi2test",
     "@kbn/usage-collection-plugin",
+    "@kbn/analytics",
   ],
   "exclude": [
     "target/**/*",
