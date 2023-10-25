@@ -64,6 +64,7 @@ import {
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
+import { RuleAttributes } from './data/rule/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -479,9 +480,31 @@ export interface RawRule extends SavedObjectAttributes {
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 
 export interface AdHocRuleRunParams extends SavedObjectAttributes {
+  createdAt: string;
   ruleId: string;
   spaceId: string;
-  createdAt: string;
+  rule: Pick<
+    RuleAttributes,
+    | 'name'
+    | 'tags'
+    | 'alertTypeId'
+    | 'enabled'
+    | 'consumer'
+    | 'schedule'
+    | 'actions'
+    | 'params'
+    | 'createdBy'
+    | 'updatedBy'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'apiKeyOwner'
+    | 'apiKeyCreatedByUser'
+    | 'throttle'
+    | 'notifyWhen'
+    | 'revision'
+    | 'muteAll'
+  >;
+  apiKeyToUse: string;
   enabled: boolean;
   intervalStart: string;
   intervalDuration: string;

@@ -465,7 +465,7 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: ['alert'],
+      includedHiddenTypes: ['alert', 'ad_hoc_rule_run_params'],
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {

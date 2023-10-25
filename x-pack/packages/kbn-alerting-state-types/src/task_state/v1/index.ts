@@ -10,7 +10,6 @@ import { versionSchema } from './schema';
 
 export {
   versionSchema,
-  adHocTaskStateSchema,
   throttledActionSchema,
   rawAlertInstanceSchema,
   metaSchema,

@@ -31,6 +31,11 @@ interface WrapParams<T extends ISearchSource | SearchSource> {
   logMetrics: (metrics: LogSearchMetricsOpts) => void;
 }
 
+export interface WrappedSearchSourceClient {
+  searchSourceClient: ISearchStartSearchSource;
+  getMetrics: () => SearchMetrics;
+}
+
 export function wrapSearchSourceClient({
   logger,
   rule,

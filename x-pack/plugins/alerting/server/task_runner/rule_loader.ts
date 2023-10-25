@@ -12,7 +12,6 @@ import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
-import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
   RuleExecutionStatusErrorReasons,
@@ -24,6 +23,7 @@ import {
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { TaskRunnerContext } from './types';
 
 export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<RawRule> {
   indirectParams: RawRule;

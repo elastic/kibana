@@ -94,6 +94,14 @@ export interface IAlertsClient<
   > | null;
 }
 
+export type UntypedAlertsClient = IAlertsClient<
+  RuleAlertData,
+  AlertInstanceState,
+  AlertInstanceContext,
+  string,
+  string
+>;
+
 export interface ProcessAndLogAlertsOpts {
   eventLogger: AlertingEventLogger;
   shouldLogAlerts: boolean;

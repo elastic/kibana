@@ -6,635 +6,184 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Logger } from '@kbn/core/server';
+import { ISavedObjectsRepository, KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
-import { RuleTypeRegistry, AdHocRuleRunParams } from '../types';
-import { AdHocTaskRunnerContext } from './ad_hoc_task_runner_factory';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  RuleTypeRegistry,
+  AdHocRuleRunParams,
+  RuleExecutionStatusErrorReasons,
+  RuleTypeParams,
+  RuleAlertData,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../types';
+import type { TaskRunnerContext } from '../task_runner/types';
+import { getFakeKibanaRequest } from '../task_runner/rule_loader';
+import { ErrorWithReason, validateRuleTypeParams } from '../lib';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { IAlertsClient, UntypedAlertsClient } from '../alerts_client/types';
+import { LegacyAlertsClient } from '../alerts_client';
+import { RuleRunner } from '../task_runner/rule_runner';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
+import { RuleResultService } from '../monitoring/rule_result_service';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { getExecutorServices } from '../task_runner/get_executor_services';
 
 type AdHocRuleRunParamResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
 interface AdHocRuleRunData extends LoadedIndirectParams<AdHocRuleRunParams> {
   indirectParams: AdHocRuleRunParams;
 }
 
+interface ConstructorOpts {
+  taskInstance: ConcreteTaskInstance;
+  context: TaskRunnerContext;
+  internalSavedObjectsRepository: ISavedObjectsRepository;
+}
+
+export interface AdHocRuleTaskRunResult {
+  state: {};
+}
+
+interface RunRuleParams {
+  fakeRequest: KibanaRequest;
+  rule: AdHocRuleRunParams['rule'];
+  validatedParams: RuleTypeParams;
+}
+
 export class AdHocTaskRunner {
-  private context: AdHocTaskRunnerContext;
+  private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: ConcreteTaskInstance;
+  private alertingEventLogger: AlertingEventLogger;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private readonly maxAlerts: number;
   private searchAbortController: AbortController;
   private cancelled: boolean;
-  private runDate = new Date();
+  private ruleMonitoring: RuleMonitoringService;
+  private ruleResult: RuleResultService;
+  private ruleRunner: RuleRunner;
   private adHocRuleRunData?: AdHocRuleRunParamResult<AdHocRuleRunData>;
 
-  constructor(context: AdHocTaskRunnerContext, taskInstance: ConcreteTaskInstance) {
+  constructor({ context, taskInstance }: ConstructorOpts) {
     this.context = context;
     this.logger = context.logger.get();
     this.taskInstance = taskInstance;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
+    this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuidv4();
-    this.maxAlerts = context.maxAlerts;
+    this.ruleMonitoring = new RuleMonitoringService();
+    this.ruleResult = new RuleResultService();
+    this.ruleRunner = new RuleRunner({
+      context: this.context,
+      logger: this.logger,
+      runCancelled: () => this.cancelled,
+    });
   }
 
-  // private async updateRuleSavedObjectPostRun(
-  //   ruleId: string,
-  //   namespace: string | undefined,
-  //   attributes: {
-  //     executionStatus?: RawRuleExecutionStatus;
-  //     monitoring?: RawRuleMonitoring;
-  //     nextRun?: string | null;
-  //     lastRun?: RawRuleLastRun | null;
-  //   }
-  // ) {
-  //   const client = this.context.internalSavedObjectsRepository;
-  //   try {
-  //     // Future engineer -> Here we are just checking if we need to wait for
-  //     // the update of the attribute `running` in the rule's saved object
-  //     // and we are swallowing the error because we still want to move forward
-  //     // with the update of our rule since we are putting back the running attribute
-  //     // back to false
-  //     await this.ruleRunning.waitFor();
-  //     // eslint-disable-next-line no-empty
-  //   } catch {}
-  //   try {
-  //     await partiallyUpdateAlert(
-  //       client,
-  //       ruleId,
-  //       { ...attributes, running: false },
-  //       {
-  //         ignore404: true,
-  //         namespace,
-  //         refresh: false,
-  //       }
-  //     );
-  //   } catch (err) {
-  //     this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
-  //   }
-  // }
+  private getAADRuleData(ruleId: string, rule: AdHocRuleRunParams['rule'], spaceId: string) {
+    return {
+      consumer: rule.consumer,
+      executionId: this.executionId,
+      id: ruleId,
+      name: rule.name,
+      parameters: rule.params,
+      revision: rule.revision,
+      spaceId,
+      tags: rule.tags,
+    };
+  }
 
-  // private shouldLogAndScheduleActionsForAlerts() {
-  //   // if execution hasn't been cancelled, return true
-  //   if (!this.cancelled) {
-  //     return true;
-  //   }
+  private async runRule({
+    fakeRequest,
+    rule,
+    validatedParams: params,
+  }: RunRuleParams): Promise<void> {
+    const {
+      params: { ruleId, spaceId },
+    } = this.taskInstance;
 
-  //   // if execution has been cancelled, return true if EITHER alerting config or rule type indicate to proceed with scheduling actions
-  //   return !this.context.cancelAlertsOnRuleTimeout || !this.ruleType.cancelAlertsOnRuleTimeout;
-  // }
+    const namespace = this.context.spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING;
+    const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
+    const ruleLabel = `${ruleType.id}:${ruleId}: '${rule.name}'`;
+    const ruleRunMetricsStore = new RuleRunMetricsStore();
+    const alertsClientParams = { logger: this.logger, ruleType };
 
-  // private getAADRuleData(rule: SanitizedRule<Params>, spaceId: string) {
-  //   return {
-  //     consumer: rule.consumer,
-  //     executionId: this.executionId,
-  //     id: rule.id,
-  //     name: rule.name,
-  //     parameters: rule.params,
-  //     revision: rule.revision,
-  //     spaceId,
-  //     tags: rule.tags,
-  //   };
-  // }
+    // Create AlertsClient if rule type has registered an alerts context
+    // with the framework. The AlertsClient will handle reading and
+    // writing from alerts-as-data indices and eventually
+    // we will want to migrate all the processing of alerts out
+    // of the LegacyAlertsClient and into the AlertsClient.
+    let alertsClient: IAlertsClient<
+      RuleAlertData,
+      AlertInstanceState,
+      AlertInstanceContext,
+      string,
+      string
+    >;
 
-  // // Usage counter for telemetry
-  // // This keeps track of how many times action executions were skipped after rule
-  // // execution completed successfully after the execution timeout
-  // // This can occur when rule executors do not short circuit execution in response
-  // // to timeout
-  // private countUsageOfActionExecutionAfterRuleCancellation() {
-  //   if (this.cancelled && this.usageCounter) {
-  //     if (this.context.cancelAlertsOnRuleTimeout && this.ruleType.cancelAlertsOnRuleTimeout) {
-  //       // Increment usage counter for skipped actions
-  //       this.usageCounter.incrementCounter({
-  //         counterName: `alertsSkippedDueToRuleExecutionTimeout_${this.ruleType.id}`,
-  //         incrementBy: 1,
-  //       });
-  //     }
-  //   }
-  // }
+    try {
+      const client =
+        (await this.context.alertsService?.createAlertsClient<
+          RuleAlertData,
+          AlertInstanceState,
+          AlertInstanceContext,
+          string,
+          string
+        >({
+          ...alertsClientParams,
+          namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
+          rule: this.getAADRuleData(ruleId, rule, spaceId),
+        })) ?? null;
 
-  // private async runRule({
-  //   fakeRequest,
-  //   rule,
-  //   apiKey,
-  //   validatedParams: params,
-  // }: RunRuleParams<Params>): Promise<RuleTaskStateAndMetrics> {
-  //   if (apm.currentTransaction) {
-  //     apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
-  //     apm.currentTransaction.addLabels({
-  //       alerting_rule_consumer: rule.consumer,
-  //       alerting_rule_name: rule.name,
-  //       alerting_rule_tags: rule.tags.join(', '),
-  //       alerting_rule_type_id: rule.alertTypeId,
-  //       alerting_rule_params: JSON.stringify(rule.params),
-  //     });
-  //   }
+      alertsClient = client
+        ? client
+        : new LegacyAlertsClient<AlertInstanceState, AlertInstanceContext, string, string>(
+            alertsClientParams
+          );
+    } catch (err) {
+      this.logger.error(
+        `Error initializing AlertsClient for context ${ruleType.alerts?.context}. Using legacy alerts client instead. - ${err.message}`
+      );
 
-  //   const {
-  //     alertTypeId: ruleTypeId,
-  //     consumer,
-  //     schedule,
-  //     throttle = null,
-  //     notifyWhen = null,
-  //     name,
-  //     tags,
-  //     createdBy,
-  //     updatedBy,
-  //     createdAt,
-  //     updatedAt,
-  //     enabled,
-  //     actions,
-  //     muteAll,
-  //     revision,
-  //     snoozeSchedule,
-  //   } = rule;
-  //   const {
-  //     params: { alertId: ruleId, spaceId },
-  //     state: {
-  //       alertInstances: alertRawInstances = {},
-  //       alertRecoveredInstances: alertRecoveredRawInstances = {},
-  //       alertTypeState: ruleTypeState = {},
-  //       previousStartedAt,
-  //     },
-  //   } = this.taskInstance;
+      alertsClient = new LegacyAlertsClient<
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        string
+      >(alertsClientParams);
+    }
 
-  //   const ruleRunMetricsStore = new RuleRunMetricsStore();
-
-  //   const namespace = this.context.spaceIdToNamespace(spaceId);
-  //   const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
-
-  //   const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
-
-  //   const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
-  //   const flappingSettings = await rulesSettingsClient.flapping().get();
-  //   const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
-
-  //   const alertsClientParams = {
-  //     logger: this.logger,
-  //     ruleType: this.ruleType as UntypedNormalizedRuleType,
-  //   };
-
-  //   // Create AlertsClient if rule type has registered an alerts context
-  //   // with the framework. The AlertsClient will handle reading and
-  //   // writing from alerts-as-data indices and eventually
-  //   // we will want to migrate all the processing of alerts out
-  //   // of the LegacyAlertsClient and into the AlertsClient.
-  //   let alertsClient: IAlertsClient<
-  //     AlertData,
-  //     AlertState,
-  //     Context,
-  //     ActionGroupIds,
-  //     RecoveryActionGroupId
-  //   >;
-
-  //   try {
-  //     const client =
-  //       (await this.context.alertsService?.createAlertsClient<
-  //         AlertData,
-  //         AlertState,
-  //         Context,
-  //         ActionGroupIds,
-  //         RecoveryActionGroupId
-  //       >({
-  //         ...alertsClientParams,
-  //         namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
-  //         rule: this.getAADRuleData(rule, spaceId),
-  //       })) ?? null;
-
-  //     alertsClient = client
-  //       ? client
-  //       : new LegacyAlertsClient<AlertState, Context, ActionGroupIds, RecoveryActionGroupId>(
-  //           alertsClientParams
-  //         );
-  //   } catch (err) {
-  //     this.logger.error(
-  //       `Error initializing AlertsClient for context ${this.ruleType.alerts?.context}. Using legacy alerts client instead. - ${err.message}`
-  //     );
-
-  //     alertsClient = new LegacyAlertsClient<
-  //       AlertState,
-  //       Context,
-  //       ActionGroupIds,
-  //       RecoveryActionGroupId
-  //     >(alertsClientParams);
-  //   }
-
-  //   await alertsClient.initializeExecution({
-  //     maxAlerts: this.maxAlerts,
-  //     ruleLabel,
-  //     flappingSettings,
-  //     startedAt: this.taskInstance.startedAt!,
-  //     activeAlertsFromState: alertRawInstances,
-  //     recoveredAlertsFromState: alertRecoveredRawInstances,
-  //   });
-
-  //   const wrappedClientOptions = {
-  //     rule: {
-  //       name: rule.name,
-  //       alertTypeId: rule.alertTypeId,
-  //       id: rule.id,
-  //       spaceId,
-  //     },
-  //     logger: this.logger,
-  //     abortController: this.searchAbortController,
-  //   };
-  //   const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
-  //   const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
-  //     ...wrappedClientOptions,
-  //     scopedClusterClient,
-  //   });
-  //   const searchSourceClient = await this.context.data.search.searchSource.asScoped(fakeRequest);
-  //   const wrappedSearchSourceClient = wrapSearchSourceClient({
-  //     ...wrappedClientOptions,
-  //     searchSourceClient,
-  //   });
-  //   const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
-
-  //   let activeMaintenanceWindows: MaintenanceWindow[] = [];
-  //   try {
-  //     activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
-  //   } catch (err) {
-  //     this.logger.error(
-  //       `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
-  //     );
-  //   }
-
-  //   const maintenanceWindowIds = activeMaintenanceWindows
-  //     .filter(({ categoryIds }) => {
-  //       // If category IDs array doesn't exist: allow all
-  //       if (!Array.isArray(categoryIds)) {
-  //         return true;
-  //       }
-  //       // If category IDs array exist: check category
-  //       if ((categoryIds as string[]).includes(ruleType.category)) {
-  //         return true;
-  //       }
-  //       return false;
-  //     })
-  //     .map(({ id }) => id);
-
-  //   if (maintenanceWindowIds.length) {
-  //     this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
-  //   }
-
-  //   const { updatedRuleTypeState } = await this.timer.runWithTimer(
-  //     TaskRunnerTimerSpan.RuleTypeRun,
-  //     async () => {
-  //       const checkHasReachedAlertLimit = () => {
-  //         const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
-  //         if (reachedLimit) {
-  //           this.logger.warn(
-  //             `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
-  //           );
-  //           ruleRunMetricsStore.setHasReachedAlertLimit(true);
-  //         }
-  //         return reachedLimit;
-  //       };
-
-  //       let executorResult: { state: RuleState } | undefined;
-  //       try {
-  //         const ctx = {
-  //           type: 'alert',
-  //           name: `execute ${rule.alertTypeId}`,
-  //           id: ruleId,
-  //           description: `execute [${rule.alertTypeId}] with name [${name}] in [${
-  //             namespace ?? 'default'
-  //           }] namespace`,
-  //         };
-
-  //         const savedObjectsClient = this.context.savedObjects.getScopedClient(fakeRequest, {
-  //           includedHiddenTypes: ['alert', 'action'],
-  //         });
-
-  //         const dataViews = await this.context.dataViews.dataViewsServiceFactory(
-  //           savedObjectsClient,
-  //           scopedClusterClient.asInternalUser
-  //         );
-
-  //         executorResult = await this.context.executionContext.withContext(ctx, () =>
-  //           this.ruleType.executor({
-  //             executionId: this.executionId,
-  //             services: {
-  //               savedObjectsClient,
-  //               searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
-  //               uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
-  //               scopedClusterClient: wrappedScopedClusterClient.client(),
-  //               alertFactory: alertsClient.factory(),
-  //               alertsClient: alertsClient.client(),
-  //               shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
-  //               shouldStopExecution: () => this.cancelled,
-  //               ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
-  //               dataViews,
-  //               share: this.context.share,
-  //               ruleResultService: this.ruleResult.getLastRunSetters(),
-  //             },
-  //             params,
-  //             state: ruleTypeState as RuleState,
-  //             startedAt: this.taskInstance.startedAt!,
-  //             previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-  //             spaceId,
-  //             namespace,
-  //             rule: {
-  //               id: ruleId,
-  //               name,
-  //               tags,
-  //               consumer,
-  //               producer: ruleType.producer,
-  //               revision,
-  //               ruleTypeId: rule.alertTypeId,
-  //               ruleTypeName: ruleType.name,
-  //               enabled,
-  //               schedule,
-  //               actions,
-  //               createdBy,
-  //               updatedBy,
-  //               createdAt,
-  //               updatedAt,
-  //               throttle,
-  //               notifyWhen,
-  //               muteAll,
-  //               snoozeSchedule,
-  //             },
-  //             logger: this.logger,
-  //             flappingSettings,
-  //             ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
-  //             getTimeRange: (timeWindow) =>
-  //               getTimeRange(this.logger, queryDelaySettings, timeWindow),
-  //           })
-  //         );
-
-  //         // Rule type execution has successfully completed
-  //         // Check that the rule type either never requested the max alerts limit
-  //         // or requested it and then reported back whether it exceeded the limit
-  //         // If neither of these apply, this check will throw an error
-  //         // These errors should show up during rule type development
-  //         alertsClient.checkLimitUsage();
-  //       } catch (err) {
-  //         // Check if this error is due to reaching the alert limit
-  //         if (!checkHasReachedAlertLimit()) {
-  //           this.alertingEventLogger.setExecutionFailed(
-  //             `rule execution failure: ${ruleLabel}`,
-  //             err.message
-  //           );
-  //           this.stackTraceLog = {
-  //             message: err,
-  //             stackTrace: err.stack,
-  //           };
-  //           throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
-  //         }
-  //       }
-
-  //       // Check if the rule type has reported that it reached the alert limit
-  //       checkHasReachedAlertLimit();
-
-  //       this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
-  //       ruleRunMetricsStore.setSearchMetrics([
-  //         wrappedScopedClusterClient.getMetrics(),
-  //         wrappedSearchSourceClient.getMetrics(),
-  //       ]);
-
-  //       return {
-  //         updatedRuleTypeState: executorResult?.state || undefined,
-  //       };
-  //     }
-  //   );
-
-  //   await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-  //     alertsClient.processAndLogAlerts({
-  //       eventLogger: this.alertingEventLogger,
-  //       ruleRunMetricsStore,
-  //       shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
-  //       flappingSettings,
-  //       notifyOnActionGroupChange:
-  //         notifyWhen === RuleNotifyWhen.CHANGE ||
-  //         some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
-  //       maintenanceWindowIds,
-  //     });
-  //   });
-
-  //   await this.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-  //     await alertsClient.persistAlerts();
-  //   });
-
-  //   const executionHandler = new ExecutionHandler({
-  //     rule,
-  //     ruleType: this.ruleType,
-  //     logger: this.logger,
-  //     taskRunnerContext: this.context,
-  //     taskInstance: this.taskInstance,
-  //     ruleRunMetricsStore,
-  //     apiKey,
-  //     ruleConsumer: this.ruleConsumer!,
-  //     executionId: this.executionId,
-  //     ruleLabel,
-  //     previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-  //     alertingEventLogger: this.alertingEventLogger,
-  //     actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
-  //     maintenanceWindowIds,
-  //     alertsClient,
-  //   });
-
-  //   let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
-
-  //   await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
-  //     if (isRuleSnoozed(rule)) {
-  //       this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
-  //     } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
-  //       this.logger.debug(
-  //         `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
-  //       );
-  //       this.countUsageOfActionExecutionAfterRuleCancellation();
-  //     } else {
-  //       executionHandlerRunResult = await executionHandler.run({
-  //         ...alertsClient.getProcessedAlerts('activeCurrent'),
-  //         ...alertsClient.getProcessedAlerts('recoveredCurrent'),
-  //       });
-  //     }
-  //   });
-
-  //   let alertsToReturn: Record<string, RawAlertInstance> = {};
-  //   let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
-
-  //   // Only serialize alerts into task state if we're auto-recovering, otherwise
-  //   // we don't need to keep this information around.
-  //   if (this.ruleType.autoRecoverAlerts) {
-  //     const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-  //       alertsClient.getAlertsToSerialize();
-  //     alertsToReturn = alerts;
-  //     recoveredAlertsToReturn = recovered;
-  //   }
-
-  //   return {
-  //     metrics: ruleRunMetricsStore.getMetrics(),
-  //     alertTypeState: updatedRuleTypeState || undefined,
-  //     alertInstances: alertsToReturn,
-  //     alertRecoveredInstances: recoveredAlertsToReturn,
-  //     summaryActions: executionHandlerRunResult.throttledSummaryActions,
-  //   };
-  // }
-
-  // /**
-  //  * Initialize event logger, load and validate the rule
-  //  */
-  // private async prepareToRun(): Promise<ValidatedRuleData<Params>> {
-  //   if (!this.ruleData) {
-  //     this.ruleData = await this.loadIndirectParams();
-  //   }
-
-  //   const {
-  //     params: { alertId: ruleId, spaceId, consumer },
-  //   } = this.taskInstance;
-
-  //   if (apm.currentTransaction) {
-  //     apm.currentTransaction.name = `Execute Alerting Rule`;
-  //     apm.currentTransaction.addLabels({
-  //       alerting_rule_space_id: spaceId,
-  //       alerting_rule_id: ruleId,
-  //     });
-  //   }
-
-  //   // Initially use consumer as stored inside the task instance
-  //   // Replace this with consumer as read from the rule saved object after
-  //   // we successfully read the rule SO. This allows us to populate a consumer
-  //   // value for `execute-start` events (which are written before the rule SO is read)
-  //   // and in the event of decryption errors (where we cannot read the rule SO)
-  //   // Because "consumer" is set when a rule is created, this value should be static
-  //   // for the life of a rule but there may be edge cases where migrations cause
-  //   // the consumer values to become out of sync.
-  //   if (consumer) {
-  //     this.ruleConsumer = consumer;
-  //   }
-
-  //   const namespace = this.context.spaceIdToNamespace(spaceId);
-
-  //   this.alertingEventLogger.initialize({
-  //     ruleId,
-  //     ruleType: this.ruleType as UntypedNormalizedRuleType,
-  //     consumer: this.ruleConsumer!,
-  //     spaceId,
-  //     executionId: this.executionId,
-  //     taskScheduledAt: this.taskInstance.scheduledAt,
-  //     ...(namespace ? { namespace } : {}),
-  //   });
-
-  //   this.alertingEventLogger.start(this.runDate);
-
-  //   return validateRule({
-  //     alertingEventLogger: this.alertingEventLogger,
-  //     ruleData: this.ruleData,
-  //     paramValidator: this.ruleType.validate.params,
-  //     ruleId,
-  //     spaceId,
-  //     context: this.context,
-  //     ruleTypeRegistry: this.ruleTypeRegistry,
-  //   });
-  // }
-
-  // private async processRunResults({
-  //   nextRun,
-  //   stateWithMetrics,
-  // }: {
-  //   nextRun: string | null;
-  //   stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
-  // }) {
-  //   const {
-  //     params: { alertId: ruleId, spaceId },
-  //   } = this.taskInstance;
-
-  //   const namespace = this.context.spaceIdToNamespace(spaceId);
-
-  //   // Getting executionStatus for backwards compatibility
-  //   const { status: executionStatus } = map<
-  //     RuleTaskStateAndMetrics,
-  //     ElasticsearchError,
-  //     IExecutionStatusAndMetrics
-  //   >(
-  //     stateWithMetrics,
-  //     (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, this.runDate),
-  //     (err: ElasticsearchError) => executionStatusFromError(err, this.runDate)
-  //   );
-
-  //   // New consolidated statuses for lastRun
-  //   const { lastRun, metrics: executionMetrics } = map<
-  //     RuleTaskStateAndMetrics,
-  //     ElasticsearchError,
-  //     ILastRun
-  //   >(
-  //     stateWithMetrics,
-  //     (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
-  //     (err: ElasticsearchError) => lastRunFromError(err)
-  //   );
-
-  //   if (apm.currentTransaction) {
-  //     if (executionStatus.status === 'ok' || executionStatus.status === 'active') {
-  //       apm.currentTransaction.setOutcome('success');
-  //     } else if (executionStatus.status === 'error' || executionStatus.status === 'unknown') {
-  //       apm.currentTransaction.setOutcome('failure');
-  //     } else if (lastRun.outcome === 'succeeded') {
-  //       apm.currentTransaction.setOutcome('success');
-  //     } else if (lastRun.outcome === 'failed') {
-  //       apm.currentTransaction.setOutcome('failure');
-  //     }
-  //   }
-
-  //   this.logger.debug(
-  //     `deprecated ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(
-  //       executionStatus
-  //     )}`
-  //   );
-  //   this.logger.debug(
-  //     `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(lastRun)}`
-  //   );
-  //   if (executionMetrics) {
-  //     this.logger.debug(
-  //       `ruleRunMetrics for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionMetrics)}`
-  //     );
-  //   }
-
-  //   // set start and duration based on event log
-  //   const { start, duration } = this.alertingEventLogger.getStartAndDuration();
-  //   if (null != start) {
-  //     executionStatus.lastExecutionDate = start;
-  //   }
-  //   if (null != duration) {
-  //     executionStatus.lastDuration = nanosToMillis(duration);
-  //   }
-
-  //   // if executionStatus indicates an error, fill in fields in
-  //   this.ruleMonitoring.addHistory({
-  //     duration: executionStatus.lastDuration,
-  //     hasError: executionStatus.error != null,
-  //     runDate: this.runDate,
-  //   });
-
-  //   if (!this.cancelled) {
-  //     this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-  //     if (lastRun.outcome === 'failed') {
-  //       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
-  //     } else if (executionStatus.error) {
-  //       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
-  //     }
-  //     this.logger.debug(
-  //       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
-  //         executionStatus
-  //       )} - ${JSON.stringify(lastRun)}`
-  //     );
-  //     await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
-  //       executionStatus: ruleExecutionStatusToRaw(executionStatus),
-  //       nextRun,
-  //       lastRun: lastRunToRaw(lastRun),
-  //       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-  //     });
-  //   }
-
-  //   return { executionStatus, executionMetrics };
-  // }
+    await this.ruleRunner.run({
+      alertingEventLogger: this.alertingEventLogger,
+      alertsClient: alertsClient as unknown as UntypedAlertsClient,
+      executionId: this.executionId,
+      executorServices: await getExecutorServices({
+        context: this.context,
+        fakeRequest,
+        abortController: this.searchAbortController,
+        logger: this.logger,
+        ruleMonitoringService: this.ruleMonitoring,
+        ruleResultService: this.ruleResult,
+        ruleData: { name: rule.name, alertTypeId: rule.alertTypeId, id: rule.id, spaceId },
+      }),
+      fakeRequest,
+      rule,
+      ruleId,
+      ruleLabel,
+      ruleRunMetricsStore,
+      spaceId,
+      startedAt: this.taskInstance.startedAt,
+      state: this.taskInstance.state,
+      validatedParams: params,
+    });
+  }
 
   async loadIndirectParams(): Promise<AdHocRuleRunParamResult<AdHocRuleRunData>> {
     try {
@@ -644,11 +193,12 @@ export class AdHocTaskRunner {
       const namespace = this.context.spaceIdToNamespace(spaceId);
 
       const adHocRuleRunParams =
-        await this.context.internalSavedObjectsRepository.get<AdHocRuleRunParams>(
+        await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<AdHocRuleRunParams>(
           'ad_hoc_rule_run_params',
           adHocRuleRunParamsId,
           { namespace }
         );
+
       this.logger.info(
         `AdHocTaskRunner loadIndirectParams loaded ${JSON.stringify(adHocRuleRunParams)}`
       );
@@ -659,13 +209,64 @@ export class AdHocTaskRunner {
     return this.adHocRuleRunData;
   }
 
-  async run() {
+  async run(): Promise<AdHocRuleTaskRunResult> {
     if (!this.adHocRuleRunData) {
       this.adHocRuleRunData = await this.loadIndirectParams();
     }
     if (this.adHocRuleRunData.error) {
       throw this.adHocRuleRunData.error;
     }
+
+    const adHocRuleRunParams: AdHocRuleRunParams = this.adHocRuleRunData.data.indirectParams;
+
+    // these are from validateRule
+    try {
+      this.ruleTypeRegistry.ensureRuleTypeEnabled(adHocRuleRunParams.rule.alertTypeId);
+    } catch (err) {
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
+    }
+
+    const ruleType = this.ruleTypeRegistry.get(adHocRuleRunParams.rule.alertTypeId);
+
+    let validatedParams: RuleTypeParams;
+    try {
+      validatedParams = validateRuleTypeParams(
+        adHocRuleRunParams.rule.params,
+        ruleType.validate.params
+      );
+    } catch (err) {
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
+    }
+
+    // Generate fake request with API key
+    const fakeRequest = getFakeKibanaRequest(
+      this.context,
+      adHocRuleRunParams.spaceId,
+      adHocRuleRunParams.apiKeyToUse
+    );
+
+    try {
+      await this.runRule({ fakeRequest, rule: adHocRuleRunParams.rule, validatedParams });
+    } catch (err) {
+      this.logger.error(`Error previewing rule - ${err.message}`);
+    }
+
+    // Other options
+    // If we want to always use the latest changes to the rule, we could
+    // just keep the rule ID in the task params and load the rule SO at
+    // the beginning of ad hoc execution. This is less aligned with re-using
+    // this for previews in the future.
+
+    // Event log
+    // We should write event log entries so we can keep a record of what
+    // happened but if we use the "execute" event, it will show up in the
+    // execution log table, but out of order. Maybe an "ad-hoc-execute" event?
+
+    // Rule metrics
+    // Don't update the rule SO with run metrics
+
+    // Rules settings
+    // Use the latest rules settings
 
     // try {
     //   const preparedResult = await this.prepareToRun();

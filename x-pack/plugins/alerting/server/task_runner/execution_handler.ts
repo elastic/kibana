@@ -23,8 +23,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
-import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
-import { TaskRunnerContext } from './task_runner_factory';
+import { Executable, ExecutionHandlerOptions, RuleTaskInstance, TaskRunnerContext } from './types';
 import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';

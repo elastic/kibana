@@ -88,6 +88,7 @@ export class AdHocRuleRunClient {
   public async bulkQueue(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     rules: Array<SavedObjectsFindResult<RuleAttributes>>,
+    spaceId: string,
     queueOptions: ScheduleAdHocRuleRunOptions
   ) {
     const bulkResponse = await unsecuredSavedObjectsClient.bulkCreate(
@@ -95,22 +96,28 @@ export class AdHocRuleRunClient {
         type: 'ad_hoc_rule_run_params',
         attributes: {
           createdAt: Date.now(),
+          spaceId,
+          ruleId: ruleSO.id,
           rule: {
             name: ruleSO.attributes.name,
             tags: ruleSO.attributes.tags,
-            alertTypeId: ruleSO.attributes.alertTypeId,
             consumer: ruleSO.attributes.consumer,
+            revision: ruleSO.attributes.revision,
+            alertTypeId: ruleSO.attributes.alertTypeId,
+            enabled: ruleSO.attributes.enabled,
             schedule: ruleSO.attributes.schedule,
+            actions: ruleSO.attributes.actions,
             params: ruleSO.attributes.params,
             createdBy: ruleSO.attributes.createdBy,
             updatedBy: ruleSO.attributes.updatedBy,
             createdAt: ruleSO.attributes.createdAt,
             updatedAt: ruleSO.attributes.updatedAt,
-            apiKeyOwner: ruleSO.attributes.apiKeyOwner,
-            apiKeyCreatedByUser: ruleSO.attributes.apiKeyCreatedByUser,
             throttle: ruleSO.attributes.throttle,
             notifyWhen: ruleSO.attributes.notifyWhen,
-            revision: ruleSO.attributes.revision,
+            muteAll: ruleSO.attributes.muteAll,
+            snoozeSchedule: ruleSO.attributes.snoozeSchedule,
+            apiKeyOwner: ruleSO.attributes.apiKeyOwner,
+            apiKeyCreatedByUser: ruleSO.attributes.apiKeyCreatedByUser,
           },
           apiKeyToUse: ruleSO.attributes.apiKey,
           enabled: true,
@@ -161,6 +168,7 @@ export class AdHocRuleRunClient {
       const findResponse = await savedObjectsRepository.find<AdHocRuleRunParams>({
         type: 'ad_hoc_rule_run_params',
         sortField: 'createdAt',
+        sortOrder: 'asc',
         perPage: 1,
       });
       this.logger.info(

@@ -23,7 +23,6 @@ export type {
   TrackedLifecycleAlertState,
   WrappedLifecycleRuleState,
   RuleTaskState,
-  AdHocRuleTaskState,
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
 export * from './alert_summary';

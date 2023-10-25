@@ -129,6 +129,7 @@ export async function scheduleAdHocRuleRun(
     const scheduleResponse = await context.adHocRuleRunClient.bulkQueue(
       context.unsecuredSavedObjectsClient,
       response.saved_objects,
+      context.spaceId,
       options
     );
     scheduleResponses.push([...scheduleResponse]);

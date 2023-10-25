@@ -50,5 +50,3 @@ export const versionSchema = schema.object({
   previousStartedAt: schema.maybe(schema.nullable(schema.string())),
   summaryActions: schema.maybe(throttledActionSchema),
 });
-
-export const adHocTaskStateSchema = schema.recordOf(schema.string(), versionSchema);
