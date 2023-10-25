@@ -117,6 +117,14 @@ export function closeToastIfVisible() {
   });
 }
 
+export const waitAndClickRuleEdit = () => {
+  cy.getBySel('globalLoadingIndicator').should('exist');
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
+  cy.getBySel('editRuleSettingsLink').click();
+  cy.getBySel('globalLoadingIndicator').should('exist');
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
+};
+
 export const deleteIntegrations = async (integrationName: string) => {
   const ids: string[] = [];
   cy.contains(integrationName)
