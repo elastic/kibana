@@ -129,7 +129,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    getDefaultLabel: (column, indexPattern, columns) =>
+    getDefaultLabel: (column, columns, indexPattern) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
