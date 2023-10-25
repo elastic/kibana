@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+
+import {LensAttributes, LensConfig, LensConfigOptions} from "./types";
+import {buildGauge, buildHeatmap, buildMetric, buildRegionMap, buildTagCloud, buildTreeMap, buildTable, buildXY} from "./charts";
+import {FormulaPublicApi} from "@kbn/lens-plugin/public";
+import {DataViewsPublicPluginStart} from "@kbn/data-views-plugin/public";
+
+export class LensConfigBuilder {
+    private charts = {
+        metric: buildMetric,
+        tagcloud: buildTagCloud,
+        treemap: buildTreeMap,
+        pie: buildTreeMap,
+        donut: buildTreeMap,
+        gauge: buildGauge,
+        heatmap: buildHeatmap,
+        mosaic: buildTreeMap,
+        regionmap: buildRegionMap,
+        xy: buildXY,
+        table: buildTable,
+    }
+    private formulaAPI: FormulaPublicApi;
+    private dataViewsAPI: DataViewsPublicPluginStart;
+
+    constructor(formulaAPI: FormulaPublicApi, dataViewsAPI: DataViewsPublicPluginStart) {
+        this.formulaAPI = formulaAPI;
+        this.dataViewsAPI = dataViewsAPI;
+    }
+
+    async build(config: LensConfig, options: LensConfigOptions = {}): Promise<LensAttributes | undefined> {
+        const { chartType } = config;
+        const chartConfig = await this.charts[chartType](config as any, {
+            formulaAPI: this.formulaAPI,
+            dataViewsAPI: this.dataViewsAPI,
+        });
+        return {
+          ...chartConfig,
+          state: {
+            ...chartConfig.state,
+            filters: options.filters || [],
+            query: options.query || { language: 'kuery', query: '' },
+          },
+        };
+    }
+}
