@@ -344,6 +344,7 @@ export const stubLogstashFieldSpecMap: Record<string, FieldSpec> = {
     name: 'custom_user_field',
     type: 'conflict',
     esTypes: ['conflict'],
+    conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
     aggregatable: true,
     searchable: true,
     count: 0,
