@@ -15,7 +15,14 @@ export const createProjectSettingsLinksFromManage = (manageLink: LinkItem): Link
   const entityAnalyticsLink = manageLink.links?.find(
     ({ id }) => id === SecurityPageName.entityAnalyticsManagement
   );
-  return entityAnalyticsLink ? [{ ...entityAnalyticsLink, sideNavDisabled: true }] : [];
+  return entityAnalyticsLink
+    ? [
+        {
+          ...entityAnalyticsLink,
+          sideNavDisabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). It is displayed in the management cards landing.
+        },
+      ]
+    : [];
 };
 
 export const projectSettingsNavLinks: ProjectNavigationLink[] = [
@@ -37,12 +44,16 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
   },
   {
     id: ExternalPageName.maps,
-    title: i18n.CLOUD_MAPS_TITLE,
-    disabled: true, // the link will be available in the navigationTree (breadcrumbs) but not appear in the sideNav
+    title: i18n.MAPS_TITLE,
+    description: i18n.MAPS_DESCRIPTION,
+    landingIcon: 'graphApp',
+    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). It is displayed in the management cards landing.
   },
   {
     id: ExternalPageName.visualize,
-    title: i18n.CLOUD_VISUALIZE_TITLE,
-    disabled: true, // the link will be available in the navigationTree (breadcrumbs) but not appear in the sideNav
+    title: i18n.VISUALIZE_TITLE,
+    description: i18n.VISUALIZE_DESCRIPTION,
+    landingIcon: 'visualizeApp',
+    disabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). It is displayed in the management cards landing.
   },
 ];

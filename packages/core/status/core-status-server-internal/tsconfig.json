@@ -40,6 +40,8 @@
     "@kbn/config-mocks",
     "@kbn/core-usage-data-server-mocks",
     "@kbn/core-analytics-server-mocks",
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-logging-server-mocks",
   ],
   "exclude": [
     "target/**/*",
