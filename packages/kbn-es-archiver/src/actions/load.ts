@@ -7,7 +7,7 @@
  */
 
 import { resolve, relative } from 'path';
-import { createReadStream } from 'fs';
+import { createReadStream, readFileSync } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -38,6 +38,11 @@ const pipeline = (...streams: Readable[]) =>
     source.once('error', (error) => dest.destroy(error)).pipe(dest as any)
   );
 
+const allowedListPath = 'fixtures/override_saved_objects_index/exception_list.json';
+const soOverrideAllowedList: string = JSON.parse(
+  readFileSync(resolve(__dirname, '..', allowedListPath), 'utf8')
+);
+
 export async function loadAction({
   inputDir,
   skipExisting,
@@ -56,6 +61,14 @@ export async function loadAction({
   kbnClient: KbnClient;
 }) {
   const name = relative(REPO_ROOT, inputDir);
+  const isArchiveInExceptionList = soOverrideAllowedList.includes(name);
+  if (isArchiveInExceptionList) {
+    log.warning(
+      `${name} overrides Saved Objects index(es) and placed temporary in exception list.
+Please fix the archive and remove it from ${allowedListPath}.
+For more details see: https://github.com/elastic/kibana/issues/161882`
+    );
+  }
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
@@ -80,7 +93,14 @@ export async function loadAction({
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
+    createCreateIndexStream({
+      client,
+      stats,
+      skipExisting,
+      docsOnly,
+      isArchiveInExceptionList,
+      log,
+    }),
     createIndexDocRecordsStream(client, stats, progress, useCreate),
   ]);
 

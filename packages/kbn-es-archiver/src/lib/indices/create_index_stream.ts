@@ -19,7 +19,11 @@ import {
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
-import { cleanSavedObjectIndices, deleteSavedObjectIndices } from './kibana_index';
+import {
+  cleanSavedObjectIndices,
+  deleteSavedObjectIndices,
+  isSavedObjectIndex,
+} from './kibana_index';
 import { deleteIndex } from './delete_index';
 import { deleteDataStream } from './delete_data_stream';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -37,12 +41,14 @@ export function createCreateIndexStream({
   stats,
   skipExisting = false,
   docsOnly = false,
+  isArchiveInExceptionList = false,
   log,
 }: {
   client: Client;
   stats: Stats;
   skipExisting?: boolean;
   docsOnly?: boolean;
+  isArchiveInExceptionList?: boolean;
   log: ToolingLog;
 }) {
   const skipDocsFromIndices = new Set();
@@ -127,6 +133,13 @@ export function createCreateIndexStream({
 
     if (docsOnly) {
       return;
+    }
+
+    if (isSavedObjectIndex(index) && !isArchiveInExceptionList) {
+      throw new Error(
+        `esArchiver doesn't support modifying the existing Saved Objects index: '${index}',
+      please update its definition in mappings.json`
+      );
     }
 
     async function attemptToCreate(attemptNumber = 1) {
