@@ -1037,6 +1037,15 @@
                           }
                         }
                       },
+                      "category": {
+                        "type": "string",
+                        "description": "The rule category, which is used by features such as category-specific maintenance windows.",
+                        "enum": [
+                          "management",
+                          "observability",
+                          "securitySolution"
+                        ]
+                      },
                       "default_action_group_id": {
                         "description": "The default identifier for the rule type group.",
                         "type": "string"
