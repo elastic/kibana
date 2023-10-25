@@ -77,12 +77,12 @@ export const SyncsContextMenu: React.FC = () => {
   const shouldShowIncrementalSync =
     productFeatures.hasIncrementalSyncEnabled && hasIncrementalSyncFeature;
 
-  const isEnterpriseSearchNotAvailable =
-    config.host && config.canDeployEntSearch && errorConnectingMessage;
-  const isSyncsDisabled = Boolean(
-    (connector?.is_native && isEnterpriseSearchNotAvailable) ||
-      ingestionStatus === IngestionStatus.INCOMPLETE
+  const isEnterpriseSearchNotAvailable = Boolean(
+    config.host && config.canDeployEntSearch && errorConnectingMessage
   );
+  const isSyncsDisabled =
+    (connector?.is_native && isEnterpriseSearchNotAvailable) ||
+    ingestionStatus === IngestionStatus.INCOMPLETE;
 
   const panels: EuiContextMenuProps['panels'] = [
     {
@@ -151,9 +151,8 @@ export const SyncsContextMenu: React.FC = () => {
         {
           // @ts-ignore - data-* attributes are applied but doesn't exist on types
           'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-cancelSync`,
-          disabled: Boolean(
-            (isCanceling && ingestionStatus !== IngestionStatus.ERROR) || status === Status.LOADING
-          ),
+          disabled:
+            (isCanceling && ingestionStatus !== IngestionStatus.ERROR) || status === Status.LOADING,
           icon: <EuiIcon type="cross" size="m" color="danger" />,
           name: (
             <EuiText color="danger" size="s">
