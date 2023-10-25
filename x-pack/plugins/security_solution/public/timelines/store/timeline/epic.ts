@@ -62,6 +62,7 @@ import {
   showCallOutUnauthorizedMsg,
   addTimeline,
   saveTimeline,
+  setChanged,
 } from './actions';
 import type { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -206,6 +207,10 @@ export const createTimelineEpic =
                 const response: ResponseTimeline = get('data.persistTimeline', result);
                 if (response == null) {
                   return [
+                    setChanged({
+                      id: action.payload.id,
+                      changed: false,
+                    }),
                     endTimelineSaving({
                       id: action.payload.id,
                     }),
@@ -228,7 +233,6 @@ export const createTimelineEpic =
                         timeline: {
                           ...savedTimeline,
                           updated: response.timeline.updated ?? undefined,
-                          changed: false,
                           savedObjectId: response.timeline.savedObjectId,
                           version: response.timeline.version,
                           status: response.timeline.status ?? TimelineStatus.active,
@@ -240,6 +244,10 @@ export const createTimelineEpic =
                         },
                       }),
                   ...callOutMsg,
+                  setChanged({
+                    id: action.payload.id,
+                    changed: false,
+                  }),
                   endTimelineSaving({
                     id: action.payload.id,
                   }),

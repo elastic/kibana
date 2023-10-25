@@ -76,6 +76,6 @@ export const createTimelineChangedEpic = (): Epic<Action, Action> => (action$) =
         changed: true,
       })
     ),
-    takeWhile((action) => action.type === setChanged.type)
+    takeWhile((action) => action.type !== setChanged.type)
   );
 };
