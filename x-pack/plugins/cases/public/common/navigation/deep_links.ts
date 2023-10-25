@@ -33,15 +33,15 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   deepLinks: [
     {
       title: i18n.translate('xpack.cases.navigation.create', {
-        defaultMessage: 'Create New Case',
+        defaultMessage: 'Create',
       }),
       ...(extend[CasesDeepLinkId.casesCreate] ?? {}),
       id: CasesDeepLinkId.casesCreate,
       path: getCreateCasePath(basePath),
     },
     {
-      title: i18n.translate('xpack.cases.navigation.configure', {
-        defaultMessage: 'Configure Cases',
+      title: i18n.translate('xpack.cases.navigation.settings', {
+        defaultMessage: 'Settings',
       }),
       ...(extend[CasesDeepLinkId.casesConfigure] ?? {}),
       id: CasesDeepLinkId.casesConfigure,

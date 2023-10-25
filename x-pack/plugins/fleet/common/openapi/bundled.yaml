@@ -5240,6 +5240,16 @@ components:
           type: number
         required_acks:
           type: number
+        secrets:
+          type: object
+          properties:
+            password:
+              type: string
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - type
@@ -5304,6 +5314,14 @@ components:
               type: number
             loadbalance:
               type: boolean
+        secrets:
+          type: object
+          properties:
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - hosts
