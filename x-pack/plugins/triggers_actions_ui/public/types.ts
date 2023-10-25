@@ -169,6 +169,10 @@ export interface ActionConnectorFieldsProps {
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
+export interface ActionReadOnlyElementProps {
+  connectorId: string;
+  connectorName: string;
+}
 
 export enum RuleFlyoutCloseReason {
   SAVED,
@@ -253,6 +257,9 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     ComponentType<ActionConnectorFieldsProps>
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  actionReadOnlyExtraComponent?: React.LazyExoticComponent<
+    ComponentType<ActionReadOnlyElementProps>
+  >;
   defaultActionParams?: RecursivePartial<ActionParams>;
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
@@ -540,7 +547,6 @@ export type AlertsTableProps = {
   pageSizeOptions: number[];
   id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
-  showExpandToDetails: boolean;
   showAlertStatusWithFlapping?: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
