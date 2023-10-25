@@ -358,8 +358,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/166344
-      describe.skip('Host details page navigation', () => {
+      describe('Host details page navigation', () => {
         after(async () => {
           await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -371,11 +370,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await waitForPageToLoad();
         });
 
-        it('maintains selected date range when navigating to the individual host details', async () => {
+        it('should maintain the selected date range when navigating to the individual host details', async () => {
           const start = START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT);
           const end = END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT);
 
           await pageObjects.timePicker.setAbsoluteRange(start, end);
+
+          await waitForPageToLoad();
 
           const hostDetailLinks = await pageObjects.infraHostsView.getAllHostDetailLinks();
           expect(hostDetailLinks.length).not.to.equal(0);
