@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   const checkMainViewFilters = async () => {
     for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await rowActions[1].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-          await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+          await testSubjects.click(`~breadcrumb & ~first`);
           await PageObjects.discover.waitForDocTableLoadingComplete();
 
           await checkMainViewFilters();
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.context.waitUntilContextLoadingHasFinished();
           await browser.refresh();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
-          await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+          await testSubjects.click(`~breadcrumb & ~first`);
           await PageObjects.discover.waitForDocTableLoadingComplete();
 
           await checkMainViewFilters();
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.removeFilter('agent');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click(`~breadcrumb & ~first`);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await filterBar.getFilterCount()).to.eql(2);
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [filterName, filterValue] = TEST_FILTER_COLUMN_NAMES[1];
       expect(await filterBar.hasFilter(filterName, filterValue, false)).to.eql(true);
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click(`~breadcrumb & ~first`);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await filterBar.getFilterCount()).to.eql(2);

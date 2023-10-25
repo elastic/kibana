@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await surrDocs.click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await singleView.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
@@ -203,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       // open saved search
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const savedSearch = await find.byCssSelector(`[data-test-subj="breadcrumb last"]`);
