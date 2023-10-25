@@ -12,7 +12,7 @@ Previous versions: {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}
 === Discover
 
 [discrete]
-==== ES|QL in Discover - Shorten your time to insights by creating aggregations and visualizations directly from Discover
+==== {esql} in Discover
 
 preview:[] In 8.11 we are introducing link:https://www.elastic.co/guide/en/elasticsearch/reference/master/esql.html[Elasticsearch Query Language (ES|QL)], Elastic’s new piped language for data exploration and investigation. ES|QL transforms, enriches, and simplifies your data explorations process. 
 
