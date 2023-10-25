@@ -35,10 +35,9 @@ import {
   addExceptionListFromSharedExceptionListHeaderMenu,
   createSharedExceptionList,
   findSharedExceptionListItemsByName,
-  waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
 import { visitRuleDetailsPage } from '../../../tasks/rule_details';
-import { deleteExceptionLists } from '../../../tasks/common';
+import { deleteEndpointExceptionList, deleteExceptionLists } from '../../../tasks/common';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165795
@@ -47,13 +46,12 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
+      login();
       deleteExceptionLists();
+      deleteEndpointExceptionList();
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
       createRule(getNewRule()).as('createdRule');
-
-      login();
       visit(EXCEPTIONS_URL);
-      waitForExceptionsTableToBeLoaded();
     });
 
     afterEach(() => {

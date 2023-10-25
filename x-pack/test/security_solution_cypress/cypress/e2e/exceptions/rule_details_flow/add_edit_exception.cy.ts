@@ -67,6 +67,14 @@ describe(
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
     const ITEM_FIELD = 'unique_value.test';
 
+    before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'exceptions' });
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', 'exceptions');
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

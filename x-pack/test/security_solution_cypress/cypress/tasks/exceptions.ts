@@ -6,6 +6,7 @@
  */
 
 import type { Exception } from '../objects/exception';
+import { TOASTER_CLOSE_ICON } from '../screens/alerts_detection_rules';
 import {
   FIELD_INPUT,
   OPERATOR_INPUT,
@@ -45,6 +46,7 @@ import {
   EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT,
   EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE,
 } from '../screens/exceptions';
+import { closeErrorToast } from './alerts_detection_rules';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', numberOfItems);
@@ -183,6 +185,12 @@ export const validateEmptyExceptionConditionField = () => {
 };
 export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).should('exist');
+  cy.root().then(($page) => {
+    const element = $page.find(TOASTER_CLOSE_ICON);
+    if (element.length > 0) {
+      closeErrorToast();
+    }
+  });
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
 };
