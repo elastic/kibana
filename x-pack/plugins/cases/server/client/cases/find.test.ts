@@ -50,7 +50,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ search });
 
       await find(findRequest, clientArgs);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+      expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
 
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 
@@ -62,7 +62,7 @@ describe('find', () => {
       const search = 'foobar';
       const findRequest = createCasesClientMockFindRequest({ search });
       await find(findRequest, clientArgs);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+      expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
 
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 

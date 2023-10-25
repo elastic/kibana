@@ -234,14 +234,14 @@ describe('useAllCasesQueryParams', () => {
 
     localStorage.setItem(
       LOCALSTORAGE_FILTER_OPTIONS_KEY,
-      JSON.stringify({ severity: 'low', status: 'closed' })
+      JSON.stringify({ severity: ['low'], status: ['closed'] })
     );
 
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(result.current.filterOptions).toMatchObject(nonDefaultUrlParams);
+    expect(result.current.filterOptions).toMatchObject({ severity: ['high'], status: ['open'] });
   });
 
   describe('validation', () => {
