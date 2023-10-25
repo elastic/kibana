@@ -176,7 +176,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream(
+  } = useFetchStream<AiopsApiLogRateAnalysis['body'], typeof streamReducer>(
     http,
     '/internal/aiops/log_rate_analysis',
     '1',
