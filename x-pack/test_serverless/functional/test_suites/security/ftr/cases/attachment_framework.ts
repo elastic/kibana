@@ -9,43 +9,39 @@ import { expect } from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
+  const common = getPageObject('common');
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
-  const svlSecNavigation = getService('svlSecNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const find = getService('find');
+  const retry = getService('retry');
+  const header = getPageObject('header');
+  const toasts = getService('toasts');
 
-  // Failing
-  // Issue: https://github.com/elastic/kibana/issues/165135
-  describe.skip('Cases persistable attachments', () => {
+  describe('Cases persistable attachments', () => {
     describe('lens visualization', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
-        );
+        await svlCommonPage.login();
+        await common.navigateToApp('security', { path: 'dashboards' });
+        await header.waitUntilLoadingHasFinished();
 
-        await svlSecNavigation.navigateToLandingPage();
-
-        await testSubjects.click('solutionSideNavItemLink-dashboards');
+        await retry.waitFor('createDashboardButton', async () => {
+          return await testSubjects.exists('createDashboardButton');
+        });
 
         await testSubjects.click('createDashboardButton');
+        await header.waitUntilLoadingHasFinished();
 
         await lens.createAndAddLensFromDashboard({});
-
         await dashboard.waitForRenderComplete();
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
-        );
+        await svlCases.api.deleteAllCaseItems();
+        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {
@@ -68,8 +64,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
-
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');
@@ -90,7 +86,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           owner: 'securitySolution',
         });
 
-        await testSubjects.click('solutionSideNavItemLink-dashboards');
+        await common.navigateToApp('security', { path: 'dashboards' });
+        await header.waitUntilLoadingHasFinished();
 
         if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
           await testSubjects.click('edit-unsaved-New-Dashboard');
@@ -107,6 +104,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');

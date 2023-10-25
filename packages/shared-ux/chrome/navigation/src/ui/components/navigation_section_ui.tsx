@@ -9,14 +9,16 @@
 import React, { FC } from 'react';
 
 import {
-  EuiAccordionProps,
-  EuiCollapsibleNavItem,
-  EuiCollapsibleNavItemProps,
-  EuiCollapsibleNavSubItemProps,
   EuiTitle,
+  EuiCollapsibleNavItem,
+  EuiSpacer,
+  type EuiAccordionProps,
+  type EuiCollapsibleNavItemProps,
+  type EuiCollapsibleNavSubItemProps,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
+import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
@@ -29,17 +31,14 @@ const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
 
 const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNode.children?.length);
 
+const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
+
 /**
  * Predicate to determine if a node should be visible in the main side nav.
  * If it is not visible it will be filtered out and not rendered.
  */
 const itemIsVisible = (item: ChromeProjectNavigationNode) => {
   if (item.sideNavStatus === 'hidden') return false;
-
-  const isGroupTitle = Boolean(item.isGroupTitle);
-  if (isGroupTitle) {
-    return true;
-  }
 
   if (nodeHasLink(item)) {
     return true;
@@ -52,6 +51,12 @@ const itemIsVisible = (item: ChromeProjectNavigationNode) => {
   return false;
 };
 
+const getRenderAs = (navNode: ChromeProjectNavigationNode): RenderAs => {
+  if (navNode.renderAs) return navNode.renderAs;
+  if (!navNode.children) return 'item';
+  return 'block';
+};
+
 const filterChildren = (
   children?: ChromeProjectNavigationNode[]
 ): ChromeProjectNavigationNode[] | undefined => {
@@ -60,12 +65,14 @@ const filterChildren = (
 };
 
 const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
-  const serialized = {
+  const serialized: ChromeProjectNavigationNode = {
     ...navNode,
     id: nodePathToString(navNode),
     children: filterChildren(navNode.children),
     href: getNavigationNodeHref(navNode),
   };
+
+  serialized.renderAs = getRenderAs(serialized);
 
   return {
     navNode: serialized,
@@ -81,6 +88,53 @@ const isEuiCollapsibleNavItemProps = (
   return (
     props.title !== undefined && (props as EuiCollapsibleNavSubItemProps).renderItem === undefined
   );
+};
+
+const renderBlockTitle: (
+  { title }: ChromeProjectNavigationNode,
+  { spaceBefore }: { spaceBefore: EuiThemeSize | null }
+) => Required<EuiCollapsibleNavSubItemProps>['renderItem'] =
+  ({ title }, { spaceBefore }) =>
+  () =>
+    (
+      <EuiTitle
+        size="xxxs"
+        className="eui-textTruncate"
+        css={({ euiTheme }: any) => {
+          return {
+            marginTop: spaceBefore ? euiTheme.size[spaceBefore] : undefined,
+            // marginTop: euiTheme.size.base,
+            paddingBlock: euiTheme.size.xs,
+            paddingInline: euiTheme.size.s,
+          };
+        }}
+      >
+        <div>{title}</div>
+      </EuiTitle>
+    );
+
+const renderGroup = (
+  navGroup: ChromeProjectNavigationNode,
+  groupItems: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps>,
+  { spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS }: { spaceBefore?: EuiThemeSize | null } = {}
+): Required<EuiCollapsibleNavItemProps>['items'] => {
+  let itemPrepend: EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps | null = null;
+
+  if (!!navGroup.title) {
+    itemPrepend = {
+      renderItem: renderBlockTitle(navGroup, { spaceBefore }),
+    };
+  } else if (spaceBefore) {
+    itemPrepend = {
+      renderItem: () => <EuiSpacer size={spaceBefore} />,
+    };
+  }
+
+  if (!itemPrepend) {
+    return groupItems;
+  }
+
+  return [itemPrepend, ...groupItems];
 };
 
 // Generate the EuiCollapsible props for both the root component (EuiCollapsibleNavItem) and its
@@ -101,46 +155,49 @@ const nodeToEuiCollapsibleNavProps = (
     isSideNavCollapsed: boolean;
     treeDepth: number;
   }
-): { props: EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps; isVisible: boolean } => {
+): {
+  items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps>;
+  isVisible: boolean;
+} => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
 
-  const { id, title, href, icon, renderAs, isActive, deepLink, isGroupTitle } = navNode;
+  const {
+    id,
+    title,
+    href,
+    icon,
+    renderAs,
+    isActive,
+    deepLink,
+    spaceBefore: _spaceBefore,
+  } = navNode;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
-  const isSelected = hasChildren ? false : isActive;
+  const isSelected = hasChildren && !isItem ? false : isActive;
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isSelected,
   });
 
-  // Note: this can be replaced with an `isGroup` API or whatever you prefer
-  // Could also probably be pulled out to a separate component vs inlined
-  if (isGroupTitle) {
-    const props: EuiCollapsibleNavSubItemProps = {
-      renderItem: () => (
-        <EuiTitle
-          size="xxxs"
-          className="eui-textTruncate"
-          css={({ euiTheme }: any) => ({
-            marginTop: euiTheme.size.base,
-            paddingBlock: euiTheme.size.xs,
-            paddingInline: euiTheme.size.s,
-          })}
-        >
-          <div id={id} data-test-subj={dataTestSubj}>
-            {title}
-          </div>
-        </EuiTitle>
-      ),
-    };
-    return { props, isVisible: true };
+  let spaceBefore = _spaceBefore;
+  if (spaceBefore === undefined && treeDepth === 1 && hasChildren) {
+    // For groups at level 1 that don't have a space specified we default to add a "m"
+    // space. For all other groups, unless specified, there is no vertical space.
+    spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS;
   }
 
   if (renderAs === 'panelOpener') {
-    const props: EuiCollapsibleNavSubItemProps = {
-      renderItem: () => <NavigationItemOpenPanel item={navNode} navigateToUrl={navigateToUrl} />,
-    };
-    return { props, isVisible: true };
+    const items: EuiCollapsibleNavSubItemProps[] = [
+      {
+        renderItem: () => <NavigationItemOpenPanel item={navNode} navigateToUrl={navigateToUrl} />,
+      },
+    ];
+    if (spaceBefore) {
+      items.unshift({
+        renderItem: () => <EuiSpacer size={spaceBefore!} />,
+      });
+    }
+    return { items, isVisible: true };
   }
 
   const onClick = (e: React.MouseEvent) => {
@@ -152,7 +209,7 @@ const nodeToEuiCollapsibleNavProps = (
     }
   };
 
-  const items: EuiCollapsibleNavItemProps['items'] = isItem
+  const subItems: EuiCollapsibleNavItemProps['items'] | undefined = isItem
     ? undefined
     : navNode.children
         ?.map((child) =>
@@ -165,7 +222,11 @@ const nodeToEuiCollapsibleNavProps = (
           })
         )
         .filter(({ isVisible }) => isVisible)
-        .map((res) => res.props);
+        .map((res) => {
+          const itemsFlattened: EuiCollapsibleNavItemProps['items'] = res.items.flat();
+          return itemsFlattened;
+        })
+        .flat();
 
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
@@ -190,22 +251,43 @@ const nodeToEuiCollapsibleNavProps = (
         ...navNode.accordionProps,
       };
 
-  const props: EuiCollapsibleNavItemProps = {
-    id,
-    title,
-    isSelected,
-    accordionProps,
-    linkProps,
-    onClick,
-    href,
-    items,
-    ['data-test-subj']: dataTestSubj,
-    icon,
-    iconProps: { size: treeDepth === 0 ? 'm' : 's' },
-  };
+  if (renderAs === 'block' && treeDepth > 0 && subItems) {
+    // Render as a group block (bold title + list of links underneath)
+    return {
+      items: [...renderGroup(navNode, subItems, { spaceBefore: spaceBefore ?? null })],
+      isVisible: subItems.length > 0,
+    };
+  }
+
+  // Render as an accordion or a link (handled by EUI) depending if
+  // "items" is undefined or not. If it is undefined --> a link, otherwise an
+  // accordion is rendered.
+  const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps> = [
+    {
+      id,
+      title,
+      isSelected,
+      accordionProps,
+      linkProps,
+      onClick,
+      href,
+      items: subItems,
+      ['data-test-subj']: dataTestSubj,
+      icon,
+      iconProps: { size: treeDepth === 0 ? 'm' : 's' },
+    },
+  ];
 
   const hasVisibleChildren = (items?.length ?? 0) > 0;
-  return { props, isVisible: isItem || hasVisibleChildren };
+  const isVisible = isItem || hasVisibleChildren;
+
+  if (isVisible && spaceBefore) {
+    items.unshift({
+      renderItem: () => <EuiSpacer size={spaceBefore!} />,
+    });
+  }
+
+  return { items, isVisible };
 };
 
 interface Props {
@@ -216,13 +298,15 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
   const { navigateToUrl, isSideNavCollapsed } = useServices();
   const { open: openPanel, close: closePanel } = usePanel();
 
-  const { props, isVisible } = nodeToEuiCollapsibleNavProps(navNode, {
+  const { items, isVisible } = nodeToEuiCollapsibleNavProps(navNode, {
     navigateToUrl,
     openPanel,
     closePanel,
     isSideNavCollapsed,
     treeDepth: 0,
   });
+
+  const [props] = items;
 
   if (!isEuiCollapsibleNavItemProps(props)) {
     throw new Error(`Invalid EuiCollapsibleNavItem props for node ${props.id}`);

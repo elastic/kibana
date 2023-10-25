@@ -20,7 +20,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover show/hide chart test', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/169458
+  // FLAKY: https://github.com/elastic/kibana/issues/169459
+  describe.skip('discover show/hide chart test', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
