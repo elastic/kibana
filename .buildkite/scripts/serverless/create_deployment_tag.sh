@@ -20,6 +20,8 @@ git tag -a "$DEPLOYMENT_TAG" "$KIBANA_COMMIT_SHA" \
  -m "Tagging release $KIBANA_COMMIT_SHA for deployment: $DEPLOYMENT_TAG"
 
 # Push the tag to GitHub
-git push origin --tags
+if [[ -z "${DRY_RUN:-}" ]]; then
+  git push origin --tags
+fi
 
 echo "Created deployment tag: $DEPLOYMENT_TAG"
