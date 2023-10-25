@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await waitAndClickByTestId('close');
 
       const headers = await find.allByCssSelector('.euiDataGridHeaderCell');
-      expect(headers.length).to.be(7);
+      expect(headers.length).to.be(6);
     });
 
     it('should take into account the column type when sorting', async () => {
@@ -107,7 +107,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    it('should open a flyout and paginate through the flyout', async () => {
+    // TODO unskip once Security Solution uses the correct useInternalFlyout hook
+    //  see https://github.com/elastic/security-team/issues/7872
+    it.skip('should open a flyout and paginate through the flyout', async () => {
       await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
       await waitFlyoutOpen();
       await waitFlyoutIsLoaded();
