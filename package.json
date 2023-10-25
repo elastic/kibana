@@ -279,7 +279,7 @@
     "leaflet-draw": "0.4.14",
     "leaflet-responsive-popup": "0.6.4",
     "leaflet.heat": "0.2.0",
-    "less": "npm:@elastic/less@2.7.3-kibana2",
+    "less": "^4.2.0",
     "load-json-file": "^6.2.0",
     "loader-utils": "^2.0.3",
     "lodash": "^4.17.21",
