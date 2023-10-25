@@ -56,7 +56,7 @@ image::images/grok-use-case.gif[An example using {esql} in an {observability} us
 [discrete]
 ==== Lens inline editing in Dashboards
 
-You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the Lens editor. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
+You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the Lens editor. In the upper right nn the visualization panel, click **&#8230;  > Edit visualization**. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. Once happy with your edits, click **Apply and close**. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
 
 [role="screenshot"]
 image::images/lens-inline-editing.gif[An example of inline editing in Lens]
