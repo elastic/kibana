@@ -5,32 +5,28 @@
  * 2.0.
  */
 
-/**
- * Test subjects in serverless navigation have the following structure:
- * "sideNavItemLink-security_project_nav.node-1-2.investigations"
- * The "node-1-2" part is dynamic and changes with the number of nodes in the tree.
- * To solve this, we use the "starts with" selector [data-test-subj^="sideNavItemLink-security_project_nav"]
- * and then we add the static end part of the selector for each link.
- */
-
-const NAVIGATION_BASE = '[data-test-subj^="sideNavItemLink-security_project_nav"]';
-const PANEL_BUTTON_BASE = '[data-test-subj^="panelOpener-security_project_nav"]';
-
 // main panels links
-export const DASHBOARDS = `${NAVIGATION_BASE}[data-test-subj$="dashboards"]`;
-export const DASHBOARDS_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="dashboards"]`;
+export const DASHBOARDS = '[data-test-subj$="nav-item-deepLinkId-securitySolutionUI:dashboards"]';
+export const DASHBOARDS_PANEL_BTN =
+  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:dashboards"]';
 
-export const INVESTIGATIONS = `${NAVIGATION_BASE}[data-test-subj$="investigations"]`;
-export const INVESTIGATIONS_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="investigations"]`;
+export const INVESTIGATIONS =
+  '[data-test-subj$="nav-item-deepLinkId-securitySolutionUI:investigations"]';
+export const INVESTIGATIONS_PANEL_BTN =
+  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:investigations"]';
 
-export const EXPLORE = `${NAVIGATION_BASE}[data-test-subj$="explore"]`;
-export const EXPLORE_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="explore"]`;
+export const EXPLORE = '[data-test-subj$="nav-item-deepLinkId-securitySolutionUI:explore"]';
+export const EXPLORE_PANEL_BTN =
+  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:explore"]';
 
-export const RULES_LANDING = `${NAVIGATION_BASE}[data-test-subj$="rules-landing"]`;
-export const RULES_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="rules-landing"]`;
+export const RULES_LANDING =
+  '[data-test-subj$="nav-item-deepLinkId-securitySolutionUI:rules-landing"]';
+export const RULES_PANEL_BTN =
+  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:rules-landing"]';
 
-export const ASSETS = `${NAVIGATION_BASE}[data-test-subj$="assets"]`;
-export const ASSETS_PANEL_BTN = `${PANEL_BUTTON_BASE}[data-test-subj$="assets"]`;
+export const ASSETS = '[data-test-subj$="nav-item-deepLinkId-securitySolutionUI:assets"]';
+export const ASSETS_PANEL_BTN =
+  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:assets"]';
 
 // main direct links
 export const DISCOVER = '[data-test-subj*="nav-item-deepLinkId-discover"]';
