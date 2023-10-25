@@ -81,9 +81,12 @@ const validateQueryParams = (queryParams: QueryParams): QueryParams => {
 };
 
 /**
- * The filter options can be passed in the URL as an array of values, but the URLSearchParams
- * returns a single value. This function parses the URL and returns the filter options as an array
- * if they are defined in the DEFAULT_FILTER_OPTIONS as an array.
+ * Parses filter options from the URL.
+ * If a filter option is defined as an array in DEFAULT_FILTER_OPTIONS, this function
+ * ensures it's returned as an array even if URLSearchParams provides it as a single value.
+ * URLSearchParams.getAll() returns an empty array if the param is not defined in the URL.
+ * URLSearchParams.get() returns null if the param is not defined in the URL and in case of
+ * multiple values, it returns the first value only
  */
 const parseURLWithFilterOptions = (search: string) => {
   const urlParams = new URLSearchParams(search);

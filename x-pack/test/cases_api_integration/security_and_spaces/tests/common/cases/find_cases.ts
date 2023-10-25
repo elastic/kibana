@@ -233,13 +233,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const cases = await findCases({
           supertest,
-          query: { status: [CaseStatuses.closed, CaseStatuses.open] },
+          query: { severity: [CaseSeverity.LOW, CaseSeverity.CRITICAL] },
         });
 
         expect(cases).to.eql({
           ...findCasesResp,
           total: 2,
           cases: [lowSeverityCase, criticalSeverityCase],
+          count_open_cases: 2,
         });
       });
 
