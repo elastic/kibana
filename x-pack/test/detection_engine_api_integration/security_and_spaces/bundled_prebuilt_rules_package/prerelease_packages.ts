@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await installPrebuiltRules(es, supertest);
 
       // Refresh ES indices to avoid race conditions between write and reading of indeces
-      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+      // await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify that status is updated after package installation
       const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
