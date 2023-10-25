@@ -16,6 +16,7 @@ import {
   ObservabilityLogExplorerPluginStart,
   ObservabilityLogExplorerStartDeps,
 } from '../types';
+import { KbnUrlStateStorageFromRouterProvider } from '../utils/kbn_url_state_context';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
 export const renderObservabilityLogExplorer = (
@@ -65,15 +66,22 @@ export const ObservabilityLogExplorerApp = ({
   return (
     <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
       <KibanaContextProviderForPlugin>
-        <Router history={appParams.history}>
-          <Routes>
-            <Route
-              path="/"
-              exact={true}
-              render={() => <ObservablityLogExplorerMainRoute appParams={appParams} core={core} />}
-            />
-          </Routes>
-        </Router>
+        <KbnUrlStateStorageFromRouterProvider
+          history={appParams.history}
+          toastsService={core.notifications.toasts}
+        >
+          <Router history={appParams.history}>
+            <Routes>
+              <Route
+                path="/"
+                exact={true}
+                render={() => (
+                  <ObservablityLogExplorerMainRoute appParams={appParams} core={core} />
+                )}
+              />
+            </Routes>
+          </Router>
+        </KbnUrlStateStorageFromRouterProvider>
       </KibanaContextProviderForPlugin>
     </KibanaRenderContextProvider>
   );

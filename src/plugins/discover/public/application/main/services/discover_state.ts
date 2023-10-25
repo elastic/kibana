@@ -11,6 +11,7 @@ import { History } from 'history';
 import {
   createKbnUrlStateStorage,
   IKbnUrlStateStorage,
+  IStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -72,6 +73,7 @@ interface DiscoverStateContainerParams {
    *
    * */
   mode?: DiscoverDisplayMode;
+  stateStorageContainer?: IStateStorage;
 }
 
 export interface LoadParams {
@@ -202,6 +204,7 @@ export function getDiscoverStateContainer({
   history,
   services,
   mode = 'standalone',
+  stateStorageContainer,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -209,12 +212,14 @@ export function getDiscoverStateContainer({
   /**
    * state storage for state in the URL
    */
-  const stateStorage = createKbnUrlStateStorage({
-    useHash: storeInSessionStorage,
-    history,
-    useHashQuery: mode !== 'embedded',
-    ...(toasts && withNotifyOnErrors(toasts)),
-  });
+  const stateStorage =
+    stateStorageContainer ??
+    createKbnUrlStateStorage({
+      useHash: storeInSessionStorage,
+      history,
+      useHashQuery: mode !== 'embedded',
+      ...(toasts && withNotifyOnErrors(toasts)),
+    });
 
   /**
    * Search session logic

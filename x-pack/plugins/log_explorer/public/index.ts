@@ -10,6 +10,11 @@ import type { LogExplorerConfig } from '../common/plugin_config';
 import { LogExplorerPlugin } from './plugin';
 export type { LogExplorerPluginSetup, LogExplorerPluginStart } from './types';
 export type { LogExplorerStateContainer } from './components/log_explorer';
+export type {
+  LogExplorerController,
+  CreateLogExplorerController,
+} from './controller/create_controller';
+export type { LogExplorerControllerContext } from './state_machines/log_explorer_controller';
 
 export function plugin(context: PluginInitializerContext<LogExplorerConfig>) {
   return new LogExplorerPlugin(context);

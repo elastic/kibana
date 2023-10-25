@@ -6,21 +6,21 @@
  */
 
 import { InvokeCreator } from 'xstate';
-import { Dataset } from '../../../../common/datasets';
-import { SingleDatasetSelection } from '../../../../common/dataset_selection';
-import { IDatasetsClient } from '../../../services/datasets';
-import { LogExplorerProfileContext, LogExplorerProfileEvent } from './types';
+import { Dataset } from '../../../../../common/datasets';
+import { SingleDatasetSelection } from '../../../../../common/dataset_selection';
+import { IDatasetsClient } from '../../../../services/datasets';
+import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
-interface LogExplorerProfileUrlStateDependencies {
+interface LogExplorerControllerUrlStateDependencies {
   datasetsClient: IDatasetsClient;
 }
 
 export const validateSelection =
   ({
     datasetsClient,
-  }: LogExplorerProfileUrlStateDependencies): InvokeCreator<
-    LogExplorerProfileContext,
-    LogExplorerProfileEvent
+  }: LogExplorerControllerUrlStateDependencies): InvokeCreator<
+    LogExplorerControllerContext,
+    LogExplorerControllerEvent
   > =>
   (context) =>
   async (send) => {

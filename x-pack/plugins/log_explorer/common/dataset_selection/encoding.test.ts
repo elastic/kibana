@@ -6,7 +6,7 @@
  */
 
 import { IndexPattern } from '@kbn/io-ts-utils';
-import { encodeDatasetSelection, decodeDatasetSelectionId } from './encoding';
+import { encodeDatasetSelection, decodeDatasetSelection } from './encoding';
 import { DatasetEncodingError } from './errors';
 import { DatasetSelectionPlain } from './types';
 
@@ -61,26 +61,24 @@ describe('DatasetSelection', () => {
     });
   });
 
-  describe('#decodeDatasetSelectionId', () => {
+  describe('#decodeDatasetSelection', () => {
     test('should decode and decompress a valid encoded string', () => {
       // Decode AllDatasetSelection plain object
-      expect(decodeDatasetSelectionId(encodedAllDatasetSelection)).toEqual(
-        allDatasetSelectionPlain
-      );
+      expect(decodeDatasetSelection(encodedAllDatasetSelection)).toEqual(allDatasetSelectionPlain);
       // Decode SingleDatasetSelection plain object
-      expect(decodeDatasetSelectionId(encodedSingleDatasetSelection)).toEqual(
+      expect(decodeDatasetSelection(encodedSingleDatasetSelection)).toEqual(
         singleDatasetSelectionPlain
       );
     });
 
     test('should throw a DatasetEncodingError if the input is an invalid compressed id', () => {
-      expect(() => decodeDatasetSelectionId(invalidCompressedId)).toThrow(
+      expect(() => decodeDatasetSelection(invalidCompressedId)).toThrow(
         new DatasetEncodingError('The stored id is not a valid compressed value.')
       );
     });
 
     test('should throw a DatasetEncodingError if the decompressed value is an invalid DatasetSelection plain object', () => {
-      const decodingRunner = () => decodeDatasetSelectionId(invalidEncodedDatasetSelection);
+      const decodingRunner = () => decodeDatasetSelection(invalidEncodedDatasetSelection);
 
       expect(decodingRunner).toThrow(DatasetEncodingError);
       expect(decodingRunner).toThrow(/^The current dataset selection is invalid/);
@@ -89,11 +87,11 @@ describe('DatasetSelection', () => {
 
   test('encoding and decoding should restore the original DatasetSelection plain object', () => {
     // Encode/Decode AllDatasetSelection plain object
-    expect(decodeDatasetSelectionId(encodeDatasetSelection(allDatasetSelectionPlain))).toEqual(
+    expect(decodeDatasetSelection(encodeDatasetSelection(allDatasetSelectionPlain))).toEqual(
       allDatasetSelectionPlain
     );
     // Encode/Decode SingleDatasetSelection plain object
-    expect(decodeDatasetSelectionId(encodeDatasetSelection(singleDatasetSelectionPlain))).toEqual(
+    expect(decodeDatasetSelection(encodeDatasetSelection(singleDatasetSelectionPlain))).toEqual(
       singleDatasetSelectionPlain
     );
   });

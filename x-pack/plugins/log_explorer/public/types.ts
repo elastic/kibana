@@ -11,12 +11,14 @@ import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { LogExplorerLocators } from '../common/locators';
 import type { LogExplorerProps } from './components/log_explorer';
+import { CreateLogExplorerController } from './controller/create_controller';
 
 export interface LogExplorerPluginSetup {
   locators: LogExplorerLocators;
 }
 export interface LogExplorerPluginStart {
   LogExplorer: ComponentType<LogExplorerProps>;
+  createLogExplorerController: CreateLogExplorerController;
 }
 
 export interface LogExplorerSetupDeps {

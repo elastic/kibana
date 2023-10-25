@@ -15,8 +15,9 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
 import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
 import { createPropertyGetProxy } from '../../utils/proxies';
-import { LogExplorerProfileContext } from '../../state_machines/log_explorer_profile';
+import { LogExplorerControllerContext } from '../../state_machines/log_explorer_controller';
 import { LogExplorerStartDeps } from '../../types';
+import { LogExplorerController } from '../../controller/create_controller';
 
 export interface CreateLogExplorerArgs {
   core: CoreStart;
@@ -25,12 +26,13 @@ export interface CreateLogExplorerArgs {
 
 export interface LogExplorerStateContainer {
   appState?: DiscoverAppState;
-  logExplorerState?: Partial<LogExplorerProfileContext>;
+  logExplorerState?: Partial<LogExplorerControllerContext>;
 }
 
 export interface LogExplorerProps {
   scopedHistory: ScopedHistory;
   state$?: BehaviorSubject<LogExplorerStateContainer>;
+  controller: LogExplorerController;
 }
 
 export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
@@ -44,10 +46,10 @@ export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
     uiSettings: createUiSettingsServiceProxy(core.uiSettings),
   };
 
-  return ({ scopedHistory, state$ }: LogExplorerProps) => {
+  return ({ scopedHistory, state$, controller }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ core, plugins, state$ })],
-      [state$]
+      () => [createLogExplorerProfileCustomizations({ core, plugins, state$, controller })],
+      [state$, controller]
     );
 
     return (
@@ -55,6 +57,7 @@ export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
         customizationCallbacks={logExplorerCustomizations}
         overrideServices={overrideServices}
         scopedHistory={scopedHistory}
+        stateStorageContainer={controller.stateStorageContainer}
       />
     );
   };

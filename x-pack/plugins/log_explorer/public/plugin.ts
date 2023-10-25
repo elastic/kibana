@@ -8,6 +8,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
 import { createLogExplorer } from './components/log_explorer';
+import { createLogExplorerControllerFactory } from './controller/create_controller';
 import {
   LogExplorerPluginSetup,
   LogExplorerPluginStart,
@@ -45,8 +46,14 @@ export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExpl
       plugins,
     });
 
+    const createLogExplorerController = createLogExplorerControllerFactory({
+      http: core.http,
+      toasts: core.notifications.toasts,
+    });
+
     return {
       LogExplorer,
+      createLogExplorerController,
     };
   }
 }

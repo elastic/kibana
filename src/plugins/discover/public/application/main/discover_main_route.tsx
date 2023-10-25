@@ -8,7 +8,11 @@
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { redirectWhenMissing, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import {
+  IStateStorage,
+  redirectWhenMissing,
+  SavedObjectNotFound,
+} from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   AnalyticsNoDataPageKibanaProvider,
@@ -44,11 +48,16 @@ interface DiscoverLandingParams {
 
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
+  stateStorageContainer?: IStateStorage;
   isDev: boolean;
   mode?: DiscoverDisplayMode;
 }
 
-export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' }: MainRouteProps) {
+export function DiscoverMainRoute({
+  customizationCallbacks,
+  stateStorageContainer,
+  mode = 'standalone',
+}: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -66,6 +75,7 @@ export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' 
       history,
       services,
       mode,
+      stateStorageContainer,
     })
   );
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =

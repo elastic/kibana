@@ -5,14 +5,16 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
+import { waitFor } from 'xstate/lib/waitFor';
 import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rxjs';
 import { dynamic } from '../utils/dynamic';
-import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
 import { LogExplorerStateContainer } from '../components/log_explorer';
 import { LogExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
+import { LogExplorerController } from '../controller/create_controller';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
@@ -21,34 +23,27 @@ export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
   plugins: LogExplorerStartDeps;
   state$?: BehaviorSubject<LogExplorerStateContainer>;
+  controller: LogExplorerController;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core, plugins, state$ }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({
+    core,
+    plugins,
+    state$,
+    controller,
+  }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     const { data, dataViews, discover } = plugins;
-    // Lazy load dependencies
-    const datasetServiceModuleLoadable = import('../services/datasets');
-    const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
+    const { service } = controller;
 
-    const [{ DatasetsService }, { initializeLogExplorerProfileStateService, waitForState }] =
-      await Promise.all([datasetServiceModuleLoadable, logExplorerMachineModuleLoadable]);
-
-    const datasetsClient = new DatasetsService().start({
-      http: core.http,
-    }).client;
-
-    const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
-      datasetsClient,
-      stateContainer,
-      toasts: core.notifications.toasts,
-    });
+    service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
 
     /**
      * Wait for the machine to be fully initialized to set the restored selection
      * create the DataView and set it in the stateContainer from Discover
      */
-    await waitForState(logExplorerProfileStateService, 'initialized');
+    await waitFor(service, (state) => state.matches('initialized'), { timeout: 30000 });
 
     /**
      * Subscribe the state$ BehaviorSubject when the consumer app wants to react to state changes.
@@ -59,7 +54,7 @@ export const createLogExplorerProfileCustomizations =
     let stateSubscription: Subscription;
     if (state$) {
       stateSubscription = createStateUpdater({
-        logExplorerProfileStateService,
+        logExplorerControllerStateService: service,
         stateContainer,
       }).subscribe(state$);
     }
@@ -76,19 +71,16 @@ export const createLogExplorerProfileCustomizations =
         return (
           <KibanaContextProviderForPlugin>
             <LazyCustomDatasetSelector
-              datasetsClient={datasetsClient}
+              datasetsClient={controller.datasetsClient}
               dataViews={dataViews}
               discover={discover}
-              logExplorerProfileStateService={logExplorerProfileStateService}
+              logExplorerControllerStateService={service}
             />
           </KibanaContextProviderForPlugin>
         );
       },
       PrependFilterBar: () => (
-        <LazyCustomDatasetFilters
-          logExplorerProfileStateService={logExplorerProfileStateService}
-          data={data}
-        />
+        <LazyCustomDatasetFilters logExplorerControllerStateService={service} data={data} />
       ),
     });
 
@@ -125,13 +117,16 @@ export const createLogExplorerProfileCustomizations =
   };
 
 const createStateUpdater = ({
-  logExplorerProfileStateService,
+  logExplorerControllerStateService,
   stateContainer,
 }: {
-  logExplorerProfileStateService: LogExplorerProfileStateService;
+  logExplorerControllerStateService: LogExplorerControllerStateService;
   stateContainer: DiscoverStateContainer;
 }) => {
-  return combineLatest([from(logExplorerProfileStateService), stateContainer.appState.state$]).pipe(
+  return combineLatest([
+    from(logExplorerControllerStateService),
+    stateContainer.appState.state$,
+  ]).pipe(
     map(([logExplorerState, appState]) => ({
       logExplorerState: logExplorerState.context,
       appState,

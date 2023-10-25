@@ -11,6 +11,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { IStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
@@ -28,6 +29,7 @@ export interface DiscoverContainerInternalProps {
   getDiscoverServices: () => Promise<DiscoverServices>;
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
+  stateStorageContainer?: IStateStorage;
   isDev: boolean;
   isLoading?: boolean;
 }
@@ -49,6 +51,7 @@ export const DiscoverContainerInternal = ({
   customizationCallbacks,
   isDev,
   getDiscoverServices,
+  stateStorageContainer,
   isLoading = false,
 }: DiscoverContainerInternalProps) => {
   const [discoverServices, setDiscoverServices] = useState<DiscoverServices | undefined>();
@@ -91,6 +94,7 @@ export const DiscoverContainerInternal = ({
           <DiscoverMainRoute
             customizationCallbacks={customizationCallbacks}
             mode="embedded"
+            stateStorageContainer={stateStorageContainer}
             isDev={isDev}
           />
         </KibanaContextProvider>

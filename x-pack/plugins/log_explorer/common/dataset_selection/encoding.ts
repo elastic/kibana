@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { decode, encode, RisonValue } from '@kbn/rison';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { RisonValue, encode, decode } from '@kbn/rison';
 import * as lz from 'lz-string';
-import { decodeOrThrow } from '../runtime_types';
 import { DatasetEncodingError } from './errors';
 import { DatasetSelectionPlain, datasetSelectionPlainRT } from './types';
-
 export const encodeDatasetSelection = (datasetSelectionPlain: DatasetSelectionPlain) => {
   const safeDatasetSelection = decodeOrThrow(
     datasetSelectionPlainRT,
@@ -21,8 +20,8 @@ export const encodeDatasetSelection = (datasetSelectionPlain: DatasetSelectionPl
   return lz.compressToBase64(encode(safeDatasetSelection));
 };
 
-export const decodeDatasetSelectionId = (datasetSelectionId: string): DatasetSelectionPlain => {
-  const risonDatasetSelection: RisonValue = lz.decompressFromBase64(datasetSelectionId);
+export const decodeDatasetSelection = (base64DatasetSelection: string): DatasetSelectionPlain => {
+  const risonDatasetSelection: RisonValue = lz.decompressFromBase64(base64DatasetSelection);
 
   if (risonDatasetSelection === null || risonDatasetSelection === '') {
     throw new DatasetEncodingError('The stored id is not a valid compressed value.');
