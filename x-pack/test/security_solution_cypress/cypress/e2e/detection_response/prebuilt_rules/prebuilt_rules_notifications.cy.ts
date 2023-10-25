@@ -135,11 +135,12 @@ describe(
               version: 2,
             });
             installPrebuiltRuleAssets([UPDATED_RULE]);
-            visitRulesManagementTable();
           });
         });
 
-        it('should notify user about prebuilt rules package available for update', () => {
+        it.only('should notify user about prebuilt rules package available for update', () => {
+          visitRulesManagementTable();
+
           // No rules available for installation
           cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules`);
           // But 1 rule available for update
