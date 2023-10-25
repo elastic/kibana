@@ -49,13 +49,14 @@ export const useCloudPostureTable = ({
   paginationLocalStorageKey,
   columnsLocalStorageKey,
   additionalFilters,
+  pageIndexUrlSuffix = '',
 }: {
   // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   defaultQuery?: (params: any) => any;
   dataView: DataView;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
-  additionalFilters?: Filter;
+  additionalFilters?: Filter[];
 }): CloudPostureTableResult => {
   const getPersistedDefaultQuery = usePersistedQuery(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -119,7 +120,7 @@ export const useCloudPostureTable = ({
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
-    ...(additionalFilters ? { additionalFilters: [additionalFilters] } : {}),
+    ...(additionalFilters ? { additionalFilters } : {}),
   });
 
   const handleUpdateQuery = useCallback(
