@@ -19,6 +19,7 @@ export interface SharedAssetsOptionsPublic<F = AssetFilters> {
 type SingleKindFilters = Omit<AssetFilters, "kind">;
 
 export type GetHostsOptionsPublic = SharedAssetsOptionsPublic<SingleKindFilters>;
+export type GetContainersOptionsPublic = SharedAssetsOptionsPublic<SingleKindFilters>;
 
 export interface GetServicesOptionsPublic extends SharedAssetsOptionsPublic<SingleKindFilters> {
   parent?: string;

@@ -14,11 +14,14 @@ import {
   AssetClientOptionsWithInjectedValues,
 } from '../../asset_client_types';
 import { parseEan } from '../../parse_ean';
+import { validateStringDateRange } from '../../validators/validate_date_range';
 
 export type GetHostsOptions = GetHostsOptionsPublic & AssetClientDependencies;
 export type GetHostsOptionsInjected = AssetClientOptionsWithInjectedValues<GetHostsOptions>;
 
 export async function getHosts(options: GetHostsOptionsInjected): Promise<{ hosts: Asset[] }> {
+  validateStringDateRange(options.from, options.to);
+  
   const metricsIndices = await options.metricsClient.getMetricIndices({
     savedObjectsClient: options.savedObjectsClient,
   });

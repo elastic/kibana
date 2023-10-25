@@ -9,7 +9,6 @@ import { Asset } from '../../common/types_api';
 import { getHosts, GetHostsOptions } from './accessors/hosts/get_hosts';
 import { getServices, GetServicesOptions } from './accessors/services/get_services';
 import { AssetClientBaseOptions, AssetClientOptionsWithInjectedValues } from './asset_client_types';
-import { validateStringDateRange } from './validators/validate_date_range';
 
 export class AssetClient {
   constructor(private baseOptions: AssetClientBaseOptions) {}
@@ -22,13 +21,11 @@ export class AssetClient {
   }
 
   async getHosts(options: GetHostsOptions): Promise<{ hosts: Asset[] }> {
-    validateStringDateRange(options.from, options.to);
     const withInjected = this.injectOptions(options);
     return await getHosts(withInjected);
   }
 
   async getServices(options: GetServicesOptions): Promise<{ services: Asset[] }> {
-    validateStringDateRange(options.from, options.to);
     const withInjected = this.injectOptions(options);
     return await getServices(withInjected);
   }
