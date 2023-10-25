@@ -147,15 +147,19 @@ export const waitForHostToEnroll = async (
     return elapsedTime > timeoutMs;
   };
   let found: Agent | undefined;
+  let agentId: string | undefined;
 
   while (!found && !hasTimedOut()) {
     found = await retryOnError(
       async () =>
         fetchFleetAgents(kbnClient, {
           perPage: 1,
-          kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
+          kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
           showInactive: false,
-        }).then((response) => response.items[0]),
+        }).then((response) => {
+          agentId = response.items[0]?.id;
+          return response.items.filter((agent) => agent.status === 'online')[0];
+        }),
       RETRYABLE_TRANSIENT_ERRORS
     );
 
@@ -166,7 +170,14 @@ export const waitForHostToEnroll = async (
   }
 
   if (!found) {
-    throw new Error(`Timed out waiting for host [${hostname}] to show up in Fleet`);
+    throw Object.assign(
+      new Error(
+        `Timed out waiting for host [${hostname}] to show up in Fleet in ${
+          timeoutMs / 60 / 1000
+        } seconds`
+      ),
+      { agentId, hostname }
+    );
   }
 
   return found;

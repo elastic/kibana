@@ -122,7 +122,7 @@ const navigationTree: NavigationTreeDefinition = {
       type: 'navItem',
       id: 'search_getting_started',
       title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-        defaultMessage: 'Getting started',
+        defaultMessage: 'Get started',
       }),
       icon: 'launch',
       link: 'serverlessElasticsearch',
