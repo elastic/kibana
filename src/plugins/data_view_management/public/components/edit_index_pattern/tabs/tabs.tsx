@@ -139,6 +139,17 @@ const addFieldButtonLabel = i18n.translate(
   }
 );
 
+const SCHEMA_ITEMS: FilterItems[] = [
+  {
+    value: 'runtime',
+    name: schemaOptionRuntime,
+  },
+  {
+    value: 'indexed',
+    name: schemaOptionIndexed,
+  },
+];
+
 export const Tabs: React.FC<TabsProps> = ({
   indexPattern,
   saveIndexPattern,
@@ -169,6 +180,9 @@ export const Tabs: React.FC<TabsProps> = ({
     setCurrentFieldTypes?: (newFieldTypes: string[] | undefined) => {
       fieldTypes: string[] | undefined;
     };
+    setCurrentSchemaFieldTypes?: (newSchemaFieldTypes: string[] | undefined) => {
+      schemaFieldTypes: string[] | undefined;
+    };
   }>({});
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
   const [isScriptedFieldFilterOpen, setIsScriptedFieldFilterOpen] = useState(false);
@@ -178,16 +192,6 @@ export const Tabs: React.FC<TabsProps> = ({
   const [indexedFieldTypes, setIndexedFieldTypes] = useState<FilterItems[]>([]);
   const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
   const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
-  const [schemaItems, setSchemaItems] = useState<FilterItems[]>([
-    {
-      value: 'runtime',
-      name: schemaOptionRuntime,
-    },
-    {
-      value: 'indexed',
-      name: schemaOptionIndexed,
-    },
-  ]);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
@@ -199,6 +203,14 @@ export const Tabs: React.FC<TabsProps> = ({
     );
   }, [indexedFieldTypeFilter, indexedFieldTypes]);
 
+  const filteredSchemaFiledTypeFilter = useMemo(() => {
+    return uniq(
+      schemaFieldTypeFilter.filter((schemaFieldType) =>
+        SCHEMA_ITEMS.some((item) => item.value === schemaFieldType)
+      )
+    );
+  }, [schemaFieldTypeFilter]);
+
   const updateTab = useCallback(
     (tab: Pick<EuiTabbedContentTab, 'id'>) => {
       syncingStateFunc.setCurrentTab?.(tab.id);
@@ -209,6 +221,13 @@ export const Tabs: React.FC<TabsProps> = ({
   const updateFieldTypeFilter = useCallback(
     (newIndexedFieldTypeFilter: string[]) => {
       syncingStateFunc?.setCurrentFieldTypes?.(newIndexedFieldTypeFilter);
+    },
+    [syncingStateFunc]
+  );
+
+  const updateSchemaFieldTypeFilter = useCallback(
+    (newSchemaFieldTypeFilter: string[]) => {
+      syncingStateFunc?.setCurrentSchemaFieldTypes?.(newSchemaFieldTypeFilter);
     },
     [syncingStateFunc]
   );
@@ -373,11 +392,9 @@ export const Tabs: React.FC<TabsProps> = ({
                         iconType="arrowDown"
                         onClick={() => setIsSchemaFilterOpen(!isSchemaFilterOpen)}
                         isSelected={isSchemaFilterOpen}
-                        numFilters={schemaItems.length}
-                        hasActiveFilters={!!schemaItems.find((item) => item.checked === 'on')}
-                        numActiveFilters={
-                          schemaItems.filter((item) => item.checked === 'on').length
-                        }
+                        numFilters={SCHEMA_ITEMS.length}
+                        hasActiveFilters={filteredSchemaFiledTypeFilter.length > 0}
+                        numActiveFilters={filteredSchemaFiledTypeFilter.length}
                       >
                         {schemaFilterLabel}
                       </EuiFilterButton>
@@ -385,25 +402,27 @@ export const Tabs: React.FC<TabsProps> = ({
                     isOpen={isSchemaFilterOpen}
                     closePopover={() => setIsSchemaFilterOpen(false)}
                   >
-                    {schemaItems.map((item, index) => (
-                      <EuiFilterSelectItem
-                        checked={item.checked}
-                        key={item.value}
-                        onClick={() => {
-                          setSchemaFieldTypeFilter(
-                            item.checked
-                              ? schemaFieldTypeFilter.filter((f) => f !== item.value)
-                              : [...schemaFieldTypeFilter, item.value]
-                          );
-                          updateFilterItem(schemaItems, index, setSchemaItems);
-                        }}
-                        data-test-subj={`schemaFieldTypeFilterDropdown-option-${item.value}${
-                          item.checked ? '-checked' : ''
-                        }`}
-                      >
-                        {item.name}
-                      </EuiFilterSelectItem>
-                    ))}
+                    {SCHEMA_ITEMS.map((item) => {
+                      const isSelected = filteredSchemaFiledTypeFilter.includes(item.value);
+                      return (
+                        <EuiFilterSelectItem
+                          checked={isSelected ? 'on' : undefined}
+                          key={item.value}
+                          onClick={() => {
+                            updateSchemaFieldTypeFilter(
+                              isSelected
+                                ? filteredSchemaFiledTypeFilter.filter((f) => f !== item.value)
+                                : [...filteredSchemaFiledTypeFilter, item.value]
+                            );
+                          }}
+                          data-test-subj={`schemaFieldTypeFilterDropdown-option-${item.value}${
+                            isSelected ? '-checked' : ''
+                          }`}
+                        >
+                          {item.name}
+                        </EuiFilterSelectItem>
+                      );
+                    })}
                   </EuiPopover>
                 </EuiFilterGroup>
               </EuiFlexItem>
@@ -471,19 +490,19 @@ export const Tabs: React.FC<TabsProps> = ({
     },
     [
       fieldFilter,
+      filteredSchemaFiledTypeFilter,
       filteredIndexedFieldTypeFilter,
       indexedFieldTypes,
       isIndexedFilterOpen,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
       isScriptedFieldFilterOpen,
-      schemaItems,
-      schemaFieldTypeFilter,
       isSchemaFilterOpen,
       openFieldEditor,
       userEditPermission,
       updateFieldFilter,
       updateFieldTypeFilter,
+      updateSchemaFieldTypeFilter,
     ]
   );
 
@@ -505,7 +524,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     fieldFilter={fieldFilter}
                     fieldWildcardMatcher={fieldWildcardMatcherDecorated}
                     indexedFieldTypeFilter={filteredIndexedFieldTypeFilter}
-                    schemaFieldTypeFilter={schemaFieldTypeFilter}
+                    schemaFieldTypeFilter={filteredSchemaFiledTypeFilter}
                     helpers={{
                       editField: openFieldEditor,
                       deleteField,
@@ -583,7 +602,7 @@ export const Tabs: React.FC<TabsProps> = ({
       history,
       indexPattern,
       filteredIndexedFieldTypeFilter,
-      schemaFieldTypeFilter,
+      filteredSchemaFiledTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
@@ -624,6 +643,7 @@ export const Tabs: React.FC<TabsProps> = ({
       setCurrentTab,
       setCurrentFieldTypes,
       setCurrentFieldFilter,
+      setCurrentSchemaFieldTypes,
       stateContainer,
     } = createEditIndexPatternPageStateContainer({
       useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
@@ -635,15 +655,18 @@ export const Tabs: React.FC<TabsProps> = ({
       setCurrentTab,
       setCurrentFieldTypes,
       setCurrentFieldFilter,
+      setCurrentSchemaFieldTypes,
     });
 
     setSelectedTabId(stateContainer.selectors.tab());
     setIndexedFieldTypeFilter((currentValue) => stateContainer.selectors.fieldTypes() ?? []);
+    setSchemaFieldTypeFilter((currentValue) => stateContainer.selectors.schemaFieldTypes() ?? []);
     setFieldFilter((currentValue) => stateContainer.selectors.fieldFilter() ?? '');
 
     const stateSubscription = stateContainer.state$.subscribe(() => {
       setSelectedTabId(stateContainer.selectors.tab());
       setIndexedFieldTypeFilter((currentValue) => stateContainer.selectors.fieldTypes() ?? []);
+      setSchemaFieldTypeFilter((currentValue) => stateContainer.selectors.schemaFieldTypes() ?? []);
       setFieldFilter((currentValue) => stateContainer.selectors.fieldFilter() ?? '');
     });
 

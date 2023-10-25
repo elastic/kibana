@@ -61,6 +61,78 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clearFieldTypeFilter('long');
     });
 
+    it('should filter indexed fields by schema type', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
+
+      await PageObjects.settings.addRuntimeField('_test', 'keyword', "emit('hi')");
+
+      const unfilteredFields = [
+        '@message',
+        '@message.raw',
+        '@tags',
+        '@tags.raw',
+        '@timestamp',
+        '_id',
+        '_index',
+        '_score',
+        '_source',
+        '_test',
+      ];
+
+      expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
+
+      await PageObjects.settings.setSchemaFieldTypeFilter('runtime');
+
+      expect(await PageObjects.settings.getFieldNames()).to.eql(['_test']);
+
+      await PageObjects.settings.setSchemaFieldTypeFilter('indexed');
+
+      expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
+    });
+
+    it('should filter indexed fields when searched', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
+
+      const unfilteredFields = [
+        '@message',
+        '@message.raw',
+        '@tags',
+        '@tags.raw',
+        '@timestamp',
+        '_id',
+        '_index',
+        '_score',
+        '_source',
+        'agent',
+      ];
+
+      expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
+
+      await PageObjects.settings.filterField('@');
+
+      expect(await PageObjects.settings.getFieldNames()).to.eql([
+        '@message',
+        '@message.raw',
+        '@tags',
+        '@tags.raw',
+        '@timestamp',
+      ]);
+
+      await PageObjects.settings.filterField('@message');
+
+      expect(await PageObjects.settings.getFieldNames()).to.eql(['@message', '@message.raw']);
+
+      expect(await testSubjects.getVisibleText('tab-indexedFields')).to.be('Fields (2 / 6)');
+
+      await testSubjects.click('clearSearchButton');
+
+      expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
+    });
+
     it('should set "conflict" filter when "View conflicts" button is pressed', async function () {
       const additionalIndexWithWrongMapping = 'logstash-wrong';
       await PageObjects.settings.navigateTo();
@@ -78,9 +150,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               bytes: {
                 type: 'keyword',
               },
-              bytes_test: {
-                type: 'long',
-              },
             },
           },
         },
@@ -90,7 +159,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         index: additionalIndexWithWrongMapping,
         body: {
           bytes: 'wrong_value',
-          bytes_test: 500,
         },
         refresh: 'wait_for',
       });
@@ -112,16 +180,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'text',
       ]);
 
-      await PageObjects.settings.filterField('by');
+      // set other filters to check if they get reset after pressing the button
+      await PageObjects.settings.filterField('unknown');
+      await PageObjects.settings.setFieldTypeFilter('text');
+      await PageObjects.settings.setSchemaFieldTypeFilter('runtime');
+      expect(await PageObjects.settings.getFieldTypes()).to.eql([]);
 
-      expect(await PageObjects.settings.getFieldTypes()).to.eql([
-        'keyword, long\nConflict',
-        'long',
-      ]);
-
+      // check that only a conflicting field is shown
       await testSubjects.click('viewDataViewMappingConflictsButton');
-
       expect(await PageObjects.settings.getFieldTypes()).to.eql(['keyword, long\nConflict']);
+      expect(await PageObjects.settings.getFieldNames()).to.eql(['bytes']);
 
       await es.indices.delete({ index: additionalIndexWithWrongMapping });
     });

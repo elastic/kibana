@@ -16,6 +16,7 @@ import {
 interface IEditIndexPatternState {
   tab: string;
   fieldTypes?: string[];
+  schemaFieldTypes?: string[];
   fieldFilter?: string;
 }
 
@@ -58,11 +59,17 @@ export function createEditIndexPatternPageStateContainer({
         ...state,
         fieldTypes: fieldTypes?.length ? fieldTypes : undefined,
       }),
+      setSchemaFieldTypes:
+        (state: IEditIndexPatternState) => (schemaFieldTypes: string[] | undefined) => ({
+          ...state,
+          schemaFieldTypes: schemaFieldTypes?.length ? schemaFieldTypes : undefined,
+        }),
     },
     {
       tab: (state: IEditIndexPatternState) => () => state.tab,
       fieldFilter: (state: IEditIndexPatternState) => () => state.fieldFilter,
       fieldTypes: (state: IEditIndexPatternState) => () => state.fieldTypes,
+      schemaFieldTypes: (state: IEditIndexPatternState) => () => state.schemaFieldTypes,
     }
   );
 
@@ -88,5 +95,7 @@ export function createEditIndexPatternPageStateContainer({
       stateContainer.transitions.setFieldFilter(newFieldFilter),
     setCurrentFieldTypes: (newFieldTypes: string[] | undefined) =>
       stateContainer.transitions.setFieldTypes(newFieldTypes),
+    setCurrentSchemaFieldTypes: (newSchemaFieldTypes: string[] | undefined) =>
+      stateContainer.transitions.setSchemaFieldTypes(newSchemaFieldTypes),
   };
 }
