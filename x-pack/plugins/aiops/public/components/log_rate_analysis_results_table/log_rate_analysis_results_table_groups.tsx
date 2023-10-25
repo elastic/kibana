@@ -140,10 +140,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       name: (
         <EuiScreenReaderOnly>
           <span>
-            {i18n.translate(
-              'app_not_found_in_i18nrc.logRateAnalysisResultsGroupsTable.span.expandRowsLabel',
-              { defaultMessage: 'Expand rows' }
-            )}
+            {i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.expandRowsLabel', {
+              defaultMessage: 'Expand rows',
+            })}
           </span>
         </EuiScreenReaderOnly>
       ),
