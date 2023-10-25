@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { IExternalUrl } from '@kbn/core-http-browser';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
 import {
   IContainer,
   EmbeddableInput,
@@ -110,4 +111,26 @@ export class ImageEmbeddableFactoryDefinition
 
   private getImageDownloadHref = (fileId: string) =>
     this.deps.start().files.getDownloadHref({ id: fileId, fileKind: imageEmbeddableFileKind.id });
+
+  public inject: EmbeddableRegistryDefinition['inject'] = (state, references) => {
+    const imageConfig = { ...state.imageConfig };
+
+    const reference = references.find(({ name }) => name === `image_${state.id}_file`);
+    if (reference) {
+      imageConfig.src.id = reference.id;
+    }
+    return { ...state, imageConfig };
+  };
+
+  public extract: EmbeddableRegistryDefinition['extract'] = (state) => {
+    const references = [];
+    const { imageConfig } = state;
+
+    if (imageConfig?.src.type === 'file') {
+      const refName = `image_${state.id}_file`;
+      references.push({ name: refName, type: 'file', id: imageConfig.src.fileId });
+    }
+
+    return { state: { ...state }, references };
+  };
 }
