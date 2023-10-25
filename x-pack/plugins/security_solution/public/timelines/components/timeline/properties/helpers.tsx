@@ -27,6 +27,7 @@ NotesCountBadge.displayName = 'NotesCountBadge';
 
 interface AddToFavoritesButtonProps {
   timelineId: string;
+  compact?: boolean;
 }
 
 export const useTimelineAddToFavoriteAction = ({ timelineId }: { timelineId: string }) => {
@@ -54,7 +55,10 @@ export const useTimelineAddToFavoriteAction = ({ timelineId }: { timelineId: str
   };
 };
 
-const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ timelineId }) => {
+const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
+  timelineId,
+  compact,
+}) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -73,7 +77,14 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
     [dispatch, timelineId, isFavorite]
   );
 
-  return (
+  return compact ? (
+    <EuiButtonIcon
+      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      onClick={handleClick}
+      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
+      disabled={disableFavoriteButton}
+    />
+  ) : (
     <EuiButton
       isSelected={isFavorite}
       fill={isFavorite}

@@ -6,7 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
@@ -14,6 +14,14 @@ import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
+import { EuiFlexGroup } from '@elastic/eui';
+import styled from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { useKibana } from '../../../../common/lib/kibana';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { State, inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -23,12 +31,19 @@ import { dispatchUpdateReduxTime } from '../../../../common/components/super_dat
 import { SearchOrFilter } from './search_or_filter';
 import type { SerializedFilterQuery } from '../../../../../common/types/timeline';
 
+const FilterItemsContainer = styled(EuiFlexGroup)`
+  margin-top: ${euiThemeVars.euiSizeXS};
+`;
+
 interface OwnProps {
   filterManager: FilterManager;
   timelineId: string;
 }
 
 type Props = OwnProps & PropsFromRedux;
+
+export const isDataView = (obj: unknown): obj is DataView =>
+  obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
 
 const StatefulSearchOrFilterComponent = React.memo<Props>(
   ({
@@ -50,6 +65,40 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     updateKqlMode,
     updateReduxTime,
   }) => {
+    const [dataView, setDataView] = useState<DataView>();
+    const {
+      services: { data },
+    } = useKibana();
+
+    const { indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
+
+    useEffect(() => {
+      let dv: DataView;
+      if (isDataView(indexPattern)) {
+        setDataView(indexPattern);
+      } else if (!filterQuery) {
+        const createDataView = async () => {
+          dv = await data.dataViews.create({ title: indexPattern.title });
+          setDataView(dv);
+        };
+        createDataView();
+      }
+      return () => {
+        if (dv?.id) {
+          data.dataViews.clearInstanceCache(dv?.id);
+        }
+      };
+    }, [data.dataViews, indexPattern, filterQuery]);
+
+    const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
+
+    const onFiltersUpdated = useCallback(
+      (newFilters: Filter[]) => {
+        filterManager.setFilters(newFilters);
+      },
+      [filterManager]
+    );
+
     const setFiltersInTimeline = useCallback(
       (newFilters: Filter[]) =>
         setFilters({
@@ -69,25 +118,35 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     );
 
     return (
-      <SearchOrFilter
-        dataProviders={dataProviders}
-        filters={filters}
-        filterManager={filterManager}
-        filterQuery={filterQuery}
-        from={from}
-        fromStr={fromStr}
-        isRefreshPaused={isRefreshPaused}
-        kqlMode={kqlMode}
-        refreshInterval={refreshInterval}
-        savedQueryId={savedQueryId}
-        setFilters={setFiltersInTimeline}
-        setSavedQueryId={setSavedQueryInTimeline}
-        timelineId={timelineId}
-        to={to}
-        toStr={toStr}
-        updateKqlMode={updateKqlMode}
-        updateReduxTime={updateReduxTime}
-      />
+      <>
+        <SearchOrFilter
+          dataProviders={dataProviders}
+          filters={filters}
+          filterManager={filterManager}
+          filterQuery={filterQuery}
+          from={from}
+          fromStr={fromStr}
+          isRefreshPaused={isRefreshPaused}
+          kqlMode={kqlMode}
+          refreshInterval={refreshInterval}
+          savedQueryId={savedQueryId}
+          setFilters={setFiltersInTimeline}
+          setSavedQueryId={setSavedQueryInTimeline}
+          timelineId={timelineId}
+          to={to}
+          toStr={toStr}
+          updateKqlMode={updateKqlMode}
+          updateReduxTime={updateReduxTime}
+        />
+
+        <FilterItemsContainer direction="row" gutterSize="xs" wrap={true} responsive={false}>
+          <FilterItems
+            filters={filters}
+            onFiltersUpdated={onFiltersUpdated}
+            indexPatterns={arrDataView}
+          />
+        </FilterItemsContainer>
+      </>
     );
   },
   (prevProps, nextProps) => {

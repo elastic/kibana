@@ -195,7 +195,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, data } = useKibana().services;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
@@ -371,7 +371,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
           <TimelineKpi timelineId={timelineId} />
-
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}

@@ -33,7 +33,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
 }) => (
   <>
     <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
-    <EuiSpacer size="xs" />
+    <EuiSpacer size="m" />
     {showCallOutUnauthorizedMsg && (
       <EuiCallOut
         data-test-subj="timelineCallOutUnauthorized"
@@ -52,9 +52,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-
-    <EuiSpacer size="xs" />
-
     {show && <DataProviders timelineId={timelineId} />}
   </>
 );
