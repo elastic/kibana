@@ -64,7 +64,12 @@ export const fileObjectType: SavedObjectsType<FileMetadata> = {
   hidden: false,
   namespaceType: 'multiple',
   management: {
-    importableAndExportable: true,
+    icon: 'document',
+    defaultSearchField: 'title',
+    getTitle(obj) {
+      return `${obj.attributes.name}.${obj.attributes.extension}`;
+    },
+    importableAndExportable: false,
   },
   mappings: {
     dynamic: false,
