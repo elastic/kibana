@@ -37,6 +37,7 @@ import {
 } from './change_point_detection_context';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { ReloadContextProvider } from '../../hooks/use_reload';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -75,6 +76,8 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   if (warning !== null) {
     return <>{warning}</>;
   }
+
+  appDependencies.embeddingOrigin = AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE;
 
   const PresentationContextProvider =
     appDependencies.presentationUtil?.ContextProvider ?? React.Fragment;

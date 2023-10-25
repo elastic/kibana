@@ -10,6 +10,7 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -25,7 +26,9 @@ import { i18n } from '@kbn/i18n';
 
 import { BetaConnectorCallout } from '../../../../../shared/beta/beta_connector_callout';
 import { docLinks } from '../../../../../shared/doc_links';
+import { HttpLogic } from '../../../../../shared/http';
 import { CONNECTOR_ICONS } from '../../../../../shared/icons/connector_icons';
+import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
 import { isConnectorIndex } from '../../../../utils/indices';
@@ -40,6 +43,8 @@ import { ResearchConfiguration } from './research_configuration';
 
 export const NativeConnectorConfiguration: React.FC = () => {
   const { index } = useValues(IndexViewLogic);
+  const { config } = useValues(KibanaLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   if (!isConnectorIndex(index)) {
     return <></>;
@@ -95,6 +100,33 @@ export const NativeConnectorConfiguration: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer />
+            {config.host && config.canDeployEntSearch && errorConnectingMessage && (
+              <>
+                <EuiCallOut
+                  color="warning"
+                  size="m"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.title',
+                    {
+                      defaultMessage: 'No running Enterprise Search instance detected',
+                    }
+                  )}
+                  iconType="warning"
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.text',
+                      {
+                        defaultMessage:
+                          'Native connectors require a running Enterprise Search instance to sync content from source.',
+                      }
+                    )}
+                  </p>
+                </EuiCallOut>
+
+                <EuiSpacer />
+              </>
+            )}
             <EuiSteps
               steps={[
                 {
@@ -122,6 +154,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 {
                   children: (
                     <NativeConnectorConfigurationConfig
+                      connector={index.connector}
                       nativeConnector={nativeConnector}
                       status={index.connector.status}
                     />

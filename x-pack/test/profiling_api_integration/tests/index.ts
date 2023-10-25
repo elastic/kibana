@@ -27,7 +27,8 @@ export default function profilingApiIntegrationTests({
 }: FtrProviderContext) {
   const registry = getService('registry');
 
-  describe('Profiling API tests', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/169820
+  describe.skip('Profiling API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 
