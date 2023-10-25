@@ -1177,10 +1177,32 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top 3 values of source');
+    });
+
+    it('should not fail if dataview is not given', () => {
+      expect(
+        termsOperation.getDefaultLabel(
+          {
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'alphabetical', fallback: true },
+              size: 3,
+              orderDirection: 'asc',
+            },
+            sourceField: 'source',
+          } as TermsIndexPatternColumn,
+          {},
+          undefined
+        )
+      ).toBe('Top 3 values of Missing field');
     });
 
     it('should return main value with single counter for two fields', () => {
@@ -1200,8 +1222,8 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top values of source + 1 other');
     });
@@ -1223,8 +1245,8 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top values of source + 2 others');
     });
