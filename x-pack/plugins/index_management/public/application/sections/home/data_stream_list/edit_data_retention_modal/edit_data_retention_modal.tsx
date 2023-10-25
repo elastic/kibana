@@ -155,8 +155,8 @@ const configurationFormSchema: FormSchema = {
 
 interface MixedIndicesCalloutProps {
   dslWithIlmIndices: {
-    ilmIndices: Array<{ name: string}>;
-    dslIndices: Array<{ name: string}>;
+    ilmIndices: Array<{ name: string }>;
+    dslIndices: Array<{ name: string }>;
   };
   history: ScopedHistory;
   ilmPolicyLink: string;
@@ -164,7 +164,13 @@ interface MixedIndicesCalloutProps {
   dataStreamName: string;
 }
 
-const MixedIndicesCallout = ({ dslWithIlmIndices, ilmPolicyLink, ilmPolicyName, dataStreamName, history }: MixedIndicesCalloutProps) => {
+const MixedIndicesCallout = ({
+  dslWithIlmIndices,
+  ilmPolicyLink,
+  ilmPolicyName,
+  dataStreamName,
+  history,
+}: MixedIndicesCalloutProps) => {
   const MAX_VISIBLE_INDICES = 3;
   const visibleIndices = dslWithIlmIndices.ilmIndices.slice(0, MAX_VISIBLE_INDICES);
 
@@ -183,18 +189,10 @@ const MixedIndicesCallout = ({ dslWithIlmIndices, ilmPolicyLink, ilmPolicyName, 
           id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
           defaultMessage="The following indices are managed by ILM: {managedByILM} {hasManyIndices, plural, one {and {remainingIndices} more} other { } } ({viewAllIndicesLink}). Updating data retention will not affect these indices, instead you will have to update the {ilmPolicyLink} policy."
           values={{
-            managedByILM: (
-              <strong>
-                {visibleIndices.map((index) => index.name).join(', ')}
-              </strong>
-            ),
+            managedByILM: <strong>{visibleIndices.map((index) => index.name).join(', ')}</strong>,
             remainingIndices: dslWithIlmIndices.ilmIndices.length - MAX_VISIBLE_INDICES,
             hasManyIndices: dslWithIlmIndices.ilmIndices.length > MAX_VISIBLE_INDICES ? 1 : 0,
-            ilmPolicyLink: (
-              <EuiLink href={ilmPolicyLink}>
-                {ilmPolicyName}
-              </EuiLink>
-            ),
+            ilmPolicyLink: <EuiLink href={ilmPolicyLink}>{ilmPolicyName}</EuiLink>,
             viewAllIndicesLink: (
               <EuiLink
                 {...reactRouterNavigate(

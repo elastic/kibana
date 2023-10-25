@@ -41,7 +41,10 @@ import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
-import { isDataStreamFullyManagedByILM, isDataStreamFullyManagedByDSL } from '../../../../lib/data_streams';
+import {
+  isDataStreamFullyManagedByILM,
+  isDataStreamFullyManagedByDSL,
+} from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
@@ -173,7 +176,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           content: (
             <ConditionalWrap
               condition={isDataStreamFullyManagedByDSL(dataStream)}
-              wrap={children => <s>{children}</s>}
+              wrap={(children) => <s>{children}</s>}
             >
               <>
                 {ilmPolicyLink ? (
@@ -195,10 +198,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
     indicesLink = (
       <EuiLink
-        {...reactRouterNavigate(
-          history,
-            getIndexListUri(`data_stream="${dataStreamName}"`, true)
-        )}
+        {...reactRouterNavigate(history, getIndexListUri(`data_stream="${dataStreamName}"`, true))}
       >
         {indices.length}
       </EuiLink>
@@ -301,7 +301,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         content: (
           <ConditionalWrap
             condition={isDataStreamFullyManagedByILM(dataStream)}
-            wrap={children => <s>{children}</s>}
+            wrap={(children) => <s>{children}</s>}
           >
             <>{getLifecycleValue(lifecycle)}</>
           </ConditionalWrap>
