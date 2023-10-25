@@ -32,7 +32,7 @@ const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
-    <EuiFlexGroup css={{ minWidth: '200px' }} alignItems="center" gutterSize="xs">
+    <EuiFlexGroup css={{ minWidth: 200, height: 16 }} alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <EuiText size="xs" css={{ fontWeight: 600 }}>
           {i18n.translate('cloud.deploymentDetails.cloudIDLabel', {

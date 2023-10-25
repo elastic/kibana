@@ -6,14 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiText,
-  EuiThemeProvider,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 import {
   useCanvasShareableState,
@@ -59,43 +52,41 @@ export const PageControlsComponent: FC<Props> = ({
   const currentPage = page + 1;
 
   return (
-    <EuiThemeProvider colorMode="dark" wrapperProps={{ cloneElement: true }}>
-      <EuiFlexGroup alignItems="center" gutterSize="none" style={{ margin: '0 12px' }}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="text"
-            data-test-subj="pageControlsPrevPage"
-            onClick={() => onSetPageNumber(page - 1)}
-            iconType="arrowLeft"
-            disabled={currentPage <= 1}
-            aria-label="Previous Page"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="text"
-            size="s"
-            onClick={onToggleScrubber}
-            data-test-subj="pageControlsCurrentPage"
-          >
-            <EuiText color="text" size="s">
-              Page {currentPage}
-              {totalPages > 1 ? ` of ${totalPages}` : null}
-            </EuiText>
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="text"
-            data-test-subj="pageControlsNextPage"
-            onClick={() => onSetPageNumber(page + 1)}
-            iconType="arrowRight"
-            disabled={currentPage >= totalPages}
-            aria-label="Next Page"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiThemeProvider>
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          color="text"
+          data-test-subj="pageControlsPrevPage"
+          onClick={() => onSetPageNumber(page - 1)}
+          iconType="arrowLeft"
+          disabled={currentPage <= 1}
+          aria-label="Previous Page"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          color="text"
+          size="s"
+          onClick={onToggleScrubber}
+          data-test-subj="pageControlsCurrentPage"
+        >
+          <EuiText color="text" size="s">
+            Page {currentPage}
+            {totalPages > 1 ? ` of ${totalPages}` : null}
+          </EuiText>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          color="text"
+          data-test-subj="pageControlsNextPage"
+          onClick={() => onSetPageNumber(page + 1)}
+          iconType="arrowRight"
+          disabled={currentPage >= totalPages}
+          aria-label="Next Page"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

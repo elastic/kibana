@@ -69,6 +69,8 @@ export function useCreateSlo() {
             values: { name: slo.name },
           })
         );
+
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
       },
       onError: (error, { slo }, context) => {
         if (context?.previousData && context?.queryKey) {
