@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
@@ -47,9 +46,8 @@ import { getNewRule } from '../../../objects/rule';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../tasks/risk_scores';
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/filter_group';
 import { setRowsPerPageTo } from '../../../tasks/table_pagination';
-
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
-import { setEndDate, setStartDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
+import { setEndDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
 import {
   enableJob,
   navigateToNextPage,
@@ -62,9 +60,7 @@ const TEST_USER_ALERTS = 2;
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_ALERTS = 2;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
-const DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
-const DATE_BEFORE_ALERT_CREATION = moment().format(DATE_FORMAT);
-const OLDEST_DATE = moment('2019-01-19T16:22:56.217Z').format(DATE_FORMAT);
+const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 
 describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
@@ -205,8 +201,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         it('filters the alerts count with time range', () => {
-          setEndDate(DATE_BEFORE_ALERT_CREATION);
-
+          setEndDate(END_DATE);
           updateDates();
 
           cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
@@ -294,7 +289,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         it('filters the alerts count with time range', () => {
-          setEndDate(DATE_BEFORE_ALERT_CREATION);
+          setEndDate(END_DATE);
           updateDates();
 
           cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
@@ -427,25 +422,13 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         it('filters the alerts count with time range', () => {
-          setEndDate(DATE_BEFORE_ALERT_CREATION);
+          setEndDate(END_DATE);
           updateDates();
 
           cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
 
           // CLEAR DATES
           setEndDateNow();
-          updateDates();
-        });
-
-        it('filters risk scores with time range', () => {
-          const now = moment().format(DATE_FORMAT);
-          setStartDate(now);
-          updateDates();
-
-          cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-
-          // CLEAR DATES
-          setStartDate(OLDEST_DATE);
           updateDates();
         });
 
@@ -532,25 +515,13 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         it('filters the alerts count with time range', () => {
-          setEndDate(DATE_BEFORE_ALERT_CREATION);
+          setEndDate(END_DATE);
           updateDates();
 
           cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
 
           // CLEAR DATES
           setEndDateNow();
-          updateDates();
-        });
-
-        it('filters risk scores with time range', () => {
-          const now = moment().format(DATE_FORMAT);
-          setStartDate(now);
-          updateDates();
-
-          cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-
-          // CLEAR DATES
-          setStartDate(OLDEST_DATE);
           updateDates();
         });
 

@@ -20,9 +20,8 @@ describe('getUserRiskScoreColumns', () => {
     const columns = getUserRiskScoreColumns(defaultProps);
 
     expect(columns[0].field).toBe('user.name');
-    expect(columns[1].field).toBe(RiskScoreFields.timestamp);
-    expect(columns[2].field).toBe(RiskScoreFields.userRiskScore);
-    expect(columns[3].field).toBe(RiskScoreFields.userRisk);
+    expect(columns[1].field).toBe(RiskScoreFields.userRiskScore);
+    expect(columns[2].field).toBe(RiskScoreFields.userRisk);
 
     columns.forEach((column) => {
       expect(column).toHaveProperty('name');
@@ -46,7 +45,7 @@ describe('getUserRiskScoreColumns', () => {
     const columns: UserRiskScoreColumns = getUserRiskScoreColumns(defaultProps);
 
     const riskScore = 10.11111111;
-    const riskScoreColumn = columns[2];
+    const riskScoreColumn = columns[1];
     const renderedColumn = riskScoreColumn.render!(riskScore, null);
 
     const { queryByTestId } = render(<TestProviders>{renderedColumn}</TestProviders>);
