@@ -16,15 +16,18 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PARAMS,
-  validate: {
-    body: schema.object({
-      id: schema.string(),
-      key: schema.string(),
-      value: schema.string(),
-      description: schema.maybe(schema.string()),
-      tags: schema.maybe(schema.arrayOf(schema.string())),
-      share_across_spaces: schema.maybe(schema.boolean()),
-    }),
+  validate: {},
+  validation: {
+    request: {
+      body: schema.object({
+        id: schema.string(),
+        key: schema.string(),
+        value: schema.string(),
+        description: schema.maybe(schema.string()),
+        tags: schema.maybe(schema.arrayOf(schema.string())),
+        share_across_spaces: schema.maybe(schema.boolean()),
+      }),
+    },
   },
   writeAccess: true,
   handler: async ({
