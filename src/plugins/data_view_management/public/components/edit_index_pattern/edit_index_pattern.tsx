@@ -283,11 +283,17 @@ export const EditIndexPattern = withRouter(
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />
-              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="warning">
+              <EuiCallOut
+                title={mappingConflictHeader}
+                color="warning"
+                iconType="warning"
+                data-test-subj="dataViewMappingConflict"
+              >
                 <p>{mappingConflictLabel}</p>
                 {
                   // eslint-disable-next-line @elastic/eui/href-or-on-click
                   <EuiLink
+                    data-test-subj="viewDataViewMappingConflictsButton"
                     href={conflictFieldsUrl}
                     onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                       e.preventDefault();
@@ -300,7 +306,7 @@ export const EditIndexPattern = withRouter(
                     {i18n.translate(
                       'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
                       {
-                        defaultMessage: 'View fields',
+                        defaultMessage: 'View conflicts',
                       }
                     )}
                   </EuiLink>

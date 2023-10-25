@@ -379,7 +379,7 @@ export const Tabs = forwardRef<TabsApi, TabsProps>(
                               );
                             }}
                             data-test-subj={`indexedFieldTypeFilterDropdown-option-${item.value}${
-                              item.checked ? '-checked' : ''
+                              isSelected ? '-checked' : ''
                             }`}
                           >
                             {item.name}
