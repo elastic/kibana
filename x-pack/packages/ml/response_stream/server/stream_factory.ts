@@ -141,7 +141,7 @@ export function streamFactory<T = unknown>(
       // FLUSH_PAYLOAD_SIZE then we'll push an additional keep-alive object
       // that contains the flush fix payload.
       if (flushFix && streamType === 'ndjson') {
-        setTimeout(function repeat() {
+        function repeat() {
           if (!tryToEnd) {
             if (responseSizeSinceLastKeepAlive < FLUSH_PAYLOAD_SIZE) {
               push({ flushPayload } as unknown as T);
@@ -149,7 +149,9 @@ export function streamFactory<T = unknown>(
             responseSizeSinceLastKeepAlive = 0;
             setTimeout(repeat, FLUSH_KEEP_ALIVE_INTERVAL_MS);
           }
-        }, 0);
+        }
+
+        repeat();
       }
     } else if (streamType === 'string' && typeof d !== 'string') {
       logger.error('Must not push non-string chunks to a string based stream.');
