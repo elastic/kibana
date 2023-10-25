@@ -8,7 +8,7 @@
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { GroupingAggregation } from '@kbn/securitysolution-grouping';
-import { GenericBuckets } from '@kbn/securitysolution-grouping/src';
+import { GenericBuckets, GroupingQuery } from '@kbn/securitysolution-grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
@@ -22,42 +22,17 @@ export interface FindingsGroupingAggregation {
   unitsCount?: {
     value?: NumberOrNull;
   };
-  description?: {
+  groupsCount?: {
+    value?: NumberOrNull;
+  };
+  groupByFields?: {
     buckets?: GenericBuckets[];
-  };
-  severitiesSubAggregation?: {
-    buckets?: GenericBuckets[];
-  };
-  countSeveritySubAggregation?: {
-    value?: NumberOrNull;
-  };
-  usersCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  hostsCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  ipsCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  rulesCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  ruleTags?: {
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
-    buckets?: GenericBuckets[];
-  };
-  stackByMultipleFields1?: {
-    buckets?: GenericBuckets[];
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
   };
 }
 
-export const getGroupedFindingsQuery = (query: any) => ({
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
+export const getGroupedFindingsQuery = (query: GroupingQuery) => ({
   ...query,
+  index: CSP_LATEST_FINDINGS_DATA_VIEW,
   size: 0,
 });
 
@@ -90,6 +65,8 @@ export const useGroupedFindings = ({ query, enabled = true }: any) => {
     {
       onError: (err: Error) => showErrorToast(toasts, err),
       enabled,
+      // This allows the UI to keep the previous data while the new data is being fetched
+      keepPreviousData: true,
     }
   );
 };
