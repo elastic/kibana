@@ -10,7 +10,7 @@ import {
   profilingPerCoreWatt,
 } from '@kbn/observability-plugin/common';
 
-describe.skip('Functions page', () => {
+describe('Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
 
@@ -203,6 +203,10 @@ describe.skip('Functions page', () => {
         .clear()
         .type('20');
       cy.contains('Save changes').click();
+      cy.getByTestSubj('kbnLoadingMessage').should('exist');
+      cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
+        timeout: 50000,
+      });
       cy.go('back');
       cy.wait('@getTopNFunctions');
       cy.get(firstRowSelector).eq(5).contains('24.22k lbs / 10.99k');
