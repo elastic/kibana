@@ -14,74 +14,11 @@ echo "--- Serverless Security Second Quality Gate"
 cd x-pack/test/security_solution_api_integration
 set +e
 
-QA_API_KEY=$(retry 5 5 vault read -field=qa_api_key secret/kibana-issues/dev/security-solution-qg-enc-key)
-
-# Generate a random 5-digit number
-random_number=$((10000 + $RANDOM % 90000))
-ENVIRONMENT_DETAILS=$(curl --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
-    --header "Authorization: ApiKey $QA_API_KEY" \
-    --header 'Content-Type: application/json' \
-    --data '{
-        "name": "ftr-integration-tests-'$random_number'",
-        "region_id": "aws-eu-west-1"}' | jq '.')
-NAME=$(echo $ENVIRONMENT_DETAILS | jq -r '.name')
-ID=$(echo $ENVIRONMENT_DETAILS | jq -r '.id')
-ES_URL=$(echo $ENVIRONMENT_DETAILS | jq -r '.endpoints.elasticsearch')
-KB_URL=$(echo $ENVIRONMENT_DETAILS | jq -r '.endpoints.kibana')
-echo $ES_URL
-echo $KB_URL
-
-# Wait five seconds for the project to appear
-sleep 5
-
-# Resetting the credentials of the elastic user in the project
-CREDS_BODY=$(curl --location --request POST "https://global.qa.cld.elstc.co/api/v1/serverless/projects/security/$ID/_reset-credentials" \
-  --header "Authorization: ApiKey $QA_API_KEY" \
-  --header 'Content-Type: application/json' | jq '.')
-USERNAME=$(echo $CREDS_BODY | jq -r '.username')
-PASSWORD=$(echo $CREDS_BODY | jq -r '.password')
-AUTH=$(echo "$USERNAME:$PASSWORD")
-
-# Checking if Elasticsearch has status green
-while : ; do
-  STATUS=$(curl -u $AUTH --location "$ES_URL:443/_cluster/health?wait_for_status=green&timeout=50s" | jq -r '.status')
-  if [ $STATUS != "green" ]; then
-    echo "Sleeping for 40s to wait for ES status to be green..."
-    sleep 40
-  else
-    break
-  fi
-done
-echo "Elasticsearch has status green." 
-
-# Checking if Kibana is available
-while : ; do
-  STATUS=$(curl -u $AUTH --location "$KB_URL:443/api/status" | jq -r '.status.overall.level')
-  if [ $STATUS != "available" ]; then
-    echo "Sleeping for 15s to wait for Kibana to be available..."
-    sleep 15
-  else
-    break
-  fi
-done
-echo "Kibana is available." 
+VAULT_DEC_KEY=$(retry 5 5 vault read -field=enc_key secret/kibana-issues/dev/security-solution-qg-enc-key)
+ENV_PWD=$(echo $TEST_ENV_PWD | openssl aes-256-cbc -d -a -pass pass:$VAULT_DEC_KEY)
 
 # Removing the https:// part of the url provided in order to use it in the command below.
-FORMATTED_ES_URL="${ES_URL/https:\/\//}"    
-echo "Formatted ES URL: $FORMATTED_ES_URL"
-FORMATTED_KB_URL="${KB_URL/https:\/\//}"
-echo "Formatted KB URL: $FORMATTED_KB_URL"
+ES_URL="${TEST_ENV_ES_URL/https:\/\//}"    
+KB_URL="${TEST_ENV_KB_URL/https:\/\//}"
 
-
-TEST_CLOUD=1 TEST_ES_URL="https://elastic:$PASSWORD@$FORMATTED_ES_URL:443" TEST_KIBANA_URL="https://elastic:$PASSWORD@$FORMATTED_KB_URL:443" yarn run $1
-cmd_status=$?
-echo "Exit code with status: $cmd_status"
-
-curl --location --request DELETE "https://global.qa.cld.elstc.co/api/v1/serverless/projects/security/$ID" \
-  --header "Authorization: ApiKey $QA_API_KEY"
-
-if [ $cmd_status -eq 0 ]; then
-    echo "Finished run."
-else
-    exit(1)
-fi
+TEST_CLOUD=1 TEST_ES_URL="https://elastic:$ENV_PWD@$ES_URL" TEST_KIBANA_URL="https://elastic:$ENV_PWD@$KB_URL" yarn run $1
