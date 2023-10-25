@@ -221,7 +221,7 @@ In support of our new ES|QL capabilities, we have added link:https://www.elastic
 .Example of an ES|QL Query utilizing an enrich policy with enrich:
 
 [role="screenshot"]
-image::images/esql-enrich.png[An example of ES|QL Query utilizing an enrich policy]
+image::images/esql-enrich.png[An example of an {esql} query using an enrich policy]
 
 .Example of the enrich policies shown in the UI:
 
