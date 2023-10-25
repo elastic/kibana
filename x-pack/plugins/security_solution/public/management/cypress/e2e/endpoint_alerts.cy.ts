@@ -25,7 +25,7 @@ describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
   beforeEach(() => {
-      login(ROLE.soc_manager);
+    login(ROLE.soc_manager);
     getEndpointIntegrationVersion().then((version) => {
       createAgentPolicyTask(version, 'alerts test').then((data) => {
         indexedPolicy = data;
@@ -55,37 +55,36 @@ describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
     }
   });
 
-    it('should create a Detection Engine alert from an endpoint alert', () => {
-      // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
-      const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
-        .toString(16)
-        .substring(2)}`;
+  it('should create a Detection Engine alert from an endpoint alert', () => {
+    // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
+    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
+      .toString(16)
+      .substring(2)}`;
 
-      // Send `execute` command that triggers malicious behaviour using the `execute` response action
-      request<ResponseActionApiResponse>({
-        method: 'POST',
-        url: EXECUTE_ROUTE,
-        body: {
-          endpoint_ids: [createdHost.agentId],
-          parameters: {
-            command: executeMaliciousCommand,
-          },
+    // Send `execute` command that triggers malicious behaviour using the `execute` response action
+    request<ResponseActionApiResponse>({
+      method: 'POST',
+      url: EXECUTE_ROUTE,
+      body: {
+        endpoint_ids: [createdHost.agentId],
+        parameters: {
+          command: executeMaliciousCommand,
         },
+      },
+    })
+      .then((response) => waitForActionToComplete(response.body.data.id))
+      .then(() => {
+        return waitForEndpointAlerts(createdHost.agentId, [
+          {
+            term: { 'process.group_leader.args': executeMaliciousCommand },
+          },
+        ]);
       })
-        .then((response) => waitForActionToComplete(response.body.data.id))
-        .then(() => {
-          return waitForEndpointAlerts(createdHost.agentId, [
-            {
-              term: { 'process.group_leader.args': executeMaliciousCommand },
-            },
-          ]);
-        })
-        .then(() => {
-          return navigateToAlertsList(
-            `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
-          );
-        });
-      getAlertsTableRows().should('have.length.greaterThan', 0);
-    });
-  }
-);
+      .then(() => {
+        return navigateToAlertsList(
+          `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
+        );
+      });
+    getAlertsTableRows().should('have.length.greaterThan', 0);
+  });
+});

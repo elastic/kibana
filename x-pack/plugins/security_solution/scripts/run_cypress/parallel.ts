@@ -160,8 +160,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           return acc;
         }, [] as string[]);
 
-        // Setting this to more than 2 cause timeouts in CI. We need a dynamic way of setting parallelism based on the number of changed files so that one job runs for each changed file.
-        files = files.slice(0, 2);
+        // to avoid running too many tests, we limit the number of files to 3
+        // we may extend this in the future
+        files = files.slice(0, 3);
       }
 
       if (!files?.length) {
