@@ -23,6 +23,13 @@ export const SAVED = i18n.translate('xpack.securitySolution.timeline.properties.
   defaultMessage: 'Saved',
 });
 
+export const UNSAVED_CHANGES = i18n.translate(
+  'xpack.securitySolution.timeline.properties.hasChangesLabel',
+  {
+    defaultMessage: 'Has unsaved changes',
+  }
+);
+
 export const INSPECT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.properties.inspectTimelineTitle',
   {

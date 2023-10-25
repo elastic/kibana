@@ -35,10 +35,12 @@ import {
   clickingOnCreateTimelineFormTemplateBtn,
   closeTimeline,
   createNewTimeline,
+  executeTimelineKQL,
   expandEventAction,
   goToQueryTab,
   pinFirstEvent,
   populateTimeline,
+  saveTimeline,
 } from '../../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
@@ -148,4 +150,38 @@ describe('Timelines', (): void => {
       });
     }
   );
+
+  describe('shows a different tooltip depending on the timeline state', () => {
+    before(() => {
+      login();
+      visitWithTimeRange(OVERVIEW_URL);
+      openTimelineUsingToggle();
+    });
+
+    it('should show the correct tooltips', { tags: ['@ess', '@serverless'] }, () => {
+      // Unsaved
+      cy.get(TIMELINE_PANEL).should('be.visible');
+      cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().realHover();
+      cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
+      cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('have.text', 'Unsaved');
+
+      saveTimeline();
+
+      // Saved
+      cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().realHover();
+      cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
+      cy.get(SAVE_TIMELINE_BTN_TOOLTIP)
+        .invoke('text')
+        .should('match', /^Saved/);
+
+      executeTimelineKQL('agent.name : *');
+
+      // Saved but has unsaved changes
+      cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().realHover();
+      cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
+      cy.get(SAVE_TIMELINE_BTN_TOOLTIP)
+        .invoke('text')
+        .should('match', /^Has unsaved changes/);
+    });
+  });
 });

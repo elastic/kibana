@@ -55,6 +55,8 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
   if (canEditTimeline) {
     if (isUnsaved) {
       tooltipContent = sharedTranslations.UNSAVED;
+    } else if (changed) {
+      tooltipContent = sharedTranslations.UNSAVED_CHANGES;
     } else {
       tooltipContent = (
         <>
