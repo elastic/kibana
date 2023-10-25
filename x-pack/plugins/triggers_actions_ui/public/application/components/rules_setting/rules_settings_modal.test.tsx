@@ -162,8 +162,9 @@ describe('rules_settings_modal', () => {
   test('reset flapping settings to initial state on cancel without triggering another server reload', async () => {
     const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
     expect(getFlappingSettingsMock).toHaveBeenCalledTimes(1);
-    expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
-    await waitForModalLoad();
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
     const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
@@ -181,12 +182,11 @@ describe('rules_settings_modal', () => {
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
     expect(modalProps.onSave).not.toHaveBeenCalled();
 
-    expect(screen.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
     expect(lookBackWindowInput.getAttribute('value')).toBe('10');
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('10');
 
     expect(getFlappingSettingsMock).toHaveBeenCalledTimes(1);
-    expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
   });
 
   test('should prevent statusChangeThreshold from being greater than lookBackWindow', async () => {

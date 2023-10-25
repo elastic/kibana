@@ -246,7 +246,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
 
   const handleSave = () => {
     if (canWriteFlappingSettings && hasFlappingChanged) {
-      mutate(flappingSettings);
+      mutate(flappingSettings!);
       setFlappingSettings(flappingSettings!, true);
     }
   };
