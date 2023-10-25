@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
@@ -29,11 +28,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     },
   },
   writeAccess: true,
-  handler: async ({
-    savedObjectsClient,
-    request,
-    response,
-  }): Promise<IKibanaResponse<DeleteParamsResponse[]>> => {
+  handler: async ({ savedObjectsClient, request }) => {
     const { ids } = request.body;
 
     const result = await savedObjectsClient.bulkDelete(
