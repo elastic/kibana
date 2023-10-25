@@ -37,7 +37,7 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
-  getKibanaPrivileges: (options) => {
+  getKibanaPrivileges: (options = {}) => {
     const subAction = options?.params?.subAction;
 
     if (!subAction) {
