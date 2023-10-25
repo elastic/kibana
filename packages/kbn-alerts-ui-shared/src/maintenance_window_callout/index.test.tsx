@@ -151,7 +151,7 @@ describe('MaintenanceWindowCallout', () => {
     );
 
     expect(
-      await findByText('Maintenance window is running for Observability rules')
+      await findByText('A maintenance window is running for Observability rules')
     ).toBeInTheDocument();
   });
 
@@ -188,7 +188,7 @@ describe('MaintenanceWindowCallout', () => {
     );
 
     expect(
-      await findByText('Maintenance window is running for Observability rules')
+      await findByText('A maintenance window is running for Observability rules')
     ).toBeInTheDocument();
   });
 
@@ -209,7 +209,7 @@ describe('MaintenanceWindowCallout', () => {
     );
 
     expect(
-      await findByText('Maintenance windows are running for Observability and Stack rules')
+      await findByText('A maintenance window is running for Observability and Stack rules')
     ).toBeInTheDocument();
   });
 

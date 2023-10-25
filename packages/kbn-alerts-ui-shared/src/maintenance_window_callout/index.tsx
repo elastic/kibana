@@ -73,6 +73,7 @@ export function MaintenanceWindowCallout({
     if (activeMaintenanceWindows.length === 0) {
       return false;
     }
+
     // If categories is omitted, always display the callout
     if (!Array.isArray(categories)) {
       return true;
@@ -130,7 +131,7 @@ export function MaintenanceWindowCallout({
           ? MAINTENANCE_WINDOW_NO_CATEGORY_TITLE
           : i18n.translate('alertsUIShared.maintenanceWindowCallout.maintenanceWindowActive', {
               defaultMessage:
-                '{activeWindowCount, plural, one {Maintenance window is} other {Maintenance windows are}} running for {categories} rules',
+                '{activeWindowCount, plural, one {A maintenance window is} other {Maintenance windows are}} running for {categories} rules',
               values: {
                 categories: categoryNames,
                 activeWindowCount: activeMaintenanceWindows.length,
