@@ -37,7 +37,7 @@ export const getAlertsTableRows = (timeout?: number): Cypress.Chainable<JQuery<H
             return Boolean($rows);
           });
       },
-      { timeout }
+      { timeout, interval: 1000 }
     )
     .then(() => $rows);
 };

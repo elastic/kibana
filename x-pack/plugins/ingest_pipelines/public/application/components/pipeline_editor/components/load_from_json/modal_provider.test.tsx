@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
 
