@@ -1120,4 +1120,18 @@ describe('AllCasesListGeneric', () => {
       });
     });
   });
+
+  describe('Columns Popover', () => {
+    it('renders the columns popover correctly', async () => {
+      appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+      expect(await screen.findByTestId('column-selection-popover')).toBeInTheDocument();
+    });
+
+    it('does not render the columns popover when isSelectorView=true', () => {
+      appMockRenderer.render(<AllCasesList isSelectorView={true} />);
+
+      expect(screen.queryByTestId('column-selection-popover')).not.toBeInTheDocument();
+    });
+  });
 });

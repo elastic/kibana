@@ -184,7 +184,6 @@ export const DEFAULT_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
   { field: 'externalIncident', name: '', isChecked: true },
   { field: 'status', name: '', isChecked: true },
   { field: 'severity', name: '', isChecked: true },
-  { field: 'actions', name: '', isChecked: true },
 ];
 
 export const SELECTOR_VIEW_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [

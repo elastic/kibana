@@ -345,12 +345,8 @@ export const useCasesColumns = ({
           return getEmptyTagValue();
         },
       },
-      actions: {
-        // no field
-        ...actions,
-      },
     }),
-    [actions, assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
+    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
   );
 
   // we need to extend the columnsDict with the columns of
@@ -371,6 +367,10 @@ export const useCasesColumns = ({
         columns.push(columnsDict[field]);
       }
     });
+
+    if (actions) {
+      columns.push(actions);
+    }
   }
 
   return { columns };

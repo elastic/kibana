@@ -20,7 +20,9 @@ export const getColumn = ({
 }): EuiTableComputedColumnType<CaseUI> => ({
   name: label,
   render: (theCase: CaseUI) => {
-    const index = theCase.customFields.findIndex((element) => element.key === key);
+    const index = theCase.customFields.findIndex(
+      (element) => element.key === key && element.value !== null
+    );
 
     if (index !== -1) {
       return (

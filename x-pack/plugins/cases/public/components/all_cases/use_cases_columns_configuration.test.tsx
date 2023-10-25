@@ -46,11 +46,6 @@ describe('useCasesColumnsConfiguration ', () => {
 
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "actions": Object {
-          "canDisplay": true,
-          "field": "actions",
-          "name": "Actions",
-        },
         "assignCaseAction": Object {
           "canDisplay": true,
           "field": "",
@@ -121,34 +116,6 @@ describe('useCasesColumnsConfiguration ', () => {
           "field": "updatedAt",
           "name": "Updated on",
         },
-      }
-    `);
-  });
-
-  it('cannot display actions without update permissions', async () => {
-    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    expect(result.current.actions).toMatchInlineSnapshot(`
-      Object {
-        "canDisplay": true,
-        "field": "actions",
-        "name": "Actions",
-      }
-    `);
-  });
-
-  it('cannot display actions without delete permissions', async () => {
-    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    expect(result.current.actions).toMatchInlineSnapshot(`
-      Object {
-        "canDisplay": true,
-        "field": "actions",
-        "name": "Actions",
       }
     `);
   });

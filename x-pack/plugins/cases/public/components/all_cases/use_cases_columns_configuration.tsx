@@ -28,11 +28,10 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
     data: { customFields },
   } = useGetCaseConfiguration();
 
-  const { owner, permissions } = useCasesContext();
+  const { owner } = useCasesContext();
   const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
 
   const canDisplayDefault = true;
-  const canDisplayActions = permissions.update || permissions.delete;
   const canDisplayOwner = !!owner.length && availableSolutions.length > 1;
 
   const result: CasesColumnsConfiguration = {
@@ -105,11 +104,6 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
       field: '',
       name: '',
       canDisplay: canDisplayDefault,
-    },
-    actions: {
-      field: 'actions',
-      name: i18n.ACTIONS,
-      canDisplay: canDisplayActions,
     },
   };
 

@@ -41,6 +41,18 @@ describe('getColumn ', () => {
     expect(screen.getByTestId(`text-custom-field-column-view-${key}`)).toHaveTextContent(value);
   });
 
+  it('render function renders a null text column correctly', async () => {
+    const key = 'test_key_1';
+    const column = getColumn({ key, label: 'MockLabel' });
+    const theCase = { ...basicCase };
+
+    theCase.customFields = [{ key, type: CustomFieldTypes.TEXT, value: null }];
+
+    render(<TestProviders>{column.render(theCase)}</TestProviders>);
+
+    expect(screen.getByTestId(`empty-text-custom-field-column-view-${key}`)).toBeInTheDocument();
+  });
+
   it('render function handles a missing custom field correctly', async () => {
     const key = 'test_key_1';
     const column = getColumn({ key, label: 'MockLabel' });
