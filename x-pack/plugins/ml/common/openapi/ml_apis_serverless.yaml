@@ -10,7 +10,7 @@ tags:
   - name: ml
     description: Machine learning
 servers:
-  - url: https://localhost:5601
+  - url: /
 paths:
   /api/ml/saved_objects/sync:
     get:
