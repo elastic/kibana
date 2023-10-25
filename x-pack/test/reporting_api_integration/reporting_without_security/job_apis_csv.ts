@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
             "objectType": "search",
           },
           "payload": Object {
-            isDeprecated: false,
+            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
