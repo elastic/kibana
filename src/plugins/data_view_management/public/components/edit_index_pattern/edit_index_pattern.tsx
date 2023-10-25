@@ -31,7 +31,7 @@ import {
 import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { Tabs, type TabsApi } from './tabs';
+import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
@@ -93,7 +93,6 @@ export const EditIndexPattern = withRouter(
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
     const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
-    const [tabsApi, setTabsApi] = useState<TabsApi | null>(null);
     const conflictFieldsUrl = useMemo(() => {
       return setStateToKbnUrl(
         APP_STATE_STORAGE_KEY,
@@ -101,12 +100,24 @@ export const EditIndexPattern = withRouter(
           fieldTypes: ['conflict'],
           tab: 'indexedFields',
         },
-        undefined,
+        { useHash: uiSettings.get('state:storeInSessionStorage') },
         application.getUrlForApp('management', {
           path: `/kibana/dataViews/dataView/${encodeURIComponent(indexPattern.id!)}`,
         })
       );
-    }, [application, indexPattern.id]);
+    }, [application, indexPattern.id, uiSettings]);
+
+    useEffect(() => {
+      // dispatch synthetic hash change event to update hash history objects
+      // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+      const unlistenParentHistory = history.listen(() => {
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      });
+
+      return () => {
+        unlistenParentHistory();
+      };
+    }, [history]);
 
     useEffect(() => {
       savedObjectsManagement.getAllowedTypes().then((resp) => {
@@ -291,17 +302,9 @@ export const EditIndexPattern = withRouter(
               >
                 <p>{mappingConflictLabel}</p>
                 {
-                  // eslint-disable-next-line @elastic/eui/href-or-on-click
                   <EuiLink
                     data-test-subj="viewDataViewMappingConflictsButton"
                     href={conflictFieldsUrl}
-                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      tabsApi?.updateTab({ id: 'indexedFields' });
-                      tabsApi?.updateFieldTypeFilter(['conflict']);
-                      tabsApi?.updateFieldFilter('');
-                    }}
                   >
                     {i18n.translate(
                       'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
@@ -317,7 +320,6 @@ export const EditIndexPattern = withRouter(
         </IndexHeader>
         <EuiSpacer size="xl" />
         <Tabs
-          ref={setTabsApi}
           indexPattern={indexPattern}
           saveIndexPattern={dataViews.updateSavedObject.bind(dataViews)}
           fields={fields}

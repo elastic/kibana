@@ -16,6 +16,7 @@ import {
 interface IEditIndexPatternState {
   tab: string;
   fieldTypes?: string[];
+  fieldFilter?: string;
 }
 
 // query param to store app state at
@@ -49,13 +50,18 @@ export function createEditIndexPatternPageStateContainer({
     },
     {
       setTab: (state: IEditIndexPatternState) => (tab: string) => ({ ...state, tab }),
-      setFieldTypes: (state: IEditIndexPatternState) => (fieldTypes: string[]) => ({
+      setFieldFilter: (state: IEditIndexPatternState) => (fieldFilter: string | undefined) => ({
         ...state,
-        fieldTypes: fieldTypes.length ? fieldTypes : undefined,
+        fieldFilter,
+      }),
+      setFieldTypes: (state: IEditIndexPatternState) => (fieldTypes: string[] | undefined) => ({
+        ...state,
+        fieldTypes: fieldTypes?.length ? fieldTypes : undefined,
       }),
     },
     {
       tab: (state: IEditIndexPatternState) => () => state.tab,
+      fieldFilter: (state: IEditIndexPatternState) => () => state.fieldFilter,
       fieldTypes: (state: IEditIndexPatternState) => () => state.fieldTypes,
     }
   );
@@ -74,12 +80,13 @@ export function createEditIndexPatternPageStateContainer({
   kbnUrlStateStorage.set(APP_STATE_STORAGE_KEY, stateContainer.getState(), { replace: true });
 
   return {
+    stateContainer,
     startSyncingState: start,
     stopSyncingState: stop,
     setCurrentTab: (newTab: string) => stateContainer.transitions.setTab(newTab),
-    getCurrentTab: () => stateContainer.selectors.tab(),
-    setCurrentFieldTypes: (newFieldTypes: string[]) =>
+    setCurrentFieldFilter: (newFieldFilter: string | undefined) =>
+      stateContainer.transitions.setFieldFilter(newFieldFilter),
+    setCurrentFieldTypes: (newFieldTypes: string[] | undefined) =>
       stateContainer.transitions.setFieldTypes(newFieldTypes),
-    getCurrentFieldTypes: () => stateContainer.selectors.fieldTypes(),
   };
 }
