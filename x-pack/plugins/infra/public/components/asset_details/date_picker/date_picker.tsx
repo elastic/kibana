@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import { EuiSuperDatePickerProps } from '@elastic/eui';
-import { EuiSuperDatePicker, type OnTimeChangeProps, type OnRefreshProps } from '@elastic/eui';
+import {
+  EuiSuperDatePicker,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiText,
+  type OnTimeChangeProps,
+  type OnRefreshProps,
+  type EuiSuperDatePickerProps,
+} from '@elastic/eui';
 import type {
   OnRefreshChangeProps,
   DurationRange,
 } from '@elastic/eui/src/components/date_picker/types';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { useLoadingStateContext } from '../hooks/use_loading_state';
+import { Popover } from '../tabs/common/popover';
 
 const COMMONLY_USED_RANGES: DurationRange[] = [
   {
@@ -93,20 +102,55 @@ export const DatePicker = () => {
   const handleOnClick = useCallback(() => updateSearchSessionId(), [updateSearchSessionId]);
 
   return (
-    <MemoEuiSuperDatePicker
-      commonlyUsedRanges={COMMONLY_USED_RANGES}
-      start={dateRange.from}
-      end={dateRange.to}
-      isPaused={autoRefresh && autoRefresh.isPaused}
-      onTimeChange={handleTimeChange}
-      onRefresh={autoRefresh && handleRefresh}
-      onRefreshChange={autoRefresh && handleAutoRefreshChange}
-      refreshInterval={autoRefresh && autoRefresh.interval}
-      onClick={handleOnClick}
-      width="full"
-    />
+    <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">
+      <EuiFlexItem grow={false}>
+        <MemoEuiSuperDatePicker
+          commonlyUsedRanges={COMMONLY_USED_RANGES}
+          start={dateRange.from}
+          end={dateRange.to}
+          isPaused={autoRefresh && autoRefresh.isPaused}
+          onTimeChange={handleTimeChange}
+          onRefresh={autoRefresh && handleRefresh}
+          onRefreshChange={autoRefresh && handleAutoRefreshChange}
+          refreshInterval={autoRefresh && autoRefresh.interval}
+          onClick={handleOnClick}
+          width="full"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ minHeight: '18px' }}>
+        {!autoRefresh?.isPaused && <AutoRefreshTroubleshootMessage />}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
+
+const AutoRefreshTroubleshootMessage = () => (
+  <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued">
+        <FormattedMessage
+          id="xpack.infra.assetDetails.datePicker.tooltip.autoRefresh"
+          defaultMessage="Experiencing continually loading data?"
+        />
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <Popover
+        iconSize="s"
+        iconColor="subdued"
+        icon="iInCircle"
+        data-test-subj="infraAssetDetailsMetadataPopoverButton"
+      >
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.infra.assetDetails.datePicker.tooltip.autoRefresh.troubleshoot"
+            defaultMessage="Try increasing the refresh interval, shortening the date range or turning off auto-refresh."
+          />
+        </EuiText>
+      </Popover>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 // Memo EuiSuperDatePicker to prevent re-renders from resetting the auto-refresh cycle
 const MemoEuiSuperDatePicker = React.memo(
