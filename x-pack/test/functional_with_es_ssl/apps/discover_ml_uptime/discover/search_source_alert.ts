@@ -338,7 +338,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // should not have data view selected by default
       const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
+      expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW logs-*');
 
       log.debug('create data views');
       const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);

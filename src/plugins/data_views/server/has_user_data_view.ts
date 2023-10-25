@@ -46,10 +46,10 @@ export const hasUserDataView = async (
 
   if (dataViews.total === 0) {
     return false;
-  } else {
-    // filter here data views that we know are not created by user during on-boarding for smoother on-boarding experience
-    // currently there is no such data views,
-
-    return true;
   }
+
+  const hasNonManagedDataViews =
+    dataViews.saved_objects.filter((savedObject) => !savedObject.managed).length > 0;
+
+  return hasNonManagedDataViews;
 };
