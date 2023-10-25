@@ -8,11 +8,14 @@ Edits a parameter with the specified ID.
 
 === {api-request-title}
 
-`PUT <your-api-host>/api/synthetics/parameters/{paramId}`
+`PUT <kibana host>:<port>/api/synthetics/params`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/synthetics/params`
 
 === {api-prereq-title}
 
-To use this API, you must have appropriate permissions for editing parameters.
+You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
 
 [[parameter-edit-path-params]]
 ==== Path Parameters
@@ -65,5 +68,3 @@ The API returns the updated parameter as follows:
   "tags": ["authentication", "security", "updated"]
 }
 --------------------------------------------------
-
-This example provides documentation for editing a parameter by its ID using the specified schema and includes an example of a PUT request and the expected response. You can replace `<your-api-host>` with the actual host where your API is available and use a valid `paramId` in the URL path.

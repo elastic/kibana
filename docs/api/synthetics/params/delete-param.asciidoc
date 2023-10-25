@@ -4,13 +4,18 @@
 <titleabbrev>Delete Parameters</titleabbrev>
 ++++
 
-Deletes one or more parameters from the system.
+Deletes one or more parameters from the Synthetics app.
 
 === {api-request-title}
 
-`DELETE <your-api-host>/api/synthetics/params`
+`DELETE <kibana host>:<port>/api/synthetics/params`
+
+`DELETE <kibana host>:<port>/s/<space_id>/api/synthetics/params`
 
 === {api-prereq-title}
+
+You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
 
 To use this API, you must have appropriate permissions for deleting parameters.
 
