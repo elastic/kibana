@@ -217,6 +217,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       dropbox: `${WORKPLACE_SEARCH_DOCS}workplace-search-dropbox-connector.html`,
       externalSharePointOnline: `${WORKPLACE_SEARCH_DOCS}sharepoint-online-external.html`,
       externalIdentities: `${WORKPLACE_SEARCH_DOCS}workplace-search-external-identities-api.html`,
+      gatedFormBlog: `${ELASTIC_WEBSITE_URL}blog/evolution-workplace-search-private-data-elasticsearch`,
       gettingStarted: `${WORKPLACE_SEARCH_DOCS}workplace-search-getting-started.html`,
       gitHub: `${WORKPLACE_SEARCH_DOCS}workplace-search-github-connector.html`,
       gmail: `${WORKPLACE_SEARCH_DOCS}workplace-search-gmail-connector.html`,
@@ -813,6 +814,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,
+      generalPrivacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
+      termsOfService: `${ELASTIC_WEBSITE_URL}legal/elastic-cloud-account-terms`,
+      dataUse: `${ELASTIC_WEBSITE_URL}legal/privacy-statement#how-we-use-the-information`,
     },
     kibanaUpgradeSavedObjects: {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
