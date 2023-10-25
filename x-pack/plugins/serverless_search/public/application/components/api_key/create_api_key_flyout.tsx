@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -29,7 +29,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMutation } from '@tanstack/react-query';
 
 import {
   CANCEL_LABEL,
@@ -38,14 +37,11 @@ import {
   INVALID_JSON_ERROR,
   REQUIRED_LABEL,
 } from '../../../../common/i18n_string';
-import { CreateAPIKeyArgs } from '../../../../common/types';
-import { useKibanaServices } from '../../hooks/use_kibana';
-import { CREATE_API_KEY_PATH } from '../../../../common/routes';
 import { isApiError } from '../../../utils/api';
 import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';
 import { SecurityPrivilegesForm } from './security_privileges_form';
-import { CreateApiKeyResponse } from './types';
+import { CreateApiKeyResponse, useCreateApiKey } from '../../hooks/api/use_create_api_key';
 
 const DEFAULT_ROLE_DESCRIPTORS = `{
   "serverless_search": {
@@ -84,7 +80,6 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   setApiKey,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { http } = useKibanaServices();
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);
   const [roleDescriptors, setRoleDescriptors] = useState(DEFAULT_ROLE_DESCRIPTORS);
@@ -142,18 +137,15 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
     });
   };
 
-  const { isLoading, isError, error, mutate } = useMutation({
-    mutationFn: async (input: CreateAPIKeyArgs) => {
-      const result = await http.post<CreateApiKeyResponse>(CREATE_API_KEY_PATH, {
-        body: JSON.stringify(input),
-      });
-      return result;
-    },
-    onSuccess: (apiKey) => {
-      setApiKey(apiKey);
+  const { data, isLoading, isError, isSuccess, error, mutate } = useCreateApiKey();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setApiKey(data);
       onClose();
-    },
+    }
   });
+
   const createError = parseCreateError(error);
   return (
     <EuiFlyout
