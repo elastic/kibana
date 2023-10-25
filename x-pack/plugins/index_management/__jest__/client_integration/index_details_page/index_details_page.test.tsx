@@ -334,7 +334,7 @@ describe('<IndexDetailsPage />', () => {
         expect(dataStreamContent).toBe(
           `Data stream${
             dataStreamDetails.generation
-          }GenerationsSee templateLast update${humanizeTimeStamp(dataStreamDetails.maxTimeStamp!)}`
+          }GenerationsSee detailsRelated templateLast update${humanizeTimeStamp(dataStreamDetails.maxTimeStamp!)}`
         );
       });
 
