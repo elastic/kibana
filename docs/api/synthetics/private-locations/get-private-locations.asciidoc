@@ -8,9 +8,10 @@ Retrieves a list of private locations or a single private location by ID.
 
 === {api-request-title}
 
-`GET <your-api-host>/api/synthetics/private_locations`
+`GET <kibana host>:<port>/api/synthetics/private-locations`
 
-`GET <your-api-host>/api/synthetics/private_locations/{paramId}`
+`GET <kibana host>:<port>/s/<space_id>/api/synthetics/private-locations}`
+
 
 === {api-prereq-title}
 

@@ -8,7 +8,9 @@ Deletes a private location using the provided location ID.
 
 === {api-request-title}
 
-`DELETE <your-api-host>/api/private-locations/{locationId}`
+`DELETE <kibana host>:<port>/api/synthetics/private-locations/{locationId}`
+
+`DELETE <kibana host>:<port>/s/<space_id>/api/synthetics/private-locations/{locationId}`
 
 === {api-prereq-title}
 
