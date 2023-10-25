@@ -32,7 +32,6 @@ import type { PolicyData } from '../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import { loadPage } from '../tasks/common';
 import { login, ROLE } from '../tasks/login';
-import { createEndpointHost } from '../tasks/create_endpoint_host';
 import { enableAllPolicyProtections } from '../tasks/endpoint_policy';
 import { getEndpointIntegrationVersion, createAgentPolicyTask } from '../tasks/fleet';
 import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
