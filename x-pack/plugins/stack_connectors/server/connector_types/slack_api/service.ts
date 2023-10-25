@@ -120,13 +120,11 @@ export const createExternalService = (
     throw Error(`[Action][${SLACK_CONNECTOR_NAME}]: Wrong configuration.`);
   }
 
-  const axiosInstance = axios.create({
-    baseURL: SLACK_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-type': 'application/json; charset=UTF-8',
-    },
-  });
+  const axiosInstance = axios.create();
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    'Content-type': 'application/json; charset=UTF-8',
+  };
 
   const validChannelId = async (
     channelId: string
@@ -138,7 +136,8 @@ export const createExternalService = (
           configurationUtilities,
           logger,
           method: 'get',
-          url: `conversations.info?channel=${channelId}`,
+          headers,
+          url: `${SLACK_URL}conversations.info?channel=${channelId}`,
         });
       };
       if (channelId.length === 0) {
@@ -198,9 +197,10 @@ export const createExternalService = (
       const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
         method: 'post',
-        url: 'chat.postMessage',
+        url: `${SLACK_URL}chat.postMessage`,
         logger,
         data: { channel: channelToUse, text },
+        headers,
         configurationUtilities,
       });
 

@@ -43,6 +43,15 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
+  secrets?: {
+    ssl?: {
+      key?:
+        | string
+        | {
+            id: string;
+          };
+    };
+  };
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
@@ -121,4 +130,18 @@ export interface KafkaOutput extends NewBaseOutput {
   timeout?: number;
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+  secrets?: {
+    password?:
+      | string
+      | {
+          id: string;
+        };
+    ssl?: {
+      key?:
+        | string
+        | {
+            id: string;
+          };
+    };
+  };
 }

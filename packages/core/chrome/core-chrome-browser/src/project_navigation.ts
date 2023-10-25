@@ -8,7 +8,7 @@
 
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
-import { EuiAccordionProps, IconType } from '@elastic/eui';
+import type { EuiAccordionProps, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -53,6 +53,8 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
+export type EuiThemeSize = Exclude<typeof EuiThemeSizes[number], 'base' | 'xxs' | 'xxxl' | 'xxxxl'>;
+
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
   pathNameSerialized: string;
@@ -94,15 +96,14 @@ interface NodeDefinitionBase {
    */
   getIsActive?: GetIsActiveFn;
   /**
+   * Add vertical space before this node
+   */
+  spaceBefore?: EuiThemeSize | null;
+  /**
    * ----------------------------------------------------------------------------------------------
    * ------------------------------- GROUP NODES ONLY PROPS ---------------------------------------
    * ----------------------------------------------------------------------------------------------
    */
-  /**
-   * ["group" nodes only] Optional flag to indicate if the node must be treated as a group title.
-   * Can not be used with `children`
-   */
-  isGroupTitle?: boolean;
   /**
    * ["group" nodes only] Property to indicate how the group should be rendered.
    * - Accordion: wraps the items in an EuiAccordion

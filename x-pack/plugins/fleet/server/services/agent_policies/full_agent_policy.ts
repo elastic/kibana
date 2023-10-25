@@ -31,6 +31,8 @@ import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
+import { getOutputSecretReferences } from '../secrets';
+
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
 import {
@@ -110,6 +112,10 @@ export async function getFullAgentPolicy(
     return acc;
   }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
 
+  const outputSecretReferences = outputs.flatMap((output) => getOutputSecretReferences(output));
+  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+    (policy) => policy.secret_references || []
+  );
   const defaultMonitoringConfig: FullAgentPolicyMonitoring = {
     enabled: false,
     logs: false,
@@ -152,9 +158,7 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs,
-    secret_references: (agentPolicy?.package_policies || []).flatMap(
-      (policy) => policy.secret_references || []
-    ),
+    secret_references: [...outputSecretReferences, ...packagePolicySecretReferences],
     revision: agentPolicy.revision,
     agent: {
       download: {
@@ -308,7 +312,8 @@ export function transformOutputToFullPolicyOutput(
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper } = output;
+  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper, secrets } =
+    output;
 
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
 
@@ -435,6 +440,7 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
+    ...(secrets ? { secrets } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
 

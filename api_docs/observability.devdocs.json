@@ -4656,6 +4656,16 @@
           "section": "def-public.SloEditLocatorParams",
           "text": "SloEditLocatorParams"
         },
+        ">; sloListLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        "SloListLocatorParams",
         ">; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -13744,7 +13754,7 @@
                 "label": "requiresPageReload",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -13839,7 +13849,7 @@
                 "label": "requiresPageReload",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -13934,7 +13944,7 @@
                 "label": "requiresPageReload",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -15472,6 +15482,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.sloListLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloListLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_LIST_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.syntheticsEditMonitorLocatorID",
         "type": "string",
         "tags": [],
@@ -15618,7 +15643,7 @@
         "label": "observabilityPaths",
         "description": [],
         "signature": [
-          "{ alerts: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; slos: string; slosWelcome: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
+          "{ alerts: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; slos: string; slosWelcome: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,

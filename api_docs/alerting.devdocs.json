@@ -929,6 +929,46 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.InstallShutdownError",
+        "type": "Class",
+        "tags": [],
+        "label": "InstallShutdownError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.InstallShutdownError",
+            "text": "InstallShutdownError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/install_with_timeout.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.InstallShutdownError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/install_with_timeout.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -3222,6 +3262,38 @@
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.getTimeRange",
+            "type": "Function",
+            "tags": [],
+            "label": "getTimeRange",
+            "description": [],
+            "signature": [
+              "(timeWindow?: string | undefined) => { dateStart: string; dateEnd: string; }"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.RuleExecutorOptions.getTimeRange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "timeWindow",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3386,10 +3458,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor.ts"
               },
               {
                 "plugin": "infra",
@@ -8865,17 +8933,31 @@
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.RulesSettingsFlappingProperties",
-                "text": "RulesSettingsFlappingProperties"
+                "section": "def-common.RulesSettingsFlapping",
+                "text": "RulesSettingsFlapping"
               },
-              " & ",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RulesSettings.queryDelay",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "queryDelay",
+            "description": [],
+            "signature": [
               {
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.RulesSettingsModificationMetadata",
-                "text": "RulesSettingsModificationMetadata"
-              }
+                "section": "def-common.RulesSettingsQueryDelay",
+                "text": "RulesSettingsQueryDelay"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,
@@ -8987,6 +9069,87 @@
             "type": "string",
             "tags": [],
             "label": "updatedAt",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RulesSettingsProperties",
+        "type": "Interface",
+        "tags": [],
+        "label": "RulesSettingsProperties",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RulesSettingsProperties.flapping",
+            "type": "Object",
+            "tags": [],
+            "label": "flapping",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RulesSettingsFlappingProperties",
+                "text": "RulesSettingsFlappingProperties"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RulesSettingsProperties.queryDelay",
+            "type": "Object",
+            "tags": [],
+            "label": "queryDelay",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RulesSettingsQueryDelayProperties",
+                "text": "RulesSettingsQueryDelayProperties"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RulesSettingsQueryDelayProperties",
+        "type": "Interface",
+        "tags": [],
+        "label": "RulesSettingsQueryDelayProperties",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RulesSettingsQueryDelayProperties.delay",
+            "type": "number",
+            "tags": [],
+            "label": "delay",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,
@@ -9542,6 +9705,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"allQueryDelaySettings\""
+        ],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.BASE_ALERTING_API_PATH",
         "type": "string",
         "tags": [],
@@ -9579,6 +9757,36 @@
         "description": [],
         "signature": [
           "20"
+        ],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.DEFAULT_QUERY_DELAY",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_QUERY_DELAY",
+        "description": [],
+        "signature": [
+          "0"
+        ],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.DEFAULT_SERVERLESS_QUERY_DELAY",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_SERVERLESS_QUERY_DELAY",
+        "description": [],
+        "signature": [
+          "15"
         ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
@@ -10103,6 +10311,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.MAX_QUERY_DELAY",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_QUERY_DELAY",
+        "description": [],
+        "signature": [
+          "60"
+        ],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.MAX_STATUS_CHANGE_THRESHOLD",
         "type": "number",
         "tags": [],
@@ -10125,6 +10348,21 @@
         "description": [],
         "signature": [
           "2"
+        ],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MIN_QUERY_DELAY",
+        "type": "number",
+        "tags": [],
+        "label": "MIN_QUERY_DELAY",
+        "description": [],
+        "signature": [
+          "0"
         ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
@@ -10170,6 +10408,21 @@
         "description": [],
         "signature": [
           "\"readFlappingSettings\""
+        ],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"readQueryDelaySettings\""
         ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
@@ -10473,13 +10726,28 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.RULES_SETTINGS_SAVED_OBJECT_ID",
+        "id": "def-common.RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID",
         "type": "string",
         "tags": [],
-        "label": "RULES_SETTINGS_SAVED_OBJECT_ID",
+        "label": "RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID",
         "description": [],
         "signature": [
           "\"rules-settings\""
+        ],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID",
+        "description": [],
+        "signature": [
+          "\"query-delay-settings\""
         ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
@@ -10538,6 +10806,35 @@
             "docId": "kibAlertingPluginApi",
             "section": "def-common.RulesSettingsFlappingProperties",
             "text": "RulesSettingsFlappingProperties"
+          },
+          " & ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RulesSettingsModificationMetadata",
+            "text": "RulesSettingsModificationMetadata"
+          }
+        ],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RulesSettingsQueryDelay",
+        "type": "Type",
+        "tags": [],
+        "label": "RulesSettingsQueryDelay",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RulesSettingsQueryDelayProperties",
+            "text": "RulesSettingsQueryDelayProperties"
           },
           " & ",
           {
@@ -12742,6 +13039,28 @@
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.API_PRIVILEGES.READ_QUERY_DELAY_SETTINGS",
+            "type": "string",
+            "tags": [],
+            "label": "READ_QUERY_DELAY_SETTINGS",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.API_PRIVILEGES.WRITE_QUERY_DELAY_SETTINGS",
+            "type": "string",
+            "tags": [],
+            "label": "WRITE_QUERY_DELAY_SETTINGS",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12788,6 +13107,56 @@
             "type": "number",
             "tags": [],
             "label": "statusChangeThreshold",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.DEFAULT_QUERY_DELAY_SETTINGS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_QUERY_DELAY_SETTINGS",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DEFAULT_QUERY_DELAY_SETTINGS.delay",
+            "type": "number",
+            "tags": [],
+            "label": "delay",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS.delay",
+            "type": "number",
+            "tags": [],
+            "label": "delay",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,

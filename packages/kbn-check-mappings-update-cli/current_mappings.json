@@ -1820,6 +1820,32 @@
       },
       "channel_buffer_size": {
         "type": "integer"
+      },
+      "secrets": {
+        "dynamic": false,
+        "properties": {
+          "password": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "ssl": {
+            "dynamic": false,
+            "properties": {
+              "key": {
+                "dynamic": false,
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },

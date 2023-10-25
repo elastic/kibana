@@ -32,7 +32,6 @@ export interface MostRecentPingsRequest {
   to?: string;
   size?: number;
   pageIndex?: number;
-  finalAttempt?: boolean;
   statusFilter?: 'up' | 'down';
 }
 
@@ -43,7 +42,6 @@ export const fetchMonitorRecentPings = async ({
   to,
   size = 10,
   pageIndex = 0,
-  finalAttempt,
   statusFilter,
 }: MostRecentPingsRequest): Promise<PingsResponse> => {
   const locations = JSON.stringify([locationId]);
@@ -59,7 +57,6 @@ export const fetchMonitorRecentPings = async ({
       sort,
       size,
       pageIndex,
-      finalAttempt,
       status: statusFilter,
     },
     PingsResponseType
