@@ -174,6 +174,24 @@ describe('MaintenanceWindowCallout', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('should be visible if there is a "running" maintenance window with a category, and no categories are specified', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('Maintenance window is running for Observability rules')
+    ).toBeInTheDocument();
+  });
+
   it('should only display the specified categories in the callout title for a maintenance window that matches muliple categories', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([
       {
