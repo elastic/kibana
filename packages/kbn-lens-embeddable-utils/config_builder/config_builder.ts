@@ -9,8 +9,9 @@
 
 import {LensAttributes, LensConfig, LensConfigOptions} from "./types";
 import {buildGauge, buildHeatmap, buildMetric, buildRegionMap, buildTagCloud, buildTreeMap, buildTable, buildXY} from "./charts";
-import {FormulaPublicApi} from "@kbn/lens-plugin/public";
+import {FormulaPublicApi, LensEmbeddableInput} from "@kbn/lens-plugin/public";
 import {DataViewsPublicPluginStart} from "@kbn/data-views-plugin/public";
+import { v4 as uuidv4 } from 'uuid';
 
 export class LensConfigBuilder {
     private charts = {
@@ -34,19 +35,31 @@ export class LensConfigBuilder {
         this.dataViewsAPI = dataViewsAPI;
     }
 
-    async build(config: LensConfig, options: LensConfigOptions = {}): Promise<LensAttributes | undefined> {
+    async build(config: LensConfig, options: LensConfigOptions = {}): Promise<LensAttributes | LensEmbeddableInput | undefined> {
         const { chartType } = config;
         const chartConfig = await this.charts[chartType](config as any, {
             formulaAPI: this.formulaAPI,
             dataViewsAPI: this.dataViewsAPI,
         });
-        return {
-          ...chartConfig,
-          state: {
-            ...chartConfig.state,
-            filters: options.filters || [],
-            query: options.query || { language: 'kuery', query: '' },
-          },
+
+        const chartState = {
+            ...chartConfig,
+            state: {
+                ...chartConfig.state,
+                filters: options.filters || [],
+                query: options.query || { language: 'kuery', query: '' },
+            },
         };
+
+        if (options.embeddable) {
+            return {
+                id: uuidv4(),
+                attributes: chartState,
+                timeRange: options.timeRange,
+                references: chartState.references,
+            } as LensEmbeddableInput;
+        }
+
+        return chartState;
     }
 }
