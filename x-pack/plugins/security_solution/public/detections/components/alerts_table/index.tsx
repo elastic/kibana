@@ -258,7 +258,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       id: `detection-engine-alert-table-${configId}-${tableView}`,
       featureIds: ['siem'],
       query: finalBoolQuery,
-      showExpandToDetails: false,
       gridStyle,
       shouldHighlightRow,
       rowHeightsOptions,
