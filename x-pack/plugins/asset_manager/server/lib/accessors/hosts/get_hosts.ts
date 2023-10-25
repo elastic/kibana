@@ -13,6 +13,7 @@ import {
   AssetClientDependencies,
   AssetClientOptionsWithInjectedValues,
 } from '../../asset_client_types';
+import { parseEan } from '../../parse_ean';
 
 export type GetHostsOptions = GetHostsOptionsPublic & AssetClientDependencies;
 export type GetHostsOptionsInjected = AssetClientOptionsWithInjectedValues<GetHostsOptions>;
@@ -25,10 +26,28 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
   const filters: QueryDslQueryContainer[] = [];
 
   if (options.filters?.ean) {
-    const fn = options.filters.ean.includes('*') ? 'wildcard' : 'term';
+    const ean = Array.isArray(options.filters.ean) ? options.filters.ean[0] : options.filters.ean;
+    const { kind, id } = parseEan(ean);
+    
+    // if EAN filter isn't targeting a host asset, we don't need to do this query
+    if (kind !== 'host') {
+      return {
+        hosts: []
+      };
+    }
+
+    filters.push({
+      term: {
+        'host.hostname': id,
+      },
+    });
+  }
+
+  if (options.filters?.id) {
+    const fn = options.filters.id.includes('*') ? 'wildcard' : 'term';
     filters.push({
       [fn]: {
-        'host.hostname': options.filters.ean,
+        'host.hostname': options.filters.id,
       },
     });
   }

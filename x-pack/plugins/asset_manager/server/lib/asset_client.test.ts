@@ -143,7 +143,190 @@ describe('Server assets client', () => {
         { exists: { field: 'kubernetes.node.name' } },
         { exists: { field: 'kubernetes.pod.uid' } },
         { exists: { field: 'container.id' } },
+        { exists: { field: 'cloud.provider' }}
       ]);
+    });
+
+    it('should correctly include an EAN filter as a hostname term query', async () => {
+      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
+      const mockHostName = 'some-hostname-123';
+
+      await client.getHosts({
+        from: 'now-1h',
+        elasticsearchClient: esClientMock,
+        savedObjectsClient: soClientMock,
+        filters: {
+          ean: `host:${mockHostName}`
+        }
+      });
+
+      const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
+      const { bool } = dsl?.query || {};
+      expect(bool).toBeDefined();
+
+      expect(bool?.must).toEqual(expect.arrayContaining([
+        {
+          exists: {
+            field: 'host.hostname',
+          },
+        },
+        {
+          term: {
+            'host.hostname': mockHostName
+          }
+        }
+      ]));
+    });
+
+    it('should not query ES and return empty if filtering on non-host EAN', async () => {
+      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
+      const mockId = 'some-id-123';
+
+      const result = await client.getHosts({
+        from: 'now-1h',
+        elasticsearchClient: esClientMock,
+        savedObjectsClient: soClientMock,
+        filters: {
+          ean: `container:${mockId}`
+        }
+      });
+
+      expect(esClientMock.search).toHaveBeenCalledTimes(0);
+      expect(result).toEqual({ hosts: [] });
+    });
+
+    it('should throw an error when an invalid EAN is provided', async () => {
+      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
+
+      try {
+        await client.getHosts({
+          from: 'now-1h',
+          elasticsearchClient: esClientMock,
+          savedObjectsClient: soClientMock,
+          filters: {
+            ean: `invalid`
+          }
+        });
+      } catch (error) {
+        const hasMessage = 'message' in error;
+        expect(hasMessage).toEqual(true);
+        expect(error.message).toEqual('invalid is not a valid EAN');
+      }
+
+      try {
+        await client.getHosts({
+          from: 'now-1h',
+          elasticsearchClient: esClientMock,
+          savedObjectsClient: soClientMock,
+          filters: {
+            ean: `invalid:toomany:colons`
+          }
+        });
+      } catch (error) {
+        const hasMessage = 'message' in error;
+        expect(hasMessage).toEqual(true);
+        expect(error.message).toEqual('invalid:toomany:colons is not a valid EAN');
+      }
+    });
+
+    it('should include a wildcard ID filter when an ID filter is provided with asterisks included', async () => {
+      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
+      const mockIdPattern = '*partial-id*';
+
+      await client.getHosts({
+        from: 'now-1h',
+        elasticsearchClient: esClientMock,
+        savedObjectsClient: soClientMock,
+        filters: {
+          id: mockIdPattern
+        }
+      });
+
+      const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
+      const { bool } = dsl?.query || {};
+      expect(bool).toBeDefined();
+
+      expect(bool?.must).toEqual(expect.arrayContaining([
+        {
+          exists: {
+            field: 'host.hostname',
+          },
+        },
+        {
+          wildcard: {
+            'host.hostname': mockIdPattern
+          }
+        }
+      ]));
+    });
+
+    it('should include a term ID filter when an ID filter is provided without asterisks included', async () => {
+      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
+      const mockId = 'full-id';
+
+      await client.getHosts({
+        from: 'now-1h',
+        elasticsearchClient: esClientMock,
+        savedObjectsClient: soClientMock,
+        filters: {
+          id: mockId
+        }
+      });
+
+      const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
+      const { bool } = dsl?.query || {};
+      expect(bool).toBeDefined();
+
+      expect(bool?.must).toEqual(expect.arrayContaining([
+        {
+          exists: {
+            field: 'host.hostname',
+          },
+        },
+        {
+          term: {
+            'host.hostname': mockId
+          }
+        }
+      ]));
+    });
+
+    it('should include a term filter for cloud filters', async () => {
+      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
+      const mockCloudProvider = 'gcp';
+      const mockCloudRegion = 'us-central-1';
+
+      await client.getHosts({
+        from: 'now-1h',
+        elasticsearchClient: esClientMock,
+        savedObjectsClient: soClientMock,
+        filters: {
+          'cloud.provider': mockCloudProvider,
+          'cloud.region': mockCloudRegion
+        }
+      });
+
+      const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
+      const { bool } = dsl?.query || {};
+      expect(bool).toBeDefined();
+
+      expect(bool?.must).toEqual(expect.arrayContaining([
+        {
+          exists: {
+            field: 'host.hostname',
+          },
+        },
+        {
+          term: {
+            'cloud.provider': mockCloudProvider
+          }
+        },
+        {
+          term: {
+            'cloud.region': mockCloudRegion
+          }
+        }
+      ]));
     });
 
     it('should reject with 400 for invalid "from" date', () => {
