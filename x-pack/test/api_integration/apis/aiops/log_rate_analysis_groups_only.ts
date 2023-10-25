@@ -197,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
             // Originally we assumed that we can assert streaming in contrast
             // to non-streaming if there is more than one chunk. However,
             // this turned out to be flaky since a stream could finish fast
-            // enough to contain only one chunk. So no we are checking if
+            // enough to contain only one chunk. So now we are checking if
             // there's just one chunk or more.
             expect(chunkCounter).to.be.greaterThan(
               0,
