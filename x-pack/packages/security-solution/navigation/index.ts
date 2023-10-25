@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { useGetAppUrl, useNavigateTo, useNavigation } from './src/navigation';
+export {
+  useGetAppUrl,
+  useNavigateTo,
+  useNavigation,
+  getNavigationPropsFromId,
+} from './src/navigation';
 export type { GetAppUrl, NavigateTo } from './src/navigation';
 export { NavigationProvider } from './src/context';
 export { SecurityPageName, LinkCategoryType } from './src/constants';
