@@ -264,14 +264,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const isNumericMap: Record<string, boolean> = useMemo(() => {
     const numericMap: Record<string, boolean> = {};
     for (const column of firstLocalTable.columns) {
-      // filtered metrics result as "number" type, but have no field
-      numericMap[column.id] =
-        (column.meta.type === 'number' && column.meta.field != null) ||
-        // as fallback check the first available value type
-        // mind here: date can be seen as numbers, to carefully check that is a filtered metric
-        (column.meta.field == null &&
-          typeof firstLocalTable.rows.find((row) => row[column.id] != null)?.[column.id] ===
-            'number');
+      numericMap[column.id] = column.meta.type === 'number';
     }
     return numericMap;
   }, [firstLocalTable]);
