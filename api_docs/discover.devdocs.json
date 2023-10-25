@@ -281,6 +281,22 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.sampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "sampleSize",
+            "description": [
+              "\nCustom sample size"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverAppState.breakdownField",
             "type": "string",
             "tags": [],

@@ -178,6 +178,8 @@ const createVagrantVm = async ({
       env: {
         VAGRANT_CWD,
       },
+      // Only `pipe` STDERR to parent process
+      stdio: ['inherit', 'inherit', 'pipe'],
     });
     // eslint-disable-next-line no-empty
   } catch (e) {}
@@ -191,7 +193,8 @@ const createVagrantVm = async ({
         CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
         CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
       },
-      stdio: ['inherit', 'inherit', 'inherit'],
+      // Only `pipe` STDERR to parent process
+      stdio: ['inherit', 'inherit', 'pipe'],
     });
   } catch (e) {
     log.error(e);
@@ -231,7 +234,7 @@ const createMultipassVm = async ({
   };
 };
 
-const deleteMultipassVm = async (vmName: string): Promise<void> => {
+export const deleteMultipassVm = async (vmName: string): Promise<void> => {
   if (process.env.CI) {
     await execa.command(`vagrant destroy -f`, {
       env: {
@@ -319,7 +322,8 @@ const enrollHostWithFleet = async ({
       env: {
         VAGRANT_CWD,
       },
-      stdio: ['inherit', 'inherit', 'inherit'],
+      // Only `pipe` STDERR to parent process
+      stdio: ['inherit', 'inherit', 'pipe'],
     });
   } else {
     log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
@@ -335,7 +339,10 @@ const enrollHostWithFleet = async ({
     ]);
   }
   log.info(`Waiting for Agent to check-in with Fleet`);
-  const agent = await waitForHostToEnroll(kbnClient, vmName, 120000);
+
+  const agent = await waitForHostToEnroll(kbnClient, vmName, 8 * 60 * 1000);
+
+  log.info(`Agent enrolled with Fleet, status: `, agent.status);
 
   return {
     agentId: agent.id,

@@ -95,6 +95,10 @@ export const createRuleTypeMocks = () => {
         },
         startedAt: new Date(),
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange: () => {
+          const date = new Date(Date.now()).toISOString();
+          return { dateStart: date, dateEnd: date };
+        },
       });
     },
   };

@@ -29,10 +29,11 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { isTestable } from './test_models';
+import { isTestable, isDfaTrainedModel } from './test_models';
 import { ModelItem } from './models_list';
 
 export function useModelActions({
+  onDfaTestAction,
   onTestAction,
   onModelsDeleteRequest,
   onModelDeployRequest,
@@ -42,6 +43,7 @@ export function useModelActions({
   modelAndDeploymentIds,
 }: {
   isLoading: boolean;
+  onDfaTestAction: (model: ModelItem) => void;
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (models: ModelItem[]) => void;
   onModelDeployRequest: (model: ModelItem) => void;
@@ -463,13 +465,8 @@ export function useModelActions({
           onModelDeployRequest(model);
         },
         available: (item) => {
-          const isDfaTrainedModel =
-            item.metadata?.analytics_config !== undefined ||
-            item.inference_config?.regression !== undefined ||
-            item.inference_config?.classification !== undefined;
-
           return (
-            isDfaTrainedModel &&
+            isDfaTrainedModel(item) &&
             !isBuiltInModel(item) &&
             !item.putModelConfig &&
             canManageIngestPipelines
@@ -540,7 +537,13 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: isTestable,
-        onClick: (item) => onTestAction(item),
+        onClick: (item) => {
+          if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
+            onDfaTestAction(item);
+          } else {
+            onTestAction(item);
+          }
+        },
         enabled: (item) => {
           return canTestTrainedModels && isTestable(item, true) && !isLoading;
         },
@@ -599,6 +602,7 @@ export function useModelActions({
       canDeleteTrainedModels,
       isBuiltInModel,
       onTestAction,
+      onDfaTestAction,
       canTestTrainedModels,
       canManageIngestPipelines,
     ]

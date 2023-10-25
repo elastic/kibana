@@ -25,7 +25,7 @@ export interface MetricDetailsQueryParams {
 }
 
 export type AssetDetailsQueryParams = MetricDetailsQueryParams &
-  Omit<AssetDetailsUrlState, 'dateRange'>;
+  Omit<AssetDetailsUrlState, 'dateRange' | 'autoRefresh'>;
 
 type SearchParams<T extends InventoryItemType> = T extends 'host'
   ? AssetDetailsQueryParams

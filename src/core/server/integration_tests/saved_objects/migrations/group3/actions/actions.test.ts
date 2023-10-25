@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-migration-server-internal';
 import { runActionTestSuite } from './actions_test_suite';

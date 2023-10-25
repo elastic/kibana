@@ -8,6 +8,6 @@ import { CloudStart } from '@kbn/cloud-plugin/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 
 export interface ProfilingPluginStartDeps {
-  fleet: FleetStartContract;
-  cloud: CloudStart;
+  fleet?: FleetStartContract;
+  cloud?: CloudStart;
 }

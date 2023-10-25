@@ -23,12 +23,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { getAlertDetailsUrl } from '../../../../common/components/link_to';
-import {
-  SecuritySolutionLinkAnchor,
-  useGetSecuritySolutionLinkProps,
-} from '../../../../common/components/links';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
@@ -39,7 +33,6 @@ import {
   EVENT_SUMMARY_CONVERSATION_ID,
 } from '../../../../common/components/event_details/translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { SecurityPageName } from '../../../../../common/constants';
 import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
 
 export type HandleOnEventClosed = () => void;
@@ -98,12 +91,6 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
     timestamp,
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
-    const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
-    const { onClick } = useGetSecuritySolutionLinkProps()({
-      deepLinkId: SecurityPageName.alerts,
-      path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
-    });
-
     const alertDetailsLink = useGetAlertDetailsFlyoutLink({
       _id: eventId,
       _index: eventIndex,
@@ -122,19 +109,6 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                 <>
                   <EuiSpacer size="s" />
                   <PreferenceFormattedDate value={new Date(timestamp)} />
-                </>
-              )}
-              {isAlert && eventId && isAlertDetailsPageEnabled && (
-                <>
-                  <EuiSpacer size="l" />
-                  <SecuritySolutionLinkAnchor
-                    data-test-subj="open-alert-details-page"
-                    deepLinkId={SecurityPageName.alerts}
-                    onClick={onClick}
-                  >
-                    {i18n.OPEN_ALERT_DETAILS_PAGE}
-                  </SecuritySolutionLinkAnchor>
-                  <EuiSpacer size="m" />
                 </>
               )}
             </>

@@ -45,6 +45,9 @@
     "@kbn/core-http-common",
     "@kbn/data-views-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/rison",
+    "@kbn/discover-plugin",
+    "@kbn/data-plugin",
     "@kbn/security-api-integration-helpers",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-plugin",
@@ -58,6 +61,8 @@
     "@kbn/serverless-observability-settings",
     "@kbn/serverless-search-settings",
     "@kbn/serverless-security-settings",
+    "@kbn/cloud-security-posture-plugin",
+    "@kbn/reporting-plugin",
     "@kbn/management-settings-ids",
   ]
 }
