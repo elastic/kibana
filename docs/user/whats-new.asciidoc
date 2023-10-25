@@ -208,7 +208,7 @@ The existing Elasticsearch alerting rule is now available in o11y flow so custom
 In order to manage the o11y roles properly, a new field is added to determine which role will be allowed to maintain the created rule and its generated alerts. 
 
 [role="screenshot"]
-image::images/alerting-rule.png[An example of creating an altering rule in Observability]
+image::images/alerting-rule.png[An example of creating an altering rule in {observability}]
 
 [discrete]
 === Global Experience 
