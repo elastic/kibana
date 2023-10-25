@@ -36,7 +36,6 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   e2e: {
-    supportFile: 'cypress/support/serverless_e2e.ts',
     baseUrl: 'http://localhost:5601',
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalMemoryManagement: true,

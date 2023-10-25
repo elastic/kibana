@@ -26,7 +26,6 @@ export default defineCypressConfig({
     grepTags: '@serverless --@brokenInServerless --@skipInServerless',
   },
   e2e: {
-    supportFile: 'cypress/support/serverless_e2e.ts',
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,

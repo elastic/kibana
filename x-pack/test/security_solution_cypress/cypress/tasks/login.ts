@@ -15,6 +15,12 @@ import {
 } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
 import { rootRequest } from './common';
+import {
+  CLOUD_SERVERLESS,
+  ELASTICSEARCH_PASSWORD,
+  ELASTICSEARCH_USERNAME,
+  IS_SERVERLESS,
+} from '../env_var_names_constants';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -33,30 +39,6 @@ const ELASTICSEARCH_USERNAME_CONFIG_PATH = 'config.elasticsearch.username';
  * authenticating with Kibana.
  */
 const ELASTICSEARCH_PASSWORD_CONFIG_PATH = 'config.elasticsearch.password';
-
-/**
- * The `CYPRESS_ELASTICSEARCH_USERNAME` environment variable specifies the
- * username to be used when authenticating with Kibana
- */
-const ELASTICSEARCH_USERNAME = 'ELASTICSEARCH_USERNAME';
-
-/**
- * The `CYPRESS_ELASTICSEARCH_PASSWORD` environment variable specifies the
- * username to be used when authenticating with Kibana
- */
-const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
-
-/**
- * The `IS_SERVERLESS` environment variable specifies wether the currently running
- * environment is serverless snapshot.
- */
-const IS_SERVERLESS = 'IS_SERVERLESS';
-
-/**
- * The `IS_SERVERLESS` environment variable specifies wether the currently running
- * environment is a real MKI.
- */
-const CLOUD_SERVERLESS = 'CLOUD_SERVERLESS';
 
 /**
  * Authenticates with Kibana using, if specified, credentials specified by

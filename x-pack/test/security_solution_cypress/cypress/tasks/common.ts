@@ -11,6 +11,7 @@ import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 import { deleteAllDocuments } from './api_calls/elasticsearch';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './api_calls/alerts';
+import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../env_var_names_constants';
 
 const primaryButton = 0;
 
@@ -21,8 +22,8 @@ const primaryButton = 0;
 const dndSloppyClickDetectionThreshold = 5;
 
 export const API_AUTH = Object.freeze({
-  user: Cypress.env('ELASTICSEARCH_USERNAME'),
-  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  user: Cypress.env(ELASTICSEARCH_USERNAME),
+  pass: Cypress.env(ELASTICSEARCH_PASSWORD),
 });
 
 export const API_HEADERS = Object.freeze({
