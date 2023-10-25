@@ -109,7 +109,7 @@ export const percentileRanksOperation: OperationDefinition<
         (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
     );
   },
-  getDefaultLabel: (column, indexPattern, columns) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.params.value,

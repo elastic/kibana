@@ -14,3 +14,5 @@ export {
   COLLECTOR_PACKAGE_POLICY_NAME,
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from './fleet_policies';
+
+export type { ProfilingCloudSetupOptions } from './cloud_setup';
