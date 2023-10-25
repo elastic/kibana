@@ -23,11 +23,11 @@ import { i18n } from '@kbn/i18n';
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
   children: ConstructorParameters<typeof EuiFormRow>[0]['children'];
-  error: string[] | undefined;
+  error?: string[];
   isInvalid?: boolean;
   title: string;
   clear: () => void;
-  initialValue: any;
+  initialValue?: any;
   onUsePlainText: () => void;
 }> = ({ fullWidth, error, isInvalid, children, clear, title, initialValue, onUsePlainText }) => {
   const hasInitialValue = initialValue !== undefined;
