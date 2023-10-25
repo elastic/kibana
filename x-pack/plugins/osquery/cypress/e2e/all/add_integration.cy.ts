@@ -31,7 +31,7 @@ import {
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe.only('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {

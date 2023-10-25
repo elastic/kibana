@@ -14,7 +14,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe.only('Add to Cases', () => {
+describe('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
   beforeEach(() => {

@@ -121,6 +121,7 @@ export const addToCase = (caseId: string) => {
 };
 
 export const addLiveQueryToCase = (actionId: string, caseId: string) => {
+  cy.waitForReact();
   cy.react('ActionsTableComponent').within(() => {
     cy.getBySel(`row-${actionId}`).react('ActionTableResultsButton').click();
   });
