@@ -28,7 +28,7 @@ import {
   getSimpleRule,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
-import { createRoleAndUser, deleteRoleAndUser } from '../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // This test was meant to be more full flow, ensuring that
 // exported rules are able to be reimported as opposed to
@@ -43,11 +43,11 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('import_export_rules_flow', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
-      await createRoleAndUser(getService, ROLES.soc_manager);
+      await createUserAndRole(getService, ROLES.soc_manager);
     });
 
     afterEach(async () => {
-      await deleteRoleAndUser(getService, ROLES.soc_manager);
+      await deleteUserAndRole(getService, ROLES.soc_manager);
       await deleteAllExceptions(supertest, log);
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);

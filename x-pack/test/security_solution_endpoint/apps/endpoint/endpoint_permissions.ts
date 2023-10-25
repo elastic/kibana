@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { createRoleAndUser, deleteRoleAndUser } from '../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
@@ -47,7 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe(`when running with user/role [${role}]`, () => {
         before(async () => {
           // create role/user
-          await createRoleAndUser(getService, role);
+          await createUserAndRole(getService, role);
 
           // log back in with new uer
           await PageObjects.security.login(role, 'changeme');
@@ -59,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await PageObjects.security.forceLogout();
 
           // delete role/user
-          await deleteRoleAndUser(getService, role);
+          await deleteUserAndRole(getService, role);
         });
 
         it('should NOT allow access to endpoint management pages', async () => {

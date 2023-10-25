@@ -29,7 +29,7 @@ import {
   ruleToNdjson,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
-import { createRoleAndUser, deleteRoleAndUser } from '../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 const getImportRuleBuffer = (connectorId: string) => {
   const rule1 = {
@@ -103,12 +103,12 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('import_rules', () => {
     describe('importing rules with different roles', () => {
       before(async () => {
-        await createRoleAndUser(getService, ROLES.hunter_no_actions);
-        await createRoleAndUser(getService, ROLES.hunter);
+        await createUserAndRole(getService, ROLES.hunter_no_actions);
+        await createUserAndRole(getService, ROLES.hunter);
       });
       after(async () => {
-        await deleteRoleAndUser(getService, ROLES.hunter_no_actions);
-        await deleteRoleAndUser(getService, ROLES.hunter);
+        await deleteUserAndRole(getService, ROLES.hunter_no_actions);
+        await deleteUserAndRole(getService, ROLES.hunter);
       });
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);

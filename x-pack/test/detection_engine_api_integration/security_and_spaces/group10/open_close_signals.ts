@@ -29,7 +29,7 @@ import {
   waitForRuleSuccess,
   getRuleForSignalTesting,
 } from '../../utils';
-import { createRoleAndUser, deleteRoleAndUser } from '../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -218,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          await createRoleAndUser(getService, ROLES.t1_analyst);
+          await createUserAndRole(getService, ROLES.t1_analyst);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
           expect(everySignalClosed).to.eql(true);
 
-          await deleteRoleAndUser(getService, ROLES.t1_analyst);
+          await deleteUserAndRole(getService, ROLES.t1_analyst);
         });
 
         // This fails and should be investigated or removed if it no longer applies
@@ -255,7 +255,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const userAndRole = ROLES.soc_manager;
-          await createRoleAndUser(getService, userAndRole);
+          await createUserAndRole(getService, userAndRole);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -280,7 +280,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
           expect(everySignalClosed).to.eql(true);
 
-          await deleteRoleAndUser(getService, userAndRole);
+          await deleteUserAndRole(getService, userAndRole);
         });
       });
     });

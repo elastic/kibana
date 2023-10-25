@@ -62,8 +62,8 @@ import {
   importFile,
 } from '../../../../../../lists_api_integration/utils';
 import {
-  createRoleAndUser,
-  deleteRoleAndUser,
+  createUserAndRole,
+  deleteUserAndRole,
 } from '../../../../../../common/services/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -507,11 +507,11 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
-          await createRoleAndUser(getService, role);
+          await createUserAndRole(getService, role);
         });
 
         afterEach(async () => {
-          await deleteRoleAndUser(getService, role);
+          await deleteUserAndRole(getService, role);
         });
 
         it('should NOT be able to create an exception list', async () => {

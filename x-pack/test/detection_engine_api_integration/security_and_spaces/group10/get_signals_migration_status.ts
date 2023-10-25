@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '@kbn/security-sol
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteAllAlerts, getIndexNameFromLoad } from '../../utils';
-import { createRoleAndUser, deleteRoleAndUser } from '../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createRoleAndUser(getService, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
 
       await supertestWithoutAuth
         .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .query({ from: '2020-10-10' })
         .expect(403);
 
-      await deleteRoleAndUser(getService, ROLES.t1_analyst);
+      await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });
 };

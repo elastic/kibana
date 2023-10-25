@@ -20,7 +20,7 @@ const allSupportedRoles = {
  * @param getService
  * @param role
  */
-export const createRoleAndUser = async (
+export const createUserAndRole = async (
   getService: FtrProviderContext['getService'],
   role: SecurityRoleName
 ): Promise<void> => {
@@ -42,7 +42,7 @@ export const createRoleAndUser = async (
  * @param roleName The user and role to delete with the same name
  * @param securityService The security service
  */
-export const deleteRoleAndUser = async (
+export const deleteUserAndRole = async (
   getService: FtrProviderContext['getService'],
   roleName: SecurityRoleName
 ): Promise<void> => {

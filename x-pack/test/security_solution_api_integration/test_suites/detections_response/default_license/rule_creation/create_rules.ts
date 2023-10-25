@@ -45,8 +45,8 @@ import {
   updateUsername,
 } from '../../utils';
 import {
-  createRoleAndUser,
-  deleteRoleAndUser,
+  createUserAndRole,
+  deleteUserAndRole,
 } from '../../../../../common/services/security_solution';
 import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
@@ -437,11 +437,11 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
-          await createRoleAndUser(getService, role);
+          await createUserAndRole(getService, role);
         });
 
         afterEach(async () => {
-          await deleteRoleAndUser(getService, role);
+          await deleteUserAndRole(getService, role);
         });
 
         it('should NOT be able to create a rule', async () => {
