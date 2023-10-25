@@ -757,7 +757,7 @@ class OutputService {
         // remove ES specific field
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
-        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token = null;
+        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
       }
 
       if (data.type !== outputType.Logstash) {
