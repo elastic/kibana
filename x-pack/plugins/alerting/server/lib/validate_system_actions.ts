@@ -11,43 +11,24 @@ import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapte
 import { bulkValidateConnectorAdapterActionParams } from '../connector_adapters/validate_rule_action_params';
 import { NormalizedSystemAction } from '../rules_client';
 import { RuleSystemAction } from '../types';
-interface ValidateSystemActionsWithRuleTypeIdParams {
-  connectorAdapterRegistry: ConnectorAdapterRegistry;
-  systemActions: RuleSystemAction[];
-}
-
-interface ValidateSystemActionsWithoutRuleTypeIdParams {
+interface Params {
   actionsClient: ActionsClient;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   systemActions: Array<RuleSystemAction | NormalizedSystemAction>;
 }
 
-export const validateSystemActionsWithRuleTypeId = ({
-  connectorAdapterRegistry,
-  systemActions,
-}: ValidateSystemActionsWithRuleTypeIdParams) => {
-  if (systemActions.length === 0) {
-    return;
-  }
-
-  bulkValidateConnectorAdapterActionParams({
-    connectorAdapterRegistry,
-    actions: systemActions,
-  });
-};
-
-export const validateSystemActionsWithoutRuleTypeId = async ({
+export const validateSystemActions = async ({
   actionsClient,
   connectorAdapterRegistry,
   systemActions,
-}: ValidateSystemActionsWithoutRuleTypeIdParams) => {
+}: Params) => {
   if (systemActions.length === 0) {
     return;
   }
 
   /**
    * When updating or creating a rule the actions may not contain
-   * the actionTypeId (for example: bulk operations). We need to getBulk using the
+   * the actionTypeId. We need to getBulk using the
    * actionsClient to get the actionTypeId of each action.
    * The actionTypeId is needed to get the schema of
    * the action params using the connector adapter registry
