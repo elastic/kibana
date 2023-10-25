@@ -42,7 +42,10 @@ export const InvokeAIActionParamsSchema = schema.object({
     schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
   ),
   temperature: schema.maybe(schema.number()),
-  stream: schema.boolean({ defaultValue: false }),
+  // TODO: Remove in part 2 of streaming work for security solution
+  // tracked here: https://github.com/elastic/security-team/issues/7363
+  // `stream` is a temporary parameter while the feature is developed behind a feature flag
+  stream: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({

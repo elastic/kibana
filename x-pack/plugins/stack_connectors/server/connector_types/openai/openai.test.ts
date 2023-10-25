@@ -17,6 +17,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
 import { initDashboard } from './create_dashboard';
+import { InvokeAIActionResponse } from '../../../common/openai/types';
 jest.mock('./create_dashboard');
 
 describe('OpenAIConnector', () => {
@@ -266,7 +267,9 @@ describe('OpenAIConnector', () => {
 
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
-        const response = await connector.invokeAI(sampleOpenAiBody);
+        const response: InvokeAIActionResponse = (await connector.invokeAI(
+          sampleOpenAiBody
+        )) as unknown as InvokeAIActionResponse;
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://api.openai.com/v1/chat/completions',

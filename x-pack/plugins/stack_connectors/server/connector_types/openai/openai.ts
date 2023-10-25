@@ -28,7 +28,6 @@ import {
   DashboardActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-  StreamingResponse,
 } from '../../../common/openai/types';
 import { initDashboard } from './create_dashboard';
 import {
@@ -190,22 +189,18 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    */
   public async invokeAI(
     params: InvokeAIActionParams
-  ): Promise<InvokeAIActionResponse | StreamingResponse> {
-    const { stream, ...body } = params;
+  ): Promise<InvokeAIActionResponse | RunActionResponse> {
+    // TODO: Remove in part 2 of streaming work for security solution
+    // tracked here: https://github.com/elastic/security-team/issues/7363
+    // `stream` is a temporary parameter while the feature is developed behind a feature flag
+    const { stream = false, ...body } = params;
     const res = await this.streamApi({ body: JSON.stringify(body), stream });
 
+    // TODO: Remove in part 2 of streaming work for security solution
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();
       return { message: result, usage: res.usage };
     }
     return res;
-
-    return {
-      message:
-        'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.',
-      ...(res.usage
-        ? { usage: res.usage }
-        : { usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } }),
-    };
   }
 }

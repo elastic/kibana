@@ -14,16 +14,14 @@ import {
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
-import React, { useMemo, useRef } from 'react';
+import React from 'react';
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
 
-export type ChatActionClickHandler = (payload: { type: string; query: string }) => Promise<unknown>;
 interface Props {
   content: string;
   loading: boolean;
-  onActionClick: ChatActionClickHandler;
 }
 
 const ANIMATION_TIME = 1;
@@ -90,74 +88,72 @@ const loadingCursorPlugin = () => {
   };
 };
 
-export function MessageText({ loading, content, onActionClick }: Props) {
+const getPluginDependencies = () => {
+  const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+
+  const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+
+  const { components } = processingPlugins[1][1];
+
+  processingPlugins[1][1].components = {
+    ...components,
+    customCodeBlock: (props) => {
+      return (
+        <>
+          <CustomCodeBlock value={props.value} />
+          <EuiSpacer size="m" />
+        </>
+      );
+    },
+    cursor: Cursor,
+    table: (props) => (
+      <>
+        <div className="euiBasicTable">
+          {' '}
+          <table className="euiTable" {...props} />
+        </div>
+        <EuiSpacer size="m" />
+      </>
+    ),
+    th: (props) => {
+      const { children, ...rest } = props;
+      return (
+        <th className="euiTableHeaderCell" {...rest}>
+          <span className="euiTableCellContent">
+            <span className="euiTableCellContent__text" title={children}>
+              {children}
+            </span>
+          </span>
+        </th>
+      );
+    },
+    tr: (props) => <tr className="euiTableRow" {...props} />,
+    td: (props) => {
+      const { children, ...rest } = props;
+      return (
+        <td className="euiTableRowCell" {...rest}>
+          <div className="euiTableCellContent euiTableCellContent--truncateText">
+            <span className="euiTableCellContent__text" title={children}>
+              {children}
+            </span>
+          </div>
+        </td>
+      );
+    },
+  };
+
+  return {
+    parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins],
+    processingPluginList: processingPlugins,
+  };
+};
+
+export function MessageText({ loading, content }: Props) {
   const containerClassName = css`
     overflow-wrap: break-word;
   `;
 
-  const onActionClickRef = useRef(onActionClick);
-
-  onActionClickRef.current = onActionClick;
-
-  const { parsingPluginList, processingPluginList } = useMemo(() => {
-    const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-
-    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
-
-    const { components } = processingPlugins[1][1];
-
-    processingPlugins[1][1].components = {
-      ...components,
-      customCodeBlock: (props) => {
-        return (
-          <>
-            <CustomCodeBlock value={props.value} />
-            <EuiSpacer size="m" />
-          </>
-        );
-      },
-      cursor: Cursor,
-      table: (props) => (
-        <>
-          <div className="euiBasicTable">
-            {' '}
-            <table className="euiTable" {...props} />
-          </div>
-          <EuiSpacer size="m" />
-        </>
-      ),
-      th: (props) => {
-        const { children, ...rest } = props;
-        return (
-          <th className="euiTableHeaderCell" {...rest}>
-            <span className="euiTableCellContent">
-              <span className="euiTableCellContent__text" title={children}>
-                {children}
-              </span>
-            </span>
-          </th>
-        );
-      },
-      tr: (props) => <tr className="euiTableRow" {...props} />,
-      td: (props) => {
-        const { children, ...rest } = props;
-        return (
-          <td className="euiTableRowCell" {...rest}>
-            <div className="euiTableCellContent euiTableCellContent--truncateText">
-              <span className="euiTableCellContent__text" title={children}>
-                {children}
-              </span>
-            </div>
-          </td>
-        );
-      },
-    };
-
-    return {
-      parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins],
-      processingPluginList: processingPlugins,
-    };
-  }, [loading]);
+  const { parsingPluginList, processingPluginList } = getPluginDependencies();
 
   return (
     <EuiText className={containerClassName}>
