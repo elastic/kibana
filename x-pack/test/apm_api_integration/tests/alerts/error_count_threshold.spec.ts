@@ -14,19 +14,17 @@ import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
-  deleteRuleById,
-  deleteAlertsByRuleId,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
   ApmAlertFields,
   createIndexConnector,
-  deleteActionConnector,
   getIndexAction,
 } from './helpers/alerting_api_helper';
-import { cleanupAllState } from './helpers/cleanup_state';
+import { cleanupRuleAndAlertState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
+import { beforeOrAfter } from '../../common/utils/before_or_after';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -54,9 +52,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ],
     };
 
-    before(async () => {
-      cleanupAllState({ es, supertest });
+    beforeOrAfter(async () => {
+      await synthtraceEsClient.clean();
+      await cleanupRuleAndAlertState({ es, supertest, logger });
+    });
 
+    before(async () => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -104,10 +105,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
     });
 
-    after(async () => {
-      await synthtraceEsClient.clean();
-    });
-
     describe('create rule without kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
@@ -131,16 +128,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         ruleId = createdRule.id;
         alerts = await waitForAlertsForRule({ es, ruleId, minimumAlertCount: 2 });
-      });
-
-      after(async () => {
-        try {
-          await deleteActionConnector({ supertest, es, actionId });
-          await deleteRuleById({ supertest, ruleId });
-          await deleteAlertsByRuleId({ es, ruleId });
-        } catch (e) {
-          logger.info('Could not delete rule or action connector', e);
-        }
       });
 
       it('checks if rule is active', async () => {
@@ -282,15 +269,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           actions: [],
         });
         ruleId = createdRule.id;
-      });
-
-      after(async () => {
-        try {
-          await deleteRuleById({ supertest, ruleId });
-          await deleteAlertsByRuleId({ es, ruleId });
-        } catch (e) {
-          logger.info('Could not delete rule', e);
-        }
       });
 
       it('produces one alert for the opbeans-php service', async () => {
