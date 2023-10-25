@@ -17,13 +17,13 @@ const MAINTENANCE_WINDOW_FEATURE_ID = 'maintenanceWindow';
 const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
   'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveDescription',
   {
-    defaultMessage: 'Rule notifications are stopped while the maintenance window is running.',
+    defaultMessage: 'Rule notifications are stopped while maintenance windows are running.',
   }
 );
 const MAINTENANCE_WINDOW_NO_CATEGORY_TITLE = i18n.translate(
   'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveNoCategories',
   {
-    defaultMessage: 'Maintenance window is running',
+    defaultMessage: 'One or more maintenance windows are running',
   }
 );
 
@@ -129,9 +129,11 @@ export function MaintenanceWindowCallout({
         !categoryNames
           ? MAINTENANCE_WINDOW_NO_CATEGORY_TITLE
           : i18n.translate('alertsUIShared.maintenanceWindowCallout.maintenanceWindowActive', {
-              defaultMessage: 'Maintenance window is running for {categories} rules',
+              defaultMessage:
+                '{activeWindowCount, plural, one {Maintenance window is} other {Maintenance windows are}} running for {categories} rules',
               values: {
                 categories: categoryNames,
+                activeWindowCount: activeMaintenanceWindows.length,
               },
             })
       }

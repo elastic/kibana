@@ -79,7 +79,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
+    expect(await findAllByText('One or more maintenance windows are running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -94,7 +94,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
+    expect(await findAllByText('One or more maintenance windows are running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -106,7 +106,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(await findByText('One or more maintenance windows are running')).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -191,7 +191,7 @@ describe('MaintenanceWindowCallout', () => {
     );
 
     expect(
-      await findByText('Maintenance window is running for Observability and Stack rules')
+      await findByText('Maintenance windows are running for Observability and Stack rules')
     ).toBeInTheDocument();
   });
 
@@ -230,7 +230,7 @@ describe('MaintenanceWindowCallout', () => {
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledWith(mockError, {
         title: 'Failed to check if maintenance windows are active',
-        toastMessage: 'Rule notifications are stopped while the maintenance window is running.',
+        toastMessage: 'Rule notifications are stopped while maintenance windows are running.',
       });
     });
   });
@@ -256,7 +256,7 @@ describe('MaintenanceWindowCallout', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should work as expected if window maintenance privilege is READ ', async () => {
+  it('should work as expected if window maintenance privilege is READ', async () => {
     const servicesMock = {
       ...kibanaServicesMock,
       application: {
@@ -274,7 +274,7 @@ describe('MaintenanceWindowCallout', () => {
       wrapper: TestProviders,
     });
 
-    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(await findByText('One or more maintenance windows are running')).toBeInTheDocument();
   });
 
   it('should display the callout if the category ids contains the specified category', async () => {
