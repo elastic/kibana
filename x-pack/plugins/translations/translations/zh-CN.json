@@ -7249,7 +7249,7 @@
     "xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResultsHelpMessage": "对组唯一的项目将用星号 (*) 标注。",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardButtonLabel": "复制到剪贴板",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardGroupMessage": "将组项目作为 KQL 语法复制到剪贴板",
-    "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantTermMessage": "将字段/值对作为 KQL 语法复制到剪贴板",
+    "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantItemMessage": "将字段/值对作为 KQL 语法复制到剪贴板",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInDiscover": "在 Discover 中查看",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInLogPatternAnalysis": "在日志模式分析中查看",
     "xpack.aiops.logRateAnalysis.resultsTable.mlLocatorMissingErrorMessage": "未检测到用于日志模式分析的定位器",
