@@ -19,13 +19,13 @@ interface Props {
 }
 
 export const SearchResponseWarningsBadge = (props: Props) => {
-  if (!props.warnings.length) {
-    return null;
-  }
-
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
+
+  if (!props.warnings.length) {
+    return null;
+  }
 
   return (
     <EuiPopover
