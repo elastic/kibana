@@ -23,6 +23,10 @@ import {
   createRule,
   createLegacyRuleAction,
   getLegacyActionSO,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+  getRuleSOById,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+  RULE_WITH_INVESTIGATION_FIELD,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -517,20 +521,119 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('migrates investigation fields when array exists', async () => {
+      it('errors if trying to patch investigation fields using legacy format', async () => {
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            {
+              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+              name: 'some other name',
+              investigation_fields: ['foobar'],
+            },
+          ])
+          .expect(400);
+
+        expect(body.message).to.eql(
+          '[request body]: Invalid value "["foobar"]" supplied to "investigation_fields"'
+        );
+      });
+
+      it('should patch a rule with a legacy investigation field and migrate', async () => {
         // patch a simple rule's name
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .send([{ rule_id: '2297be91-894c-4831-830f-b424a0ec84f0', name: 'some other name' }])
+          .send([{ rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD, name: 'some other name' }])
+          .expect(200);
+
+        const bodyToCompareLegacyField = removeServerGeneratedProperties(body[0]);
+        expect(bodyToCompareLegacyField.investigation_fields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+        expect(bodyToCompareLegacyField.name).to.eql('some other name');
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, body[0].id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+      });
+
+      it('should patch a rule with a legacy investigation field - empty array - and migrate', async () => {
+        // patch a simple rule's name
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            {
+              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+              name: 'some other name 2',
+            },
+          ])
+          .expect(200);
+
+        const bodyToCompareLegacyFieldEmptyArray = removeServerGeneratedProperties(body[0]);
+        expect(bodyToCompareLegacyFieldEmptyArray.investigation_fields).to.eql(undefined);
+        expect(bodyToCompareLegacyFieldEmptyArray.name).to.eql('some other name 2');
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, body[0].id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
+      });
+
+      it('should patch a rule with an investigation field', async () => {
+        // patch a simple rule's name
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            {
+              rule_id: RULE_WITH_INVESTIGATION_FIELD,
+              name: 'some other name 3',
+            },
+          ])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare.investigation_fields).to.eql({
-          field_names: ['client.address', 'agent.name'],
+          field_names: ['host.name'],
         });
-        expect(bodyToCompare.name).to.eql('some other name');
+        expect(bodyToCompare.name).to.eql('some other name 3');
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, body[0].id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({
+          field_names: ['host.name'],
+        });
       });
     });
   });

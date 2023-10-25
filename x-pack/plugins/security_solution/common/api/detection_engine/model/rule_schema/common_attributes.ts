@@ -7,13 +7,7 @@
 
 import * as t from 'io-ts';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  NonEmptyString,
-  version,
-  UUID,
-  NonEmptyArray,
-  NonEmptyStringArray,
-} from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyString, version, UUID, NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
 import { max_signals, threat } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export type RuleObjectId = t.TypeOf<typeof RuleObjectId>;
@@ -292,21 +286,3 @@ export const InvestigationFields = t.exact(
     field_names: NonEmptyArray(NonEmptyString),
   })
 );
-
-// 8.10.x is mapped as an array of strings
-export type LegacyInvestigationFields = t.TypeOf<typeof LegacyInvestigationFields>;
-export const LegacyInvestigationFields = NonEmptyStringArray;
-
-/*
- * In ESS 8.10.x "investigation_fields" are mapped as string[].
- * For 8.11+ logic is added on read in our endpoints to migrate
- * the data over to it's intended type of { field_names: string[] }.
- * The SO rule type will continue to support both types until we deprecate,
- * but APIs will only support intended object format.
- * See PR 169061
- */
-export type InvestigationFieldsCombined = t.TypeOf<typeof InvestigationFieldsCombined>;
-export const InvestigationFieldsCombined = t.union([
-  InvestigationFields,
-  LegacyInvestigationFields,
-]);

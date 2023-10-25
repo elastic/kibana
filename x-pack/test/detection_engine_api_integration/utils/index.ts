@@ -18,6 +18,7 @@ export * from './create_rule';
 export * from './create_rule_with_auth';
 export * from './create_rule_with_exception_entries';
 export * from './create_signals_index';
+export * from './constants';
 export * from './delete_all_rules';
 export * from './delete_all_event_log_execution_events';
 export * from './delete_all_rule_execution_info';

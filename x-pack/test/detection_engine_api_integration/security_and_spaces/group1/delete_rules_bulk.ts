@@ -26,6 +26,9 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getLegacyActionSO,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+  RULE_WITH_INVESTIGATION_FIELD,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -467,9 +470,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send([
-            { rule_id: '2297be91-894c-4831-830f-b424a0ec9102' },
-            { rule_id: '2297be91-894c-4831-830f-b424a0ec5678' },
-            { rule_id: '2297be91-894c-4831-830f-b424a0ec84f0' },
+            { rule_id: RULE_WITH_INVESTIGATION_FIELD },
+            { rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY },
+            { rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD },
           ])
           .expect(200);
         const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
@@ -487,9 +490,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send([
-            { rule_id: '2297be91-894c-4831-830f-b424a0ec9102' },
-            { rule_id: '2297be91-894c-4831-830f-b424a0ec5678' },
-            { rule_id: '2297be91-894c-4831-830f-b424a0ec84f0' },
+            { rule_id: RULE_WITH_INVESTIGATION_FIELD },
+            { rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY },
+            { rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD },
           ])
           .expect(200);
         const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);

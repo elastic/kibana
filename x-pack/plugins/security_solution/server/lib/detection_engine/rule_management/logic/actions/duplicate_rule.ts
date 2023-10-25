@@ -50,6 +50,8 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
       requiredFields,
       setup,
       exceptionsList: [],
+      // Don't want to create any more instances of rules with legacy
+      // investigation field, so migrating data here.
       investigationFields: migrateInvestigationFields(rule.params.investigationFields),
     },
     schedule: rule.schedule,

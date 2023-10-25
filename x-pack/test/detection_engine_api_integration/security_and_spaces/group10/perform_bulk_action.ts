@@ -38,6 +38,13 @@ import {
   installMockPrebuiltRules,
   removeServerGeneratedProperties,
   waitForRuleSuccess,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+  RULE_WITH_INVESTIGATION_FIELD,
+  getRuleSOById,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY_SO_ID,
+  RULE_WITH_INVESTIGATION_FIELD_SO_ID,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -3057,10 +3064,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete rules', async () => {
-        const ruleIdWithLegacyInvestigationField = '2297be91-894c-4831-830f-b424a0ec84f0';
-        const ruleIdWithLegacyInvestigationFieldEmptyArray = '2297be91-894c-4831-830f-b424a0ec5678';
-        const ruleIdWithInvestigationField = '2297be91-894c-4831-830f-b424a0ec9102';
-
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.delete })
           .expect(200);
@@ -3076,16 +3079,12 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(names.includes('Test investigation fields object')).to.eql(true);
 
         // Check that the updates have been persisted
-        await fetchRule(ruleIdWithLegacyInvestigationField).expect(404);
-        await fetchRule(ruleIdWithLegacyInvestigationFieldEmptyArray).expect(404);
-        await fetchRule(ruleIdWithInvestigationField).expect(404);
+        await fetchRule(RULE_WITH_LEGACY_INVESTIGATION_FIELD).expect(404);
+        await fetchRule(RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY).expect(404);
+        await fetchRule(RULE_WITH_INVESTIGATION_FIELD).expect(404);
       });
 
       it('should enable rules with legacy investigation fields', async () => {
-        const ruleIdWithLegacyInvestigationField = '2297be91-894c-4831-830f-b424a0ec84f0';
-        const ruleIdWithLegacyInvestigationFieldEmptyArray = '2297be91-894c-4831-830f-b424a0ec5678';
-        const ruleIdWithInvestigationField = '2297be91-894c-4831-830f-b424a0ec9102';
-
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.enable })
           .expect(200);
@@ -3093,27 +3092,63 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
 
         // Check that the updated rule is returned with the response
+        // and field transformed on response
         expect(
           body.attributes.results.updated.every(
             (returnedRule: RuleResponse) => returnedRule.enabled
           )
         ).to.eql(true);
 
-        // Check that the updates have been persisted
-        const { body: ruleBody } = await fetchRule(ruleIdWithLegacyInvestigationField).expect(200);
-        expect(ruleBody.enabled).to.eql(true);
-        const { body: ruleBody2 } = await fetchRule(
-          ruleIdWithLegacyInvestigationFieldEmptyArray
-        ).expect(200);
-        expect(ruleBody2.enabled).to.eql(true);
-        const { body: ruleBody3 } = await fetchRule(ruleIdWithInvestigationField).expect(200);
-        expect(ruleBody3.enabled).to.eql(true);
+        const ruleWithLegacyField = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.rule_id === RULE_WITH_LEGACY_INVESTIGATION_FIELD
+        );
+        expect(ruleWithLegacyField.investigation_fields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+
+        const ruleWithEmptyArray = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.rule_id === RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY
+        );
+        expect(ruleWithEmptyArray.investigation_fields).to.eql(undefined);
+
+        const ruleWithIntendedType = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) => returnedRule.rule_id === RULE_WITH_INVESTIGATION_FIELD
+        );
+        expect(ruleWithIntendedType.investigation_fields).to.eql({ field_names: ['host.name'] });
+
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should not include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyField.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+        expect(ruleSO?.alert?.enabled).to.eql(true);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSO2 }],
+          },
+        } = await getRuleSOById(es, ruleWithEmptyArray.id);
+        expect(ruleSO2?.alert?.params?.investigationFields).to.eql([]);
+        expect(ruleSO?.alert?.enabled).to.eql(true);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSO3 }],
+          },
+        } = await getRuleSOById(es, ruleWithIntendedType.id);
+        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
+        expect(ruleSO?.alert?.enabled).to.eql(true);
       });
 
       it('should disable rules with legacy investigation fields', async () => {
-        const ruleIdWithLegacyInvestigationField = '2297be91-894c-4831-830f-b424a0ec84f0';
-        const ruleIdWithLegacyInvestigationFieldEmptyArray = '2297be91-894c-4831-830f-b424a0ec5678';
-        const ruleIdWithInvestigationField = '2297be91-894c-4831-830f-b424a0ec9102';
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.disable })
           .expect(200);
@@ -3121,21 +3156,57 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
 
         // Check that the updated rule is returned with the response
+        // and field transformed on response
         expect(
           body.attributes.results.updated.every(
-            (returnedRule: RuleResponse) => returnedRule.enabled === false
+            (returnedRule: RuleResponse) => !returnedRule.enabled
           )
         ).to.eql(true);
 
-        // Check that the updates have been persisted
-        const { body: ruleBody } = await fetchRule(ruleIdWithLegacyInvestigationField).expect(200);
-        expect(ruleBody.enabled).to.eql(false);
-        const { body: ruleBody2 } = await fetchRule(
-          ruleIdWithLegacyInvestigationFieldEmptyArray
-        ).expect(200);
-        expect(ruleBody2.enabled).to.eql(false);
-        const { body: ruleBody3 } = await fetchRule(ruleIdWithInvestigationField).expect(200);
-        expect(ruleBody3.enabled).to.eql(false);
+        const ruleWithLegacyField = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.rule_id === RULE_WITH_LEGACY_INVESTIGATION_FIELD
+        );
+        expect(ruleWithLegacyField.investigation_fields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+
+        const ruleWithEmptyArray = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.rule_id === RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY
+        );
+        expect(ruleWithEmptyArray.investigation_fields).to.eql(undefined);
+
+        const ruleWithIntendedType = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) => returnedRule.rule_id === RULE_WITH_INVESTIGATION_FIELD
+        );
+        expect(ruleWithIntendedType.investigation_fields).to.eql({ field_names: ['host.name'] });
+
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should not include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyField.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSO2 }],
+          },
+        } = await getRuleSOById(es, ruleWithEmptyArray.id);
+        expect(ruleSO2?.alert?.params?.investigationFields).to.eql([]);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSO3 }],
+          },
+        } = await getRuleSOById(es, ruleWithIntendedType.id);
+        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
       });
 
       it('should duplicate rules with legacy investigation fields', async () => {
@@ -3165,14 +3236,86 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(rulesResponse.total).to.eql(6);
+
+        const ruleWithLegacyField = body.attributes.results.created.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.name === 'Test investigation fields [Duplicate]'
+        );
+        const ruleWithEmptyArray = body.attributes.results.created.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.name === 'Test investigation fields empty array [Duplicate]'
+        );
+        const ruleWithIntendedType = body.attributes.results.created.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.name === 'Test investigation fields object [Duplicate]'
+        );
+
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, duplicated
+         * rules should have migrated value.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyField.id);
+
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({
+          field_names: ['client.address', 'agent.name'],
+        });
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSO2 }],
+          },
+        } = await getRuleSOById(es, ruleWithEmptyArray.id);
+        expect(ruleSO2?.alert?.params?.investigationFields).to.eql(undefined);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSO3 }],
+          },
+        } = await getRuleSOById(es, ruleWithIntendedType.id);
+        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
+
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, the original
+         * rules selected to be duplicated should not be migrated.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSOOriginalLegacy }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID);
+
+        expect(ruleSOOriginalLegacy?.alert?.params?.investigationFields).to.eql([
+          'client.address',
+          'agent.name',
+        ]);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSOOriginalLegacyEmptyArray }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY_SO_ID);
+        expect(ruleSOOriginalLegacyEmptyArray?.alert?.params?.investigationFields).to.eql([]);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSOOriginalNoLegacy }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_INVESTIGATION_FIELD_SO_ID);
+        expect(ruleSOOriginalNoLegacy?.alert?.params?.investigationFields).to.eql({
+          field_names: ['host.name'],
+        });
       });
 
       it('should edit rules with legacy investigation fields', async () => {
-        const ruleIdWithLegacyInvestigationField = '2297be91-894c-4831-830f-b424a0ec84f0';
-        const ruleIdWithLegacyInvestigationFieldEmptyArray = '2297be91-894c-4831-830f-b424a0ec5678';
-        const ruleIdWithInvestigationField = '2297be91-894c-4831-830f-b424a0ec9102';
-
-        const { body: setTagsBody } = await postBulkAction().send({
+        const { body } = await postBulkAction().send({
           query: '',
           action: BulkActionType.edit,
           [BulkActionType.edit]: [
@@ -3182,37 +3325,62 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
-        expect(setTagsBody.attributes.summary).to.eql({
+        expect(body.attributes.summary).to.eql({
           failed: 0,
           skipped: 0,
           succeeded: 3,
           total: 3,
         });
 
-        // Check that the updates have been persisted
-        const { body: setTagsRuleLegacyInvestigationField } = await fetchRule(
-          ruleIdWithLegacyInvestigationField
-        ).expect(200);
-        expect(setTagsRuleLegacyInvestigationField.tags).to.eql(['reset-tag']);
-        expect(setTagsRuleLegacyInvestigationField.investigation_fields).to.eql({
+        // Check that the updated rule is returned with the response
+        // and field transformed on response
+        const ruleWithLegacyField = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.rule_id === RULE_WITH_LEGACY_INVESTIGATION_FIELD
+        );
+        expect(ruleWithLegacyField.investigation_fields).to.eql({
           field_names: ['client.address', 'agent.name'],
         });
+        expect(ruleWithLegacyField.tags).to.eql(['reset-tag']);
 
-        const { body: setTagsRuleLegacyInvestigationFieldEmptyArray } = await fetchRule(
-          ruleIdWithLegacyInvestigationFieldEmptyArray
-        ).expect(200);
-        expect(setTagsRuleLegacyInvestigationFieldEmptyArray.tags).to.eql(['reset-tag']);
-        expect(setTagsRuleLegacyInvestigationFieldEmptyArray.investigation_fields).to.eql(
-          undefined
+        const ruleWithEmptyArray = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) =>
+            returnedRule.rule_id === RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY
         );
+        expect(ruleWithEmptyArray.investigation_fields).to.eql(undefined);
+        expect(ruleWithEmptyArray.tags).to.eql(['reset-tag']);
 
-        const { body: setTagsRuleInvestigationField } = await fetchRule(
-          ruleIdWithInvestigationField
-        ).expect(200);
-        expect(setTagsRuleInvestigationField.tags).to.eql(['reset-tag']);
-        expect(setTagsRuleInvestigationField.investigation_fields).to.eql({
-          field_names: ['host.name'],
-        });
+        const ruleWithIntendedType = body.attributes.results.updated.find(
+          (returnedRule: RuleResponse) => returnedRule.rule_id === RULE_WITH_INVESTIGATION_FIELD
+        );
+        expect(ruleWithIntendedType.investigation_fields).to.eql({ field_names: ['host.name'] });
+        expect(ruleWithIntendedType.tags).to.eql(['reset-tag']);
+
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should not include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSO2 }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY_SO_ID);
+        expect(ruleSO2?.alert?.params?.investigationFields).to.eql([]);
+
+        const {
+          hits: {
+            hits: [{ _source: ruleSO3 }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_INVESTIGATION_FIELD_SO_ID);
+        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
       });
     });
   });

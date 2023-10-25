@@ -8,6 +8,7 @@ export * from './rules';
 export * from './exception_list_and_item';
 export * from './alerts';
 export * from './actions';
+export * from './get_rule_so_by_id';
 
 export * from './count_down_test';
 export * from './count_down_es';

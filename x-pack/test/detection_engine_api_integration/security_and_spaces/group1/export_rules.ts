@@ -24,6 +24,13 @@ import {
   getWebHookAction,
   removeServerGeneratedProperties,
   waitForRulePartialFailure,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+  RULE_WITH_INVESTIGATION_FIELD,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID,
+  getRuleSOById,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY_SO_ID,
+  RULE_WITH_INVESTIGATION_FIELD_SO_ID,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -739,13 +746,13 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('exports rule with investigation fields as array and migrates to object', async () => {
+      it('exports a rule that has legacy investigation_field and transforms field in response', async () => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
-            objects: [{ rule_id: '2297be91-894c-4831-830f-b424a0ec84f0' }],
+            objects: [{ rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD }],
           })
           .expect(200)
           .parse(binaryToString);
@@ -755,15 +762,30 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(exportedRule.investigation_fields).toEqual({
           field_names: ['client.address', 'agent.name'],
         });
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * NOT include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID);
+        expect(ruleSO?.alert?.params?.investigationFields).toEqual([
+          'client.address',
+          'agent.name',
+        ]);
       });
 
-      it('exports rule with investigation fields as empty array and unsets field', async () => {
+      it('exports a rule that has a legacy investigation field set to empty array and unsets field in response', async () => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
-            objects: [{ rule_id: '2297be91-894c-4831-830f-b424a0ec5678' }],
+            objects: [{ rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY }],
           })
           .expect(200)
           .parse(binaryToString);
@@ -771,6 +793,19 @@ export default ({ getService }: FtrProviderContext): void => {
         const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
         expect(exportedRule.investigation_fields).toEqual(undefined);
+
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * NOT include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY_SO_ID);
+        expect(ruleSO?.alert?.params?.investigationFields).toEqual([]);
       });
 
       it('exports rule with investigation fields as intended object type', async () => {
@@ -779,7 +814,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
-            objects: [{ rule_id: '2297be91-894c-4831-830f-b424a0ec9102' }],
+            objects: [{ rule_id: RULE_WITH_INVESTIGATION_FIELD }],
           })
           .expect(200)
           .parse(binaryToString);
@@ -789,6 +824,17 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(exportedRule.investigation_fields).toEqual({
           field_names: ['host.name'],
         });
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * NOT include a migration on SO.
+         */ const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_INVESTIGATION_FIELD_SO_ID);
+        expect(ruleSO?.alert?.params?.investigationFields).toEqual({ field_names: ['host.name'] });
       });
     });
   });

@@ -22,11 +22,10 @@ import type {
   AlertSuppression,
   AlertSuppressionCamel,
   InvestigationFields,
-  InvestigationFieldsCombined,
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 
-import type { RuleAlertType, RuleParams } from '../../rule_schema';
+import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';

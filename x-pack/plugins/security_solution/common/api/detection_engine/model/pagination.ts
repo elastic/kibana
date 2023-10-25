@@ -6,12 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import {
-  PositiveInteger,
-  PositiveIntegerGreaterThanZero,
-  NonEmptyString,
-  UUID,
-} from '@kbn/securitysolution-io-ts-types';
+import { PositiveInteger, PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 
 export type Page = t.TypeOf<typeof Page>;
 export const Page = PositiveIntegerGreaterThanZero;
@@ -31,12 +26,3 @@ export const PaginationResult = t.type({
   per_page: PerPage,
   total: PositiveInteger,
 });
-
-export type HasReferences = t.TypeOf<typeof HasReferences>;
-export const HasReferences = t.type({
-  type: NonEmptyString,
-  id: UUID,
-});
-
-export type HasReferencesOrUndefined = t.TypeOf<typeof HasReferencesOrUndefined>;
-export const HasReferencesOrUndefined = t.union([HasReferences, t.undefined]);

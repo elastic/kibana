@@ -15,7 +15,7 @@
           "description": "a",
           "ruleId": "2297be91-894c-4831-830f-b424a0ec84f0",
           "falsePositives": [],
-          "from": "now-360s",
+          "from": "1900-01-01T00:00:00.000Z",
           "immutable": false,
           "license": "",
           "outputIndex": "",
@@ -36,17 +36,8 @@
           "exceptionsList": [],
           "type": "query",
           "language": "kuery",
-          "index": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*"
-          ],
-          "query": "*:*",
+          "index": ["auditbeat-*"],
+          "query": "_id:BhbXBmkBR346wHgn4PeZ or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi",
           "filters": []
         },
         "schedule": {
@@ -105,7 +96,7 @@
           "description": "a",
           "ruleId": "2297be91-894c-4831-830f-b424a0ec5678",
           "falsePositives": [],
-          "from": "now-360s",
+          "from": "1900-01-01T00:00:00.000Z",
           "immutable": false,
           "license": "",
           "outputIndex": "",
@@ -126,17 +117,8 @@
           "exceptionsList": [],
           "type": "query",
           "language": "kuery",
-          "index": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*"
-          ],
-          "query": "*:*",
+          "index": ["auditbeat-*"],
+          "query": "_id:BhbXBmkBR346wHgn4PeZ or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi",
           "filters": []
         },
         "schedule": {
@@ -195,7 +177,7 @@
           "description": "a",
           "ruleId": "2297be91-894c-4831-830f-b424a0ec9102",
           "falsePositives": [],
-          "from": "now-360s",
+          "from": "1900-01-01T00:00:00.000Z",
           "immutable": false,
           "license": "",
           "outputIndex": "",
@@ -218,17 +200,8 @@
           "exceptionsList": [],
           "type": "query",
           "language": "kuery",
-          "index": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*"
-          ],
-          "query": "*:*",
+          "index": ["auditbeat-*"],
+          "query": "_id:BhbXBmkBR346wHgn4PeZ or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi",
           "filters": []
         },
         "schedule": {

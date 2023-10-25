@@ -18,10 +18,17 @@ import {
   deleteAllRules,
   getComplexRule,
   getComplexRuleOutput,
+  getRuleSOById,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
+  RULE_WITH_INVESTIGATION_FIELD,
+  RULE_WITH_INVESTIGATION_FIELD_SO_ID,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY_SO_ID,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -29,6 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   describe('find_rules', () => {
     describe('find_rules', () => {
@@ -295,15 +303,15 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const [ruleWithFieldAsArray] = body.data.filter(
-          (rule: RuleResponse) => rule.rule_id === '2297be91-894c-4831-830f-b424a0ec84f0'
+          (rule: RuleResponse) => rule.rule_id === RULE_WITH_LEGACY_INVESTIGATION_FIELD
         );
 
         const [ruleWithFieldAsEmptyArray] = body.data.filter(
-          (rule: RuleResponse) => rule.rule_id === '2297be91-894c-4831-830f-b424a0ec5678'
+          (rule: RuleResponse) => rule.rule_id === RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY
         );
 
         const [ruleWithExpectedTyping] = body.data.filter(
-          (rule: RuleResponse) => rule.rule_id === '2297be91-894c-4831-830f-b424a0ec9102'
+          (rule: RuleResponse) => rule.rule_id === RULE_WITH_INVESTIGATION_FIELD
         );
 
         expect(ruleWithFieldAsArray.investigation_fields).to.eql({
@@ -313,6 +321,31 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(ruleWithExpectedTyping.investigation_fields).to.eql({
           field_names: ['host.name'],
         });
+
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * NOT include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_SO_ID);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+        const {
+          hits: {
+            hits: [{ _source: ruleSO2 }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY_SO_ID);
+        expect(ruleSO2?.alert?.params?.investigationFields).to.eql([]);
+        const {
+          hits: {
+            hits: [{ _source: ruleSO3 }],
+          },
+        } = await getRuleSOById(es, RULE_WITH_INVESTIGATION_FIELD_SO_ID);
+        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
       });
     });
   });

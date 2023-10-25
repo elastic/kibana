@@ -57,7 +57,7 @@ describe('use_rule_with_fallback', () => {
         });
         const mockHit = getMockAlertSearchResponse(mockRule);
         const result = transformRuleFromAlertHit(mockHit);
-        expect(result?.investigation_fields).toEqual({ field_names: ['foo'] });
+        expect(result?.investigation_fields).toBeUndefined();
       });
 
       it('transforms investigation_fields when set as legacy empty array', () => {

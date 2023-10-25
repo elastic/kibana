@@ -8,10 +8,8 @@
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useEffect, useMemo } from 'react';
-import type {
-  InvestigationFields,
-  InvestigationFieldsCombined,
-} from '../../../../common/api/detection_engine';
+import type { InvestigationFieldsCombined } from '../../../../server/lib/detection_engine/rule_schema';
+import type { InvestigationFields } from '../../../../common/api/detection_engine';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
@@ -118,6 +116,10 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   };
 };
 
+// Testing edge case, where if hook does not find the rule and turns to the alert document,
+// the alert document could still have an unmigrated, legacy version of investigation_fields.
+// We are not looking to do any migrations to these legacy fields in the alert document, so need
+// to transform it on read in this case.
 export const migrateRuleLegacyInvestigationFields = (rule: Rule): Rule => {
   if (!rule) return rule;
 
@@ -128,12 +130,6 @@ export const migrateInvestigationFields = (
   investigationFields: InvestigationFieldsCombined | undefined
 ): InvestigationFields | undefined => {
   if (investigationFields && Array.isArray(investigationFields)) {
-    if (investigationFields.length) {
-      return {
-        field_names: investigationFields,
-      };
-    }
-
     return undefined;
   }
 

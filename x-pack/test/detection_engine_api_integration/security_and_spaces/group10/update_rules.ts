@@ -35,6 +35,9 @@ import {
   getThresholdRuleForSignalTesting,
   getLegacyActionSO,
   getSimpleRuleWithoutRuleId,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+  getRuleSOById,
 } from '../../utils';
 import {
   getActionsWithFrequencies,
@@ -929,7 +932,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('errors if sending legacy investigation fields type', async () => {
         const updatedRule = {
-          ...getSimpleRuleUpdate('2297be91-894c-4831-830f-b424a0ec84f0'),
+          ...getSimpleRuleUpdate(RULE_WITH_LEGACY_INVESTIGATION_FIELD),
           investigation_fields: ['foo'],
         };
 
@@ -947,7 +950,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('unsets legacy investigation fields when field not specified for update', async () => {
         // rule_id of a rule with legacy investigation fields set
-        const updatedRule = getSimpleRuleUpdate('2297be91-894c-4831-830f-b424a0ec5678');
+        const updatedRule = getSimpleRuleUpdate(RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY);
 
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
@@ -958,12 +961,24 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql(undefined);
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, body.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
       });
 
       it('updates a rule with legacy investigation fields', async () => {
         // rule_id of a rule with legacy investigation fields set
         const updatedRule = {
-          ...getSimpleRuleUpdate('2297be91-894c-4831-830f-b424a0ec5678'),
+          ...getSimpleRuleUpdate(RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY),
           investigation_fields: {
             field_names: ['foo'],
           },
@@ -978,6 +993,21 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql({
+          field_names: ['foo'],
+        });
+
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, body.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({
           field_names: ['foo'],
         });
       });

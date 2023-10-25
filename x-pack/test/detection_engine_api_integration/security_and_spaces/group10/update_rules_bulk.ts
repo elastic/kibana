@@ -32,6 +32,9 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleWithoutRuleId,
   getSimpleRuleOutputWithoutRuleId,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD,
+  RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
+  RULE_WITH_INVESTIGATION_FIELD,
 } from '../../utils';
 import { removeUUIDFromActions } from '../../utils/remove_uuid_from_actions';
 import {
@@ -831,7 +834,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               ...getSimpleRule(),
               name: 'New name',
-              rule_id: '2297be91-894c-4831-830f-b424a0ec84f0',
+              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD,
               investigation_fields: ['client.foo'],
             },
           ])
@@ -852,12 +855,12 @@ export default ({ getService }: FtrProviderContext) => {
             {
               ...getSimpleRule(),
               name: 'New name - used to have legacy investigation fields',
-              rule_id: '2297be91-894c-4831-830f-b424a0ec84f0',
+              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD,
             },
             {
               ...getSimpleRule(),
               name: 'New name - used to have legacy investigation fields, empty array',
-              rule_id: '2297be91-894c-4831-830f-b424a0ec5678',
+              rule_id: RULE_WITH_LEGACY_INVESTIGATION_FIELD_EMPTY_ARRAY,
               investigation_fields: {
                 field_names: ['foo'],
               },
@@ -865,7 +868,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               ...getSimpleRule(),
               name: 'New name - never had legacy investigation fields',
-              rule_id: '2297be91-894c-4831-830f-b424a0ec9102',
+              rule_id: RULE_WITH_INVESTIGATION_FIELD,
               investigation_fields: {
                 field_names: ['bar'],
               },

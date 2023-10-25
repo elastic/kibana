@@ -39,6 +39,7 @@ import {
   getLegacyActionSO,
   createRule,
   getRule,
+  getRuleSOById,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
@@ -1935,6 +1936,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await getRule(supertest, log, 'rule-1');
         expect(rule.investigation_fields).to.eql({ field_names: ['foo', 'bar'] });
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, rule.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({ field_names: ['foo', 'bar'] });
       });
 
       it('imports rule with investigation fields as empty array', async () => {
@@ -1957,6 +1970,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await getRule(supertest, log, 'rule-1');
         expect(rule.investigation_fields).to.eql(undefined);
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, rule.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
       });
 
       it('imports rule with investigation fields as intended object type', async () => {
@@ -1978,6 +2003,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await getRule(supertest, log, 'rule-1');
         expect(rule.investigation_fields).to.eql({ field_names: ['foo'] });
+        /*
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, rule.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({ field_names: ['foo'] });
       });
     });
   });

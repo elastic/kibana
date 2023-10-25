@@ -38,6 +38,7 @@ import {
 } from '@kbn/securitysolution-rules';
 
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
@@ -77,7 +78,7 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-  InvestigationFieldsCombined,
+  InvestigationFields,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   savedIdOrUndefined,
@@ -86,6 +87,24 @@ import {
 } from '../../../../../common/api/detection_engine';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/api/detection_engine/model/rule_response_actions';
+
+// 8.10.x is mapped as an array of strings
+export type LegacyInvestigationFields = t.TypeOf<typeof LegacyInvestigationFields>;
+export const LegacyInvestigationFields = t.array(NonEmptyString);
+
+/*
+ * In ESS 8.10.x "investigation_fields" are mapped as string[].
+ * For 8.11+ logic is added on read in our endpoints to migrate
+ * the data over to it's intended type of { field_names: string[] }.
+ * The SO rule type will continue to support both types until we deprecate,
+ * but APIs will only support intended object format.
+ * See PR 169061
+ */
+export type InvestigationFieldsCombined = t.TypeOf<typeof InvestigationFieldsCombined>;
+export const InvestigationFieldsCombined = t.union([
+  InvestigationFields,
+  LegacyInvestigationFields,
+]);
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 
