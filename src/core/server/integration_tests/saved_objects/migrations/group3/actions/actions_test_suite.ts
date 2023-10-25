@@ -1155,7 +1155,7 @@ export const runActionTestSuite = ({
       const res = (await reindex({
         client,
         sourceIndex: 'existing_index_with_100k_docs',
-        targetIndex: 'reindex_target',
+        targetIndex: 'reindex_target_7',
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
