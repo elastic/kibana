@@ -90,6 +90,18 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Anomaly detection',
               }),
               link: 'ml:anomalyDetection',
+              renderAs: 'item',
+              children: [
+                {
+                  link: 'ml:singleMetricViewer',
+                },
+                {
+                  link: 'ml:anomalyExplorer',
+                },
+                {
+                  link: 'ml:settings',
+                },
+              ],
             },
             {
               title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
@@ -179,7 +191,7 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-        defaultMessage: 'Get Started',
+        defaultMessage: 'Get started',
       }),
       link: 'observabilityOnboarding',
       icon: 'launch',
