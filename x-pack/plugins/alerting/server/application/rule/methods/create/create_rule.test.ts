@@ -30,6 +30,7 @@ import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../..
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { ConnectorAdapter } from '../../../../connector_adapters/types';
 import { RuleDomain } from '../../types';
+import { RuleSystemAction } from '../../../../types';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -4002,6 +4003,26 @@ describe('create()', () => {
           },
         ]
       `);
+    });
+
+    test('should throw an error if the system action does not exist', async () => {
+      const action: RuleSystemAction = {
+        id: 'fake-system-action',
+        uuid: '123',
+        params: {},
+        actionTypeId: '.test',
+        type: RuleActionTypes.SYSTEM,
+      };
+
+      const data = getMockData({ actions: [action] });
+      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
+        `[Error: Action fake-system-action is not a system action]`
+      );
+
+      expect(actionsClient.getBulk).toBeCalledWith({
+        ids: ['fake-system-action'],
+        throwIfSystemAction: false,
+      });
     });
 
     test('should throw an error if the system action contains the frequency', async () => {

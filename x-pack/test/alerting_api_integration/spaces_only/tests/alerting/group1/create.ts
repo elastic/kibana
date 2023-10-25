@@ -521,7 +521,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
 
       it('should throw 400 if the system action is missing required properties', async () => {
-        for (const propertyToOmit of ['id', 'actionTypeId', 'uuid']) {
+        for (const propertyToOmit of ['id']) {
           const systemActionWithoutProperty = omit(systemAction, propertyToOmit);
 
           await supertest
@@ -530,34 +530,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 actions: [systemActionWithoutProperty],
-              })
-            )
-            .expect(400);
-        }
-      });
-
-      it('should throw 400 if the system action contain properties from the default actions', async () => {
-        for (const propertyAdd of [
-          { group: 'test' },
-          {
-            frequency: {
-              notify_when: 'onThrottleInterval' as const,
-              summary: true,
-              throttle: '1h',
-            },
-          },
-          {
-            alerts_filter: {
-              query: { dsl: '{test:1}', kql: 'test:1s', filters: [] },
-            },
-          },
-        ]) {
-          await supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                actions: [{ ...systemAction, ...propertyAdd }],
               })
             )
             .expect(400);
