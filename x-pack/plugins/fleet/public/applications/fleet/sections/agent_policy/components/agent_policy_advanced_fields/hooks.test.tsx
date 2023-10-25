@@ -95,6 +95,31 @@ const mockApiCallsWithLogstashOutputs = (http: MockedFleetStartServices['http'])
   });
 };
 
+const mockApiCallsWithRemoteESOutputs = (http: MockedFleetStartServices['http']) => {
+  http.get.mockImplementation(async (path) => {
+    if (typeof path !== 'string') {
+      throw new Error('Invalid request');
+    }
+    if (path === '/api/fleet/outputs') {
+      return {
+        data: {
+          items: [
+            {
+              id: 'remote1',
+              name: 'Remote1',
+              type: 'remote-elasticsearch',
+              is_default: false,
+              is_default_monitoring: false,
+            },
+          ],
+        },
+      };
+    }
+
+    return defaultHttpClientGetImplementation(path);
+  });
+};
+
 describe('useOutputOptions', () => {
   it('should generate enabled options if the licence is platinium', async () => {
     const testRenderer = createFleetTestRendererMock();
@@ -506,5 +531,22 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
+  });
+
+  it('should only enable remote es output for monitoring output', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    mockedUseLicence.mockReturnValue({
+      hasAtLeast: () => true,
+    } as unknown as LicenseService);
+    mockApiCallsWithRemoteESOutputs(testRenderer.startServices.http);
+    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+      useOutputOptions({} as AgentPolicy)
+    );
+    expect(result.current.isLoading).toBeTruthy();
+
+    await waitForNextUpdate();
+    expect(result.current.dataOutputOptions.length).toEqual(1);
+    expect(result.current.monitoringOutputOptions.length).toEqual(2);
+    expect(result.current.monitoringOutputOptions[1].value).toEqual('remote1');
   });
 });

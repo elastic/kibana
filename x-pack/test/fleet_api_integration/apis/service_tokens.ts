@@ -53,5 +53,25 @@ export default function (providerContext: FtrProviderContext) {
         .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
         .expect(200);
     });
+
+    it('should create a valid remote service account token', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/fleet/service_tokens?remote=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expect(apiResponse).have.property('name');
+      expect(apiResponse).have.property('value');
+
+      const { body: tokensResponse } = await esClient.transport.request<any>(
+        {
+          method: 'GET',
+          path: `_security/service/elastic/fleet-server-remote/credential`,
+        },
+        { meta: true }
+      );
+
+      expect(tokensResponse.tokens).have.property(apiResponse.name);
+    });
   });
 }

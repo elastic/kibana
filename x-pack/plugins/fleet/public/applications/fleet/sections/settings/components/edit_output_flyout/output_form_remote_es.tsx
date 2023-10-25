@@ -67,6 +67,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             defaultMessage="Generate a service token in the remote cluster with this API call and copy the value."
           />
         }
+        data-test-subj="serviceTokenCallout"
       >
         <EuiCodeBlock isCopyable={true}>
           {`curl -XPOST 'https://REMOTE_KIBANA_HOST:PORT/api/fleet/service_tokens?remote=true' -H 'kbn-xsrf: remote-es' -u USER:PASSWORD`}
