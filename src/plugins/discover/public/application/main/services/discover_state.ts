@@ -227,7 +227,7 @@ export function getDiscoverStateContainer({
   /**
    * Global State Container, synced with the _g part URL
    */
-  const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
+  const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage, services);
 
   /**
    * Saved Search State Container, the persisted saved object of Discover

@@ -396,7 +396,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
@@ -411,7 +411,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
@@ -440,7 +440,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(message),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(message),index:the-data-view-id,interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();

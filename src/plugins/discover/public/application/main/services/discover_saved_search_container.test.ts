@@ -18,7 +18,10 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
-  const globalStateContainer = getDiscoverGlobalStateContainer(createKbnUrlStateStorage());
+  const globalStateContainer = getDiscoverGlobalStateContainer(
+    createKbnUrlStateStorage(),
+    services
+  );
 
   describe('getTitle', () => {
     it('returns undefined for new saved searches', () => {

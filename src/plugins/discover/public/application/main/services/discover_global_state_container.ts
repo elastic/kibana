@@ -8,6 +8,7 @@
 
 import type { QueryState } from '@kbn/data-plugin/common';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverServices } from '../../../build_services';
 
 export interface DiscoverGlobalStateContainer {
   get: () => QueryState | null;
@@ -17,10 +18,26 @@ export interface DiscoverGlobalStateContainer {
 const GLOBAL_STATE_URL_KEY = '_g';
 
 export const getDiscoverGlobalStateContainer = (
-  stateStorage: IKbnUrlStateStorage
-): DiscoverGlobalStateContainer => ({
-  get: () => stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY),
-  set: async (state: QueryState) => {
+  stateStorage: IKbnUrlStateStorage,
+  services: DiscoverServices
+): DiscoverGlobalStateContainer => {
+  const get = () => {
+    const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
+    const globalFilters = services.filterManager.getGlobalFilters();
+    if (state && Object.keys(state).length === 0 && globalFilters?.length) {
+      // taking care of the case when users navigate from Dashboard/Lens to Discover, and the filter is not in URL
+      // but in the filterManager. this makes sure it's considered when updating the seach source
+      return { filters: globalFilters };
+    } else {
+      return state;
+    }
+  };
+  const set = async (state: QueryState) => {
     await stateStorage.set(GLOBAL_STATE_URL_KEY, state, { replace: true });
-  },
-});
+  };
+
+  return {
+    get,
+    set,
+  };
+};
