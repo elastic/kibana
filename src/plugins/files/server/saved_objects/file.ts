@@ -61,10 +61,10 @@ const properties: Properties = {
 
 export const fileObjectType: SavedObjectsType<FileMetadata> = {
   name: FILE_SO_TYPE,
-  hidden: true,
-  namespaceType: 'multiple-isolated',
+  hidden: false,
+  namespaceType: 'multiple',
   management: {
-    importableAndExportable: false,
+    importableAndExportable: true,
   },
   mappings: {
     dynamic: false,
