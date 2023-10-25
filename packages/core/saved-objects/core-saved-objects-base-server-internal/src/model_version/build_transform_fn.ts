@@ -64,7 +64,7 @@ export const unsafeTransformChangeToTransformFn = (
   return change.transformFn;
 };
 
-export const mergeTransformFunctions = (
+const mergeTransformFunctions = (
   transformFns: SavedObjectModelTransformationFn[]
 ): SavedObjectModelTransformationFn => {
   if (transformFns.length === 0) {

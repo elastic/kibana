@@ -34,6 +34,6 @@ export {
   getVirtualVersionsFromMappingMeta,
 } from './model_version_from_mappings';
 export { getModelVersionDelta } from './get_version_delta';
-export { buildModelVersionTransformFn, mergeTransformFunctions } from './build_transform_fn';
+export { buildModelVersionTransformFn } from './build_transform_fn';
 export { aggregateMappingAdditions } from './aggregate_model_changes';
 export { convertModelVersionBackwardConversionSchema } from './backward_conversion_schema';

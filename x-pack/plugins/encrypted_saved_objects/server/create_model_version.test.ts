@@ -37,7 +37,7 @@ describe('create ESO model version', () => {
   };
   const encryptionSavedObjectService = encryptedSavedObjectsServiceMock.create();
 
-  it('throws if the types are not compatible', async () => {
+  it('throws if the types are not compatible', () => {
     const mvCreator = getCreateEsoModelVersion(encryptionSavedObjectService, () =>
       encryptedSavedObjectsServiceMock.create()
     );
@@ -67,7 +67,7 @@ describe('create ESO model version', () => {
     );
   });
 
-  it('merges unsafe transforms', async () => {
+  it('merges all applicable transforms', () => {
     const instantiateServiceWithLegacyType = jest.fn(() =>
       encryptedSavedObjectsServiceMock.create()
     );
@@ -79,13 +79,19 @@ describe('create ESO model version', () => {
 
     const esoModelVersion = mvCreator({
       modelVersion: {
+        // changes include at least one of each supported transform type in an interleaved order
+        // (we're not concerned with mapping changes here)
         changes: [
           {
             type: 'unsafe_transform',
             transformFn: (document) => {
-              document.attributes.one = '1';
+              document.attributes.three = '3';
               return { document };
             },
+          },
+          {
+             type: 'data_removal',
+             removedAttributePaths: ['firstAttr'],
           },
           {
             type: 'unsafe_transform',
@@ -95,10 +101,9 @@ describe('create ESO model version', () => {
             },
           },
           {
-            type: 'unsafe_transform',
-            transformFn: (document) => {
-              document.attributes.three = '3';
-              return { document };
+            type: 'data_backfill',
+            backfillFn: () => {
+              return { attributes: { one: '1' } };
             },
           },
           {
@@ -112,14 +117,24 @@ describe('create ESO model version', () => {
       },
     });
 
-    const attributes = {
+    const initialAttributes = {
       firstAttr: 'first_attr',
     };
 
-    encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
-    encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
+    const expectedAttributes = {
+      one: '1',
+      two: '2',
+      three: '3',
+      four: '4',
+    };
 
-    // There should be only one unsafe transform now
+    encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(initialAttributes);
+    encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(expectedAttributes);
+
+    // There should be only one change now
+    expect(esoModelVersion.changes.length === 1);
+
+    // It should be a single unsafe transform
     const unsafeTransforms = esoModelVersion.changes.filter(
       (change) => change.type === 'unsafe_transform'
     ) as SavedObjectsModelUnsafeTransformChange[];
@@ -130,9 +145,21 @@ describe('create ESO model version', () => {
         id: '123',
         type: 'known-type-1',
         namespace: 'namespace',
-        attributes,
+        attributes: initialAttributes,
       },
       context
+    );
+
+    // This is the major part of the test. Did the encrypt function get called with
+    // the attributes updated by all of the transform functions.
+    expect(encryptionSavedObjectService.encryptAttributesSync).toBeCalledTimes(1);
+    expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      expectedAttributes
     );
 
     expect(result).toEqual({
@@ -140,21 +167,15 @@ describe('create ESO model version', () => {
         id: '123',
         type: 'known-type-1',
         namespace: 'namespace',
-        new_prop_1: 'new prop 1',
-        new_prop_2: 'new prop 2',
-        attributes: {
-          firstAttr: 'first_attr',
-          one: '1',
-          two: '2',
-          three: '3',
-          four: '4',
-        },
+        new_prop_1: 'new prop 1', // added by unsafe tranfsorm
+        new_prop_2: 'new prop 2', // added by unsafe tranfsorm
+        attributes: expectedAttributes,
       },
     });
   });
 
   describe('transformation on an existing type', () => {
-    it('uses the type in the current service for both input and output types when none are specified', async () => {
+    it('uses the type in the current service for both input and output types when none are specified', () => {
       const instantiateServiceWithLegacyType = jest.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
@@ -676,7 +697,7 @@ describe('create ESO model version', () => {
   });
 
   describe('transformation from a legacy type', () => {
-    it('uses the input type for decryption', async () => {
+    it('uses the input type for decryption', () => {
       const serviceWithLegacyType = encryptedSavedObjectsServiceMock.create();
       const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
 
@@ -779,7 +800,7 @@ describe('create ESO model version', () => {
       });
     }
 
-    it('decrypts with input type, and encrypts with output type', async () => {
+    it('decrypts with input type, and encrypts with output type', () => {
       const esoMv = createEsoMv();
 
       expect(instantiateServiceWithLegacyType).toHaveBeenCalledWith(inputType);

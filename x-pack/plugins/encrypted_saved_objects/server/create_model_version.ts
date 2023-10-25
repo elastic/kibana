@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { mergeTransformFunctions } from '@kbn/core-saved-objects-base-server-internal';
+import { buildModelVersionTransformFn } from '@kbn/core-saved-objects-base-server-internal';
 import type {
-  SavedObjectModelUnsafeTransformFn,
+  SavedObjectModelTransformationFn,
   SavedObjectsModelChange,
-  SavedObjectsModelUnsafeTransformChange,
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
 
@@ -30,13 +29,14 @@ export interface CreateEsoModelVersionFnOpts {
 // from AAD) are performed correctly. Prior to Model Versions, the CreateEncryptedSavedObjectsMigrationFn handled
 // wrapping migration functions for the same purpose.
 //
-// For Model Versions, 'unsafe_transform' changes are leveraged to implement any changes that require re-encryption.
-// This funtion returns a Model Version where the 'unsafe_transform' changes are merged into a single transform where
-// the document being transformed is first decrypted via the inputType EncryptedSavedObjectTypeRegistration (or by
-// default, the EncryptedSavedObjectTypeRegistration registered with the ESO Plugin), then transformed based on the
-// 'unsafe_transform' changes defined in the the input Model Versions, and finally encrypred via the outputType
-// EncryptedSavedObjectTypeRegistration (or by default, the EncryptedSavedObjectTypeRegistration registered with the
-// ESO Plugin). The implementation for this can be found in getCreateEsoModelVersion below.
+// For Model Versions, 'data_backfill', 'data_removal', and 'unsafe_transform' changes are leveraged to implement
+// any changes to the object as usual. This funtion returns a Model Version where the changes are merged into a
+// single 'unsafe_transform' transform where the document being transformed is first decrypted via the inputType
+// EncryptedSavedObjectTypeRegistration (or by default, the EncryptedSavedObjectTypeRegistration registered with
+// the ESO Plugin), then transformed based on the changes defined in the the input Model Version, and finally
+// encrypred via the outputType EncryptedSavedObjectTypeRegistration (or by default, the
+// EncryptedSavedObjectTypeRegistration registered with the ESO Plugin). The implementation for this can be found
+// in getCreateEsoModelVersion below.
 export type CreateEsoModelVersionFn = (
   opts: CreateEsoModelVersionFnOpts
 ) => SavedObjectsModelVersion;
@@ -49,14 +49,12 @@ export const getCreateEsoModelVersion =
     ) => EncryptedSavedObjectsService
   ): CreateEsoModelVersionFn =>
   ({ modelVersion, shouldTransformIfDecryptionFails, inputType, outputType }) => {
-    // If there are no unsafe changes, then there is no reason to create an Encrypted Saved Objects Model Version
+    // If there are no changes, then there is no reason to create an Encrypted Saved Objects Model Version
     // Throw an error to notify the developer
-    const incomingUnsafeChanges = modelVersion.changes.filter(
-      (change) => change.type === 'unsafe_transform'
-    ) as SavedObjectsModelUnsafeTransformChange[];
-    if (incomingUnsafeChanges.length === 0) {
+    const incomingChanges = modelVersion.changes;
+    if (incomingChanges.length === 0) {
       throw new Error(
-        `No unsafe transform changes defined. At least one unsafe transform change is required to create an Encrypted Saved Objects Model Version.`
+        `No Model Version changes defined. At least one change is required to create an Encrypted Saved Objects Model Version.`
       );
     }
 
@@ -74,30 +72,24 @@ export const getCreateEsoModelVersion =
       ? instantiateServiceWithLegacyType(outputType)
       : encryptedSavedObjectsService;
 
-    const transformFn = createMergedUnsafeTransformFn(
+    const transformFn = createMergedTransformFn(
       inputService,
       transformedService,
       shouldTransformIfDecryptionFails,
-      incomingUnsafeChanges.map((change) => change.transformFn)
+      incomingChanges
     );
 
-    // ToDo: not sure of what the order should be here. I opted to place the merged unsafe transform at the beginning
-    const changes: SavedObjectsModelChange[] = [
-      { type: 'unsafe_transform', transformFn },
-      ...modelVersion.changes.filter((change) => change.type !== 'unsafe_transform'),
-    ];
-
-    return { ...modelVersion, changes };
+    return { ...modelVersion, changes: [{ type: 'unsafe_transform', transformFn }] };
   };
 
-function createMergedUnsafeTransformFn(
+function createMergedTransformFn(
   inputService: Readonly<EncryptedSavedObjectsService>,
   transformedService: Readonly<EncryptedSavedObjectsService>,
   shouldTransformIfDecryptionFails: boolean | undefined,
-  unsafeTransforms: SavedObjectModelUnsafeTransformFn[]
-): SavedObjectModelUnsafeTransformFn {
-  // merge all transforms
-  const mergedUnsafeTransform = mergeTransformFunctions(unsafeTransforms);
+  modelChanges: SavedObjectsModelChange[]
+): SavedObjectModelTransformationFn {
+  // This merges the functions from all 'data_backfill', 'data_removal', and 'unsafe_transform' changes
+  const mergedTransformFn = buildModelVersionTransformFn(modelChanges);
 
   return (document, context) => {
     const { type, id, originId } = document;
@@ -134,7 +126,7 @@ function createMergedUnsafeTransformFn(
     });
 
     // call merged transforms
-    const result = mergedUnsafeTransform(documentToTransform, context);
+    const result = mergedTransformFn(documentToTransform, context);
 
     // encrypt
     const transformedDoc = mapAttributes(result.document, (transformedAttributes) => {
