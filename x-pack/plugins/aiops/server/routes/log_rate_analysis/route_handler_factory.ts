@@ -139,7 +139,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
           }
 
           const { fieldCandidates, textFieldCandidates } = indexInfo;
-          let { fieldCandidatesCount } = indexInfo;
+          let fieldCandidatesCount = fieldCandidates.length;
 
           // Step 2: Significant Categories and Items
 

@@ -111,7 +111,7 @@ export const indexInfoHandlerFactory =
         end();
         return;
       }
-
-      return { fieldCandidates, fieldCandidatesCount, textFieldCandidates, totalDocCount };
     }
+
+    return { fieldCandidates, textFieldCandidates };
   };
