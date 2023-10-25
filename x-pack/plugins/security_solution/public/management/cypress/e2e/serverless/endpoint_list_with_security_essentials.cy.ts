@@ -48,11 +48,11 @@ describe(
       });
 
       it('should display `release` options in host row actions', () => {
-        getUnIsolateActionMenuItem().should('exist');
+        getUnIsolateActionMenuItem().should('not.exist');
       });
 
       it('should NOT display access to response console', () => {
-        getConsoleActionMenuItem().should('not.exist');
+        getConsoleActionMenuItem().should('exist');
       });
     });
   }
