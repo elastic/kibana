@@ -73,7 +73,8 @@
     "@kbn/no-data-page-plugin",
     "@kbn/rule-data-utils",
     "@kbn/global-search-plugin",
-    "@kbn/resizable-layout"
+    "@kbn/resizable-layout",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": [
     "target/**/*"
