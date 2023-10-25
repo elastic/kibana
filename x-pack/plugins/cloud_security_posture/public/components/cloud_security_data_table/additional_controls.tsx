@@ -10,9 +10,7 @@ import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { type DataView } from '@kbn/data-views-plugin/common';
 import numeral from '@elastic/numeral';
 import { FieldsSelectorModal } from './fields_selector';
-import { FindingsGroupBySelector } from '../../pages/configurations/layout/findings_group_by_selector';
 import { useStyles } from './use_styles';
-import { AnyAsyncThunk } from '@reduxjs/toolkit/dist/matchers';
 
 const formatNumber = (value: number) => {
   return value < 1000 ? value : numeral(value).format('0.0a');
@@ -33,7 +31,7 @@ export const AdditionalControls = ({
   columns: string[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
-  groupSelector: any;
+  groupSelector?: JSX.Element;
 }) => {
   const styles = useStyles();
 
@@ -43,9 +41,6 @@ export const AdditionalControls = ({
   const showModal = () => setIsFieldSelectorModalVisible(true);
 
   const GroupSelector = () => {
-    if (groupSelector === null) {
-      return null;
-    }
     if (groupSelector) {
       return (
         <EuiFlexItem grow={false} className={styles.groupBySelector}>
@@ -53,11 +48,8 @@ export const AdditionalControls = ({
         </EuiFlexItem>
       );
     }
-    return (
-      <EuiFlexItem grow={false} className={styles.groupBySelector}>
-        <FindingsGroupBySelector type="default" />;
-      </EuiFlexItem>
-    );
+
+    return null;
   };
 
   return (

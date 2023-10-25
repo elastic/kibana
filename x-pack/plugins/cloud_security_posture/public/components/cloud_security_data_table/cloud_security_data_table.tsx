@@ -73,6 +73,15 @@ interface CloudSecurityDataGridProps {
    */
   loadMore: () => void;
   'data-test-subj'?: string;
+  /**
+   * This is the component that will be rendered in the group selector.
+   * This component will receive the current group and a function to change the group.
+   */
+  groupSelector?: JSX.Element;
+  /**
+   * Height override for the data grid.
+   */
+  height?: number;
 }
 
 export const CloudSecurityDataTable = ({
@@ -87,6 +96,7 @@ export const CloudSecurityDataTable = ({
   title,
   customCellRenderer,
   groupSelector,
+  height,
   ...rest
 }: CloudSecurityDataGridProps) => {
   const {
@@ -222,7 +232,7 @@ export const CloudSecurityDataTable = ({
     // Change the height of the grid to fit the page
     // If there are filters, leave space for the filter bar
     // Todo: Replace this component with EuiAutoSizer
-    height: `calc(100vh - ${filters.length > 0 ? 443 : 403}px)`,
+    height: height ?? `calc(100vh - ${filters.length > 0 ? 443 : 403}px)`,
   };
 
   const rowHeightState =
