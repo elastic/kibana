@@ -883,21 +883,9 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
               "type": "keyword",
               "ignore_above": 2048
             },
-            "system": {
+            "env": {
               "type": "object",
-              "dynamic": true,
-              "properties": {
-                "process": {
-                  "type": "object",
-                  "dynamic": true,
-                  "properties": {
-                    "env": {
-                      "type": "object",
-                      "dynamic": true
-                    }
-                  }
-                }
-              }
+              "dynamic": true
             },
             "cpu": {
               "properties": {
@@ -1093,33 +1081,9 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                         }
                       }
                     },
-                    "system": {
+                    "percpu": {
                       "type": "object",
-                      "dynamic": true,
-                      "properties": {
-                        "process": {
-                          "type": "object",
-                          "dynamic": true,
-                          "properties": {
-                            "cgroup": {
-                              "type": "object",
-                              "dynamic": true,
-                              "properties": {
-                                "cpuacct": {
-                                  "type": "object",
-                                  "dynamic": true,
-                                  "properties": {
-                                    "percpu": {
-                                      "type": "object",
-                                      "dynamic": true
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
+                      "dynamic": true
                     }
                   }
                 },
@@ -1432,6 +1396,10 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 },
                 "failed": {
                   "type": "long"
+                },
+                "states": {
+                  "type": "object",
+                  "dynamic": true
                 }
               }
             },

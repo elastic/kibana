@@ -188,39 +188,22 @@ function _generateMappings(
 ): {
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
+  hasDynamicTemplateMappings: boolean;
 } {
   let hasNonDynamicTemplateMappings = false;
+  let hasDynamicTemplateMappings = false;
   const props: Properties = {};
 
-  function addParentObjectAsStaticProperty(pathMatch: string) {
-    let parentPath = pathMatch.replace(/\.\*$/, '');
-    let parentParts = parentPath.split('.');
-
-    interface Property {
-      type: string,
-      dynamic: boolean,
-      properties?: Properties,
-    }
-    let parent : Property = {
+  function addParentObjectAsStaticProperty(field : Field) {
+    let fieldProps = {
       type: 'object',
       dynamic: true,
-    }
+    };
 
-    props[parentParts[0]] = parent;
+    props[field.name] = fieldProps;
     hasNonDynamicTemplateMappings = true;
-
-    if (parentParts.length > 1) {
-      for (var part of parentParts.slice(1)) {
-        let next : Property = {
-          type: 'object',
-          dynamic: true,
-        }
-        parent.properties = ({[part]: next})
-        parent = next;
-      }
-    }
   }
-  
+
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
   if (fields) {
@@ -265,10 +248,13 @@ function _generateMappings(
               properties: dynProperties,
               runtimeProperties: fieldProps,
             });
+            hasDynamicTemplateMappings = true;
 
             // Add the parent object as static property, this is needed for
             // index templates not using `"dynamic": true`.
-            addParentObjectAsStaticProperty(pathMatch);
+            if (!field.name.includes('*')) {
+              addParentObjectAsStaticProperty(field);
+            }
           }
           return;
         }
@@ -367,10 +353,13 @@ function _generateMappings(
             matchingType,
             properties: dynProperties,
           });
+          hasDynamicTemplateMappings = true;
 
           // Add the parent object as static property, this is needed for
           // index templates not using `"dynamic": true`.
-          addParentObjectAsStaticProperty(pathMatch);
+          if (!field.name.includes('*')) {
+            addParentObjectAsStaticProperty(field);
+          }
         }
       } else {
         let fieldProps = getDefaultProperties(field);
@@ -383,14 +372,19 @@ function _generateMappings(
                 ? `${ctx.groupFieldName}.${field.name}`
                 : field.name,
             });
-            if (!mappings.hasNonDynamicTemplateMappings) {
+            if (mappings.hasNonDynamicTemplateMappings) {
+              fieldProps = {
+                properties: mappings.properties,
+                ...generateDynamicAndEnabled(field),
+              };
+            } else if (mappings.hasDynamicTemplateMappings) {
+              fieldProps = {
+                type: 'object',
+                dynamic: true,
+              };
+            } else {
               return;
             }
-
-            fieldProps = {
-              properties: mappings.properties,
-              ...generateDynamicAndEnabled(field),
-            };
             break;
           case 'group-nested':
             fieldProps = {
@@ -500,7 +494,7 @@ function _generateMappings(
     });
   }
 
-  return { properties: props, hasNonDynamicTemplateMappings };
+  return { properties: props, hasNonDynamicTemplateMappings, hasDynamicTemplateMappings };
 }
 
 function generateDynamicAndEnabled(field: Field) {
