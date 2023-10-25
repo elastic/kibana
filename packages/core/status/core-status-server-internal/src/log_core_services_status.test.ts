@@ -57,13 +57,15 @@ describe('logCoreStatusChanges', () => {
 
     await delay();
 
-    expect(l.get).toBeCalledTimes(2);
+    expect(l.get).toBeCalledTimes(3);
     expect(l.get).nthCalledWith(1, 'elasticsearch');
     expect(l.get).nthCalledWith(2, 'savedObjects');
-    expect(l.error).not.toBeCalled();
+    expect(l.get).nthCalledWith(3, 'savedObjects');
     expect(l.warn).not.toBeCalled();
+    expect(l.error).toBeCalledTimes(1);
     expect(l.info).toBeCalledTimes(2);
     expect(l.info).nthCalledWith(1, 'elasticsearch service is now available: Avail!');
+    expect(l.error).nthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
     expect(l.info).nthCalledWith(2, 'savedObjects service is now available: Avail!');
   });
 
@@ -81,12 +83,14 @@ describe('logCoreStatusChanges', () => {
 
     await delay();
 
-    expect(l.get).toBeCalledTimes(1);
+    expect(l.get).toBeCalledTimes(2);
     expect(l.get).nthCalledWith(1, 'elasticsearch');
-    expect(l.error).not.toBeCalled();
+    expect(l.get).nthCalledWith(2, 'savedObjects');
     expect(l.warn).not.toBeCalled();
+    expect(l.error).toBeCalledTimes(1);
     expect(l.info).toBeCalledTimes(1);
     expect(l.info).nthCalledWith(1, 'elasticsearch service is now available: Avail!');
+    expect(l.error).nthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
   });
 
   it('throttles and aggregates messages of plugins that emit too often', async () => {
@@ -131,13 +135,14 @@ describe('logCoreStatusChanges', () => {
     expect(l.get).toBeCalledWith('savedObjects');
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.info).toHaveBeenCalledTimes(4);
-    expect(l.error).toHaveBeenCalledTimes(2);
+    expect(l.error).toHaveBeenCalledTimes(3);
+    expect(l.error).nthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
     expect(l.info).nthCalledWith(1, 'elasticsearch service is now available: Avail!');
-    expect(l.error).nthCalledWith(1, 'elasticsearch service is now unavailable: Unavail!');
+    expect(l.error).nthCalledWith(2, 'elasticsearch service is now unavailable: Unavail!');
     expect(l.info).nthCalledWith(2, 'elasticsearch service is now available: Avail!');
     expect(l.info).nthCalledWith(3, 'savedObjects service is now available: Avail!');
     expect(l.error).nthCalledWith(
-      2,
+      3,
       'elasticsearch service is now unavailable: Unavail! (repeated 10 times)'
     );
     expect(l.info).nthCalledWith(
@@ -224,18 +229,19 @@ describe('logCoreStatusChanges', () => {
     });
 
     expect(l.get).toBeCalledWith('elasticsearch');
-    expect(l.get).not.toBeCalledWith('savedObjects');
+    expect(l.get).toBeCalledWith('savedObjects');
     expect(l.info).toHaveBeenCalledTimes(5);
-    expect(l.error).toHaveBeenCalledTimes(3);
+    expect(l.error).toHaveBeenCalledTimes(4);
     expect(l.warn).toHaveBeenCalledTimes(1);
     // the first 3 messages are the max allowed per interval
     expect(l.info).nthCalledWith(1, 'elasticsearch service is now available: attempt #1');
-    expect(l.error).nthCalledWith(1, 'elasticsearch service is now unavailable: attempt #2');
+    expect(l.error).nthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
+    expect(l.error).nthCalledWith(2, 'elasticsearch service is now unavailable: attempt #2');
     expect(l.info).nthCalledWith(2, 'elasticsearch service is now available: attempt #3');
     // the next 4 messages are throttled (emitted after 10ms)
-    expect(l.error).nthCalledWith(2, 'elasticsearch service is now unavailable: attempt #4');
+    expect(l.error).nthCalledWith(3, 'elasticsearch service is now unavailable: attempt #4');
     expect(l.info).nthCalledWith(3, 'elasticsearch service is now available: attempt #5');
-    expect(l.error).nthCalledWith(3, 'elasticsearch service is now unavailable: attempt #6');
+    expect(l.error).nthCalledWith(4, 'elasticsearch service is now unavailable: attempt #6');
     expect(l.info).nthCalledWith(4, 'elasticsearch service is now available: attempt #7');
 
     // these messages exceed the maxThrottledMessages quota, truncated + warning

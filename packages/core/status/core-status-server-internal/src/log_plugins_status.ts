@@ -137,7 +137,7 @@ const getPluginUpdates = (
   Object.entries(next)
     .filter(([name, pluginStatus]) => {
       const currentLevel = pluginStatus.level;
-      const previousLevel = previous[name]?.level ?? ServiceStatusLevels.unavailable;
+      const previousLevel = previous[name]?.level;
       return pluginStatus.reported && currentLevel !== previousLevel;
     })
     .map(([name, pluginStatus]) => ({ ...pluginStatus, name }));

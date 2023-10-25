@@ -142,7 +142,7 @@ const getServiceUpdates = ({
   for (name in current) {
     if (Object.hasOwn(current, name)) {
       const currentLevel = current[name].level;
-      const previousLevel = previous?.[name].level ?? ServiceStatusLevels.unavailable;
+      const previousLevel = previous?.[name].level;
 
       if (currentLevel !== previousLevel) {
         updated.push({ ...current[name], name });
