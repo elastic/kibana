@@ -30,7 +30,7 @@ export const aiopsLogRateAnalysisSchema = schema.object({
       loaded: schema.maybe(schema.number()),
       remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
       // TODO Improve schema
-      significantTerms: schema.maybe(schema.arrayOf(schema.any())),
+      significantItems: schema.maybe(schema.arrayOf(schema.any())),
       regroupOnly: schema.maybe(schema.boolean()),
     })
   ),

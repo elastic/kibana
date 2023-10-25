@@ -53,26 +53,26 @@ export default ({ getService }: FtrProviderContext) => {
             expect(typeof d.type).to.be('string');
           });
 
-          const addSignificantTermsActions = data.filter(
-            (d) => d.type === testData.expected.significantTermFilter
+          const addSignificantItemsActions = data.filter(
+            (d) => d.type === testData.expected.significantItemFilter
           );
-          expect(addSignificantTermsActions.length).to.greaterThan(0);
+          expect(addSignificantItemsActions.length).to.greaterThan(0);
 
-          const significantTerms = orderBy(
-            addSignificantTermsActions.flatMap((d) => d.payload),
+          const significantItems = orderBy(
+            addSignificantItemsActions.flatMap((d) => d.payload),
             ['doc_count'],
             ['desc']
           );
 
-          expect(significantTerms).to.eql(
-            testData.expected.significantTerms,
-            'Significant terms do not match expected values.'
+          expect(significantItems).to.eql(
+            testData.expected.significantItems,
+            'Significant items do not match expected values.'
           );
 
           const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
           const histograms = histogramActions.flatMap((d) => d.payload);
-          // for each significant term we should get a histogram
-          expect(histogramActions.length).to.be(significantTerms.length);
+          // for each significant item we should get a histogram
+          expect(histogramActions.length).to.be(significantItems.length);
           // each histogram should have a length of 20 items.
           histograms.forEach((h, index) => {
             expect(h.histogram.length).to.be(20);
@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
             (d) => d.type === testData.expected.groupHistogramFilter
           );
           const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
-          // for each significant terms group we should get a histogram
+          // for each significant items group we should get a histogram
           expect(groupHistograms.length).to.be(groups.length);
           // each histogram should have a length of 20 items.
           groupHistograms.forEach((h, index) => {

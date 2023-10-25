@@ -10,7 +10,7 @@ import { uniq } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
-import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 
 import type { Category } from '../../../common/api/log_categorization/types';
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
@@ -83,7 +83,7 @@ export const fetchSignificantCategories = async (
 
   if (categoriesOverall.length !== fieldNames.length) return [];
 
-  const significantCategories: SignificantTerm[] = [];
+  const significantCategories: SignificantItem[] = [];
 
   // Using for...of to allow `await` within the loop.
   for (const [i, fieldName] of fieldNames.entries()) {
@@ -152,7 +152,7 @@ export const fetchSignificantCategories = async (
           score,
           pValue,
           normalizedScore: getNormalizedScore(score),
-          type: SIGNIFICANT_TERM_TYPE.LOG_PATTERN,
+          type: SIGNIFICANT_ITEM_TYPE.LOG_PATTERN,
         });
       }
     });

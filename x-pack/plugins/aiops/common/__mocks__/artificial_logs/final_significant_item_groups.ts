@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 
-export const finalSignificantTermGroups: SignificantTermGroup[] = [
+export const finalSignificantItemGroups: SignificantItemGroup[] = [
   {
     docCount: 632,
     group: [

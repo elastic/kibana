@@ -16,22 +16,22 @@ import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type {
-  SignificantTerm,
-  SignificantTermGroup,
+  SignificantItem,
+  SignificantItemGroup,
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
-import { SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { RANDOM_SAMPLER_SEED, AIOPS_TELEMETRY_ID } from '../../common/constants';
 import {
-  addSignificantTermsAction,
-  addSignificantTermsGroupAction,
-  addSignificantTermsGroupHistogramAction,
-  addSignificantTermsHistogramAction,
+  addSignificantItemsAction,
+  addSignificantItemsGroupAction,
+  addSignificantItemsGroupHistogramAction,
+  addSignificantItemsHistogramAction,
   aiopsLogRateAnalysisSchema,
   addErrorAction,
   pingAction,
@@ -56,7 +56,7 @@ import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { fetchTerms2CategoriesCounts } from './queries/fetch_terms_2_categories_counts';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
-import { getSignificantTermGroups } from './queries/get_significant_term_groups';
+import { getSignificantItemGroups } from './queries/get_significant_item_groups';
 import { trackAIOpsRouteUsage } from '../lib/track_route_usage';
 
 // 10s ping frequency to keep the stream alive.
@@ -297,10 +297,10 @@ export const defineLogRateAnalysisRoute = (
               // This will store the combined count of detected significant log patterns and keywords
               let fieldValuePairsCount = 0;
 
-              const significantCategories: SignificantTerm[] = request.body.overrides
-                ?.significantTerms
-                ? request.body.overrides?.significantTerms.filter(
-                    (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
+              const significantCategories: SignificantItem[] = request.body.overrides
+                ?.significantItems
+                ? request.body.overrides?.significantItems.filter(
+                    (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
                   )
                 : [];
 
@@ -319,13 +319,13 @@ export const defineLogRateAnalysisRoute = (
                 );
 
                 if (significantCategories.length > 0) {
-                  push(addSignificantTermsAction(significantCategories));
+                  push(addSignificantItemsAction(significantCategories));
                 }
               }
 
-              const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
-                ? request.body.overrides?.significantTerms.filter(
-                    (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
+              const significantTerms: SignificantItem[] = request.body.overrides?.significantItems
+                ? request.body.overrides?.significantItems.filter(
+                    (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
                   )
                 : [];
 
@@ -387,7 +387,7 @@ export const defineLogRateAnalysisRoute = (
                   });
                   significantTerms.push(...pValues);
 
-                  push(addSignificantTermsAction(pValues));
+                  push(addSignificantItemsAction(pValues));
                 }
 
                 push(
@@ -426,7 +426,7 @@ export const defineLogRateAnalysisRoute = (
               fieldValuePairsCount = significantCategories.length + significantTerms.length;
 
               if (fieldValuePairsCount === 0) {
-                logDebugMessage('Stopping analysis, did not find significant terms.');
+                logDebugMessage('Stopping analysis, did not find significant items.');
                 endWithUpdatedLoadingState();
                 return;
               }
@@ -549,7 +549,7 @@ export const defineLogRateAnalysisRoute = (
                   }
 
                   if (fields.length > 0 && itemSets.length > 0) {
-                    const significantTermGroups = getSignificantTermGroups(
+                    const significantItemGroups = getSignificantItemGroups(
                       itemSets,
                       [...significantTerms, ...significantCategories],
                       fields
@@ -557,10 +557,10 @@ export const defineLogRateAnalysisRoute = (
 
                     // We'll find out if there's at least one group with at least two items,
                     // only then will we return the groups to the clients and make the grouping option available.
-                    const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
+                    const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
 
                     if (maxItems > 1) {
-                      push(addSignificantTermsGroupAction(significantTermGroups));
+                      push(addSignificantItemsGroupAction(significantItemGroups));
                     }
 
                     loaded += PROGRESS_STEP_GROUPING;
@@ -573,9 +573,9 @@ export const defineLogRateAnalysisRoute = (
                       return;
                     }
 
-                    logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
+                    logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
 
-                    const groupHistogramQueue = queue(async function (cpg: SignificantTermGroup) {
+                    const groupHistogramQueue = queue(async function (cpg: SignificantItemGroup) {
                       if (shouldStop) {
                         logDebugMessage('shouldStop abort fetching group histograms.');
                         groupHistogramQueue.kill();
@@ -632,13 +632,13 @@ export const defineLogRateAnalysisRoute = (
                             return {
                               key: o.key,
                               key_as_string: o.key_as_string ?? '',
-                              doc_count_significant_term: current.doc_count,
+                              doc_count_significant_item: current.doc_count,
                               doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                             };
                           }) ?? [];
 
                         push(
-                          addSignificantTermsGroupHistogramAction([
+                          addSignificantItemsGroupHistogramAction([
                             {
                               id: cpg.id,
                               histogram,
@@ -648,7 +648,7 @@ export const defineLogRateAnalysisRoute = (
                       }
                     }, MAX_CONCURRENT_QUERIES);
 
-                    groupHistogramQueue.push(significantTermGroups);
+                    groupHistogramQueue.push(significantItemGroups);
                     await groupHistogramQueue.drain();
                   }
                 } catch (e) {
@@ -671,7 +671,7 @@ export const defineLogRateAnalysisRoute = (
                 overallTimeSeries !== undefined &&
                 !request.body.overrides?.regroupOnly
               ) {
-                const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
+                const fieldValueHistogramQueue = queue(async function (cp: SignificantItem) {
                   if (shouldStop) {
                     logDebugMessage('shouldStop abort fetching field/value histograms.');
                     fieldValueHistogramQueue.kill();
@@ -734,7 +734,7 @@ export const defineLogRateAnalysisRoute = (
                         return {
                           key: o.key,
                           key_as_string: o.key_as_string ?? '',
-                          doc_count_significant_term: current.doc_count,
+                          doc_count_significant_item: current.doc_count,
                           doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                         };
                       }) ?? [];
@@ -744,7 +744,7 @@ export const defineLogRateAnalysisRoute = (
                     loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                     pushHistogramDataLoadingState();
                     push(
-                      addSignificantTermsHistogramAction([
+                      addSignificantItemsHistogramAction([
                         {
                           fieldName,
                           fieldValue,
@@ -826,7 +826,7 @@ export const defineLogRateAnalysisRoute = (
                       return {
                         key: o.key,
                         key_as_string: o.key_as_string ?? '',
-                        doc_count_significant_term: current.doc_count,
+                        doc_count_significant_item: current.doc_count,
                         doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                       };
                     }) ?? [];
@@ -836,7 +836,7 @@ export const defineLogRateAnalysisRoute = (
                   loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                   pushHistogramDataLoadingState();
                   push(
-                    addSignificantTermsHistogramAction([
+                    addSignificantItemsHistogramAction([
                       {
                         fieldName,
                         fieldValue,

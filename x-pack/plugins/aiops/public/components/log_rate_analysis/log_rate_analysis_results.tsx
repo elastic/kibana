@@ -31,7 +31,7 @@ import {
 } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -80,9 +80,9 @@ export interface LogRateAnalysisResultsData {
   /** The type of analysis, whether it's a spike or dip */
   analysisType: LogRateAnalysisType;
   /** Statistically significant field/value items. */
-  significantTerms: SignificantTerm[];
+  significantItems: SignificantItem[];
   /** Statistically significant groups of field/value items. */
-  significantTermsGroups: SignificantTermGroup[];
+  significantItemsGroups: SignificantItemGroup[];
 }
 
 /**
@@ -164,7 +164,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setOverrides({
       loaded: 0,
       remainingFieldCandidates: [],
-      significantTerms: data.significantTerms.filter((d) => !skippedFields.includes(d.fieldName)),
+      significantItems: data.significantItems.filter((d) => !skippedFields.includes(d.fieldName)),
       regroupOnly: true,
     });
     startHandler(true, false);
@@ -206,10 +206,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
-  const { significantTerms } = data;
+  const { significantItems } = data;
   useEffect(
-    () => setUniqueFieldNames(uniq(significantTerms.map((d) => d.fieldName)).sort()),
-    [significantTerms]
+    () => setUniqueFieldNames(uniq(significantItems.map((d) => d.fieldName)).sort()),
+    [significantItems]
   );
 
   useEffect(() => {
@@ -221,14 +221,14 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         ((Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
           groupsMissing)
       ) {
-        setOverrides({ loaded, remainingFieldCandidates, significantTerms: data.significantTerms });
+        setOverrides({ loaded, remainingFieldCandidates, significantItems: data.significantItems });
       } else {
         setOverrides(undefined);
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
             analysisType,
-            significantTerms: data.significantTerms,
-            significantTermsGroups: data.significantTermsGroups,
+            significantItems: data.significantItems,
+            significantItemsGroups: data.significantItemsGroups,
           });
         }
       }
@@ -239,7 +239,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
-  // significant terms on analysis refresh.
+  // significant items on analysis refresh.
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
       setOverrides(undefined);
@@ -277,8 +277,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   }, []);
 
   const groupTableItems = useMemo(
-    () => getGroupTableItems(data.significantTermsGroups),
-    [data.significantTermsGroups]
+    () => getGroupTableItems(data.significantItemsGroups),
+    [data.significantItemsGroups]
   );
 
   const shouldRerunAnalysis = useMemo(
@@ -288,7 +288,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     [currentAnalysisWindowParameters, windowParameters]
   );
 
-  const showLogRateAnalysisResultsTable = data?.significantTerms.length > 0;
+  const showLogRateAnalysisResultsTable = data?.significantItems.length > 0;
   const groupItemCount = groupTableItems.reduce((p, c) => {
     return p + c.groupItemsSortedByUniqueness.length;
   }, 0);
@@ -475,7 +475,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       >
         {showLogRateAnalysisResultsTable && groupResults ? (
           <LogRateAnalysisResultsGroupsTable
-            significantTerms={data.significantTerms}
+            significantItems={data.significantItems}
             groupTableItems={groupTableItems}
             loading={isRunning}
             dataView={dataView}
@@ -487,7 +487,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
           <LogRateAnalysisResultsTable
-            significantTerms={data.significantTerms}
+            significantItems={data.significantItems}
             loading={isRunning}
             dataView={dataView}
             timeRangeMs={timeRangeMs}

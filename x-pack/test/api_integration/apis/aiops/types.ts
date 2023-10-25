@@ -6,7 +6,7 @@
  */
 
 import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
 
@@ -22,13 +22,13 @@ export interface TestData {
     actionsLengthGroupOnly: number;
     noIndexChunksLength: number;
     noIndexActionsLength: number;
-    significantTermFilter: 'add_significant_terms';
-    groupFilter: 'add_significant_terms_group';
-    groupHistogramFilter: 'add_significant_terms_group_histogram';
-    histogramFilter: 'add_significant_terms_histogram';
+    significantItemFilter: 'add_significant_items';
+    groupFilter: 'add_significant_items_group';
+    groupHistogramFilter: 'add_significant_items_group_histogram';
+    histogramFilter: 'add_significant_items_histogram';
     errorFilter: 'add_error';
-    significantTerms: SignificantTerm[];
-    groups: SignificantTermGroup[];
+    significantItems: SignificantItem[];
+    groups: SignificantItemGroup[];
     histogramLength: number;
   };
 }

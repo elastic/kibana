@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { significantTermGroups } from '../../../common/__mocks__/artificial_logs/significant_term_groups';
+import { significantItemGroups } from '../../../common/__mocks__/artificial_logs/significant_item_groups';
 import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { duplicateIdentifier } from './duplicate_identifier';
@@ -13,27 +13,27 @@ import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplic
 import { groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
-import { getMissingSignificantTerms } from './get_missing_significant_terms';
+import { getMissingSignificantItems } from './get_missing_significant_items';
 
-describe('getMissingSignificantTerms', () => {
-  it('get missing significant terms', () => {
-    const groupedSignificantTerms = groupDuplicates(significantTerms, duplicateIdentifier).filter(
+describe('getMissingSignificantItems', () => {
+  it('get missing significant items', () => {
+    const groupedSignificantItems = groupDuplicates(significantTerms, duplicateIdentifier).filter(
       (g) => g.group.length > 1
     );
 
-    const fieldValuePairCounts = getFieldValuePairCounts(significantTermGroups);
-    const markedDuplicates = getMarkedDuplicates(significantTermGroups, fieldValuePairCounts);
+    const fieldValuePairCounts = getFieldValuePairCounts(significantItemGroups);
+    const markedDuplicates = getMarkedDuplicates(significantItemGroups, fieldValuePairCounts);
     const groupsWithReaddedDuplicates = getGroupsWithReaddedDuplicates(
       markedDuplicates,
-      groupedSignificantTerms
+      groupedSignificantItems
     );
 
-    const missingSignificantTerms = getMissingSignificantTerms(
+    const missingSignificantItems = getMissingSignificantItems(
       significantTerms,
       groupsWithReaddedDuplicates
     );
 
-    expect(missingSignificantTerms).toEqual([
+    expect(missingSignificantItems).toEqual([
       {
         key: 'user:Peter',
         type: 'keyword',

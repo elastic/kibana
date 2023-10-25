@@ -6,10 +6,10 @@
  */
 
 export {
-  addSignificantTermsAction,
-  addSignificantTermsGroupAction,
-  addSignificantTermsGroupHistogramAction,
-  addSignificantTermsHistogramAction,
+  addSignificantItemsAction,
+  addSignificantItemsGroupAction,
+  addSignificantItemsGroupHistogramAction,
+  addSignificantItemsHistogramAction,
   addErrorAction,
   pingAction,
   resetAllAction,

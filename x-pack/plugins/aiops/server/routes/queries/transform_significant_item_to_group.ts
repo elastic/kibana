@@ -6,17 +6,17 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
-import type { SignificantTermDuplicateGroup } from '../../../common/types';
+import type { SignificantItemDuplicateGroup } from '../../../common/types';
 
-export function transformSignificantTermToGroup(
-  significantTerm: SignificantTerm,
-  groupedSignificantTerms: SignificantTermDuplicateGroup[]
-): SignificantTermGroup {
-  const { key, type, fieldName, fieldValue, doc_count: docCount, pValue } = significantTerm;
+export function transformSignificantItemToGroup(
+  significantItem: SignificantItem,
+  groupedSignificantItems: SignificantItemDuplicateGroup[]
+): SignificantItemGroup {
+  const { key, type, fieldName, fieldValue, doc_count: docCount, pValue } = significantItem;
 
-  const duplicates = groupedSignificantTerms.find((d) =>
+  const duplicates = groupedSignificantItems.find((d) =>
     d.group.some((dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue)
   );
 

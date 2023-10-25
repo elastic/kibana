@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
       const overrides = {
         loaded: 0,
         remainingFieldCandidates: [],
-        significantTerms: testData.expected.significantTerms,
+        significantItems: testData.expected.significantItems,
         regroupOnly: true,
       };
 
@@ -61,16 +61,16 @@ export default ({ getService }: FtrProviderContext) => {
             expect(typeof d.type).to.be('string');
           });
 
-          const addSignificantTermsActions = data.filter(
-            (d) => d.type === testData.expected.significantTermFilter
+          const addSignificantItemsActions = data.filter(
+            (d) => d.type === testData.expected.significantItemFilter
           );
-          expect(addSignificantTermsActions.length).to.eql(
+          expect(addSignificantItemsActions.length).to.eql(
             0,
-            `Expected significant terms actions to be 0, got ${addSignificantTermsActions.length}`
+            `Expected significant items actions to be 0, got ${addSignificantItemsActions.length}`
           );
 
           const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
-          // for each significant term we should get a histogram
+          // for each significant item we should get a histogram
           expect(histogramActions.length).to.eql(
             0,
             `Expected histogram actions to be 0, got ${histogramActions.length}`
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
             (d) => d.type === testData.expected.groupHistogramFilter
           );
           const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
-          // for each significant terms group we should get a histogram
+          // for each significant items group we should get a histogram
           expect(groupHistograms.length).to.be(groups.length);
           // each histogram should have a length of 20 items.
           groupHistograms.forEach((h, index) => {

@@ -10,20 +10,20 @@ import { orderBy } from 'lodash';
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
 import { frequentItemSets } from '../../../common/__mocks__/artificial_logs/frequent_item_sets';
 import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
-import { finalSignificantTermGroups } from '../../../common/__mocks__/artificial_logs/final_significant_term_groups';
+import { finalSignificantItemGroups } from '../../../common/__mocks__/artificial_logs/final_significant_item_groups';
 
-import { getSignificantTermGroups } from './get_significant_term_groups';
+import { getSignificantItemGroups } from './get_significant_item_groups';
 
-describe('getSignificantTermGroups', () => {
-  it('gets significant terms groups', () => {
-    const significantTermGroups = getSignificantTermGroups(
+describe('getSignificantItemGroups', () => {
+  it('gets significant items groups', () => {
+    const significantItemGroups = getSignificantItemGroups(
       frequentItemSets,
       significantTerms,
       fields
     );
 
-    expect(orderBy(significantTermGroups, ['docCount'])).toEqual(
-      orderBy(finalSignificantTermGroups, ['docCount'])
+    expect(orderBy(significantItemGroups, ['docCount'])).toEqual(
+      orderBy(finalSignificantItemGroups, ['docCount'])
     );
   });
 });

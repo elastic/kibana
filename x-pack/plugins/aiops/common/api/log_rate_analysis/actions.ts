@@ -6,17 +6,17 @@
  */
 
 import type {
-  SignificantTerm,
-  SignificantTermHistogram,
-  SignificantTermGroup,
-  SignificantTermGroupHistogram,
+  SignificantItem,
+  SignificantItemHistogram,
+  SignificantItemGroup,
+  SignificantItemGroupHistogram,
 } from '@kbn/ml-agg-utils';
 
 export const API_ACTION_NAME = {
-  ADD_SIGNIFICANT_TERMS: 'add_significant_terms',
-  ADD_SIGNIFICANT_TERMS_HISTOGRAM: 'add_significant_terms_histogram',
-  ADD_SIGNIFICANT_TERMS_GROUP: 'add_significant_terms_group',
-  ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM: 'add_significant_terms_group_histogram',
+  ADD_SIGNIFICANT_ITEMS: 'add_significant_items',
+  ADD_SIGNIFICANT_ITEMS_HISTOGRAM: 'add_significant_items_histogram',
+  ADD_SIGNIFICANT_ITEMS_GROUP: 'add_significant_items_group',
+  ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM: 'add_significant_items_group_histogram',
   ADD_ERROR: 'add_error',
   PING: 'ping',
   RESET_ALL: 'reset_all',
@@ -26,58 +26,58 @@ export const API_ACTION_NAME = {
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
 
-interface ApiActionAddSignificantTerms {
-  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS;
-  payload: SignificantTerm[];
+interface ApiActionAddSignificantItems {
+  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS;
+  payload: SignificantItem[];
 }
 
-export function addSignificantTermsAction(
-  payload: ApiActionAddSignificantTerms['payload']
-): ApiActionAddSignificantTerms {
+export function addSignificantItemsAction(
+  payload: ApiActionAddSignificantItems['payload']
+): ApiActionAddSignificantItems {
   return {
-    type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS,
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS,
     payload,
   };
 }
 
-interface ApiActionAddSignificantTermsHistogram {
-  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM;
-  payload: SignificantTermHistogram[];
+interface ApiActionAddSignificantItemsHistogram {
+  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM;
+  payload: SignificantItemHistogram[];
 }
 
-export function addSignificantTermsHistogramAction(
-  payload: ApiActionAddSignificantTermsHistogram['payload']
-): ApiActionAddSignificantTermsHistogram {
+export function addSignificantItemsHistogramAction(
+  payload: ApiActionAddSignificantItemsHistogram['payload']
+): ApiActionAddSignificantItemsHistogram {
   return {
-    type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM,
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM,
     payload,
   };
 }
 
-interface ApiActionAddSignificantTermsGroup {
-  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP;
-  payload: SignificantTermGroup[];
+interface ApiActionAddSignificantItemsGroup {
+  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP;
+  payload: SignificantItemGroup[];
 }
 
-export function addSignificantTermsGroupAction(
-  payload: ApiActionAddSignificantTermsGroup['payload']
+export function addSignificantItemsGroupAction(
+  payload: ApiActionAddSignificantItemsGroup['payload']
 ) {
   return {
-    type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP,
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP,
     payload,
   };
 }
 
-interface ApiActionAddSignificantTermsGroupHistogram {
-  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM;
-  payload: SignificantTermGroupHistogram[];
+interface ApiActionAddSignificantItemsGroupHistogram {
+  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM;
+  payload: SignificantItemGroupHistogram[];
 }
 
-export function addSignificantTermsGroupHistogramAction(
-  payload: ApiActionAddSignificantTermsGroupHistogram['payload']
-): ApiActionAddSignificantTermsGroupHistogram {
+export function addSignificantItemsGroupHistogramAction(
+  payload: ApiActionAddSignificantItemsGroupHistogram['payload']
+): ApiActionAddSignificantItemsGroupHistogram {
   return {
-    type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM,
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM,
     payload,
   };
 }
@@ -149,10 +149,10 @@ export function updateLoadingStateAction(
 }
 
 export type AiopsLogRateAnalysisApiAction =
-  | ApiActionAddSignificantTerms
-  | ApiActionAddSignificantTermsGroup
-  | ApiActionAddSignificantTermsHistogram
-  | ApiActionAddSignificantTermsGroupHistogram
+  | ApiActionAddSignificantItems
+  | ApiActionAddSignificantItemsGroup
+  | ApiActionAddSignificantItemsHistogram
+  | ApiActionAddSignificantItemsGroupHistogram
   | ApiActionAddError
   | ApiActionPing
   | ApiActionResetAll

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 
-export const significantTermGroups: SignificantTermGroup[] = [
+export const significantItemGroups: SignificantItemGroup[] = [
   {
     id: 'group-1',
     group: [
