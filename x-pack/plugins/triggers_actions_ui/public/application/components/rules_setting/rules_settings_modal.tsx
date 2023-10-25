@@ -6,9 +6,7 @@
  */
 
 import React, { memo, useCallback, useState, useRef } from 'react';
-import {
-  RulesSettingsFlappingProperties,
-} from '@kbn/alerting-plugin/common';
+import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -230,20 +228,20 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     key: keyof RulesSettingsFlappingProperties,
     value: number | boolean
   ) => {
-      if (!flappingSettings) {
-        return;
-      }
-      const newSettings = {
-        ...flappingSettings,
-        [key]: value,
-      };
-      setFlappingSettings({
-        ...newSettings,
-        statusChangeThreshold: Math.min(
-          newSettings.lookBackWindow,
-          newSettings.statusChangeThreshold
-        ),
-      });
+    if (!flappingSettings) {
+      return;
+    }
+    const newSettings = {
+      ...flappingSettings,
+      [key]: value,
+    };
+    setFlappingSettings({
+      ...newSettings,
+      statusChangeThreshold: Math.min(
+        newSettings.lookBackWindow,
+        newSettings.statusChangeThreshold
+      ),
+    });
   };
 
   const handleSave = () => {
