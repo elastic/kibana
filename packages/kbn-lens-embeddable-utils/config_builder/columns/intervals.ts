@@ -13,9 +13,9 @@ export const getIntervalsColumn = ({
                                        options,
                                    }: {
     field: string;
-    options?: any;
+    options: RangeIndexPatternColumn['params'];
 }): RangeIndexPatternColumn => {
-    const { intervals = [], ...params } = options ?? {};
+    const { ranges = [], ...params } = options ?? {};
     return {
             label: `Intervals of ${field}`,
       dataType: 'number',
@@ -24,6 +24,7 @@ export const getIntervalsColumn = ({
       sourceField: field,
       isBucketed: true,
       params: {
+        ranges,
         ...params,
       },
     };

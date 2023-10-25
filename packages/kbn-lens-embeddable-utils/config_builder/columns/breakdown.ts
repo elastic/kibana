@@ -63,12 +63,24 @@ export const getBreakdownColumn = ({
     case 'intervals':
       const intervalOptions = config as LensBreakdownIntervalsConfig;
       return getIntervalsColumn({ field, options: {
-        granularity: intervalOptions.granularity
+        type: 'range',
+        ranges: [{
+          from: 0,
+          to: 1000,
+          label: '',
+        }],
+        maxBars: intervalOptions.granularity || 'auto',
       }});
     case 'filters':
       const filterOptions = config as LensBreakdownFiltersConfig;
       return getFiltersColumn({ options: {
-        filters: filterOptions.filters
+        filters: filterOptions.filters.map(f => ({
+          label: f.label || '',
+          input: {
+            language: 'kql',
+            query: f.filter
+          },
+        })),
       }});
   }
 };

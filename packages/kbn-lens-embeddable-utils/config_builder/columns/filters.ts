@@ -11,7 +11,7 @@ import { FiltersIndexPatternColumn } from "@kbn/lens-plugin/public";
 export const getFiltersColumn = ({
                                        options,
                                    }: {
-    options?: any;
+    options?: FiltersIndexPatternColumn['params'];
 }): FiltersIndexPatternColumn => {
     const { filters = [], ...params } = options ?? {};
     return {
