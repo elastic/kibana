@@ -31,7 +31,7 @@ import {
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
+describe.only('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
@@ -66,8 +66,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169702
-  describe.skip('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
+  describe('Add and upgrade integration', { tags: ['@ess', '@skipInServerless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
@@ -82,7 +81,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cleanupAgentPolicy(policyId);
     });
 
-    it('should add the old integration and be able to upgrade it', { tags: '@ess' }, () => {
+    it('should add the old integration and be able to upgrade it', () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
       policyContainsIntegration(integrationName, policyName);

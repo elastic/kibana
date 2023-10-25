@@ -14,10 +14,10 @@ import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Add to Cases', () => {
+describe.only('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
-  before(() => {
+  beforeEach(() => {
     loadLiveQuery({
       agent_all: true,
       query: "SELECT * FROM os_version where name='Ubuntu';",

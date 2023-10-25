@@ -10,7 +10,7 @@ import { checkActionItemsInResults, loadRuleAlerts } from '../../tasks/live_quer
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe('Alert Flyout Automated Action Results', () => {
+describe.only('Alert Flyout Automated Action Results', () => {
   let ruleId: string;
 
   beforeEach(() => {
