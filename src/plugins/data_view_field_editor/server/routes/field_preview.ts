@@ -45,7 +45,13 @@ const geoShape = schema.object({
   coordinates: schema.arrayOf(schema.any()),
 });
 
-const valueSchema = schema.oneOf([schema.boolean(), schema.number(), schema.string(), geoPoint, geoShape]);
+const valueSchema = schema.oneOf([
+  schema.boolean(),
+  schema.number(),
+  schema.string(),
+  geoPoint,
+  geoShape,
+]);
 
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
   router.versioned.post({ path, access: 'internal' }).addVersion(
