@@ -272,8 +272,21 @@ describe('rules_list component empty', () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
     renderWithProviders(<RulesList />);
     expect(
-      await screen.findByText('One or more maintenance windows are running')
+      await screen.findByText(
+        'Rule notifications are stopped while maintenance windows are running.'
+      )
     ).toBeInTheDocument();
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides MaintenanceWindowCallout if filterConsumers does not match the running maintenance window's category", async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      { ...RUNNING_MAINTENANCE_WINDOW_1, categoryIds: ['securitySolution'] },
+    ]);
+    renderWithProviders(<RulesList filterConsumers={['observability']} />);
+    await expect(
+      screen.findByText('Rule notifications are stopped while maintenance windows are running.')
+    ).rejects.toThrow();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
