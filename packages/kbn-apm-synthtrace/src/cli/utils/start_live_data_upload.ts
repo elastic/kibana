@@ -22,7 +22,7 @@ export async function startLiveDataUpload({
   runOptions: RunOptions;
   start: Date;
 }) {
-  const file = runOptions.file;
+  const file = runOptions.file as string;
 
   const { logger, apmEsClient } = await bootstrap(runOptions);
 

@@ -34,7 +34,7 @@ async function start() {
     version,
   });
 
-  const file = runOptions.file;
+  const file = runOptions.file as string;
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
