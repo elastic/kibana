@@ -13,8 +13,7 @@ import { login } from '../../tasks/login';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 import { changeAlertsFilter } from '../../tasks/alerts';
 
-// FLAKY: https://github.com/elastic/kibana/issues/168340
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     tags: [
@@ -43,7 +42,7 @@ describe.skip(
       disableExpandableFlyoutAdvancedSettings();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168427
+    // FLAKY: https://github.com/elastic/kibana/issues/169828
     describe.skip('From alerts', () => {
       let ruleId: string;
       let ruleName: string;

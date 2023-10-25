@@ -9,12 +9,11 @@ import { getAlertsTableRows, navigateToAlertsList } from '../screens/alerts';
 import { waitForEndpointAlerts } from '../tasks/alerts';
 import { request } from '../tasks/common';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
-import { login } from '../tasks/login';
+import { login, ROLE } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
-// FIXME: Flaky. Needs fixing (security team issue #7763)
-describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.createEndpointHost();
   });
@@ -24,7 +23,7 @@ describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, ()
   });
 
   beforeEach(() => {
-    login();
+    login(ROLE.soc_manager);
   });
 
   it('should create a Detection Engine alert from an endpoint alert', () => {

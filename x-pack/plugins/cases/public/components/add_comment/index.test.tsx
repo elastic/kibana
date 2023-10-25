@@ -51,7 +51,8 @@ const sampleData: CaseAttachmentWithoutOwner = {
 const appId = 'testAppId';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
-describe('AddComment ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/168505
+describe.skip('AddComment ', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

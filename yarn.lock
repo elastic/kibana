@@ -3792,6 +3792,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-plugin-dynamic-resolving-a@link:test/plugin_functional/plugins/core_dynamic_resolving_a":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugin-dynamic-resolving-b@link:test/plugin_functional/plugins/core_dynamic_resolving_b":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-plugin-execution-context-plugin@link:test/plugin_functional/plugins/core_plugin_execution_context":
   version "0.0.0"
   uid ""
@@ -3825,6 +3833,14 @@
   uid ""
 
 "@kbn/core-plugins-browser@link:packages/core/plugins/core-plugins-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-contracts-browser@link:packages/core/plugins/core-plugins-contracts-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-contracts-server@link:packages/core/plugins/core-plugins-contracts-server":
   version "0.0.0"
   uid ""
 
@@ -5577,10 +5593,6 @@
   uid ""
 
 "@kbn/shared-ux-avatar-solution@link:packages/shared-ux/avatar/solution":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-avatar-user-profile-components@link:packages/shared-ux/avatar/user_profile/impl":
   version "0.0.0"
   uid ""
 

@@ -27,8 +27,7 @@ import {
   FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON,
 } from '../../screens/fleet/agent_details';
 
-// FLAKY: https://github.com/elastic/kibana/issues/168284
-describe.skip('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
+describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.createEndpointHost();
   });

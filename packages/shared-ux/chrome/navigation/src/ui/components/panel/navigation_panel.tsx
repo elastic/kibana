@@ -37,7 +37,9 @@ export const NavigationPanel: FC = () => {
   const onOutsideClick = useCallback(
     ({ target }: Event) => {
       // Only close if we are not clicking on the currently selected nav node
-      if ((target as HTMLButtonElement).dataset.testSubj !== `panelOpener-${selectedNode?.id}`) {
+      if (
+        !(target as HTMLButtonElement).dataset.testSubj?.includes(`panelOpener-${selectedNode?.id}`)
+      ) {
         close();
       }
     },
