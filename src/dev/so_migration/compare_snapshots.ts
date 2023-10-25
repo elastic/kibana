@@ -8,10 +8,11 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import * as os from 'os';
 import { execSync } from 'child_process';
-import { basename, resolve } from 'path';
+import { basename, dirname, resolve } from 'path';
+import { writeFileSync } from 'fs';
 import { MigrationInfoRecord, MigrationSnapshot } from './types';
 
 const SO_MIGRATIONS_SNAPSHOT_FOLDER = 'kibana-so-types-snapshots';
@@ -77,11 +78,13 @@ function validateInput({ from, to }: { from: string; to: string }) {
 }
 
 function writeSnapshot(outputPath: string, result: any) {
-  throw new Error('Function not implemented.');
+  const json = JSON.stringify(result, null, 2);
+  mkdirSync(dirname(outputPath), { recursive: true });
+  writeFileSync(outputPath, json);
 }
 
 function isCommitHash(str: string) {
-  return /^[a-f0-9]{40}$/.test(str);
+  return /^[a-f0-9]+$/.test(str);
 }
 
 function isUrl(str: string) {
@@ -102,13 +105,22 @@ async function downloadToTemp(googleCloudUrl: string): Promise<string> {
 }
 
 async function downloadSnapshot(commitHash: string, log: ToolingLog): Promise<string> {
-  const googleCloudUrl = `gs://${SO_MIGRATIONS_SNAPSHOT_FOLDER}/${commitHash}.json`;
+  const fullCommitHash = expandCommitHash(commitHash);
+  const googleCloudUrl = `gs://${SO_MIGRATIONS_SNAPSHOT_FOLDER}/${fullCommitHash}.json`;
 
   log.info('Downloading snapshot from: ' + googleCloudUrl);
   const filePath = await downloadToTemp(googleCloudUrl);
   log.info('Downloaded snapshot to: ' + filePath);
 
   return filePath;
+}
+
+function expandCommitHash(commitHash: string) {
+  if (commitHash.length < 40) {
+    return execSync(`git rev-parse ${commitHash}`).toString().trim();
+  } else {
+    return commitHash;
+  }
 }
 
 /**
