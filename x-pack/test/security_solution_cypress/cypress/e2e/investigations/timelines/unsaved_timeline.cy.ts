@@ -25,6 +25,8 @@ import { closeTimelineUsingToggle } from '../../../tasks/security_main';
 import { createNewTimeline, populateTimeline, saveTimeline } from '../../../tasks/timeline';
 import { hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
+// https://github.com/elastic/kibana/issues/169021
+
 describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();

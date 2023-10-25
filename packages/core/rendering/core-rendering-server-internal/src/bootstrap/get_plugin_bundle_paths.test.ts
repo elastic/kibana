@@ -30,6 +30,7 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
       type: PluginType.standard,
       optionalPlugins: [],
       requiredPlugins: [],
+      runtimePluginDependencies: [],
       requiredBundles: deps,
     });
 

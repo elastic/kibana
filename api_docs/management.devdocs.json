@@ -813,7 +813,7 @@
           "label": "setupCardsNavigation",
           "description": [],
           "signature": [
-            "({ enabled, hideLinksTo }: ",
+            "({ enabled, hideLinksTo, extendCardNavDefinitions, }: ",
             "NavigationCardsSubject",
             ") => void"
           ],
@@ -826,7 +826,7 @@
               "id": "def-public.ManagementStart.setupCardsNavigation.$1",
               "type": "Object",
               "tags": [],
-              "label": "{ enabled, hideLinksTo }",
+              "label": "{\n    enabled,\n    hideLinksTo,\n    extendCardNavDefinitions,\n  }",
               "description": [],
               "signature": [
                 "NavigationCardsSubject"
