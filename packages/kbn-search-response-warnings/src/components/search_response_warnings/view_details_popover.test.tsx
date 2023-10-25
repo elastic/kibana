@@ -77,6 +77,5 @@ describe('ViewDetailsPopover', () => {
       expect(request1MockOpenInInspector).toHaveBeenCalled();
       expect(request2MockOpenInInspector).not.toHaveBeenCalled();
     });
-  })
-  
+  });
 });
