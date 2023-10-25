@@ -11,7 +11,6 @@ import { catchError } from 'rxjs/operators';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import type { ExecutionContextSetup } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
-import { getRequestAbortedSignal } from '../..';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -29,7 +28,6 @@ export function registerBsearchRoute(
     IKibanaSearchResponse
   >('/internal/bsearch', (request) => {
     const search = getScoped(request);
-    const abortSignal = getRequestAbortedSignal(request.events.aborted$);
     return {
       /**
        * @param requestOptions
@@ -41,7 +39,7 @@ export function registerBsearchRoute(
           apm.addLabels(executionContextService.getAsLabels());
 
           return firstValueFrom(
-            search.search(requestData, { ...restOptions, abortSignal }).pipe(
+            search.search(requestData, restOptions).pipe(
               catchError((err) => {
                 // Re-throw as object, to get attributes passed to the client
                 // eslint-disable-next-line no-throw-literal
