@@ -35,6 +35,13 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Log Explorer',
           }),
           link: 'observability-log-explorer',
+          renderAs: 'item',
+          children: [
+            {
+              link: 'discover',
+              sideNavStatus: 'hidden',
+            },
+          ],
         },
         {
           title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
