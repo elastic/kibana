@@ -66,12 +66,13 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('Add and upgrade integration', { tags: ['@ess', '@skipInServerless'] }, () => {
+  describe('Add and upgrade integration', { tags: ['@ess'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
 
     beforeEach(() => {
+      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
