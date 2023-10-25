@@ -56,11 +56,11 @@ function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<s
         scale: 'ratio',
       };
     },
-    getDefaultLabel: (column, indexPattern, columns) => {
+    getDefaultLabel: (column, columns, indexPattern) => {
       const ref = columns[column.references[0]];
       return ofName(
         ref && 'sourceField' in ref
-          ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+          ? indexPattern?.getFieldByName(ref.sourceField)?.displayName
           : undefined
       );
     },
