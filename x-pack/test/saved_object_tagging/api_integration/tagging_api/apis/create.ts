@@ -30,9 +30,11 @@ export default function ({ getService }: FtrProviderContext) {
       const createResponse = await supertest
         .post(`/api/saved_objects_tagging/tags/create`)
         .send({
-          name: 'my new tag',
-          description: 'some desc',
-          color: '#772299',
+          attributes: {
+            name: 'my new tag',
+            description: 'some desc',
+            color: '#772299',
+          },
         })
         .expect(200);
 
@@ -67,9 +69,11 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post(`/api/saved_objects_tagging/tags/create`)
         .send({
-          name: 'a',
-          description: 'some desc',
-          color: 'this is not a valid color',
+          attributes: {
+            name: 'a',
+            description: 'some desc',
+            color: 'this is not a valid color',
+          },
         })
         .expect(400)
         .then(({ body }) => {
@@ -94,9 +98,11 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post(`/api/saved_objects_tagging/tags/create`)
         .send({
-          name: existingName,
-          description: 'some desc',
-          color: '#000000',
+          attributes: {
+            name: existingName,
+            description: 'some desc',
+            color: '#000000',
+          },
         })
         .expect(409)
         .then(({ body }) => {
