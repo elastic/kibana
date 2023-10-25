@@ -45,9 +45,7 @@ export const SyncsContextMenu: React.FC = () => {
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
-  const { configState } = useValues(ConnectorConfigurationLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
-  const { connector } = useValues(IndexViewLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -137,7 +135,7 @@ export const SyncsContextMenu: React.FC = () => {
                 'data-test-subj':
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
                 disabled: Boolean(
-                  isSyncsDisabled || !configState.use_document_level_security?.value
+                  isSyncsDisabled || !connector?.configuration.use_document_level_security?.value
                 ),
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
