@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import expect from 'expect';
 // import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await installPrebuiltRules(es, supertest);
 
       // Refresh ES indices to avoid race conditions between write and reading of indeces
-      // await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify that status is updated after package installation
       const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
