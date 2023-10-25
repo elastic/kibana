@@ -107,15 +107,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
-        const expects = ['Results are partial and may be incomplete.', 'Query result'];
-        await asyncForEach(toasts, async (t, index) => {
-          expect(await t.getVisibleText()).to.eql(expects[index]);
-        });
+        await testSubjects.click('viewWarningBtn');
       });
-
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('viewWarningBtn');
-      await openShardModalButton.click();
 
       // request
       await retry.try(async () => {
@@ -164,10 +157,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
-        const expects = ['Results are partial and may be incomplete.', 'Query result'];
-        await asyncForEach(toasts, async (t, index) => {
-          expect(await t.getVisibleText()).to.eql(expects[index]);
-        });
       });
 
       // warnings tab

@@ -89,6 +89,7 @@ export function handleWarnings({
           onClick={() => {
             incompleteWarning.openInInspector();
           }}
+          data-test-subj="viewWarningBtn"
         >
           {viewDetailsLabel}
         </EuiButtonEmpty>
