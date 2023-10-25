@@ -143,7 +143,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('takes into account existing localStorage filter options values on first run', () => {
-    const existingLocalStorageValues = { severity: 'critical', status: 'open' };
+    const existingLocalStorageValues = { severity: ['critical'], status: ['open'] };
 
     localStorage.setItem(
       LOCALSTORAGE_FILTER_OPTIONS_KEY,
@@ -155,6 +155,24 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(result.current.filterOptions).toMatchObject(existingLocalStorageValues);
+  });
+
+  it('takes into account legacy localStorage filter values', () => {
+    const existingLocalStorageValues = { severity: 'critical', status: 'open' };
+
+    localStorage.setItem(
+      LOCALSTORAGE_FILTER_OPTIONS_KEY,
+      JSON.stringify(existingLocalStorageValues)
+    );
+
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.filterOptions).toMatchObject({
+      severity: ['critical'],
+      status: ['open'],
+    });
   });
 
   it('takes into account existing url query params on first run', () => {

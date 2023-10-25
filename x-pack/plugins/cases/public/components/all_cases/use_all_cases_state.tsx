@@ -106,6 +106,18 @@ const parseURLWithFilterOptions = (search: string) => {
   return parsedUrlParams;
 };
 
+/**
+ * Previously, 'status' and 'legacy' were represented as single options (strings).
+ * To maintain backward compatibility while transitioning to the new type of string[],
+ * we map the legacy type to the new type.
+ */
+const convertToFilterOptionArray = (value: string | string[] | undefined) => {
+  if (typeof value === 'string') {
+    return [value];
+  }
+  return value;
+};
+
 const getFilterOptions = (
   filterOptions: FilterOptions,
   params: FilterOptions,
@@ -115,13 +127,13 @@ const getFilterOptions = (
   const severity =
     params?.severity ??
     urlParams?.severity ??
-    localStorageFilterOptions?.severity ??
+    convertToFilterOptionArray(localStorageFilterOptions?.severity) ??
     DEFAULT_FILTER_OPTIONS.severity;
 
   const status =
     params?.status ??
     urlParams?.status ??
-    localStorageFilterOptions?.status ??
+    convertToFilterOptionArray(localStorageFilterOptions?.status) ??
     DEFAULT_FILTER_OPTIONS.status;
 
   return {
