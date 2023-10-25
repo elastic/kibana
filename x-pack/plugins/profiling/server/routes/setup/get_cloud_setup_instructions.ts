@@ -25,7 +25,7 @@ export interface SetupDataCollectionInstructions {
   stackVersion: string;
 }
 
-export async function getSetupInstructions({
+export async function getCloudSetupInstructions({
   packagePolicyClient,
   soClient,
   apmServerHost,
