@@ -90,8 +90,8 @@ describe('create ESO model version', () => {
             },
           },
           {
-             type: 'data_removal',
-             removedAttributePaths: ['firstAttr'],
+            type: 'data_removal',
+            removedAttributePaths: ['firstAttr'],
           },
           {
             type: 'unsafe_transform',
