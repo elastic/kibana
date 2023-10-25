@@ -15,7 +15,7 @@ import {
   deleteRuleById,
   ApmAlertFields,
 } from '../alerts/helpers/alerting_api_helper';
-import { waitForRuleStatus } from '../alerts/helpers/wait_for_rule_status';
+import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
 import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
@@ -135,11 +135,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       });
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForRuleStatus({
-          ruleId,
-          expectedStatus: 'active',
-          supertest,
-        });
+        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
         expect(ruleStatus).to.be('active');
       });
 
