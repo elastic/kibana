@@ -155,7 +155,35 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('filter by multiple status', async () => {});
+      it('filter by multiple status', async () => {
+        const openCase = await createCase(supertest, postCaseReq);
+        const toCloseCase = await createCase(supertest, postCaseReq);
+        const closedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: toCloseCase.id,
+                version: toCloseCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { status: [CaseStatuses.closed, CaseStatuses.open] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [openCase, closedCases[0]],
+          count_open_cases: 1,
+          count_closed_cases: 1,
+        });
+      });
 
       it('filters by severity', async () => {
         await createCase(supertest, postCaseReq);
@@ -196,7 +224,24 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('filters by multiple severities', async () => {});
+      it('filters by multiple severities', async () => {
+        const lowSeverityCase = await createCase(supertest, postCaseReq);
+        const criticalSeverityCase = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.CRITICAL,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { status: [CaseStatuses.closed, CaseStatuses.open] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [lowSeverityCase, criticalSeverityCase],
+        });
+      });
 
       it('filters by a single category', async () => {
         await createCase(supertest, postCaseReq);
