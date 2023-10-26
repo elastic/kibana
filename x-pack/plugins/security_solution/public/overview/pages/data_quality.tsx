@@ -281,6 +281,7 @@ const DataQualityComponent: React.FC = () => {
                   onTimeChange={onTimeChange}
                   showUpdateButton={false}
                   isDisabled={true}
+                  data-test-subj="dataQualityDatePicker"
                 />
               </EuiToolTip>
             )}

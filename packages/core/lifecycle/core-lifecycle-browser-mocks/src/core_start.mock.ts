@@ -40,6 +40,9 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     deprecations: deprecationsServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
+    plugins: {
+      onStart: jest.fn(),
+    },
   };
 
   return mock;
