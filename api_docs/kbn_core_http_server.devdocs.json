@@ -4297,11 +4297,11 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
@@ -6711,7 +6711,7 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "reporting",
