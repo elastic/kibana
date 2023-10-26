@@ -226,4 +226,9 @@ export const addAllExtensions = (
   extensionsService.addFilter(ilmFilterExtension);
 
   extensionsService.addIndexOverviewCard({ renderCardContent: IndexLifecycleSummary });
+  extensionsService.setIndexOverviewMainCard({
+    renderCardContent: ({ index }) => {
+      return <pre>{JSON.stringify(index, null, 2)}</pre>;
+    },
+  });
 };
