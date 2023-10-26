@@ -10,25 +10,23 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 
-export const ExtensionsSummary: FunctionComponent<{ index: Index }> = ({ index }) => {
+export const IndexOverviewCards: FunctionComponent<{ index: Index }> = ({ index }) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
   } = useAppContext();
-  const summaries = extensionsService.summaries.map((summaryExtension, i) => {
-    const summary = summaryExtension({ index, getUrlForApp });
+  const cards = extensionsService.indexOverviewCards.map(({ renderCardContent }, i) => {
+    const card = renderCardContent({ index, getUrlForApp });
 
-    if (!summary) {
+    if (!card) {
       return null;
     }
     return (
       <Fragment key={`extensionsSummary-${i}`}>
-        <EuiPanel data-test-subj={`extensionsSummary-${i}`} hasBorder={true}>
-          {summary}
-        </EuiPanel>
+        <EuiPanel data-test-subj={`extensionsSummary-${i}`} hasBorder={true}>{card}</EuiPanel>
         <EuiSpacer />
       </Fragment>
     );
   });
-  return <>{summaries}</>;
+  return <>{cards}</>;
 };

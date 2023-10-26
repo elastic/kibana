@@ -25,8 +25,9 @@ import {
 } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core/public';
+import { Index } from '@kbn/index-management-plugin/common';
 import { getPolicyEditPath } from '../../application/services/navigation';
-import { Index, IndexLifecyclePolicy } from '../../../common/types';
+import { IndexLifecyclePolicy } from '../../../common/types';
 
 const getHeaders = (): Array<[keyof IndexLifecyclePolicy, string]> => {
   return [
@@ -127,7 +128,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
               />
             </EuiPopoverTitle>
             <EuiCodeBlock language="json">
-              {JSON.stringify(ilm.phase_execution, null, 2)}
+              {JSON.stringify(ilm?.managed ? ilm.phase_execution : {}, null, 2)}
             </EuiCodeBlock>
           </EuiPopover>
         </EuiDescriptionListDescription>
@@ -144,7 +145,8 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
       right: [],
     };
     headers.forEach(([fieldName, label], arrayIndex) => {
-      const value: any = ilm[fieldName];
+      // @ts-ignore
+      const value: any = ilm?.[fieldName];
       let content;
       if (fieldName === 'action_time_millis') {
         content = moment(value).format('YYYY-MM-DD HH:mm:ss');
@@ -178,13 +180,13 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
         rows.right.push(cell);
       }
     });
-    if (ilm.phase_execution) {
+    if (ilm?.managed && ilm?.phase_execution) {
       rows.right.push(renderPhaseExecutionPopoverButton());
     }
     return rows;
   };
 
-  if (!ilm.managed) {
+  if (!ilm?.managed) {
     return null;
   }
   const { left, right } = buildRows();

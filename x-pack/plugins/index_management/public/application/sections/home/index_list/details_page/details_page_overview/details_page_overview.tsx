@@ -32,10 +32,10 @@ import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
-import { ExtensionsSummary } from './extensions_summary';
 import { DataStreamDetails } from './data_stream_details';
 import { StorageDetails } from './storage_details';
 import { AliasesDetails } from './aliases_details';
+import { IndexOverviewCards } from './index_overview_cards';
 
 interface Props {
   indexDetails: Index;
@@ -94,7 +94,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
       <EuiSpacer />
 
-      <ExtensionsSummary index={indexDetails} />
+      <IndexOverviewCards index={indexDetails} />
 
       <EuiFlexGroup direction="column">
         <EuiFlexItem>

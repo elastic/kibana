@@ -7,20 +7,30 @@
 
 import { i18n } from '@kbn/i18n';
 import type { IndexDetailsTab } from '../../common/constants';
+import { ReactNode } from 'react';
+import { ApplicationStart } from '@kbn/core-application-browser';
+import { Index } from '..';
+
+export interface IndexOverviewCard {
+  renderCardContent: (args: {
+    index: Index;
+    getUrlForApp: ApplicationStart['getUrlForApp'];
+  }) => ReactNode;
+}
 
 export interface ExtensionsSetup {
-  addSummary(summary: any): void;
   addAction(action: any): void;
   addBanner(banner: any): void;
   addFilter(filter: any): void;
   addBadge(badge: any): void;
   addToggle(toggle: any): void;
   addIndexDetailsTab(tab: IndexDetailsTab): void;
+  addIndexOverviewCard(card: IndexOverviewCard): void;
+  setIndexOverviewMainCard(card: IndexOverviewCard): void;
 }
 
 export class ExtensionsService {
   private _indexDetailsTabs: IndexDetailsTab[] = [];
-  private _summaries: any[] = [];
   private _actions: any[] = [];
   private _banners: any[] = [];
   private _filters: any[] = [];
@@ -37,6 +47,13 @@ export class ExtensionsService {
     },
   ];
   private _toggles: any[] = [];
+  private _indexOverview: {
+    cards: IndexOverviewCard[];
+    mainCard: IndexOverviewCard | null;
+  } = {
+    cards: [],
+    mainCard: null,
+  };
   private service?: ExtensionsSetup;
 
   public setup(): ExtensionsSetup {
@@ -45,16 +62,13 @@ export class ExtensionsService {
       addBadge: this.addBadge.bind(this),
       addBanner: this.addBanner.bind(this),
       addFilter: this.addFilter.bind(this),
-      addSummary: this.addSummary.bind(this),
       addToggle: this.addToggle.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
+      addIndexOverviewCard: this.addIndexOverviewCard.bind(this),
+      setIndexOverviewMainCard: this.setIndexOverviewMainCard.bind(this),
     };
 
     return this.service;
-  }
-
-  private addSummary(summary: any) {
-    this._summaries.push(summary);
   }
 
   private addAction(action: any) {
@@ -78,11 +92,19 @@ export class ExtensionsService {
   }
 
   private addIndexDetailsTab(tab: IndexDetailsTab) {
-    this._indexDetailsTabs.push(tab);
+      this._indexDetailsTabs.push(tab);
   }
 
-  public get summaries() {
-    return this._summaries;
+    private addIndexOverviewCard(card: IndexOverviewCard) {
+    this._indexOverview.cards.push(card);
+  }
+
+  private setIndexOverviewMainCard(card: IndexOverviewCard) {
+    if (this._indexOverview.mainCard) {
+      throw new Error(`The main card for index overview has already been set.`);
+    } else {
+      this._indexOverview.mainCard = card;
+    }
   }
 
   public get actions() {
@@ -107,5 +129,13 @@ export class ExtensionsService {
 
   public get indexDetailsTabs() {
     return this._indexDetailsTabs;
+  }
+
+  public get indexOverviewCards() {
+    return this._indexOverview.cards;
+  }
+
+  public get indexOverviewMainCard() {
+    return this._indexOverview.mainCard;
   }
 }
