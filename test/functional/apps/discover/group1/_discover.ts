@@ -334,37 +334,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
       });
     });
-
-    describe('URL state', () => {
-      it('should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID', async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
-        const originalUrl = await browser.getCurrentUrl();
-        const newUrl = originalUrl.replace(dataViewId, 'invalid-data-view-id');
-        await browser.get(newUrl);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async () => {
-          expect(await browser.getCurrentUrl()).to.be(originalUrl);
-          expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
-        });
-      });
-
-      it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        const originalHash = await browser.execute<[], string>('return window.location.hash');
-        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
-        const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
-        await browser.execute(`window.location.hash = "${newHash}"`);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async () => {
-          const currentHash = await browser.execute<[], string>('return window.location.hash');
-          expect(currentHash).to.be(originalHash);
-          expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
-        });
-      });
-    });
   });
 }

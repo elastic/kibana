@@ -24,19 +24,3 @@ export const USER_RISK_TITLE = i18n.translate(
     defaultMessage: 'User Risk Scores',
   }
 );
-
-export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.hostsTableTooltip',
-  {
-    defaultMessage:
-      'The host risk table is not affected by the time range. This table shows the latest recorded risk score for each host.',
-  }
-);
-
-export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.usersTableTooltip',
-  {
-    defaultMessage:
-      'The user risk table is not affected by the time range. This table shows the latest recorded risk score for each user.',
-  }
-);
