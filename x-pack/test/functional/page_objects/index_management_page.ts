@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
@@ -133,6 +133,29 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
           return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
         });
       },
+    },
+    async clickCreateIndexButton() {
+      await testSubjects.click('createIndexButton');
+      await testSubjects.existOrFail('createIndexSaveButton');
+    },
+    async setCreateIndexName(value: string) {
+      await testSubjects.existOrFail('createIndexNameFieldText');
+      await testSubjects.setValue('createIndexNameFieldText', value);
+    },
+    async clickCreateIndexSaveButton() {
+      await testSubjects.click('createIndexSaveButton');
+      // Wait for modal to close
+      await testSubjects.missingOrFail('createIndexSaveButton');
+    },
+    async expectIndexToExist(indexName: string) {
+      const table = await find.byCssSelector('table');
+      const rows = await table.findAllByTestSubject('indexTableRow');
+      const indexNames: string[] = await Promise.all(
+        rows.map(async (row) => {
+          return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
+        })
+      );
+      expect(indexNames.some((i) => i === indexName)).to.be(true);
     },
   };
 }
