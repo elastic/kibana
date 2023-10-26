@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -15,8 +16,46 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   let pkgVersion: string;
+
+  const getSecretById = (id: string) => {
+    return es.get({
+      index: '.fleet-secrets',
+      id,
+    });
+  };
+
+  const deleteAllSecrets = async () => {
+    try {
+      await es.deleteByQuery({
+        index: '.fleet-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+    } catch (err) {
+      // index doesn't exist
+    }
+  };
+
+  const enableSecrets = async () => {
+    try {
+      await kibanaServer.savedObjects.update({
+        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        id: 'fleet-default-settings',
+        attributes: {
+          secret_storage_requirements_met: true,
+        },
+        overwrite: false,
+      });
+    } catch (e) {
+      throw e;
+    }
+  };
 
   describe('fleet_outputs_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
@@ -32,6 +71,7 @@ export default function (providerContext: FtrProviderContext) {
     let fleetServerPolicyWithCustomOutputId: string;
 
     before(async function () {
+      await enableSecrets();
       // we must first force install the fleet_server package to override package verification error on policy create
       // https://github.com/elastic/kibana/issues/137450
       const getPkRes = await supertest
@@ -39,6 +79,8 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       pkgVersion = getPkRes.body.item.version;
+
+      await deleteAllSecrets();
 
       await supertest
         .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
@@ -421,6 +463,84 @@ export default function (providerContext: FtrProviderContext) {
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
         const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
         expect(newOutput[0].shipper).to.equal(null);
+      });
+
+      it('should allow secrets to be updated + delete unused secret', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const outputId = res.body.item.id;
+        const secretId = res.body.item.secrets.ssl.key.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('KEY');
+
+        const updateRes = await supertest
+          .put(`/api/fleet/outputs/${outputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'NEW_KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const updatedSecretId = updateRes.body.item.secrets.ssl.key.id;
+
+        expect(updatedSecretId).not.to.equal(secretId);
+
+        const updatedSecret = await getSecretById(updatedSecretId);
+
+        // @ts-ignore _source unknown type
+        expect(updatedSecret._source.value).to.equal('NEW_KEY');
+
+        try {
+          await getSecretById(secretId);
+          expect().fail('Secret should have been deleted');
+        } catch (e) {
+          // not found
+        }
       });
     });
 
@@ -876,6 +996,142 @@ export default function (providerContext: FtrProviderContext) {
           queue_flush_timeout: null,
         });
       });
+
+      it('should not allow ssl.key and secrets.ssl.key to be set for logstash output ', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            secrets: { ssl: { key: 'KEY' } },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+      });
+
+      it('should not allow password and secrets.password to be set for kafka output ', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            secrets: { password: 'pass' },
+          })
+          .expect(400);
+      });
+
+      it('should not allow ssl.key and secrets.ssl.key to be set for kafka output ', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+      });
+
+      it('should create ssl.key secret correctly', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const secretId = res.body.item.secrets.ssl.key.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('KEY');
+      });
+
+      it('should create ssl.password secret correctly', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Password Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            secrets: { password: 'pass' },
+          });
+
+        const secretId = res.body.item.secrets.password.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('pass');
+      });
     });
 
     describe('DELETE /outputs/{outputId}', () => {
@@ -948,6 +1204,50 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           expect(deleteResponse.id).to.eql(outputId);
+        });
+
+        it('should delete secrets when deleting an output', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Kafka Output With Secret',
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'ssl',
+              topics: [{ topic: 'topic1' }],
+              config_yaml: 'shipper: {}',
+              shipper: {
+                disk_queue_enabled: true,
+                disk_queue_path: 'path/to/disk/queue',
+                disk_queue_encryption_enabled: true,
+              },
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: {
+                ssl: {
+                  key: 'KEY',
+                },
+              },
+            })
+            .expect(200);
+
+          const outputWithSecretsId = res.body.item.id;
+          const secretId = res.body.item.secrets.ssl.key.id;
+
+          await supertest
+            .delete(`/api/fleet/outputs/${outputWithSecretsId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          try {
+            await getSecretById(secretId);
+            expect().fail('Secret should have been deleted');
+          } catch (e) {
+            // not found
+          }
         });
       });
 
