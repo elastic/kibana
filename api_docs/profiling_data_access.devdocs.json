@@ -57,12 +57,12 @@
             "section": "def-common.ProfilingStatus",
             "text": "ProfilingStatus"
           },
-          ">; getSetupState: (options: ",
-          "ProfilingSetupOptions",
-          ", clientWithProfilingAuth: ",
-          "ProfilingESClient",
+          ">; getSetupState: ({ esClient, soClient, spaceId }: ",
+          "SetupStateParams",
           ") => Promise<",
-          "SetupState",
+          "CloudSetupStateType",
+          " | ",
+          "SetupStateType",
           ">; fetchFunction: ({ esClient, rangeFromMs, rangeToMs, kuery, startIndex, endIndex, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
@@ -388,7 +388,64 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.ProfilingCloudSetupOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProfilingCloudSetupOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "profilingDataAccess",
+            "scope": "common",
+            "docId": "kibProfilingDataAccessPluginApi",
+            "section": "def-common.ProfilingCloudSetupOptions",
+            "text": "ProfilingCloudSetupOptions"
+          },
+          " extends ",
+          "ProfilingSetupOptions"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.ProfilingCloudSetupOptions.packagePolicyClient",
+            "type": "Object",
+            "tags": [],
+            "label": "packagePolicyClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.PackagePolicyClient",
+                "text": "PackagePolicyClient"
+              }
+            ],
+            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.ProfilingCloudSetupOptions.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
