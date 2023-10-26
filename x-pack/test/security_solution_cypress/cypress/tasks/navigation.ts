@@ -8,7 +8,7 @@
 import { encode } from '@kbn/rison';
 
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
-import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
 import { constructUrlWithUser, getUrlWithRoute, User } from './login';
 

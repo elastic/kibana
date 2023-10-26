@@ -8,8 +8,8 @@
 import {
   KNOWN_ESS_ROLE_DEFINITIONS,
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,
-  SecurityRoleName,
 } from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const KNOWN_ROLE_DEFINITIONS = {

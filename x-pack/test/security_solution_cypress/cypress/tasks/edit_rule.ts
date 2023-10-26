@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { BACK_TO_RULE_DETAILS, EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { editRuleUrl } from '../urls/edit_rule';
 import { visit } from './navigation';
