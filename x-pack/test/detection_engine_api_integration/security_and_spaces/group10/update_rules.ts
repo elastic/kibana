@@ -973,12 +973,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql(undefined);
-        /**
-         * Confirm type on SO so that it's clear in the tests whether it's expected that
-         * the SO itself is migrated to the inteded object type, or if the transformation is
-         * happening just on the response. In this case, change should
-         * include a migration on SO.
-         */
         const {
           hits: {
             hits: [{ _source: ruleSO }],
@@ -987,7 +981,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
       });
 
-      it('updates a rule with legacy investigation fields', async () => {
+      it('updates a rule with legacy investigation fields when field specified for update in intended format', async () => {
         // rule_id of a rule with legacy investigation fields set
         const updatedRule = {
           ...getSimpleRuleUpdate(ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId),
@@ -1007,13 +1001,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare.investigation_fields).to.eql({
           field_names: ['foo'],
         });
-
-        /**
-         * Confirm type on SO so that it's clear in the tests whether it's expected that
-         * the SO itself is migrated to the inteded object type, or if the transformation is
-         * happening just on the response. In this case, change should
-         * include a migration on SO.
-         */
         const {
           hits: {
             hits: [{ _source: ruleSO }],

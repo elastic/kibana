@@ -283,8 +283,7 @@ export default ({ getService }: FtrProviderContext) => {
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change will
-         * include a migration on SO because this route uses our rules PATCH
-         * under the hood.
+         * NOT include a migration on SO.
          */
         const {
           hits: {
@@ -294,9 +293,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(
           ruleSO?.alert.params.exceptionsList.some((list) => list.type === 'rule_default')
         ).to.eql(true);
-        expect(ruleSO?.alert.params.investigationFields).to.eql({
-          field_names: ['client.address', 'agent.name'],
-        });
+        expect(ruleSO?.alert.params.investigationFields).to.eql(['client.address', 'agent.name']);
       });
     });
   });

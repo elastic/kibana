@@ -3031,7 +3031,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should export rules with legacy investigation_fields and migrate field in response', async () => {
+      it('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.export })
           .expect(200)
@@ -3069,9 +3069,8 @@ export default ({ getService }: FtrProviderContext): void => {
           hits: {
             hits: [{ _source: ruleSO }],
           },
-        } = await getRuleSOById(es, rule1.id);
+        } = await getRuleSOById(es, JSON.parse(rule1).id);
         expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
-        expect(ruleSO?.alert?.enabled).to.eql(true);
 
         const exportDetails = JSON.parse(exportDetailsJson);
         expect(exportDetails).to.eql({
@@ -3093,7 +3092,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should delete rules with investigation fields and migrate rules in response', async () => {
+      it('should delete rules with investigation fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.delete })
           .expect(200);
@@ -3123,7 +3122,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await fetchRule('rule-with-investigation-field').expect(404);
       });
 
-      it('should enable rules with legacy investigation fields', async () => {
+      it('should enable rules with legacy investigation fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.enable })
           .expect(200);
@@ -3187,7 +3186,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(ruleSO?.alert?.enabled).to.eql(true);
       });
 
-      it('should disable rules with legacy investigation fields', async () => {
+      it('should disable rules with legacy investigation fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionType.disable })
           .expect(200);
@@ -3248,7 +3247,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(ruleSO3?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
       });
 
-      it('should duplicate rules with legacy investigation fields', async () => {
+      it('should duplicate rules with legacy investigation fields and transform field in response', async () => {
         const { body } = await postBulkAction()
           .send({
             query: '',
@@ -3293,7 +3292,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, duplicated
-         * rules should have migrated value.
+         * rules should NOT have migrated value on write.
          */
         const {
           hits: {
@@ -3301,16 +3300,14 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         } = await getRuleSOById(es, ruleWithLegacyField.id);
 
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql({
-          field_names: ['client.address', 'agent.name'],
-        });
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
 
         const {
           hits: {
             hits: [{ _source: ruleSO2 }],
           },
         } = await getRuleSOById(es, ruleWithEmptyArray.id);
-        expect(ruleSO2?.alert?.params?.investigationFields).to.eql(undefined);
+        expect(ruleSO2?.alert?.params?.investigationFields).to.eql([]);
 
         const {
           hits: {

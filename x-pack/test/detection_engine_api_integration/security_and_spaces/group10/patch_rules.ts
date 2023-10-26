@@ -724,7 +724,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('should patch a rule with a legacy investigation field and migrate', async () => {
+        it('should patch a rule with a legacy investigation field and transform response', async () => {
           const { body } = await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -743,19 +743,20 @@ export default ({ getService }: FtrProviderContext) => {
            * Confirm type on SO so that it's clear in the tests whether it's expected that
            * the SO itself is migrated to the inteded object type, or if the transformation is
            * happening just on the response. In this case, change should
-           * include a migration on SO.
+           * NOT include a migration on SO.
            */
           const {
             hits: {
               hits: [{ _source: ruleSO }],
             },
           } = await getRuleSOById(es, body.id);
-          expect(ruleSO?.alert?.params?.investigationFields).to.eql({
-            field_names: ['client.address', 'agent.name'],
-          });
+          expect(ruleSO?.alert?.params?.investigationFields).to.eql([
+            'client.address',
+            'agent.name',
+          ]);
         });
 
-        it('should patch a rule with a legacy investigation field - empty array - and migrate', async () => {
+        it('should patch a rule with a legacy investigation field - empty array - and transform response', async () => {
           const { body } = await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -772,14 +773,14 @@ export default ({ getService }: FtrProviderContext) => {
            * Confirm type on SO so that it's clear in the tests whether it's expected that
            * the SO itself is migrated to the inteded object type, or if the transformation is
            * happening just on the response. In this case, change should
-           * include a migration on SO.
+           * NOT include a migration on SO.
            */
           const {
             hits: {
               hits: [{ _source: ruleSO }],
             },
           } = await getRuleSOById(es, body.id);
-          expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
+          expect(ruleSO?.alert?.params?.investigationFields).to.eql([]);
         });
       });
     });

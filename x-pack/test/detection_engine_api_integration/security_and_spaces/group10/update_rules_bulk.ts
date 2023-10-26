@@ -36,6 +36,7 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFields,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  getRuleSOById,
 } from '../../utils';
 import { removeUUIDFromActions } from '../../utils/remove_uuid_from_actions';
 import {
@@ -811,6 +812,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('legacy investigation fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
       let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+      let ruleWithInvestigationFields: RuleResponse;
 
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
@@ -824,7 +826,7 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
         );
-        await createRule(supertest, log, {
+        ruleWithInvestigationFields = await createRule(supertest, log, {
           ...getSimpleRule('rule-with-investigation-field'),
           name: 'Test investigation fields object',
           investigation_fields: { field_names: ['host.name'] },
@@ -856,7 +858,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('updates a rule with legacy investigation fields', async () => {
+      it('updates a rule with legacy investigation fields and transforms field in response', async () => {
         // update rule
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
@@ -889,6 +891,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body[0].investigation_fields).to.eql(undefined);
         expect(body[0].name).to.eql('New name - used to have legacy investigation fields');
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
 
         expect(body[1].investigation_fields).to.eql({
           field_names: ['foo'],
@@ -896,11 +904,27 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[1].name).to.eql(
           'New name - used to have legacy investigation fields, empty array'
         );
+        const {
+          hits: {
+            hits: [{ _source: ruleSO2 }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationFieldEmptyArray.id);
+        expect(ruleSO2?.alert?.params?.investigationFields).to.eql({
+          field_names: ['foo'],
+        });
 
         expect(body[2].investigation_fields).to.eql({
           field_names: ['bar'],
         });
         expect(body[2].name).to.eql('New name - never had legacy investigation fields');
+        const {
+          hits: {
+            hits: [{ _source: ruleSO3 }],
+          },
+        } = await getRuleSOById(es, ruleWithInvestigationFields.id);
+        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({
+          field_names: ['bar'],
+        });
       });
     });
   });
