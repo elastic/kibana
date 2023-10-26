@@ -7,7 +7,7 @@
  */
 
 import { resolve, relative } from 'path';
-import { createReadStream, readFileSync } from 'fs';
+import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -30,6 +30,8 @@ import {
   createDefaultSpace,
 } from '../lib';
 
+import soOverrideAllowedList from '../fixtures/override_saved_objects_index/exception_list.json';
+
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
 // are not listened for
@@ -37,11 +39,6 @@ const pipeline = (...streams: Readable[]) =>
   streams.reduce((source, dest) =>
     source.once('error', (error) => dest.destroy(error)).pipe(dest as any)
   );
-
-const allowedListPath = 'fixtures/override_saved_objects_index/exception_list.json';
-const soOverrideAllowedList: string = JSON.parse(
-  readFileSync(resolve(__dirname, '..', allowedListPath), 'utf8')
-);
 
 export async function loadAction({
   inputDir,
@@ -64,8 +61,11 @@ export async function loadAction({
   const isArchiveInExceptionList = soOverrideAllowedList.includes(name);
   if (isArchiveInExceptionList) {
     log.warning(
-      `${name} overrides Saved Objects index(es) and placed temporary in exception list.
-Please fix the archive and remove it from ${allowedListPath}.
+      `${name} overrides Saved Objects index(es) and placed temporary in the exception list.
+Please fix the archive and remove it from ${resolve(
+        __dirname,
+        '../fixtures/override_saved_objects_index/exception_list.json'
+      )}.
 For more details see: https://github.com/elastic/kibana/issues/161882`
     );
   }
