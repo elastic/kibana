@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { execSync } from 'child_process';
-import { Octokit } from '@octokit/rest';
 import { readFileSync } from 'fs';
+import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
+import { getExec } from './prepared_exec';
 import { getGithubClient, BuildkiteClient } from '#pipeline-utils';
 
-const kibanaDir = execSync('git rev-parse --show-toplevel').toString().trim();
-
-const exec = (command: string, opts: any = {}) =>
-  execSync(command, { encoding: 'utf-8', cwd: kibanaDir }).toString().trim();
-
 const octokit = getGithubClient();
+
+const exec = getExec(!process.env.CI);
 
 async function main() {
   // Current commit info
@@ -44,6 +41,11 @@ async function main() {
   // Save Object migration comparison
   const comparisonResult = compareSOSnapshots(previousSha, selectedSha);
   await addBuildkiteInfoSection(toSOComparisonBlockHtml(comparisonResult));
+
+  if (!process.env.CI) {
+    // @ts-ignore
+    console.log(exec.calls);
+  }
 }
 
 async function getCurrentQARelease() {
@@ -53,6 +55,7 @@ async function getCurrentQARelease() {
     path: 'services/kibana/versions.yaml',
   });
 
+  // @ts-ignore
   const fileContent = Buffer.from(releasesFile.data.content, 'base64').toString('utf8');
 
   const sha = fileContent.match(`qa: "([a-z0-9]+)"`)?.[1];
@@ -64,7 +67,9 @@ async function getCurrentQARelease() {
   }
 }
 
-async function shaToCommit(sha: string): Promise<Octokit.ReposGetCommitResponse> {
+type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];
+
+async function shaToCommit(sha: string): Promise<GithubCommitType> {
   const commit = await octokit.repos.getCommit({
     owner: 'elastic',
     repo: 'kibana',
@@ -74,11 +79,11 @@ async function shaToCommit(sha: string): Promise<Octokit.ReposGetCommitResponse>
   return commit.data;
 }
 
-function getReadableInfoOfCommit(commit: Octokit.ReposGetCommitResponse) {
+function getReadableInfoOfCommit(commit: GithubCommitType) {
   return {
     sha: commit.sha,
     message: commit.commit.message,
-    date: commit.commit.author.date,
+    date: commit.commit.author?.date,
     author: commit.author?.login,
     title: commit.commit.message.split('\n')[0],
     link: commit.html_url,
@@ -100,6 +105,15 @@ async function getBuildkiteBuild(commitSha: string) {
       e.context === 'buildkite/on-merge' && e.target_url
   );
 
+  if (!buildkiteStatus) {
+    return {
+      success: false,
+      stateEmoji: '❓',
+      url: '',
+      buildNumber: '',
+    };
+  }
+
   const buildkiteURL = buildkiteStatus.target_url;
   const buildkiteBuildNumber = buildkiteURL.match(/builds\/([0-9]+)/)?.[1];
   const state = buildkiteStatus.state as 'failure' | 'pending' | 'success';
@@ -119,18 +133,18 @@ async function getBuildkiteBuild(commitSha: string) {
 }
 
 async function addBuildkiteInfoSection(html: string) {
-  execSync(`buildkite-agent annotate --append --style 'info' --context 'commit-info'`, {
+  exec(`buildkite-agent annotate --append --style 'info' --context 'commit-info'`, {
     input: html + '<br />',
   });
 }
 
 function compareSOSnapshots(previousSha: string, selectedSha: string) {
-  const command = `node scripts/snapshot_plugin_types compare ${previousSha} ${selectedSha}`;
+  const command = `node scripts/snapshot_plugin_types compare --from ${previousSha} --to ${selectedSha}`;
   exec(`${command} --outputPath 'so_comparison.json'`);
 
   const soComparisonResult = JSON.parse(readFileSync('so_comparison.json').toString());
 
-  const buildkite = new BuildkiteClient();
+  const buildkite = new BuildkiteClient({ exec });
   buildkite.uploadArtifacts('so_comparison.json');
 
   return {
@@ -145,8 +159,8 @@ function toCommitInfoHtml(
   commitInfo: {
     sha: string;
     message: string;
-    date: string;
-    author: string;
+    date: string | undefined;
+    author: string | undefined;
     title: string;
     link: string;
   }

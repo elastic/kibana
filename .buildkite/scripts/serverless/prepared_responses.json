@@ -1,0 +1,6 @@
+{
+  "buildkite-agent annotate --append --style 'info' --context 'commit-info'": "ok",
+  "buildkite-agent meta-data get \"commit-sha\"": "906987c2860b53b91d449bc164957857adddc06a",
+  "node scripts/snapshot_plugin_types compare --from b5aa37525578 --to 906987c2860b53b91d449bc164957857adddc06a --outputPath 'so_comparison.json'": "ok",
+  "buildkite-agent artifact upload 'so_comparison.json'": "ok"
+}

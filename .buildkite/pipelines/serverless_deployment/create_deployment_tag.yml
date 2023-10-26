@@ -16,6 +16,8 @@ steps:
     command: ts-node .buildkite/scripts/serverless/collect_commit_info.ts
     depends_on: collect_data
 
+  - wait: ~
+
   - block: "Confirm deployment"
     depends_on: collect_data
 
