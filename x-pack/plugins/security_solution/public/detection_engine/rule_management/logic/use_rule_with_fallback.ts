@@ -144,7 +144,7 @@ export const migrateLegacyInvestigationFields = (
  * @param rule Rule
  * @returns Rule
  */
-export const migrateRuleWithLegacyInvestigationFields = (rule: Rule): Rule => {
+export const migrateRuleWithLegacyInvestigationFieldsFromAlertHit = (rule: Rule): Rule => {
   if (!rule) return rule;
 
   return {
@@ -177,8 +177,8 @@ export const transformRuleFromAlertHit = (
       ...expandedRuleWithParams?.kibana?.alert?.rule?.parameters,
     };
     delete expandedRule.parameters;
-    return migrateRuleWithLegacyInvestigationFields(expandedRule as Rule);
+    return migrateRuleWithLegacyInvestigationFieldsFromAlertHit(expandedRule as Rule);
   }
 
-  return migrateRuleWithLegacyInvestigationFields(rule);
+  return migrateRuleWithLegacyInvestigationFieldsFromAlertHit(rule);
 };

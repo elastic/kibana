@@ -51,7 +51,7 @@ describe('use_rule_with_fallback', () => {
     // We are not looking to do any migrations to these legacy fields in the alert document, so need
     // to transform it on read in this case.
     describe('investigation_fields', () => {
-      it('transforms investigation_fields when set as legacy array', () => {
+      it('sets investigation_fields to undefined when set as legacy array', () => {
         const mockRule = getMockRule({
           investigation_fields: ['foo'] as unknown as InvestigationFields,
         });
@@ -60,7 +60,7 @@ describe('use_rule_with_fallback', () => {
         expect(result?.investigation_fields).toBeUndefined();
       });
 
-      it('transforms investigation_fields when set as legacy empty array', () => {
+      it('sets investigation_fields to undefined when set as legacy empty array', () => {
         // Ideally, we would have the client side types pull from the same types
         // as server side so we could denote here that the SO can have investigation_fields
         // as array or object, but our APIs now only support object. We don't have that here
