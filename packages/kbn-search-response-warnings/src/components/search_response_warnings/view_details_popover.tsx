@@ -48,7 +48,7 @@ export const ViewDetailsPopover = (props: Props) => {
       id: 0,
       items: props.warnings.map((warning) => {
         const count = requestNameMap.has(warning.requestName)
-          ? requestNameMap.get(warning.requestName) + 1
+          ? requestNameMap.get(warning.requestName)! + 1
           : 1;
         const uniqueRequestName =
           count > 1 ? `${warning.requestName} (${count})` : warning.requestName;
