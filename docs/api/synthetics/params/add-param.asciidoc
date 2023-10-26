@@ -53,7 +53,7 @@ POST /api/synthetics/params
 {
   "key": "your-key-name",
   "value": "your-parameter-value",
-  "description": "API Key for authentication",
+  "description": "Param to use in browser monitor",
   "tags": ["authentication", "security"],
   "share_across_spaces": true
 }
@@ -98,7 +98,7 @@ Here's an example response for a single added parameter:
   "id": "unique-parameter-id",
   "key": "your-key-name",
   "value": "your-param-value",
-  "description": "API Key for authentication",
+  "description": "Param to use in browser monitor",
   "tags": ["authentication", "security"],
   "share_across_spaces": true
 }

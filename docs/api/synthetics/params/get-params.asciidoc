@@ -59,7 +59,7 @@ For users with read-only permissions:
 {
   "id": "unique-parameter-id",
   "key": "your-api-key",
-  "description": "API Key for authentication",
+  "description": "Param to use in browser monitor",
   "tags": ["authentication", "security"],
   "namespaces": ["namespace1", "namespace2"]
 }
@@ -72,7 +72,7 @@ For users with write permissions:
 {
   "id": "unique-parameter-id",
   "key": "your-param-key",
-  "description": "API Key for authentication",
+  "description": "Param to use in browser monitor",
   "tags": ["authentication", "security"],
   "namespaces": ["namespace1", "namespace2"],
   "value": "your-param-value"

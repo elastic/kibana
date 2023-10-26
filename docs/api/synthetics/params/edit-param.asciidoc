@@ -51,7 +51,7 @@ PUT /api/synthetics/params/param_id1
 {
   "key": "updated_param_key",
   "value": "updated-param-value",
-  "description": "Updated API Key for authentication",
+  "description": "Updated Param to be used in browser monitor",
   "tags": ["authentication", "security", "updated"]
 }
 --------------------------------------------------
@@ -64,7 +64,7 @@ The API returns the updated parameter as follows:
   "id": "param_id1",
   "key": "updated_param_key",
   "value": "updated-param-value",
-  "description": "Updated API Key for authentication",
+  "description": "Updated Param to be used in browser monitor",
   "tags": ["authentication", "security", "updated"]
 }
 --------------------------------------------------
