@@ -32,6 +32,7 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | '_source'
     | 'point'
     | 'shape'
+    | 'sparse_vector'
     | 'string'
     | string
     | 'nested'
@@ -52,7 +53,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   conflict: { iconType: 'warning', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
   date_range: { iconType: 'tokenDate' },
-  dense_vector: { iconType: 'tokenDenseVector' },
+  dense_vector: { iconType: 'tokenVectorDense' },
   geo_point: { iconType: 'tokenGeo' },
   geo_shape: { iconType: 'tokenGeo' },
   ip: { iconType: 'tokenIP' },
@@ -69,6 +70,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
+  sparse_vector: { iconType: 'tokenVectorSparse' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },

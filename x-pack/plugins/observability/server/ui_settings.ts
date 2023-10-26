@@ -374,7 +374,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
       defaultMessage: 'Enable Universal Profiling integration in APM',
     }),
-    value: false,
+    value: true,
     schema: schema.boolean(),
     requiresPageReload: false,
   },
@@ -396,7 +396,7 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: `The average amortized per-core power consumption (based on 100% CPU utilization).`,
     }),
     schema: schema.number({ min: 0 }),
-    requiresPageReload: false,
+    requiresPageReload: true,
   },
   [profilingDatacenterPUE]: {
     category: [observabilityFeatureId],
@@ -425,7 +425,7 @@ export const uiSettings: Record<string, UiSettings> = {
       },
     }),
     schema: schema.number({ min: 0 }),
-    requiresPageReload: false,
+    requiresPageReload: true,
   },
   [profilingCo2PerKWH]: {
     category: [observabilityFeatureId],
@@ -448,7 +448,7 @@ export const uiSettings: Record<string, UiSettings> = {
       },
     }),
     schema: schema.number({ min: 0 }),
-    requiresPageReload: false,
+    requiresPageReload: true,
   },
 };
 

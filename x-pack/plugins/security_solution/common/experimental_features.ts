@@ -62,11 +62,6 @@ export const allowedExperimentalValues = Object.freeze({
   endpointResponseActionsEnabled: true,
 
   /**
-   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
-   */
-  alertDetailsPageEnabled: false,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
@@ -103,12 +98,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics HTTP endpoints
    */
   riskScoringRoutesEnabled: true,
-  /*
-   *
-   * Enables Discover embedded within timeline
-   *
-   * */
-  discoverInTimeline: true,
 
   /**
    * disables ES|QL rules

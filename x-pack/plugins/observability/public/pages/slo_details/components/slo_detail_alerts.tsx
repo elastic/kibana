@@ -31,7 +31,6 @@ export function SloDetailsAlerts({ slo }: Props) {
             alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
             configurationId={AlertConsumers.OBSERVABILITY}
             id={ALERTS_TABLE_ID}
-            flyoutSize="s"
             data-test-subj="alertTable"
             featureIds={[AlertConsumers.SLO]}
             query={{
@@ -42,7 +41,6 @@ export function SloDetailsAlerts({ slo }: Props) {
                 ],
               },
             }}
-            showExpandToDetails={false}
             showAlertStatusWithFlapping
             pageSize={100}
           />

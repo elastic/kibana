@@ -9,22 +9,6 @@ import type { IdentifierType } from '../../../common/risk_engine';
 import { RiskScoreEntity, riskScoreBaseIndexName } from '../../../common/risk_engine';
 import type { IIndexPatternString } from './utils/create_datastream';
 
-export const ilmPolicy = {
-  _meta: {
-    managed: true,
-  },
-  phases: {
-    hot: {
-      actions: {
-        rollover: {
-          max_age: '30d',
-          max_primary_shard_size: '50gb',
-        },
-      },
-    },
-  },
-};
-
 const commonRiskFields: FieldMap = {
   id_field: {
     type: 'keyword',
@@ -140,7 +124,6 @@ export const riskScoreFieldMap: FieldMap = {
   ...buildIdentityRiskFields(RiskScoreEntity.user),
 } as const;
 
-export const ilmPolicyName = '.risk-score-ilm-policy';
 export const mappingComponentName = '.risk-score-mappings';
 export const totalFieldsLimit = 1000;
 
@@ -148,9 +131,6 @@ export const getIndexPatternDataStream = (namespace: string): IIndexPatternStrin
   template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
 });
-
-export const getLatestTransformId = (namespace: string): string =>
-  `risk_score_latest_transform_${namespace}`;
 
 export const getTransformOptions = ({ dest, source }: { dest: string; source: string[] }) => ({
   dest: {

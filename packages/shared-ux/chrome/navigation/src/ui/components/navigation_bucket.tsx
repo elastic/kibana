@@ -7,8 +7,9 @@
  */
 
 import React, { useCallback } from 'react';
-
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
+
+import { getNavigationNodeId } from '../../utils';
 import { getPresets } from '../nav_tree_presets';
 import { Navigation } from './navigation';
 import type { NavigationGroupPreset } from '../types';
@@ -41,13 +42,7 @@ export function NavigationBucket<
   const renderItems = useCallback(
     (items: Array<NodeDefinition<LinkId, Id, ChildrenId>>, isRoot = false) => {
       return items.map((item) => {
-        const id = item.id ?? item.link;
-
-        if (!id) {
-          throw new Error(
-            `At least one of id or link must be defined for navigation item ${item.title}`
-          );
-        }
+        const id = getNavigationNodeId(item);
 
         return (
           <React.Fragment key={id}>

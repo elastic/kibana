@@ -145,6 +145,7 @@ export const AnalyticsCollectionChart: React.FC<
           }
         }}
         onElementOut={() => setHoverChart(null)}
+        locale={i18n.getLocale()}
       />
 
       {charts.map(({ data: chartData, id, name, chartColor }) => (

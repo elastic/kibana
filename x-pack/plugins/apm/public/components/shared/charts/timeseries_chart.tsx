@@ -204,6 +204,7 @@ export function TimeseriesChart({
               onToggleLegend(legend);
             }
           }}
+          locale={i18n.getLocale()}
         />
         <Axis
           id="x-axis"

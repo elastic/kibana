@@ -70,6 +70,7 @@ export interface APMPerService {
 }
 
 export interface APMUsage {
+  has_any_services_per_official_agent: boolean;
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
   version: {
