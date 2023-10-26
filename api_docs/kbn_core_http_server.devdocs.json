@@ -4297,11 +4297,11 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
@@ -4342,6 +4342,14 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -6703,7 +6711,7 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "reporting",
@@ -6732,6 +6740,14 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -13610,6 +13626,10 @@
                 "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
               },
               {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/server/options_list/options_list_cluster_settings_route.ts"
               },
@@ -13972,6 +13992,10 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",

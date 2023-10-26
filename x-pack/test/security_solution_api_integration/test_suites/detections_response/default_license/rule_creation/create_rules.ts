@@ -541,6 +541,44 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
       });
+
+      describe('investigation_fields', () => {
+        it('should create a rule with investigation_fields', async () => {
+          const rule = {
+            ...getSimpleRule(),
+            investigation_fields: {
+              field_names: ['host.name'],
+            },
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send(rule)
+            .expect(200);
+
+          expect(body.investigation_fields).to.eql({
+            field_names: ['host.name'],
+          });
+        });
+
+        it('should NOT create a rule with legacy investigation_fields', async () => {
+          const rule = {
+            ...getSimpleRule(),
+            investigation_fields: ['host.name'],
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send(rule)
+            .expect(400);
+
+          expect(body.message).to.eql(
+            '[request body]: Invalid value "["host.name"]" supplied to "investigation_fields"'
+          );
+        });
+      });
     });
 
     describe('@brokenInServerless missing timestamps', () => {
