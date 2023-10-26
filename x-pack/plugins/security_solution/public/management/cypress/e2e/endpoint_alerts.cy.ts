@@ -15,17 +15,17 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endp
 import { enableAllPolicyProtections } from '../tasks/endpoint_policy';
 import type { PolicyData, ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
-import { login } from '../tasks/login';
+import { login, ROLE } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
-// FIXME: Flaky. Needs fixing (security team issue #7763)
-describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
-  before(() => {
+  beforeEach(() => {
+    login(ROLE.soc_manager);
     getEndpointIntegrationVersion().then((version) => {
       createAgentPolicyTask(version, 'alerts test').then((data) => {
         indexedPolicy = data;
@@ -41,7 +41,7 @@ describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, ()
     });
   });
 
-  after(() => {
+  afterEach(() => {
     if (createdHost) {
       cy.task('destroyEndpointHost', createdHost);
     }
@@ -53,10 +53,6 @@ describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, ()
     if (createdHost) {
       deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
     }
-  });
-
-  beforeEach(() => {
-    login();
   });
 
   it('should create a Detection Engine alert from an endpoint alert', () => {
@@ -89,7 +85,6 @@ describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, ()
           `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
         );
       });
-
     getAlertsTableRows().should('have.length.greaterThan', 0);
   });
 });
