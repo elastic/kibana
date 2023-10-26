@@ -52,6 +52,7 @@ export const formatNavigationTree = (
         breadcrumbStatus: 'hidden',
         defaultIsCollapsed: false,
         children: bodyChildren,
+        isCollapsible: false,
       },
     ],
     footer: formatFooterNodesFromLinks(footerNavItems, footerCategories),

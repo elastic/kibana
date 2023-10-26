@@ -6,9 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { SeverityAll } from '@kbn/cases-plugin/common/ui';
+import { navigateToCasesApp } from '../../../../../shared/lib/cases/helpers';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+const owner = SECURITY_SOLUTION_OWNER;
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
@@ -24,7 +28,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await svlSecNavigation.navigateToLandingPage();
 
-      await testSubjects.click('solutionSideNavItemLink-cases');
+      await navigateToCasesApp(getPageObject, getService, owner);
     });
 
     after(async () => {
@@ -151,7 +155,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('severity filtering', () => {
       // Error: retry.tryForTime timeout: Error: expected 10 to equal 5
       before(async () => {
-        await testSubjects.click('solutionSideNavItemLink-cases');
+        await navigateToCasesApp(getPageObject, getService, owner);
 
         await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'securitySolution' });
         await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'securitySolution' });
@@ -167,7 +171,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          * There is no easy way to clear the filtering.
          * Refreshing the page seems to be easier.
          */
-        await testSubjects.click('solutionSideNavItemLink-cases');
+        await navigateToCasesApp(getPageObject, getService, owner);
       });
 
       after(async () => {
