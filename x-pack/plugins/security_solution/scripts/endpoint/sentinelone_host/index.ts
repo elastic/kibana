@@ -30,9 +30,11 @@ export const cli = async () => {
 
   return run(runCli, {
     description: `Sets up the kibana system so that SentinelOne hosts data can be be streamed to Elasticsearch.
-It will first setup a host VM that runs the SentinelOne agent on it. It will then
-also setup a second VM (if necessary) that runs Elastic Agent along with the SentinelOne integration
-policy (an agent-less integration).`,
+It will first setup a host VM that runs the SentinelOne agent on it. This VM will ensure that data is being
+created in SentinelOne.
+It will then also setup a second VM (if necessary) that runs Elastic Agent along with the SentinelOne integration
+policy (an agent-less integration) - this is the process that then connects to the SentinelOne management
+console and pushes the data to Elasticsearch.`,
     flags: {
       string: [
         'kibanaUrl',
@@ -79,18 +81,9 @@ const runCli: RunFn = async ({ log, flags }) => {
   const s1ApiToken = flags.s1ApiToken as string;
   const policy = flags.policy as string;
   const forceFleetServer = flags.forceFleetServer as boolean;
-
-  createToolingLogger.defaultLogLevel = flags.verbose
-    ? 'verbose'
-    : flags.debug
-    ? 'debug'
-    : flags.silent
-    ? 'silent'
-    : flags.quiet
-    ? 'error'
-    : 'info';
-
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
+
+  createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
 
   ok(s1Url, getRequiredArgMessage('s1Url'));
   ok(s1ApiToken, getRequiredArgMessage('s1ApiToken'));
@@ -165,7 +158,7 @@ const runCli: RunFn = async ({ log, flags }) => {
     });
   } else {
     log.info(
-      `No host VM created for Fleet agent policy [${agentPolicyName}]. It already show to have [${agents}] enrolled`
+      `No host VM created for Fleet agent policy [${agentPolicyName}]. It already shows to have [${agents}] enrolled`
     );
   }
 
