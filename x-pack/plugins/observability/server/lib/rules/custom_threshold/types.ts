@@ -15,7 +15,7 @@ import {
 import { Alert } from '@kbn/alerting-plugin/server';
 import { TypeOf } from '@kbn/config-schema';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID } from './constants';
-import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './custom_threshold_executor';
+import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './translations';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { AdditionalContext } from './utils';
 import { searchConfigurationSchema } from './register_custom_threshold_rule_type';

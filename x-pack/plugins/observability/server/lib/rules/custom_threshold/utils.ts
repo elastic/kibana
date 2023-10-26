@@ -58,8 +58,6 @@ export const validateKQLStringFilter = (value: string) => {
   }
 };
 
-export const UNGROUPED_FACTORY_KEY = '*';
-
 export const createScopedLogger = (
   logger: Logger,
   scope: string,

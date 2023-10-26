@@ -40,7 +40,7 @@ import {
 } from './translations';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
-import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './translations';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/custom_threshold_rule/constants';
 
@@ -143,8 +143,8 @@ export function thresholdRuleType(
         { unknowns: 'allow' }
       ),
     },
-    defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS, NO_DATA_ACTIONS],
+    defaultActionGroupId: FIRED_ACTION.id,
+    actionGroups: [FIRED_ACTION, NO_DATA_ACTION],
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(

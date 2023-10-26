@@ -15,13 +15,8 @@ import {
   MetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
 
-import {
-  CONTAINER_ID,
-  AdditionalContext,
-  doFieldsExist,
-  KUBERNETES_POD_UID,
-  UNGROUPED_FACTORY_KEY,
-} from '../utils';
+import { UNGROUPED_FACTORY_KEY } from '../constants';
+import { CONTAINER_ID, AdditionalContext, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<

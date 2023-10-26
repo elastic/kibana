@@ -5,5 +5,26 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const FIRED_ACTIONS_ID = 'custom_threshold.fired';
 export const NO_DATA_ACTIONS_ID = 'custom_threshold.nodata';
+
+export const UNGROUPED_FACTORY_KEY = '*';
+
+export const FIRED_ACTION = {
+  id: FIRED_ACTIONS_ID,
+  name: i18n.translate('xpack.observability.customThreshold.rule.alerting.custom_threshold.fired', {
+    defaultMessage: 'Alert',
+  }),
+};
+
+export const NO_DATA_ACTION = {
+  id: NO_DATA_ACTIONS_ID,
+  name: i18n.translate(
+    'xpack.observability.customThreshold.rule.alerting.custom_threshold.nodata',
+    {
+      defaultMessage: 'No Data',
+    }
+  ),
+};

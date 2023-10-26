@@ -18,7 +18,7 @@ import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import { ObservabilityConfig } from '../../..';
-import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID } from './constants';
+import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
   AlertStates,
   CustomThresholdRuleParams,
@@ -37,7 +37,6 @@ import {
 import {
   createScopedLogger,
   getContextForRecoveredAlerts,
-  UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
   flattenAdditionalContext,

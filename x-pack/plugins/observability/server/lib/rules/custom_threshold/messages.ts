@@ -10,26 +10,11 @@ import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { formatDurationFromTimeUnitChar } from '../../../../common';
 import { Evaluation } from './lib/evaluate_rule';
 import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
-import { UNGROUPED_FACTORY_KEY } from './utils';
+import { BELOW_TEXT, ABOVE_TEXT, BETWEEN_TEXT, NOT_BETWEEN_TEXT } from './translations';
+import { UNGROUPED_FACTORY_KEY } from './constants';
 
 const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;
-
-const belowText = i18n.translate('xpack.observability.customThreshold.rule.threshold.below', {
-  defaultMessage: 'below',
-});
-const aboveText = i18n.translate('xpack.observability.customThreshold.rule.threshold.above', {
-  defaultMessage: 'above',
-});
-const betweenText = i18n.translate('xpack.observability.customThreshold.rule.threshold.between', {
-  defaultMessage: 'between',
-});
-const notBetweenText = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.notBetween',
-  {
-    defaultMessage: 'not between',
-  }
-);
 
 const recoveredComparatorToI18n = (
   comparator: Comparator,
@@ -38,30 +23,30 @@ const recoveredComparatorToI18n = (
 ) => {
   switch (comparator) {
     case Comparator.BETWEEN:
-      return currentValue < threshold[0] ? belowText : aboveText;
+      return currentValue < threshold[0] ? BELOW_TEXT : ABOVE_TEXT;
     case Comparator.OUTSIDE_RANGE:
-      return betweenText;
+      return BETWEEN_TEXT;
     case Comparator.GT:
     case Comparator.GT_OR_EQ:
-      return belowText;
+      return BELOW_TEXT;
     case Comparator.LT:
     case Comparator.LT_OR_EQ:
-      return aboveText;
+      return ABOVE_TEXT;
   }
 };
 
 const alertComparatorToI18n = (comparator: Comparator) => {
   switch (comparator) {
     case Comparator.BETWEEN:
-      return betweenText;
+      return BETWEEN_TEXT;
     case Comparator.OUTSIDE_RANGE:
-      return notBetweenText;
+      return NOT_BETWEEN_TEXT;
     case Comparator.GT:
     case Comparator.GT_OR_EQ:
-      return aboveText;
+      return ABOVE_TEXT;
     case Comparator.LT:
     case Comparator.LT_OR_EQ:
-      return belowText;
+      return BELOW_TEXT;
   }
 };
 

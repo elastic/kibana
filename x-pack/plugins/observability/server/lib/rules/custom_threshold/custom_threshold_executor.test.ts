@@ -16,7 +16,7 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
-import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './translations';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
@@ -1826,7 +1826,7 @@ interface Action {
 
 expect.extend({
   toBeAlertAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTIONS.id && !action?.action.reason.includes('no data');
+    const pass = action?.id === FIRED_ACTION.id && !action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be an ALERT action`;
     return {
       message,
@@ -1834,7 +1834,7 @@ expect.extend({
     };
   },
   toBeNoDataAction(action?: Action) {
-    const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.reason.includes('no data');
+    const pass = action?.id === NO_DATA_ACTION.id && action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be a NO DATA action`;
     return {
       message,
