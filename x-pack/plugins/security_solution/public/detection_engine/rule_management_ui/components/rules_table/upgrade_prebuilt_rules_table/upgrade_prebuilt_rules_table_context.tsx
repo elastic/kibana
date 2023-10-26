@@ -281,7 +281,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                   closeRulePreview();
                 }}
                 fill
-                data-test-subj="updatePrebuiltRuleButton"
+                data-test-subj="updatePrebuiltRuleFromFlyoutButton"
               >
                 {i18n.UPDATE_BUTTON_LABEL}
               </EuiButton>

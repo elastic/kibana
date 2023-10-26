@@ -711,41 +711,6 @@ And the Investigation Guide tab should NOT be displayed
 
 TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 
-#### **Scenario: User can preview a rule before upgrading**
-
-**Automation**: 1 e2e test
-
-```Gherkin
-Given at least 2 prebuilt rules are installed in Kibana
-And for at least 2 of the installed rules there are new versions available
-And user is on the Rule Management page
-When user opens the Rule Updates table
-Then all rules available for upgrade should be displayed in the table
-And user should be able to open a preview for a rule
-When the preview is open the user should be able to close it
-Then the user should be able to open a preview for another rule
-When the preview is open the user should be able to upgrade a rule using an action in the rule preview
-Then success message should be displayed after upgrade
-And the upgraded rule should be removed from the table
-And user should see the number of rules available to upgrade as 1
-```
-
-#### **Scenario: User can see correct rule information in preview before upgrading**
-
-**Automation**: 1 e2e test
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
-And user is on the Rule Management page
-When user opens the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
-And the user should be able to open a preview for a rule
-When the rule preview is open
-Then for every property defined in a rule the user should see property information in the correct tab and section of the preview (see Prebuilt rule properties examples)
-And selecting another rule in the table should update the preview content
-```
-
 ### Rule upgrade workflow: misc cases
 
 #### **Scenario: User doesn't see the Rule Updates tab until the package installation is completed**
