@@ -232,9 +232,9 @@ export default function ({ getService }: FtrProviderContext) {
           `${protocol}s://${hostname}:${port}/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          'Custom equation is 0.8 in the last 1 min for host-0. Alert when >= 0.2.'
+          `Average system.cpu.total.norm.pct is 80%, above the threshold of 20%. (duration: 1 min, data view: ${DATE_VIEW}, group: host-0)`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('0.8');
+        expect(resp.hits.hits[0]._source?.value).eql('80%');
         expect(resp.hits.hits[0]._source?.host).eql(
           '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
         );

@@ -15,7 +15,7 @@ import {
   EuiLink,
   EuiCallOut,
   EuiSpacer,
-  EuiTextColor,
+  EuiText,
   EuiBottomBar,
   EuiButton,
   EuiToolTip,
@@ -314,7 +314,7 @@ export class Form extends PureComponent<FormProps> {
     const unsavedCount = this.getCountOfUnsavedChanges();
     const hiddenUnsavedCount = this.getCountOfHiddenUnsavedChanges();
     return (
-      <EuiTextColor className="mgtAdvancedSettingsForm__unsavedCountMessage" color="ghost">
+      <EuiText className="mgtAdvancedSettingsForm__unsavedCountMessage">
         <FormattedMessage
           id="advancedSettings.form.countOfSettingsChanged"
           defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,
@@ -329,7 +329,7 @@ export class Form extends PureComponent<FormProps> {
             hiddenCount: hiddenUnsavedCount,
           }}
         />
-      </EuiTextColor>
+      </EuiText>
     );
   };
 
@@ -349,7 +349,7 @@ export class Form extends PureComponent<FormProps> {
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              color="ghost"
+              color="text"
               size="s"
               iconType="cross"
               onClick={this.clearAllUnsaved}

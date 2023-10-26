@@ -14,12 +14,7 @@
   },
   "servers": [
     {
-      "url": "https://{kibanaUrl}",
-      "variables": {
-        "kibanaUrl": {
-          "default": "localhost:5601"
-        }
-      }
+      "url": "/"
     }
   ],
   "security": [
