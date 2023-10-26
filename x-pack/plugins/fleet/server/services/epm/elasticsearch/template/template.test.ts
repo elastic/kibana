@@ -1107,7 +1107,7 @@ describe('EPM template', () => {
     const runtimeFieldMapping = {
       properties: {
         labels: {
-          type: "object",
+          type: 'object',
           dynamic: true,
         },
       },
@@ -1138,7 +1138,7 @@ describe('EPM template', () => {
     const runtimeFieldMapping = {
       properties: {
         numeric_labels: {
-          type: "object",
+          type: 'object',
           dynamic: true,
         },
       },
@@ -1171,7 +1171,7 @@ describe('EPM template', () => {
     const runtimeFieldMapping = {
       properties: {
         aggregate: {
-          type: "object",
+          type: 'object',
           dynamic: true,
         },
       },
@@ -1207,7 +1207,7 @@ describe('EPM template', () => {
     const runtimeFieldMapping = {
       properties: {
         group: {
-          type: "object",
+          type: 'object',
           dynamic: true,
         },
       },
