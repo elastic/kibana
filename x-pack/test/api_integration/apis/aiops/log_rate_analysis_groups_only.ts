@@ -194,12 +194,14 @@ export default ({ getService }: FtrProviderContext) => {
               data.push(action);
             }
 
-            // If streaming works correctly we should receive more than one chunk.
+            // Originally we assumed that we can assert streaming in contrast
+            // to non-streaming if there is more than one chunk. However,
+            // this turned out to be flaky since a stream could finish fast
+            // enough to contain only one chunk. So now we are checking if
+            // there's just one chunk or more.
             expect(chunkCounter).to.be.greaterThan(
-              1,
-              `Expected 'chunkCounter' to be greater than 1, got ${chunkCounter} with the following data: ${JSON.stringify(
-                data
-              )}.`
+              0,
+              `Expected 'chunkCounter' to be greater than 0, got ${chunkCounter}.`
             );
 
             await assertAnalysisResult(data);
