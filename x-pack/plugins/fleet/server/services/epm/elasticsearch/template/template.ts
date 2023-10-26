@@ -160,7 +160,7 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
     },
   });
 
-  const indexTemplateMappings: IndexTemplateMappings = { properties: properties };
+  const indexTemplateMappings: IndexTemplateMappings = { properties };
   if (dynamicTemplates.length > 0) {
     indexTemplateMappings.dynamic_templates = dynamicTemplates;
   }
@@ -194,14 +194,14 @@ function _generateMappings(
   let hasDynamicTemplateMappings = false;
   const props: Properties = {};
 
-  function addParentObjectAsStaticProperty(field : Field) {
+  function addParentObjectAsStaticProperty(field: Field) {
     // Don't add intermediary objects for wildcard names, as it will
     // be added for its parent object.
     if (field.name.includes('*')) {
       return;
     }
 
-    let fieldProps = {
+    const fieldProps = {
       type: 'object',
       dynamic: true,
     };
@@ -210,7 +210,13 @@ function _generateMappings(
     hasNonDynamicTemplateMappings = true;
   }
 
-  function addDynamicMappingWithIntermediaryObjects(path: string, pathMatch: string, matchingType: string, dynProperties: Properties, fieldProps?: Properties) {
+  function addDynamicMappingWithIntermediaryObjects(
+    path: string,
+    pathMatch: string,
+    matchingType: string,
+    dynProperties: Properties,
+    fieldProps?: Properties
+  ) {
     ctx.addDynamicMapping({
       path,
       pathMatch,
@@ -221,16 +227,16 @@ function _generateMappings(
     hasDynamicTemplateMappings = true;
 
     // Add dynamic intermediary objects.
-    let parts = pathMatch.split('.');
-    for (var i = parts.length-1; i > 0; i--) {
-      var name = parts.slice(0, i).join('.');
+    const parts = pathMatch.split('.');
+    for (let i = parts.length - 1; i > 0; i--) {
+      const name = parts.slice(0, i).join('.');
       if (!name.includes('*')) {
         continue;
       }
-      const dynProps : Properties = {
+      const dynProps: Properties = {
         type: 'object',
         dynamic: true,
-      }
+      };
       ctx.addDynamicMapping({
         path: name,
         pathMatch: name,
@@ -282,7 +288,7 @@ function _generateMappings(
               pathMatch,
               matchingType,
               dynProperties,
-              fieldProps,
+              fieldProps
             );
 
             // Add the parent object as static property, this is needed for
@@ -383,12 +389,7 @@ function _generateMappings(
         }
 
         if (dynProperties && matchingType) {
-          addDynamicMappingWithIntermediaryObjects(
-            path,
-            pathMatch,
-            matchingType,
-            dynProperties,
-          );
+          addDynamicMappingWithIntermediaryObjects(path, pathMatch, matchingType, dynProperties);
 
           // Add the parent object as static property, this is needed for
           // index templates not using `"dynamic": true`.
