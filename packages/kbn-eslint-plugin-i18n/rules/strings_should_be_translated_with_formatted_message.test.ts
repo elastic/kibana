@@ -95,6 +95,18 @@ function YetAnotherComponent() {
     )
 }`,
   },
+  {
+    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    code: `
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+function TestComponent() {
+      return (
+          <SomeChildComponent label={<FormattedMessage id="app_not_found_in_i18nrc.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+      )
+  }`,
+  },
 ];
 
 const invalid = [
@@ -159,6 +171,25 @@ function YetAnotherComponent() {
       },
     ],
     output: valid[2].code,
+  },
+  {
+    filename: valid[3].filename,
+    code: `
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+function TestComponent() {
+      return (
+          <SomeChildComponent label="This is a test" />
+      )
+  }`,
+    errors: [
+      {
+        line: 7,
+        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+      },
+    ],
+    output: valid[3].code,
   },
 ];
 

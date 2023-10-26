@@ -40,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom Threshold rule - AVG - US - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    const DATE_VIEW = 'traces-apm*,metrics-apm*,logs-apm*';
     const DATA_VIEW_ID = 'data-view-id';
 
     let synthtraceEsClient: ApmSynthtraceEsClient;
@@ -55,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         name: 'test-data-view',
         id: DATA_VIEW_ID,
-        title: 'traces-apm*,metrics-apm*,logs-apm*',
+        title: DATE_VIEW,
       });
     });
 
@@ -217,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          'Custom equation is 10,000,000 in the last 5 mins. Alert when > 7,500,000.'
+          `Average span.self_time.sum.us is 10,000,000, above the threshold of 7,500,000. (duration: 5 mins, data view: ${DATE_VIEW})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('10,000,000');
       });
