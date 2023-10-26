@@ -27,7 +27,6 @@ import {
   showTimeline,
   startTimelineSaving,
   unPinEvent,
-  updateAutoSaveMsg,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderType,
@@ -108,10 +107,6 @@ import { TimelineType } from '../../../../common/api/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
-  autoSavedWarningMsg: {
-    timelineId: null,
-    newTimelineModel: null,
-  },
   showCallOutUnauthorizedMsg: false,
   insertTimeline: null,
 };
@@ -301,13 +296,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
       andProviderId,
     }),
-  }))
-  .case(updateAutoSaveMsg, (state, { timelineId, newTimelineModel }) => ({
-    ...state,
-    autoSavedWarningMsg: {
-      timelineId,
-      newTimelineModel,
-    },
   }))
   .case(showCallOutUnauthorizedMsg, (state) => ({
     ...state,

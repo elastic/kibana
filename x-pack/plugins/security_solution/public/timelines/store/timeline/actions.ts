@@ -145,11 +145,6 @@ export const updateRange = actionCreator<{ id: string; start: string; end: strin
   'UPDATE_RANGE'
 );
 
-export const updateAutoSaveMsg = actionCreator<{
-  timelineId: string | null;
-  newTimelineModel: TimelineModel | null;
-}>('UPDATE_AUTO_SAVE');
-
 export const showCallOutUnauthorizedMsg = actionCreator('SHOW_CALL_OUT_UNAUTHORIZED_MSG');
 
 export const setSavedQueryId = actionCreator<{

@@ -308,10 +308,6 @@ export const mockGlobalState: State = {
   dragAndDrop: { dataProviders: {} },
   timeline: {
     showCallOutUnauthorizedMsg: false,
-    autoSavedWarningMsg: {
-      timelineId: null,
-      newTimelineModel: null,
-    },
     timelineById: {
       [TimelineId.test]: {
         activeTab: TimelineTabs.query,

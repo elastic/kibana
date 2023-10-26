@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  get,
-  getOr,
-  has,
-  merge as mergeObject,
-  set,
-  omit,
-  isObject,
-  toString as fpToString,
-} from 'lodash/fp';
+import { get, getOr, has, set, omit, isObject, toString as fpToString } from 'lodash/fp';
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
 import { from, EMPTY, merge } from 'rxjs';
@@ -38,11 +29,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import type {
-  TimelineErrorResponse,
-  ResponseTimeline,
-  TimelineResult,
-} from '../../../../common/api/timeline';
+import type { TimelineErrorResponse, ResponseTimeline } from '../../../../common/api/timeline';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
@@ -54,7 +41,6 @@ import * as i18n from '../../pages/translations';
 
 import {
   updateTimeline,
-  updateAutoSaveMsg,
   startTimelineSaving,
   endTimelineSaving,
   createTimeline,
@@ -189,11 +175,21 @@ export const createTimelineEpic =
               withLatestFrom(timeline$, allTimelineQuery$, kibana$),
               mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
                 const error = result as TimelineErrorResponse;
-                if (error.status_code != null && error.status_code === 405) {
-                  kibana.notifications.toasts.addDanger({
-                    title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-                    text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-                  });
+                if (error.status_code != null) {
+                  switch (error.status_code) {
+                    // conflict
+                    case 409:
+                      kibana.notifications.toasts.addDanger({
+                        title: i18n.TIMELINE_VERSION_CONFLICT_TITLE,
+                        text: i18n.TIMELINE_VERSION_CONFLICT_DESCRIPTION,
+                      });
+                      break;
+                    default:
+                      kibana.notifications.toasts.addDanger({
+                        title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+                        text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+                      });
+                  }
                   return [
                     endTimelineSaving({
                       id: action.payload.id,
@@ -221,26 +217,20 @@ export const createTimelineEpic =
                 }
 
                 return [
-                  response.code === 409
-                    ? updateAutoSaveMsg({
-                        timelineId: action.payload.id,
-                        newTimelineModel: omitTypenameInTimeline(savedTimeline, response.timeline),
-                      })
-                    : updateTimeline({
-                        id: action.payload.id,
-                        timeline: {
-                          ...savedTimeline,
-                          updated: response.timeline.updated ?? undefined,
-                          savedObjectId: response.timeline.savedObjectId,
-                          version: response.timeline.version,
-                          status: response.timeline.status ?? TimelineStatus.active,
-                          timelineType: response.timeline.timelineType ?? TimelineType.default,
-                          templateTimelineId: response.timeline.templateTimelineId ?? null,
-                          templateTimelineVersion:
-                            response.timeline.templateTimelineVersion ?? null,
-                          isSaving: false,
-                        },
-                      }),
+                  updateTimeline({
+                    id: action.payload.id,
+                    timeline: {
+                      ...savedTimeline,
+                      updated: response.timeline.updated ?? undefined,
+                      savedObjectId: response.timeline.savedObjectId,
+                      version: response.timeline.version,
+                      status: response.timeline.status ?? TimelineStatus.active,
+                      timelineType: response.timeline.timelineType ?? TimelineType.default,
+                      templateTimelineId: response.timeline.templateTimelineId ?? null,
+                      templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
+                      isSaving: false,
+                    },
+                  }),
                   ...callOutMsg,
                   setChanged({
                     id: action.payload.id,
@@ -389,14 +379,6 @@ export const convertTimelineAsInput = (
     }
     return acc;
   }, timelineInput);
-
-const omitTypename = (key: string, value: keyof TimelineModel) =>
-  key === '__typename' ? undefined : value;
-
-const omitTypenameInTimeline = (
-  oldTimeline: TimelineModel,
-  newTimeline: TimelineResult
-): TimelineModel => JSON.parse(JSON.stringify(mergeObject(oldTimeline, newTimeline)), omitTypename);
 
 const convertToString = (obj: unknown) => {
   try {
