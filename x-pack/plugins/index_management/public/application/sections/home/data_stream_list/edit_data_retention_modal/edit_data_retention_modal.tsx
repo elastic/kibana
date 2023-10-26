@@ -181,7 +181,7 @@ const MixedIndicesCallout = ({
   dataStreamName,
   history,
 }: MixedIndicesCalloutProps) => {
-  const MAX_VISIBLE_INDICES = 1;
+  const MAX_VISIBLE_INDICES = 3;
   const visibleIndices = dslWithIlmIndices.ilmIndices.slice(0, MAX_VISIBLE_INDICES);
 
   return (
