@@ -527,6 +527,12 @@ export class ModelsProvider {
     return requestedModel || recommendedModel || defaultModel!;
   }
 
+  /**
+   * Puts the requested ELSER model into elasticsearch, triggering elasticsearch to download the model.
+   * Assigns the model to the * space.
+   * @param modelId
+   * @param mlSavedObjectService
+   */
   async downloadModel(modelId: string, mlSavedObjectService: MLSavedObjectService) {
     const availableModels = await this.getModelDownloads();
     const model = availableModels.find((m) => m.name === modelId);
