@@ -895,6 +895,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
+packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 
 # Global Experience
 
