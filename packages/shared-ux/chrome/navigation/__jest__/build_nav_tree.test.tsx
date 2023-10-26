@@ -17,7 +17,7 @@ import type { RootNavigationItemDefinition } from '../src/ui/types';
 
 import { renderNavigation, TestType, type ProjectNavigationChangeListener } from './utils';
 
-const expectCatch = (type: TestType) => (e: Error) => {
+const errorHandler = (type: TestType) => (e: Error) => {
   const err = new Error(`Failed to run tests for ${type}.`);
   err.stack = e.stack;
   // eslint-disable-next-line no-console
@@ -38,26 +38,28 @@ describe('builds navigation tree', () => {
     const onProjectNavigationChange: jest.MockedFunction<ProjectNavigationChangeListener> =
       jest.fn();
 
-    const runTests = async ({ findByTestId }: RenderResult) => {
-      expect(await findByTestId(/nav-item-group1.item1\s/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.item2\s/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A.item1\s/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).toBeVisible();
+    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
+      try {
+        expect(await findByTestId(/nav-item-group1.item1\s/)).toBeVisible();
+        expect(await findByTestId(/nav-item-group1.item2\s/)).toBeVisible();
+        expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
+        expect(await findByTestId(/nav-item-group1.group1A.item1\s/)).toBeVisible();
+        expect(await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).toBeVisible();
 
-      // Click the last group to expand and show the last depth
-      (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
+        // Click the last group to expand and show the last depth
+        (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
 
-      expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
+        expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
 
-      expect(onProjectNavigationChange).toHaveBeenCalled();
-      const lastCall =
-        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-      const [{ navigationTree }] = lastCall;
-      return navigationTree;
+        expect(onProjectNavigationChange).toHaveBeenCalled();
+        const lastCall =
+          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+        const [{ navigationTree }] = lastCall;
+        return navigationTree;
+      } catch (e) {
+        errorHandler(type)(e);
+      }
     };
-
-    onProjectNavigationChange.mockReset();
 
     // -- Default navigation
     {
@@ -109,11 +111,7 @@ describe('builds navigation tree', () => {
         onProjectNavigationChange,
       });
 
-      const navigationTree = await runTests(renderResult).catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error('Error running default navigation tests');
-        throw e;
-      });
+      const navigationTree = await runTests('treeDef', renderResult);
 
       expect(navigationTree).toMatchInlineSnapshot(`
         Array [
@@ -225,6 +223,7 @@ describe('builds navigation tree', () => {
         ]
       `);
 
+      onProjectNavigationChange.mockReset();
       renderResult.unmount();
     }
 
@@ -248,11 +247,7 @@ describe('builds navigation tree', () => {
         onProjectNavigationChange,
       });
 
-      const navigationTree = await runTests(renderResult).catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error('Error running UI tests');
-        throw e;
-      });
+      const navigationTree = await runTests('uiComponents', renderResult);
 
       expect(navigationTree).toMatchInlineSnapshot(`
         Array [
@@ -397,7 +392,7 @@ describe('builds navigation tree', () => {
         expect(groupChildren[1].title).toBe('Overwrite deeplink title');
         expect(groupChildren[2].title).toBe('Title in props'); // Unknown deeplink, has not been rendered
       } catch (e) {
-        expectCatch(type)(e);
+        errorHandler(type)(e);
       }
 
       return groupChildren;
@@ -508,7 +503,7 @@ describe('builds navigation tree', () => {
         expect(rootNode.children?.[0]?.id).toBe('group2');
         return navTree;
       } catch (e) {
-        expectCatch(type)(e);
+        errorHandler(type)(e);
       }
     };
 
@@ -561,6 +556,61 @@ describe('builds navigation tree', () => {
         ),
         services: { navLinks$ },
         onProjectNavigationChange,
+      });
+
+      await runTests('uiComponents', renderResult);
+    }
+  });
+
+  test('should render recently accessed items', async () => {
+    const recentlyAccessed$ = of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]);
+
+    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
+      try {
+        expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
+        expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+          'RecentThis is an exampleAnother example'
+        );
+      } catch (e) {
+        errorHandler(type)(e);
+      }
+    };
+
+    // -- Default navigation
+    {
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'recentlyAccessed',
+        },
+      ];
+
+      const renderResult = await renderNavigation({
+        navTreeDef: {
+          body: navigationBody,
+        },
+        services: { recentlyAccessed$ },
+      });
+
+      await runTests('treeDef', renderResult);
+      renderResult.unmount();
+    }
+
+    // -- With UI Components
+    {
+      const renderResult = await renderNavigation({
+        navigationElement: (
+          <Navigation>
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.RecentlyAccessed />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        ),
+        services: { recentlyAccessed$ },
       });
 
       await runTests('uiComponents', renderResult);

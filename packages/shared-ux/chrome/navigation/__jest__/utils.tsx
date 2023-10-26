@@ -25,12 +25,12 @@ export const renderNavigation = async ({
   navTreeDef,
   navigationElement,
   services: overrideServices = {},
-  onProjectNavigationChange,
+  onProjectNavigationChange = () => undefined,
 }: {
   navTreeDef?: NavigationTreeDefinition;
   navigationElement?: React.ReactElement;
   services?: Partial<NavigationServices>;
-  onProjectNavigationChange: ProjectNavigationChangeListener;
+  onProjectNavigationChange?: ProjectNavigationChangeListener;
 }): Promise<RenderResult> => {
   const element = navigationElement ?? <DefaultNavigation navigationTree={navTreeDef} />;
 
