@@ -65,12 +65,24 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={this.deps}>
-          <h1>
-            <FormattedMessage
-              id="xpack.observability..h1.alertsEmbeddableLabel"
-              defaultMessage="Alerts Embeddable"
-            />
-          </h1>
+          <AlertsStateTable
+            alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+            configurationId={AlertConsumers.OBSERVABILITY}
+            id={ALERTS_TABLE_ID}
+            data-test-subj="alertTable"
+            featureIds={[AlertConsumers.SLO]}
+            query={{
+              bool: {
+                filter: [
+                  { term: { 'slo.id': slo.id } },
+                  { term: { 'slo.instanceId': slo.instanceId ?? ALL_VALUE } },
+                ],
+              },
+            }}
+            showExpandToDetails={false}
+            showAlertStatusWithFlapping
+            pageSize={100}
+          />
         </KibanaContextProvider>
       </I18nContext>,
       node
