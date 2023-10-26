@@ -446,6 +446,32 @@ describe('Data Streams tab', () => {
           );
         });
 
+        test('can disable lifecycle', async () => {
+          const {
+            actions: { clickNameAt, clickEditDataRetentionButton },
+          } = testBed;
+
+          await clickNameAt(0);
+
+          clickEditDataRetentionButton();
+
+          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+            success: true,
+          });
+
+          testBed.form.toggleEuiSwitch('dataRetentionEnabledField.input');
+
+          await act(async () => {
+            testBed.find('saveButton').simulate('click');
+          });
+          testBed.component.update();
+
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
+            expect.objectContaining({ body: JSON.stringify({ enabled: false }) })
+          );
+        });
+
         test('allows to set infinite retention period', async () => {
           const {
             actions: { clickNameAt, clickEditDataRetentionButton },
@@ -497,6 +523,110 @@ describe('Data Streams tab', () => {
         const { actions, findDetailPanelDataRetentionDetail } = testBed;
         await actions.clickNameAt(0);
         expect(findDetailPanelDataRetentionDetail().exists()).toBeTruthy();
+      });
+    });
+
+    describe('shows all possible states according to who manages the data stream', () => {
+      const ds1 = createDataStreamPayload({
+        name: 'dataStream1',
+        nextGenerationManagedBy: 'Index Lifecycle Management',
+        lifecycle: undefined,
+        indices: [
+          {
+            managedBy: 'Index Lifecycle Management',
+            name: 'indexName',
+            uuid: 'indexId',
+            preferILM: true,
+          },
+        ],
+      });
+
+      const ds2 = createDataStreamPayload({
+        name: 'dataStream2',
+        nextGenerationManagedBy: 'Data stream lifecycle',
+        lifecycle: {
+          enabled: true,
+          data_retention: '7d',
+        },
+        indices: [
+          {
+            managedBy: 'Index Lifecycle Management',
+            name: 'indexName1',
+            uuid: 'indexId1',
+            preferILM: true,
+          },
+          {
+            managedBy: 'Index Lifecycle Management',
+            name: 'indexName2',
+            uuid: 'indexId2',
+            preferILM: true,
+          },
+          {
+            managedBy: 'Index Lifecycle Management',
+            name: 'indexName3',
+            uuid: 'indexId3',
+            preferILM: true,
+          },
+          {
+            managedBy: 'Index Lifecycle Management',
+            name: 'indexName4',
+            uuid: 'indexId4',
+            preferILM: true,
+          },
+        ],
+      });
+
+      beforeEach(async () => {
+        const { setLoadDataStreamsResponse } = httpRequestsMockHelpers;
+
+        setLoadDataStreamsResponse([ds1, ds2]);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('when fully managed by ILM, user cannot edit data retention', async () => {
+        const { setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+        setLoadDataStreamResponse(ds1.name, ds1);
+
+        const { actions, find, exists } = testBed;
+
+        await actions.clickNameAt(0);
+        expect(find('dataRetentionDetail').text()).toBe('Disabled');
+
+        // There should be a warning that the data stream is fully managed by ILM
+        expect(exists('dsIsFullyManagedByILM')).toBe(true);
+
+        // Edit data retention button should not be visible
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(exists('editDataRetentionButton')).toBe(false);
+      });
+
+      test('when partially managed by dsl but has backing indices managed by ILM should show a warning', async () => {
+        const { setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+        setLoadDataStreamResponse(ds2.name, ds2);
+
+        const { actions, find, exists } = testBed;
+
+        await actions.clickNameAt(1);
+        expect(find('dataRetentionDetail').text()).toBe('7d');
+
+        actions.clickEditDataRetentionButton();
+
+        // There should be a warning that the data stream is managed by DSL
+        // but the backing indices that are managed by ILM wont be affected.
+        expect(exists('someIndicesAreManagedByILMCallout')).toBe(true);
+        expect(exists('viewIlmPolicyLink')).toBe(true);
+        expect(exists('viewAllIndicesLink')).toBe(true);
       });
     });
   });

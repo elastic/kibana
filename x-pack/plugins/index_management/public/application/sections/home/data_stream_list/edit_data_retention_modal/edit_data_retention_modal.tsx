@@ -202,13 +202,18 @@ const MixedIndicesCallout = ({
             managedByILM: <strong>{visibleIndices.map((index) => index.name).join(', ')}</strong>,
             remainingIndices: dslWithIlmIndices.ilmIndices.length - MAX_VISIBLE_INDICES,
             hasManyIndices: dslWithIlmIndices.ilmIndices.length > MAX_VISIBLE_INDICES ? 1 : 0,
-            ilmPolicyLink: <EuiLink href={ilmPolicyLink}>{ilmPolicyName}</EuiLink>,
+            ilmPolicyLink: (
+              <EuiLink data-test-subj="viewIlmPolicyLink" href={ilmPolicyLink}>
+                {ilmPolicyName}
+              </EuiLink>
+            ),
             viewAllIndicesLink: (
               <EuiLink
                 {...reactRouterNavigate(
                   history,
                   getIndexListUri(`data_stream="${dataStreamName}"`, true)
                 )}
+                data-test-subj="viewAllIndicesLink"
               >
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.viewAllIndices"
