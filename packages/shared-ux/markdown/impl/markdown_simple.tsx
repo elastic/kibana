@@ -14,8 +14,5 @@ export interface MarkdownSimpleProps {
 }
 
 export const MarkdownSimple: React.FC<MarkdownSimpleProps> = ({ src }) => (
-  <EuiMarkdownFormat
-    aria-label={'markdown component'}
-    children={src}
-  />
+  <EuiMarkdownFormat aria-label={'markdown component'} children={src} />
 );
