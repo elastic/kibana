@@ -270,3 +270,8 @@ export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
 export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
 
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';
+
+export const EXCEPTIONS_ITEM_ERROR_CALLOUT = '[data-test-subj="addExceptionErrorCallOut"]';
+
+export const EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON =
+  '[data-test-subj="addExceptionErrorDismissButton"]';
