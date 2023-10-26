@@ -9,16 +9,20 @@
 import util from 'util';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
+import { Role as SecurityRoleDefinition } from '@kbn/security-plugin/common';
 
 export class Role {
   constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
 
-  public async create(name: string, role: any) {
+  public async create(name: string, role: SecurityRoleDefinition) {
     this.log.debug(`creating role ${name}`);
     const { data, status, statusText } = await this.kibanaServer.request({
       path: `/api/security/role/${name}`,
       method: 'PUT',
-      body: role,
+      body: {
+        kibana: role.kibana,
+        elasticsearch: role.elasticsearch,
+      },
       retries: 0,
     });
     if (status !== 204) {
