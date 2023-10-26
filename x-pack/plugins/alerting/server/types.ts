@@ -64,7 +64,7 @@ import {
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
-import { RuleAttributes } from './data/rule/types';
+import { RuleDomain } from './application/rule/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -479,30 +479,31 @@ export interface RawRule extends SavedObjectAttributes {
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 
-export interface AdHocRuleRunParams extends SavedObjectAttributes {
+export interface AdHocRuleRunParams extends Record<string, unknown> {
   createdAt: string;
   ruleId: string;
   spaceId: string;
   rule: Pick<
-    RuleAttributes,
+    RuleDomain,
+    | 'id'
     | 'name'
     | 'tags'
     | 'alertTypeId'
-    | 'enabled'
-    | 'consumer'
-    | 'schedule'
-    | 'actions'
     | 'params'
+    | 'apiKeyOwner'
+    | 'apiKeyCreatedByUser'
+    | 'consumer'
+    | 'enabled'
+    | 'schedule'
     | 'createdBy'
     | 'updatedBy'
     | 'createdAt'
     | 'updatedAt'
-    | 'apiKeyOwner'
-    | 'apiKeyCreatedByUser'
     | 'throttle'
     | 'notifyWhen'
-    | 'revision'
     | 'muteAll'
+    | 'revision'
+    | 'snoozeSchedule'
   >;
   apiKeyToUse: string;
   enabled: boolean;

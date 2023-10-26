@@ -22,6 +22,7 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../auth
 import { ruleAuditEvent, RuleAuditAction } from '../../../../../rules_client/common/audit_events';
 import type { ScheduleAdHocRuleRunOptions } from './types';
 import { scheduleAdHocRuleRunOptionsSchema } from './schemas';
+import { transformRuleAttributesToRuleDomain } from '../../../transforms';
 
 export async function scheduleAdHocRuleRun(
   context: RulesClientContext,
@@ -126,12 +127,21 @@ export async function scheduleAdHocRuleRun(
 
   const scheduleResponses = [];
   for await (const response of rulesFinder.find()) {
-    const scheduleResponse = await context.adHocRuleRunClient.bulkQueue(
-      context.unsecuredSavedObjectsClient,
-      response.saved_objects,
-      context.spaceId,
-      options
-    );
+    const scheduleResponse = await context.adHocRuleRunClient.bulkQueue({
+      unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+      rules: response.saved_objects.map(({ id, attributes, references }) => {
+        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+        return transformRuleAttributesToRuleDomain(attributes as RuleAttributes, {
+          id,
+          logger: context.logger,
+          ruleType,
+          references,
+          omitGeneratedValues: false,
+        });
+      }),
+      spaceId: context.spaceId,
+      options,
+    });
     scheduleResponses.push([...scheduleResponse]);
   }
 

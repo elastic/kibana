@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import { parseDuration, RulesSettingsQueryDelayProperties } from '../../common';
 
-export function getTimeRange(
-  logger: Logger,
-  queryDelaySettings: RulesSettingsQueryDelayProperties,
-  window?: string
-) {
+interface GetTimeRangeOpts {
+  logger: Logger;
+  queryDelaySettings?: RulesSettingsQueryDelayProperties;
+  window?: string;
+  nowDate?: string;
+}
+export function getTimeRange({ logger, queryDelaySettings, nowDate, window }: GetTimeRangeOpts) {
   let timeWindow: number = 0;
   if (window) {
     try {
@@ -29,10 +31,13 @@ export function getTimeRange(
       );
     }
   }
-  logger.debug(`Adjusting rule query time range by ${queryDelaySettings.delay} seconds`);
 
-  const queryDelay = queryDelaySettings.delay * 1000;
-  const date = Date.now();
+  if (queryDelaySettings) {
+    logger.debug(`Adjusting rule query time range by ${queryDelaySettings.delay} seconds`);
+  }
+
+  const queryDelay = queryDelaySettings ? queryDelaySettings.delay * 1000 : 0;
+  const date = nowDate ? new Date(nowDate).valueOf() : Date.now();
   const dateStart = new Date(date - (timeWindow + queryDelay)).toISOString();
   const dateEnd = new Date(date - queryDelay).toISOString();
 

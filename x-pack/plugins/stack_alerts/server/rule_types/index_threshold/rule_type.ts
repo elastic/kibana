@@ -239,6 +239,7 @@ export function getRuleType(
 
     const esClient = scopedClusterClient.asCurrentUser;
     const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
+    logger.info(`dateStart ${dateStart} - dateEnd ${dateEnd}`);
 
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {

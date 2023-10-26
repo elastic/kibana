@@ -14,7 +14,7 @@ import {
   RuleNotifyWhen,
   RuleTypeParams,
   RuleTypeState,
-  SanitizedRule,
+  SanitizedRuleConfig,
 } from '../types';
 import { TaskRunnerContext } from './types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -36,10 +36,12 @@ interface RunOpts {
   alertingEventLogger: AlertingEventLogger;
   alertsClient: UntypedAlertsClient;
   executionId: string;
-  executorServices: ExecutorServices;
+  executorServices: ExecutorServices & {
+    getTimeRangeFn?: (timeWindow?: string) => { dateStart: string; dateEnd: string };
+  };
   fakeRequest: KibanaRequest;
   maintenanceWindowIds?: string[];
-  rule: SanitizedRule<RuleTypeParams>;
+  rule: SanitizedRuleConfig;
   ruleId: string;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
@@ -92,7 +94,7 @@ export class RuleRunner {
 
     const rulesSettingsClient = this.options.context.getRulesSettingsClientWithRequest(fakeRequest);
     const namespace = this.options.context.spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING;
-    const ruleType = this.options.context.ruleTypeRegistry.get(rule.alertTypeId);
+    const ruleType = this.options.context.ruleTypeRegistry.get(rule.ruleTypeId);
 
     const flappingSettings = await rulesSettingsClient.flapping().get();
     const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
@@ -124,9 +126,9 @@ export class RuleRunner {
         try {
           const ctx = {
             type: 'alert',
-            name: `execute ${rule.alertTypeId}`,
+            name: `execute ${rule.ruleTypeId}`,
             id: ruleId,
-            description: `execute [${rule.alertTypeId}] with name [${rule.name}] in [${namespace}] namespace`,
+            description: `execute [${rule.ruleTypeId}] with name [${rule.name}] in [${namespace}] namespace`,
           };
 
           executorResult = await this.options.context.executionContext.withContext(ctx, () =>
@@ -152,31 +154,17 @@ export class RuleRunner {
               previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
               spaceId,
               namespace,
-              rule: {
-                id: ruleId,
-                name: rule.name,
-                tags: rule.tags,
-                consumer: rule.consumer,
-                producer: ruleType.producer,
-                revision: rule.revision,
-                ruleTypeId: rule.alertTypeId,
-                ruleTypeName: ruleType.name,
-                enabled: rule.enabled,
-                schedule: rule.schedule,
-                actions: rule.actions,
-                createdBy: rule.createdBy,
-                updatedBy: rule.updatedBy,
-                createdAt: rule.createdAt,
-                updatedAt: rule.updatedAt,
-                throttle: rule.throttle,
-                notifyWhen: rule.notifyWhen,
-                muteAll: rule.muteAll,
-                snoozeSchedule: rule.snoozeSchedule,
-              },
+              rule,
               logger: this.options.logger,
               flappingSettings,
-              getTimeRange: (timeWindow?: string) =>
-                getTimeRange(this.options.logger, queryDelaySettings, timeWindow),
+              getTimeRange:
+                executorServices.getTimeRangeFn ??
+                ((timeWindow?: string) =>
+                  getTimeRange({
+                    logger: this.options.logger,
+                    queryDelaySettings,
+                    window: timeWindow,
+                  })),
             })
           );
 

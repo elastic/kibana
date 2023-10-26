@@ -197,5 +197,6 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: 'ad_hoc_rule_run_params',
     attributesToEncrypt: new Set(['apiKeyToUse']),
+    attributesToExcludeFromAAD: new Set(['intervalStart']),
   });
 }

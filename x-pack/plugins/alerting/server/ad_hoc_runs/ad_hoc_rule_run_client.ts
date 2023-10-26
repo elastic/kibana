@@ -10,7 +10,6 @@ import {
   ISavedObjectsRepository,
   Logger,
   SavedObjectsClientContract,
-  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import {
   RunContext,
@@ -18,7 +17,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { ScheduleAdHocRuleRunOptions } from '../application/rule/methods/ad_hoc_runs/schedule/types';
-import { RuleAttributes } from '../data/rule/types';
+import { RuleDomain } from '../application/rule/types';
 import { AlertingPluginsStart } from '../plugin';
 import { TaskRunnerFactory } from '../task_runner';
 import { AdHocRuleRunParams } from '../types';
@@ -28,6 +27,13 @@ interface ConstructorOpts {
   logger: Logger;
   taskRunnerFactory: TaskRunnerFactory;
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>;
+}
+
+interface BulkQueueOpts {
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  rules: RuleDomain[];
+  spaceId: string;
+  options: ScheduleAdHocRuleRunOptions;
 }
 
 export class AdHocRuleRunClient {
@@ -85,45 +91,40 @@ export class AdHocRuleRunClient {
     }
   }
 
-  public async bulkQueue(
-    unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    rules: Array<SavedObjectsFindResult<RuleAttributes>>,
-    spaceId: string,
-    queueOptions: ScheduleAdHocRuleRunOptions
-  ) {
-    const bulkResponse = await unsecuredSavedObjectsClient.bulkCreate(
-      rules.map((ruleSO: SavedObjectsFindResult<RuleAttributes>) => ({
+  public async bulkQueue({ unsecuredSavedObjectsClient, rules, spaceId, options }: BulkQueueOpts) {
+    const bulkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRuleRunParams>(
+      rules.map((rule: RuleDomain) => ({
         type: 'ad_hoc_rule_run_params',
         attributes: {
-          createdAt: Date.now(),
+          createdAt: new Date().toISOString(),
           spaceId,
-          ruleId: ruleSO.id,
+          ruleId: rule.id,
           rule: {
-            name: ruleSO.attributes.name,
-            tags: ruleSO.attributes.tags,
-            consumer: ruleSO.attributes.consumer,
-            revision: ruleSO.attributes.revision,
-            alertTypeId: ruleSO.attributes.alertTypeId,
-            enabled: ruleSO.attributes.enabled,
-            schedule: ruleSO.attributes.schedule,
-            actions: ruleSO.attributes.actions,
-            params: ruleSO.attributes.params,
-            createdBy: ruleSO.attributes.createdBy,
-            updatedBy: ruleSO.attributes.updatedBy,
-            createdAt: ruleSO.attributes.createdAt,
-            updatedAt: ruleSO.attributes.updatedAt,
-            throttle: ruleSO.attributes.throttle,
-            notifyWhen: ruleSO.attributes.notifyWhen,
-            muteAll: ruleSO.attributes.muteAll,
-            snoozeSchedule: ruleSO.attributes.snoozeSchedule,
-            apiKeyOwner: ruleSO.attributes.apiKeyOwner,
-            apiKeyCreatedByUser: ruleSO.attributes.apiKeyCreatedByUser,
+            id: rule.id,
+            name: rule.name,
+            tags: rule.tags,
+            alertTypeId: rule.alertTypeId,
+            params: rule.params,
+            apiKeyOwner: rule.apiKeyOwner,
+            apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
+            consumer: rule.consumer,
+            enabled: rule.enabled,
+            schedule: rule.schedule,
+            createdBy: rule.createdBy,
+            updatedBy: rule.updatedBy,
+            createdAt: rule.createdAt,
+            updatedAt: rule.updatedAt,
+            throttle: rule.throttle,
+            notifyWhen: rule.notifyWhen,
+            muteAll: rule.muteAll,
+            revision: rule.revision,
+            snoozeSchedule: rule.snoozeSchedule,
           },
-          apiKeyToUse: ruleSO.attributes.apiKey,
+          apiKeyToUse: rule.apiKey!,
           enabled: true,
-          intervalStart: queueOptions.intervalStart,
-          intervalDuration: queueOptions.intervalDuration,
-          ...(queueOptions.intervalEnd ? { intervalEnd: queueOptions.intervalEnd } : {}),
+          intervalStart: options.intervalStart,
+          intervalDuration: options.intervalDuration,
+          ...(options.intervalEnd ? { intervalEnd: options.intervalEnd } : {}),
         },
       }))
     );
