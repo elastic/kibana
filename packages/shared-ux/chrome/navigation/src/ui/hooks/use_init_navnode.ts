@@ -120,6 +120,11 @@ function validateNodeProps<
       `[Chrome navigation] Error in node [${id}]. If renderAs is set to "panelOpener", a "link" must also be provided.`
     );
   }
+  if (renderAs === 'item' && !link) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" must also be provided.`
+    );
+  }
   if (appendHorizontalRule && !isGroup) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. "appendHorizontalRule" can only be added for group with children.`
@@ -192,7 +197,8 @@ export const useInitNavNode = <
   node: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'>,
   { cloudLinks }: { cloudLinks: CloudLinks }
 ) => {
-  const { isActive: isActiveControlled } = node;
+  const { isActive: isActiveControlled, isGroup: _isGroup } = node;
+  const isGroup = _isGroup && node.renderAs !== 'item';
 
   /**
    * Map of children nodes
@@ -253,10 +259,14 @@ export const useInitNavNode = <
       return aOrder - bOrder;
     });
 
-    const { unregister, path } = registerNodeOnParent({
-      ...internalNavNode,
-      children: children.length ? children : undefined,
-    });
+    const nodeToRegister =
+      isGroup && children.length === 0
+        ? null // A group with no children is not registered in the nav tree
+        : {
+            ...internalNavNode,
+            children: children.length ? children : undefined,
+          };
+    const { unregister, path } = registerNodeOnParent(internalNavNode.id, nodeToRegister);
 
     setNodePath((prev) => {
       if (!isSamePath(prev, path)) {
@@ -266,7 +276,7 @@ export const useInitNavNode = <
     });
 
     unregisterRef.current = unregister;
-  }, [internalNavNode, childrenNodes, registerNodeOnParent]);
+  }, [internalNavNode, childrenNodes, isGroup, registerNodeOnParent]);
 
   // Un-register from the parent. This will happen when the node is unmounted or if the deeplink
   // is not active anymore.
@@ -278,7 +288,23 @@ export const useInitNavNode = <
   }, [id]);
 
   const registerChildNode = useCallback<RegisterFunction>(
-    (childNode) => {
+    (_id, childNode) => {
+      if (orderChildrenRef.current[_id] === undefined) {
+        orderChildrenRef.current[_id] = idx.current++;
+      }
+
+      if (childNode === null) {
+        // We are removing this child
+        setChildrenNodes((prev) => {
+          const { [_id]: currentNode, ...rest } = prev;
+          return rest;
+        });
+        return {
+          unregister: () => undefined,
+          path: [],
+        };
+      }
+
       const childPath = nodePath ? [...nodePath, childNode.id] : [];
 
       setChildrenNodes((prev) => {
@@ -290,10 +316,6 @@ export const useInitNavNode = <
           },
         };
       });
-
-      if (orderChildrenRef.current[childNode.id] === undefined) {
-        orderChildrenRef.current[childNode.id] = idx.current++;
-      }
 
       return {
         unregister: (childId: string) => {

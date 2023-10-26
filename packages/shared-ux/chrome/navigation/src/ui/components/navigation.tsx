@@ -93,10 +93,22 @@ export function Navigation({
     });
   }, []);
 
-  const register = useCallback(
-    (navNode: ChromeProjectNavigationNode) => {
-      if (orderChildrenRef.current[navNode.id] === undefined) {
-        orderChildrenRef.current[navNode.id] = idx.current++;
+  const register = useCallback<RegisterFunction>(
+    (id, navNode) => {
+      if (orderChildrenRef.current[id] === undefined) {
+        orderChildrenRef.current[id] = idx.current++;
+      }
+
+      if (navNode === null) {
+        // We are removing this child
+        setNavigationItems((prevItems) => {
+          const { [id]: currentNode, ...rest } = prevItems;
+          return rest;
+        });
+        return {
+          unregister: () => undefined,
+          path: [],
+        };
       }
 
       setNavigationItems((prevItems) => {
