@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import serverlessRoleDefinitions from '@kbn/es/src/serverless_resources/security_roles.json';
-import essRoleDefinitions from '@kbn/security-solution-plugin/common/test/ess_roles.json';
-import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import {
+  KNOWN_ESS_ROLE_DEFINITIONS,
+  KNOWN_SERVERLESS_ROLE_DEFINITIONS,
+  SecurityRoleName,
+} from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const allSupportedRoles = {
-  ...serverlessRoleDefinitions,
-  ...essRoleDefinitions,
+const KNOWN_ROLE_DEFINITIONS = {
+  ...KNOWN_SERVERLESS_ROLE_DEFINITIONS,
+  ...KNOWN_ESS_ROLE_DEFINITIONS,
 };
 
 /**
@@ -25,7 +27,7 @@ export const createUserAndRole = async (
   role: SecurityRoleName
 ): Promise<void> => {
   const securityService = getService('security');
-  const roleDefinition = allSupportedRoles[role];
+  const roleDefinition = KNOWN_ROLE_DEFINITIONS[role];
 
   await securityService.role.create(role, roleDefinition);
   await securityService.user.create(role, {

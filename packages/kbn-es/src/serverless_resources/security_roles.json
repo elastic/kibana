@@ -1,5 +1,6 @@
 {
   "t1_analyst": {
+    "name": "t1_analyst",
     "elasticsearch": {
       "cluster": [],
       "indices": [
@@ -42,6 +43,7 @@
     ]
   },
   "t2_analyst": {
+    "name": "t2_analyst",
     "elasticsearch": {
       "cluster": [],
       "indices": [
@@ -86,6 +88,7 @@
     ]
   },
   "t3_analyst": {
+    "name": "t3_analyst",
     "elasticsearch": {
       "cluster": [],
       "indices": [
@@ -147,6 +150,7 @@
     ]
   },
   "rule_author": {
+    "name": "rule_author",
     "elasticsearch": {
       "cluster": [],
       "indices": [
@@ -197,6 +201,7 @@
     ]
   },
   "soc_manager": {
+    "name": "soc_manager",
     "elasticsearch": {
       "cluster": [],
       "indices": [
@@ -247,6 +252,7 @@
     ]
   },
   "detections_admin": {
+    "name": "detections_admin",
     "elasticsearch": {
       "cluster": ["manage"],
       "indices": [
@@ -293,6 +299,7 @@
     ]
   },
   "platform_engineer": {
+    "name": "platform_engineer",
     "elasticsearch": {
       "cluster": ["manage"],
       "indices": [

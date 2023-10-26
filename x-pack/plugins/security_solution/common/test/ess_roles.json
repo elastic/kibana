@@ -1,5 +1,6 @@
 {
   "reader": {
+    "name": "reader",
     "elasticsearch": {
       "cluster": [],
       "indices": [
@@ -38,6 +39,7 @@
     ]
   },
   "hunter": {
+    "name": "hunter",
     "elasticsearch": {
       "cluster": [],
       "indices": [
@@ -85,6 +87,7 @@
     ]
   },
   "hunter_no_actions": {
+    "name": "hunter_no_actions",
     "elasticsearch": {
       "cluster": [],
       "indices": [

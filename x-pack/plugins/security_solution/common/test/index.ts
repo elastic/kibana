@@ -6,12 +6,13 @@
  */
 
 import serverlessRoleDefinitions from '@kbn/es/src/serverless_resources/security_roles.json';
-import type essRoleDefinitions from './ess_roles.json';
+import essRoleDefinitions from './ess_roles.json';
 
 type ServerlessSecurityRoleName = keyof typeof serverlessRoleDefinitions;
 type EssSecurityRoleName = keyof typeof essRoleDefinitions;
 
-export const KNOWN_SERVERLESS_ROLES = Object.keys(serverlessRoleDefinitions);
+export const KNOWN_SERVERLESS_ROLE_DEFINITIONS = serverlessRoleDefinitions;
+export const KNOWN_ESS_ROLE_DEFINITIONS = essRoleDefinitions;
 
 export type SecurityRoleName = ServerlessSecurityRoleName | EssSecurityRoleName;
 

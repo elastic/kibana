@@ -11,7 +11,7 @@ import Url from 'url';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
 import {
   SecurityRoleName,
-  KNOWN_SERVERLESS_ROLES,
+  KNOWN_SERVERLESS_ROLE_DEFINITIONS,
 } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
 import { rootRequest } from './common';
@@ -123,7 +123,7 @@ export const constructUrlWithUser = (user: User, route: string) => {
 const loginWithRole = (role: SecurityRoleName) => {
   if (
     (Cypress.env(IS_SERVERLESS) || Cypress.env(CLOUD_SERVERLESS)) &&
-    !KNOWN_SERVERLESS_ROLES.includes(role)
+    !(role in KNOWN_SERVERLESS_ROLE_DEFINITIONS)
   ) {
     throw new Error(`An attempt to log in with unsupported by Serverless role "${role}".`);
   }

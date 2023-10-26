@@ -8,8 +8,10 @@
 import './commands';
 import 'cypress-real-events/support';
 import registerCypressGrep from '@cypress/grep';
-import serverlessRoleDefinitions from '@kbn/es/src/serverless_resources/security_roles.json';
-import essRoleDefinitions from '@kbn/security-solution-plugin/common/test/ess_roles.json';
+import {
+  KNOWN_ESS_ROLE_DEFINITIONS,
+  KNOWN_SERVERLESS_ROLE_DEFINITIONS,
+} from '@kbn/security-solution-plugin/common/test';
 import { setupUsers } from './setup_users';
 import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 
@@ -18,21 +20,15 @@ before(() => {
 });
 
 if (!Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
-  // Create Serverless and ESS roles and corresponding users. This helps to seamlessly reuse tests
+  // Create Serverless + ESS roles and corresponding users. This helps to seamlessly reuse tests
   // between ESS and Serverless having all the necessary users set up.
   before(() => {
-    const allSupportedRoles = [
-      ...Object.keys(serverlessRoleDefinitions).map((serverlessRoleName) => ({
-        name: serverlessRoleName,
-        ...serverlessRoleDefinitions[serverlessRoleName as keyof typeof serverlessRoleDefinitions],
-      })),
-      ...Object.keys(essRoleDefinitions).map((essRoleName) => ({
-        name: essRoleName,
-        ...essRoleDefinitions[essRoleName as keyof typeof essRoleDefinitions],
-      })),
+    const KNOWN_ROLE_DEFINITIONS = [
+      ...Object.values(KNOWN_SERVERLESS_ROLE_DEFINITIONS),
+      ...Object.values(KNOWN_ESS_ROLE_DEFINITIONS),
     ];
 
-    setupUsers(allSupportedRoles);
+    setupUsers(KNOWN_ROLE_DEFINITIONS);
   });
 }
 
