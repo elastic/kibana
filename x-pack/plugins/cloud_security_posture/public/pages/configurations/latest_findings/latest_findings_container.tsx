@@ -12,6 +12,7 @@ import { Filter, Query } from '@kbn/es-query';
 import { isNoneGroup, useGrouping, getGroupingQuery } from '@kbn/securitysolution-grouping';
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
 import * as uuid from 'uuid';
+import { css } from '@emotion/react';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import {
   useBaseEsQuery,
@@ -223,7 +224,13 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   }
 
   return (
-    <>
+    <div
+      css={css`
+        && .euiAccordion__optionalAction {
+          display: none;
+        }
+      `}
+    >
       <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
       {grouping.getGrouping({
         activePage,
@@ -252,7 +259,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         selectedGroup,
         takeActionItems: () => [],
       })}
-    </>
+    </div>
   );
 };
 
