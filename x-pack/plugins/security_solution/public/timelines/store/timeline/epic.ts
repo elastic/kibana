@@ -119,8 +119,7 @@ export const createTimelineEpic =
             return getOr(false, 'payload.savedTimeline', action);
           } else if (
             action.type === saveTimeline.type &&
-            // don't save when the timeline (or its related queries are loading), unless the timeline changed
-            (!timelineObj.isLoading || timelineObj.changed) &&
+            !timelineObj.isSaving &&
             isItAtimelineAction(timelineId)
           ) {
             return true;
@@ -200,11 +199,11 @@ export const createTimelineEpic =
                 const savedTimeline = recentTimeline[action.payload.id];
                 const response: ResponseTimeline = get('data.persistTimeline', result);
                 if (response == null) {
+                  kibana.notifications.toasts.addDanger({
+                    title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+                    text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
+                  });
                   return [
-                    setChanged({
-                      id: action.payload.id,
-                      changed: false,
-                    }),
                     endTimelineSaving({
                       id: action.payload.id,
                     }),
