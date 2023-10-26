@@ -21,15 +21,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from './slo_selector';
 
-import type { EmbeddableSloProps } from './types';
+interface SloOnCreateConfigurationProps {
+  sloId: string | undefined;
+  sloInstanceId: string | undefined;
+}
 
 interface SloConfigurationProps {
-  onCreate: (props: EmbeddableSloProps) => void;
+  onCreate: (props: SloOnCreateConfigurationProps) => void;
   onCancel: () => void;
 }
 
 export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
-  const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
+  const [selectedSlo, setSelectedSlo] = useState<SloOnCreateConfigurationProps>();
   const onConfirmClick = () =>
     onCreate({ sloId: selectedSlo?.sloId, sloInstanceId: selectedSlo?.sloInstanceId });
   const [hasError, setHasError] = useState(false);
