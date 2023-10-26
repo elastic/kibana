@@ -20,11 +20,12 @@ import type {
 } from '../../../../../common/api/detection_engine/rule_management';
 import type {
   AlertSuppression,
-  RuleResponse,
   AlertSuppressionCamel,
+  InvestigationFields,
+  RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 
-import type { RuleAlertType, RuleParams } from '../../rule_schema';
+import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
@@ -380,3 +381,27 @@ export const convertAlertSuppressionToSnake = (
         missing_fields_strategy: input.missingFieldsStrategy,
       }
     : undefined;
+
+/**
+ * In ESS 8.10.x "investigation_fields" are mapped as string[].
+ * For 8.11+ logic is added on read in our endpoints to migrate
+ * the data over to it's intended type of { field_names: string[] }.
+ * The SO rule type will continue to support both types until we deprecate,
+ * but APIs will only support intended object format.
+ * See PR 169061
+ */
+export const migrateLegacyInvestigationFields = (
+  investigationFields: InvestigationFieldsCombined | undefined
+): InvestigationFields | undefined => {
+  if (investigationFields && Array.isArray(investigationFields)) {
+    if (investigationFields.length) {
+      return {
+        field_names: investigationFields,
+      };
+    }
+
+    return undefined;
+  }
+
+  return investigationFields;
+};
