@@ -47,8 +47,9 @@ Here are examples of POST requests to add parameters, either as a single paramet
 
 To add a single parameter:
 
-[source,json]
+[source,sh]
 --------------------------------------------------
+POST /api/synthetics/params
 {
   "key": "api_key",
   "value": "your-api-key-value",
@@ -60,8 +61,9 @@ To add a single parameter:
 
 To add multiple parameters:
 
-[source,json]
+[source,sh]
 --------------------------------------------------
+POST /api/synthetics/params
 [
   {
     "key": "param1",
@@ -119,5 +121,3 @@ And here's an example response for adding multiple parameters:
   }
 ]
 --------------------------------------------------
-
-This updated documentation provides information for adding parameters, whether as a single parameter or an array of parameters, and includes examples of the API request and response. You can replace `<your-api-host>` with the actual host where your API is available.

@@ -36,11 +36,8 @@ export const editGlobalParam = async ({
   paramRequest: SyntheticsParamRequest;
 }): Promise<SyntheticsParams> =>
   apiService.put<SyntheticsParams>(
-    SYNTHETICS_API_URLS.PARAMS,
-    {
-      id,
-      ...paramRequest,
-    },
+    SYNTHETICS_API_URLS.PARAMS + `/${id}`,
+    paramRequest,
     SyntheticsParamsCodec
   );
 

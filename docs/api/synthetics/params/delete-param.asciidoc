@@ -17,7 +17,8 @@ Deletes one or more parameters from the Synthetics app.
 You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
-To use this API, you must have appropriate permissions for deleting parameters.
+You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
 
 [[parameters-delete-request-body]]
 ==== Request Body
@@ -26,6 +27,20 @@ The request body should contain an array of parameter IDs that you want to delet
 
 `ids`::
 (Required, array of strings) An array of parameter IDs to delete.
+
+
+Here's an example request body:
+
+[source,sh]
+--------------------------------------------------
+DELETE /api/synthetics/params
+{
+  "ids": [
+    "param1-id",
+    "param2-id"
+  ]
+}
+--------------------------------------------------
 
 [[parameters-delete-response-example]]
 ==== Response Example
@@ -37,7 +52,7 @@ The API response includes information about the deleted parameters, where each e
 
 Here's an example response for deleting multiple parameters:
 
-[source,json]
+[source,sh]
 --------------------------------------------------
 [
   {
@@ -50,5 +65,3 @@ Here's an example response for deleting multiple parameters:
   }
 ]
 --------------------------------------------------
-
-This API allows you to delete one or more parameters by specifying their IDs in the request body. The response array provides information about the success of the deletion process for each parameter. You can replace `<your-api-host>` with the actual host where your API is available.

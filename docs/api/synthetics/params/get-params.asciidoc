@@ -41,6 +41,15 @@ If the user has write permissions, the following additional attribute will be in
 
 - `value` (string): The value associated with the parameter.
 
+
+Here's an example request for retrieving a single parameter by its ID:
+
+[source,sh]
+--------------------------------------------------
+GET /api/synthetics/params/unique-parameter-id
+--------------------------------------------------
+
+
 Here's an example response for retrieving a single parameter by its ID:
 
 For users with read-only permissions:
