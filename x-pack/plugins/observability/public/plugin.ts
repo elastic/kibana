@@ -297,6 +297,15 @@ export class Plugin
     };
     registerSloEmbeddableFactory();
 
+    const registerSloAlertsEmbeddableFactory = async () => {
+      const { SloAlertsEmbeddableFactoryDefinition } = await import(
+        './embeddable/slo/alerts/slo_alerts_embeddable_factory'
+      );
+      const factory = new SloAlertsEmbeddableFactoryDefinition(coreSetup.getStartServices);
+      pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+    };
+    registerSloAlertsEmbeddableFactory();
+
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
         id: observabilityFeatureId,
