@@ -40,10 +40,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  beforeEach(() => {
-    cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
-  });
-
   after(() => {
     cleanupSavedQuery(savedQueryId);
   });
@@ -66,12 +62,13 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('Add and upgrade integration', { tags: ['@ess', '@brokenInServerless'] }, () => {
+  describe('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
 
     beforeEach(() => {
+      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
@@ -100,6 +97,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     let policyId: string;
 
     beforeEach(() => {
+      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
@@ -140,6 +138,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
 
     beforeEach(() => {
+      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });

@@ -121,7 +121,6 @@ export const waitAndClickRuleEdit = () => {
   cy.getBySel('globalLoadingIndicator').should('exist');
   cy.getBySel('globalLoadingIndicator').should('not.exist');
   cy.getBySel('editRuleSettingsLink').click();
-  cy.getBySel('globalLoadingIndicator').should('exist');
   cy.getBySel('globalLoadingIndicator').should('not.exist');
 };
 
