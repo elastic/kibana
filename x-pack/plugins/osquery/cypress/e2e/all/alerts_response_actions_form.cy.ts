@@ -92,9 +92,10 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
         cy.contains('Advanced').click();
         typeInECSFieldInput('{downArrow}{enter}');
         cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
-        cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
       })
       .clickOutside();
+
+    cy.wait(3000);
 
     // cy.contains('Please fix issues listed below').should('not.exist');
     cy.getBySel('ruleEditSubmitButton').click();
