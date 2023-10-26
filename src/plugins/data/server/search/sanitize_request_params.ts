@@ -9,7 +9,9 @@
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { SanitizedConnectionRequestParams } from '../../common';
 
-export function sanitizeRequestParams(requestParams: ConnectionRequestParams): SanitizedConnectionRequestParams {
+export function sanitizeRequestParams(
+  requestParams: ConnectionRequestParams
+): SanitizedConnectionRequestParams {
   return {
     method: requestParams.method,
     path: requestParams.path,
