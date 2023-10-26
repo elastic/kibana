@@ -52,8 +52,7 @@ export const epicPersistPinnedEvent = (
     mergeMap(([result, recentTimeline, allTimelineQuery]) => {
       const savedTimeline = recentTimeline[action.payload.id];
       const response: PinnedEventResponse = get('data.persistPinnedEventOnTimeline', result);
-      const callOutMsg =
-        response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [EMPTY];
+      const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       if (allTimelineQuery.refetch != null) {
         (allTimelineQuery.refetch as inputsModel.Refetch)();
@@ -98,7 +97,7 @@ export const epicPersistPinnedEvent = (
         endTimelineSaving({
           id: action.payload.id,
         }),
-      ];
+      ].filter(Boolean);
     }),
     startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(

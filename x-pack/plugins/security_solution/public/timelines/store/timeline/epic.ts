@@ -209,7 +209,7 @@ export const createTimelineEpic =
                     }),
                   ];
                 }
-                const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [EMPTY];
+                const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
                 if (allTimelineQuery.refetch != null) {
                   (allTimelineQuery.refetch as inputsModel.Refetch)();
@@ -238,7 +238,7 @@ export const createTimelineEpic =
                   endTimelineSaving({
                     id: action.payload.id,
                   }),
-                ];
+                ].filter(Boolean);
               }),
               startWith(startTimelineSaving({ id: action.payload.id })),
               takeUntil(
