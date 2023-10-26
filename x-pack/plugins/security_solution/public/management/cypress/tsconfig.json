@@ -10,8 +10,7 @@
     "outDir": "target/types",
     "types": [
       "cypress",
-      "node",
-      "cypress-react-selector"
+      "node"
     ],
   },
   "kbn_references": [

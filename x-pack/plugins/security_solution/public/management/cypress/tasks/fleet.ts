@@ -85,11 +85,15 @@ export const createAgentPolicyTask = (
 ): Cypress.Chainable<IndexedFleetEndpointPolicyResponse> => {
   const policyName = `${policyPrefix || 'Reassign'} ${Math.random().toString(36).substring(2, 7)}`;
 
-  return cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-    policyName,
-    endpointPackageVersion: version,
-    agentPolicyName: policyName,
-  });
+  return cy.task<IndexedFleetEndpointPolicyResponse>(
+    'indexFleetEndpointPolicy',
+    {
+      policyName,
+      endpointPackageVersion: version,
+      agentPolicyName: policyName,
+    },
+    { timeout: 90000 }
+  );
 };
 
 export const enableAgentTamperProtectionFeatureFlagInPolicy = (agentPolicyId: string) => {

@@ -16,6 +16,7 @@ export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): voi
   closeAllToasts();
   cy.contains(endpointHostname).should('exist');
 };
+
 export const openResponseConsoleFromEndpointList = (): void => {
   cy.getByTestSubj('endpointTableRowActions').first().click();
   cy.contains('Respond').click();

@@ -1470,6 +1470,7 @@
     "csstype": "^3.0.2",
     "cypress": "^13.3.0",
     "cypress-axe": "^1.5.0",
+    "cypress-data-session": "^2.7.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.3",
     "cypress-react-selector": "^3.0.0",

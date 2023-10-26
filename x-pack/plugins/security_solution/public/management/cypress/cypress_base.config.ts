@@ -6,6 +6,7 @@
  */
 
 import { merge } from 'lodash';
+import registerDataSession from 'cypress-data-session/src/plugin';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
@@ -41,9 +42,6 @@ export const getCypressBaseConfig = (
       experimentalStudio: true,
 
       env: {
-        'cypress-react-selector': {
-          root: '#security-solution-app',
-        },
         KIBANA_URL: 'http://localhost:5601',
         ELASTICSEARCH_URL: 'http://localhost:9200',
         FLEET_SERVER_URL: 'https://localhost:8220',
@@ -70,6 +68,7 @@ export const getCypressBaseConfig = (
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+          registerDataSession(on, config);
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
 
