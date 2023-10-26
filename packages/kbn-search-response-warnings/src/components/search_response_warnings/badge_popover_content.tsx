@@ -75,8 +75,7 @@ export const SearchResponseWarningsBadgePopoverContent = (props: Props) => {
             </EuiButtonEmpty>
           </EuiPanel>
         </EuiContextMenuPanel>
-      )
-    }
+      )}
     </div>
   );
 };

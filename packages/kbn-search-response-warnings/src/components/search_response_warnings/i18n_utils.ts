@@ -50,24 +50,26 @@ export function getWarningsDescription(
   visualizationLabel?: string
 ) {
   const nonSuccessfulClusters = getNonSuccessfulClusters(warnings);
-  const clusterStatement = nonSuccessfulClusters.size <= 1
-    ? i18n.translate('searchResponseWarnings.description.clusterStatement.singleCluster', {
-        defaultMessage:
-          'This cluster had issues returning data.',
-      })
-    : i18n.translate('searchResponseWarnings.description.clusterStatement.multipleClusters', {
-        defaultMessage:
-          'These clusters had issues returning data.',
-      });
-  return clusterStatement + ' ' + i18n.translate('searchResponseWarnings.description.consequenceStatement', {
-    defaultMessage:
-      'This might result in an incomplete {visualizationLabel}.',
-    values: {
-      visualizationLabel: visualizationLabel
-        ? visualizationLabel
-        : i18n.translate('searchResponseWarnings.description.defaultVisualizationLabel', {
-            defaultMessage: 'visualization',
-          }),
-    },
-  });
+  const clusterStatement =
+    nonSuccessfulClusters.size <= 1
+      ? i18n.translate('searchResponseWarnings.description.clusterStatement.singleCluster', {
+          defaultMessage: 'This cluster had issues returning data.',
+        })
+      : i18n.translate('searchResponseWarnings.description.clusterStatement.multipleClusters', {
+          defaultMessage: 'These clusters had issues returning data.',
+        });
+  return (
+    clusterStatement +
+    ' ' +
+    i18n.translate('searchResponseWarnings.description.consequenceStatement', {
+      defaultMessage: 'This might result in an incomplete {visualizationLabel}.',
+      values: {
+        visualizationLabel: visualizationLabel
+          ? visualizationLabel
+          : i18n.translate('searchResponseWarnings.description.defaultVisualizationLabel', {
+              defaultMessage: 'visualization',
+            }),
+      },
+    })
+  );
 }
