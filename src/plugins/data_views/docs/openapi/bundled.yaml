@@ -9,8 +9,7 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: /
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -60,8 +59,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-    servers:
-      - url: https://localhost:5601
   /api/data_views/data_view:
     post:
       summary: Creates a data view.
@@ -94,10 +91,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/data_views/data_view/{viewId}:
     get:
       summary: Retrieves a single data view by identifier.
@@ -142,8 +135,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Updates a data view.
       operationId: updateDataView
@@ -176,10 +167,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/data_views/data_view/{viewId}/fields:
     post:
       summary: Update fields presentation metadata such as count, customLabel and format.
@@ -222,10 +209,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/data_views/data_view/{viewId}/runtime_field:
     post:
       summary: Creates a runtime field.
@@ -316,10 +299,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
       summary: Retrieves a runtime field.
@@ -413,10 +392,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/data_views/default:
     get:
       summary: Retrieves the default data view identifier.
@@ -491,10 +466,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
