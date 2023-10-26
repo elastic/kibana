@@ -291,6 +291,18 @@ const nodeToEuiCollapsibleNavProps = (
   return { items, isVisible };
 };
 
+// Temporary solution to prevent showing the outline when the page load when the
+// accordion is auto-expanded if one of its children is active
+// Once https://github.com/elastic/eui/pull/7314 is released in Kibana we can
+// safely remove this CSS class.
+const className = css`
+  .euiAccordion__childWrapper,
+  .euiAccordion__children,
+  .euiCollapsibleNavAccordion__children {
+    outline: none;
+  }
+`;
+
 interface AccordionItemsState {
   [navNodeId: string]: {
     isCollapsible: boolean;
@@ -453,15 +465,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
   return (
     <EuiCollapsibleNavItem
       {...props}
-      // We add this css to prevent showing the outline when the page load when the
-      // accordion is auto-expanded if one of its children is active
-      className={css`
-        .euiAccordion__childWrapper,
-        .euiAccordion__children,
-        .euiCollapsibleNavAccordion__children {
-          outline: none;
-        }
-      `}
+      className={className}
       items={subItems}
       accordionProps={setAccordionProps(navNode.id)}
     />
