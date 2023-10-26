@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './alert_details_response';
+require('../../../../../src/setup_node_env');
+require('./sentinelone_host').cli();
