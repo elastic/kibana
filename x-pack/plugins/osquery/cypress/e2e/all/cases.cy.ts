@@ -14,7 +14,8 @@ import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Add to Cases', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/169747
+describe.skip('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
   before(() => {
