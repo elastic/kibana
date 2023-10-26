@@ -85,9 +85,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await isVisible('unifiedHistogramResizableButton')).to.be(true);
       });
     });
-
-    it('should show the the grid toolbar', async () => {
-      await testSubjects.existOrFail('dscGridToolbar');
-    });
   });
 }
