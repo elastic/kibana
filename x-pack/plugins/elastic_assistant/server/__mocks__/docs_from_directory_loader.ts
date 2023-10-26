@@ -72,16 +72,3 @@ export const mockExampleQueryDocsFromDirectoryLoader: Document[] = [
     },
   },
 ];
-
-/**
- * Mock LangChain `Document`s from `knowledge_base/esql/static_context`, loaded from a LangChain `DirectoryLoader`
- */
-export const mockStaticContextFromDirectoryLoader: Document[] = [
-  {
-    pageContent: '[[esql-overview]]\n\nThe following is an example ES|QL overview document',
-    metadata: {
-      source:
-        '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/static_context/esql_overview.asciidoc',
-    },
-  },
-];
