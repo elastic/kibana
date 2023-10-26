@@ -65,8 +65,8 @@ export function reportSearchError(res: KibanaResponseFactory, err: KbnSearchErro
       message: err.message,
       attributes: err.errBody
         ? {
-            error: err.errBody?.error ? err.errBody.error : err.message,
-            rawResponse: err.errBody?.response,
+            error: err.errBody.error,
+            rawResponse: err.errBody.response,
             ...(err.requestParams ? { requestParams: err.requestParams } : {})
           }
         : undefined,
