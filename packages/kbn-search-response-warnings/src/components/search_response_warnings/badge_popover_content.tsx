@@ -28,20 +28,28 @@ interface Props {
 export const SearchResponseWarningsBadgePopoverContent = (props: Props) => {
   const [openPanel, setOpenPanel] = useState(WARNING_PANEL_ID);
 
+  const requestNameMap = new Map<string, number>();
   return (
     <div className="euiContextMenu">
       {openPanel === VIEW_DETAILS_PANEL_ID ? (
         <EuiContextMenuPanel
           items={props.warnings.map((warning) => {
+            const count = requestNameMap.has(warning.requestName)
+              ? requestNameMap.get(warning.requestName) + 1
+              : 1;
+            const uniqueRequestName = count > 1
+              ? `${warning.requestName} (${count})`
+              : warning.requestName
+            requestNameMap.set(warning.requestName, count);
             return (
               <EuiContextMenuItem
-                key={warning.requestName}
+                key={uniqueRequestName}
                 onClick={() => {
                   props.onViewDetailsClick?.();
                   warning.openInInspector();
                 }}
               >
-                {warning.requestName}
+                {uniqueRequestName}
               </EuiContextMenuItem>
             );
           })}

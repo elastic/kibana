@@ -42,12 +42,20 @@ export const ViewDetailsPopover = (props: Props) => {
     );
   }
 
+  const requestNameMap = new Map<string, number>();
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
       items: props.warnings.map((warning) => {
+        const count = requestNameMap.has(warning.requestName)
+          ? requestNameMap.get(warning.requestName) + 1
+          : 1;
+        const uniqueRequestName = count > 1
+          ? `${warning.requestName} (${count})`
+          : warning.requestName
+        requestNameMap.set(warning.requestName, count);
         return {
-          name: warning.requestName,
+          name: uniqueRequestName,
           onClick: () => {
             setIsPopoverOpen(false);
             warning.openInInspector();

@@ -44,36 +44,42 @@ describe('SearchResponseWarningsBadgePopoverContent', () => {
   });
 
   describe('multiple warnings', () => {
+    const request1MockOpenInInspector = jest.fn();
+    const request2MockOpenInInspector = jest.fn();
+    const warnings = [
+      {
+        type: 'incomplete',
+        requestName: 'My first request',
+        clusters: {
+          remote1: {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: request1MockOpenInInspector,
+      } as SearchResponseWarning,
+      {
+        type: 'incomplete',
+        requestName: 'My second request',
+        clusters: {
+          remote1: {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
+          },
+        },
+        openInInspector: request2MockOpenInInspector,
+      } as SearchResponseWarning,
+    ];
+
+    beforeEach(() => {
+      request1MockOpenInInspector.mockReset();
+      request2MockOpenInInspector.mockReset();
+    });
+
     test('Clicking "view details" should open content panel with button to view details for each warning', () => {
-      const request1MockOpenInInspector = jest.fn();
-      const request2MockOpenInInspector = jest.fn();
       const mockOnViewDetailsClick = jest.fn();
-      const warnings = [
-        {
-          type: 'incomplete',
-          requestName: 'My first request',
-          clusters: {
-            remote1: {
-              status: 'partial',
-              indices: '',
-              timed_out: false,
-            },
-          },
-          openInInspector: request1MockOpenInInspector,
-        } as SearchResponseWarning,
-        {
-          type: 'incomplete',
-          requestName: 'My second request',
-          clusters: {
-            remote1: {
-              status: 'partial',
-              indices: '',
-              timed_out: false,
-            },
-          },
-          openInInspector: request2MockOpenInInspector,
-        } as SearchResponseWarning,
-      ];
       render(
         <SearchResponseWarningsBadgePopoverContent
           onViewDetailsClick={mockOnViewDetailsClick}
@@ -91,6 +97,25 @@ describe('SearchResponseWarningsBadgePopoverContent', () => {
       expect(request1MockOpenInInspector).toHaveBeenCalled();
       expect(mockOnViewDetailsClick).toHaveBeenCalled();
       expect(request2MockOpenInInspector).not.toHaveBeenCalled();
+    });
+
+    test('Should ensure unique request names by numbering duplicate request names', () => {
+      const warningsWithDuplicateRequestNames = warnings.map(warning => {
+        return {
+          ...warning,
+          requestName: "Request"
+        };
+      });
+      render(
+        <SearchResponseWarningsBadgePopoverContent
+          warnings={warningsWithDuplicateRequestNames}
+        />
+      );
+      const viewDetailsButton = screen.getByRole('button');
+      fireEvent.click(viewDetailsButton);
+
+      screen.getByRole('button', { name: 'Request' });  
+      screen.getByRole('button', { name: 'Request (2)' });
     });
   });
 });
