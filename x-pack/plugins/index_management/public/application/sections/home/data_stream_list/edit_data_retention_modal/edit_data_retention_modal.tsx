@@ -271,7 +271,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       if (responseData) {
         const successMessage = i18n.translate(
           'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
-          { defaultMessage: 'Data retention updated' }
+          {
+            defaultMessage:
+              'Data retention {disabledDataRetention, plural, one { disabled } other { updated } }',
+            values: { disabledDataRetention: !data.dataRetentionEnabled ? 1 : 0 },
+          }
         );
         notificationService.showSuccessToast(successMessage);
 

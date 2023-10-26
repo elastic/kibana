@@ -105,7 +105,7 @@ interface Props {
   onClose: (shouldReload?: boolean) => void;
 }
 
-const ConditionalWrap = ({
+export const ConditionalWrap = ({
   condition,
   wrap,
   children,

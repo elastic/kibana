@@ -27,6 +27,8 @@ import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
+import { ConditionalWrap } from '../data_stream_detail_panel';
+import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 
 interface Props {
   dataStreams?: DataStream[];
@@ -151,7 +153,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle']) => getLifecycleValue(lifecycle, INFINITE_AS_ICON),
+    render: (lifecycle: DataStream['lifecycle'], dataStream) => (
+      <ConditionalWrap
+        condition={isDataStreamFullyManagedByILM(dataStream)}
+        wrap={(children) => <s>{children}</s>}
+      >
+        <>{getLifecycleValue(lifecycle, INFINITE_AS_ICON)}</>
+      </ConditionalWrap>
+    ),
   });
 
   columns.push({
