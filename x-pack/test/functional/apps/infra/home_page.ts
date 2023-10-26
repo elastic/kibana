@@ -197,6 +197,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           before(async () => {
             await pageObjects.infraHome.clickOnNode();
             await pageObjects.assetDetails.clickApmTabLink();
+            await pageObjects.infraHome.waitForLoading();
           });
 
           it('should navigate to APM traces', async () => {
@@ -204,9 +205,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const query = decodeURIComponent(url.query ?? '');
             const kuery = 'kuery=host.hostname:"demo-stack-nginx-01"';
 
-            expect(url.pathname).to.eql('/app/apm/traces');
-            expect(query).to.contain(kuery);
-
+            await retry.try(async () => {
+              expect(url.pathname).to.eql('/app/apm/traces');
+              expect(query).to.contain(kuery);
+            });
             await returnTo(INVENTORY_PATH);
           });
         });
