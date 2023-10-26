@@ -12,14 +12,7 @@ import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
-export interface MonacoError {
-  message: string;
-  startColumn: number;
-  startLineNumber: number;
-  endColumn: number;
-  endLineNumber: number;
-  severity: monaco.MarkerSeverity;
-}
+export type MonacoMessage = monaco.editor.IMarkerData;
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -45,7 +38,7 @@ export const useDebounceWithOptions = (
 
 const quotedWarningMessageRegexp = /"(.*?)"/g;
 
-export const parseWarning = (warning: string): MonacoError[] => {
+export const parseWarning = (warning: string): MonacoMessage[] => {
   if (quotedWarningMessageRegexp.test(warning)) {
     const matches = warning.match(quotedWarningMessageRegexp);
     if (matches) {
@@ -81,7 +74,7 @@ export const parseWarning = (warning: string): MonacoError[] => {
           startLineNumber,
           endColumn: startColumn + errorLength - 1,
           endLineNumber: startLineNumber,
-          severity: monaco.MarkerSeverity.Error,
+          severity: monaco.MarkerSeverity.Warning,
         };
       });
     }
@@ -94,14 +87,18 @@ export const parseWarning = (warning: string): MonacoError[] => {
       startLineNumber: 1,
       endColumn: 10,
       endLineNumber: 1,
-      severity: monaco.MarkerSeverity.Error,
+      severity: monaco.MarkerSeverity.Warning,
     },
   ];
 };
 
-export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
+export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   return errors.map((error) => {
-    if (error.message.includes('line')) {
+    if (
+      // Found while testing random commands (as inlinestats)
+      !error.message.includes('esql_illegal_argument_exception') &&
+      error.message.includes('line')
+    ) {
       const text = error.message.split('line')[1];
       const [lineNumber, startPosition, errorMessage] = text.split(':');
       // initialize the length to 10 in case no error word found
@@ -114,7 +111,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
         message: errorMessage,
         startColumn: Number(startPosition),
         startLineNumber: Number(lineNumber),
-        endColumn: Number(startPosition) + errorLength,
+        endColumn: Number(startPosition) + errorLength + 1,
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
       };

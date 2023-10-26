@@ -23,7 +23,7 @@ describe('helpers', function () {
       const errors = [error];
       expect(parseErrors(errors, 'SELECT miaou from test')).toEqual([
         {
-          endColumn: 13,
+          endColumn: 14,
           endLineNumber: 1,
           message: ' Unknown column [miaou]',
           severity: 8,
@@ -47,7 +47,7 @@ describe('helpers', function () {
         )
       ).toEqual([
         {
-          endColumn: 11,
+          endColumn: 12,
           endLineNumber: 3,
           message: ' Condition expression needs to be boolean, found [TEXT]',
           severity: 8,
@@ -83,7 +83,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
-          severity: 8,
+          severity: 4,
           startColumn: 52,
           startLineNumber: 1,
         },
@@ -99,7 +99,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
-          severity: 8,
+          severity: 4,
           startColumn: 52,
           startLineNumber: 1,
         },
@@ -108,7 +108,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded.',
-          severity: 8,
+          severity: 4,
           startColumn: 84,
           startLineNumber: 1,
         },
@@ -124,7 +124,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [geo.coordinates] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -133,7 +133,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [ip_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -142,7 +142,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [timestamp_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -157,7 +157,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [geo.coordinates] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -166,7 +166,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [ip_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -175,7 +175,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
-          severity: 8,
+          severity: 4,
           startColumn: 52,
           startLineNumber: 1,
         },
