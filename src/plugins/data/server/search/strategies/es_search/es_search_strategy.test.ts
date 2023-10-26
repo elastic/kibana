@@ -113,7 +113,7 @@ describe('ES search strategy', () => {
       )
     );
     const [, searchOptions] = esClient.search.mock.calls[0];
-    expect(searchOptions).toEqual({ signal: undefined, maxRetries: 5 });
+    expect(searchOptions).toEqual({ signal: undefined, maxRetries: 5, meta: true });
   });
 
   it('can be aborted', async () => {
@@ -131,7 +131,7 @@ describe('ES search strategy', () => {
       ...params,
       track_total_hits: true,
     });
-    expect(esClient.search.mock.calls[0][1]).toEqual({ signal: expect.any(AbortSignal) });
+    expect(esClient.search.mock.calls[0][1]).toEqual({ signal: expect.any(AbortSignal), meta: true });
   });
 
   it('throws normalized error if ResponseError is thrown', async () => {

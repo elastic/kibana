@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { errors } from '@elastic/elasticsearch';
 import { KibanaResponseFactory } from '@kbn/core/server';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
+import {
+  sanitizeRequestParams,
+  type SanitizedConnectionRequestParams,
+} from './sanitize_request_params';
 
 // Why not use just use kibana-utils-plugin KbnServerError and reportServerError?
 //
@@ -19,9 +24,17 @@ import { KbnError } from '@kbn/kibana-utils-plugin/common';
 // non-search usages of KbnServerError and reportServerError with extra information.
 export class KbnSearchError extends KbnError {
   public errBody?: Record<string, any>;
-  constructor(message: string, public readonly statusCode: number, errBody?: Record<string, any>) {
+  public requestParams?: SanitizedConnectionRequestParams;
+
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    errBody?: Record<string, any>,
+    requestParams?: ConnectionRequestParams
+  ) {
     super(message);
     this.errBody = errBody;
+    this.requestParams = requestParams ? sanitizeRequestParams(requestParams) : undefined;
   }
 }
 
@@ -35,7 +48,8 @@ export function getKbnSearchError(e: Error) {
   return new KbnSearchError(
     e.message ?? 'Unknown error',
     e instanceof errors.ResponseError ? e.statusCode! : 500,
-    e instanceof errors.ResponseError ? e.body : undefined
+    e instanceof errors.ResponseError ? e.body : undefined,
+    e instanceof errors.ResponseError ? e.meta?.meta?.request?.params : undefined
   );
 }
 
@@ -51,8 +65,9 @@ export function reportSearchError(res: KibanaResponseFactory, err: KbnSearchErro
       message: err.message,
       attributes: err.errBody
         ? {
-            error: err.errBody.error,
-            rawResponse: err.errBody.response,
+            error: err.errBody?.error ? err.errBody.error : err.message,
+            rawResponse: err.errBody?.response,
+            ...(err.requestParams ? { requestParams: err.requestParams } : {})
           }
         : undefined,
     },
