@@ -32,7 +32,7 @@ export const SearchResponseWarningsCallout = (props: Props) => {
       <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
         <EuiFlexItem grow={false}>{getWarningsDescription(props.warnings)}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ViewDetailsPopover warnings={props.warnings} />
+          <ViewDetailsPopover displayAsLink={true} warnings={props.warnings} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>

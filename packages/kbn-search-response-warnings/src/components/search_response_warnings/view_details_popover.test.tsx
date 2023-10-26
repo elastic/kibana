@@ -29,7 +29,7 @@ describe('ViewDetailsPopover', () => {
           openInInspector: mockOpenInInspector,
         } as SearchResponseWarning,
       ];
-      render(<ViewDetailsPopover warnings={warnings} />);
+      render(<ViewDetailsPopover displayAsLink={false} warnings={warnings} />);
       const viewDetailsButton = screen.getByRole('button');
       fireEvent.click(viewDetailsButton);
       expect(mockOpenInInspector).toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('ViewDetailsPopover', () => {
           openInInspector: request2MockOpenInInspector,
         } as SearchResponseWarning,
       ];
-      render(<ViewDetailsPopover warnings={warnings} />);
+      render(<ViewDetailsPopover displayAsLink={false} warnings={warnings} />);
       const viewDetailsButton = screen.getByRole('button');
       fireEvent.click(viewDetailsButton);
       expect(request1MockOpenInInspector).not.toHaveBeenCalled();

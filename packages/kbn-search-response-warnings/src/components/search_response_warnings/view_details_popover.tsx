@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiIcon,
   EuiLink,
   EuiContextMenu,
@@ -18,11 +19,14 @@ import { viewDetailsLabel } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
+  displayAsLink: boolean;
   warnings: SearchResponseWarning[];
 }
 
 export const ViewDetailsPopover = (props: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const ActionComponent = props.displayAsLink ? EuiLink : EuiButton;
 
   if (!props.warnings.length) {
     return null;
@@ -30,9 +34,9 @@ export const ViewDetailsPopover = (props: Props) => {
 
   if (props.warnings.length === 1) {
     return (
-      <EuiLink color="primary" onClick={props.warnings[0].openInInspector}>
+      <ActionComponent color="primary" onClick={props.warnings[0].openInInspector}>
         {viewDetailsLabel}
-      </EuiLink>
+      </ActionComponent>
     );
   }
 
@@ -55,11 +59,11 @@ export const ViewDetailsPopover = (props: Props) => {
     <EuiPopover
       id="ViewDetailsPopover"
       button={
-        <EuiLink color="primary" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <ActionComponent color="primary" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
           <>
             {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
           </>
-        </EuiLink>
+        </ActionComponent>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
