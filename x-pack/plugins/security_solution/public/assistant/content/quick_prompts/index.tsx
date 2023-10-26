@@ -34,7 +34,6 @@ export const BASE_SECURITY_QUICK_PROMPTS: QuickPrompt[] = [
     categories: [KNOWLEDGE_BASE_CATEGORY],
     isDefault: true,
   },
-
   {
     title: i18n.RULE_CREATION_TITLE,
     prompt: i18n.RULE_CREATION_PROMPT,
