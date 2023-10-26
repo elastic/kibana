@@ -14,7 +14,6 @@ import { SearchResponseWarningsBadgePopoverContent } from './badge_popover_conte
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
-  visualizationLabel?: string;
   warnings: SearchResponseWarning[];
 }
 
@@ -68,7 +67,6 @@ export const SearchResponseWarningsBadge = (props: Props) => {
         onViewDetailsClick={() => {
           setIsPopoverOpen(false);
         }}
-        visualizationLabel={props.visualizationLabel}
         warnings={props.warnings}
       />
     </EuiPopover>

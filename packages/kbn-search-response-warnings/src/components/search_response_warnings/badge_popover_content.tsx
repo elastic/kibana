@@ -22,7 +22,6 @@ const VIEW_DETAILS_PANEL_ID = 1;
 
 interface Props {
   onViewDetailsClick?: () => void;
-  visualizationLabel?: string;
   warnings: SearchResponseWarning[];
 }
 
@@ -55,7 +54,7 @@ export const SearchResponseWarningsBadgePopoverContent = (props: Props) => {
         <EuiContextMenuPanel title={getWarningsTitle(props.warnings)}>
           <EuiPanel color="transparent" paddingSize="s">
             <EuiText size="s">
-              {getWarningsDescription(props.warnings, props.visualizationLabel)}
+              {getWarningsDescription(props.warnings)}
             </EuiText>
             <EuiButtonEmpty
               color="primary"

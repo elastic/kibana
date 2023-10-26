@@ -13,7 +13,6 @@ import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
-  visualizationLabel?: string;
   warnings: SearchResponseWarning[];
 }
 
@@ -32,7 +31,7 @@ export const SearchResponseWarningsCallout = (props: Props) => {
     >
       <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
         <EuiFlexItem grow={false}>
-          {getWarningsDescription(props.warnings, props.visualizationLabel)}
+          {getWarningsDescription(props.warnings)}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ViewDetailsPopover warnings={props.warnings} />

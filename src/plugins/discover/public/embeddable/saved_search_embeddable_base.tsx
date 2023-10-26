@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import {
@@ -74,9 +73,6 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
       {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
 
       <SearchResponseWarningsBadge
-        visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
-          defaultMessage: 'table',
-        })}
         warnings={interceptedWarnings ?? []}
       />
     </EuiFlexGroup>

@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ViewDetailsPopover } from './view_details_popover';
-import { getNonSuccessfulClusters } from './i18n_utils';
+import { getWarningsDescription } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
@@ -18,8 +18,6 @@ interface Props {
 }
 
 export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
-  const nonSuccessfulClusters = getNonSuccessfulClusters(props.warnings);
-
   return (
     <EuiEmptyPrompt
       iconType="warning"
@@ -31,13 +29,7 @@ export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
           })}
         </h2>
       }
-      body={i18n.translate('searchResponseWarnings.emptyPromptBody', {
-        defaultMessage:
-          '{nonSuccessfulClustersCount} {nonSuccessfulClustersCount, plural, one {cluster} other {clusters}} had issues returning data. This might result in incomplete data.',
-        values: {
-          nonSuccessfulClustersCount: nonSuccessfulClusters.size,
-        },
-      })}
+      body={getWarningsDescription(props.warnings)}
       actions={<ViewDetailsPopover warnings={props.warnings} />}
       data-test-subj="searchResponseWarningsEmptyPrompt"
     />

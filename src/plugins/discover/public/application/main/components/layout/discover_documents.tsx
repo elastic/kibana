@@ -278,9 +278,6 @@ function DiscoverDocumentsComponent({
           selectedColumns={currentColumns}
         />
         <SearchResponseWarningsCallout
-          visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
-            defaultMessage: 'table',
-          })}
           warnings={documentState.interceptedWarnings ?? []}
         />
       </>

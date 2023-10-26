@@ -99,7 +99,7 @@ describe('getWarningsDescription', () => {
       } as SearchResponseWarning,
     ];
     expect(getWarningsDescription(warnings)).toEqual(
-      'This cluster had issues returning data. This might result in an incomplete visualization.'
+      'This cluster had issues returning data and results might be incomplete.'
     );
   });
 
@@ -124,27 +124,7 @@ describe('getWarningsDescription', () => {
       } as SearchResponseWarning,
     ];
     expect(getWarningsDescription(warnings)).toEqual(
-      'These clusters had issues returning data. This might result in an incomplete visualization.'
-    );
-  });
-
-  test('Should show custom visualization label', () => {
-    const warnings = [
-      {
-        type: 'incomplete',
-        requestName: 'My request',
-        clusters: {
-          remote1: {
-            status: 'partial',
-            indices: '',
-            timed_out: false,
-          },
-        },
-        openInInspector: () => {},
-      } as SearchResponseWarning,
-    ];
-    expect(getWarningsDescription(warnings, 'table')).toEqual(
-      'This cluster had issues returning data. This might result in an incomplete table.'
+      'These clusters had issues returning data and results might be incomplete.'
     );
   });
 });

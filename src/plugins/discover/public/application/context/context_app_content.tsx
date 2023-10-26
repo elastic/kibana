@@ -7,7 +7,6 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -155,9 +154,6 @@ export function ContextAppContent({
         {interceptedWarnings.length && (
           <>
             <SearchResponseWarningsCallout
-              visualizationLabel={i18n.translate('discover.documentsVisualizationLabel', {
-                defaultMessage: 'table',
-              })}
               warnings={interceptedWarnings}
             />
             <EuiSpacer size="s" />
