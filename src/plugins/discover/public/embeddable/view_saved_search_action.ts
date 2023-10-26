@@ -33,9 +33,13 @@ export class ViewSavedSearchAction implements Action<ViewSearchContext> {
 
   async execute(context: ActionExecutionContext<ViewSearchContext>): Promise<void> {
     const embeddable = context.embeddable as SavedSearchEmbeddable;
+    const savedSearch = embeddable.getSavedSearch();
+    if (!savedSearch) {
+      return;
+    }
     const locatorParams = getDiscoverLocatorParams({
       input: embeddable.getInput(),
-      savedSearch: embeddable.getSavedSearch(),
+      savedSearch,
     });
     await this.locator.navigate(locatorParams);
   }

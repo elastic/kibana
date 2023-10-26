@@ -7,7 +7,7 @@
  */
 
 import React, { Suspense, ComponentType, ReactElement, Ref } from 'react';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 
 import { Fallback } from './fallback';
 
@@ -21,9 +21,11 @@ export const withSuspense = <P extends {}, R = {}>(
   fallback: ReactElement | null = <Fallback />
 ) =>
   React.forwardRef((props: P, ref: Ref<R>) => (
-    <EuiErrorBoundary>
-      <Suspense fallback={fallback}>
-        <Component {...props} ref={ref} />
-      </Suspense>
-    </EuiErrorBoundary>
+    <KibanaErrorBoundaryProvider>
+      <KibanaErrorBoundary>
+        <Suspense fallback={fallback}>
+          <Component {...props} ref={ref} />
+        </Suspense>
+      </KibanaErrorBoundary>
+    </KibanaErrorBoundaryProvider>
   ));
