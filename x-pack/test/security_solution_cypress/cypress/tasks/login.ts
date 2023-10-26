@@ -9,10 +9,8 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
-import {
-  SecurityRoleName,
-  KNOWN_SERVERLESS_ROLE_DEFINITIONS,
-} from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
 import { rootRequest } from './common';
 import {
@@ -48,7 +46,7 @@ const ELASTICSEARCH_PASSWORD_CONFIG_PATH = 'config.elasticsearch.password';
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = (role?: SecurityRoleName) => {
+export const login = (role?: SecurityRoleName): void => {
   if (role != null) {
     loginWithRole(role);
   } else if (credentialsProvidedByEnvironment()) {
@@ -63,7 +61,7 @@ export interface User {
   password: string;
 }
 
-export const loginWithUser = (user: User) => {
+export const loginWithUser = (user: User): void => {
   cy.session(user, () => {
     loginWithUsernameAndPassword(user.username, user.password);
   });
@@ -77,7 +75,7 @@ export const loginWithUser = (user: User) => {
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: SecurityRoleName, route: string) => {
+export const getUrlWithRoute = (role: SecurityRoleName, route: string): string => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -98,7 +96,7 @@ export const getUrlWithRoute = (role: SecurityRoleName, route: string) => {
  * @param user the user information to build the basic auth with
  * @param route string route to visit
  */
-export const constructUrlWithUser = (user: User, route: string) => {
+export const constructUrlWithUser = (user: User, route: string): string => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const hostname = kibana.hostname;
@@ -120,7 +118,7 @@ export const constructUrlWithUser = (user: User, route: string) => {
  *
  * @param role role name
  */
-const loginWithRole = (role: SecurityRoleName) => {
+const loginWithRole = (role: SecurityRoleName): void => {
   if (
     (Cypress.env(IS_SERVERLESS) || Cypress.env(CLOUD_SERVERLESS)) &&
     !(role in KNOWN_SERVERLESS_ROLE_DEFINITIONS)
@@ -149,7 +147,7 @@ const credentialsProvidedByEnvironment = (): boolean =>
  * environment variables, and POSTing the username and password directly to
  * Kibana's `/internal/security/login` endpoint, bypassing the login page (for speed).
  */
-const loginViaEnvironmentCredentials = () => {
+const loginViaEnvironmentCredentials = (): void => {
   cy.log(
     `Authenticating via environment credentials from the \`CYPRESS_${ELASTICSEARCH_USERNAME}\` and \`CYPRESS_${ELASTICSEARCH_PASSWORD}\` environment variables`
   );
@@ -167,7 +165,7 @@ const loginViaEnvironmentCredentials = () => {
  * `kibana.dev.yml` file and POSTing the username and password directly to
  * Kibana's `/internal/security/login` endpoint, bypassing the login page (for speed).
  */
-const loginViaConfig = () => {
+const loginViaConfig = (): void => {
   cy.log(
     `Authenticating via config credentials \`${ELASTICSEARCH_USERNAME_CONFIG_PATH}\` and \`${ELASTICSEARCH_PASSWORD_CONFIG_PATH}\` from \`${KIBANA_DEV_YML_PATH}\``
   );
@@ -201,11 +199,11 @@ export const getEnvAuth = (): User => {
   }
 };
 
-export const logout = () => {
+export const logout = (): void => {
   cy.visit(LOGOUT_URL);
 };
 
-const loginWithUsernameAndPassword = (username: string, password: string) => {
+const loginWithUsernameAndPassword = (username: string, password: string): void => {
   const baseUrl = Cypress.config().baseUrl;
   if (!baseUrl) {
     throw Error(`Cypress config baseUrl not set!`);
