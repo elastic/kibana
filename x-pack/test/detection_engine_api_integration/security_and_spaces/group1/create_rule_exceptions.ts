@@ -251,9 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // TODO: When available this tag should be @skipInServerless
-    // This use case is not relevant to serverless.
-    describe('@brokenInServerless legacy investigation_fields', () => {
+    describe('legacy investigation_fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
 
       beforeEach(async () => {
