@@ -179,7 +179,7 @@ export class TaskManagerPlugin
     core.status.set(
       combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
         map(([derivedStatus, serviceStatus]) =>
-          serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
+          serviceStatus.level >= derivedStatus.level ? serviceStatus : derivedStatus
         )
       )
     );
