@@ -105,7 +105,7 @@ describe('useLoadingState', () => {
     act(() => {
       autoRefreshTick$.next(null); // auto-refresh ticks
       result.current.requestState$.next('running'); // simulates a new request
-      result.current.requestState$.next('done'); // simulates a completition of a request
+      result.current.requestState$.next('done'); // simulates completion of a request
       result.current.requestState$.next('running');
       result.current.requestState$.next('running');
       result.current.requestState$.next('running');
@@ -130,7 +130,7 @@ describe('useLoadingState', () => {
     act(() => {
       autoRefreshTick$.next(null); // auto-refresh ticks
       result.current.requestState$.next('running'); // simulates a new request
-      result.current.requestState$.next('done'); // simulates a completition of a request
+      result.current.requestState$.next('done'); // simulates completion of a request
       result.current.requestState$.next('running');
       result.current.requestState$.next('done');
       jest.runOnlyPendingTimers();

@@ -8,23 +8,23 @@
 import {
   first,
   tap,
-  concatMap,
   switchMap,
   distinctUntilChanged,
   filter,
   map,
   debounceTime,
   skipUntil,
+  withLatestFrom,
 } from 'rxjs/operators';
 import createContainer from 'constate';
-import { BehaviorSubject, merge } from 'rxjs';
-import { useCallback, useEffect, useRef } from 'react';
-import { waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
+import { BehaviorSubject, iif, merge, Observable } from 'rxjs';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from './use_date_picker';
 
-export type RequestState = 'running' | 'done';
-const WAIT_TS = 1000;
+export type RequestState = 'running' | 'done' | 'error';
+const WAIT_MS = 1000;
 
 export const useLoadingState = () => {
   const { autoRefreshTick$, autoRefreshConfig$ } = useDatePickerContext();
@@ -33,62 +33,67 @@ export const useLoadingState = () => {
     data: { search },
   } = services;
 
-  const isAutoRefreshRequestPending$ = useRef(new BehaviorSubject<boolean>(false));
-  const requestsCount$ = useRef(new BehaviorSubject(0));
-  const requestState$ = useRef(new BehaviorSubject<RequestState | null>(null));
+  const isAutoRefreshRequestPending$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
+  const requestsCount$ = useMemo(() => new BehaviorSubject(0), []);
+  const requestState$ = useMemo(() => new BehaviorSubject<RequestState | null>(null), []);
+  const [searchSessionId, setSearchSessionId] = useState<string>();
 
   const updateSearchSessionId = useCallback(() => {
-    search.session.start();
+    setSearchSessionId(() => search.session.start());
   }, [search.session]);
 
   const waitUntilRequestsCompletes$ = useCallback(
     () =>
-      requestsCount$.current.pipe(
+      requestsCount$.pipe(
         distinctUntilChanged(),
         // Skip values emitted by subject$ until the first state equals 0.
-        skipUntil(requestsCount$.current.pipe(first((state) => state === 0))),
+        skipUntil(requestsCount$.pipe(first((state) => state === 0))),
         // Wait for a specified period of idle time before emitting a value.
-        debounceTime(WAIT_TS),
+        debounceTime(WAIT_MS),
         // Emit the first value where state equals 0.
         first((state) => state === 0)
       ),
-    []
+    [requestsCount$]
   );
 
   const isAutoRefreshEnabled$ = useCallback(
     () =>
-      autoRefreshConfig$.pipe(first((autoRefreshConfig) => autoRefreshConfig?.isPaused !== true)),
+      autoRefreshConfig$.pipe(
+        first((config) => {
+          return !!config && config.isPaused !== true;
+        })
+      ),
     [autoRefreshConfig$]
   );
 
   useEffect(() => {
     updateSearchSessionId();
-  }, [search.session, updateSearchSessionId]);
+  }, [updateSearchSessionId]);
 
   useEffect(() => {
     // Subscribe to updates in the request state
-    const requestStateSubscription = requestState$.current
+    const requestStateSubscription = requestState$
       .pipe(
-        filter((status) => !!status),
-        map((status) => (status === 'done' ? -1 : 1)),
+        filter((status): status is RequestState => !!status),
+        map((status) => (['error', 'done'].includes(status) ? -1 : 1)),
         tap((value) => {
           // Update the number of running requests
           // NOTE: We could use the http.getLoadingCount$ instead, to count the number of HTTP requests.
           // However, it would consider the whole page, and here we're limiting the scope to the http requests that happen in the Asset Details context.
-          requestsCount$.current.next(requestsCount$.current.getValue() + value);
+          requestsCount$.next(requestsCount$.getValue() + value);
         }),
         // Concatenate with loadingCounter$ observable
-        concatMap(() =>
-          requestsCount$.current.pipe(
-            skipUntil(isAutoRefreshEnabled$()),
+        switchMap(() =>
+          requestsCount$.pipe(
             distinctUntilChanged(),
+            skipUntil(isAutoRefreshEnabled$()),
+            debounceTime(WAIT_MS),
             // Small window for requests to be considered in the auto-refresh cycle
-            debounceTime(WAIT_TS),
             tap((runningRequestsCount) => {
               if (runningRequestsCount > 0) {
-                // isAutoRefreshRequestPending$.current.next is only set to false in the autoRefreshTick$ subscription
+                // isAutoRefreshRequestPending$.next is only set to false in the autoRefreshTick$ subscription
                 // which will allow us to control when new requests can be made.
-                isAutoRefreshRequestPending$.current.next(true);
+                isAutoRefreshRequestPending$.next(true);
               }
             })
           )
@@ -100,22 +105,39 @@ export const useLoadingState = () => {
     const autoRefreshTickSubscription = merge(
       autoRefreshTick$.pipe(
         skipUntil(isAutoRefreshEnabled$()),
-        switchMap(() =>
-          // Wait until requests complete before processing the next tick
+        withLatestFrom(requestsCount$),
+        switchMap(([, count]) =>
           // Any request called using `use_request_observable` will fall into this case
-          waitUntilRequestsCompletes$().pipe(
-            tap(() => isAutoRefreshRequestPending$.current.next(false))
+          // If there are still pending requests
+          iif(
+            () => count > 0,
+            // Wait until requests complete before processing the next tick
+            waitUntilRequestsCompletes$().pipe(tap(() => isAutoRefreshRequestPending$.next(false))),
+            // Else immediately emit false if the counter is already 0
+            new Observable(() => {
+              isAutoRefreshRequestPending$.next(false);
+            })
           )
         )
       ),
+
       autoRefreshTick$.pipe(
         skipUntil(isAutoRefreshEnabled$()),
-        concatMap(() =>
-          // Wait until queries using data.search complete before processing the next tick
-          // data.search in the context of the Asset Details is used by Lens.
-          waitUntilNextSessionCompletes$(search.session, {
-            waitForIdle: WAIT_TS,
-          }).pipe(tap(() => updateSearchSessionId()))
+        withLatestFrom(search.session.state$),
+        switchMap(([, state]) =>
+          // if the current state$ value is not Completed
+          iif(
+            () =>
+              state !== SearchSessionState.Completed &&
+              state !== SearchSessionState.BackgroundCompleted,
+            // Wait until queries using data.search complete before processing the next tick
+            // data.search in the context of the Asset Details is used by Lens.
+            waitUntilNextSessionCompletes$(search.session).pipe(tap(() => updateSearchSessionId())),
+            // Else mmediately emit true if session state is already completed
+            new Observable(() => {
+              updateSearchSessionId();
+            })
+          )
         )
       )
     ).subscribe();
@@ -125,9 +147,11 @@ export const useLoadingState = () => {
       autoRefreshTickSubscription.unsubscribe();
     };
   }, [
-    autoRefreshConfig$,
     autoRefreshTick$,
     isAutoRefreshEnabled$,
+    isAutoRefreshRequestPending$,
+    requestState$,
+    requestsCount$,
     search.session,
     updateSearchSessionId,
     waitUntilRequestsCompletes$,
@@ -135,9 +159,9 @@ export const useLoadingState = () => {
 
   return {
     updateSearchSessionId,
-    searchSessionId: search.session.getSessionId(),
-    requestState$: requestState$.current,
-    isAutoRefreshRequestPending$: isAutoRefreshRequestPending$.current,
+    searchSessionId,
+    requestState$,
+    isAutoRefreshRequestPending$,
   };
 };
 

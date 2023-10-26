@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { map, mergeMap, filter } from 'rxjs/operators';
 import { catchError, of, from, Subject, withLatestFrom } from 'rxjs';
 import { useLoadingStateContext } from './use_loading_state';
@@ -14,11 +14,11 @@ import { useDatePickerContext } from './use_date_picker';
 export const useRequestObservable = <T>() => {
   const { requestState$, isAutoRefreshRequestPending$ } = useLoadingStateContext();
   const { autoRefreshConfig$ } = useDatePickerContext();
-  const request$ = useRef(new Subject<() => Promise<T>>());
+  const request$ = useMemo(() => new Subject<() => Promise<T>>(), []);
 
   useEffect(() => {
     // Subscribe to updates in the request$
-    const subscription = request$.current
+    const subscription = request$
       .pipe(
         // Combine latest values from request$, autoRefreshConfig$, and pendingRequests$
         withLatestFrom(isAutoRefreshRequestPending$, autoRefreshConfig$),
@@ -40,7 +40,7 @@ export const useRequestObservable = <T>() => {
               return response;
             }),
             catchError((error) => {
-              requestState$.next('done');
+              requestState$.next('error');
               throw error;
             })
           );
@@ -49,9 +49,10 @@ export const useRequestObservable = <T>() => {
       .subscribe();
 
     return () => {
+      requestState$.next('done');
       subscription.unsubscribe();
     };
-  }, [autoRefreshConfig$, isAutoRefreshRequestPending$, requestState$]);
+  }, [autoRefreshConfig$, isAutoRefreshRequestPending$, request$, requestState$]);
 
-  return { request$: request$.current };
+  return { request$ };
 };

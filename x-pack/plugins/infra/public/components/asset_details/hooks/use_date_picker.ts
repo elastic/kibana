@@ -7,7 +7,7 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { BehaviorSubject } from 'rxjs';
 import { parseDateRange } from '../../../utils/datemath';
@@ -21,9 +21,10 @@ export function useDatePicker({
   dateRange = getDefaultDateRange(),
   autoRefresh,
 }: UseDateRangeProviderProps) {
-  const autoRefreshTick$ = useRef(new BehaviorSubject(null));
-  const autoRefreshConfig$ = useRef(
-    new BehaviorSubject<UseDateRangeProviderProps['autoRefresh'] | undefined>(undefined)
+  const autoRefreshTick$ = useMemo(() => new BehaviorSubject(null), []);
+  const autoRefreshConfig$ = useMemo(
+    () => new BehaviorSubject<UseDateRangeProviderProps['autoRefresh'] | undefined>(undefined),
+    []
   );
 
   const [urlState, setUrlState] = useAssetDetailsUrlState();
@@ -32,9 +33,7 @@ export function useDatePicker({
   );
 
   useEffectOnce(() => {
-    autoRefreshConfig$.current.next({
-      ...(urlState?.autoRefresh ? urlState.autoRefresh : autoRefresh),
-    });
+    autoRefreshConfig$.next(urlState?.autoRefresh ? urlState.autoRefresh : autoRefresh);
     setUrlState({
       ...(!urlState?.dateRange
         ? {
@@ -55,20 +54,20 @@ export function useDatePicker({
 
   const onAutoRefresh = useCallback(
     (newDateRange: TimeRange) => {
-      autoRefreshTick$.current.next(null);
+      autoRefreshTick$.next(null);
       setDateRange(newDateRange);
     },
-    [setDateRange]
+    [autoRefreshTick$, setDateRange]
   );
 
   const setAutoRefresh = useCallback(
     (newAutoRefresh: AssetDetailsProps['autoRefresh']) => {
-      autoRefreshConfig$.current.next(newAutoRefresh);
+      autoRefreshConfig$.next(newAutoRefresh);
       setUrlState({
         autoRefresh: newAutoRefresh,
       });
     },
-    [setUrlState]
+    [autoRefreshConfig$, setUrlState]
   );
 
   const getParsedDateRange = useCallback(() => {
@@ -85,8 +84,8 @@ export function useDatePicker({
 
   return {
     autoRefresh: urlState?.autoRefresh ?? autoRefresh,
-    autoRefreshTick$: autoRefreshTick$.current,
-    autoRefreshConfig$: autoRefreshConfig$.current,
+    autoRefreshTick$,
+    autoRefreshConfig$,
     dateRange: urlState?.dateRange ?? dateRange,
     getDateRangeInTimestamp,
     getParsedDateRange,
