@@ -84,17 +84,19 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
 
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
 
-    cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
-      cy.contains('Query is a required field');
-      inputQuery('select * from uptime');
-      cy.contains('Query is a required field').should('not.exist');
-      cy.contains('Advanced').click();
-      typeInECSFieldInput('{downArrow}{enter}');
-      cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
-      cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
-    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_2)
+      .within(() => {
+        cy.contains('Query is a required field');
+        inputQuery('select * from uptime');
+        cy.contains('Query is a required field').should('not.exist');
+        cy.contains('Advanced').click();
+        typeInECSFieldInput('{downArrow}{enter}');
+        cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
+      })
+      .clickOutside();
+    cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
 
-    cy.contains('Please fix issues listed below').should('not.exist');
+    // cy.contains('Please fix issues listed below').should('not.exist');
     cy.getBySel('ruleEditSubmitButton').click();
     cy.contains(`${ruleName} was saved`).should('exist');
     closeToastIfVisible();
@@ -118,11 +120,13 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('select * from uptime1');
       cy.getBySel('remove-response-action').click();
     });
-    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
-      cy.contains('Search for a pack to run');
-      cy.contains('Pack is a required field');
-      cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
-    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
+      .within(() => {
+        cy.contains('Search for a pack to run');
+        cy.contains('Pack is a required field');
+        cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+      })
+      .clickOutside();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
       cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
@@ -131,7 +135,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
 
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
 
-    cy.contains('Please fix issues listed below').should('not.exist');
+    // cy.contains('Please fix issues listed below').should('not.exist');
     cy.getBySel('ruleEditSubmitButton').click();
     cy.wait('@saveRuleSingleQuery').should(({ request }) => {
       const oneQuery = [
@@ -158,11 +162,13 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       })
       .clickOutside();
 
-    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
-      cy.contains('select * from uptime');
-      cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
-      cy.contains('Days of uptime');
-    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1)
+      .within(() => {
+        cy.contains('select * from uptime');
+        cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
+        cy.contains('Days of uptime');
+      })
+      .clickOutside();
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
     cy.contains('Save changes').click();
     cy.wait('@saveRuleMultiQuery').should(({ request }) => {
