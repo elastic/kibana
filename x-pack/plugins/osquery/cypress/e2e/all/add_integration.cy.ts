@@ -70,11 +70,13 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       interceptAgentPolicyId((agentPolicyId) => {
+        console.log({ agentPolicyId });
         policyId = agentPolicyId;
       });
     });
 
     afterEach(() => {
+      console.log({ policyId });
       cleanupAgentPolicy(policyId);
     });
 

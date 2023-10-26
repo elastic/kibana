@@ -54,7 +54,8 @@ export const integrationExistsWithinPolicyDetails = (integrationName: string) =>
 };
 
 export const interceptAgentPolicyId = (cb: (policyId: string) => void) => {
-  cy.intercept('POST', '**/api/fleet/agent_policies**', (req) => {
+  // create policy has agent_policies?SOMEPARAMS=true , this ? helps to distinguish it from the delete agent_policies/delete route
+  cy.intercept('POST', '**/api/fleet/agent_policies?**', (req) => {
     req.continue((res) => {
       cb(res.body.item.id);
 

@@ -80,8 +80,12 @@ Cypress.Commands.add(
 
 Cypress.Commands.add('login', (role) => {
   if (isServerless) {
+    console.log('Logged with Serverless');
+
     return login.with(role, 'changeme');
   }
+
+  console.log('logged Normally');
 
   // @ts-expect-error hackish way to provide a new role in Osquery ESS only (Reader)
   return login(role);
