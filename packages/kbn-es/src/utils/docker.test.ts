@@ -40,6 +40,7 @@ import {
   SERVERLESS_JWKS_PATH,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
+import * as waitForSecurityIndexUtil from './wait_for_security_index';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -53,6 +54,10 @@ jest.mock('./wait_until_cluster_ready', () => ({
   waitUntilClusterReady: jest.fn(),
 }));
 
+jest.mock('./wait_for_security_index', () => ({
+  waitForSecurityIndex: jest.fn(),
+}));
+
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
@@ -63,6 +68,7 @@ const serverlessDir = 'stateless';
 const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
 
 const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
+const waitForSecurityIndexMock = jest.spyOn(waitForSecurityIndexUtil, 'waitForSecurityIndex');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -559,6 +565,32 @@ describe('runServerlessCluster()', () => {
     expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
     expect(waitUntilClusterReadyMock.mock.calls[0][0].expectedStatus).toEqual('green');
     expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+  });
+
+  test(`should wait for the security index`, async () => {
+    waitForSecurityIndexMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
+    expect(waitForSecurityIndexMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+  });
+
+  test(`should not wait for the security index when security is disabled`, async () => {
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, {
+      basePath: baseEsPath,
+      waitForReady: true,
+      esArgs: ['xpack.security.enabled=false'],
+    });
+    expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
   });
 });
 
