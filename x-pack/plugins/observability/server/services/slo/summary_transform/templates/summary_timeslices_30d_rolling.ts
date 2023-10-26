@@ -137,8 +137,8 @@ export const SUMMARY_TIMESLICES_30D_ROLLING: TransformPutTransformRequest = {
   frequency: '1m',
   sync: {
     time: {
-      field: '@timestamp',
-      delay: '125s',
+      field: 'event.ingested',
+      delay: '65s',
     },
   },
   settings: {

@@ -21,6 +21,7 @@ import {
   manageSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
+import { SLO_SUMMARY_ENRICH_POLICY_NAME } from '../../assets/constants';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
@@ -83,12 +84,15 @@ const createSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const systemEsClient = (await context.core).elasticsearch.client.asInternalUser;
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
     const createSLO = new CreateSLO(esClient, repository, transformManager);
 
     const response = await createSLO.execute(params.body);
+
+    await systemEsClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
 
     return response;
   },
@@ -105,6 +109,7 @@ const updateSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const systemEsClient = (await context.core).elasticsearch.client.asInternalUser;
     const soClient = (await context.core).savedObjects.client;
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
@@ -112,6 +117,8 @@ const updateSLORoute = createObservabilityServerRoute({
     const updateSLO = new UpdateSLO(repository, transformManager, esClient);
 
     const response = await updateSLO.execute(params.path.id, params.body);
+
+    await systemEsClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
 
     return response;
   },
@@ -134,6 +141,7 @@ const deleteSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const systemEsClient = (await context.core).elasticsearch.client.asInternalUser;
     const soClient = (await context.core).savedObjects.client;
     const rulesClient = getRulesClientWithRequest(request);
 
@@ -143,6 +151,7 @@ const deleteSLORoute = createObservabilityServerRoute({
     const deleteSLO = new DeleteSLO(repository, transformManager, esClient, rulesClient);
 
     await deleteSLO.execute(params.path.id);
+    await systemEsClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
   },
 });
 

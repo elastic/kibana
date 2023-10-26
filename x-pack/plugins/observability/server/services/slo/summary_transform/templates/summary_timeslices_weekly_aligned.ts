@@ -150,8 +150,8 @@ export const SUMMARY_TIMESLICES_WEEKLY_ALIGNED: TransformPutTransformRequest = {
   frequency: '1m',
   sync: {
     time: {
-      field: '@timestamp',
-      delay: '125s',
+      field: 'event.ingested',
+      delay: '65s',
     },
   },
   settings: {
