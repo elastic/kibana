@@ -80,7 +80,7 @@ export const ElasticsearchOverview = () => {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-  });
+  }, [hash]);
 
   const { data: _data } = useQuery({
     queryKey: ['fetchConnectors'],
