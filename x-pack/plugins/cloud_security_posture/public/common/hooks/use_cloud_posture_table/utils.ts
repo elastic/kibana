@@ -23,7 +23,6 @@ const getBaseQuery = ({
   filters,
   config,
 }: FindingsBaseURLQuery & FindingsBaseProps & FindingsBaseESQueryConfig) => {
-  console.log('filters', filters);
   try {
     return {
       query: buildEsQuery(dataView, query, filters, config), // will throw for malformed query

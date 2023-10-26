@@ -49,7 +49,6 @@ export const useCloudPostureTable = ({
   paginationLocalStorageKey,
   columnsLocalStorageKey,
   additionalFilters,
-  pageIndexUrlSuffix = '',
 }: {
   // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   defaultQuery?: (params: any) => any;

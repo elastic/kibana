@@ -86,7 +86,7 @@ interface GroupingArgs<T> {
  * @param onGroupChange callback executed when selected group is changed, used for tracking
  * @param onOptionsChange callback executed when grouping options are changed, used for consumer grouping selector
  * @param tracker telemetry handler
- * @param title title of the grouping selector component
+ * @param title of the grouping selector component
  * @returns {@link Grouping} the grouping constructor { getGrouping, groupSelector, pagination, selectedGroups }
  */
 export const useGrouping = <T,>({

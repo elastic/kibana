@@ -122,6 +122,7 @@ export const useGetGroupSelector = ({
         return;
       }
 
+      // Simulate a toggle behavior when maxGroupingLevels is 1
       if (maxGroupingLevels === 1) {
         setSelectedGroups([groupSelection]);
       } else {

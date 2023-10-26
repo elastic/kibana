@@ -54,7 +54,7 @@ const getDefaultQuery = ({
 const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: 'result.evaluation', width: 80 },
   { id: 'resource.id' },
-  { id: 'resource.id' },
+  { id: 'resource.name' },
   { id: 'resource.sub_type' },
   { id: 'rule.benchmark.rule_number' },
   { id: 'rule.name' },
