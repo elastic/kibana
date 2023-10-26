@@ -9,12 +9,11 @@
 import util from 'util';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
-import { Role as SecurityRoleDefinition } from '@kbn/security-plugin/common';
 
 export class Role {
   constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
 
-  public async create(name: string, role: SecurityRoleDefinition) {
+  public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);
     const { data, status, statusText } = await this.kibanaServer.request({
       path: `/api/security/role/${name}`,
