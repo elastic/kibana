@@ -65,7 +65,6 @@ export type AlertsTableStateProps = {
   featureIds: ValidFeatureId[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
-  showExpandToDetails: boolean;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
   runtimeMappings?: MappingRuntimeFields;
@@ -148,7 +147,6 @@ const AlertsTableStateWithQueryProvider = ({
   featureIds,
   query,
   pageSize,
-  showExpandToDetails,
   leadingControlColumns,
   rowHeightsOptions,
   renderCellValue,
@@ -387,7 +385,6 @@ const AlertsTableStateWithQueryProvider = ({
       pageSizeOptions: [10, 20, 50, 100],
       id,
       leadingControlColumns: leadingControlColumns ?? [],
-      showExpandToDetails,
       showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
@@ -407,6 +404,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      featureIds,
     }),
     [
       alertsTableConfiguration,
@@ -416,7 +414,6 @@ const AlertsTableStateWithQueryProvider = ({
       pagination.pageSize,
       id,
       leadingControlColumns,
-      showExpandToDetails,
       showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
@@ -434,6 +431,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      featureIds,
     ]
   );
 

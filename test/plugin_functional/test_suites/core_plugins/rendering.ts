@@ -266,6 +266,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableIndexActions (any)',
         'xpack.index_management.enableLegacyTemplates (any)',
         'xpack.index_management.enableIndexStats (any)',
+        'xpack.index_management.editableIndexSettings (any)',
+        'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
@@ -278,6 +280,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logsUIEnabled (any)',
+        'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
 
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
