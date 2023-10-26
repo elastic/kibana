@@ -17,6 +17,7 @@ import {
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_PANEL,
+  TIMELINE_STATUS,
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   TIMELINE_SAVE_MODAL_OPEN_BUTTON,
   SAVE_TIMELINE_BTN_TOOLTIP,
@@ -147,35 +148,32 @@ describe('Timelines', (): void => {
     }
   );
 
-  describe('shows a different tooltip depending on the timeline state', () => {
+  describe('shows the different timeline states', () => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);
       openTimelineUsingToggle();
     });
 
-    it('should show the correct tooltips', { tags: ['@ess', '@serverless'] }, () => {
+    it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {
       // Unsaved
       cy.get(TIMELINE_PANEL).should('be.visible');
-      cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().realHover();
-      cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
-      cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('have.text', 'Unsaved');
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS).should('have.text', 'Unsaved');
 
       saveTimeline();
 
       // Saved
-      cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().realHover();
-      cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
-      cy.get(SAVE_TIMELINE_BTN_TOOLTIP)
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS)
         .invoke('text')
         .should('match', /^Saved/);
 
       executeTimelineKQL('agent.name : *');
 
       // Saved but has unsaved changes
-      cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().realHover();
-      cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
-      cy.get(SAVE_TIMELINE_BTN_TOOLTIP)
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS)
         .invoke('text')
         .should('match', /^Has unsaved changes/);
     });

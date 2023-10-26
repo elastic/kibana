@@ -14,7 +14,9 @@ import {
   EuiText,
   EuiButtonEmpty,
   useEuiTheme,
+  EuiTextColor,
 } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n-react';
 import type { MouseEventHandler } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
@@ -25,7 +27,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import type { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
@@ -229,6 +231,11 @@ const StyledTimelineHeader = styled(EuiFlexGroup)`
   flex: 0;
 `;
 
+const TimelineStatusInfoContainer = styled.span`
+  ${({ theme }) => `margin-left: ${theme.eui.euiSizeS};`}
+  white-space: nowrap;
+`;
+
 const KpisContainer = styled.div`
   ${({ theme }) => `margin-right: ${theme.eui.euiSizeM};`}
 `;
@@ -272,11 +279,10 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
 
 const TimelineName = React.memo(TimelineNameComponent);
 
-const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const description = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
-  );
+const TimelineDescriptionComponent: React.FC<{ timelineId: string; description?: string }> = ({
+  timelineId,
+  description,
+}) => {
   const dispatch = useDispatch();
 
   const onReadMore = useCallback(() => {
@@ -298,6 +304,39 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
 };
 
 const TimelineDescription = React.memo(TimelineDescriptionComponent);
+
+const TimelineStatusInfoComponent = React.memo<{
+  status: TimelineStatus;
+  updated?: number;
+  changed?: boolean;
+}>(({ status, updated, changed }) => {
+  const isUnsaved = status === TimelineStatus.draft;
+
+  let statusContent: React.ReactNode = null;
+  if (isUnsaved) {
+    statusContent = <EuiTextColor color="warning">{i18n.UNSAVED}</EuiTextColor>;
+  } else if (changed) {
+    statusContent = <EuiTextColor color="warning">{i18n.UNSAVED_CHANGES}</EuiTextColor>;
+  } else {
+    statusContent = (
+      <>
+        {i18n.SAVED}{' '}
+        <FormattedRelative
+          data-test-subj="timeline-status"
+          key="timeline-status-autosaved"
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          value={new Date(updated!)}
+        />
+      </>
+    );
+  }
+  return (
+    <EuiText size="xs" data-test-subj="timeline-status">
+      {statusContent}
+    </EuiText>
+  );
+});
+TimelineStatusInfoComponent.displayName = 'TimelineStatusInfoComponent';
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const { selectedPatterns, indexPattern, browserFields } = useSourcererDataView(
@@ -377,10 +416,17 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
         <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
           <RowFlexItem>
             <TimelineName timelineId={timelineId} />
+            <TimelineStatusInfoContainer>
+              <TimelineStatusInfoComponent
+                status={timeline.status}
+                changed={timeline.changed}
+                updated={timeline.updated}
+              />
+            </TimelineStatusInfoContainer>
             <TimelineSavePrompt timelineId={timelineId} />
           </RowFlexItem>
           <RowFlexItem>
-            <TimelineDescription timelineId={timelineId} />
+            <TimelineDescription timelineId={timelineId} description={timeline.description} />
           </RowFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

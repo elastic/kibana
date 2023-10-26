@@ -297,6 +297,8 @@ export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
 
 export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
 
+export const TIMELINE_STATUS = '[data-test-subj="timeline-status"]';
+
 export const SAVE_TIMELINE_BTN_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =

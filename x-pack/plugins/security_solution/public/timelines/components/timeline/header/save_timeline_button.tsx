@@ -7,14 +7,12 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
 import { getTimelineStatusByIdSelector } from '../../flyout/header/selectors';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineStatus } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as timelineTranslations from './translations';
-import * as sharedTranslations from '../../flyout/header/translations';
 
 export interface SaveTimelineButtonProps {
   timelineId: string;
@@ -40,39 +38,12 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
     kibanaSecuritySolutionsPrivileges: { crud: canEditTimeline },
   } = useUserPrivileges();
   const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
-  const {
-    status: timelineStatus,
-    isSaving,
-    updated,
-    changed,
-  } = useDeepEqualSelector((state) => getTimelineStatus(state, timelineId));
+  const { status: timelineStatus, isSaving } = useDeepEqualSelector((state) =>
+    getTimelineStatus(state, timelineId)
+  );
 
   const isUnsaved = timelineStatus === TimelineStatus.draft;
-  // Urge the user to save the timeline because it's not been saved yet or it has changed
-  const urgeToSave = isUnsaved || changed;
-
-  let tooltipContent: React.ReactNode = null;
-  if (canEditTimeline) {
-    if (isUnsaved) {
-      tooltipContent = sharedTranslations.UNSAVED;
-    } else if (changed) {
-      tooltipContent = sharedTranslations.UNSAVED_CHANGES;
-    } else {
-      tooltipContent = (
-        <>
-          {sharedTranslations.SAVED}{' '}
-          <FormattedRelative
-            data-test-subj="timeline-status"
-            key="timeline-status-autosaved"
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            value={new Date(updated!)}
-          />
-        </>
-      );
-    }
-  } else {
-    tooltipContent = timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG;
-  }
+  const tooltipContent = canEditTimeline ? null : timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG;
 
   return (
     <EuiToolTip
@@ -83,7 +54,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
       <>
         <EuiButton
           fill
-          color={urgeToSave ? 'success' : 'primary'}
+          color="primary"
           onClick={openEditTimeline}
           iconType="save"
           isLoading={isSaving}
