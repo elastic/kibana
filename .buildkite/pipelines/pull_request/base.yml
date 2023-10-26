@@ -232,3 +232,13 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  - command: .buildkite/scripts/steps/check_types.sh
+    label: 'Check Types'
+    agents:
+      queue: n2-2-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
