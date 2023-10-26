@@ -42,7 +42,8 @@ import {
 } from '../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/168897
+describe.skip(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
   { tags: ['@ess', '@serverless'] },
   () => {
