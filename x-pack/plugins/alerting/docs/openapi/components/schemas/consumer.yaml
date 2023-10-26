@@ -1,4 +1,16 @@
 type: string
 description: >
   The name of the application or feature that owns the rule.
-  For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+  This value affects which Kibana feature privileges are required to access the rule.
+enum:
+  - apm
+  - alerts
+  - discover
+  - infrastructure
+  - logs
+  - ml
+  - monitoring
+  - siem
+  - slo
+  - stackAlerts
+  - uptime

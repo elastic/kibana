@@ -4874,7 +4874,20 @@
       },
       "consumer": {
         "type": "string",
-        "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.\n"
+        "description": "The name of the application or feature that owns the rule. This value affects which Kibana feature privileges are required to access the rule.\n",
+        "enum": [
+          "apm",
+          "alerts",
+          "discover",
+          "infrastructure",
+          "logs",
+          "ml",
+          "monitoring",
+          "siem",
+          "slo",
+          "stackAlerts",
+          "uptime"
+        ]
       },
       "enabled_rule": {
         "type": "boolean",
@@ -7184,7 +7197,7 @@
               }
             }
           ],
-          "consumer": "alerts",
+          "consumer": "stackAlerts",
           "name": "my Elasticsearch query rule",
           "params": {
             "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
@@ -7209,7 +7222,7 @@
       "create_es_query_kql_rule_request": {
         "summary": "Create an Elasticsearch query rule that uses Kibana query language (KQL).",
         "value": {
-          "consumer": "alerts",
+          "consumer": "stackAlerts",
           "name": "my Elasticsearch query KQL rule",
           "params": {
             "aggType": "count",
@@ -7355,7 +7368,7 @@
           "name": "my Elasticsearch query rule",
           "tags": [],
           "rule_type_id": ".es-query",
-          "consumer": "alerts",
+          "consumer": "stackAlerts",
           "schedule": {
             "interval": "1d"
           },
@@ -7436,7 +7449,7 @@
           "name": "my Elasticsearch query KQL rule\"",
           "tags": [],
           "rule_type_id": ".es-query",
-          "consumer": "alerts",
+          "consumer": "stackAlerts",
           "schedule": {
             "interval": "1m"
           },

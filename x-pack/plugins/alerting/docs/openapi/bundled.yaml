@@ -3344,7 +3344,19 @@ components:
     consumer:
       type: string
       description: |
-        The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+        The name of the application or feature that owns the rule. This value affects which Kibana feature privileges are required to access the rule.
+      enum:
+        - apm
+        - alerts
+        - discover
+        - infrastructure
+        - logs
+        - ml
+        - monitoring
+        - siem
+        - slo
+        - stackAlerts
+        - uptime
     enabled_rule:
       type: boolean
       description: Indicates whether you want to run the rule on an interval basis after it is created.
@@ -4961,7 +4973,7 @@ components:
             frequency:
               summary: false
               notify_when: onActionGroupChange
-        consumer: alerts
+        consumer: stackAlerts
         name: my Elasticsearch query rule
         params:
           esQuery: '"""{"query":{"match_all" : {}}}"""'
@@ -4980,7 +4992,7 @@ components:
     create_es_query_kql_rule_request:
       summary: Create an Elasticsearch query rule that uses Kibana query language (KQL).
       value:
-        consumer: alerts
+        consumer: stackAlerts
         name: my Elasticsearch query KQL rule
         params:
           aggType: count
@@ -5102,7 +5114,7 @@ components:
         name: my Elasticsearch query rule
         tags: []
         rule_type_id: .es-query
-        consumer: alerts
+        consumer: stackAlerts
         schedule:
           interval: 1d
         actions:
@@ -5167,7 +5179,7 @@ components:
         name: my Elasticsearch query KQL rule"
         tags: []
         rule_type_id: .es-query
-        consumer: alerts
+        consumer: stackAlerts
         schedule:
           interval: 1m
         actions: []
