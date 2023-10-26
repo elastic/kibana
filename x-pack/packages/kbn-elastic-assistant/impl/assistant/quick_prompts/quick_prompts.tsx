@@ -40,14 +40,11 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
 
     const contextFilteredQuickPrompts = useMemo(() => {
       const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
-      // Intermediate step to filter out quick prompts that should only be available if the KB is enabled
-      const kbFilteredQuickPrompts = allQuickPrompts.filter((quickPrompt) => {
-        return !(
-          quickPrompt.categories?.includes(KNOWLEDGE_BASE_CATEGORY) &&
-          !knowledgeBase.assistantLangChain
-        );
-      });
-      return kbFilteredQuickPrompts.filter((quickPrompt) => {
+      // If KB is enabled, include KNOWLEDGE_BASE_CATEGORY so KB dependent quick prompts are shown
+      if (knowledgeBase.assistantLangChain) {
+        registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
+      }
+      return allQuickPrompts.filter((quickPrompt) => {
         // Return quick prompt as match if it has no categories, otherwise ensure category exists in registered prompt contexts
         if (quickPrompt.categories == null || quickPrompt.categories.length === 0) {
           return true;
