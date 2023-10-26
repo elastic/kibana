@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { InfraMetadata } from '../../../../../common/http_api';
+import type {
+  InfraMetadata,
+  InfraMetadataHost,
+  InfraMetadataAgent,
+  InfraMetadataCloud,
+} from '../../../../../common/http_api';
 
 export interface Field {
   name: string;
@@ -14,103 +19,52 @@ export interface Field {
 
 export const getAllFields = (metadata: InfraMetadata | null) => {
   if (!metadata?.info) return [];
-  return prune([
-    {
-      name: 'host.architecture',
-      value: metadata.info.host?.architecture,
-    },
-    {
-      name: 'host.hostname',
-      value: metadata.info.host?.name,
-    },
-    {
-      name: 'host.id',
-      value: metadata.info.host?.id,
-    },
-    {
-      name: 'host.ip',
-      value: metadata.info.host?.ip,
-    },
-    {
-      name: 'host.mac',
-      value: metadata.info.host?.mac,
-    },
-    {
-      name: 'host.name',
-      value: metadata.info.host?.name,
-    },
-    {
-      name: 'host.os.build',
-      value: metadata.info.host?.os?.build,
-    },
-    {
-      name: 'host.os.family',
-      value: metadata.info.host?.os?.family,
-    },
-    {
-      name: 'host.os.name',
-      value: metadata.info.host?.os?.name,
-    },
-    {
-      name: 'host.os.kernel',
-      value: metadata.info.host?.os?.kernel,
-    },
-    {
-      name: 'host.os.platform',
-      value: metadata.info.host?.os?.platform,
-    },
-    {
-      name: 'host.os.version',
-      value: metadata.info.host?.os?.version,
-    },
-    {
-      name: 'cloud.account.id',
-      value: metadata.info.cloud?.account?.id,
-    },
-    {
-      name: 'cloud.account.name',
-      value: metadata.info.cloud?.account?.name,
-    },
-    {
-      name: 'cloud.availability_zone',
-      value: metadata.info.cloud?.availability_zone,
-    },
-    {
-      name: 'cloud.instance.id',
-      value: metadata.info.cloud?.instance?.id,
-    },
-    {
-      name: 'cloud.instance.name',
-      value: metadata.info.cloud?.instance?.name,
-    },
-    {
-      name: 'cloud.machine.type',
-      value: metadata.info.cloud?.machine?.type,
-    },
-    {
-      name: 'cloud.provider',
-      value: metadata.info.cloud?.provider,
-    },
-    {
-      name: 'cloud.region',
-      value: metadata.info.cloud?.region,
-    },
-    {
-      name: 'agent.id',
-      value: metadata.info.agent?.id,
-    },
-    {
-      name: 'agent.version',
-      value: metadata.info.agent?.version,
-    },
-    {
-      name: 'agent.policy',
-      value: metadata.info.agent?.policy,
-    },
-  ]);
+  const tempPropertyMap = new Map();
+
+  const mapNestedProperties = (
+    category: 'host' | 'agent' | 'cloud',
+    property: keyof InfraMetadataHost | keyof InfraMetadataCloud | keyof InfraMetadataHost
+  ) => {
+    tempPropertyMap.set(property, metadata?.info[`${category}`][property]);
+
+    if (
+      typeof tempPropertyMap.get(property) === 'string' ||
+      typeof tempPropertyMap.get(property) === 'boolean' ||
+      tempPropertyMap.get(property)?.length
+    ) {
+      return {
+        name: `${category}.${property}`,
+        value:
+          tempPropertyMap.get(property) === false
+            ? String(tempPropertyMap.get(property))
+            : tempPropertyMap.get(property),
+      };
+    } else {
+      const subProps = [];
+      for (const [prop, subProp] of Object.entries(tempPropertyMap.get(property))) {
+        subProps.push({
+          name: `${category}.${property}.${prop}`,
+          value: subProp,
+        });
+      }
+      return subProps;
+    }
+  };
+
+  const agent = Object.keys(metadata.info.agent ?? {}).flatMap((prop: keyof InfraMetadataAgent) =>
+    mapNestedProperties('agent', prop)
+  );
+  const cloud = Object.keys(metadata.info.cloud ?? {}).flatMap((prop: keyof InfraMetadataCloud) =>
+    mapNestedProperties('cloud', prop)
+  );
+  const host = Object.keys(metadata.info.host ?? {}).flatMap((prop: keyof InfraMetadataHost) =>
+    mapNestedProperties('host', prop)
+  );
+
+  return prune([...host, ...agent, ...cloud]);
 };
 
-const prune = (fields: Field[]) => fields.filter((f) => !!f.value);
+const prune = (fields: Field[]) => fields.filter((f) => !!f?.value);
 
 export const getRowsWithPins = (rows: Field[], pinnedItems: Array<Field['name']>) => {
   if (pinnedItems.length > 0) {
