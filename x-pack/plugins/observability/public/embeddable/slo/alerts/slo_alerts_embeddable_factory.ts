@@ -21,6 +21,13 @@ export type SloAlertsEmbeddableFactory = EmbeddableFactory;
 export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = SLO_ALERTS_EMBEDDABLE;
 
+  public readonly grouping = [
+    {
+      id: 'slos',
+      getDisplayName: () => 'SLOs',
+    },
+  ];
+
   constructor(
     private getStartServices: CoreSetup<
       ObservabilityPublicPluginsStart,

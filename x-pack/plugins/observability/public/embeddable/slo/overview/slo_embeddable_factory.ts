@@ -21,6 +21,13 @@ export type SloOverviewEmbeddableFactory = EmbeddableFactory;
 export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = SLO_EMBEDDABLE;
 
+  public readonly grouping = [
+    {
+      id: 'slos',
+      getDisplayName: () => 'SLOs',
+    },
+  ];
+
   constructor(
     private getStartServices: CoreSetup<
       ObservabilityPublicPluginsStart,
