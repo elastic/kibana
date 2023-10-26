@@ -83,6 +83,9 @@ export default function ({ getService }: FtrProviderContext) {
             const doc = resp.hits.hits[0];
             const docMilliseconds = Date.parse(doc._source!.timestamp);
             const nowMilliseconds = Date.now();
+
+            console.log('now value in test:: %o \n', new Date(nowMilliseconds));
+
             const delta = Math.abs(nowMilliseconds - docMilliseconds);
             expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 5);
           });
