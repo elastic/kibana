@@ -25,5 +25,9 @@ export function LogLevel({ level }: LogLevelProps) {
 
   const levelColor = LEVEL_DICT[level] ?? LEVEL_DICT.default;
 
-  return <EuiBadge color={levelColor}>{level}</EuiBadge>;
+  return (
+    <EuiBadge color={levelColor} data-test-subj="logExplorerFlyoutLogLevel">
+      {level}
+    </EuiBadge>
+  );
 }

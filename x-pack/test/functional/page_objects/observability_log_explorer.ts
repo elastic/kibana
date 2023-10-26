@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { extractTimeFields } from '@kbn/data-view-editor-plugin/public/lib';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
@@ -109,6 +110,7 @@ export function ObservabilityLogExplorerPageObject({
   getService,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
+  const es = getService('es');
   const log = getService('log');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
@@ -119,6 +121,8 @@ export function ObservabilityLogExplorerPageObject({
     'search'
   > & {
     search?: Record<string, string>;
+    from?: string;
+    to?: string;
   };
 
   return {
@@ -167,6 +171,27 @@ export function ObservabilityLogExplorerPageObject({
       };
     },
 
+    async setupDataStream(datasetName: string, namespace: string = 'default') {
+      log.info(`===== Setup initial data stream "${datasetName}". =====`);
+      const dataStream = `logs-${datasetName}-${namespace}`;
+      await es.indices.createDataStream({ name: dataStream });
+
+      return async () => {
+        log.info(`===== Removing data stream "${datasetName}". =====`);
+        await es.indices.deleteDataStream({
+          name: dataStream,
+        });
+      };
+    },
+
+    ingestLogEntries(dataStream: string, docs: MockLogDoc[] = []) {
+      log.info(`===== Ingesting ${docs.length} docs for "${dataStream}" data stream. =====`);
+      return es.bulk({
+        body: docs.flatMap((doc) => [{ create: { _index: dataStream } }, createLogDoc(doc)]),
+        refresh: 'wait_for',
+      });
+    },
+
     async setupAdditionalIntegrations() {
       log.info(`===== Setup additional integration packages. =====`);
       log.info(`===== Install ${additionalPackages.length} mock integration packages. =====`);
@@ -183,11 +208,11 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     async navigateTo(options: NavigateToAppOptions = {}) {
-      const { search = {}, ...extraOptions } = options;
+      const { search = {}, from = FROM, to = TO, ...extraOptions } = options;
       const composedSearch = querystring.stringify({
         ...search,
         _g: rison.encode({
-          time: { from: FROM, to: TO },
+          time: { from, to },
         }),
       });
 
@@ -262,6 +287,11 @@ export function ObservabilityLogExplorerPageObject({
       return testSubjects.find('unmanagedDatasets');
     },
 
+    async getFlyoutDetail(docPos: number = 0) {
+      await this.openLogFlyout(docPos);
+      return testSubjects.find('logExplorerFlyoutDetail');
+    },
+
     async getIntegrations() {
       const menu = await this.getIntegrationsContextMenu();
 
@@ -277,6 +307,14 @@ export function ObservabilityLogExplorerPageObject({
     async openDatasetSelector() {
       const button = await this.getDatasetSelectorButton();
       return button.click();
+    },
+
+    async openLogFlyout(docPos: number = 0) {
+      const docEntries = await testSubjects.findAll('docTableExpandToggleColumn');
+      const selectedDoc = docEntries[docPos];
+      if (selectedDoc) {
+        await selectedDoc.click();
+      }
     },
 
     async closeDatasetSelector() {
@@ -378,5 +416,57 @@ export function ObservabilityLogExplorerPageObject({
       await this.typeInQueryBar(query);
       await testSubjects.click('querySubmitButton');
     },
+  };
+}
+
+interface MockLogDoc {
+  time: number;
+  logFilepath: string;
+  serviceName?: string;
+  namespace: string;
+  datasetName: string;
+  message?: string;
+  logLevel?: string;
+  [key: string]: unknown;
+}
+
+export function createLogDoc({
+  time,
+  logFilepath,
+  serviceName,
+  namespace,
+  datasetName,
+  message,
+  logLevel,
+  ...extraFields
+}: MockLogDoc) {
+  return {
+    input: {
+      type: 'log',
+    },
+    '@timestamp': new Date(time).toISOString(),
+    log: {
+      file: {
+        path: logFilepath,
+      },
+    },
+    ...(serviceName
+      ? {
+          service: {
+            name: serviceName,
+          },
+        }
+      : {}),
+    data_stream: {
+      namespace,
+      type: 'logs',
+      dataset: datasetName,
+    },
+    message,
+    event: {
+      dataset: datasetName,
+    },
+    ...(logLevel && { 'log.level': logLevel }),
+    ...extraFields,
   };
 }

@@ -16,5 +16,9 @@ interface TimestampProps {
 export function Timestamp({ timestamp }: TimestampProps) {
   if (!timestamp) return null;
 
-  return <EuiBadge color="hollow">{timestamp}</EuiBadge>;
+  return (
+    <EuiBadge color="hollow" data-test-subj="logExplorerFlyoutLogTimestamp">
+      {timestamp}
+    </EuiBadge>
+  );
 }

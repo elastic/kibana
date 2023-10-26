@@ -18,7 +18,7 @@ export function Message({ message }: MessageProps) {
   if (!message) return null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj="logExplorerFlyoutLogMessage">
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
           {flyoutMessageLabel}
