@@ -74,6 +74,8 @@ get:
                             type: string
                           name:
                             type: string 
+                alerts:
+                  type: object
                 authorized_consumers:
                   description: The list of the plugins IDs that have access to the rule type.
                   type: object
@@ -163,6 +165,10 @@ get:
                   type: boolean
                 enabled_in_license:
                   description: Indicates whether the rule type is enabled or disabled based on the subscription.
+                  type: boolean
+                has_alerts_mappings:
+                  type: boolean
+                has_fields_for_a_a_d:
                   type: boolean
                 id: 
                   description: The unique identifier for the rule type.
