@@ -244,11 +244,7 @@ const removeOptionFromFilter = ({
   filterOptions: string[];
   optionToBeRemoved: string;
 }) => {
-  const index = filterOptions.indexOf(optionToBeRemoved);
-  const resultingFilterOptions =
-    index > -1
-      ? [...filterOptions.slice(0, index), ...filterOptions.slice(index + 1, filterOptions.length)]
-      : filterOptions;
+  const resultingFilterOptions = filterOptions.filter((option) => option !== optionToBeRemoved)
   return resultingFilterOptions.length === 0 ? {} : { [filterKey]: resultingFilterOptions };
 };
 
