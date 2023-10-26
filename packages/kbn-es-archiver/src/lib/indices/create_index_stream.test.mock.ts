@@ -20,10 +20,12 @@ export const mockDeleteSavedObjectIndices = jest.fn() as jest.MockedFunction<
   typeof deleteSavedObjectIndices
 >;
 
-export const mockisSavedObjectIndex = jest.fn() as jest.MockedFunction<typeof isSavedObjectIndex>;
+export const mockIsSavedObjectIndex = jest.fn() as unknown as jest.MockedFunction<
+  typeof isSavedObjectIndex
+>;
 
 jest.mock('./kibana_index', () => ({
   cleanSavedObjectIndices: mockCleanSavedObjectIndices,
   deleteSavedObjectIndices: mockDeleteSavedObjectIndices,
-  isSavedObjectIndex: mockisSavedObjectIndex,
+  isSavedObjectIndex: mockIsSavedObjectIndex,
 }));

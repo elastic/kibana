@@ -7,7 +7,7 @@
  */
 
 import {
-  mockisSavedObjectIndex,
+  mockIsSavedObjectIndex,
   mockCleanSavedObjectIndices,
   mockDeleteSavedObjectIndices,
 } from './create_index_stream.test.mock';
@@ -32,7 +32,7 @@ const chance = new Chance();
 const log = createStubLogger();
 
 beforeEach(() => {
-  mockisSavedObjectIndex.mockClear();
+  mockIsSavedObjectIndex.mockClear();
   mockCleanSavedObjectIndices.mockClear();
   mockDeleteSavedObjectIndices.mockClear();
 });

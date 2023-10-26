@@ -5,7 +5,6 @@
   "x-pack/test/functional/es_archives/alerts",
   "x-pack/test/functional/es_archives/alerts_legacy/rules",
   "x-pack/test/functional/es_archives/alerts_legacy/tasks",
-  "x-pack/test/functional/es_archives/canvas/reports",
   "x-pack/test/functional/es_archives/cases/default",
   "x-pack/test/functional/es_archives/cases/migrations/7.11.1",
   "x-pack/test/functional/es_archives/cases/migrations/7.13.2",
