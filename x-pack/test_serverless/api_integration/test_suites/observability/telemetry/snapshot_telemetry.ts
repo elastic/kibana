@@ -18,8 +18,7 @@ import type { UsageStatsPayloadTestFriendly } from '../../../../../test/api_inte
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/168625
-  describe.skip('Snapshot telemetry', function () {
+  describe('Snapshot telemetry', function () {
     let stats: UsageStatsPayloadTestFriendly;
 
     before(async () => {

@@ -3,7 +3,7 @@
 ## Disable plugins
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
-xpack.infra.enabled: false
+xpack.infra.enabled: true
 xpack.securitySolution.enabled: false
 xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
@@ -39,6 +39,9 @@ xpack.fleet.internal.registry.excludePackages: [
     'endpoint',
     'beaconing',
     'osquery_manager',
+    # synthetics is not enabled yet
+    'synthetics',
+    'synthetics_dashboards',
     # Removed in 8.11 integrations
     'cisco',
     'microsoft',
@@ -50,11 +53,14 @@ xpack.fleet.internal.registry.excludePackages: [
 xpack.fleet.packages:
   - name: apm
     version: latest
+# fleet_server package installed to publish agent metrics
+  - name: fleet_server
+    version: latest
 ## Disable APM UI components and API calls
 xpack.apm.featureFlags.agentConfigurationAvailable: false
 xpack.apm.featureFlags.configurableIndicesAvailable: false
-xpack.apm.featureFlags.infrastructureTabAvailable: false
-xpack.apm.featureFlags.infraUiAvailable: false
+xpack.apm.featureFlags.infrastructureTabAvailable: true
+xpack.apm.featureFlags.infraUiAvailable: true
 xpack.apm.featureFlags.migrationToFleetAvailable: false
 xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false
@@ -65,3 +71,4 @@ telemetry.labels.serverless: observability
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: false
+xpack.ml.compatibleModuleType: 'observability'

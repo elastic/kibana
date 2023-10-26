@@ -17,10 +17,9 @@ import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import {
   createMetricThresholdExecutor,
-  FIRED_ACTIONS,
   MetricThresholdAlertContext,
-  NO_DATA_ACTIONS,
 } from './custom_threshold_executor';
+import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './translations';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -127,6 +126,10 @@ const mockOptions = {
   },
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+  getTimeRange: () => {
+    const date = STARTED_AT_MOCK_DATE.toISOString();
+    return { dateStart: date, dateEnd: date };
+  },
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
@@ -233,10 +236,9 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBeUndefined();
-      expect(action.reason).toContain('is 1');
-      expect(action.reason).toContain('Alert when > 0.75');
-      expect(action.reason).toContain('test.metric.1');
-      expect(action.reason).toContain('in the last 1 min');
+      expect(action.reason).toBe(
+        'test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedIndexPattern)'
+      );
     });
   });
 
@@ -993,16 +995,10 @@ describe('The metric threshold alert type', () => {
       const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       const { action } = mostRecentAction(instanceID);
-      const reasons = action.reason.split('\n');
-      expect(reasons.length).toBe(2);
-      expect(reasons[0]).toContain('test.metric.1');
-      expect(reasons[1]).toContain('test.metric.2');
-      expect(reasons[0]).toContain('is 1');
-      expect(reasons[1]).toContain('is 3');
-      expect(reasons[0]).toContain('Alert when >= 1');
-      expect(reasons[1]).toContain('Alert when >= 3');
-      expect(reasons[0]).toContain('in the last 1 min');
-      expect(reasons[1]).toContain('in the last 1 min');
+      const reasons = action.reason;
+      expect(reasons).toBe(
+        'test.metric.1 is 1, above the threshold of 1; test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedIndexPattern)'
+      );
     });
   });
   describe('querying with the count aggregator', () => {
