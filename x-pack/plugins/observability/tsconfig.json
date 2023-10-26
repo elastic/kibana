@@ -90,7 +90,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/core-application-common",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": [
     "target/**/*"

@@ -12,19 +12,11 @@ import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
 
-/**
- * The below import is required to avoid a console error warn from the "brace" package
- * console.warn ../node_modules/brace/index.js:3999
-      Could not load worker ReferenceError: Worker is not defined
-          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
- */
-import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { createMemoryHistory } from 'history';
 import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
-stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
@@ -399,7 +391,7 @@ describe('<IndexManagementHome />', () => {
         const { table } = testBed;
         const { tableCellsValues } = table.getMetaData('indexTable');
 
-        expect(tableCellsValues).toEqual([['', 'test', '1', '1', '']]);
+        expect(tableCellsValues).toEqual([['', 'test', '']]);
       });
     });
   });

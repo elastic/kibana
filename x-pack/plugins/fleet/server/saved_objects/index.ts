@@ -147,6 +147,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         },
         is_protected: { type: 'boolean' },
         overrides: { type: 'flattened', index: false },
+        keep_monitoring_alive: { type: 'boolean' },
       },
     },
     migrations: {
@@ -246,6 +247,28 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         broker_buffer_size: { type: 'integer' },
         required_acks: { type: 'integer' },
         channel_buffer_size: { type: 'integer' },
+        secrets: {
+          dynamic: false,
+          properties: {
+            password: {
+              dynamic: false,
+              properties: {
+                id: { type: 'keyword' },
+              },
+            },
+            ssl: {
+              dynamic: false,
+              properties: {
+                key: {
+                  dynamic: false,
+                  properties: {
+                    id: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
     modelVersions: {

@@ -363,6 +363,11 @@ export class DiscoverPageObject extends FtrService {
     return await this.find.byClassName('monaco-editor');
   }
 
+  public async findFieldByNameInDocViewer(name: string) {
+    const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
+    await fieldSearch.type(name);
+  }
+
   public async getMarks() {
     const table = await this.docTable.getTable();
     const marks = await table.findAllByTagName('mark');

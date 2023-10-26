@@ -45,7 +45,7 @@ export function SloDetailsPage() {
   const sloInstanceId = useGetInstanceIdQueryParam();
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
-  const { isLoading, slo } = useFetchSloDetails({
+  const { isLoading, data: slo } = useFetchSloDetails({
     sloId,
     instanceId: sloInstanceId,
     shouldRefetch: isAutoRefreshing,

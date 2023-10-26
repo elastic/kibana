@@ -245,6 +245,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
           legendPosition="right"
           legendSize={130}
           legendSort={[Function]}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="donut"
@@ -639,6 +640,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
           legendColorPicker={[Function]}
           legendPosition="right"
           legendSize={130}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="mosaic"
@@ -1097,6 +1099,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
           legendPosition="right"
           legendSize={130}
           legendSort={[Function]}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="pie"
@@ -1555,6 +1558,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
           legendPosition="right"
           legendSize={130}
           legendSort={[Function]}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="pie"
@@ -1949,6 +1953,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
           legendColorPicker={[Function]}
           legendPosition="right"
           legendSize={130}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="treemap"
@@ -2302,6 +2307,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           legendPosition="right"
           legendSize={130}
           legendSort={[Function]}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="waffle"

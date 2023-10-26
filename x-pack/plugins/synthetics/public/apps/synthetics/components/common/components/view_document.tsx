@@ -6,8 +6,9 @@
  */
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import React, { useState } from 'react';
 import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
+import React, { useState, MouseEvent } from 'react';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
@@ -29,12 +30,20 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
         data-test-subj="syntheticsViewDocumentButton"
         iconType="inspect"
         title={INSPECT_DOCUMENT}
-        onClick={() => {
+        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
           setIsFlyoutVisible(true);
         }}
       />
       {isFlyoutVisible && (
-        <EuiFlyout onClose={() => setIsFlyoutVisible(false)} ownFocus={true}>
+        <EuiFlyout
+          onClose={() => setIsFlyoutVisible(false)}
+          ownFocus={true}
+          onClick={(evt: MouseEvent) => {
+            // needed to prevent propagation to the table row click
+            evt.stopPropagation();
+          }}
+        >
           <EuiFlyoutHeader>
             <EuiTitle size="m">
               <h4>

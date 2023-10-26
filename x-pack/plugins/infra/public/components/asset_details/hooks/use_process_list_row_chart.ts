@@ -36,7 +36,10 @@ export function useProcessListRowChart(command: string) {
       to,
       command,
     }),
-    decodeResponse
+    decodeResponse,
+    undefined,
+    undefined,
+    true
   );
 
   useEffect(() => setInErrorState(true), [error]);

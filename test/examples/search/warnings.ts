@@ -25,9 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const monacoEditor = getService('monacoEditor');
 
-  // Failing: See https://github.com/elastic/kibana/issues/166484
-  describe.skip('handling warnings with search source fetch', function () {
+  describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
@@ -104,35 +104,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
 
+      await retry.try(async () => {
+        const toasts = await find.allByCssSelector(toastsSelector);
+        expect(toasts.length).to.be(2);
+        const expects = ['Results are partial and may be incomplete.', 'Query result'];
+        await asyncForEach(toasts, async (t, index) => {
+          expect(await t.getVisibleText()).to.eql(expects[index]);
+        });
+      });
+
+      // click "see full error" button in the toast
+      const [openShardModalButton] = await testSubjects.findAll('viewWarningBtn');
+      await openShardModalButton.click();
+
+      // request
+      await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailRequest');
+        const requestText = await monacoEditor.getCodeEditorValue(0);
+        expect(requestText).to.contain(testRollupField);
+      });
+
+      // response
+      await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailResponse');
+        const responseText = await monacoEditor.getCodeEditorValue(0);
+        expect(responseText).to.contain(shardFailureReason);
+      });
+
+      await testSubjects.click('euiFlyoutCloseButton');
+
       // wait for response - toasts appear before the response is rendered
       let response: estypes.SearchResponse | undefined;
       await retry.try(async () => {
         response = await getTestJson('responseTab', 'responseCodeBlock');
         expect(response).not.to.eql({});
       });
-
-      // toasts
-      const toasts = await find.allByCssSelector(toastsSelector);
-      expect(toasts.length).to.be(2);
-      const expects = ['The data might be incomplete or wrong.', 'Query result'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
-      });
-
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('openIncompleteResultsModalBtn');
-      await openShardModalButton.click();
-
-      // request
-      await testSubjects.click('showRequestButton');
-      const requestBlock = await testSubjects.find('incompleteResultsModalRequestBlock');
-      expect(await requestBlock.getVisibleText()).to.contain(testRollupField);
-      // response
-      await testSubjects.click('showResponseButton');
-      const responseBlock = await testSubjects.find('incompleteResultsModalResponseBlock');
-      expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
-
-      await testSubjects.click('closeIncompleteResultsModal');
 
       // response tab
       assert(response && response._shards.failures);
@@ -158,10 +164,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
-      });
-      const expects = ['The data might be incomplete or wrong.', 'Query result'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
+        const expects = ['Results are partial and may be incomplete.', 'Query result'];
+        await asyncForEach(toasts, async (t, index) => {
+          expect(await t.getVisibleText()).to.eql(expects[index]);
+        });
       });
 
       // warnings tab

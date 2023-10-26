@@ -26,7 +26,12 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-  const { isLoading, slo, refetch, isRefetching } = useFetchSloDetails({
+  const {
+    isLoading,
+    data: slo,
+    refetch,
+    isRefetching,
+  } = useFetchSloDetails({
     sloId,
     instanceId: sloInstanceId,
   });
@@ -133,6 +138,7 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
               )
             );
           }}
+          locale={i18n.getLocale()}
         />
         <Metric id={`${slo?.id}-${slo?.instanceId}`} data={[metricData]} />
       </Chart>

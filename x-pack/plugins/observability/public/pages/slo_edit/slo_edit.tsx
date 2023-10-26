@@ -33,7 +33,7 @@ export function SloEditPage() {
   const { sloId } = useParams<{ sloId: string | undefined }>();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
-  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
+  const { data: slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   useBreadcrumbs([
     {

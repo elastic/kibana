@@ -8,11 +8,14 @@
 
 import { AppStateUrl } from '../services/discover_app_state_container';
 import { cleanupUrlState } from './cleanup_url_state';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
+
+const services = createDiscoverServicesMock();
 
 describe('cleanupUrlState', () => {
   test('cleaning up legacy sort', async () => {
     const state = { sort: ['batman', 'desc'] } as AppStateUrl;
-    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`
+    expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`
       Object {
         "sort": Array [
           Array [
@@ -25,7 +28,7 @@ describe('cleanupUrlState', () => {
   });
   test('not cleaning up broken legacy sort', async () => {
     const state = { sort: ['batman'] } as unknown as AppStateUrl;
-    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+    expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`Object {}`);
   });
   test('not cleaning up regular sort', async () => {
     const state = {
@@ -34,7 +37,7 @@ describe('cleanupUrlState', () => {
         ['robin', 'asc'],
       ],
     } as AppStateUrl;
-    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`
+    expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`
       Object {
         "sort": Array [
           Array [
@@ -53,14 +56,14 @@ describe('cleanupUrlState', () => {
     const state = {
       sort: [],
     } as AppStateUrl;
-    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+    expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`Object {}`);
   });
 
   test('should keep a valid rowsPerPage', async () => {
     const state = {
       rowsPerPage: 50,
     } as AppStateUrl;
-    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`
+    expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`
       Object {
         "rowsPerPage": 50,
       }
@@ -71,13 +74,63 @@ describe('cleanupUrlState', () => {
     const state = {
       rowsPerPage: -50,
     } as AppStateUrl;
-    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+    expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`Object {}`);
   });
 
   test('should remove an invalid rowsPerPage', async () => {
     const state = {
       rowsPerPage: 'test',
     } as unknown as AppStateUrl;
-    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+    expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`Object {}`);
+  });
+
+  describe('sampleSize', function () {
+    test('should keep a valid sampleSize', async () => {
+      const state = {
+        sampleSize: 50,
+      } as AppStateUrl;
+      expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`
+              Object {
+                "sampleSize": 50,
+              }
+          `);
+    });
+
+    test('should remove for ES|QL', async () => {
+      const state = {
+        sampleSize: 50,
+        query: {
+          esql: 'from test',
+        },
+      } as AppStateUrl;
+      expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`
+        Object {
+          "query": Object {
+            "esql": "from test",
+          },
+        }
+      `);
+    });
+
+    test('should remove a negative sampleSize', async () => {
+      const state = {
+        sampleSize: -50,
+      } as AppStateUrl;
+      expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`Object {}`);
+    });
+
+    test('should remove an invalid sampleSize', async () => {
+      const state = {
+        sampleSize: 'test',
+      } as unknown as AppStateUrl;
+      expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`Object {}`);
+    });
+
+    test('should remove a too large sampleSize', async () => {
+      const state = {
+        sampleSize: 500000,
+      } as AppStateUrl;
+      expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`Object {}`);
+    });
   });
 });

@@ -45,6 +45,7 @@ import {
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -90,6 +91,7 @@ export interface InfraClientSetupDeps {
   lens: LensPublicStart;
   fieldFormats: FieldFormatsSetup;
   licensing: LicensingPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -100,6 +102,8 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   kibanaVersion?: string;
+  isCloudEnv: boolean;
+  isServerlessEnv: boolean;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   ml: MlPluginStart;

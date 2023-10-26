@@ -10,26 +10,31 @@ import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { parseDateRange } from '../../../utils/datemath';
+import { AssetDetailsProps } from '../types';
 import { getDefaultDateRange, toTimestampRange } from '../utils';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
-export interface UseDateRangeProviderProps {
-  initialDateRange?: TimeRange;
-}
+export type UseDateRangeProviderProps = Pick<AssetDetailsProps, 'autoRefresh' | 'dateRange'>;
 
 export function useDateRangeProvider({
-  initialDateRange = getDefaultDateRange(),
+  dateRange = getDefaultDateRange(),
+  autoRefresh,
 }: UseDateRangeProviderProps) {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange;
-  const [parsedDateRange, setParsedDateRange] = useState(parseDateRange(dateRange));
+  const [parsedDateRange, setParsedDateRange] = useState(
+    parseDateRange(urlState?.dateRange ?? dateRange)
+  );
   const [refreshTs, setRefreshTs] = useState(Date.now());
 
   useEffectOnce(() => {
-    const { from, to } = getParsedDateRange();
-
-    // forces the date picker to initialize with absolute dates.
-    setUrlState({ dateRange: { from, to } });
+    setUrlState({
+      ...(!urlState?.dateRange
+        ? {
+            dateRange,
+          }
+        : undefined),
+      ...(!urlState?.autoRefresh ? { autoRefresh } : undefined),
+    });
   });
 
   const setDateRange = useCallback(
@@ -37,6 +42,15 @@ export function useDateRangeProvider({
       setUrlState({ dateRange: newDateRange });
       setParsedDateRange(parseDateRange(newDateRange));
       setRefreshTs(Date.now());
+    },
+    [setUrlState]
+  );
+
+  const setAutoRefresh = useCallback(
+    (newAutoRefresh: AssetDetailsProps['autoRefresh']) => {
+      setUrlState({
+        autoRefresh: newAutoRefresh,
+      });
     },
     [setUrlState]
   );
@@ -54,10 +68,12 @@ export function useDateRangeProvider({
   );
 
   return {
-    dateRange,
+    autoRefresh: urlState?.autoRefresh ?? autoRefresh,
+    dateRange: urlState?.dateRange ?? dateRange,
     getDateRangeInTimestamp,
     getParsedDateRange,
     refreshTs,
+    setAutoRefresh,
     setDateRange,
   };
 }

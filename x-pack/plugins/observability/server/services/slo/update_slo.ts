@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
+import { isEqual } from 'lodash';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
@@ -28,10 +29,17 @@ export class UpdateSLO {
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
-    const updatedSlo: SLO = Object.assign({}, originalSlo, params, {
+    let updatedSlo: SLO = Object.assign({}, originalSlo, params, {
+      groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
+    });
+
+    if (isEqual(originalSlo, updatedSlo)) {
+      return this.toResponse(originalSlo);
+    }
+
+    updatedSlo = Object.assign(updatedSlo, {
       updatedAt: new Date(),
       revision: originalSlo.revision + 1,
-      groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
     });
 
     validateSLO(updatedSlo);
