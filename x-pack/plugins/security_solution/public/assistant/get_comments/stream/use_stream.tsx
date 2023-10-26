@@ -7,7 +7,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { concatMap, delay, Observable, of, scan, share, shareReplay, timestamp } from 'rxjs';
+import {
+  concatMap,
+  delay,
+  finalize,
+  Observable,
+  of,
+  scan,
+  share,
+  shareReplay,
+  timestamp,
+} from 'rxjs';
+
 export interface PromptObservableState {
   chunks: Chunk[];
   message?: string;
@@ -32,13 +43,25 @@ interface UseStreamProps {
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 interface UseStream {
+  // The error message, if an error occurs during streaming.
   error: string | undefined;
+  // Indicates whether the streaming is in progress or not
   isLoading: boolean;
+  // Indicates whether the streaming is in progress and there is a pending message.
   isStreaming: boolean;
+  // The pending message from the streaming data.
   pendingMessage: string;
+  //  A function to mark the streaming as complete
   setComplete: (complete: boolean) => void;
 }
 const MIN_DELAY = 35;
+/**
+ * A hook that takes a ReadableStreamDefaultReader and returns an object with properties and functions
+ * that can be used to handle streaming data from a readable stream
+ * @param amendMessage - handles the amended message
+ * @param content - the content of the message. If provided, the function will not use the reader to stream data.
+ * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
+ */
 export const useStream = ({ amendMessage, content, reader }: UseStreamProps): UseStream => {
   const observer$ = useMemo(
     () =>
@@ -127,7 +150,9 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
               }
 
               return of(value.value).pipe(delay(delayFor));
-            })
+            }),
+            // set loading to false when the observable completes or errors out
+            finalize(() => setLoading(false))
           )
         : new Observable<PromptObservableState>(),
     [content, reader]
@@ -156,11 +181,9 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
       },
       complete: () => {
         setComplete(true);
-        setLoading(false);
       },
       error: (err) => {
         setError(err.message);
-        setLoading(false);
       },
     });
     setSubscription(newSubscription);
