@@ -37,7 +37,6 @@ interface Props {
 
 export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
   const {
-    versionId,
     version,
     // TODO: Add a tooltip explaining that: a false value means that the cluster global state
     // is not stored as part of the snapshot.
@@ -62,12 +61,12 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemVersionLabel"
-              defaultMessage="Version / Version ID"
+              defaultMessage="Version"
             />
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            {version} / {versionId}
+            {version}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 
