@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommonReportingSetup } from '@kbn/reporting-common/types';
+import { CommonReportingSetup } from '@kbn/reporting-common-export-types-helpers';
 
 export const reportingMock = {
   createStart: (): CommonReportingSetup => ({

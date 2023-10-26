@@ -18,13 +18,7 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
-import {
-  CancellationToken,
-  ReportingError,
-  QueueTimeoutError,
-  KibanaShuttingDownError,
-  TaskRunResult,
-} from '@kbn/reporting-common';
+import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { ExportTypesRegistry, getContentStream } from '..';
 import type { ReportingCore } from '../..';
@@ -36,6 +30,11 @@ import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
+import {
+  QueueTimeoutError,
+  ReportingError,
+  KibanaShuttingDownError,
+} from '../../../common/errors/errors';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 

@@ -8,7 +8,10 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { JobParamsDownloadCSV, ReportingRequestHandlerContext } from '@kbn/reporting-common/types';
+import {
+  JobParamsDownloadCSV,
+  ReportingRequestHandlerContext,
+} from '@kbn/reporting-common-export-types-helpers';
 import moment from 'moment';
 import type { ReportingCore } from '../../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE, INTERNAL_ROUTES } from '../../../../common/constants';
