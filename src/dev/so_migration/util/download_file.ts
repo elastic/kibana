@@ -9,18 +9,22 @@
 import { createWriteStream, unlinkSync } from 'fs';
 import https from 'https';
 
-export async function downloadFile(url: string, outputPath: string) {
+export function downloadFile(url: string, outputPath: string) {
   const file = createWriteStream(outputPath);
 
-  await new Promise((res, rej) => {
+  return new Promise((res, rej) => {
     https
       .get(url, (response) => {
-        response.pipe(file);
+        if (response.statusCode !== 200) {
+          rej(response.statusMessage);
+        } else {
+          response.pipe(file);
 
-        file.on('finish', () => {
-          file.close();
-          res(undefined);
-        });
+          file.on('finish', () => {
+            file.close();
+            res(undefined);
+          });
+        }
       })
       .on('error', (err) => {
         unlinkSync(outputPath);

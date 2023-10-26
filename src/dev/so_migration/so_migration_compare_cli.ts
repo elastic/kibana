@@ -32,16 +32,16 @@ run(
       process.argv0,
       scriptName,
       'compare',
-      '--from <hash|filename|url>',
-      '--to <hash|filename|url>',
+      '--from <rev|filename|url>',
+      '--to <rev|filename|url>',
       '[--outputPath <outputPath>]',
     ].join(' '),
     description: `Compares two Saved Object snapshot files based on hashes, filenames or urls.`,
     flags: {
       string: ['outputPath', 'from', 'to'],
       help: `
-        --from            The source snapshot to compare from. Can be a full hash, filename or url.
-        --to              The target snapshot to compare to. Can be a full hash, filename or url.
+        --from            The source snapshot to compare from. Can be a revision, filename or url.
+        --to              The target snapshot to compare to. Can be a revision, filename or url.
         --outputPath      The path to write the comparison report to. If omitted, raw JSON will be output to stdout.
       `,
     },

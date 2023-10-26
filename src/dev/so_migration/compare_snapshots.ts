@@ -8,11 +8,10 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { readFile } from 'fs/promises';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import * as os from 'os';
 import { execSync } from 'child_process';
 import { basename, dirname, resolve } from 'path';
-import { writeFileSync } from 'fs';
 import { MigrationInfoRecord, MigrationSnapshot } from './types';
 import { downloadFile } from './util/download_file';
 
@@ -36,20 +35,23 @@ async function compareSnapshots({
     to,
   });
 
-  const fromSnapshotPath = isCommitHash(from) ? await downloadSnapshot(from, log) : from;
-  const toSnapshotPath = isCommitHash(to) ? await downloadSnapshot(to, log) : to;
+  const fromSnapshotPath = isFile(from) ? from : await downloadSnapshot(from, log);
+  const toSnapshotPath = isFile(to) ? to : await downloadSnapshot(to, log);
 
   const fromSnapshot = await loadJson(fromSnapshotPath);
   const toSnapshot = await loadJson(toSnapshotPath);
 
   const result = compareSnapshotFiles(fromSnapshot, toSnapshot);
 
+  log.info(
+    `Snapshots compared: ${from} <=> ${to}. ` +
+      `${result.hasChanges ? 'No changes' : 'Changed: ' + result.changed.join(', ')}`
+  );
+
   if (outputPath) {
-    log.info(`Snapshots compared: ${from} <=> ${to}`);
     writeSnapshot(outputPath, result);
     log.info(`Output written to: ${outputPath}`);
   } else {
-    log.info(`Snapshots compared: ${from} <=> ${to}`);
     log.info(
       `Emitting result to STDOUT... (Enable '--silent' or '--quiet' to disable non-parseable output)`
     );
@@ -68,18 +70,6 @@ function validateInput({ from, to }: { from: string; to: string }) {
   if (from === to) {
     throw new Error('"from" and "to" must be different');
   }
-
-  if (!isCommitHash(from) && !isUrl(from) && !isFilePath(from)) {
-    throw new Error(
-      'Invalid "--from" argument. Must be a full commit hash, a URL or an existent file path'
-    );
-  }
-
-  if (!isCommitHash(to) && !isUrl(to) && !isFilePath(to)) {
-    throw new Error(
-      'Invalid "--to" argument. Must be a full commit hash, a URL or an existent file path'
-    );
-  }
 }
 
 function writeSnapshot(outputPath: string, result: any) {
@@ -88,16 +78,12 @@ function writeSnapshot(outputPath: string, result: any) {
   writeFileSync(outputPath, json);
 }
 
-function isCommitHash(str: string) {
-  return /^[a-f0-9]+$/.test(str);
-}
-
-function isUrl(str: string) {
-  return /^https?:\/\//.test(str);
-}
-
-function isFilePath(str: string) {
-  return existsSync(str);
+function isFile(str: string) {
+  try {
+    return existsSync(str);
+  } catch (err) {
+    return false;
+  }
 }
 
 async function downloadToTemp(googleCloudUrl: string, log: ToolingLog): Promise<string> {
@@ -108,27 +94,36 @@ async function downloadToTemp(googleCloudUrl: string, log: ToolingLog): Promise<
     log.info('Snapshot already exists at: ' + filePath);
     return filePath;
   } else {
-    log.info('Downloading snapshot from: ' + googleCloudUrl);
-    await downloadFile(googleCloudUrl, filePath);
-    log.info('File downloaded: ' + filePath);
-    return filePath;
+    try {
+      log.info('Downloading snapshot from: ' + googleCloudUrl);
+      await downloadFile(googleCloudUrl, filePath);
+      log.info('File downloaded: ' + filePath);
+      return filePath;
+    } catch (err) {
+      log.error("Couldn't download snapshot from: " + googleCloudUrl);
+      throw err;
+    }
   }
 }
 
-async function downloadSnapshot(commitHash: string, log: ToolingLog): Promise<string> {
-  const fullCommitHash = expandCommitHash(commitHash);
+function downloadSnapshot(gitRev: string, log: ToolingLog): Promise<string> {
+  const fullCommitHash = expandGitRev(gitRev);
   const googleCloudUrl = `${SO_MIGRATIONS_BUCKET_PREFIX}/${fullCommitHash}.json`;
 
-  const filePath = await downloadToTemp(googleCloudUrl, log);
-
-  return filePath;
+  return downloadToTemp(googleCloudUrl, log);
 }
 
-function expandCommitHash(commitHash: string) {
-  if (commitHash.length < 40) {
-    return execSync(`git rev-parse ${commitHash}`).toString().trim();
+function expandGitRev(gitRev: string) {
+  if (gitRev.match(/^[0-9a-f]{40}$/)) {
+    return gitRev;
   } else {
-    return commitHash;
+    try {
+      return execSync(`git rev-parse ${gitRev}`, { stdio: ['pipe', 'pipe', null] })
+        .toString()
+        .trim();
+    } catch (err) {
+      throw new Error(`Couldn't expand git rev: ${gitRev} - ${err.message}`);
+    }
   }
 }
 
