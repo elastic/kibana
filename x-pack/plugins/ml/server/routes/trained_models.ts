@@ -8,9 +8,9 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElserVersion } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -788,7 +788,7 @@ export function trainedModelsRoutes(
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_model/{modelId}`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canTestTrainedModels'],
+        tags: ['access:ml:canCreateTrainedModels'],
       },
     })
     .addVersion(

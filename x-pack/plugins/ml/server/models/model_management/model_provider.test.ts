@@ -8,7 +8,7 @@
 import { modelsProvider } from './models_provider';
 import { type IScopedClusterClient } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 
 describe('modelsProvider', () => {
   const mockClient = {
