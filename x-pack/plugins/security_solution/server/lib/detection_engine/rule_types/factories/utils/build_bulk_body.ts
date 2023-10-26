@@ -7,6 +7,7 @@
 
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { requiredOptional } from '@kbn/zod-helpers';
 
 import type { BaseHit, SearchTypes } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
@@ -92,7 +93,7 @@ export const buildBulkBody = (
         riskScoreOverride: buildRiskScoreFromMapping({
           eventSource: mergedDoc._source ?? {},
           riskScore: completeRule.ruleParams.riskScore,
-          riskScoreMapping: completeRule.ruleParams.riskScoreMapping,
+          riskScoreMapping: requiredOptional(completeRule.ruleParams.riskScoreMapping),
         }).riskScore,
       }
     : undefined;

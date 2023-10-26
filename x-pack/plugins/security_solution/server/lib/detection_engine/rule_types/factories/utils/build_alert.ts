@@ -43,6 +43,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { requiredOptional } from '@kbn/zod-helpers';
 
 import { createHash } from 'crypto';
 
@@ -229,7 +230,7 @@ export const buildAlert = (
     [ALERT_RULE_NAMESPACE_FIELD]: params.namespace,
     [ALERT_RULE_NOTE]: params.note,
     [ALERT_RULE_REFERENCES]: params.references,
-    [ALERT_RULE_RISK_SCORE_MAPPING]: params.riskScoreMapping,
+    [ALERT_RULE_RISK_SCORE_MAPPING]: requiredOptional(params.riskScoreMapping),
     [ALERT_RULE_RULE_ID]: params.ruleId,
     [ALERT_RULE_RULE_NAME_OVERRIDE]: params.ruleNameOverride,
     [ALERT_RULE_SEVERITY_MAPPING]: params.severityMapping,

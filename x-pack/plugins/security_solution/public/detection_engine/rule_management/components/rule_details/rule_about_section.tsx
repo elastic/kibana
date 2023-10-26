@@ -25,6 +25,7 @@ import type {
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
+import { requiredOptional } from '@kbn/zod-helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
@@ -333,7 +334,9 @@ const prepareAboutSectionListItems = (
               ) : (
                 ''
               ),
-            description: <RiskScoreMappingItem riskScoreMappingItem={riskScoreMappingItem} />,
+            description: (
+              <RiskScoreMappingItem riskScoreMappingItem={requiredOptional(riskScoreMappingItem)} />
+            ),
           };
         })
     );
