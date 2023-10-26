@@ -52,6 +52,10 @@ const appId = 'testAppId';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
 // FLAKY: https://github.com/elastic/kibana/issues/168505
+// FLAKY: https://github.com/elastic/kibana/issues/168506
+// FLAKY: https://github.com/elastic/kibana/issues/168507
+// FLAKY: https://github.com/elastic/kibana/issues/168508
+// FLAKY: https://github.com/elastic/kibana/issues/168509
 describe.skip('AddComment ', () => {
   let appMockRender: AppMockRenderer;
 
@@ -246,7 +250,11 @@ describe.skip('AddComment ', () => {
   });
 });
 
-describe('draft comment ', () => {
+// Depends on useCreateAttachmentsMock.mockImplementation
+// in describe.skip('AddComment')
+// https://github.com/elastic/kibana/issues/169875
+// FLAKY: https://github.com/elastic/kibana/issues/169876
+describe.skip('draft comment ', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {

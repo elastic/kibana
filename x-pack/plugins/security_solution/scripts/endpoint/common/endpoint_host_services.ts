@@ -73,7 +73,7 @@ export const createEndpointHost = async ({
   const agentDownload = await getAgentDownloadUrl(version, useClosestVersionMatch, log).then<{
     url: string;
     cache?: DownloadedAgentInfo;
-  }>((url) => {
+  }>(({ url }) => {
     if (useCache) {
       cacheCleanupPromise = cleanupDownloads();
 
