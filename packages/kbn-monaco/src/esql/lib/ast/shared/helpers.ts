@@ -363,20 +363,32 @@ export function getDurationItemsWithQuantifier(quantifier: number = 1) {
     }));
 }
 
+function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
+  if (fuzzyName[fuzzyName.length - 1] === '*') {
+    const prefix = fuzzyName.substring(0, fuzzyName.length - 1);
+    for (const resourceName of resources) {
+      if (resourceName.startsWith(prefix)) {
+        // just to be sure that there's not an exact match here
+        // i.e. name-* should not match name-
+        return resourceName.length > prefix.length;
+      }
+    }
+  }
+}
+
+export function columnExists(
+  column: string,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
+) {
+  if (fields.has(column) || variables.has(column)) {
+    return true;
+  }
+  return Boolean(fuzzySearch(column, fields.keys()) || fuzzySearch(column, variables.keys()));
+}
+
 export function sourceExists(index: string, sources: Set<string>) {
   if (sources.has(index)) {
     return true;
   }
-  // it is a fuzzy match
-  if (index[index.length - 1] === '*') {
-    const prefix = index.substring(0, index.length - 1);
-    for (const sourceName of sources.keys()) {
-      if (sourceName.includes(prefix)) {
-        // just to be sure that there's not an exact match here
-        // i.e. index-* should not match index-
-        return sourceName.length > prefix.length;
-      }
-    }
-  }
-  return false;
+  return Boolean(fuzzySearch(index, sources.keys()));
 }

@@ -33,6 +33,7 @@ import {
   inKnownTimeInterval,
   printFunctionSignature,
   sourceExists,
+  columnExists,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -504,34 +505,37 @@ function validateColumnForCommand(
       );
     }
   } else {
-    const commandDef = getCommandDefinition(commandName);
-    const columnRef = getColumnHit(column.name, references);
-    if (columnRef) {
+    const columnCheck = columnExists(column.name, references);
+    if (columnCheck) {
+      const commandDef = getCommandDefinition(commandName);
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
         ({ type, innerType }) => type === 'column' && innerType
       );
 
-      if (
-        columnParamsWithInnerTypes.every(({ innerType }) => {
-          return innerType !== columnRef.type;
-        }) &&
-        columnParamsWithInnerTypes.length
-      ) {
-        const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
-
-        messages.push(
-          getMessageFromId({
-            messageId: 'unsupportedColumnTypeForCommand',
-            values: {
-              command: capitalize(commandName),
-              type: supportedTypes.join(', '),
-              typeCount: supportedTypes.length,
-              givenType: columnRef.type,
-              column: column.name,
-            },
-            locations: column.location,
+      if (columnParamsWithInnerTypes.length) {
+        // this should be guaranteed by the columnCheck above
+        const columnRef = getColumnHit(column.name, references)!;
+        if (
+          columnParamsWithInnerTypes.every(({ innerType }) => {
+            return innerType !== columnRef.type;
           })
-        );
+        ) {
+          const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
+
+          messages.push(
+            getMessageFromId({
+              messageId: 'unsupportedColumnTypeForCommand',
+              values: {
+                command: capitalize(commandName),
+                type: supportedTypes.join(', '),
+                typeCount: supportedTypes.length,
+                givenType: columnRef.type,
+                column: column.name,
+              },
+              locations: column.location,
+            })
+          );
+        }
       }
     } else {
       if (column.name) {

@@ -470,6 +470,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
+    testErrorsAndWarnings('from index | keep s*', []);
+    testErrorsAndWarnings('from index | keep s*, n*', []);
+    testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
   });
 
   describe('drop', () => {
@@ -489,6 +492,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
+    testErrorsAndWarnings('from index | drop s*', []);
+    testErrorsAndWarnings('from index | drop s*, n*', []);
+    testErrorsAndWarnings('from index | drop m*', ['Unknown column [m*]']);
   });
 
   describe('mv_expand', () => {
