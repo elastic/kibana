@@ -779,9 +779,9 @@ export function trainedModelsRoutes(
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /internal/ml/trained_models/infer/:modelId Evaluates a trained model
-   * @apiName InferTrainedModelDeployment
-   * @apiDescription Evaluates a trained model.
+   * @api {post} /internal/ml/trained_models/download_model/:modelId Downloads elser model
+   * @apiName DownloadTrainedModel
+   * @apiDescription Downloads elser model.
    */
   router.versioned
     .post({
