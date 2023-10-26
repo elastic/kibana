@@ -275,6 +275,7 @@ describe('metric visualization', () => {
       mockDatasource.publicAPIMock.getMaxPossibleNumValues.mockReturnValue(maxPossibleNumValues);
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         isStaticValue: false,
+        dataType: 'number',
       } as OperationDescriptor);
 
       datasourceLayers = {
@@ -623,7 +624,7 @@ describe('metric visualization', () => {
       it('always applies max function to static max dimensions', () => {
         (
           datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
-        ).getOperationForColumnId.mockReturnValueOnce({
+        ).getOperationForColumnId.mockReturnValue({
           isStaticValue: true,
         } as OperationDescriptor);
 
@@ -655,6 +656,9 @@ describe('metric visualization', () => {
             "type": "function",
           }
         `);
+        (
+          datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
+        ).getOperationForColumnId.mockClear();
       });
     });
 

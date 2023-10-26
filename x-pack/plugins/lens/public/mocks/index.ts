@@ -6,6 +6,7 @@
  */
 
 import { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createMockDataViewsState } from '../data_views_service/mocks';
 import { FramePublicAPI, FrameDatasourceAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
@@ -94,7 +95,9 @@ export function generateActiveData(
     const columns = Object.keys(rows[0]).map((columnId) => ({
       id: columnId,
       name: columnId,
-      meta: { type: 'number' as const },
+      meta: {
+        type: typeof rows[0][columnId]! as DatatableColumnType,
+      },
     }));
     memo[id] = {
       type: 'datatable' as const,
