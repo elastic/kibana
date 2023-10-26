@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { last } from 'lodash';
+import { flatten, last } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isObservable, Observable, Subscription } from 'rxjs';
@@ -333,15 +333,16 @@ export function useTimeline({
   return {
     items,
     onEdit: async (item, newMessage) => {
-      const indexOf = items.indexOf(item);
-      const sliced = messages.slice(0, indexOf - 1);
+      const indexOf = flatten(items).indexOf(item);
+      const sliced = messages.slice(0, indexOf);
       const nextMessages = await chat(sliced.concat(newMessage));
       onChatComplete(nextMessages);
     },
     onFeedback: (item, feedback) => {},
     onRegenerate: (item) => {
-      const indexOf = items.indexOf(item);
-      chat(messages.slice(0, indexOf - 1)).then((nextMessages) => onChatComplete(nextMessages));
+      const indexOf = flatten(items).indexOf(item);
+
+      chat(messages.slice(0, indexOf)).then((nextMessages) => onChatComplete(nextMessages));
     },
     onStopGenerating: () => {
       subscription?.unsubscribe();

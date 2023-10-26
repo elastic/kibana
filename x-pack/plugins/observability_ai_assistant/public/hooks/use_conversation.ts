@@ -115,7 +115,13 @@ export function useConversation({
                         id: conversationId,
                       },
                     },
-                    omit(conversationObject, 'conversation.last_updated', 'namespace', 'user'),
+                    omit(
+                      conversationObject,
+                      'conversation.last_updated',
+                      'namespace',
+                      'user',
+                      'messages'
+                    ),
                     { messages }
                   ),
                 },

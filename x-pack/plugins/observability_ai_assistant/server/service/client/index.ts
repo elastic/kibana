@@ -100,7 +100,7 @@ export class ObservabilityAIAssistantClient {
     await this.dependencies.esClient.delete({
       id: conversation._id,
       index: conversation._index,
-      refresh: 'wait_for',
+      refresh: true,
     });
   };
 
@@ -244,7 +244,7 @@ export class ObservabilityAIAssistantClient {
       id: document._id,
       index: document._index,
       doc: updatedConversation,
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return updatedConversation;
@@ -334,7 +334,7 @@ export class ObservabilityAIAssistantClient {
       id: document._id,
       index: document._index,
       doc: { conversation: { title } },
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return updatedConversation;
@@ -356,7 +356,7 @@ export class ObservabilityAIAssistantClient {
     await this.dependencies.esClient.index({
       index: this.dependencies.resources.aliases.conversations,
       document: createdConversation,
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return createdConversation;
