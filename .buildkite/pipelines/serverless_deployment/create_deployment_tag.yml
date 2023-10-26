@@ -1,8 +1,6 @@
 ## Creates deployment@<timestamp> tag on Kibana
 agents:
  queue: kibana-default
-env:
-  SKIP_KIBANA_BOOTSTRAP: "true"
 
 steps:
   - label: "List Kibana commits"
@@ -13,7 +11,7 @@ steps:
   - wait: ~
 
   - label: "Collect commit info"
-    command: ts-node .buildkite/scripts/serverless/collect_commit_info.ts
+    command: .buildkite/scripts/serverless/collect_commit_info.sh
     depends_on: collect_data
 
   - wait: ~
