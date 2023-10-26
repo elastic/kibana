@@ -50,7 +50,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
   return {
     type: 'security:endpoint-meta-telemetry',
     title: 'Security Solution Telemetry Endpoint Metrics and Info task',
-    interval: '30s',
+    interval: '24h',
     timeout: '5m',
     version: '1.0.0',
     getLastExecutionTime: getPreviousDailyTaskTimestamp,
