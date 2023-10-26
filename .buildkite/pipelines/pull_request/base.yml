@@ -63,7 +63,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
@@ -75,7 +75,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 4
     retry:
       automatic:
         - exit_status: '*'
@@ -135,7 +135,7 @@ steps:
       queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 10
     retry:
       automatic:
         - exit_status: '*'
@@ -146,8 +146,8 @@ steps:
     agents:
       queue: n2-4-virt
     depends_on: build
-    timeout_in_minutes: 120
-    parallelism: 2
+    timeout_in_minutes: 60
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
@@ -158,7 +158,7 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 120
+    timeout_in_minutes: 60
     parallelism: 2
     retry:
       automatic:
@@ -170,7 +170,7 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 50
+    timeout_in_minutes: 60
     parallelism: 6
     retry:
       automatic:
@@ -182,7 +182,7 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 50
+    timeout_in_minutes: 60
     parallelism: 6
     retry:
       automatic:

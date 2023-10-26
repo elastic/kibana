@@ -211,6 +211,7 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
     let hostname: string;
 
     before(() => {
+      disableExpandableFlyoutAdvancedSettings();
       indexNewCase().then((indexCase) => {
         caseData = indexCase;
         caseUrlPath = `${APP_CASES_PATH}/${indexCase.data.id}`;
