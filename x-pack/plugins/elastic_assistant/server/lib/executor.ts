@@ -29,7 +29,6 @@ export const executeAction = async ({
 }: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
-  console.log('one');
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
     params: {
@@ -42,7 +41,7 @@ export const executeAction = async ({
           : { body: JSON.stringify(request.body.params.subActionParams), stream: true },
     },
   });
-  console.log('two', actionResult);
+
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
     return {
@@ -53,7 +52,5 @@ export const executeAction = async ({
   }
   const readable = get('data', actionResult);
 
-  console.log('typeof', typeof readable);
-  console.log('three', readable);
   return (readable as Readable).pipe(new PassThrough());
 };

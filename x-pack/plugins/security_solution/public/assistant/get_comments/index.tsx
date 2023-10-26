@@ -50,10 +50,6 @@ export const getComments = ({
     regenerateMessage(currentConversation.id);
   };
 
-  console.log('get comments return', {
-    isFetchingResponse,
-    currentConversation,
-  });
   const extraLoadingComment = isFetchingResponse
     ? [
         {
