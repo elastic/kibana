@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// THIS IS A PARSER FOR A SUB operations/expression/statement of TinyMath  A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =
+
 interface AggMap {
   [key: string]: any;
 }
@@ -50,7 +52,7 @@ export class PainlessTinyMathParser {
     let currentDepth = 0;
     for (let i = expression.indexOf(levelDownChar); i < expressionLength; i++) {
       const char = expression.charAt(i);
-      // console.log(char, currentDepth)
+
       if (char === levelDownChar) {
         currentDepth += 1;
       }
@@ -112,7 +114,7 @@ export class PainlessTinyMathParser {
         .replace(this.NOT, '')
         .trim();
 
-      // Build the ifelse function and switch the true/false values if it is a NOT case
+      // Build the ifelse function and switch the true/false position if it is a NOT case
       // Every condition will be evaluated to 0 or 1 and then we will use the ifelse function to return the correct value
       // example: ifelse(A > 0, 1, 0) example for NOT: ifelse(A > 0, 0, 1)
       let result = `ifelse(${stripedPart},${isNOT ? '0,1' : '1,0'})`;
@@ -120,8 +122,7 @@ export class PainlessTinyMathParser {
       const openParentheses = part.match(this.openParenthesesRegex);
       const closeParentheses = part.match(this.closeParenthesesRegex);
 
-      // Ignore parentheses if they are closed and opened in the same part
-      // As we are going to put them in the ifelse function
+      // Ignore parentheses if they are opened and closed in the same condition as we put them using ifelse function
       // Extra parentheses will throw error in Lens
       // We keep the open parentheses and the closing parentheses that are not part of the same condition
       if (
@@ -143,8 +144,8 @@ export class PainlessTinyMathParser {
       return result;
     });
 
-    // At the end of the loop, we will have an array of conditions for and an ifelse function
-    // And to evaluate the whole condition, we need to check if all the conditions are true (>0)
+    // At the end of the loop, we will have an array of conditions with AND(*) and OR(+)
+    // And to evaluate the whole condition, by wrapping them with ifelse and check if all the conditions are true (>0)
     const conditions = res.join(' ') + ' > 0';
     return conditions;
   }
@@ -170,8 +171,7 @@ export class PainlessTinyMathParser {
   }
 
   parse(): string {
-    if (!this.equation || this.equation === '') throw new Error('Invalid Equation');
-    const recursiveParse = (expression: string): string => {
+    const recursiveParseConditions = (expression: string): string => {
       const condition = this.parseCondition(this.getCondition(expression));
       const trueBranch = this.getTrueBranch(expression);
       const falseBranch = this.getFalseBrach(expression);
@@ -179,49 +179,22 @@ export class PainlessTinyMathParser {
       let fullCondition = `ifelse(${condition}, ${trueBranch}, ${falseBranch})`;
 
       if (trueBranch.includes(this.IF)) {
-        const parsedTrueBranch = recursiveParse(trueBranch);
+        const parsedTrueBranch = recursiveParseConditions(trueBranch);
         fullCondition = fullCondition.replace(trueBranch, parsedTrueBranch);
       }
       if (falseBranch.includes(this.IF)) {
-        const parsedFalseBranch = recursiveParse(falseBranch);
+        const parsedFalseBranch = recursiveParseConditions(falseBranch);
         fullCondition = fullCondition.replace(falseBranch, parsedFalseBranch);
       }
       const result = this.replaceCharactersWithAggMap(fullCondition, this.aggMap);
       return result;
     };
 
-    return recursiveParse(this.equation);
+    if (!this.equation || this.equation === '') throw new Error('Invalid Equation');
+
+    if (this.equation.includes(this.IF)) {
+      return recursiveParseConditions(this.equation);
+    }
+    return this.replaceCharactersWithAggMap(this.equation, this.aggMap);
   }
 }
-// A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =
-const input =
-  'A && F ? B ? C ? D ? DT : DF : CF : BF : AF_A ? AF_B ? AF_C ? AF_CT : AF_CF : AF_BF : AF_AF';
-const dirtyInput =
-  'A > 0 && A < 100 || A == 20 ? A > 50 ? A == 80 ? 80 : 60 : A == 22 ? 200 : 0 : 22';
-const simpleInput = 'A > 0 ? A : 22';
-const complexInput = `condition1 ? condition2 ? 
-      (condition3 ? value1 : value2) : 
-      (condition4 ? value3 : 
-          value4)) : 
-  (condition5 ? 
-      (condition6 ? value5 : value6) : 
-      (condition7 ? value7 : value8))`;
-// const inputExpression = "A > 0 || A == 10 && A == 20 ? A : 22";
-const test2 = '!(A > 0) && A < 100 ? A : 22';
-// const inp = "(A > 1||(A > 1 && A > 100)) && ( A==1 || A==1  ? A : 20)"
-// const t = "(A > 0 || A == 10 && A == 20 ? A : A>100 ? A : 22) || (A<200) && (A==300) ? A : 22)"
-// const t = "A > 0 || A == 10 && A == 20 ? A : A>100 || A<200 && A==300 ? A : 22"
-const go = 'Z || (B && C) ? D : E || F && G ? H : I';
-// const g2 = "R || (Z || W) && (V && C) ? D : E || F && G ? H : I"
-const g3 = '(Z > 1 || W == 2) && (V == 2 && C < 2) ? D : E || F && G ? H : I';
-
-const neg1 = '(A > 1) ? 100 : 200';
-const neg = '(A > 1) && !(A===2) ? 100 : 200';
-const negWithParentheses = '!(A > 1) && !(A===2) ? 100 : 200';
-const neg2 = 'A != 10 ? 1400 :3';
-
-const parser = new PainlessTinyMathParser({
-  equation: input,
-});
-const result = parser.parse();
-console.log(result);
