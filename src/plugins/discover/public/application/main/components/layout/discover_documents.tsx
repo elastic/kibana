@@ -21,7 +21,13 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarnings } from '@kbn/search-response-warnings';
-import { DataLoadingState, UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  UnifiedDataTable,
+  useColumns,
+  type DataTableColumnTypes,
+  getTextBasedColumnTypes,
+} from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -198,6 +204,14 @@ function DiscoverDocumentsComponent({
     [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
   );
 
+  const columnTypes: DataTableColumnTypes | undefined = useMemo(
+    () =>
+      documentState.textBasedQueryColumns
+        ? getTextBasedColumnTypes(documentState.textBasedQueryColumns)
+        : undefined,
+    [documentState.textBasedQueryColumns]
+  );
+
   const renderDocumentView = useCallback(
     (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
@@ -280,6 +294,7 @@ function DiscoverDocumentsComponent({
               <DataGridMemoized
                 ariaLabelledBy="documentsAriaLabel"
                 columns={currentColumns}
+                columnTypes={columnTypes}
                 expandedDoc={expandedDoc}
                 dataView={dataView}
                 loadingState={

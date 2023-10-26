@@ -61,7 +61,7 @@ import {
 } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
-import { columnActions } from '@kbn/unified-data-table';
+import { columnActions, getTextBasedColumnTypes } from '@kbn/unified-data-table';
 import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
@@ -332,6 +332,7 @@ export class SavedSearchEmbeddable
           this.services.data,
           this.services.expressions,
           this.services.inspector,
+          this.abortController.signal,
           this.input.filters,
           this.input.query
         );
@@ -340,6 +341,9 @@ export class SavedSearchEmbeddable
           ...this.getOutput(),
           loading: false,
         });
+        searchProps.columnTypes = result.textBasedQueryColumns
+          ? getTextBasedColumnTypes(result.textBasedQueryColumns)
+          : undefined;
 
         searchProps.rows = result.records;
         searchProps.totalHitCount = result.records.length;
@@ -728,11 +732,7 @@ export class SavedSearchEmbeddable
     }
   }
 
-  public getSavedSearch(): SavedSearch {
-    if (!this.savedSearch) {
-      throw new Error('Saved search not defined');
-    }
-
+  public getSavedSearch(): SavedSearch | undefined {
     return this.savedSearch;
   }
 
