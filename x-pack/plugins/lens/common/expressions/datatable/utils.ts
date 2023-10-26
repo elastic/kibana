@@ -8,21 +8,10 @@
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { getOriginalId } from './transpose_helpers';
 
-function isValidNumber(value: unknown): boolean {
-  return typeof value === 'number' || value == null;
-}
-
 export function isNumericFieldForDatatable(currentData: Datatable | undefined, accessor: string) {
   const column = currentData?.columns.find(
     (col) => col.id === accessor || getOriginalId(col.id) === accessor
   );
-  const isNumeric = column?.meta.type === 'number';
 
-  return (
-    isNumeric &&
-    currentData?.rows.every((row) => {
-      const val = row[accessor];
-      return isValidNumber(val) || (Array.isArray(val) && val.every(isValidNumber));
-    })
-  );
+  return column?.meta.type === 'number';
 }
