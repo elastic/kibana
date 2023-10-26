@@ -535,6 +535,7 @@ x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-monaco @elastic/appex-sharedux
+packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 x-pack/plugins/monitoring_collection @elastic/infra-monitoring-ui
 x-pack/plugins/monitoring @elastic/infra-monitoring-ui
 src/plugins/navigation @elastic/appex-sharedux
