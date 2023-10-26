@@ -8,20 +8,11 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
-import assert from 'assert';
 import type { HostVm } from './types';
 import type { BaseVmCreateOptions } from './vm_services';
 import { createMultipassHostVmClient, createVagrantHostVmClient, createVm } from './vm_services';
-import type { DownloadedAgentInfo } from './agent_downloads_service';
-import { cleanupDownloads, downloadAndStoreAgent } from './agent_downloads_service';
-import {
-  fetchAgentPolicyEnrollmentKey,
-  fetchFleetServerUrl,
-  getAgentDownloadUrl,
-  unEnrollFleetAgent,
-  waitForHostToEnroll,
-} from './fleet_services';
+import { downloadAndStoreAgent } from './agent_downloads_service';
+import { enrollHostVmWithFleet, getAgentDownloadUrl, unEnrollFleetAgent } from './fleet_services';
 
 export const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
 
@@ -62,79 +53,39 @@ export const createAndEnrollEndpointHost = async ({
   useClosestVersionMatch = false,
   useCache = true,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
-  let cacheCleanupPromise: ReturnType<typeof cleanupDownloads> = Promise.resolve({
-    deleted: [],
-  });
-
+  const isRunningInCI = Boolean(process.env.CI);
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
+  const { url: agentUrl } = await getAgentDownloadUrl(version, useClosestVersionMatch, log);
+  const agentDownload = isRunningInCI ? await downloadAndStoreAgent(agentUrl) : undefined;
 
-  const agentDownload = await getAgentDownloadUrl(version, useClosestVersionMatch, log).then<{
-    url: string;
-    cache?: DownloadedAgentInfo;
-  }>(({ url }) => {
-    if (useCache) {
-      cacheCleanupPromise = cleanupDownloads();
-
-      return downloadAndStoreAgent(url).then((cache) => {
-        return {
-          url,
-          cache,
-        };
+  const hostVm = process.env.CI
+    ? await createVm({
+        type: 'vagrant',
+        name: vmName,
+        log,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        agentDownload: agentDownload!,
+        disk,
+        cpus,
+        memory,
+      })
+    : await createVm({
+        type: 'multipass',
+        log,
+        name: vmName,
+        disk,
+        cpus,
+        memory,
       });
-    }
 
-    return { url };
-  });
-
-  const [hostVm, fleetServerUrl, enrollmentToken] = await Promise.all([
-    process.env.CI
-      ? createVm({
-          type: 'vagrant',
-          name: vmName,
-          log,
-          agentDownload: agentDownload.cache as DownloadedAgentInfo,
-        })
-      : createVm({
-          type: 'multipass',
-          log,
-          name: vmName,
-          disk,
-          cpus,
-          memory,
-        }),
-
-    fetchFleetServerUrl(kbnClient),
-
-    fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId),
-  ]);
-
-  // Some validations before we proceed
-  assert(agentDownload.url, 'Missing agent download URL');
-  assert(fleetServerUrl, 'Fleet server URL not set');
-  assert(enrollmentToken, `No enrollment token for agent policy id [${agentPolicyId}]`);
-
-  log.verbose(`Enrolling host [${hostVm.name}]
-  with fleet-server [${fleetServerUrl}]
-  using enrollment token [${enrollmentToken}]`);
-
-  const { agentId } = await enrollHostWithFleet({
+  const { id: agentId } = await enrollHostVmWithFleet({
     kbnClient,
     log,
-    fleetServerUrl,
-    agentDownloadUrl: agentDownload.url,
-    cachedAgentDownload: agentDownload.cache,
-    enrollmentToken,
     hostVm,
-  });
-
-  await cacheCleanupPromise.then((results) => {
-    if (results.deleted.length > 0) {
-      log.verbose(`Agent Downloads cache directory was cleaned up and the following ${
-        results.deleted.length
-      } were deleted:
-${results.deleted.join('\n')}
-`);
-    }
+    agentPolicyId,
+    version,
+    closestVersionMatch: useClosestVersionMatch,
+    useAgentCache: useCache,
   });
 
   return {
@@ -165,90 +116,6 @@ export const deleteMultipassVm = async (vmName: string): Promise<void> => {
     : createMultipassHostVmClient(vmName);
 
   await hostVm.destroy();
-};
-
-interface EnrollHostWithFleetOptions {
-  kbnClient: KbnClient;
-  log: ToolingLog;
-  hostVm: HostVm;
-  agentDownloadUrl: string;
-  cachedAgentDownload?: DownloadedAgentInfo;
-  fleetServerUrl: string;
-  enrollmentToken: string;
-}
-
-const enrollHostWithFleet = async ({
-  kbnClient,
-  log,
-  hostVm,
-  fleetServerUrl,
-  agentDownloadUrl,
-  cachedAgentDownload,
-  enrollmentToken,
-}: EnrollHostWithFleetOptions): Promise<{ agentId: string }> => {
-  const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
-  const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
-  const vmName = hostVm.name;
-
-  // For multipass VMs, we need to get the Agent archive into the VM and extract it
-  // (Vagrant VMs already has it in the VM created)
-  if (hostVm.type === 'multipass') {
-    const downloadsHostVmMountedDir = '~/_agent_downloads';
-
-    if (cachedAgentDownload) {
-      log.debug(
-        `Installing agent on host using cached download from [${cachedAgentDownload.fullFilePath}]`
-      );
-
-      log.debug(`mounting [${cachedAgentDownload.directory}] to [${downloadsHostVmMountedDir}]`);
-      await hostVm.mount(cachedAgentDownload.directory, downloadsHostVmMountedDir);
-
-      log.debug(`Extracting ${cachedAgentDownload.filename}`);
-      await hostVm.exec(`tar -zxf _agent_downloads/${cachedAgentDownload.filename}`);
-
-      log.debug(`un-mounting [${downloadsHostVmMountedDir}]`);
-    } else {
-      log.debug(`Downloading Agent to host VM: ${agentDownloadUrl}`);
-
-      await execa.command(
-        `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`
-      );
-      await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
-      await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
-    }
-  }
-
-  const agentInstallCommand = [
-    'sudo',
-
-    './elastic-agent',
-
-    'install',
-
-    '--insecure',
-
-    '--force',
-
-    '--url',
-    fleetServerUrl,
-
-    '--enrollment-token',
-    enrollmentToken,
-  ].join(' ');
-
-  log.info(`Enrolling elastic agent with Fleet`);
-  log.debug(`Agent enroll command:\n${agentInstallCommand}`);
-
-  await hostVm.exec(`cd ${vmDirName} && ${agentInstallCommand}`);
-
-  log.info(`Waiting for Agent to check-in with Fleet`);
-  const agent = await waitForHostToEnroll(kbnClient, vmName, 8 * 60 * 1000);
-
-  log.info(`Agent enrolled with Fleet, status: `, agent.status);
-
-  return {
-    agentId: agent.id,
-  };
 };
 
 export async function stopEndpointHost(hostName: string): Promise<void> {

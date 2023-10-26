@@ -56,6 +56,7 @@ import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
+import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
 import { downloadAndStoreAgent } from './agent_downloads_service';
@@ -606,6 +607,10 @@ export const enrollHostVmWithFleet = async ({
 }: EnrollHostVmWithFleetOptions): Promise<Agent> => {
   log.info(`Enrolling host VM [${hostVm.name}] with Fleet`);
 
+  if (!(await isFleetServerRunning(kbnClient))) {
+    throw new Error(`Fleet server does not seem to be running on this instance of kibana!`);
+  }
+
   const agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
   const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log);
 
@@ -667,9 +672,7 @@ export const enrollHostVmWithFleet = async ({
   await hostVm.exec(agentEnrollCommand);
 
   log.info(`Waiting for Agent to check-in with Fleet`);
-  const agent = await waitForHostToEnroll(kbnClient, hostVm.name, timeoutMs);
-
-  return agent;
+  return waitForHostToEnroll(kbnClient, hostVm.name, timeoutMs);
 };
 
 interface GetOrCreateDefaultAgentPolicyOptions {
@@ -710,7 +713,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
     monitoring_enabled: ['logs', 'metrics'],
   };
 
-  const newAgentPolicy = kbnClient
+  const newAgentPolicy = await kbnClient
     .request<CreateAgentPolicyResponse>({
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
       headers: {

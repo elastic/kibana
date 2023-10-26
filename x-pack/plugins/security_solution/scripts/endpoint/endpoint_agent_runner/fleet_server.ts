@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { startFleetServer } from '../common/fleet_server/fleet_server_services';
+import {
+  isFleetServerRunning,
+  startFleetServer,
+} from '../common/fleet_server/fleet_server_services';
 import { getRuntimeServices } from './runtime';
 
 export const runFleetServerIfNeeded = async (): Promise<
@@ -19,14 +22,16 @@ export const runFleetServerIfNeeded = async (): Promise<
   // for kibana.
   const forceInstall = Boolean(process.env.CI);
 
-  const startedFleetServer = await startFleetServer({
-    kbnClient,
-    logger: log,
-    force: forceInstall,
-  });
+  if (forceInstall || !(await isFleetServerRunning(kbnClient))) {
+    const startedFleetServer = await startFleetServer({
+      kbnClient,
+      logger: log,
+      force: forceInstall,
+    });
 
-  return {
-    fleetServerContainerId: startedFleetServer.id,
-    fleetServerAgentPolicyId: startedFleetServer.policyId,
-  };
+    return {
+      fleetServerContainerId: startedFleetServer.id,
+      fleetServerAgentPolicyId: startedFleetServer.policyId,
+    };
+  }
 };
