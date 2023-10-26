@@ -218,8 +218,8 @@ export class AlertingPlugin {
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
-  private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private nodeRoles: PluginInitializerContext['node']['roles'];
+  private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();

@@ -72,7 +72,7 @@ const actionAlertsFilterSchema = schema.object({
 
 const actionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   id: schema.string(),
   connector_type_id: schema.string(),
   params: actionParamsSchema,

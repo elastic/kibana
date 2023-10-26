@@ -6,8 +6,34 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RuleActionTypes } from '../../../../../../common';
 import { validateDuration } from '../../../validation';
 import { notifyWhenSchema, actionAlertsFilterSchema } from '../../../schemas';
+
+const defaultActionSchema = schema.object({
+  group: schema.string(),
+  id: schema.string(),
+  actionTypeId: schema.maybe(schema.string()),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+  frequency: schema.maybe(
+    schema.object({
+      summary: schema.boolean(),
+      notifyWhen: notifyWhenSchema,
+      throttle: schema.nullable(schema.string({ validate: validateDuration })),
+    })
+  ),
+  uuid: schema.maybe(schema.string()),
+  alertsFilter: schema.maybe(actionAlertsFilterSchema),
+  type: schema.literal(RuleActionTypes.DEFAULT),
+});
+
+export const systemActionSchema = schema.object({
+  id: schema.string(),
+  actionTypeId: schema.maybe(schema.string()),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+  uuid: schema.maybe(schema.string()),
+  type: schema.literal(RuleActionTypes.SYSTEM),
+});
 
 export const createRuleDataSchema = schema.object({
   name: schema.string(),
@@ -20,23 +46,8 @@ export const createRuleDataSchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDuration }),
   }),
-  actions: schema.arrayOf(
-    schema.object({
-      group: schema.string(),
-      id: schema.string(),
-      actionTypeId: schema.maybe(schema.string()),
-      params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
-      frequency: schema.maybe(
-        schema.object({
-          summary: schema.boolean(),
-          notifyWhen: notifyWhenSchema,
-          throttle: schema.nullable(schema.string({ validate: validateDuration })),
-        })
-      ),
-      uuid: schema.maybe(schema.string()),
-      alertsFilter: schema.maybe(actionAlertsFilterSchema),
-    }),
-    { defaultValue: [] }
-  ),
+  actions: schema.arrayOf(schema.oneOf([defaultActionSchema, systemActionSchema]), {
+    defaultValue: [],
+  }),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
 });

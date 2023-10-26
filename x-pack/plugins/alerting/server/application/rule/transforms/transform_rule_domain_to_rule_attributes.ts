@@ -7,20 +7,30 @@
 import { RuleDomain } from '../types';
 import { RuleAttributes } from '../../../data/rule/types';
 import { getMappedParams } from '../../../rules_client/common';
+import { transformDomainActionsToRawActions } from './transform_domain_actions_to_raw_actions';
+import { DenormalizedAction } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
   legacyId: RuleAttributes['legacyId'];
-  actionsWithRefs: RuleAttributes['actions'];
   paramsWithRefs: RuleAttributes['params'];
   meta?: RuleAttributes['meta'];
 }
 
-export const transformRuleDomainToRuleAttributes = (
-  rule: Omit<RuleDomain, 'actions' | 'params'>,
-  params: TransformRuleToEsParams
-): RuleAttributes => {
-  const { legacyId, actionsWithRefs, paramsWithRefs, meta } = params;
+export const transformRuleDomainToRuleAttributes = ({
+  actionsWithRefs,
+  rule,
+  params,
+}: {
+  actionsWithRefs: DenormalizedAction[];
+  rule: Omit<RuleDomain, 'actions' | 'params'>;
+  params: TransformRuleToEsParams;
+}): RuleAttributes => {
+  const { legacyId, paramsWithRefs, meta } = params;
   const mappedParams = getMappedParams(paramsWithRefs);
+
+  const transformedActionsWithRefs = transformDomainActionsToRawActions({
+    actions: actionsWithRefs,
+  });
 
   return {
     name: rule.name,
@@ -30,7 +40,7 @@ export const transformRuleDomainToRuleAttributes = (
     consumer: rule.consumer,
     legacyId,
     schedule: rule.schedule,
-    actions: actionsWithRefs,
+    actions: transformedActionsWithRefs,
     params: paramsWithRefs,
     ...(Object.keys(mappedParams).length ? { mapped_params: mappedParams } : {}),
     ...(rule.scheduledTaskId !== undefined ? { scheduledTaskId: rule.scheduledTaskId } : {}),

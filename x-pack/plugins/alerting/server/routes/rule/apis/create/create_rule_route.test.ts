@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import { createRuleRoute } from './create_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -14,10 +14,15 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/apis/create';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib';
-import { AsApiContract } from '../../../lib';
-import { SanitizedRule } from '../../../../types';
+import {
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
+  SanitizedRule,
+} from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -32,6 +37,38 @@ beforeEach(() => {
 describe('createRuleRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
+  const action: RuleDefaultAction = {
+    actionTypeId: 'test',
+    group: 'default',
+    id: '2',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    alertsFilter: {
+      query: {
+        kql: 'name:test',
+        dsl: '{"must": {"term": { "name": "test" }}}',
+        filters: [],
+      },
+      timeframe: {
+        days: [1],
+        hours: { start: '08:00', end: '17:00' },
+        timezone: 'UTC',
+      },
+    },
+    type: RuleActionTypes.DEFAULT,
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    type: RuleActionTypes.SYSTEM,
+  };
 
   const mockedAlert: SanitizedRule<{ bar: boolean }> = {
     alertTypeId: '1',
@@ -43,29 +80,7 @@ describe('createRuleRoute', () => {
       bar: true,
     },
     throttle: '30s',
-    actions: [
-      {
-        actionTypeId: 'test',
-        group: 'default',
-        id: '2',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-        alertsFilter: {
-          query: {
-            kql: 'name:test',
-            dsl: '{"must": {"term": { "name": "test" }}}',
-            filters: [],
-          },
-          timeframe: {
-            days: [1],
-            hours: { start: '08:00', end: '17:00' },
-            timezone: 'UTC',
-          },
-        },
-      },
-    ],
+    actions: [action],
     enabled: true,
     muteAll: false,
     createdBy: '',
@@ -89,18 +104,21 @@ describe('createRuleRoute', () => {
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
-        group: mockedAlert.actions[0].group,
+        group: action.group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         alerts_filter: {
-          query: { kql: mockedAlert.actions[0].alertsFilter!.query!.kql, filters: [] },
-          timeframe: mockedAlert.actions[0].alertsFilter?.timeframe!,
+          query: {
+            kql: action.alertsFilter!.query!.kql,
+            filters: [],
+          },
+          timeframe: action.alertsFilter?.timeframe!,
         },
       },
     ],
   };
 
-  const createResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
+  const createResult = {
     ...ruleToCreate,
     mute_all: mockedAlert.muteAll,
     created_by: mockedAlert.createdBy,
@@ -119,8 +137,8 @@ describe('createRuleRoute', () => {
       {
         ...ruleToCreate.actions[0],
         alerts_filter: {
-          query: mockedAlert.actions[0].alertsFilter?.query!,
-          timeframe: mockedAlert.actions[0].alertsFilter!.timeframe!,
+          query: action.alertsFilter?.query!,
+          timeframe: action.alertsFilter!.timeframe!,
         },
         connector_type_id: 'test',
         uuid: '123-456',
@@ -198,6 +216,7 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -314,6 +333,7 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -431,6 +451,7 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -548,6 +569,7 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -645,5 +667,173 @@ describe('createRuleRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  describe('actions', () => {
+    it('adds the type of the actions correctly before passing the request to the rules client', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      createRuleRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      rulesClient.create.mockResolvedValueOnce({ ...mockedAlert, actions: [action, systemAction] });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: { ...ruleToCreate, actions: [omit(action, 'type'), omit(systemAction, 'type')] },
+        },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "2",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "type": "default",
+                  "uuid": "123-456",
+                },
+                Object {
+                  "actionTypeId": "test-2",
+                  "id": "system_action-id",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "type": "system",
+                  "uuid": "123-456",
+                },
+              ],
+              "alertTypeId": "1",
+              "consumer": "bar",
+              "enabled": true,
+              "name": "abc",
+              "notifyWhen": "onActionGroupChange",
+              "params": Object {
+                "bar": true,
+              },
+              "schedule": Object {
+                "interval": "10s",
+              },
+              "tags": Array [
+                "foo",
+              ],
+              "throttle": "30s",
+            },
+            "options": Object {
+              "id": undefined,
+            },
+          },
+        ]
+      `);
+    });
+
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      createRuleRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      rulesClient.create.mockResolvedValueOnce({ ...mockedAlert, actions: [action, systemAction] });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: ruleToCreate,
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.actions).toEqual([
+        {
+          alerts_filter: {
+            query: { dsl: '{"must": {"term": { "name": "test" }}}', filters: [], kql: 'name:test' },
+            timeframe: { days: [1], hours: { end: '17:00', start: '08:00' }, timezone: 'UTC' },
+          },
+          connector_type_id: 'test',
+          group: 'default',
+          id: '2',
+          params: { foo: true },
+          uuid: '123-456',
+        },
+        {
+          connector_type_id: 'test-2',
+          id: 'system_action-id',
+          params: { foo: true },
+          uuid: '123-456',
+        },
+      ]);
+    });
+
+    it('fails if the action contains a type in the request', async () => {
+      const actionToValidate: RuleDefaultAction = {
+        actionTypeId: 'test',
+        group: 'default',
+        id: '2',
+        params: {
+          foo: true,
+        },
+        uuid: '123-456',
+        type: RuleActionTypes.DEFAULT,
+      };
+
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+      createRuleRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [config, _] = router.post.mock.calls[0];
+
+      expect(() =>
+        // @ts-expect-error: body exists
+        config.validate.body.validate({ ...ruleToCreate, actions: [actionToValidate] })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[actions.0.type]: definition for this key is missing"`
+      );
+    });
   });
 });

@@ -50,6 +50,7 @@ import {
   RuleAlertData,
   SanitizedRule,
   RuleNotifyWhen,
+  RuleActionTypes,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -565,7 +566,12 @@ export class TaskRunner<
         flappingSettings,
         notifyOnActionGroupChange:
           notifyWhen === RuleNotifyWhen.CHANGE ||
-          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
+          some(
+            actions,
+            (action) =>
+              action.type !== RuleActionTypes.SYSTEM &&
+              action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE
+          ),
         maintenanceWindowIds,
       });
     });

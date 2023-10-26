@@ -40,6 +40,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           // Assert versioned inputs
           const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
@@ -55,7 +56,9 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
-              data: transformCreateBodyV1<RuleParamsV1>(createRuleData),
+              data: transformCreateBodyV1<RuleParamsV1>(createRuleData, (connectorId: string) =>
+                actionsClient.isSystemAction(connectorId)
+              ),
               options: { id: params?.id },
             })) as Rule<RuleParamsV1>;
 

@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
 import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -159,7 +160,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               },
               {
                 id: 'system-connector-test.system-action',
-                group: 'default',
+                actionTypeId: 'test.system-action',
+                uuid: '123',
                 params: {},
               },
             ],
@@ -193,10 +195,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           },
           {
             id: 'system-connector-test.system-action',
-            group: 'default',
             connector_type_id: 'test.system-action',
             params: {},
-            uuid: response.body.actions[2].uuid,
+            uuid: '123',
           },
         ],
         enabled: true,
@@ -255,9 +256,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         {
           actionRef: 'system_action:system-connector-test.system-action',
           actionTypeId: 'test.system-action',
-          group: 'default',
           params: {},
-          uuid: rawActions[2].uuid,
+          uuid: '123',
         },
       ]);
 
@@ -462,6 +462,102 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
       expect(response.body.scheduledTaskId).to.eql(undefined);
+    });
+
+    describe('system actions', () => {
+      const systemAction = {
+        id: 'system-connector-test.system-action',
+        actionTypeId: 'test.system-action',
+        uuid: '123',
+        params: {},
+      };
+
+      it('should create a rule with a system action correctly', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [systemAction],
+            })
+          );
+
+        expect(response.status).to.eql(200);
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        expect(response.body.actions).to.eql([
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+            uuid: '123',
+          },
+        ]);
+
+        const esResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${response.body.id}`,
+          },
+          { meta: true }
+        );
+
+        expect(esResponse.statusCode).to.eql(200);
+        const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+
+        expect(rawActions).to.eql([
+          {
+            actionRef: 'system_action:system-connector-test.system-action',
+            actionTypeId: 'test.system-action',
+            params: {},
+            uuid: '123',
+          },
+        ]);
+
+        const references = esResponse.body._source?.references ?? [];
+
+        expect(references.length).to.eql(0);
+      });
+
+      it('should throw 400 if the system action is missing required properties', async () => {
+        for (const propertyToOmit of ['id']) {
+          const systemActionWithoutProperty = omit(systemAction, propertyToOmit);
+
+          await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                actions: [systemActionWithoutProperty],
+              })
+            )
+            .expect(400);
+        }
+      });
+
+      it('should throw 400 if the system action is missing required params', async () => {
+        const res = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  ...systemAction,
+                  params: {},
+                  id: 'system-connector-test.system-action-connector-adapter',
+                  actionTypeId: 'test.test.system-action-connector-adapter',
+                },
+              ],
+            })
+          )
+          .expect(400);
+
+        expect(res.body.message).to.eql(
+          'Invalid system action params. System action type: test.system-action-connector-adapter - [myParam]: expected value of type [string] but got [undefined]'
+        );
+      });
     });
 
     describe('legacy', () => {

@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { RuleAction, RuleActionTypes } from '../types';
+import { RuleAction, RuleActionTypes, RuleSystemAction } from '../types';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
@@ -26,6 +26,7 @@ const mockOldAction: RuleAction = {
   actionTypeId: 'slack',
   params: {},
   uuid: '123-456',
+  type: RuleActionTypes.DEFAULT,
 };
 
 const mockAction: RuleAction = {
@@ -39,6 +40,7 @@ const mockAction: RuleAction = {
     throttle: null,
   },
   uuid: '123-456',
+  type: RuleActionTypes.DEFAULT,
 };
 
 const mockSummaryAction: RuleAction = {
@@ -52,11 +54,11 @@ const mockSummaryAction: RuleAction = {
     throttle: '1d',
   },
   uuid: '111-111',
+  type: RuleActionTypes.DEFAULT,
 };
 
-const mockSystemAction = {
+const mockSystemAction: RuleSystemAction = {
   id: '1',
-  group: 'default',
   actionTypeId: '.test',
   params: {},
   uuid: '123-456',
@@ -71,8 +73,6 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is a system action', () => {
-      // TODO: Remove when system actions are introduced in types
-      // @ts-expect-error: cannot accept system actions at the moment
       const result = isSummaryAction(mockSystemAction);
       expect(result).toBe(false);
     });
@@ -105,8 +105,6 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is a system action', () => {
-      // TODO: Remove when system actions are introduced in types
-      // @ts-expect-error: cannot accept system actions at the moment
       const result = isActionOnInterval(mockSystemAction);
       expect(result).toBe(false);
     });
@@ -150,8 +148,6 @@ describe('rule_action_helper', () => {
     });
 
     test('should return a hash for system actions action', () => {
-      // TODO: Remove when system actions are introduced in types
-      // @ts-expect-error: cannot accept system actions at the moment
       const result = generateActionHash(mockSystemAction);
       expect(result).toBe('system-action:.test:summary');
     });
@@ -186,8 +182,6 @@ describe('rule_action_helper', () => {
 
     test('should filtered out system actions', () => {
       const result = getSummaryActionsFromTaskState({
-        // TODO: Remove when system actions are introduced in types
-        // @ts-expect-error: cannot accept system actions at the moment
         actions: [mockSummaryAction, mockSystemAction],
         summaryActions: {
           '111-111': { date: new Date('01.01.2020').toISOString() },
@@ -236,8 +230,6 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is a system action', () => {
-      // TODO: Remove when system actions are introduced in types
-      // @ts-expect-error: cannot accept system actions at the moment
       const result = isSummaryActionThrottled({ action: mockSystemAction, logger });
       expect(result).toBe(false);
     });
@@ -347,8 +339,6 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is a system action', () => {
-      // TODO: Remove when system actions are introduced in types
-      // @ts-expect-error: cannot accept system actions at the moment
       const result = isSummaryActionOnInterval(mockSystemAction);
       expect(result).toBe(false);
     });
@@ -381,8 +371,6 @@ describe('rule_action_helper', () => {
     });
 
     test('returns undefined start and end action is a system action', () => {
-      // TODO: Remove when system actions are introduced in types
-      // @ts-expect-error: cannot accept system actions at the moment
       expect(getSummaryActionTimeBounds(mockSystemAction, { interval: '1m' }, null)).toEqual({
         start: undefined,
         end: undefined,

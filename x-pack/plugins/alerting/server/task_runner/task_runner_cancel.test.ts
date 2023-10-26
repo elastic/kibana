@@ -111,6 +111,7 @@ describe('Task Runner Cancel', () => {
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const dataPlugin = dataPluginMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -151,7 +152,7 @@ describe('Task Runner Cancel', () => {
     getMaintenanceWindowClientWithRequest: jest
       .fn()
       .mockReturnValue(maintenanceWindowClientMock.create()),
-    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+    connectorAdapterRegistry,
   };
 
   beforeEach(() => {

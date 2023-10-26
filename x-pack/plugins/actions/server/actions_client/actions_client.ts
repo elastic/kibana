@@ -422,7 +422,7 @@ export class ActionsClient {
   /**
    * Get all system connectors
    */
-  public async getAllSystemConnectors(): Promise<FindConnectorResult[]> {
+  public async getAllSystemConnectors(): Promise<ConnectorWithExtraFindData[]> {
     return getAllSystemConnectors({ context: this.context });
   }
 
