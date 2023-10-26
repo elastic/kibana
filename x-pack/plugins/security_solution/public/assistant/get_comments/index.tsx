@@ -7,14 +7,24 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 import type { Conversation } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiMarkdownFormat, EuiText, tint } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiMarkdownFormat,
+  EuiSpacer,
+  EuiText,
+  getDefaultEuiMarkdownParsingPlugins,
+  getDefaultEuiMarkdownProcessingPlugins,
+  tint,
+} from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
+import { customCodeBlockLanguagePlugin } from './custom_codeblock/custom_codeblock_markdown_plugin';
+import { CustomCodeBlock } from './custom_codeblock/custom_code_block';
 
 export const getComments = ({
   currentConversation,
@@ -24,8 +34,29 @@ export const getComments = ({
   currentConversation: Conversation;
   lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
   showAnonymizedValues: boolean;
-}): EuiCommentProps[] =>
-  currentConversation.messages.map((message, index) => {
+}): EuiCommentProps[] => {
+  const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+  const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+
+  const { components } = processingPlugins[1][1];
+
+  processingPlugins[1][1].components = {
+    ...components,
+    customCodeBlock: (props) => {
+      return (
+        <>
+          <CustomCodeBlock value={props.value} />
+          <EuiSpacer size="m" />
+        </>
+      );
+    },
+  };
+
+  // Fun fact: must spread existing parsingPlugins last
+  const parsingPluginList = [customCodeBlockLanguagePlugin, ...parsingPlugins];
+  const processingPluginList = processingPlugins;
+
+  return currentConversation.messages.map((message, index) => {
     const isUser = message.role === 'user';
     const replacements = currentConversation.replacements;
     const messageContentWithReplacements =
@@ -45,13 +76,21 @@ export const getComments = ({
       children:
         index !== currentConversation.messages.length - 1 ? (
           <EuiText>
-            <EuiMarkdownFormat className={`message-${index}`}>
+            <EuiMarkdownFormat
+              className={`message-${index}`}
+              parsingPluginList={parsingPluginList}
+              processingPluginList={processingPluginList}
+            >
               {showAnonymizedValues ? message.content : transformedMessage.content}
             </EuiMarkdownFormat>
           </EuiText>
         ) : (
           <EuiText>
-            <EuiMarkdownFormat className={`message-${index}`}>
+            <EuiMarkdownFormat
+              className={`message-${index}`}
+              parsingPluginList={parsingPluginList}
+              processingPluginList={processingPluginList}
+            >
               {showAnonymizedValues ? message.content : transformedMessage.content}
             </EuiMarkdownFormat>
             <span ref={lastCommentRef} />
@@ -82,3 +121,4 @@ export const getComments = ({
         : {}),
     };
   });
+};

@@ -3,7 +3,7 @@
 # A failure in this pipeline build will prevent further progression to the subsequent stage.
 
 steps:
-  - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
+  - label: ":kibana: Kibana Serverless Tests for ${ENVIRONMENT}"
     trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
     soft_fail: true # Remove this before release or when tests stabilize
     build:
@@ -13,21 +13,23 @@ steps:
         EC_REGION: aws-eu-west-1
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
-  - group: ":female-detective: Security Solution Tests"
-    key: "security"
-    steps:
-      - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/pipeline.sh
+  # TODO: Uncomment this code when the integration is ready.
+  # - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
+  #   trigger: security-serverless-quality-gate # https://buildkite.com/elastic/security-serverless-quality-gate
+  #   soft_fail: true # Remove this when tests are fixed
+  #   build:
+  #     env:
+  #       ENVIRONMENT: ${ENVIRONMENT}
+  #     message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
-  - label: ":pipeline::ship::seedling: Trigger Fleet serverless smoke tests for ${ENVIRONMENT}"
+  - label: ":ship: Fleet serverless smoke tests for ${ENVIRONMENT}"
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests
-    soft_fail: true # Remove this before release
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
-  - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
+  - label: ":rocket: control-plane e2e tests"
     trigger: "ess-k8s-qa-e2e-tests-daily" # https://buildkite.com/elastic/ess-k8s-qa-e2e-tests-daily
     build:
       env:

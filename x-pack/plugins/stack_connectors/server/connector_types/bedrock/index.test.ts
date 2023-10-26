@@ -33,9 +33,9 @@ describe('Bedrock Connector', () => {
     configurationUtilities = actionsConfigMock.create();
     connectorType = getConnectorType();
   });
-  test('exposes the connector as `AWS Bedrock` with id `.bedrock`', () => {
+  test('exposes the connector as `Amazon Bedrock` with id `.bedrock`', () => {
     expect(connectorType.id).toEqual('.bedrock');
-    expect(connectorType.name).toEqual('AWS Bedrock');
+    expect(connectorType.name).toEqual('Amazon Bedrock');
   });
   describe('config validation', () => {
     test('config validation passes when only required fields are provided', () => {
@@ -55,7 +55,7 @@ describe('Bedrock Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring AWS Bedrock action: Error: URL Error: Invalid URL: example.com/do-something"'
+        '"Error configuring Amazon Bedrock action: Error: URL Error: Invalid URL: example.com/do-something"'
       );
     });
 
@@ -75,7 +75,7 @@ describe('Bedrock Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities: configUtils });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring AWS Bedrock action: Error: error validating url: target url is not present in allowedHosts"`
+        `"Error configuring Amazon Bedrock action: Error: error validating url: target url is not present in allowedHosts"`
       );
     });
   });

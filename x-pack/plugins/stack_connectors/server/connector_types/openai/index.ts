@@ -27,7 +27,7 @@ import { renderParameterTemplates } from './render';
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: OPENAI_CONNECTOR_ID,
   name: OPENAI_TITLE,
-  Service: OpenAIConnector,
+  getService: (params) => new OpenAIConnector(params),
   schema: {
     config: ConfigSchema,
     secrets: SecretsSchema,
