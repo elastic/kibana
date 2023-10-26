@@ -84,7 +84,11 @@ export const ElasticsearchOverview = () => {
           <WelcomeBanner user={user} assetBasePath={assetBasePath} />
         </EuiText>
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="select-client-section"
+      >
         <SelectClientPanel docLinks={docLinks} http={http}>
           <EuiFlexItem>
             <LanguageGrid
@@ -97,7 +101,11 @@ export const ElasticsearchOverview = () => {
         </SelectClientPanel>
       </EuiPageTemplate.Section>
 
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="install-client-section"
+      >
         <InstallClientPanel
           codeSnippet={getLanguageDefinitionCodeSnippet(
             selectedLanguage,
@@ -113,7 +121,11 @@ export const ElasticsearchOverview = () => {
           sharePlugin={share}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="api-keys-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.apiKey.description', {
             defaultMessage:
@@ -126,7 +138,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="cloud-details-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.cloudIdDetails.description', {
             defaultMessage:
@@ -185,7 +201,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="configure-client-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.configureClient.description', {
             defaultMessage: 'Initialize your client with your unique API key and Cloud ID',
@@ -226,7 +246,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="test-client-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.testConnection.description', {
             defaultMessage:
@@ -254,7 +278,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="ingest-client-section"
+      >
         <IngestData
           codeSnippet={getLanguageDefinitionCodeSnippet(
             selectedLanguage,
@@ -271,7 +299,11 @@ export const ElasticsearchOverview = () => {
           sharePlugin={share}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="search-client-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.searchQuery.description', {
             defaultMessage:
@@ -299,7 +331,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section alignment="top" className="serverlessSearchOverviewFooterSection">
+      <EuiPageTemplate.Section
+        alignment="top"
+        className="serverlessSearchOverviewFooterSection"
+        data-test-subj="footer-section"
+      >
         <OverviewPanel
           title={i18n.translate('xpack.serverlessSearch.overview.footer.title', {
             defaultMessage: 'Do more with your data',

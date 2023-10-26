@@ -16,7 +16,10 @@ import { DetectPreventProtectionLevel } from '../detect_prevent_protection_level
 import { SettingCard } from '../setting_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import type { Immutable } from '../../../../../../../../common/endpoint/types';
-import { PolicyOperatingSystem } from '../../../../../../../../common/endpoint/types';
+import {
+  PolicyOperatingSystem,
+  ProtectionModes,
+} from '../../../../../../../../common/endpoint/types';
 import type { RansomwareProtectionOSes } from '../../../../types';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
@@ -42,6 +45,8 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const protection = 'ransomware';
+    const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
+
     const protectionLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.protections.ransomware',
       {
@@ -69,8 +74,11 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
         })}
         supportedOss={[OperatingSystem.WINDOWS]}
         dataTestSubj={getTestId()}
+        selected={selected}
+        mode={mode}
         rightCorner={
           <ProtectionSettingCardSwitch
+            selected={selected}
             policy={policy}
             onChange={onChange}
             mode={mode}
