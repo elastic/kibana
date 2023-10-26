@@ -57,9 +57,9 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
 
     before(() => {
       cy.getCreatedHostData().then(({ createdHost }) => {
-       return getAgentByHostName(createdHost.hostname).then((agentData) => {
+        return getAgentByHostName(createdHost.hostname).then((agentData) => {
           initialAgentData = agentData;
-        })
+        });
       });
       getEndpointIntegrationVersion().then((version) => {
         createAgentPolicyTask(version).then((data) => {
