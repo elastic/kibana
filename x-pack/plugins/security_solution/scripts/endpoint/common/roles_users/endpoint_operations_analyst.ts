@@ -11,7 +11,39 @@ import { getNoResponseActionsRole } from './without_response_actions_role';
 export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
   const noResponseActionsRole = getNoResponseActionsRole();
   return {
-    ...noResponseActionsRole,
+    elasticsearch: {
+      cluster: [],
+      indices: [
+        {
+          names: [
+            'metrics-endpoint.metadata_current_*',
+            '.fleet-agents*',
+            '.fleet-actions*',
+            'apm-*-transaction*',
+            'traces-apm*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+            '.lists*',
+            '.items*',
+          ],
+          privileges: ['read'],
+        },
+        {
+          names: [
+            '.alerts-security*',
+            '.siem-signals-*',
+            '.preview.alerts-security*',
+            '.internal.preview.alerts-security*',
+          ],
+          privileges: ['read', 'write'],
+        },
+      ],
+      run_as: [],
+    },
     kibana: [
       {
         ...noResponseActionsRole.kibana[0],
