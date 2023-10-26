@@ -21,6 +21,7 @@ import {
   kibanaDevServiceAccount,
 } from '@kbn/dev-utils';
 
+import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
 import {
@@ -687,6 +688,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         : {}),
     });
     await waitUntilClusterReady({ client, expectedStatus: 'green', log });
+    await waitForSecurityIndex({ client, log });
   }
 
   if (!options.background) {
