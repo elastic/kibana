@@ -95,7 +95,7 @@ interface StartFleetServerOptions {
 }
 
 interface StartedFleetServer extends StartedServer {
-  /** The policy id that the fleet-server agent is running with */
+  /** The Fleet Agent policy id that the fleet-server agent is running with */
   policyId: string;
 }
 
@@ -110,8 +110,6 @@ export const startFleetServer = async ({
   logger.info(`Starting Fleet Server and connecting it to Kibana`);
 
   return logger.indent(4, async () => {
-    const isServerless = await isServerlessKibanaFlavor(kbnClient);
-
     // Check if fleet already running if `force` is false
     if (!force && (await isFleetServerRunning(kbnClient))) {
       throw new Error(
@@ -119,6 +117,7 @@ export const startFleetServer = async ({
       );
     }
 
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
     const policyId =
       policy || !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
     const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
