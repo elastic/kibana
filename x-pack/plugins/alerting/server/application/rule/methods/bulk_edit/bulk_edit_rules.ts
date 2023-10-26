@@ -80,6 +80,7 @@ import {
 } from '../../transforms';
 import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { bulkEditOperationsSchema } from './schemas';
+import { denormalizeActions } from '../../../../rules_client/lib/denormalize_actions';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -546,9 +547,13 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       validatedMutatedAlertTypeParams
     );
 
-    const ruleAttributes = await transformRuleDomainToRuleAttributes({
-      actions: updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
+    const { actions: actionsWithRefs } = await denormalizeActions(
       context,
+      updatedRuleActions as NormalizedAlertActionWithGeneratedValues[]
+    );
+
+    const ruleAttributes = transformRuleDomainToRuleAttributes({
+      actionsWithRefs,
       rule: updatedRule,
       params: {
         legacyId: rule.attributes.legacyId,

@@ -41,8 +41,6 @@ export * from './rule_circuit_breaker_error_message';
 
 export { isSystemAction } from './system_actions/is_system_action';
 
-export { isSystemAction } from './system_actions/is_system_action';
-
 export type {
   MaintenanceWindowModificationMetadata,
   DateRange,
