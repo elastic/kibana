@@ -779,9 +779,9 @@ export function trainedModelsRoutes(
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /internal/ml/trained_models/download_model/:modelId Downloads elser model
+   * @api {post} /internal/ml/trained_models/download_model/:modelId Downloads ELSER model
    * @apiName DownloadTrainedModel
-   * @apiDescription Downloads elser model.
+   * @apiDescription Downloads ELSER model.
    */
   router.versioned
     .post({
