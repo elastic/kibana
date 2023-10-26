@@ -32,11 +32,11 @@ export async function waitForSecurityIndex({
 
   log.info(`waiting for ES cluster to bootstrap the security index`);
 
+  // Hack to force the creation of the index `.security-7` index
+  const response = await client.security.createApiKey({ name: 'test-api-key-to-delete' });
   while (true) {
     attempt += 1;
 
-    // Hack to force the creation of the index `.security-7` index
-    const response = await client.security.createApiKey({ name: 'test-api-key-to-delete' });
     try {
       await client.security.invalidateApiKey({ ids: [response.id] });
       log.success('ES security index is ready');
