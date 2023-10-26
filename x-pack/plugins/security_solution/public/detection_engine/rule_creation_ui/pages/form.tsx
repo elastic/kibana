@@ -99,9 +99,11 @@ export const useRuleForms = ({
     options: { stripEmptyFields: false },
     schema,
   });
+  console.log('actionsStepForm', actionsStepForm.getFields());
   const [actionsStepFormData] = useFormData<ActionsStepRule | {}>({
     form: actionsStepForm,
   });
+  console.log('actionsStepFormData', actionsStepFormData);
   const actionsStepData =
     'actions' in actionsStepFormData ? actionsStepFormData : actionsStepDefault;
 

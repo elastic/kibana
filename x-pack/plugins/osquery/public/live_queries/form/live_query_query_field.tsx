@@ -11,6 +11,7 @@ import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui'
 import React, { useCallback, useMemo, useState } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { TimeoutField } from '../../form/timeout_field';
 import type { LiveQueryFormFields } from '.';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
@@ -68,6 +69,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         resetField('query', { defaultValue: savedQuery.query });
         resetField('savedQueryId', { defaultValue: savedQuery.savedQueryId });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
+        resetField('timeout', { defaultValue: savedQuery.timeout ?? 60 });
 
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setAdvancedContentState('open');
@@ -120,8 +122,14 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   return (
     <>
       {!isSavedQueryDisabled && (
-        <SavedQueriesDropdown disabled={isSavedQueryDisabled} onChange={handleSavedQueryChange} />
+        <>
+          <SavedQueriesDropdown disabled={isSavedQueryDisabled} onChange={handleSavedQueryChange} />
+          <EuiSpacer size="m" />
+        </>
       )}
+
+      <TimeoutField />
+
       <EuiFormRow
         isInvalid={!!error?.message}
         error={error?.message}

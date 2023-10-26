@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, pickBy, some, isBoolean } from 'lodash';
+import { isEmpty, pickBy, some, isBoolean, isNumber } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
 import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
@@ -50,6 +50,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           interval,
           snapshot,
           removed,
+          timeout,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           ecs_mapping,
         } = request.body;
@@ -80,15 +81,18 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               interval,
               snapshot,
               removed,
+              timeout,
               ecs_mapping: convertECSMappingToArray(ecs_mapping),
               created_by: currentUser,
               created_at: new Date().toISOString(),
               updated_by: currentUser,
               updated_at: new Date().toISOString(),
             },
-            (value) => !isEmpty(value) || isBoolean(value)
+            (value) => !isEmpty(value) || isBoolean(value) || isNumber(value)
           )
         );
+
+        console.log('savedQuerySO', savedQuerySO);
 
         const { attributes } = savedQuerySO;
 
@@ -102,6 +106,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             snapshot: attributes.snapshot,
             version: attributes.version,
             interval: attributes.interval,
+            timeout: attributes.timeout,
             platform: attributes.platform,
             query: attributes.query,
             updated_at: attributes.updated_at,
@@ -109,7 +114,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             saved_object_id: savedQuerySO.id,
             ecs_mapping,
           },
-          (value) => !isEmpty(value)
+          (value) => !isEmpty(value) || isNumber(value)
         );
 
         return response.ok({

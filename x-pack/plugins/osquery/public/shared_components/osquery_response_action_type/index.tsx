@@ -24,23 +24,27 @@ interface OsqueryResponseActionsValues {
   id?: string;
   ecsMapping?: ECSMapping;
   query?: string;
+  timeout: number;
   packId?: string;
   queries?: Array<{
     id: string;
     ecs_mapping: ECSMapping;
     query: string;
+    timeout: number;
   }>;
 }
 
 interface OsqueryResponseActionsParamsFormFields {
   savedQueryId: string | null;
   ecs_mapping: ECSMapping;
+  timeout: number;
   query: string;
   packId?: string[];
   queries: Array<{
     id: string;
     ecs_mapping: ECSMapping;
     query: string;
+    timeout: number;
   }>;
   queryType: 'query' | 'pack';
 }
@@ -105,6 +109,7 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   useEffect(() => {
     const subscription = watch((formData) => {
+      console.log('formData', formData);
       onChange(
         // @ts-expect-error update types
         formData.queryType === 'pack'
@@ -115,6 +120,7 @@ const OsqueryResponseActionParamsFormComponent = ({
           : {
               savedQueryId: formData.savedQueryId,
               query: formData.query,
+              timeout: formData.timeout,
               ecsMapping: formData.ecs_mapping,
             }
       );

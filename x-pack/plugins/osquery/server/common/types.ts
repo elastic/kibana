@@ -41,6 +41,7 @@ export interface SavedQuerySavedObject {
   description: string | undefined;
   query: string;
   interval: number | string;
+  timeout: number;
   snapshot?: boolean;
   removed?: boolean;
   platform: string;

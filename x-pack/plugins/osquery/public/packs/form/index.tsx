@@ -148,6 +148,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         queries,
         ...restPayload
       }: PackFormData) => {
+        console.log('queries', queries);
         const mappedShards = !isEmpty(shards)
           ? (filter(
               map(shards, (shard, key) => {

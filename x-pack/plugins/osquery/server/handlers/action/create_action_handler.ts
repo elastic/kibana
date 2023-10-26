@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { filter, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
+import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
@@ -66,6 +66,9 @@ export const createActionHandler = async (
     packSO = await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, params.pack_id);
   }
 
+  console.log('params', params);
+  console.log('packSO', packSO);
+
   const osqueryAction = {
     action_id: uuidv4(),
     '@timestamp': moment().toISOString(),
@@ -90,6 +93,7 @@ export const createActionHandler = async (
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
           const replacedQuery = replacedQueries(packQuery.query, alertData);
+          console.log('packQuery', packQuery);
 
           return pickBy(
             {
@@ -100,9 +104,10 @@ export const createActionHandler = async (
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
               platform: packQuery.platform,
+              timeout: packQuery.timeout,
               agents: selectedAgents,
             },
-            (value) => !isEmpty(value)
+            (value) => !isEmpty(value) || isNumber(value)
           );
         })
       : await createDynamicQueries({
@@ -113,6 +118,8 @@ export const createActionHandler = async (
           error,
         }),
   };
+
+  console.log('osqueryAction', osqueryAction);
 
   const fleetActions = !error
     ? map(
@@ -125,10 +132,13 @@ export const createActionHandler = async (
           input_type: 'osquery',
           agents: query.agents,
           user_id: metadata?.currentUser,
+          timeout: query.timeout,
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
         })
       )
     : [];
+
+  console.log('fleetActions', fleetActions);
 
   if (fleetActions.length) {
     await osqueryContext.service.getFleetActionsClient()?.bulkCreate(fleetActions);

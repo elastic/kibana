@@ -18,6 +18,7 @@ export interface SavedQuerySOFormData {
   description?: string;
   query?: string;
   interval?: string;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform?: string;
@@ -30,6 +31,7 @@ export interface SavedQueryFormData {
   description?: string;
   query?: string;
   interval?: number;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform?: string;
@@ -46,6 +48,7 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   description: payload.description,
   query: payload.query,
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  timeout: payload.timeout ?? 60,
   snapshot: payload.snapshot ?? true,
   removed: payload.removed ?? false,
   platform: payload.platform,
@@ -95,6 +98,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             id: '',
             query: '',
             interval: 3600,
+            timeout: 60,
             ecs_mapping: {},
             snapshot: true,
           },

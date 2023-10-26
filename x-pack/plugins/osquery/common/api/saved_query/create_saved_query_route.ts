@@ -18,6 +18,7 @@ import {
   snapshotOrUndefined,
   removedOrUndefined,
   ecsMappingOrUndefined,
+  timeout,
 } from '@kbn/osquery-io-ts-types';
 
 export const createSavedQueryRequestSchema = t.type({
@@ -27,6 +28,7 @@ export const createSavedQueryRequestSchema = t.type({
   query,
   version: versionOrUndefined,
   interval,
+  timeout,
   snapshot: snapshotOrUndefined,
   removed: removedOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,

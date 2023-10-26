@@ -37,6 +37,7 @@ const EditSavedQueryPageComponent = () => {
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
   const { isLoading, data: savedQueryDetails } = useSavedQuery({ savedQueryId });
+  console.log('savedQueryDetails', savedQueryDetails);
   const updateSavedQueryMutation = useUpdateSavedQuery({ savedQueryId });
   const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
 

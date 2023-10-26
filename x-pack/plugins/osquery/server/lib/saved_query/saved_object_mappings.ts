@@ -67,6 +67,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     interval: {
       type: 'keyword',
     },
+    timeout: {
+      type: 'long',
+    },
     ecs_mapping: {
       dynamic: false,
       properties: {},
@@ -145,6 +148,9 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
         interval: {
           type: 'text',
         },
+        timeout: {
+          type: 'long',
+        },
         platform: {
           type: 'keyword',
         },
@@ -218,6 +224,9 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
         interval: {
           type: 'text',
+        },
+        timeout: {
+          type: 'long',
         },
         platform: {
           type: 'keyword',

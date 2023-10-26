@@ -25,7 +25,7 @@ export interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
-      | (Pick<SavedQuerySO, 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+      | (Pick<SavedQuerySO, 'id' | 'description' | 'query' | 'ecs_mapping' | 'timeout'> & {
           savedQueryId: string;
         })
       | null
@@ -53,16 +53,20 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
   const queryOptions = useMemo(
     () =>
-      data?.data?.map((savedQuery) => ({
-        label: savedQuery.id ?? '',
-        value: {
-          savedQueryId: savedQuery.id,
-          id: savedQuery.id,
-          description: savedQuery.description,
-          query: savedQuery.query,
-          ecs_mapping: savedQuery.ecs_mapping,
-        },
-      })) ?? [],
+      data?.data?.map((savedQuery) => {
+        console.log(savedQuery);
+
+        return {
+          label: savedQuery.id ?? '',
+          value: {
+            savedQueryId: savedQuery.id,
+            id: savedQuery.id,
+            description: savedQuery.description,
+            query: savedQuery.query,
+            ecs_mapping: savedQuery.ecs_mapping,
+          },
+        };
+      }) ?? [],
     [data]
   );
 

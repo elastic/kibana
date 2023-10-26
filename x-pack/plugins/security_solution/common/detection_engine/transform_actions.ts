@@ -112,6 +112,7 @@ export const transformAlertToRuleResponseAction = ({
   params,
 }: RuleResponseAction): ResponseAction => {
   if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+    console.log('params', params);
     const { savedQueryId, ecsMapping, packId, ...rest } = params;
     return {
       params: {

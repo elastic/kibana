@@ -371,6 +371,7 @@ const CreateRulePageComponent: React.FC = () => {
         const localAboutStepData = aboutStepForm.getFormData();
         const localScheduleStepData = scheduleStepForm.getFormData();
         const localActionsStepData = actionsStepForm.getFormData();
+        console.log('localActionsStepData', localActionsStepData);
         const startMlJobsIfNeeded = async () => {
           if (!isMlRule(ruleType) || !enabled) {
             return;

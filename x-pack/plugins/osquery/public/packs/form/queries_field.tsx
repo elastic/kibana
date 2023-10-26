@@ -84,6 +84,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
               draft.id = updatedQuery.id;
               draft.interval = updatedQuery.interval;
               draft.query = updatedQuery.query;
+              draft.timeout = updatedQuery.timeout;
 
               if (updatedQuery.platform?.length) {
                 draft.platform = updatedQuery.platform;
@@ -137,6 +138,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
             {
               id: newQueryId,
               interval: newQuery.interval ?? parsedContent.interval ?? '3600',
+              timeout: newQuery.timeout ?? parsedContent.timeout ?? 60,
               query: newQuery.query,
               version: newQuery.version ?? parsedContent.version,
               snapshot: newQuery.snapshot ?? parsedContent.snapshot,
