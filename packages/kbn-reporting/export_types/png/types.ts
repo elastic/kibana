@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { BaseParams, BasePayload } from '@kbn/reporting-common/types';
-import { LocatorParams } from '@kbn/reporting-common/url';
+import type { BaseParams, BasePayload } from '@kbn/reporting-common-export-types-helpers';
+import type { LocatorParams } from '@kbn/reporting-common/url';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
 // Job params: structure of incoming user request data

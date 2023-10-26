@@ -13,24 +13,22 @@ import { CsvGenerator } from '@kbn/generate-csv';
 import {
   CancellationToken,
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
-  JobParamsDownloadCSV,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  ReportingRequestHandlerContext,
   TaskRunResult,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
-import {
-  ExportType,
+import type {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
-  getFieldFormats,
+  ReportingRequestHandlerContext,
+  JobParamsDownloadCSV,
 } from '@kbn/reporting-common-export-types-helpers';
-
+import { getFieldFormats, ExportType } from '@kbn/reporting-common-export-types-helpers';
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceImmediateExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;

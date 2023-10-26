@@ -24,7 +24,6 @@ import apm from 'elastic-apm-node';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { fromEventPattern, lastValueFrom, Observable, of, throwError } from 'rxjs';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { BaseParams, TaskPayloadPDF } from '@kbn/reporting-common/types';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import {
   decryptJobHeaders,
@@ -33,6 +32,8 @@ import {
   getCustomLogo,
   getFullUrls,
   validateUrls,
+  BaseParams,
+  TaskPayloadPDF,
 } from '@kbn/reporting-common-export-types-helpers';
 
 interface BaseParamsPDF {

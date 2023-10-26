@@ -7,25 +7,12 @@
  */
 
 export { CancellationToken } from './cancellation_token';
-export type { TaskRunMetrics, CsvMetrics, TaskRunResult } from './metrics';
+export type { TaskRunMetrics, CsvMetrics, TaskRunResult, PdfMetrics } from './metrics';
 export { buildKibanaPath } from './build_kibana_path';
 export * from './errors';
 export * from './constants';
 export * from './schema_utils';
 export * from './schema';
-export type {
-  BaseParams,
-  BasePayload,
-  BaseParamsV2,
-  BasePayloadV2,
-  ReportingServerInfo,
-  CreateJobFn,
-  RunTaskFn,
-  JobParamsDownloadCSV,
-  ReportingRequestHandlerContext,
-  JobId,
-  CommonReportingSetup,
-} from './types';
 export type {
   LocatorParams,
   UrlOrUrlLocatorTuple,

@@ -2,10 +2,4 @@
   "type": "shared-common",
   "id": "@kbn/reporting-common",
   "owner": "@elastic/appex-sharedux",
-  "plugin": {
-    "server": true,
-    "browser": true,
-    "requiredBundles": ["kibanaUtils"],
-    "extraPublicDirs": ["common"]
-  }
 }

@@ -21,3 +21,4 @@ export { cryptoFactory } from './crypto';
 export { ExportType } from './export_type';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
 export { getTracker } from './pdf_tracker';
+export * from './types';

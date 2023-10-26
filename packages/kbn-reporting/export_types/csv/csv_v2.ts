@@ -21,7 +21,6 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_ENTERPRISE,
   CancellationToken,
-  ReportingRequestHandlerContext,
 } from '@kbn/reporting-common';
 import {
   BaseExportTypeSetupDeps,
@@ -29,6 +28,7 @@ import {
   decryptJobHeaders,
   ExportType,
   getFieldFormats,
+  ReportingRequestHandlerContext,
 } from '@kbn/reporting-common-export-types-helpers';
 import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from './types';
 

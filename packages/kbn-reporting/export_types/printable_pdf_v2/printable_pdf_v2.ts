@@ -36,13 +36,14 @@ import {
 } from '@kbn/reporting-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
 import {
   generatePdfObservableV2,
   decryptJobHeaders,
   getCustomLogo,
   getFullRedirectAppUrl,
   ExportType,
+  JobParamsPDFV2,
+  TaskPayloadPDFV2,
 } from '@kbn/reporting-common-export-types-helpers';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {

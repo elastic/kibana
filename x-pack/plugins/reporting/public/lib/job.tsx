@@ -7,8 +7,8 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TaskRunResult } from '@kbn/reporting-common';
-import { BaseParamsV2, JobId } from '@kbn/reporting-common/types';
+import type { TaskRunResult } from '@kbn/reporting-common';
+import type { BaseParamsV2, JobId } from '@kbn/reporting-common-export-types-helpers';
 import moment from 'moment';
 import React from 'react';
 import { JobTypes, JOB_STATUSES } from '../../common/constants';

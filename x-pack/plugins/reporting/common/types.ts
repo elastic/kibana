@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BasePayload, TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
-import { JobId } from '@kbn/reporting-common/types';
+import type { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
+import type { BasePayload, JobId } from '@kbn/reporting-common-export-types-helpers';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 
 export interface ReportDocumentHead {
