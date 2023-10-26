@@ -9,7 +9,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import chalk from 'chalk';
 import { userInfo } from 'os';
-import { resolve, dirname } from 'path';
+import { join as pathJoin, dirname } from 'path';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -193,7 +193,7 @@ const createVagrantVm = async ({
   name,
   log = createToolingLogger(),
   agentDownload: { fullFilePath: agentFullFilePath, filename: agentFileName },
-  vagrantFile = resolve('../endpoint_agent_runner/Vagrantfile'),
+  vagrantFile = pathJoin(__dirname, 'vagrant', 'Vagrantfile'),
   memory,
   cpus,
   disk,
