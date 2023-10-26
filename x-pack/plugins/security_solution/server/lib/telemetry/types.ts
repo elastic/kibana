@@ -457,3 +457,5 @@ export interface ValueListResponse {
   exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
   indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
 }
+
+export type Nullable<T> = T | null | undefined;
