@@ -360,6 +360,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
       openAddFilterPopover();
       fillAddFilterForm({
         key: 'kibana.alert.workflow_status',
+        operator: 'is',
         value: 'invalid',
       });
       waitForPageFilters();
