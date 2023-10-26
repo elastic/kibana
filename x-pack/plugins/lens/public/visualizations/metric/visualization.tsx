@@ -723,7 +723,7 @@ export const getMetricVisualization = ({
           fixableInEditor: true,
           displayLocations: [{ id: 'dimensionButton', dimensionId: state.maxAccessor }],
           shortMessage: i18n.translate('xpack.lens.lnsMetric_maxDimensionPanel.nonNumericError', {
-            defaultMessage: 'Maximum value cannot be defined for non-numeric primary metric.',
+            defaultMessage: 'Primary metric must be numeric to set a maximum value.',
           }),
           longMessage: '',
         });
