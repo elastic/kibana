@@ -17,7 +17,9 @@ export function useDocDetail(
 ): FlyoutDoc {
   const { services } = useKibanaContextForPlugin();
 
-  const formatField = (field: keyof LogDocument['flattened']) => {
+  const formatField = <F extends keyof LogDocument['flattened']>(
+    field: F
+  ): LogDocument['flattened'][F] => {
     return (
       doc.flattened[field] &&
       formatFieldValue(
@@ -35,15 +37,15 @@ export function useDocDetail(
   const message = formatField(MESSAGE_FIELD);
 
   return {
-    level,
-    timestamp,
-    message,
+    [LOG_LEVEL_FIELD]: level,
+    [TIMESTAMP_FIELD]: timestamp,
+    [MESSAGE_FIELD]: message,
   };
 }
 
-export const getFlyoutRenderFlags = (doc: FlyoutDoc) => {
-  const hasTimestamp = Boolean(doc.timestamp);
-  const hasLogLevel = Boolean(doc.level);
+export const getDocDetailRenderFlags = (doc: FlyoutDoc) => {
+  const hasTimestamp = Boolean(doc['@timestamp']);
+  const hasLogLevel = Boolean(doc['log.level']);
   const hasMessage = Boolean(doc.message);
 
   const hasBadges = hasTimestamp || hasLogLevel;

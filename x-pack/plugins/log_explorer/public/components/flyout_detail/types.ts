@@ -10,15 +10,15 @@ import { DataTableRecord } from '@kbn/discover-utils/types';
 
 export interface LogDocument extends DataTableRecord {
   flattened: {
-    'log.level': string;
     '@timestamp': string;
-    message: string;
+    'log.level'?: string;
+    message?: string;
   };
 }
 
 export interface FlyoutDoc {
-  level?: string;
-  timestamp: string;
+  '@timestamp': string;
+  'log.level'?: string;
   message?: string;
 }
 

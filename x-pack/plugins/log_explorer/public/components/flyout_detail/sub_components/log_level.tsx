@@ -17,7 +17,7 @@ const LEVEL_DICT: Record<string, EuiBadgeProps['color']> = {
 };
 
 interface LogLevelProps {
-  level: FlyoutDoc['level'];
+  level: FlyoutDoc['log.level'];
 }
 
 export function LogLevel({ level }: LogLevelProps) {

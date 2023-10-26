@@ -10,7 +10,7 @@ import { EuiBadge } from '@elastic/eui';
 import { FlyoutDoc } from '../types';
 
 interface TimestampProps {
-  timestamp: FlyoutDoc['timestamp'];
+  timestamp: FlyoutDoc['@timestamp'];
 }
 
 export function Timestamp({ timestamp }: TimestampProps) {
