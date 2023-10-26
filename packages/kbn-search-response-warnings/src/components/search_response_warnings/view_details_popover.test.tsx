@@ -109,17 +109,19 @@ describe('ViewDetailsPopover', () => {
     });
 
     test('Should ensure unique request names by numbering duplicate request names', () => {
-      const warningsWithDuplicateRequestNames = warnings.map(warning => {
+      const warningsWithDuplicateRequestNames = warnings.map((warning) => {
         return {
           ...warning,
-          requestName: "Request"
+          requestName: 'Request',
         };
       });
-      render(<ViewDetailsPopover displayAsLink={true} warnings={warningsWithDuplicateRequestNames} />);
+      render(
+        <ViewDetailsPopover displayAsLink={true} warnings={warningsWithDuplicateRequestNames} />
+      );
       const viewDetailsButton = screen.getByRole('button');
       fireEvent.click(viewDetailsButton);
 
-      screen.getByRole('button', { name: 'Request' });  
+      screen.getByRole('button', { name: 'Request' });
       screen.getByRole('button', { name: 'Request (2)' });
     });
   });
