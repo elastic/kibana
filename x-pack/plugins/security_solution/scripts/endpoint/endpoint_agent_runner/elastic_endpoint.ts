@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { userInfo } from 'os';
-import chalk from 'chalk';
-import { getMultipassVmCountNotice } from '../common/vm_services';
+import { generateVmName } from '../common/vm_services';
 import { createAndEnrollEndpointHost } from '../common/endpoint_host_services';
 import {
   addEndpointIntegrationToAgentPolicy,
@@ -18,6 +16,7 @@ import { dump } from './utils';
 
 export const enrollEndpointHost = async (): Promise<string | undefined> => {
   let vmName;
+
   const {
     log,
     kbnClient,
@@ -28,8 +27,6 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
   log.indent(4);
 
   try {
-    const uniqueId = Math.random().toString().substring(2, 6);
-    const username = userInfo().username.toLowerCase().replaceAll('.', '-'); // Multipass doesn't like periods in username
     const policyId: string = policy || (await getOrCreateAgentPolicyId());
 
     if (!policyId) {
@@ -40,11 +37,11 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       throw new Error(`No 'version' specified`);
     }
 
-    vmName = `${username}-dev-${uniqueId}`;
+    vmName = generateVmName('dev');
 
     log.info(`Creating VM named: ${vmName}`);
 
-    await createAndEnrollEndpointHost({
+    const { hostVm } = await createAndEnrollEndpointHost({
       kbnClient,
       log,
       hostname: vmName,
@@ -54,25 +51,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       disk: '8G',
     });
 
-    if (process.env.CI) {
-      log.info(`VM created using Vagrant.
-      VM Name: ${vmName}
-      Elastic Agent Version: ${version}
-
-      Shell access: ${chalk.bold(`vagrant ssh ${vmName}`)}
-      Delete VM:    ${chalk.bold(`vagrant destroy ${vmName} -f`)}
-  `);
-    } else {
-      log.info(`VM created using Multipass.
-        VM Name: ${vmName}
-        Elastic Agent Version: ${version}
-
-        Shell access: ${chalk.bold(`multipass shell ${vmName}`)}
-        Delete VM:    ${chalk.bold(
-          `multipass delete -p ${vmName}${await getMultipassVmCountNotice()}`
-        )}
-    `);
-    }
+    log.info(hostVm.info());
   } catch (error) {
     log.error(dump(error));
     log.indent(-4);

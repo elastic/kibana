@@ -16,6 +16,8 @@ export interface HostVm {
   unmount: (hostVmDir: string) => Promise<void>;
   destroy: () => Promise<void>;
   info: () => string;
+  stop: () => void;
+  start: () => void;
 }
 
 export type SupportedVmManager = 'multipass' | 'vagrant';

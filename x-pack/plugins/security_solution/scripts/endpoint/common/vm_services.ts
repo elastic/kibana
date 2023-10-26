@@ -112,6 +112,14 @@ export const createMultipassHostVmClient = (
     };
   };
 
+  const start = async () => {
+    await execa.command(`multipass start ${name}`);
+  };
+
+  const stop = async () => {
+    await execa.command(`multipass stop ${name}`);
+  };
+
   return {
     type: 'multipass',
     name,
@@ -120,6 +128,8 @@ export const createMultipassHostVmClient = (
     info,
     mount,
     unmount,
+    start,
+    stop,
   };
 };
 
@@ -281,6 +291,14 @@ export const createVagrantHostVmClient = (
     throw new Error('VM action `mount` not currently supported for vagrant');
   };
 
+  const start = async () => {
+    await execa.command(`vagrant up ${name}`);
+  };
+
+  const stop = async () => {
+    await execa.command(`vagrant suspend ${name}`);
+  };
+
   return {
     type: 'vagrant',
     name,
@@ -289,5 +307,7 @@ export const createVagrantHostVmClient = (
     info,
     mount,
     unmount,
+    start,
+    stop,
   };
 };
