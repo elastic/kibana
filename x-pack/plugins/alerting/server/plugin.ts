@@ -97,7 +97,7 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
-import { rulesSettingsFeature } from './rules_settings_feature';
+import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
@@ -255,7 +255,7 @@ export class AlertingPlugin {
       };
     });
 
-    plugins.features.registerKibanaFeature(rulesSettingsFeature);
+    plugins.features.registerKibanaFeature(getRulesSettingsFeature(!!plugins.serverless));
 
     plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
