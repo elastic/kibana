@@ -132,7 +132,7 @@ import PropTypes from 'prop-types';
    }
  }
 
- Button.proptypes = {
+ Button.propTypes = {
   text: PropTypes.string,
  }
 ```
