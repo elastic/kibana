@@ -15,7 +15,15 @@ import { navLinksMock } from '../mocks/src/navlinks';
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
 
-import { renderNavigation, type ProjectNavigationChangeListener } from './utils';
+import { renderNavigation, TestType, type ProjectNavigationChangeListener } from './utils';
+
+const expectCatch = (type: TestType) => (e: Error) => {
+  const err = new Error(`Failed to run tests for ${type}.`);
+  err.stack = e.stack;
+  // eslint-disable-next-line no-console
+  console.error(err.message);
+  throw err;
+};
 
 describe('builds navigation tree', () => {
   beforeAll(() => {
@@ -372,7 +380,7 @@ describe('builds navigation tree', () => {
     const onProjectNavigationChange: jest.MockedFunction<ProjectNavigationChangeListener> =
       jest.fn();
 
-    const runTests = (type: 'treeDef' | 'uiComponents') => {
+    const runTests = (type: TestType) => {
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
@@ -389,11 +397,7 @@ describe('builds navigation tree', () => {
         expect(groupChildren[1].title).toBe('Overwrite deeplink title');
         expect(groupChildren[2].title).toBe('Title in props'); // Unknown deeplink, has not been rendered
       } catch (e) {
-        const err = new Error(`Failed to run tests for ${type}.`);
-        err.stack = e.stack;
-        // eslint-disable-next-line no-console
-        console.error(err.message);
-        throw err;
+        expectCatch(type)(e);
       }
 
       return groupChildren;
@@ -470,6 +474,96 @@ describe('builds navigation tree', () => {
       const groupChildren = runTests('uiComponents');
       // "item4" has been skipped as it is an unknown deeplink and we have the next item in the list
       expect(groupChildren[3].title).toBe('Title in children');
+    }
+  });
+
+  test('should not render the group if it does not have children AND no href or deeplink', async () => {
+    const navLinks$: Observable<ChromeNavLink[]> = of([
+      {
+        id: 'item1',
+        title: 'Title from deeplink',
+        baseUrl: '',
+        url: '',
+        href: '',
+      },
+    ]);
+    const onProjectNavigationChange: jest.MockedFunction<ProjectNavigationChangeListener> =
+      jest.fn();
+
+    const runTests = (type: TestType, { queryByTestId }: RenderResult) => {
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+
+      try {
+        // Check the DOM
+        expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
+        expect(queryByTestId(/nav-item-root.group2.item1/)).toBeVisible();
+
+        // Check the navigation tree
+        const lastCall =
+          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+        const [navTree] = lastCall;
+        const [rootNode] = navTree.navigationTree;
+        expect(rootNode.id).toBe('root');
+        expect(rootNode.children?.length).toBe(1); // only 1 group --> "group1" has been removed
+        expect(rootNode.children?.[0]?.id).toBe('group2');
+        return navTree;
+      } catch (e) {
+        expectCatch(type)(e);
+      }
+    };
+
+    // -- Default navigation
+    {
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          isCollapsible: false,
+          children: [
+            {
+              id: 'group1',
+              children: [{ link: 'notRegistered' }],
+            },
+            {
+              id: 'group2',
+              children: [{ link: 'item1' }],
+            },
+          ],
+        },
+      ];
+
+      const renderResult = await renderNavigation({
+        navTreeDef: { body: navigationBody },
+        services: { navLinks$ },
+        onProjectNavigationChange,
+      });
+
+      await runTests('treeDef', renderResult);
+
+      onProjectNavigationChange.mockReset();
+      renderResult.unmount();
+    }
+
+    // -- With UI components
+    {
+      const renderResult = await renderNavigation({
+        navigationElement: (
+          <Navigation>
+            <Navigation.Group id="root" isCollapsible={false}>
+              <Navigation.Group id="group1" title="Hello">
+                <Navigation.Item<any> link="notRegistered" />
+              </Navigation.Group>
+              <Navigation.Group id="group2">
+                <Navigation.Item<any> link="item1" />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        ),
+        services: { navLinks$ },
+        onProjectNavigationChange,
+      });
+
+      await runTests('uiComponents', renderResult);
     }
   });
 });

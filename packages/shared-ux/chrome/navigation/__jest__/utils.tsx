@@ -19,6 +19,7 @@ import { NavigationServices } from '../types';
 const services = getServicesMock();
 
 export type ProjectNavigationChangeListener = (projectNavigation: ChromeProjectNavigation) => void;
+export type TestType = 'treeDef' | 'uiComponents';
 
 export const renderNavigation = async ({
   navTreeDef,
