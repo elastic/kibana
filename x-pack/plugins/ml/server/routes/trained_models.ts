@@ -8,9 +8,9 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElserVersion } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -134,7 +134,7 @@ export function trainedModelsRoutes(
                   ...Object.values(modelDeploymentsMap).flat(),
                 ])
               );
-              const modelsClient = modelsProvider(client);
+              const modelsClient = modelsProvider(client, mlClient, cloud);
 
               const modelsPipelinesAndIndices = await Promise.all(
                 modelIdsAndAliases.map(async (modelIdOrAlias) => {
@@ -302,7 +302,9 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
         try {
           const { modelId } = request.params;
-          const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
+          const result = await modelsProvider(client, mlClient, cloud).getModelsPipelines(
+            modelId.split(',')
+          );
           return response.ok({
             body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
           });
@@ -334,7 +336,7 @@ export function trainedModelsRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
         try {
-          const body = await modelsProvider(client).getPipelines();
+          const body = await modelsProvider(client, mlClient, cloud).getPipelines();
           return response.ok({
             body,
           });
@@ -371,7 +373,7 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
         try {
           const { pipeline, pipelineName } = request.body;
-          const body = await modelsProvider(client).createInferencePipeline(
+          const body = await modelsProvider(client, mlClient, cloud).createInferencePipeline(
             pipeline!,
             pipelineName
           );
@@ -461,7 +463,7 @@ export function trainedModelsRoutes(
 
           if (withPipelines) {
             // first we need to delete pipelines, otherwise ml api return an error
-            await modelsProvider(client).deleteModelPipelines(modelId.split(','));
+            await modelsProvider(client, mlClient, cloud).deleteModelPipelines(modelId.split(','));
           }
 
           const body = await mlClient.deleteTrainedModel({
@@ -720,9 +722,9 @@ export function trainedModelsRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.fullLicenseAPIGuard(async ({ response, client }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ response, mlClient, client }) => {
         try {
-          const body = await modelsProvider(client, cloud).getModelDownloads();
+          const body = await modelsProvider(client, mlClient, cloud).getModelDownloads();
 
           return response.ok({
             body,
@@ -757,11 +759,11 @@ export function trainedModelsRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ response, client, request }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ response, client, mlClient, request }) => {
         try {
           const { version } = request.query;
 
-          const body = await modelsProvider(client, cloud).getELSER(
+          const body = await modelsProvider(client, mlClient, cloud).getELSER(
             version ? { version: Number(version) as ElserVersion } : undefined
           );
 
@@ -772,5 +774,48 @@ export function trainedModelsRoutes(
           return response.customError(wrapError(e));
         }
       })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/infer/:modelId Evaluates a trained model
+   * @apiName InferTrainedModelDeployment
+   * @apiDescription Evaluates a trained model.
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_model/{modelId}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: modelIdSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const { modelId } = request.params;
+            const body = await modelsProvider(client, mlClient, cloud).downloadModel(
+              modelId,
+              mlSavedObjectService
+            );
+
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
     );
 }

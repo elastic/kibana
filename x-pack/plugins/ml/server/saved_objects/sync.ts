@@ -137,6 +137,10 @@ export function syncSavedObjectsFactory(
                 }
                 const job = getJobDetailsFromTrainedModel(mod);
                 await mlSavedObjectService.createTrainedModel(modelId, job);
+                if (modelId[0] === '.') {
+                  // if the model id starts with a dot, it is an internal modal and should be in all spaces
+                  await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
+                }
                 results.savedObjectsCreated[type]![modelId] = {
                   success: true,
                 };

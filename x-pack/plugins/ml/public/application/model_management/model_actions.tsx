@@ -401,10 +401,7 @@ export function useModelActions({
         onClick: async (item) => {
           try {
             onLoading(true);
-            await trainedModelsApiService.putTrainedModelConfig(
-              item.model_id,
-              item.putModelConfig!
-            );
+            await trainedModelsApiService.downloadTrainedModelConfig(item.model_id);
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
                 defaultMessage: '"{modelId}" model download has been started successfully.',

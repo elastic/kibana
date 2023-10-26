@@ -278,6 +278,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         version: '1',
       });
     },
+
+    downloadTrainedModelConfig(modelId: string) {
+      return httpService.http<estypes.MlPutTrainedModelResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_model/${modelId}`,
+        method: 'POST',
+        version: '1',
+      });
+    },
   };
 }
 

@@ -12,6 +12,7 @@ import {
   JOB_MAP_NODE_TYPES,
   type DeleteDataFrameAnalyticsWithIndexStatus,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
@@ -52,9 +53,10 @@ function getExtendedMap(
   mlClient: MlClient,
   client: IScopedClusterClient,
   idOptions: ExtendAnalyticsMapArgs,
-  enabledFeatures: MlFeatures
+  enabledFeatures: MlFeatures,
+  cloud: CloudSetup
 ) {
-  const analytics = new AnalyticsManager(mlClient, client, enabledFeatures);
+  const analytics = new AnalyticsManager(mlClient, client, enabledFeatures, cloud);
   return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
 }
 
@@ -65,9 +67,10 @@ function getExtendedModelsMap(
     analyticsId?: string;
     modelId?: string;
   },
-  enabledFeatures: MlFeatures
+  enabledFeatures: MlFeatures,
+  cloud: CloudSetup
 ) {
-  const analytics = new AnalyticsManager(mlClient, client, enabledFeatures);
+  const analytics = new AnalyticsManager(mlClient, client, enabledFeatures, cloud);
   return analytics.extendModelsMap(idOptions);
 }
 
@@ -92,12 +95,10 @@ function convertForStringify(aggs: Aggregation[], fields: Field[]): void {
 /**
  * Routes for the data frame analytics
  */
-export function dataFrameAnalyticsRoutes({
-  router,
-  mlLicense,
-  routeGuard,
-  getEnabledFeatures,
-}: RouteInitialization) {
+export function dataFrameAnalyticsRoutes(
+  { router, mlLicense, routeGuard, getEnabledFeatures }: RouteInitialization,
+  { cloud }: { cloud: CloudSetup }
+) {
   async function userCanDeleteIndex(
     client: IScopedClusterClient,
     destinationIndex: string
@@ -805,7 +806,8 @@ export function dataFrameAnalyticsRoutes({
                 analyticsId: type !== JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
                 index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
               },
-              getEnabledFeatures()
+              getEnabledFeatures(),
+              cloud
             );
           } else {
             results = await getExtendedModelsMap(
@@ -815,7 +817,8 @@ export function dataFrameAnalyticsRoutes({
                 analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
                 modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
               },
-              getEnabledFeatures()
+              getEnabledFeatures(),
+              cloud
             );
           }
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
 import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
@@ -22,12 +23,19 @@ import {
   type ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
+import type { MlClient } from '../../lib/ml_client';
+import { spacesUtilsProvider } from '../../lib/spaces_utils';
+import { checksFactory, MLSavedObjectService } from '../../saved_objects';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
-export const modelsProvider = (client: IScopedClusterClient, cloud?: CloudSetup) =>
-  new ModelsProvider(client, cloud);
+export const modelsProvider = (
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  cloud: CloudSetup
+) => new ModelsProvider(client, mlClient, cloud);
 
 interface ModelMapResult {
   ingestPipelines: Map<string, Record<string, PipelineDefinition> | null>;
@@ -49,7 +57,11 @@ interface ModelMapResult {
 export class ModelsProvider {
   private _transforms?: TransformGetTransformTransformSummary[];
 
-  constructor(private _client: IScopedClusterClient, private _cloud?: CloudSetup) {}
+  constructor(
+    private _client: IScopedClusterClient,
+    private _mlClient: MlClient,
+    private _cloud: CloudSetup
+  ) {}
 
   private async initTransformData() {
     if (!this._transforms) {
@@ -515,5 +527,91 @@ export class ModelsProvider {
     }
 
     return requestedModel || recommendedModel || defaultModel!;
+  }
+
+  async downloadModel(modelId: string, mlSavedObjectService: MLSavedObjectService) {
+    const availableModels = await this.getModelDownloads();
+    const model = availableModels.find((m) => m.name === modelId);
+    if (!model) {
+      throw Boom.notFound('Model not found');
+    }
+
+    let esModelExists = false;
+    try {
+      await this._client.asInternalUser.ml.getTrainedModels({ model_id: modelId });
+      esModelExists = true;
+    } catch (error) {
+      // model doesn't exist, ignore error
+    }
+
+    if (esModelExists) {
+      throw Boom.badRequest('Model already exists');
+    }
+
+    const putResponse = await this._mlClient.putTrainedModel({
+      model_id: model.name,
+      body: model.config,
+    });
+
+    await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
+    return putResponse;
+  }
+
+  async downloadModel2(
+    modelId: string,
+    getSpacesPlugin: (() => Promise<SpacesPluginStart>) | undefined,
+    request: KibanaRequest,
+    mlSavedObjectService: MLSavedObjectService
+  ) {
+    const availableModels = await this.getModelDownloads();
+    const model = availableModels.find((m) => m.name === modelId);
+    if (!model) {
+      throw new Error('Model not found');
+    }
+
+    let esModelExists = false;
+    try {
+      const esModel = await this._client.asInternalUser.ml.getTrainedModels({ model_id: modelId });
+      esModelExists = esModel.count > 0;
+    } catch (error) {
+      // model doesn't exist, ignore error
+    }
+
+    if (esModelExists === false) {
+      const putResponse = await this._mlClient.putTrainedModel({
+        model_id: model.name,
+        body: model.config,
+      });
+
+      await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
+      return putResponse;
+    }
+
+    // find out if there is a saved object and if it is in the current space
+    // if not, add it to the current space
+    // if there is no saved object, run sync.
+    const { trainedModelsSpaces } = checksFactory(this._client, mlSavedObjectService);
+    const { getCurrentSpaceId } = spacesUtilsProvider(getSpacesPlugin, request);
+
+    const [{ trainedModels }, currentSpaceId] = await Promise.all([
+      trainedModelsSpaces(),
+      getCurrentSpaceId(),
+    ]);
+
+    if (currentSpaceId === null) {
+      throw new Error('Current space id is null');
+    }
+
+    const modelSpaces = trainedModels[modelId];
+    if (modelSpaces === undefined) {
+      // sync
+    } else if (modelSpaces.includes(currentSpaceId) === false) {
+      // add to space
+      throw new Error('Model already exists, but not in current space');
+      // await mlSavedObjectService.updateTrainedModelsSpaces([modelId], [currentSpaceId], []);
+    } else {
+      throw new Error('Model already exists');
+      // error model already exists in space
+    }
   }
 }

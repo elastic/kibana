@@ -239,7 +239,7 @@ export class MlServerPlugin
 
     // Register Data Frame Analytics routes
     if (this.enabledFeatures.dfa) {
-      dataFrameAnalyticsRoutes(routeInit);
+      dataFrameAnalyticsRoutes(routeInit, { cloud: plugins.cloud });
     }
 
     // Register Trained Model Management routes

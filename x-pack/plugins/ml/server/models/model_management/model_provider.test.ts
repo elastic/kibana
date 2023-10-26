@@ -8,6 +8,7 @@
 import { modelsProvider } from './models_provider';
 import { type IScopedClusterClient } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { MlClient } from '../../lib/ml_client';
 
 describe('modelsProvider', () => {
   const mockClient = {
@@ -36,8 +37,34 @@ describe('modelsProvider', () => {
     },
   } as unknown as jest.Mocked<IScopedClusterClient>;
 
+  const mockMlClient = {
+    // asInternalUser: {
+    //   transport: {
+    //     request: jest.fn().mockResolvedValue({
+    //       _nodes: {
+    //         total: 1,
+    //         successful: 1,
+    //         failed: 0,
+    //       },
+    //       cluster_name: 'default',
+    //       nodes: {
+    //         yYmqBqjpQG2rXsmMSPb9pQ: {
+    //           name: 'node-0',
+    //           roles: ['ml'],
+    //           attributes: {},
+    //           os: {
+    //             name: 'Linux',
+    //             arch: 'amd64',
+    //           },
+    //         },
+    //       },
+    //     }),
+    //   },
+    // },
+  } as unknown as jest.Mocked<MlClient>;
+
   const mockCloud = cloudMock.createSetup();
-  const modelService = modelsProvider(mockClient, mockCloud);
+  const modelService = modelsProvider(mockClient, mockMlClient, mockCloud);
 
   afterEach(() => {
     jest.clearAllMocks();
