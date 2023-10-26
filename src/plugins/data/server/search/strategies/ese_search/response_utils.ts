@@ -14,7 +14,11 @@ import { sanitizeRequestParams } from '../../sanitize_request_params';
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
-export function toAsyncKibanaSearchResponse(response: AsyncSearchResponse, warning?: string, requestParams?: ConnectionRequestParams) {
+export function toAsyncKibanaSearchResponse(
+  response: AsyncSearchResponse,
+  warning?: string,
+  requestParams?: ConnectionRequestParams
+) {
   return {
     id: response.id,
     rawResponse: response.response,

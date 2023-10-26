@@ -80,7 +80,11 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning, meta?.request?.params);
+      return toAsyncKibanaSearchResponse(
+        { ...body, response },
+        headers?.warning,
+        meta?.request?.params
+      );
     };
 
     const cancel = async () => {
@@ -135,7 +139,9 @@ export const enhancedEsSearchStrategyProvider = (
       const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),
-        ...(esResponse.meta?.request?.params ? { requestParams: sanitizeRequestParams(esResponse.meta?.request?.params) } : {}),
+        ...(esResponse.meta?.request?.params
+          ? { requestParams: sanitizeRequestParams(esResponse.meta?.request?.params) }
+          : {}),
         ...getTotalLoaded(response),
       };
     } catch (e) {
