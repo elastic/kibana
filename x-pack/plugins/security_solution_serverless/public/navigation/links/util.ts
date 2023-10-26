@@ -26,6 +26,12 @@ export const getProjectPageNameFromNavLinkId = (navLinkId: string): ProjectPageN
 export const isCloudLink = (linkId: string): boolean => linkId.startsWith('cloud:');
 export const getCloudLinkKey = (linkId: string): string => linkId.replace('cloud:', '');
 export const getProjectDetails = (cloud: CloudStart) => cloud.serverless;
+export const getProjectDetailsUrl = (cloud: CloudStart) => {
+  const projectId = cloud.serverless?.projectId;
+  return projectId
+    ? `${getCloudUrl('projects', cloud)}/${SECURITY_PROJECT_TYPE}/${projectId}`
+    : undefined;
+};
 
 export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
   switch (cloudUrlKey) {
@@ -43,9 +49,6 @@ export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
       return cloud.usersAndRolesUrl;
     case 'projects':
       return cloud.projectsUrl;
-    case 'project':
-      const projectId = getProjectDetails(cloud)?.projectId;
-      return projectId ? `${cloud.projectsUrl}/${SECURITY_PROJECT_TYPE}/${projectId}` : undefined;
     default:
       return undefined;
   }
