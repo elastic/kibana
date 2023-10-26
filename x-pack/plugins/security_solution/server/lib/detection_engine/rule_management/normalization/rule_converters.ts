@@ -77,7 +77,11 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
-import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
+import {
+  convertAlertSuppressionToCamel,
+  convertAlertSuppressionToSnake,
+  migrateLegacyInvestigationFields,
+} from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
 
@@ -661,7 +665,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
     timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
-    investigation_fields: params.investigationFields,
+    investigation_fields: migrateLegacyInvestigationFields(params.investigationFields),
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,
