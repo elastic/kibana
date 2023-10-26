@@ -47,36 +47,41 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       true
     );
 
+    const staticContextLoader = new DirectoryLoader(
+      resolve(__dirname, '../../../knowledge_base/esql/static_context'),
+      {
+        '.asciidoc': (path) => new TextLoader(path),
+      },
+      true
+    );
+
     const docs = await docsLoader.load();
     const languageDocs = await languageLoader.load();
     const rawExampleQueries = await exampleQueriesLoader.load();
+    const staticContext = await staticContextLoader.load();
 
-    // Add additional metadata to the example queries that indicates they are required KB documents:
-    const requiredExampleQueries = addRequiredKbResourceMetadata({
-      docs: rawExampleQueries,
+    // Add additional metadata to the example queries and static context docs that indicates they are required KB documents:
+    const requiredContextDocs = addRequiredKbResourceMetadata({
+      docs: [...rawExampleQueries, ...staticContext],
       kbResource: ESQL_RESOURCE,
     });
 
     logger.info(
-      `Loading ${docs.length} ES|QL docs, ${languageDocs.length} language docs, and ${requiredExampleQueries.length} example queries into the Knowledge Base`
+      `Loading ${docs.length} ES|QL docs, ${languageDocs.length} language docs, and ${requiredContextDocs.length} required context docs into the Knowledge Base`
     );
 
-    const response = await esStore.addDocuments([
-      ...docs,
-      ...languageDocs,
-      ...requiredExampleQueries,
-    ]);
+    const response = await esStore.addDocuments([...docs, ...languageDocs, ...requiredContextDocs]);
 
     logger.info(
       `Loaded ${
         response?.length ?? 0
-      } ES|QL docs, language docs, and example queries into the Knowledge Base`
+      } ES|QL docs, language docs, and required context docs into the Knowledge Base`
     );
 
     return response.length > 0;
   } catch (e) {
     logger.error(
-      `Failed to load ES|QL docs, language docs, and example queries into the Knowledge Base\n${e}`
+      `Failed to load ES|QL docs, language docs, and required context docs into the Knowledge Base\n${e}`
     );
     return false;
   }

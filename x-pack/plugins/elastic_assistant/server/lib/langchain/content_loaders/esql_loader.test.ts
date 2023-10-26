@@ -14,6 +14,7 @@ import {
   mockEsqlDocsFromDirectoryLoader,
   mockEsqlLanguageDocsFromDirectoryLoader,
   mockExampleQueryDocsFromDirectoryLoader,
+  mockStaticContextFromDirectoryLoader,
 } from '../../../__mocks__/docs_from_directory_loader';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 
@@ -46,7 +47,8 @@ describe('loadESQL', () => {
       .fn()
       .mockReturnValueOnce(mockEsqlDocsFromDirectoryLoader)
       .mockReturnValueOnce(mockEsqlLanguageDocsFromDirectoryLoader)
-      .mockReturnValueOnce(mockExampleQueryDocsFromDirectoryLoader);
+      .mockReturnValueOnce(mockExampleQueryDocsFromDirectoryLoader)
+      .mockReturnValueOnce(mockStaticContextFromDirectoryLoader);
   });
 
   describe('loadESQL', () => {
@@ -54,12 +56,15 @@ describe('loadESQL', () => {
       await loadESQL(esStore, logger);
     });
 
-    it('loads ES|QL docs, language files, and example queries into the Knowledge Base', async () => {
+    it('loads ES|QL docs, language files, and required context docs into the Knowledge Base', async () => {
       expect(esStore.addDocuments).toHaveBeenCalledWith([
         ...mockEsqlDocsFromDirectoryLoader,
         ...mockEsqlLanguageDocsFromDirectoryLoader,
         ...addRequiredKbResourceMetadata({
-          docs: mockExampleQueryDocsFromDirectoryLoader,
+          docs: [
+            ...mockExampleQueryDocsFromDirectoryLoader,
+            ...mockStaticContextFromDirectoryLoader,
+          ],
           kbResource: ESQL_RESOURCE,
         }),
       ]);
@@ -67,13 +72,13 @@ describe('loadESQL', () => {
 
     it('logs the expected (distinct) counts for each category of documents', async () => {
       expect((logger.info as jest.Mock).mock.calls[0][0]).toEqual(
-        'Loading 1 ES|QL docs, 2 language docs, and 3 example queries into the Knowledge Base'
+        'Loading 1 ES|QL docs, 2 language docs, and 4 required context docs into the Knowledge Base'
       );
     });
 
     it('logs the expected total of all documents loaded', async () => {
       expect((logger.info as jest.Mock).mock.calls[1][0]).toEqual(
-        'Loaded 5 ES|QL docs, language docs, and example queries into the Knowledge Base'
+        'Loaded 5 ES|QL docs, language docs, and required context docs into the Knowledge Base'
       );
     });
 
@@ -105,7 +110,7 @@ describe('loadESQL', () => {
     await loadESQL(esStore, logger);
 
     expect(logger.error).toHaveBeenCalledWith(
-      'Failed to load ES|QL docs, language docs, and example queries into the Knowledge Base\nError: Failed to load documents'
+      'Failed to load ES|QL docs, language docs, and required context docs into the Knowledge Base\nError: Failed to load documents'
     );
   });
 });
