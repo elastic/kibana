@@ -71,6 +71,14 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
       const customBucket = agg.getParam('customBucket');
       return bucket && bucket[customBucket.id] && customMetric.getValue(bucket[customBucket.id]);
     },
+    getValueType(agg) {
+      const customMetric = agg.getParam('customMetric');
+      return (
+        customMetric.type.getValueType?.(customMetric) ||
+        customMetric.params.field?.type ||
+        'number'
+      );
+    },
     getValueBucketPath(agg) {
       const customBucket = agg.getParam('customBucket');
       const customMetric = agg.getParam('customMetric');
