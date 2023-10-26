@@ -6,11 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  CaseSeverity,
-  CaseStatuses,
-  CustomFieldTypes,
-} from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../../ftr_provider_context';
