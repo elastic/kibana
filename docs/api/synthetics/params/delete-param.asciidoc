@@ -29,7 +29,7 @@ The request body should contain an array of parameter IDs that you want to delet
 (Required, array of strings) An array of parameter IDs to delete.
 
 
-Here's an example request body:
+Here is an example of a DELETE request to delete a list of parameters by ID:
 
 [source,sh]
 --------------------------------------------------
