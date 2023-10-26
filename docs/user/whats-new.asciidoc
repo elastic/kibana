@@ -21,13 +21,13 @@ image::images/esql-demo.gif[A short video demo of {esql}]
 
 Here is what you can expect: 
 
-* *Easy start:* To begin using {esql} in Discover, select “Try {esql}” from the data-view picker.
+* *Easy start:* To begin using {esql} in Discover, select **Try {esql}** from the data view menu.
 * *Efficient and easy query building:* {esql} in Discover offers auto-complete and in-app documentation, making it easy to craft powerful queries right from the query bar. 
 * *Comprehensive and powerful data exploration:* Conduct ad-hoc data exploration within Discover. Create aggregations, transform data, enrich datasets, and more directly from the query builder. Results are presented in a tabular format or as visualizations. It depends on the query you are executing. 
 * *Contextual Visualizations:* When writing {esql} queries in Discover, you’ll receive visual representations powered by the Lens suggestion engine. Your query’s nature determines the type of visualization you get, such as a metric, histogram, heatmap, and so on. 
 * *Enrichment:* Use the enrich command to enhance your query dataset with fields from another dataset, complete with in-context suggestions for the selected policy, such as hinting the matching field and enriched columns.
 * *In-line visualization editing:* Edit {esql} visualizations directly within Discover and Dashboards. No need to navigate to Lens for quick edits, so you can make changes seamlessly. 
-* *Dashboard integration:* Save your {esql} visualizations to a Dashboard directly from Discover once you’re satisfied with the results. 
+* *Dashboard integration:* Save your {esql} visualizations to a dashboard directly from Discover once you’re satisfied with the results. 
 * *Alerting:* Use {esql} for observability and security alerts, setting aggregated values as thresholds. Enhance detection accuracy and receive actionable notifications by emphasizing meaningful trends over isolated incidents, reducing false positives. 
 
 {esql} in Discover brings efficiency and power to your data investigations, streamlining your path to insights. 
@@ -54,9 +54,9 @@ image::images/grok-use-case.gif[An example using {esql} in an {observability} us
 === Dashboard 
 
 [discrete]
-==== Lens inline editing in Dashboards
+==== Lens inline editing in dashboards
 
-You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the Lens editor. In the upper right nn the visualization panel, click **&#8230;  > Edit visualization**. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. Once happy with your edits, click **Apply and close**. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
+You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the Lens editor. Open the panel menu and select **Edit visualization**. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. Once happy with your edits, click **Apply and close**. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
 
 [role="screenshot"]
 image::images/lens-inline-editing.gif[An example of inline editing in Lens]
@@ -64,7 +64,7 @@ image::images/lens-inline-editing.gif[An example of inline editing in Lens]
 [discrete]
 ==== Links panel
 
-You can now easily navigate from one dashboard to another using the links panel. Better organize your dashboards and make them more performant by chunking them in multiple dashboards with fewer visualizations and linking them together. You can carry over your filters, query and time range when navigating to other related dashboards. Display your links horizontally or vertically as it better suits your dashboard layout. You can also use the links panel to include external links in your dashboards, such as to your wiki page or other applications. Decide whether you want to open the links in the same browser tab or in a new one.
+You can now easily navigate from one dashboard to another using the links panel. Better organize your dashboards and make them more performant by chunking them in multiple dashboards with fewer visualizations and linking them together. You can carry over your filters, query, and time range when navigating to other related dashboards. Display your links horizontally or vertically as it better suits your dashboard layout. You can also use the links panel to include external links in your dashboards, such as to your wiki page or other applications. Decide whether you want to open the links in the same browser tab or in a new one.
 
 [role="screenshot"]
 image::images/links-panel.gif[An example of the new links panel]
@@ -76,7 +76,7 @@ image::images/edit-links-panel.png[An example of the edit links panel flyout]
 image::images/edit-links.png[An example of how to edit links using the panel flyout]
 
 [discrete]
-====Color mapping for enhanced data visualization
+==== Color mapping for enhanced data visualization
 
 Color is a fundamental visual element, alongside position and shape, that plays a crucial role in conveying information effectively. 
 
@@ -86,7 +86,7 @@ image::images/color-mapping.png[An example of the new color mapping feature]
 Here’s what our new color mapping feature offers:
 
 * *Effortless categorization:* Easily assign one or more field categories to specific colors. This makes it simpler than ever to organize and understand your data. 
-* *Guided color selection:* Our intuitive color picker provides you with predefined palettes that ensures your charts not only look great but also align seamlessly with different {kib} themes. 
+* *Guided color selection:* Our intuitive color chooser provides you with predefined palettes that ensure your charts not only look great, but also align seamlessly with different {kib} themes. 
 * *Enhanced color palettes:* We’ve reintroduced a clear concept of color palettes, making it easier for you to select and apply gradients, improving the overall aesthetics of your visualizations. 
 
 Whether you’re working with cartesian, partition, or tag clouds charts, these enhancements are designed to help you make the most of your data. With this feature, you can expect an improved ability to categorize, differentiate, and emphasize data points on your charts, ultimately leading to better insights and more visually appealing dashboards.
@@ -94,7 +94,7 @@ Whether you’re working with cartesian, partition, or tag clouds charts, these 
 [discrete]
 ==== {ccs-cap} ({ccs-init}) query inspector
 
-Customers querying data from multiple clusters link:{ref}/modules-cross-cluster-search.html[({ccs-init} queries)] will get more information about each of the cluster's responses. For each of the visualizations in a dashboard as well as in the Discover app, you can look at response times per cluster and shard failures. This is especially important when one or more clusters were not able to provide all the data so you know that you are looking at partial results and why they fail.
+Customers querying data from multiple clusters link:{ref}/modules-cross-cluster-search.html[({ccs-init} queries)] will get more information about each of the cluster's responses. For each of the visualizations in a dashboard as well as in **Discover**, you can look at response times per cluster and shard failures. This is especially important when one or more clusters are not able to provide all the data, so you know that you are looking at partial results and why they fail.
 
 [role="screenshot"]
 image::images/ccs-query-inspector.png[An example of the new {ccs} query inspector, width=50%]
@@ -117,7 +117,7 @@ In 8.8, we introduced Elastic Learned Sparse Encoder in technical preview. ELSER
 
 In 8.11, we're releasing a generally available second version. ELSER model-2 comes in two versions:
 
-* The optimized model which runs on the linux-x86_64 platform
+* The optimized model, which runs on the linux-x86_64 platform
 * The cross-platform model 
 
 Both ELSER model-2 versions, platform-optimized and cross-platform, show improved relevance compared to the original ELSER release, as measured against the BEIR benchmarks. Importantly, the optimized version also shows significantly improved performance (reduced inference latency). The {ecloud} supports the optimized version and so {ecloud} users will benefit from the materially improved performance of the optimized ELSER model-2.
@@ -158,7 +158,7 @@ preview:[] In 8.10, we introduced the **Data comparison** view to help you detec
 image::images/data-drift.png[An example of data drift workflows]
 
 [discrete]
-==== UX improvements in anomaly detection embeddability and data frame analytics pipelines
+==== Improvements in anomaly detection embeddability and data frame analytics pipelines
 
 We have improved the UX for attaching anomaly swim lanes and anomaly charts to dashboards. It is now more friendly and consistent with the same functionality from Lens. In addition, you can now attach these ML charts to new dashboards (previously this was only able to be done for existing ones). 
 
@@ -180,7 +180,7 @@ image::images/esql-rule-type.gif[An example of creating a rule type using {esql}
 [discrete]
 ==== {kib} cases custom field
 
-A new functionality is now available in Kibana cases. Users will be able to add custom fields to the case structure so they can use it for better classification and case enrichment. As a first step those fields will be available in the case view only, but next step we’re planning to have more fields types, dedicated privilege, support filters, and search capabilities in the case table accordingly.
+A new functionality is now available in Kibana cases. Users will be able to add custom fields to the case structure, so they can use it for better classification and case enrichment. As a first step, those fields will be available in the case view only. In the next step, we’re planning to have more field types, dedicated privileges, support filters, and search capabilities in the case table.
 
 [role="screenshot"]
 image::images/custom-field.gif[An example of creating a custom case field in {kib}]
@@ -188,7 +188,7 @@ image::images/custom-field.gif[An example of creating a custom case field in {ki
 [discrete]
 ==== Supporting multi levels of term aggregations in {es} rule type 
 
-The existing {es} alerting rule (KQL-based) is now supported by multiple selection when grouping by alert fields which allows you to define multiple layers of term aggregations.
+The existing {es} alerting rule (KQL-based) is now supported by multiple selection when grouping by alert fields, which allows you to define multiple layers of term aggregations.
 
 [role="screenshot"]
 image::images/term-aggs.png[An example of creating multiple layers of term aggregations]
@@ -196,15 +196,15 @@ image::images/term-aggs.png[An example of creating multiple layers of term aggre
 [discrete]
 ==== Slack connector - allow List
 
-The Slack connector supports a new allow list so customers will be able to manage the available slack channels within the alert actions. 
+The Slack connector supports a new allow list, so customers will be able to manage the available Slack channels within the alert actions. 
 
 [discrete]
 === {observability}
 
 [discrete]
-==== {es} alerting rule availability in {observability} solution
+==== {es} alerting rule now available in {observability}
 
-The existing {es} alerting rule is now available in {observability}. Before this update, {observability} customers who leverage the {es}  rule were required to move between {stack-manage-app} and {observability} to manage their alerts.
+The {es} alerting rule is now available in {observability}. Before this update, {observability} customers who leverage the {es} rule were required to move between **{stack-manage-app}** and **{observability}** to manage their alerts.
 To manage the {observability} roles properly, we added a new field to determine which role can maintain the created rule and its generated alerts. 
 
 [role="screenshot"]
@@ -216,7 +216,7 @@ image::images/alerting-rule.png[An example of creating an altering rule in {obse
 [discrete]
 ==== Create and manage {esql} enrichment index policies
 
-In support of our new {esql} capabilities, we have added link:{ref}/ingest-enriching-data.html[enrich policies] to our **Index Management** experience. Users can now create their enrichment policies right from here and get started using it right away. Once configured, all enrich policies are available in the **Enrich Policies** tab. Existing policies can be managed right from the enrichment policies tab in index management.
+In support of our new {esql} capabilities, we have added link:{ref}/ingest-enriching-data.html[enrich policies] to our **Index Management** experience. Users can now create their enrichment policies right from here and get started using it right away. Once configured, all enrich policies are available in the **Enrich Policies** tab.
 
 .Example of an ES|QL Query using an enrich policy with enrich:
 
@@ -235,7 +235,7 @@ image::images/enrich-index-management.png[An example of where an enrich policy l
 [discrete]
 ==== Start Discover {esql} from global search
 
-**Discover** searches are powered by KQL by default. You can easily switch to {esql} mode within Discover and search your data with this new query language. You can also access {esql} in Discover from the global search bar within Elastic. With just a few keystrokes, simply type in “ESQL” and you can access **Discover** with {esql} enabled for you.
+**Discover** searches are powered by KQL by default. You can easily switch to {esql} mode within **Discover** and search your data with this new query language. You can also access {esql} in **Discover** from the global search bar within Elastic. With just a few keystrokes, simply type in “ESQL” and you can access **Discover** with {esql} enabled for you.
 
 [role="screenshot"]
 image::images/start-esql-in-discover.gif[An example of using ES|QL in Discover]
