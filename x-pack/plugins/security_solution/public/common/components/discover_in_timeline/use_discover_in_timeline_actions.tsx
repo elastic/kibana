@@ -9,7 +9,7 @@ import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import type { RefObject } from 'react';
 import { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
@@ -51,11 +51,7 @@ export const useDiscoverInTimelineActions = (
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const timeline = useShallowEqualSelector(
-    (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
-  );
-  const { savedSearchId } = timeline;
+  const savedSearchId = useSelector(timelineSelectors.savedSearchId);
 
   const queryClient = useQueryClient();
 

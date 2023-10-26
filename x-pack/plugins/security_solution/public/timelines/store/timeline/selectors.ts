@@ -7,6 +7,7 @@
 
 import { createSelector } from 'reselect';
 import type { State } from '../../../common/store/types';
+import { TimelineId } from '../../../../common/types';
 
 import type { TimelineModel } from './model';
 import type { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
@@ -23,6 +24,10 @@ export const selectTimeline = (state: State, timelineId: string): TimelineModel 
 
 export const selectInsertTimeline = (state: State): InsertTimeline | null =>
   state.timeline.insertTimeline;
+
+export const savedSearchId = createSelector(selectTimelineById, (timeline) =>
+  timeline[TimelineId.active] ? timeline[TimelineId.active].savedSearchId : null
+);
 
 export const autoSaveMsgSelector = createSelector(selectAutoSaveMsg, (autoSaveMsg) => autoSaveMsg);
 
