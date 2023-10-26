@@ -13,7 +13,7 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { useWizard } from '.';
-import { BackButton } from './back_button';
+import { BackButton } from '../../shared/back_button';
 
 export function Inspect() {
   const { goBack, getState, getPath, getUsage } = useWizard();
