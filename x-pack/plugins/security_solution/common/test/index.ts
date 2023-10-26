@@ -25,6 +25,7 @@ export enum ROLES {
   detections_admin = 'detections_admin',
   platform_engineer = 'platform_engineer',
   // ESS roles
+  reader = 'reader',
   hunter = 'hunter',
   hunter_no_actions = 'hunter_no_actions',
 }
