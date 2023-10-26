@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
