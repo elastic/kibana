@@ -24,7 +24,7 @@ export function LayerConfiguration({
   datasourceMap,
   datasourceId,
   framePublicAPI,
-  setIsInlineFlyoutFooterVisible,
+  setIsInlineFlyoutVisible,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -56,7 +56,7 @@ export function LayerConfiguration({
     uiActions: startDependencies.uiActions,
     hideLayerHeader: datasourceId === 'textBased',
     indexPatternService,
-    setIsInlineFlyoutFooterVisible,
+    setIsInlineFlyoutVisible,
   };
   return (
     <EuiFlexItem

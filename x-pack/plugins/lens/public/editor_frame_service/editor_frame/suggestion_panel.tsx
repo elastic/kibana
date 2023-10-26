@@ -107,6 +107,8 @@ export interface SuggestionPanelProps {
   core: CoreStart;
   showOnlyIcons?: boolean;
   wrapSuggestions?: boolean;
+  isAccordionOpen?: boolean;
+  toggleAccordionCb?: (flag: boolean) => void;
 }
 
 const PreviewRenderer = ({
@@ -253,6 +255,8 @@ export function SuggestionPanel({
   core,
   showOnlyIcons,
   wrapSuggestions,
+  toggleAccordionCb,
+  isAccordionOpen,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -261,20 +265,27 @@ export function SuggestionPanel({
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
-
   const frameDatasourceAPI = useLensSelector((state) =>
     selectFrameDatasourceAPI(state, datasourceMap)
   );
   const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
+  const initialAccordionStatusValue =
+    typeof isAccordionOpen !== 'undefined' ? !Boolean(isAccordionOpen) : false;
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
     LOCAL_STORAGE_SUGGESTIONS_PANEL,
-    false
+    initialAccordionStatusValue
   );
+  useEffect(() => {
+    if (typeof isAccordionOpen !== 'undefined') {
+      setHideSuggestions(!Boolean(isAccordionOpen));
+    }
+  }, [isAccordionOpen, setHideSuggestions]);
 
   const toggleSuggestions = useCallback(() => {
     setHideSuggestions(!hideSuggestions);
-  }, [setHideSuggestions, hideSuggestions]);
+    toggleAccordionCb?.(!hideSuggestions);
+  }, [setHideSuggestions, hideSuggestions, toggleAccordionCb]);
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,

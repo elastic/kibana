@@ -280,6 +280,7 @@ export const EditorFooter = memo(function EditorFooter({
             onClick={runQuery}
             isDisabled={Boolean(disableSubmitAction)}
             data-test-subj="TextBasedLangEditor-run-query-button"
+            minWidth={hasSmallerSpace ? false : undefined}
           >
             <EuiFlexGroup
               gutterSize="xs"

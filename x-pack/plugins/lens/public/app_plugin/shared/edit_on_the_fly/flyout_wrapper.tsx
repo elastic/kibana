@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiTitle,
   EuiIcon,
   EuiToolTip,
@@ -27,7 +28,8 @@ import type { FlyoutWrapperProps } from './types';
 export const FlyoutWrapper = ({
   children,
   attributesChanged,
-  isInlineFooterVisible,
+  isInlineFlyoutVisible,
+  isScrollable,
   displayFlyoutHeader,
   onCancel,
   navigateToLensEditor,
@@ -35,6 +37,51 @@ export const FlyoutWrapper = ({
 }: FlyoutWrapperProps) => {
   return (
     <>
+      {isInlineFlyoutVisible && displayFlyoutHeader && (
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            pointer-events: auto;
+          `}
+          data-test-subj="editFlyoutHeader"
+        >
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h2 id="Edit visualization">
+                      {i18n.translate('xpack.lens.config.editVisualizationLabel', {
+                        defaultMessage: 'Edit visualization',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate('xpack.lens.config.experimentalLabel', {
+                      defaultMessage:
+                        'Technical preview, ES|QL currently offers limited configuration options',
+                    })}
+                  >
+                    <EuiIcon type="beaker" size="m" />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {navigateToLensEditor && (
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
+                  {i18n.translate('xpack.lens.config.editLinkLabel', {
+                    defaultMessage: 'Edit in Lens',
+                  })}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+      )}
+
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
@@ -52,61 +99,14 @@ export const FlyoutWrapper = ({
           }
           .euiFlyoutBody__overflowContent {
             padding: 0;
+            block-size: 100%;
+            overflow: ${isScrollable ? 'visible' : 'hidden'};
           }
         `}
       >
-        <EuiFlexGroup gutterSize="none" direction="column">
-          {displayFlyoutHeader && (
-            <EuiFlexItem
-              data-test-subj="editFlyoutHeader"
-              css={css`
-                padding: ${euiThemeVars.euiSizeL};
-                border-block-end: 1px solid ${euiThemeVars.euiBorderColor};
-              `}
-            >
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h2 id="Edit visualization">
-                          {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                            defaultMessage: 'Edit visualization',
-                          })}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.translate('xpack.lens.config.experimentalLabel', {
-                          defaultMessage:
-                            'Technical preview, ES|QL currently offers limited configuration options',
-                        })}
-                      >
-                        <EuiIcon type="beaker" size="m" />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {navigateToLensEditor && (
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      onClick={navigateToLensEditor}
-                      data-test-subj="navigateToLensEditorLink"
-                    >
-                      {i18n.translate('xpack.lens.config.editLinkLabel', {
-                        defaultMessage: 'Edit in Lens',
-                      })}
-                    </EuiLink>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {children}
-        </EuiFlexGroup>
+        {children}`
       </EuiFlyoutBody>
-      {isInlineFooterVisible && (
+      {isInlineFlyoutVisible && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>

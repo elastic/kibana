@@ -15,8 +15,9 @@ import type { Document } from '../../../persistence';
 
 export interface FlyoutWrapperProps {
   children: JSX.Element;
-  isInlineFooterVisible: boolean;
+  isInlineFlyoutVisible: boolean;
   attributesChanged: boolean;
+  isScrollable: boolean;
   displayFlyoutHeader?: boolean;
   onCancel?: () => void;
   onApply?: () => void;
@@ -78,5 +79,5 @@ export interface LayerConfigurationProps {
   datasourceMap: DatasourceMap;
   datasourceId: 'formBased' | 'textBased';
   framePublicAPI: FramePublicAPI;
-  setIsInlineFlyoutFooterVisible: (flag: boolean) => void;
+  setIsInlineFlyoutVisible: (flag: boolean) => void;
 }

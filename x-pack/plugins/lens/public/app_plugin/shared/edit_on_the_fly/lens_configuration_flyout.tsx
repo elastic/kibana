@@ -9,7 +9,7 @@ import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react'
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiAccordion, useEuiTheme, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiAccordion, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -48,12 +48,13 @@ export function LensEditConfigurationFlyout({
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
   const [errors, setErrors] = useState<Error[] | undefined>();
-  const [isInlineFooterVisible, setIsInlineFlyoutFooterVisible] = useState(true);
+  const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
+  const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
-  const displayCallout = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
+  const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
   }, []);
@@ -206,17 +207,19 @@ export function LensEditConfigurationFlyout({
     };
     return selectFramePublicAPI(newState, datasourceMap);
   });
+
   if (isLoading) return null;
   // Example is the Discover editing where we dont want to render the text based editor on the panel
   if (!canEditTextBasedQuery) {
     return (
       <FlyoutWrapper
         attributesChanged={attributesChanged}
-        isInlineFooterVisible={isInlineFooterVisible}
+        isInlineFlyoutVisible={isInlineFlyoutVisible}
         displayFlyoutHeader={displayFlyoutHeader}
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
+        isScrollable={true}
       >
         <LayerConfiguration
           attributes={attributes}
@@ -226,7 +229,7 @@ export function LensEditConfigurationFlyout({
           datasourceMap={datasourceMap}
           datasourceId={datasourceId}
           framePublicAPI={framePublicAPI}
-          setIsInlineFlyoutFooterVisible={setIsInlineFlyoutFooterVisible}
+          setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
         />
       </FlyoutWrapper>
     );
@@ -236,99 +239,119 @@ export function LensEditConfigurationFlyout({
     <>
       <FlyoutWrapper
         attributesChanged={attributesChanged}
-        isInlineFooterVisible={isInlineFooterVisible}
+        isInlineFlyoutVisible={isInlineFlyoutVisible}
         displayFlyoutHeader={displayFlyoutHeader}
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
+        isScrollable={false}
       >
-        <>
+        <EuiFlexGroup
+          css={css`
+            block-size: 100%;
+          `}
+          direction="column"
+          gutterSize="none"
+        >
           {isOfAggregateQueryType(query) && (
-            <TextBasedLangEditor
-              query={query}
-              onTextLangQueryChange={(q) => {
-                setQuery(q);
-                prevQuery.current = q;
-              }}
-              expandCodeEditor={(status: boolean) => {}}
-              isCodeEditorExpanded
-              detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
-              errors={errors}
-              hideMinimizeButton
-              editorIsInline
-              hideRunQueryText
-              disableSubmitAction={isEqual(query, prevQuery.current)}
-              onTextLangQuerySubmit={(q) => {
-                if (q) {
-                  runQuery(q);
+            <EuiFlexItem grow={false}>
+              <TextBasedLangEditor
+                query={query}
+                onTextLangQueryChange={(q) => {
+                  setQuery(q);
+                  prevQuery.current = q;
+                }}
+                expandCodeEditor={(status: boolean) => {}}
+                isCodeEditorExpanded
+                detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
+                errors={errors}
+                warning={
+                  suggestsLimitedColumns
+                    ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                        defaultMessage:
+                          'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                      })
+                    : undefined
                 }
-              }}
-              isDisabled={false}
-            />
-          )}
-          {displayCallout && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiCallOut
-                size="s"
-                title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                  defaultMessage:
-                    'Displaying a limited portion of the available fields. Add more from the configuration panel.',
-                })}
-                iconType="iInCircle"
+                hideMinimizeButton
+                editorIsInline
+                hideRunQueryText
+                disableSubmitAction={isEqual(query, prevQuery.current)}
+                onTextLangQuerySubmit={(q) => {
+                  if (q) {
+                    runQuery(q);
+                  }
+                }}
+                isDisabled={false}
               />
-              <EuiSpacer size="s" />
-            </>
+            </EuiFlexItem>
           )}
-          <EuiAccordion
-            id="layer-configuration"
-            buttonContent={
-              <EuiTitle size="xxs">
-                <h5>
-                  {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
-                    defaultMessage: 'Layer configuration',
-                  })}
-                </h5>
-              </EuiTitle>
-            }
-            initialIsOpen={true}
-            css={css`
-              padding: ${euiTheme.size.s};
-              border-bottom: ${euiTheme.border.thin};
-              // styles needed to display extra drop targets that are outside of the config panel main area
-              .euiAccordion__childWrapper {
-                overflow: inherit;
+
+          <EuiFlexItem
+            grow={isLayerAccordionOpen ? 1 : false} // todo: conditionally change false to 1 when accordion is open
+          >
+            <EuiAccordion
+              id="layer-configuration"
+              buttonContent={
+                <EuiTitle size="xxs">
+                  <h5>
+                    {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
+                      defaultMessage: 'Layer configuration',
+                    })}
+                  </h5>
+                </EuiTitle>
               }
-            `}
+              initialIsOpen={isLayerAccordionOpen}
+              forceState={isLayerAccordionOpen ? 'open' : 'closed'}
+              css={css`
+                padding: ${euiTheme.size.s};
+                // styles needed to display extra drop targets that are outside of the config panel main area
+                .euiAccordion__childWrapper {
+                  overflow: visible;
+                }
+              `}
+              onToggle={() => {
+                setIsLayerAccordionOpen(!isLayerAccordionOpen);
+              }}
+            >
+              {/* todo: make interior accordion contents vertically scrollable */}
+              <LayerConfiguration
+                attributes={attributes}
+                coreStart={coreStart}
+                startDependencies={startDependencies}
+                visualizationMap={visualizationMap}
+                datasourceMap={datasourceMap}
+                datasourceId={datasourceId}
+                framePublicAPI={framePublicAPI}
+                setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+              />
+            </EuiAccordion>
+          </EuiFlexItem>
+
+          <EuiFlexItem
+            grow={!isLayerAccordionOpen ? 1 : false} // todo: conditionally change false to 1 when accordion is open
           >
-            <LayerConfiguration
-              attributes={attributes}
-              coreStart={coreStart}
-              startDependencies={startDependencies}
-              visualizationMap={visualizationMap}
-              datasourceMap={datasourceMap}
-              datasourceId={datasourceId}
-              framePublicAPI={framePublicAPI}
-              setIsInlineFlyoutFooterVisible={setIsInlineFlyoutFooterVisible}
-            />
-          </EuiAccordion>
-          <div
-            css={css`
-              padding: ${euiTheme.size.s};
-            `}
-          >
-            <SuggestionPanel
-              ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
-              frame={framePublicAPI}
-              core={coreStart}
-              nowProvider={startDependencies.data.nowProvider}
-              showOnlyIcons
-              wrapSuggestions
-            />
-          </div>
-        </>
+            <div
+              css={css`
+                padding: ${euiTheme.size.s};
+              `}
+            >
+              {/* todo: make interior accordion contents vertically scrollable */}
+              <SuggestionPanel
+                ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                frame={framePublicAPI}
+                core={coreStart}
+                nowProvider={startDependencies.data.nowProvider}
+                showOnlyIcons
+                wrapSuggestions
+                isAccordionOpen={!isLayerAccordionOpen}
+                toggleAccordionCb={setIsLayerAccordionOpen}
+              />
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </FlyoutWrapper>
     </>
   );

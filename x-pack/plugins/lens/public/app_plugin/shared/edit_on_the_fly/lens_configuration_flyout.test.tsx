@@ -123,6 +123,7 @@ describe('LensEditConfigurationFlyout', () => {
     const newProps = {
       ...props,
       displayFlyoutHeader: true,
+      isInlineFlyoutVisible: true,
       navigateToLensEditor: navigateToLensEditorSpy,
     };
     const { instance } = await prepareAndMountComponent(newProps);
