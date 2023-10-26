@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
-import { lowerCaseFirstLetter, upperCaseFirstLetter } from './utils';
+import { cleanString, lowerCaseFirstLetter, upperCaseFirstLetter } from './utils';
 
-export function getIntentFromNode(value: string, parent: TSESTree.Node | undefined): string {
+export function getIntentFromNode(
+  value: string,
+  parent: TSESTree.Node | undefined
+): string | false {
   const processedValue = lowerCaseFirstLetter(
-    value
-      .replace(/[?!@#$%^&*()_+\][{}|/<>,'"]/g, '')
-      .trim()
+    cleanString(value)
       .split(' ')
-      .filter((v, i) => i < 4)
+      .filter((_, i) => i < 4)
       .map(upperCaseFirstLetter)
       .join('')
   );
@@ -27,6 +28,10 @@ export function getIntentFromNode(value: string, parent: TSESTree.Node | undefin
   ) {
     const parentTagName = String(parent.openingElement.name.name);
 
+    // Exceptions
+    if (parentTagName === 'EuiCode') {
+      return false;
+    }
     if (parentTagName.includes('Eui')) {
       return `${processedValue}${parentTagName.replace('Eui', '')}Label`;
     }
