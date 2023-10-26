@@ -25,9 +25,7 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Elasticsearch',
       icon: 'logoElasticsearch',
       defaultIsCollapsed: false,
-      accordionProps: {
-        arrowProps: { css: { display: 'none' } },
-      },
+      isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
         {
@@ -76,7 +74,6 @@ const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
-
         {
           id: 'content',
           title: i18n.translate('xpack.serverlessSearch.nav.content', {
