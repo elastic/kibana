@@ -33,6 +33,12 @@ export class CommonPageObject extends FtrService {
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
+  private getUrlWithoutPort(urlStr: string) {
+    const url = new URL(urlStr);
+    url.port = '';
+    return url.toString();
+  }
+
   /**
    * Logins to Kibana as default user and navigates to provided app
    * @param appUrl Kibana URL
@@ -121,8 +127,13 @@ export class CommonPageObject extends FtrService {
         throw new Error(msg);
       }
 
-      if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
-        throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+      if (ensureCurrentUrl) {
+        const actualUrl = this.getUrlWithoutPort(currentUrl);
+        const expectedUrl = this.getUrlWithoutPort(appUrl);
+
+        if (!actualUrl.includes(expectedUrl)) {
+          throw new Error(`expected ${actualUrl}.includes(${expectedUrl})`);
+        }
       }
     });
   }
@@ -400,9 +411,18 @@ export class CommonPageObject extends FtrService {
    * Clicks cancel button on modal
    * @param overlayWillStay pass in true if your test will show multiple modals in succession
    */
-  async clickCancelOnModal(overlayWillStay = true) {
+  async clickCancelOnModal(overlayWillStay = true, ignorePageLeaveWarning = false) {
     this.log.debug('Clicking modal cancel');
-    await this.testSubjects.click('confirmModalCancelButton');
+    await this.testSubjects.exists('confirmModalTitleText');
+
+    await this.retry.try(async () => {
+      const warning = await this.testSubjects.exists('confirmModalTitleText');
+      if (warning) {
+        await this.testSubjects.click(
+          ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+        );
+      }
+    });
     if (!overlayWillStay) {
       await this.ensureModalOverlayHidden();
     }

@@ -73,6 +73,7 @@ interface PolicyTemplateVarsFormProps {
   packageInfo: PackageInfo;
   onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
   setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFormProps) => {

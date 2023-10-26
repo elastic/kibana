@@ -20,7 +20,7 @@
     "patterns": [
       "_data_stream/{name}/_lifecycle"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/dlm-get-lifecycle.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams-get-lifecycle.html",
     "availability": {
       "stack": true,
       "serverless": true

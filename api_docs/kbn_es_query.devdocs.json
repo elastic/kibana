@@ -2757,7 +2757,7 @@
         "label": "getLanguageDisplayName",
         "description": [],
         "signature": [
-          "(language: string) => string"
+          "(language: string | undefined) => string"
         ],
         "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
         "deprecated": false,
@@ -2771,12 +2771,12 @@
             "label": "language",
             "description": [],
             "signature": [
-              "string"
+              "string | undefined"
             ],
             "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],

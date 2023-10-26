@@ -13,6 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { WorkplaceSearchGatePage } from './gated_form_page';
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { Overview } from './overview';
@@ -32,8 +33,19 @@ describe('Overview', () => {
     expect(wrapper.prop('pageHeader')).toBeUndefined();
   });
 
-  it('renders onboarding state', () => {
-    setMockValues({ dataLoading: false });
+  it('does not render overview page when kibanaUIsEnabled is false', () => {
+    setMockValues({ dataLoading: true });
+    const wrapper = shallow(<Overview />);
+
+    expect(wrapper.find(WorkplaceSearchGatePage)).toHaveLength(1);
+    expect(wrapper.find(OnboardingSteps)).toHaveLength(0);
+    expect(wrapper.find(OrganizationStats)).toHaveLength(0);
+    expect(wrapper.find(RecentActivity)).toHaveLength(0);
+  });
+
+  it('renders onboarding state when kibanaUIsEnabled is true', () => {
+    setMockValues({ dataLoading: false, organization: { kibanaUIsEnabled: true } });
+
     const wrapper = shallow(<Overview />);
 
     expect(wrapper.find(OnboardingSteps)).toHaveLength(1);
@@ -50,6 +62,7 @@ describe('Overview', () => {
       organization: {
         name: 'foo',
         defaultOrgName: 'bar',
+        kibanaUIsEnabled: true,
       },
     });
     const wrapper = shallow(<Overview />);

@@ -24,7 +24,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
 } from '../../../../../../common/constants';
 import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
-import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   PreviewResponse,
   RulePreviewLogs,
@@ -53,6 +53,7 @@ import type {
 } from '../../../rule_types/types';
 import {
   createEqlAlertType,
+  createEsqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
@@ -283,14 +284,18 @@ export const previewRulesRoute = async (
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
+                getTimeRange: () => {
+                  const date = startedAt.toISOString();
+                  return { dateStart: date, dateEnd: date };
+                },
               })) as { state: TState });
 
               const errors = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+                .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
                 .map((item) => item.message ?? 'Unknown Error');
 
               const warnings = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
+                .filter((item) => item.newStatus === RuleExecutionStatusEnum['partial failure'])
                 .map((item) => item.message ?? 'Unknown Warning');
 
               logs.push({
@@ -407,6 +412,27 @@ export const previewRulesRoute = async (
                 eqlAlertType.executor,
                 eqlAlertType.id,
                 eqlAlertType.name,
+                previewRuleParams,
+                () => true,
+                {
+                  create: alertInstanceFactoryStub,
+                  alertLimit: {
+                    getValue: () => 1000,
+                    setLimitReached: () => {},
+                  },
+                  done: () => ({ getRecoveredAlerts: () => [] }),
+                }
+              );
+              break;
+            case 'esql':
+              if (!config.settings.ESQLEnabled || config.experimentalFeatures.esqlRulesDisabled) {
+                throw Error('ES|QL rule type is not supported');
+              }
+              const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));
+              await runExecutors(
+                esqlAlertType.executor,
+                esqlAlertType.id,
+                esqlAlertType.name,
                 previewRuleParams,
                 () => true,
                 {

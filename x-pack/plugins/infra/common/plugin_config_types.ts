@@ -25,10 +25,21 @@ export interface InfraConfig {
       };
     };
   };
+  featureFlags: {
+    customThresholdAlertsEnabled: boolean;
+    logsUIEnabled: boolean;
+    metricsExplorerEnabled: boolean;
+    osqueryEnabled: boolean;
+    inventoryThresholdAlertRuleEnabled: boolean;
+    metricThresholdAlertRuleEnabled: boolean;
+    logThresholdAlertRuleEnabled: boolean;
+    alertsAndRulesDropdownEnabled: boolean;
+  };
 }
 
 export const publicConfigKeys = {
   sources: true,
+  featureFlags: true,
 } as const;
 
 export type InfraPublicConfigKey = keyof {

@@ -101,7 +101,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
       },
       {
         title: 'transform_version',
-        description: item.config.version,
+        description: item.config.version ?? '',
       },
       {
         title: 'description',
@@ -120,9 +120,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
       },
       {
         title: 'destination_index',
-        description: Array.isArray(item.config.dest.index)
-          ? item.config.dest.index[0]
-          : item.config.dest.index,
+        description: item.config.dest.index,
       },
       {
         title: 'authorization',

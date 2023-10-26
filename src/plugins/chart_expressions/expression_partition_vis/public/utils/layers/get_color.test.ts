@@ -8,7 +8,6 @@
 
 import type { PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { byDataColorPaletteMap, SimplifiedArrayNode } from './get_color';
 import type { SeriesLayer } from '@kbn/coloring';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -21,29 +20,28 @@ import { ChartTypes } from '../../../common/types';
 import { getDistinctSeries } from '..';
 
 describe('#byDataColorPaletteMap', () => {
-  let datatable: Datatable;
   let paletteDefinition: PaletteDefinition;
   let palette: PaletteOutput;
-  const columnId = 'foo';
+  const visData = createMockVisData();
+  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const formatters = generateFormatters(visData, defaultFormatter);
 
   beforeEach(() => {
-    datatable = {
-      rows: [
-        {
-          [columnId]: '1',
-        },
-        {
-          [columnId]: '2',
-        },
-      ],
-    } as unknown as Datatable;
     paletteDefinition = chartPluginMock.createPaletteRegistry().get('default');
     palette = { type: 'palette' } as PaletteOutput;
   });
 
   it('should create byDataColorPaletteMap', () => {
-    expect(byDataColorPaletteMap(datatable.rows, columnId, paletteDefinition, palette))
-      .toMatchInlineSnapshot(`
+    expect(
+      byDataColorPaletteMap(
+        visData.rows,
+        visData.columns[0],
+        paletteDefinition,
+        palette,
+        formatters,
+        fieldFormatsMock
+      )
+    ).toMatchInlineSnapshot(`
       Object {
         "getColor": [Function],
       }
@@ -52,21 +50,25 @@ describe('#byDataColorPaletteMap', () => {
 
   it('should get color', () => {
     const colorPaletteMap = byDataColorPaletteMap(
-      datatable.rows,
-      columnId,
+      visData.rows,
+      visData.columns[0],
       paletteDefinition,
-      palette
+      palette,
+      formatters,
+      fieldFormatsMock
     );
 
-    expect(colorPaletteMap.getColor('1')).toBe('black');
+    expect(colorPaletteMap.getColor('Logstash Airways')).toBe('black');
   });
 
   it('should return undefined in case if values not in datatable', () => {
     const colorPaletteMap = byDataColorPaletteMap(
-      datatable.rows,
-      columnId,
+      visData.rows,
+      visData.columns[0],
       paletteDefinition,
-      palette
+      palette,
+      formatters,
+      fieldFormatsMock
     );
 
     expect(colorPaletteMap.getColor('wrong')).toBeUndefined();
@@ -74,24 +76,26 @@ describe('#byDataColorPaletteMap', () => {
 
   it('should increase rankAtDepth for each new value', () => {
     const colorPaletteMap = byDataColorPaletteMap(
-      datatable.rows,
-      columnId,
+      visData.rows,
+      visData.columns[0],
       paletteDefinition,
-      palette
+      palette,
+      formatters,
+      fieldFormatsMock
     );
-    colorPaletteMap.getColor('1');
-    colorPaletteMap.getColor('2');
+    colorPaletteMap.getColor('Logstash Airways');
+    colorPaletteMap.getColor('JetBeats');
 
     expect(paletteDefinition.getCategoricalColor).toHaveBeenNthCalledWith(
       1,
-      [{ name: '1', rankAtDepth: 0, totalSeriesAtDepth: 2 }],
+      [{ name: 'Logstash Airways', rankAtDepth: 0, totalSeriesAtDepth: 4 }],
       { behindText: false },
       undefined
     );
 
     expect(paletteDefinition.getCategoricalColor).toHaveBeenNthCalledWith(
       2,
-      [{ name: '2', rankAtDepth: 1, totalSeriesAtDepth: 2 }],
+      [{ name: 'JetBeats', rankAtDepth: 1, totalSeriesAtDepth: 4 }],
       { behindText: false },
       undefined
     );

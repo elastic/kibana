@@ -21,7 +21,7 @@ export function getConnectorType(): BedrockConnector {
     id: BEDROCK_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.bedrock.selectMessageText', {
-      defaultMessage: 'Send a request to AWS Bedrock systems.',
+      defaultMessage: 'Send a request to Amazon Bedrock.',
     }),
     actionTypeTitle: BEDROCK_TITLE,
     validateParams: async (

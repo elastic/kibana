@@ -18,7 +18,7 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
@@ -54,6 +54,7 @@ import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
+import { EsqlInfoIcon } from '../../../../detection_engine/rule_creation/components/esql_info_icon';
 import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
@@ -65,6 +66,7 @@ import {
   isThreatMatchRule,
   isThresholdRule,
   isQueryRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -116,7 +118,6 @@ interface StepDefineRuleReadOnlyProps {
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: DefineStepRule;
   indexPattern: DataViewBase;
-  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -173,6 +174,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
+
+  const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
   const { getFields, reset, setFieldValue } = form;
 
@@ -309,6 +312,43 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           defaultValue: defaultCustomQuery.forNormalRules,
         });
       }
+    }
+  }, [ruleType, previousRuleType, getFields]);
+
+  /**
+   * ensures when user switches between rule types, written ES|QL query is not getting lost
+   * additional work is required in this code area, as currently switching to EQL will result in query lose
+   * https://github.com/elastic/kibana/issues/166933
+   */
+  useEffect(() => {
+    const { queryBar: currentQuery } = getFields();
+    if (currentQuery == null) {
+      return;
+    }
+
+    const currentQueryValue = currentQuery.value as DefineStepRule['queryBar'];
+
+    // sets ES|QL query to a default value or earlier added one, when switching to ES|QL rule type
+    if (isEsqlRule(ruleType)) {
+      if (previousRuleType && !isEsqlRule(previousRuleType)) {
+        currentQuery.reset({
+          defaultValue: esqlQueryRef.current ?? defaultCustomQuery.forEsqlRules,
+        });
+      }
+      // otherwise reset it to default values of other rule types
+    } else if (isEsqlRule(previousRuleType)) {
+      // sets ES|QL query value to reference, so it can be used when user switch back from one rule type to another
+      if (currentQueryValue?.query?.language === 'esql') {
+        esqlQueryRef.current = currentQueryValue;
+      }
+
+      const defaultValue = isThreatMatchRule(ruleType)
+        ? defaultCustomQuery.forThreatMatchRules
+        : defaultCustomQuery.forNormalRules;
+
+      currentQuery.reset({
+        defaultValue,
+      });
     }
   }, [ruleType, previousRuleType, getFields]);
 
@@ -570,6 +610,45 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     handleResetIndices,
   ]);
 
+  const queryBarProps = useMemo(
+    () =>
+      ({
+        idAria: 'detectionEngineStepDefineRuleQueryBar',
+        indexPattern,
+        isDisabled: isLoading,
+        isLoading,
+        dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+        onValidityChange: setIsQueryBarValid,
+      } as QueryBarDefineRuleProps),
+    [indexPattern, isLoading, setIsQueryBarValid]
+  );
+
+  const esqlQueryBarConfig = useMemo(
+    () => ({
+      ...schema.queryBar,
+      label: i18n.ESQL_QUERY,
+      labelAppend: <EsqlInfoIcon />,
+    }),
+    []
+  );
+
+  const EsqlQueryBarMemo = useMemo(
+    () => (
+      <UseField
+        key="QueryBarDefineRule"
+        path="queryBar"
+        config={esqlQueryBarConfig}
+        component={QueryBarDefineRule}
+        componentProps={{
+          ...queryBarProps,
+          dataTestSubj: 'detectionEngineStepDefineRuleEsqlQueryBar',
+          idAria: 'detectionEngineStepDefineRuleEsqlQueryBar',
+        }}
+      />
+    ),
+    [queryBarProps, esqlQueryBarConfig]
+  );
+
   const QueryBarMemo = useMemo(
     () => (
       <UseField
@@ -688,8 +767,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
-              <EuiSpacer size="s" />
-              {DataSource}
+              <StyledVisibleContainer isVisible={!isEsqlRule(ruleType)}>
+                <EuiSpacer size="s" />
+                {DataSource}
+              </StyledVisibleContainer>
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <UseField
@@ -715,6 +796,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     label: i18n.EQL_QUERY_BAR_LABEL,
                   }}
                 />
+              ) : isEsqlRule(ruleType) ? (
+                EsqlQueryBarMemo
               ) : (
                 QueryBarMemo
               )}
@@ -910,7 +993,6 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   defaultValues: data,
   descriptionColumns,
   indexPattern,
-  isInPanelView = false,
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
 
@@ -921,7 +1003,6 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
         schema={filterRuleFieldsForType(schema, data.ruleType)}
         data={filterRuleFieldsForType(dataForDescription, data.ruleType)}
         indexPatterns={indexPattern}
-        isInPanelView={isInPanelView}
       />
     </StepContentWrapper>
   );

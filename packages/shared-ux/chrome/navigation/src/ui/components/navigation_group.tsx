@@ -7,11 +7,11 @@
  */
 
 import React, { createContext, useCallback, useMemo, useContext } from 'react';
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
-import type { NodeProps, RegisterFunction } from '../types';
+import type { NodeProps, NodePropsEnhanced, RegisterFunction } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';
 import { NavigationBucket, type Props as NavigationBucketProps } from './navigation_bucket';
@@ -38,7 +38,6 @@ export interface Props<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
-  defaultIsCollapsed?: boolean;
 }
 
 function NavigationGroupInternalComp<
@@ -51,45 +50,61 @@ function NavigationGroupInternalComp<
 
   const { children, node } = useMemo(() => {
     const { children: _children, defaultIsCollapsed, ...rest } = props;
+    const nodeEnhanced: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'> = {
+      ...rest,
+      isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
+      isGroup: true,
+    };
     return {
       children: _children,
-      node: {
-        ...rest,
-        isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
-      },
+      node: nodeEnhanced,
     };
   }, [props]);
 
   const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node, { cloudLinks });
 
+  // We add to the nav node the children that have mounted and registered themselves.
+  // Those children render in the UI inside the NavigationSectionUI -> EuiCollapsibleNavItem -> items
+  const navNodeWithChildren = useMemo(() => {
+    if (!navNode) return null;
+
+    const hasChildren = Object.keys(childrenNodes).length > 0;
+    const withChildren: ChromeProjectNavigationNode = {
+      ...navNode,
+      children: hasChildren ? Object.values(childrenNodes) : undefined,
+    };
+
+    return withChildren;
+  }, [navNode, childrenNodes]);
+
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 
   const renderContent = useCallback(() => {
-    if (!path || !navNode) {
+    if (!path || !navNodeWithChildren) {
       return null;
     }
+
+    if (navNodeWithChildren.sideNavStatus === 'hidden') return null;
 
     if (unstyled) {
       // No UI for unstyled groups
       return children;
     }
 
-    // Each "top level" group is rendered using the EuiCollapsibleNavGroup component
-    // inside the NavigationSectionUI. That's how we get the "collapsible" behavior.
-    const isTopLevel = path && path.length === 1;
+    // We will only render the <NavigationSectionUI /> component for root groups. The nested group
+    // are handled by the EuiCollapsibleNavItem component through its "items" prop.
+    const isRootLevel = path && path.length === 1;
 
     return (
       <>
-        {isTopLevel && (
-          <NavigationSectionUI navNode={navNode} items={Object.values(childrenNodes)} />
-        )}
-        {/* We render the children so they mount and can register themselves but
-        visually they don't appear here in the DOM. They are rendered inside the
-        <EuiCollapsibleNavItem />  "items" prop (see <NavigationSectionUI />) */}
+        {isRootLevel && <NavigationSectionUI navNode={navNodeWithChildren} />}
+        {/* We render the children so they mount and can **register** themselves but
+          visually they don't appear here in the DOM. They are rendered inside the
+          <EuiCollapsibleNavItem />  "items" prop (see <NavigationSectionUI />) */}
         {children}
       </>
     );
-  }, [navNode, path, childrenNodes, children, unstyled]);
+  }, [navNodeWithChildren, path, children, unstyled]);
 
   const contextValue = useMemo(() => {
     return {

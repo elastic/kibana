@@ -794,18 +794,14 @@ export class Embeddable
    * Used for the Edit in Lens link inside the inline editing flyout.
    */
   private async navigateToLensEditor() {
-    const executionContext = this.getExecutionContext();
+    const appContext = this.getAppContext();
     /**
      * The origininating app variable is very important for the Save and Return button
      * of the editor to work properly.
-     * The best way to get it dynamically is from the execution context but for the dashboard
-     * it needs to be pluralized
      */
     const transferState = {
-      originatingApp:
-        executionContext?.type === 'dashboard'
-          ? 'dashboards'
-          : executionContext?.type ?? 'dashboards',
+      originatingApp: appContext?.currentAppId ?? 'dashboards',
+      originatingPath: appContext?.getCurrentPath?.(),
       valueInput: this.getExplicitInput(),
       embeddableId: this.id,
       searchSessionId: this.getInput().searchSessionId,
@@ -818,6 +814,7 @@ export class Embeddable
       await transfer.navigateToEditor(APP_ID, {
         path: this.output.editPath,
         state: transferState,
+        skipAppLeave: true,
       });
     }
   }

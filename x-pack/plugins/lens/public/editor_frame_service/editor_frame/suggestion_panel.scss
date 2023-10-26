@@ -28,6 +28,7 @@
   margin-right: $euiSizeS;
   margin-left: $euiSizeXS / 2;
   margin-bottom: $euiSizeXS / 2;
+  padding: 0 $euiSizeS;
   box-shadow: none !important; // sass-lint:disable-line no-important
 
   &:focus {

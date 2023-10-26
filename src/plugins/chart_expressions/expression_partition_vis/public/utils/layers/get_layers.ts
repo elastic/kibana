@@ -61,9 +61,11 @@ export const getLayers = (
   if (!syncColors && columns[1]?.id && palettes && visParams.palette) {
     byDataPalette = byDataColorPaletteMap(
       rows,
-      columns[1].id,
+      columns[1],
       palettes?.get(visParams.palette.name),
-      visParams.palette
+      visParams.palette,
+      formatters,
+      formatter
     );
   }
 

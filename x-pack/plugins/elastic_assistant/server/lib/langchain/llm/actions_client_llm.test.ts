@@ -51,6 +51,7 @@ const mockRequest: KibanaRequest<unknown, unknown, RequestBody> = {
       },
       subAction: 'invokeAI',
     },
+    assistantLangChain: true,
   },
 } as KibanaRequest<unknown, unknown, RequestBody>;
 
@@ -72,7 +73,7 @@ describe('ActionsClientLlm', () => {
 
       await actionsClientLlm._call(prompt); // ignore the result
 
-      expect(actionsClientLlm.getActionResultData()).toEqual(mockActionResponse);
+      expect(actionsClientLlm.getActionResultData()).toEqual(mockActionResponse.message);
     });
   });
 
@@ -86,6 +87,18 @@ describe('ActionsClientLlm', () => {
       });
 
       expect(actionsClientLlm._llmType()).toEqual('ActionsClientLlm');
+    });
+
+    it('returns the expected LLM type when overridden', () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actions: mockActions,
+        connectorId,
+        llmType: 'special-llm-type',
+        logger: mockLogger,
+        request: mockRequest,
+      });
+
+      expect(actionsClientLlm._llmType()).toEqual('special-llm-type');
     });
   });
 
@@ -129,7 +142,7 @@ describe('ActionsClientLlm', () => {
     });
 
     it('rejects with the expected error the message has invalid content', async () => {
-      const invalidContent = 1234;
+      const invalidContent = { message: 1234 };
 
       mockExecute.mockImplementation(() => ({
         data: invalidContent,

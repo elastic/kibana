@@ -25,6 +25,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
+
 export const modelsProvider = (client: IScopedClusterClient, cloud?: CloudSetup) =>
   new ModelsProvider(client, cloud);
 
@@ -83,6 +84,7 @@ export class ModelsProvider {
       return { [index]: null };
     }
   }
+
   private getNodeId(
     elementOriginalId: string,
     nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
@@ -446,18 +448,39 @@ export class ModelsProvider {
       }
     }
 
-    const result = Object.entries(ELASTIC_MODEL_DEFINITIONS).map(([name, def]) => {
+    const modelDefinitionMap = new Map<string, ModelDefinitionResponse[]>();
+
+    for (const [name, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
       const recommended =
         (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
         (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
-      return {
-        ...def,
-        name,
-        ...(recommended ? { recommended } : {}),
-      };
-    });
 
-    return result;
+      const { modelName, ...rest } = def;
+
+      const modelDefinitionResponse = {
+        ...rest,
+        ...(recommended ? { recommended } : {}),
+        name,
+      };
+
+      if (modelDefinitionMap.has(modelName)) {
+        modelDefinitionMap.get(modelName)!.push(modelDefinitionResponse);
+      } else {
+        modelDefinitionMap.set(modelName, [modelDefinitionResponse]);
+      }
+    }
+
+    // check if there is no recommended, so we mark default as recommended
+    for (const arr of modelDefinitionMap.values()) {
+      const defaultModel = arr.find((a) => a.default);
+      const recommendedModel = arr.find((a) => a.recommended);
+      if (defaultModel && !recommendedModel) {
+        delete defaultModel.default;
+        defaultModel.recommended = true;
+      }
+    }
+
+    return [...modelDefinitionMap.values()].flat();
   }
 
   /**

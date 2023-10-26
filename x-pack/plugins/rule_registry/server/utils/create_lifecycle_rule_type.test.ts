@@ -59,6 +59,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
     isExportable: true,
     minimumLicenseRequired: 'basic',
     name: 'ruleTypeName',
+    category: 'test',
     producer: 'producer',
     validate: {
       params: schema.object(
@@ -147,6 +148,10 @@ function createRule(shouldWriteAlerts: boolean = true) {
         startedAt,
         state,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange: () => {
+          const date = new Date(Date.now()).toISOString();
+          return { dateStart: date, dateEnd: date };
+        },
       })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;

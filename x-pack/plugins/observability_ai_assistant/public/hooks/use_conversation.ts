@@ -6,9 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { merge, omit } from 'lodash';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import { type Conversation, type Message } from '../../common';
-import type { ConversationCreateRequest } from '../../common/types';
+import { ConversationCreateRequest, MessageRole } from '../../common/types';
+import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 import { ObservabilityAIAssistantChatService } from '../types';
 import { useAbortableAsync, type AbortableAsyncState } from './use_abortable_async';
 import { useKibana } from './use_kibana';
@@ -21,7 +22,7 @@ export function useConversation({
   connectorId,
 }: {
   conversationId?: string;
-  chatService?: ObservabilityAIAssistantChatService;
+  chatService?: ObservabilityAIAssistantChatService; // will eventually resolve to a non-nullish value
   connectorId: string | undefined;
 }): {
   conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined>;
@@ -40,6 +41,19 @@ export function useConversation({
   } = useKibana();
 
   const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
+
+  const displayedMessagesWithHardcodedSystemMessage = useMemo(() => {
+    if (!chatService) {
+      return displayedMessages;
+    }
+    const systemMessage = getAssistantSetupMessage({ contexts: chatService?.getContexts() || [] });
+
+    if (displayedMessages[0]?.message.role === MessageRole.User) {
+      return [systemMessage, ...displayedMessages];
+    }
+
+    return [systemMessage, ...displayedMessages.slice(1)];
+  }, [displayedMessages, chatService]);
 
   const conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined> =
     useAbortableAsync(
@@ -71,7 +85,7 @@ export function useConversation({
 
   return {
     conversation,
-    displayedMessages,
+    displayedMessages: displayedMessagesWithHardcodedSystemMessage,
     setDisplayedMessages,
     save: (messages: Message[], handleRefreshConversations?: () => void) => {
       const conversationObject = conversation.value!;

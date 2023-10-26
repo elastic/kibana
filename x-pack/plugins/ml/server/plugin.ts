@@ -313,10 +313,10 @@ export class MlServerPlugin
 
       if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
         if (this.cases) {
-          registerCasesPersistableState(this.cases, this.enabledFeatures);
+          registerCasesPersistableState(this.cases, this.enabledFeatures, this.log);
         }
         if (this.home) {
-          registerSampleDataSetLinks(this.home, this.enabledFeatures);
+          registerSampleDataSetLinks(this.home, this.enabledFeatures, this.log);
         }
       }
       // check whether the job saved objects exist

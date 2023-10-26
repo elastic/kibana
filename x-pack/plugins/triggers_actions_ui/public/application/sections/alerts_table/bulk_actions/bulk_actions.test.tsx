@@ -49,6 +49,12 @@ const mockCaseService = createCasesServiceMock();
 const mockKibana = jest.fn().mockReturnValue({
   services: {
     cases: mockCaseService,
+    notifications: {
+      toasts: {
+        addDanger: jest.fn(),
+        addSuccess: jest.fn(),
+      },
+    },
   },
 });
 
@@ -163,7 +169,6 @@ describe('AlertsTable.BulkActions', () => {
     pageSize: 2,
     pageSizeOptions: [2, 4],
     leadingControlColumns: [],
-    showExpandToDetails: true,
     trailingControlColumns: [],
     useFetchAlertsData: () => alertsData,
     visibleColumns: columns.map((c) => c.id),
@@ -700,8 +705,8 @@ describe('AlertsTable.BulkActions', () => {
             expect(within(selectedOptions[0]).getByRole('checkbox')).toBeDefined();
 
             // second row, first column
-            expect(within(selectedOptions[4]).getByLabelText('Loading')).toBeDefined();
-            expect(within(selectedOptions[4]).queryByRole('checkbox')).not.toBeInTheDocument();
+            expect(within(selectedOptions[3]).getByLabelText('Loading')).toBeDefined();
+            expect(within(selectedOptions[3]).queryByRole('checkbox')).not.toBeInTheDocument();
           });
 
           it('should hide the loading state on each selected row', async () => {

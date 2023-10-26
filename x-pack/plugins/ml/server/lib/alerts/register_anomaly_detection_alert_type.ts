@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -19,7 +19,6 @@ import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/serve
 import { ALERT_NAMESPACE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -236,6 +235,7 @@ export function registerAnomalyDetectionAlertType({
         },
       ],
     },
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
@@ -265,7 +265,7 @@ export function registerAnomalyDetectionAlertType({
           id: name,
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
           context,
-          payload: expandFlattenedAlert({
+          payload: {
             [ALERT_URL]: payload[ALERT_URL],
             [ALERT_REASON]: payload[ALERT_REASON],
             [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
@@ -274,7 +274,7 @@ export function registerAnomalyDetectionAlertType({
             [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
             [ALERT_TOP_RECORDS]: payload.top_records,
             [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
-          }),
+          },
         });
       }
 
@@ -285,11 +285,11 @@ export function registerAnomalyDetectionAlertType({
           alertsClient.setAlertData({
             id: alertId,
             context,
-            payload: expandFlattenedAlert({
+            payload: {
               [ALERT_URL]: payload[ALERT_URL],
               [ALERT_REASON]: payload[ALERT_REASON],
               [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
-            }),
+            },
           });
         }
       }

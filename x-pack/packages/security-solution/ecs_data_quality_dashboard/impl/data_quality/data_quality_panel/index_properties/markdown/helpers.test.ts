@@ -402,7 +402,7 @@ describe('helpers', () => {
   describe('getTabCountsMarkdownComment', () => {
     test('it returns a comment with the expected counts', () => {
       expect(getTabCountsMarkdownComment(mockPartitionedFieldMetadata)).toBe(
-        '### **Incompatible fields** `3` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n'
+        '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n'
       );
     });
   });

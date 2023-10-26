@@ -51,13 +51,23 @@ class TagModal extends FtrService {
    * If a field is undefined, will not set the value (use a empty string for that)
    * If `submit` is true, will call `clickConfirm` once the fields have been filled.
    */
-  async fillForm(fields: FillTagFormFields, { submit = false }: { submit?: boolean } = {}) {
+  async fillForm(
+    fields: FillTagFormFields,
+    {
+      submit = false,
+      clearWithKeyboard = false,
+    }: { submit?: boolean; clearWithKeyboard?: boolean } = {}
+  ) {
     if (fields.name !== undefined) {
       await this.testSubjects.click('createModalField-name');
-      await this.testSubjects.setValue('createModalField-name', fields.name);
+      await this.testSubjects.setValue('createModalField-name', fields.name, {
+        clearWithKeyboard,
+      });
     }
     if (fields.color !== undefined) {
-      await this.testSubjects.setValue('~createModalField-color', fields.color);
+      await this.testSubjects.setValue('~createModalField-color', fields.color, {
+        clearWithKeyboard,
+      });
       // Close the popover before moving to the next input, as it can get in the way of interacting with other elements
       await this.testSubjects.existOrFail('euiSaturation');
       await this.retry.try(async () => {
@@ -69,7 +79,9 @@ class TagModal extends FtrService {
     }
     if (fields.description !== undefined) {
       await this.testSubjects.click('createModalField-description');
-      await this.testSubjects.setValue('createModalField-description', fields.description);
+      await this.testSubjects.setValue('createModalField-description', fields.description, {
+        clearWithKeyboard,
+      });
     }
 
     if (submit) {

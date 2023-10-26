@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
 
@@ -49,6 +50,8 @@ export interface LogCategorizationPageProps {
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
   onClose: () => void;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 const BAR_TARGET = 20;
@@ -58,6 +61,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   savedSearch,
   selectedField,
   onClose,
+  embeddingOrigin,
 }) => {
   const {
     notifications: { toasts },
@@ -151,7 +155,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           timeField,
           earliest,
           latest,
-          searchQuery
+          searchQuery,
+          { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
         ),
         runCategorizeRequest(
           index,
@@ -193,6 +198,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     runCategorizeRequest,
     intervalMs,
     toasts,
+    embeddingOrigin,
   ]);
 
   const onAddFilter = useCallback(

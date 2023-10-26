@@ -49,6 +49,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
           isDefault: qp.isDefault ?? false,
         },
         label: qp.title,
+        'data-test-subj': qp.title,
         color: qp.color,
       }))
     );
@@ -164,6 +165,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
                 <EuiButtonIcon
                   iconType="cross"
                   aria-label={i18n.DELETE_QUICK_PROMPT_}
+                  data-test-subj="delete-quick-prompt"
                   color="danger"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
@@ -185,6 +187,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
+        data-test-subj="quickPromptSelector"
         aria-label={i18n.QUICK_PROMPT_SELECTOR}
         compressed
         isDisabled={isDisabled}

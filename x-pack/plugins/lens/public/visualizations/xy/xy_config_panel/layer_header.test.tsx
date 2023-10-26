@@ -71,6 +71,15 @@ describe('layer header', () => {
           .text()
           .trim()
       ).toBe(byRefGroupTitle);
+
+      const cachedMetadata = { title: 'A cached title', description: '', tags: [] };
+      expect(
+        mountWithIntl(
+          <LayerHeader {...props} state={getStateWithLayers([{ ...byRefLayer, cachedMetadata }])} />
+        )
+          .text()
+          .trim()
+      ).toBe(cachedMetadata.title);
     });
   });
 });

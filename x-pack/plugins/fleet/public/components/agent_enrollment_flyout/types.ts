@@ -17,9 +17,7 @@ export type K8sMode =
 
 export type CloudSecurityIntegrationType = 'kspm' | 'vuln_mgmt' | 'cspm';
 export type CloudSecurityIntegrationAwsAccountType = 'single-account' | 'organization-account';
-export type CloudSecurityIntegrationAzureAccountType =
-  | 'single-account-azure'
-  | 'organization-account-azure';
+export type CloudSecurityIntegrationAzureAccountType = 'single-account' | 'organization-account';
 
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;

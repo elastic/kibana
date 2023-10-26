@@ -1638,6 +1638,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.colorMapping",
+            "type": "string",
+            "tags": [],
+            "label": "colorMapping",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.DataLayerArgs.decorations",
             "type": "Array",
             "tags": [],
@@ -2848,7 +2862,7 @@
             "label": "autoScaleMetricAlignment",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -2979,7 +2993,7 @@
             "label": "textAlign",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -3022,7 +3036,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"top\" | \"left\" | \"right\" | \"bottom\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -3070,7 +3084,7 @@
               "\nHorizontal Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"left\" | \"right\" | undefined"
+              "\"right\" | \"left\" | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -4673,6 +4687,21 @@
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.colorMapping",
+            "type": "Object",
+            "tags": [],
+            "label": "colorMapping",
+            "description": [],
+            "signature": [
+              "Config",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4998,11 +5027,14 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.SuggestionRequest.mainPalette",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "mainPalette",
-            "description": [],
+            "description": [
+              "\nPassing the legacy palette or the new color mapping if available"
+            ],
             "signature": [
+              "{ type: \"legacyPalette\"; value: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -5010,7 +5042,9 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
+              "Config",
+              "; } | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5319,7 +5353,7 @@
               "\nInitialize is allowed to modify the state stored in memory. The initialize function\nis called with a previous state in two cases:\n- Loading from a saved visualization\n- When using suggestions, the suggested state is passed in"
             ],
             "signature": [
-              "{ (addNewLayer: () => string, nonPersistedState?: T | undefined, mainPalette?: ",
+              "{ (addNewLayer: () => string, nonPersistedState?: T | undefined, mainPalette?: { type: \"legacyPalette\"; value: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -5327,7 +5361,9 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: ",
+              "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
+              "Config",
+              "; } | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: { type: \"legacyPalette\"; value: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -5335,7 +5371,9 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined, annotationGroups?: ",
+              "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
+              "Config",
+              "; } | undefined, annotationGroups?: ",
               "AnnotationGroups",
               " | undefined, references?: ",
               {
@@ -5440,7 +5478,7 @@
             "label": "getMainPalette",
             "description": [],
             "signature": [
-              "((state: T) => ",
+              "((state: T) => { type: \"legacyPalette\"; value: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -5448,7 +5486,9 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined) | undefined"
+              "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
+              "Config",
+              "; } | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -8583,7 +8623,7 @@
               "LegendPositionConfig",
               " | undefined; rotation?: ",
               "Rotation",
-              " | undefined; debug?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+              " | undefined; debug?: boolean | undefined; locale?: string | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
               "Rendering",
               " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
               "MakeOverridesSerializable",
@@ -8817,6 +8857,21 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.colorMapping",
+            "type": "Object",
+            "tags": [],
+            "label": "colorMapping",
+            "description": [],
+            "signature": [
+              "Config",
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -9938,7 +9993,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"above\" | \"below\" | \"auto\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -10565,7 +10620,7 @@
           "LegendPositionConfig",
           " | undefined; rotation?: ",
           "Rotation",
-          " | undefined; debug?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+          " | undefined; debug?: boolean | undefined; locale?: string | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
           "Rendering",
           " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
           "MakeOverridesSerializable",
@@ -10807,7 +10862,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"bottom\" | \"auto\""
+          "\"right\" | \"left\" | \"bottom\" | \"auto\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -11086,7 +11141,7 @@
             "label": "autoScaleMetricAlignment",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -11217,7 +11272,7 @@
             "label": "textAlign",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,

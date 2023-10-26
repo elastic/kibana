@@ -23,10 +23,10 @@
     "patterns": [
       "{index}/_disk_usage"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-disk-usage.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-disk-usage.html",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }

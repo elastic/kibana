@@ -1,0 +1,22 @@
+---
+id: kibDevDocsOpsEslintPluginI18N
+slug: /kibana-dev-docs/ops/kbn-eslint-plugin-i18n
+title: '@kbn/eslint-plugin-i18n'
+description: Custom ESLint rules to support translations in the Kibana repository
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'i18n']
+---
+
+`@kbn/eslint-plugin-i18n` is an ESLint plugin providing custom rules for validating JSXCode in the Kibana repo to make sure they are translated.
+
+Note: At the moment these rules only work for apps that are inside `/x-pack/plugins`.
+If you want to enable this rule on code that is outside of this path, adjust `/helpers/get_i18n_identifier_from_file_path.ts`.
+
+## `@kbn/i18n/strings_should_be_translated_with_i18n`
+
+This rule warns engineers to translate their strings by using i18n.translate from the '@kbn/i18n' package. It provides an autofix that takes into account the context of the translatable string in the JSX tree to generate a translation ID.
+It kicks in on JSXText elements and specific JSXAttributes (`label` and `aria-label`) which expect a translated value.
+
+## `@kbn/i18n/strings_should_be_translated_with_formatted_message`
+
+This rule warns engineers to translate their strings by using `<FormattedMessage>` from the '@kbn/i18n-react' package. It provides an autofix that takes into account the context of the translatable string in the JSX tree and to generate a translation ID.
+It kicks in on JSXText elements and specific JSXAttributes (`label` and `aria-label`) which expect a translated value.

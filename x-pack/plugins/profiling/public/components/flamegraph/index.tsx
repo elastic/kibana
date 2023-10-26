@@ -20,6 +20,7 @@ import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import { i18n } from '@kbn/i18n';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
 import { FlameGraphLegend } from './flame_graph_legend';
 import { FrameInformationWindow } from '../frame_information_window';
@@ -126,6 +127,7 @@ export function FlameGraph({
                         setHighlightedVmIndex(selectedElement!.vmIndex);
                       }
                     }}
+                    locale={i18n.getLocale()}
                   />
                   <Tooltip
                     actions={[{ label: '', onSelect: () => {} }]}
@@ -140,8 +142,15 @@ export function FlameGraph({
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const totalSeconds = primaryFlamegraph.TotalSeconds;
                       const nodeID = primaryFlamegraph.ID[valueIndex];
-
+                      const inline = primaryFlamegraph.Inline[valueIndex];
                       const comparisonNode = columnarData.comparisonNodesById[nodeID];
+
+                      const parentLabel = inline
+                        ? // If it's an inline frame, look up for its parent frame
+                          primaryFlamegraph.Label[
+                            primaryFlamegraph.Edges.findIndex((edge) => edge.includes(valueIndex))
+                          ]
+                        : undefined;
 
                       return (
                         <FlameGraphTooltip
@@ -162,6 +171,8 @@ export function FlameGraph({
                             toggleShowInformationWindow();
                             setHighlightedVmIndex(valueIndex);
                           }}
+                          inline={inline}
+                          parentLabel={parentLabel}
                         />
                       );
                     }}
@@ -194,7 +205,6 @@ export function FlameGraph({
           frame={selected}
           totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
           totalSamples={totalSamples}
-          showAIAssistant={!isEmbedded}
           showSymbolsStatus={!isEmbedded}
         />
       )}

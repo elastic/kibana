@@ -14,5 +14,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./findings'));
     loadTestFile(require.resolve('./findings_alerts'));
     loadTestFile(require.resolve('./compliance_dashboard'));
+    loadTestFile(require.resolve('./vulnerability_dashboard'));
+    loadTestFile(require.resolve('./cis_integration'));
   });
 }

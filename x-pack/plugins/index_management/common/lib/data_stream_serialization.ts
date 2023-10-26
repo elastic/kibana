@@ -54,3 +54,19 @@ export function deserializeDataStreamList(
 ): DataStream[] {
   return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream));
 }
+
+export const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
+  let size = '';
+  let unit = '';
+
+  const result = /(\d+)(\w+)/.exec(field);
+  if (result) {
+    size = result[1];
+    unit = result[2];
+  }
+
+  return {
+    size,
+    unit,
+  };
+};

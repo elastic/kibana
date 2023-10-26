@@ -18,15 +18,16 @@ import {
 import { upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
-import { AssetManagerConfig, configSchema } from './types';
-import { AssetAccessor } from './lib/asset_accessor';
+import { AssetClient } from './lib/asset_client';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
+import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
 
 export const config: PluginConfigDescriptor<AssetManagerConfig> = {
   schema: configSchema,
+  exposeToBrowser: exposeToBrowserConfig,
 };
 
 export class AssetManagerServerPlugin
@@ -49,24 +50,23 @@ export class AssetManagerServerPlugin
   public setup(core: CoreSetup, plugins: AssetManagerPluginSetupDependencies) {
     // Check for config value and bail out if not "alpha-enabled"
     if (!this.config.alphaEnabled) {
-      this.logger.info('Asset manager plugin [tech preview] is NOT enabled');
+      this.logger.info('Server is NOT enabled');
       return;
     }
 
-    this.logger.info('Asset manager plugin [tech preview] is enabled');
+    this.logger.info('Server is enabled');
 
-    const assetAccessor = new AssetAccessor({
-      source: this.config.lockedSource,
+    const assetClient = new AssetClient({
       sourceIndices: this.config.sourceIndices,
       getApmIndices: plugins.apmDataAccess.getApmIndices,
       metricsClient: plugins.metricsDataAccess.client,
     });
 
     const router = core.http.createRouter();
-    setupRoutes<RequestHandlerContext>({ router, assetAccessor });
+    setupRoutes<RequestHandlerContext>({ router, assetClient });
 
     return {
-      assetAccessor,
+      assetClient,
     };
   }
 
@@ -76,14 +76,11 @@ export class AssetManagerServerPlugin
       return;
     }
 
-    // create/update assets-* index template
-    if (this.config.lockedSource === 'assets') {
-      upsertTemplate({
-        esClient: core.elasticsearch.client.asInternalUser,
-        template: assetsIndexTemplateConfig,
-        logger: this.logger,
-      });
-    }
+    upsertTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      template: assetsIndexTemplateConfig,
+      logger: this.logger,
+    });
 
     return {};
   }

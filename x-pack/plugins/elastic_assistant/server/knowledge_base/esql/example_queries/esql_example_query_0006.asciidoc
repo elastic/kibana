@@ -1,0 +1,10 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+FROM metrics-apm*
+| WHERE metricset.name == "transaction" AND metricset.interval == "1m"
+| EVAL bucket = AUTO_BUCKET(transaction.duration.histogram, 50, <start-date>, <end-date>)
+| STATS avg_duration = AVG(transaction.duration.histogram) BY bucket
+```

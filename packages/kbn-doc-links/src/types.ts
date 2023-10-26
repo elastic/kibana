@@ -46,6 +46,7 @@ export interface DocLinks {
     readonly guide: string;
   };
   readonly cloud: {
+    readonly beatsAndLogstashConfiguration: string;
     readonly indexManagement: string;
   };
   readonly console: {
@@ -122,6 +123,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsAzureBlobStorage: string;
+    readonly connectorsBox: string;
     readonly connectorsClients: string;
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
@@ -138,14 +140,16 @@ export interface DocLinks {
     readonly connectorsNetworkDrive: string;
     readonly connectorsOneDrive: string;
     readonly connectorsOracle: string;
+    readonly connectorsOutlook: string;
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
     readonly connectorsSalesforce: string;
     readonly connectorsServiceNow: string;
     readonly connectorsSharepoint: string;
     readonly connectorsSharepointOnline: string;
+    readonly connectorsTeams: string;
     readonly connectorsSlack: string;
-    readonly connectorsWorkplaceSearch: string;
+    readonly connectorsZoom: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
@@ -194,6 +198,7 @@ export interface DocLinks {
     readonly dropbox: string;
     readonly externalSharePointOnline: string;
     readonly externalIdentities: string;
+    readonly gatedFormBlog: string;
     readonly gitHub: string;
     readonly gettingStarted: string;
     readonly gmail: string;
@@ -323,6 +328,7 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
+    readonly artifactControl: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
@@ -343,6 +349,7 @@ export interface DocLinks {
     };
     readonly privileges: string;
     readonly manageDetectionRules: string;
+    readonly createEsqlRuleType: string;
   };
   readonly query: {
     readonly eql: string;
@@ -410,6 +417,7 @@ export interface DocLinks {
     monitorUptimeSynthetics: string;
     userExperience: string;
     createAlerts: string;
+    syntheticsAlerting: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
@@ -516,6 +524,8 @@ export interface DocLinks {
     agentPolicy: string;
     api: string;
     uninstallAgent: string;
+    installAndUninstallIntegrationAssets: string;
+    elasticAgentInputConfiguration: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -563,6 +573,9 @@ export interface DocLinks {
   };
   readonly legal: {
     readonly privacyStatement: string;
+    readonly generalPrivacyStatement: string;
+    readonly termsOfService: string;
+    readonly dataUse: string;
   };
   readonly kibanaUpgradeSavedObjects: {
     readonly resolveMigrationFailures: string;
@@ -575,6 +588,7 @@ export interface DocLinks {
     readonly elasticsearch: string;
   };
   readonly serverlessClients: {
+    readonly clientLib: string;
     readonly goApiReference: string;
     readonly goGettingStarted: string;
     readonly httpApis: string;
@@ -597,6 +611,9 @@ export interface DocLinks {
     readonly integrationsBeats: string;
     readonly integrationsConnectorClient: string;
     readonly integrationsLogstash: string;
+  };
+  readonly serverlessSecurity: {
+    readonly apiKeyPrivileges: string;
   };
   readonly synthetics: {
     readonly featureRoles: string;

@@ -21,8 +21,7 @@ export default function ({ getPageObjects, getService }) {
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167320
-  describe.skip('maps add-to-dashboard save flow', () => {
+  describe('maps add-to-dashboard save flow', () => {
     before(async () => {
       await security.testUser.setRoles(
         [

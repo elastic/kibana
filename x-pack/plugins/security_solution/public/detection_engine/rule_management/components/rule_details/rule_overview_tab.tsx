@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
-import { RuleAboutSection } from './rule_about_section';
+import { RuleAboutSection, Description } from './rule_about_section';
 import { RuleDefinitionSection } from './rule_definition_section';
 import { RuleScheduleSection } from './rule_schedule_section';
 import { RuleSetupGuideSection } from './rule_setup_guide_section';
@@ -103,7 +103,8 @@ export const RuleOverviewTab = ({
       isOpen={expandedOverviewSections.about}
       toggle={toggleOverviewSection.about}
     >
-      <RuleAboutSection rule={rule} />
+      {rule.description && <Description description={rule.description} />}
+      <RuleAboutSection rule={rule} hideDescription hideName />
     </ExpandableSection>
     <EuiHorizontalRule margin="m" />
     <ExpandableSection

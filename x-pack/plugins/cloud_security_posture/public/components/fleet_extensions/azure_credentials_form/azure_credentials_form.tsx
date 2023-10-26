@@ -68,11 +68,6 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
-    disabled: true,
-    tooltip: i18n.translate(
-      'xpack.csp.azureIntegration.setupFormatOptions.manual.disabledTooltip',
-      { defaultMessage: 'Coming Soon' }
-    ),
   },
 ];
 
@@ -83,6 +78,7 @@ interface Props {
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
 }
 
 const ARM_TEMPLATE_EXTERNAL_DOC_URL =
@@ -108,7 +104,7 @@ const ArmTemplateSetup = ({
 
   return (
     <>
-      <EuiText color="subdued" size="s">
+      <EuiText color="text" size="s">
         <ol
           css={css`
             list-style: auto;
@@ -159,6 +155,50 @@ const ArmTemplateSetup = ({
   );
 };
 
+const ManualSetup = ({ integrationLink }: { integrationLink: string }) => {
+  return (
+    <>
+      <EuiText color="text" size="s">
+        <FormattedMessage
+          id="xpack.csp.azureIntegration.manualCredentialType.instructions"
+          defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication. Refer to our {gettingStartedLink} for details."
+          values={{
+            gettingStartedLink: (
+              <EuiLink href={integrationLink} target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
+                  defaultMessage="Getting Started guide"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+      <EuiSpacer />
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.azureIntegration.manualCredentialType.documentaion"
+          defaultMessage="Read the {documentation} for more details"
+          values={{
+            documentation: (
+              <EuiLink
+                href={ARM_TEMPLATE_EXTERNAL_DOC_URL}
+                target="_blank"
+                rel="noopener nofollow noreferrer"
+                data-test-subj="externalLink"
+              >
+                {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
+                  defaultMessage: 'documentation',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+    </>
+  );
+};
+
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
 
 export const AzureCredentialsForm = ({
@@ -168,6 +208,7 @@ export const AzureCredentialsForm = ({
   packageInfo,
   onChange,
   setIsValid,
+  disabled,
 }: Props) => {
   const { setupFormat, onSetupFormatChange, integrationLink, hasArmTemplateUrl } =
     useAzureCredentialsForm({
@@ -221,6 +262,7 @@ export const AzureCredentialsForm = ({
       <AzureSetupInfoContent integrationLink={integrationLink} />
       <EuiSpacer size="l" />
       <RadioGroup
+        disabled={disabled}
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
@@ -231,6 +273,9 @@ export const AzureCredentialsForm = ({
       <EuiSpacer size="l" />
       {setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
+      )}
+      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && (
+        <ManualSetup integrationLink={integrationLink} />
       )}
       <EuiSpacer />
     </>

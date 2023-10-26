@@ -27,11 +27,18 @@ const From = ({ from, interval }: FromProps) => (
   <EuiText size="s">{getHumanizedDuration(from, interval)}</EuiText>
 );
 
-export interface RuleScheduleSectionProps {
-  rule: RuleResponse;
+export interface RuleScheduleSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
+  rule: Partial<RuleResponse>;
 }
 
-export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
+export const RuleScheduleSection = ({
+  rule,
+  ...descriptionListProps
+}: RuleScheduleSectionProps) => {
+  if (!rule.interval || !rule.from) {
+    return null;
+  }
+
   const ruleSectionListItems = [];
 
   ruleSectionListItems.push(
@@ -46,12 +53,13 @@ export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
   );
 
   return (
-    <div>
+    <div data-test-subj="listItemColumnStepRuleDescription">
       <EuiDescriptionList
-        type="column"
+        type={descriptionListProps.type ?? 'column'}
+        rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={ruleSectionListItems}
         columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
+        {...descriptionListProps}
       />
     </div>
   );

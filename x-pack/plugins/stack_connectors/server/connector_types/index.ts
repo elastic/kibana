@@ -17,7 +17,7 @@ import { getTinesConnectorType } from './tines';
 import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
-import { getConnectorType as getGenerativeAiConnectorType } from './gen_ai';
+import { getConnectorType as getOpenAIConnectorType } from './openai';
 import { getConnectorType as getBedrockConnectorType } from './bedrock';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
@@ -101,7 +101,7 @@ export function registerConnectorTypes({
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
-  actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
+  actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
 }
