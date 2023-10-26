@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
@@ -17,9 +16,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
-import { AlertsLocatorParams, getAlertUrl, TimeUnitChar } from '../../../../common';
-import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
+import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID } from './constants';
 import {
@@ -47,6 +44,7 @@ import {
   getFormattedGroupBy,
 } from './utils';
 
+import { formatAlertResult } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
@@ -192,14 +190,7 @@ export const createCustomThresholdExecutor = ({
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults
-          .map((result) =>
-            buildFiredAlertReason({
-              ...formatAlertResult(result[group]),
-              group,
-            })
-          )
-          .join('\n');
+        reason = buildFiredAlertReason(alertResults, group, dataView);
       }
 
       /* NO DATA STATE HANDLING
@@ -335,61 +326,3 @@ export const createCustomThresholdExecutor = ({
       },
     };
   };
-
-export const FIRED_ACTIONS = {
-  id: 'custom_threshold.fired',
-  name: i18n.translate('xpack.observability.customThreshold.rule.alerting.custom_threshold.fired', {
-    defaultMessage: 'Alert',
-  }),
-};
-
-export const NO_DATA_ACTIONS = {
-  id: 'custom_threshold.nodata',
-  name: i18n.translate(
-    'xpack.observability.customThreshold.rule.alerting.custom_threshold.nodata',
-    {
-      defaultMessage: 'No Data',
-    }
-  ),
-};
-
-const formatAlertResult = <AlertResult>(
-  alertResult: {
-    metric: string;
-    currentValue: number | null;
-    threshold: number[];
-    comparator: Comparator;
-    timeSize: number;
-    timeUnit: TimeUnitChar;
-  } & AlertResult
-) => {
-  const { metric, currentValue, threshold, comparator } = alertResult;
-  const noDataValue = i18n.translate(
-    'xpack.observability.customThreshold.rule.alerting.threshold.noDataFormattedValue',
-    { defaultMessage: '[NO DATA]' }
-  );
-
-  if (metric.endsWith('.pct')) {
-    const formatter = createFormatter('percent');
-    return {
-      ...alertResult,
-      currentValue:
-        currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
-      threshold: Array.isArray(threshold)
-        ? threshold.map((v: number) => formatter(v))
-        : formatter(threshold),
-      comparator,
-    };
-  }
-
-  const formatter = createFormatter('highPrecision');
-  return {
-    ...alertResult,
-    currentValue:
-      currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
-    threshold: Array.isArray(threshold)
-      ? threshold.map((v: number) => formatter(v))
-      : formatter(threshold),
-    comparator,
-  };
-};

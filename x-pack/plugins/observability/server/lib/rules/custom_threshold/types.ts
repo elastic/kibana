@@ -45,7 +45,8 @@ export type CustomThresholdAlertContext = AlertContext & {
   group?: object;
   reason?: string;
   timestamp: string; // ISO string
-  value?: Array<number | null> | null;
+  // String type is for [NO DATA]
+  value?: Array<number | string | null>;
 };
 export type CustomThresholdSpecificActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof NO_DATA_ACTIONS

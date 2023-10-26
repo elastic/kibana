@@ -37,13 +37,10 @@ import {
   tagsActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
-} from './messages';
+} from './translations';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
-import {
-  createCustomThresholdExecutor,
-  FIRED_ACTIONS,
-  NO_DATA_ACTIONS,
-} from './custom_threshold_executor';
+import { createCustomThresholdExecutor } from './custom_threshold_executor';
+import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './translations';
 import { ObservabilityConfig } from '../../..';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/custom_threshold_rule/constants';
 
