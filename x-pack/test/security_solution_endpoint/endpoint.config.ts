@@ -16,5 +16,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return generateConfig({
     baseConfig: xpackFunctionalConfig,
     junitReportName: 'X-Pack Endpoint Functional Tests on ESS',
+    mochaGrep: '@ess',
   });
 }

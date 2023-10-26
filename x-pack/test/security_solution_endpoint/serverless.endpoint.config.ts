@@ -17,5 +17,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     baseConfig: svlBaseConfig,
     junitReportName: 'X-Pack Endpoint Functional Tests on Serverless',
     kbnServerArgs: ['--serverless=security'],
+    mochaGrep: '/^(?!.*@brokenInServerless).*@serverless.*/',
   });
 }

@@ -18,9 +18,11 @@ export const generateConfig = ({
   baseConfig,
   junitReportName,
   kbnServerArgs = [],
+  mochaGrep,
 }: {
   baseConfig: Config;
   junitReportName: string;
+  mochaGrep: string;
   kbnServerArgs?: string[];
 }): Config => ({
   ...baseConfig.getAll(),
@@ -56,6 +58,10 @@ export const generateConfig = ({
       `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
       ...kbnServerArgs,
     ],
+  },
+  mochaOpts: {
+    ...baseConfig.get('mochaOpts'),
+    grep: mochaGrep,
   },
   layout: {
     fixedHeaderHeight: 200,
