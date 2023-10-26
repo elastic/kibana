@@ -12,8 +12,7 @@ tags:
   - name: cases
     description: Case APIs enable you to open and track issues.
 servers:
-  - url: 'http://localhost:5601'
-    description: local
+  - url: /
 paths:
 # Paths in the default space
   '/api/cases':

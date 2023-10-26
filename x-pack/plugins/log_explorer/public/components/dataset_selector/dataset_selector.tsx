@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import styled from '@emotion/styled';
 import { EuiContextMenu, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
+import styled from '@emotion/styled';
+import React, { useMemo } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
+import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
+  dataViewsLabel,
+  DATA_VIEWS_PANEL_ID,
+  DATA_VIEWS_TAB_ID,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
   INTEGRATIONS_PANEL_ID,
@@ -20,24 +24,37 @@ import {
 } from './constants';
 import { useDatasetSelector } from './state_machine/use_dataset_selector';
 import { DatasetsPopover } from './sub_components/datasets_popover';
+import { DataViewsPanelTitle } from './sub_components/data_views_panel_title';
+import { EsqlSelector } from './sub_components/esql_selector';
 import { SearchControls } from './sub_components/search_controls';
 import { SelectorActions } from './sub_components/selector_actions';
 import { DatasetSelectorProps } from './types';
 import {
   buildIntegrationsTree,
+  createDataViewsStatusItem,
   createIntegrationStatusItem,
   createUncategorizedStatusItem,
 } from './utils';
 
 export function DatasetSelector({
   datasets,
-  datasetsError,
   datasetSelection,
+  datasetsError,
+  dataViews,
+  dataViewsError,
+  discoverEsqlUrlProps,
   integrations,
   integrationsError,
+  isEsqlEnabled,
+  isLoadingDataViews,
   isLoadingIntegrations,
-  isLoadingStreams,
+  isLoadingUncategorized,
   isSearchingIntegrations,
+  onDataViewSelection,
+  onDataViewsReload,
+  onDataViewsSearch,
+  onDataViewsSort,
+  onDataViewsTabClick,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -45,10 +62,10 @@ export function DatasetSelector({
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
   onSelectionChange,
-  onStreamsEntryClick,
-  onUnmanagedStreamsReload,
-  onUnmanagedStreamsSearch,
-  onUnmanagedStreamsSort,
+  onUncategorizedReload,
+  onUncategorizedSearch,
+  onUncategorizedSort,
+  onUncategorizedTabClick,
 }: DatasetSelectorProps) {
   const {
     panelId,
@@ -62,21 +79,26 @@ export function DatasetSelector({
     searchByName,
     selectAllLogDataset,
     selectDataset,
+    selectDataView,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
+    switchToDataViewsTab,
     togglePopover,
   } = useDatasetSelector({
     initialContext: { selection: datasetSelection },
+    onDataViewSelection,
+    onDataViewsSearch,
+    onDataViewsSort,
     onIntegrationsLoadMore,
     onIntegrationsReload,
     onIntegrationsSearch,
     onIntegrationsSort,
     onIntegrationsStreamsSearch,
     onIntegrationsStreamsSort,
-    onUnmanagedStreamsSearch,
-    onUnmanagedStreamsSort,
-    onUnmanagedStreamsReload,
+    onUncategorizedSearch,
+    onUncategorizedSort,
+    onUncategorizedReload,
     onSelectionChange,
   });
 
@@ -117,8 +139,8 @@ export function DatasetSelector({
         createUncategorizedStatusItem({
           data: datasets,
           error: datasetsError,
-          isLoading: isLoadingStreams,
-          onRetry: onUnmanagedStreamsReload,
+          isLoading: isLoadingUncategorized,
+          onRetry: onUncategorizedReload,
         }),
       ];
     }
@@ -127,7 +149,26 @@ export function DatasetSelector({
       name: dataset.title,
       onClick: () => selectDataset(dataset),
     }));
-  }, [datasets, datasetsError, isLoadingStreams, selectDataset, onUnmanagedStreamsReload]);
+  }, [datasets, datasetsError, isLoadingUncategorized, selectDataset, onUncategorizedReload]);
+
+  const dataViewsItems = useMemo(() => {
+    if (!dataViews || dataViews.length === 0) {
+      return [
+        createDataViewsStatusItem({
+          data: dataViews,
+          error: dataViewsError,
+          isLoading: isLoadingDataViews,
+          onRetry: onDataViewsReload,
+        }),
+      ];
+    }
+
+    return dataViews.map((dataView) => ({
+      'data-test-subj': getDataViewTestSubj(dataView.title),
+      name: dataView.name,
+      onClick: () => selectDataView(dataView),
+    }));
+  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataView, onDataViewsReload]);
 
   const tabs = [
     {
@@ -140,10 +181,19 @@ export function DatasetSelector({
       id: UNCATEGORIZED_TAB_ID,
       name: uncategorizedLabel,
       onClick: () => {
-        onStreamsEntryClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
+        onUncategorizedTabClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
         switchToUncategorizedTab();
       },
       'data-test-subj': 'datasetSelectorUncategorizedTab',
+    },
+    {
+      id: DATA_VIEWS_TAB_ID,
+      name: dataViewsLabel,
+      onClick: () => {
+        onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
+        switchToDataViewsTab();
+      },
+      'data-test-subj': 'datasetSelectorDataViewsTab',
     },
   ];
 
@@ -175,7 +225,7 @@ export function DatasetSelector({
         search={search}
         onSearch={searchByName}
         onSort={sortByOrder}
-        isLoading={isSearchingIntegrations || isLoadingStreams}
+        isLoading={isSearchingIntegrations || isLoadingUncategorized}
       />
       <EuiHorizontalRule margin="none" />
       {/* For a smoother user experience, we keep each tab content mount and we only show the select one
@@ -215,6 +265,23 @@ export function DatasetSelector({
         data-test-subj="uncategorizedContextMenu"
         size="s"
       />
+      {/* Data views tab content */}
+      <ContextMenu
+        hidden={tabId !== DATA_VIEWS_TAB_ID}
+        initialPanelId={DATA_VIEWS_PANEL_ID}
+        panels={[
+          {
+            id: DATA_VIEWS_PANEL_ID,
+            title: <DataViewsPanelTitle />,
+            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            items: dataViewsItems,
+          },
+        ]}
+        className="eui-yScroll"
+        data-test-subj="dataViewsContextMenu"
+        size="s"
+      />
+      {isEsqlEnabled && <EsqlSelector {...discoverEsqlUrlProps} />}
     </DatasetsPopover>
   );
 }

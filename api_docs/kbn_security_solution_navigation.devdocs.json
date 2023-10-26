@@ -21,6 +21,41 @@
     "functions": [
       {
         "parentPluginId": "@kbn/security-solution-navigation",
+        "id": "def-common.getNavigationPropsFromId",
+        "type": "Function",
+        "tags": [],
+        "label": "getNavigationPropsFromId",
+        "description": [
+          "\nReturns the appId, deepLinkId, and path from a given navigation id"
+        ],
+        "signature": [
+          "(id: string) => { appId: string; deepLinkId?: string | undefined; path?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/security-solution/navigation/src/navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-navigation",
+            "id": "def-common.getNavigationPropsFromId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/navigation/src/navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-navigation",
         "id": "def-common.isAccordionLinkCategory",
         "type": "Function",
         "tags": [],

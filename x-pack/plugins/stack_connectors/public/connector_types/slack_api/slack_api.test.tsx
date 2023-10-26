@@ -44,6 +44,20 @@ describe('Slack action params validation', () => {
     });
   });
 
+  test('should succeed when action params include valid message and channels and channel ids', async () => {
+    const actionParams = {
+      subAction: 'postMessage',
+      subActionParams: { channels: ['general'], channelIds: ['general'], text: 'some text' },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        text: [],
+        channels: [],
+      },
+    });
+  });
+
   test('should fail when channels field is missing in action params', async () => {
     const actionParams = {
       subAction: 'postMessage',
@@ -53,7 +67,7 @@ describe('Slack action params validation', () => {
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         text: [],
-        channels: ['Channel is required.'],
+        channels: ['Channel ID is required.'],
       },
     });
   });

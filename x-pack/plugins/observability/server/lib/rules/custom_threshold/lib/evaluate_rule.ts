@@ -8,14 +8,26 @@
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { MetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
-import { isCustom } from './metric_expression_params';
+import {
+  Aggregators,
+  CustomMetricExpressionParams,
+  MetricExpressionParams,
+} from '../../../../../common/custom_threshold_rule/types';
 import { AdditionalContext, getIntervalInSeconds } from '../utils';
 import { SearchConfigurationType } from '../custom_threshold_executor';
-import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../messages';
+import {
+  AVERAGE_I18N,
+  CARDINALITY_I18N,
+  CUSTOM_EQUATION_I18N,
+  DOCUMENT_COUNT_I18N,
+  MAX_I18N,
+  MIN_I18N,
+  SUM_I18N,
+} from '../translations';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
+import { isCustom } from './metric_expression_params';
 
 export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
@@ -28,10 +40,29 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   currentValue: number | null;
   timestamp: string;
   shouldFire: boolean;
-  shouldWarn: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
   context?: AdditionalContext;
+};
+
+const getMetric = (criterion: CustomMetricExpressionParams) => {
+  if (!criterion.label && criterion.metrics.length === 1) {
+    switch (criterion.metrics[0].aggType) {
+      case Aggregators.COUNT:
+        return DOCUMENT_COUNT_I18N;
+      case Aggregators.AVERAGE:
+        return AVERAGE_I18N(criterion.metrics[0].field!);
+      case Aggregators.MAX:
+        return MAX_I18N(criterion.metrics[0].field!);
+      case Aggregators.MIN:
+        return MIN_I18N(criterion.metrics[0].field!);
+      case Aggregators.CARDINALITY:
+        return CARDINALITY_I18N(criterion.metrics[0].field!);
+      case Aggregators.SUM:
+        return SUM_I18N(criterion.metrics[0].field!);
+    }
+  }
+  return criterion.label || CUSTOM_EQUATION_I18N;
 };
 
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
@@ -42,8 +73,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   logger: Logger,
+  timeframe: { start: string; end: string },
   lastPeriodEnd?: number,
-  timeframe?: { start?: number; end: number },
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, searchConfiguration } = params;
@@ -91,7 +122,6 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           currentValues[missingGroup.key] = {
             value: null,
             trigger: false,
-            warn: false,
             bucketKey: missingGroup.bucketKey,
           };
         }
@@ -100,21 +130,18 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const evaluations: Record<string, Evaluation> = {};
       for (const key of Object.keys(currentValues)) {
         const result = currentValues[key];
-        if (result.trigger || result.warn || result.value === null) {
+        if (result.trigger || result.value === null) {
           evaluations[key] = {
             ...criterion,
             metric:
               criterion.aggType === 'count'
                 ? DOCUMENT_COUNT_I18N
-                : isCustom(criterion) && criterion.label
-                ? criterion.label
-                : criterion.aggType === 'custom'
-                ? CUSTOM_EQUATION_I18N
+                : isCustom(criterion)
+                ? getMetric(criterion)
                 : criterion.metric,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,
-            shouldWarn: result.warn,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
             context: {

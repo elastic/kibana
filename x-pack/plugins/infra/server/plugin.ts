@@ -6,7 +6,7 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import {
   CoreStart,
   Plugin,
@@ -19,12 +19,7 @@ import { Logger } from '@kbn/logging';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
-import {
-  DISCOVER_APP_TARGET,
-  LOGS_APP_TARGET,
-  LOGS_FEATURE_ID,
-  METRICS_FEATURE_ID,
-} from '../common/constants';
+import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -61,18 +56,6 @@ import { mapSourceToLogView } from './utils/map_source_to_log_view';
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    // Setting variants only allowed in the Serverless offering, otherwise always default `logs-ui` value
-    logs: offeringBasedSchema({
-      serverless: schema.object({
-        app_target: schema.oneOf(
-          [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
-          { defaultValue: LOGS_APP_TARGET }
-        ),
-      }),
-      options: {
-        defaultValue: { app_target: LOGS_APP_TARGET } as const, // "as const" is required for TS to not generalize `app_target: string`
-      },
-    }),
     alerting: schema.object({
       inventory_threshold: schema.object({
         group_by_page_size: schema.number({ defaultValue: 5_000 }),
@@ -97,6 +80,40 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         ),
       })
     ),
+    featureFlags: schema.object({
+      customThresholdAlertsEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      logsUIEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      metricsExplorerEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      osqueryEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      inventoryThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      metricThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      logThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      alertsAndRulesDropdownEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
   deprecations: configDeprecations,
   exposeToBrowser: publicConfigKeys,
@@ -128,7 +145,7 @@ export class InfraServerPlugin
   private logsRules: RulesService;
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
-  private metricsExplorerViews: MetricsExplorerViewsService;
+  private metricsExplorerViews?: MetricsExplorerViewsService;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
@@ -146,9 +163,9 @@ export class InfraServerPlugin
     );
 
     this.inventoryViews = new InventoryViewsService(this.logger.get('inventoryViews'));
-    this.metricsExplorerViews = new MetricsExplorerViewsService(
-      this.logger.get('metricsExplorerViews')
-    );
+    this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
+      ? new MetricsExplorerViewsService(this.logger.get('metricsExplorerViews'))
+      : undefined;
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
@@ -172,12 +189,14 @@ export class InfraServerPlugin
 
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
-    const metricsExplorerViews = this.metricsExplorerViews.setup();
+    const metricsExplorerViews = this.metricsExplorerViews?.setup();
 
     // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
-    core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
+    if (this.config.featureFlags.metricsExplorerEnabled) {
+      core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
+    }
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
     // and make them available via the request context so we can do away with
@@ -223,17 +242,19 @@ export class InfraServerPlugin
       countLogs: () => UsageCollector.countLogs(),
     });
 
-    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
-      {
-        sampleObject: null, // indicates that there is no sample object associated with this app link's path
-        getPath: () => `/app/logs`,
-        label: logsSampleDataLinkLabel,
-        icon: 'logsApp',
-      },
-    ]);
+    if (this.config.featureFlags.logsUIEnabled) {
+      plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+        {
+          sampleObject: null, // indicates that there is no sample object associated with this app link's path
+          getPath: () => `/app/logs`,
+          label: logsSampleDataLinkLabel,
+          icon: 'logsApp',
+        },
+      ]);
+    }
 
     initInfraServer(this.libs);
-    registerRuleTypes(plugins.alerting, this.libs, plugins.ml);
+    registerRuleTypes(plugins.alerting, this.libs, this.config);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
@@ -272,7 +293,7 @@ export class InfraServerPlugin
       savedObjects: core.savedObjects,
     });
 
-    const metricsExplorerViews = this.metricsExplorerViews.start({
+    const metricsExplorerViews = this.metricsExplorerViews?.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
     });

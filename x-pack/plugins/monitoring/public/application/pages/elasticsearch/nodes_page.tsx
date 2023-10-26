@@ -186,15 +186,17 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   );
 };
 
-function sortNodeRoles(roles: string[] | undefined): string[] | undefined {
+function sortNodeRoles(roles: string[] | string | undefined): string[] | undefined {
   if (!roles) {
     return undefined;
   }
 
-  if (roles.length === 0) {
+  const rolesList = Array.isArray(roles) ? roles : [roles];
+
+  if (rolesList.length === 0) {
     return [];
   }
 
-  const rolesAsSet = new Set(roles);
+  const rolesAsSet = new Set(rolesList);
   return rolesByImportance.filter((role) => rolesAsSet.has(role));
 }

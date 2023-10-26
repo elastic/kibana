@@ -21,8 +21,9 @@ export const createConnector = async (
     isNative: boolean;
     language: string | null;
     name?: string;
-    pipeline: IngestPipelineParams;
+    pipeline?: IngestPipelineParams;
     serviceType?: string | null;
+    instant_response?: boolean;
   }
 ): Promise<Connector> => {
   const document = createConnectorDocument({
@@ -33,7 +34,7 @@ export const createConnector = async (
   const result = await client.index({
     document,
     index: CURRENT_CONNECTORS_INDEX,
-    refresh: 'wait_for',
+    refresh: input.instant_response ? false : 'wait_for',
   });
 
   return { ...document, id: result._id };

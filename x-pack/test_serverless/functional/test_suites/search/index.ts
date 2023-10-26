@@ -13,9 +13,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./empty_page'));
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./cases/attachment_framework'));
-
     loadTestFile(require.resolve('./dashboards/build_dashboard'));
     loadTestFile(require.resolve('./dashboards/import_dashboard'));
     loadTestFile(require.resolve('./advanced_settings'));
+    loadTestFile(require.resolve('./rules/rule_details'));
+
+    loadTestFile(require.resolve('./ml'));
   });
 }

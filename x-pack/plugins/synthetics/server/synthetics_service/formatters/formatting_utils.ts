@@ -10,7 +10,10 @@ import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 
-export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
+export type FormatterFn = (
+  fields: Partial<MonitorFields>,
+  key: ConfigKey
+) => string | number | null;
 
 export const replaceStringWithParams = (
   value: string | boolean | {} | [],
@@ -56,4 +59,8 @@ export const secondsToCronFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
   return value ? `${value}s` : null;
+};
+
+export const maxAttemptsFormatter: FormatterFn = (fields, key) => {
+  return (fields[key] as number) ?? 2;
 };

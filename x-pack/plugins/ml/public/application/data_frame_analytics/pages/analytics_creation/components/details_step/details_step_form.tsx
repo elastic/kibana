@@ -61,7 +61,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   } = form;
 
   const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
-    cloneJob === undefined && hasSwitchedToEditor === false
+    hasSwitchedToEditor === false && destinationIndex !== undefined && destinationIndex === jobId
   );
   const [useResultsFieldDefault, setUseResultsFieldDefault] = useState<boolean>(
     (cloneJob === undefined && hasSwitchedToEditor === false && resultsField === undefined) ||
@@ -178,8 +178,6 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     if (destIndexSameAsId === true && !jobIdEmpty && jobIdValid) {
       setFormState({ destinationIndex: jobId });
-    } else if (destIndexSameAsId === false && hasSwitchedToEditor === false) {
-      setFormState({ destinationIndex: '' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destIndexSameAsId, jobId]);

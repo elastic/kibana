@@ -53,11 +53,17 @@ const StyledEuiLink = styled(EuiLink)`
   word-break: break-word;
 `;
 
+interface NameProps {
+  name: string;
+}
+
+const Name = ({ name }: NameProps) => <EuiText size="s">{name}</EuiText>;
+
 interface DescriptionProps {
   description: string;
 }
 
-const Description = ({ description }: DescriptionProps) => (
+export const Description = ({ description }: DescriptionProps) => (
   <EuiText size="s">{description}</EuiText>
 );
 
@@ -217,10 +223,29 @@ interface TagsProps {
 
 const Tags = ({ tags }: TagsProps) => <BadgeList badges={tags} />;
 
-const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListProps['listItems'] => {
+// eslint-disable-next-line complexity
+const prepareAboutSectionListItems = (
+  rule: Partial<RuleResponse>,
+  hideName?: boolean,
+  hideDescription?: boolean
+): EuiDescriptionListProps['listItems'] => {
   const aboutSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
-  if (rule.author.length > 0) {
+  if (!hideName && rule.name) {
+    aboutSectionListItems.push({
+      title: i18n.NAME_FIELD_LABEL,
+      description: <Name name={rule.name} />,
+    });
+  }
+
+  if (!hideDescription && rule.description) {
+    aboutSectionListItems.push({
+      title: i18n.DESCRIPTION_FIELD_LABEL,
+      description: <Description description={rule.description} />,
+    });
+  }
+
+  if (rule.author && rule.author.length > 0) {
     aboutSectionListItems.push({
       title: i18n.AUTHOR_FIELD_LABEL,
       description: <Author author={rule.author} />,
@@ -234,12 +259,14 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     });
   }
 
-  aboutSectionListItems.push({
-    title: i18n.SEVERITY_FIELD_LABEL,
-    description: <SeverityBadge value={rule.severity} />,
-  });
+  if (rule.severity) {
+    aboutSectionListItems.push({
+      title: i18n.SEVERITY_FIELD_LABEL,
+      description: <SeverityBadge value={rule.severity} />,
+    });
+  }
 
-  if (rule.severity_mapping.length > 0) {
+  if (rule.severity_mapping && rule.severity_mapping.length > 0) {
     aboutSectionListItems.push(
       ...rule.severity_mapping
         .filter((severityMappingItem) => severityMappingItem.field !== '')
@@ -252,12 +279,14 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     );
   }
 
-  aboutSectionListItems.push({
-    title: i18n.RISK_SCORE_FIELD_LABEL,
-    description: <RiskScore riskScore={rule.risk_score} />,
-  });
+  if (rule.risk_score) {
+    aboutSectionListItems.push({
+      title: i18n.RISK_SCORE_FIELD_LABEL,
+      description: <RiskScore riskScore={rule.risk_score} />,
+    });
+  }
 
-  if (rule.risk_score_mapping.length > 0) {
+  if (rule.risk_score_mapping && rule.risk_score_mapping.length > 0) {
     aboutSectionListItems.push(
       ...rule.risk_score_mapping
         .filter((riskScoreMappingItem) => riskScoreMappingItem.field !== '')
@@ -270,14 +299,14 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     );
   }
 
-  if (rule.references.length > 0) {
+  if (rule.references && rule.references.length > 0) {
     aboutSectionListItems.push({
       title: i18n.REFERENCES_FIELD_LABEL,
       description: <References references={rule.references} />,
     });
   }
 
-  if (rule.false_positives.length > 0) {
+  if (rule.false_positives && rule.false_positives.length > 0) {
     aboutSectionListItems.push({
       title: i18n.FALSE_POSITIVES_FIELD_LABEL,
       description: <FalsePositives falsePositives={rule.false_positives} />,
@@ -307,7 +336,7 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     });
   }
 
-  if (rule.threat.length > 0) {
+  if (rule.threat && rule.threat.length > 0) {
     aboutSectionListItems.push({
       title: i18n.THREAT_FIELD_LABEL,
       description: <Threat threat={rule.threat} />,
@@ -328,7 +357,7 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     });
   }
 
-  if (rule.tags.length > 0) {
+  if (rule.tags && rule.tags.length > 0) {
     aboutSectionListItems.push({
       title: i18n.TAGS_FIELD_LABEL,
       description: <Tags tags={rule.tags} />,
@@ -338,31 +367,30 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
   return aboutSectionListItems;
 };
 
-export interface RuleAboutSectionProps {
-  rule: RuleResponse;
+export interface RuleAboutSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
+  rule: Partial<RuleResponse>;
+  hideName?: boolean;
+  hideDescription?: boolean;
 }
 
-export const RuleAboutSection = ({ rule }: RuleAboutSectionProps) => {
-  const aboutSectionListItems = prepareAboutSectionListItems(rule);
+export const RuleAboutSection = ({
+  rule,
+  hideName,
+  hideDescription,
+  ...descriptionListProps
+}: RuleAboutSectionProps) => {
+  const aboutSectionListItems = prepareAboutSectionListItems(rule, hideName, hideDescription);
 
   return (
     <div>
-      {rule.description && (
-        <EuiDescriptionList
-          listItems={[
-            {
-              title: i18n.DESCRIPTION_FIELD_LABEL,
-              description: <Description description={rule.description} />,
-            },
-          ]}
-        />
-      )}
       <EuiSpacer size="m" />
       <EuiDescriptionList
-        type="column"
+        type={descriptionListProps.type ?? 'column'}
+        rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={aboutSectionListItems}
         columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
+        data-test-subj="listItemColumnStepRuleDescription"
+        {...descriptionListProps}
       />
     </div>
   );

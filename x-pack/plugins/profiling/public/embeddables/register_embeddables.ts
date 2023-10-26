@@ -12,8 +12,18 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { EmbeddableFlamegraphFactory } from './flamegraph/embeddable_flamegraph_factory';
 import { EmbeddableFunctionsFactory } from './functions/embeddable_functions_factory';
+import { GetProfilingEmbeddableDependencies } from './profiling_embeddable_provider';
 
-export function registerEmbeddables(embeddable: EmbeddableSetup) {
-  embeddable.registerEmbeddableFactory(EMBEDDABLE_FLAMEGRAPH, new EmbeddableFlamegraphFactory());
-  embeddable.registerEmbeddableFactory(EMBEDDABLE_FUNCTIONS, new EmbeddableFunctionsFactory());
+export function registerEmbeddables(
+  embeddable: EmbeddableSetup,
+  getProfilingEmbeddableDependencies: GetProfilingEmbeddableDependencies
+) {
+  embeddable.registerEmbeddableFactory(
+    EMBEDDABLE_FLAMEGRAPH,
+    new EmbeddableFlamegraphFactory(getProfilingEmbeddableDependencies)
+  );
+  embeddable.registerEmbeddableFactory(
+    EMBEDDABLE_FUNCTIONS,
+    new EmbeddableFunctionsFactory(getProfilingEmbeddableDependencies)
+  );
 }

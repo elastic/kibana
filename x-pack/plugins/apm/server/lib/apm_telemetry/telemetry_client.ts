@@ -46,6 +46,10 @@ export interface TelemetryClient {
     path: string;
     method: 'get';
   }) => Promise<unknown>;
+
+  fieldCaps(
+    params: estypes.FieldCapsRequest
+  ): Promise<estypes.FieldCapsResponse>;
 }
 
 export async function getTelemetryClient({
@@ -68,6 +72,10 @@ export async function getTelemetryClient({
     transportRequest: (params) =>
       unwrapEsResponse(
         esClient.asInternalUser.transport.request(params, { meta: true })
+      ),
+    fieldCaps: (params) =>
+      unwrapEsResponse(
+        esClient.asInternalUser.fieldCaps(params, { meta: true })
       ),
   };
 }

@@ -8,11 +8,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type ElserVersion } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { MlFeatures, RouteInitialization } from '../types';
+import type { ElserVersion } from '@kbn/ml-trained-models-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
@@ -29,7 +29,10 @@ import {
   createIngestPipelineSchema,
   modelDownloadsQuery,
 } from './schemas/inference_schema';
-import type { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import type {
+  PipelineDefinition,
+  TrainedModelConfigResponse,
+} from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
@@ -84,12 +87,20 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
-          const { with_pipelines: withPipelines, ...query } = request.query;
+          const {
+            with_pipelines: withPipelines,
+            with_indices: withIndicesRaw,
+            ...getTrainedModelsRequestParams
+          } = request.query;
+
+          const withIndices =
+            request.query.with_indices === 'true' || request.query.with_indices === true;
+
           const resp = await mlClient.getTrainedModels({
-            ...query,
+            ...getTrainedModelsRequestParams,
             ...(modelId ? { model_id: modelId } : {}),
             size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
-          } as MlGetTrainedModelsRequest);
+          } as estypes.MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
           const result = resp.trained_model_configs as TrainedModelConfigResponse[];
@@ -123,20 +134,54 @@ export function trainedModelsRoutes(
                   ...Object.values(modelDeploymentsMap).flat(),
                 ])
               );
+              const modelsClient = modelsProvider(client);
 
-              const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
-                modelIdsAndAliases
+              const modelsPipelinesAndIndices = await Promise.all(
+                modelIdsAndAliases.map(async (modelIdOrAlias) => {
+                  return {
+                    modelIdOrAlias,
+                    result: await modelsClient.getModelsPipelinesAndIndicesMap(modelIdOrAlias, {
+                      withIndices,
+                    }),
+                  };
+                })
               );
+
               for (const model of result) {
-                model.pipelines = {
-                  ...(pipelinesResponse.get(model.model_id) ?? {}),
-                  ...(model.metadata?.model_aliases ?? []).reduce((acc, alias) => {
-                    return Object.assign(acc, pipelinesResponse.get(alias) ?? {});
-                  }, {}),
-                  ...(modelDeploymentsMap[model.model_id] ?? []).reduce((acc, deploymentId) => {
-                    return Object.assign(acc, pipelinesResponse.get(deploymentId) ?? {});
-                  }, {}),
-                };
+                const modelAliases = model.metadata?.model_aliases ?? [];
+                const modelMap = modelsPipelinesAndIndices.find(
+                  (d) => d.modelIdOrAlias === model.model_id
+                )?.result;
+
+                const allRelatedModels = modelsPipelinesAndIndices
+                  .filter(
+                    (m) =>
+                      [
+                        model.model_id,
+                        ...modelAliases,
+                        ...(modelDeploymentsMap[model.model_id] ?? []),
+                      ].findIndex((alias) => alias === m.modelIdOrAlias) > -1
+                  )
+                  .map((r) => r?.result)
+                  .filter(isDefined);
+                const ingestPipelinesFromModelAliases = allRelatedModels
+                  .map((r) => r?.ingestPipelines)
+                  .filter(isDefined) as Array<Map<string, Record<string, PipelineDefinition>>>;
+
+                model.pipelines = ingestPipelinesFromModelAliases.reduce<
+                  Record<string, PipelineDefinition>
+                >((allPipelines, modelsToPipelines) => {
+                  for (const [, pipelinesObj] of modelsToPipelines?.entries()) {
+                    Object.entries(pipelinesObj).forEach(([pipelineId, pipelineInfo]) => {
+                      allPipelines[pipelineId] = pipelineInfo;
+                    });
+                  }
+                  return allPipelines;
+                }, {});
+
+                if (modelMap && withIndices) {
+                  model.indices = modelMap.indices;
+                }
               }
             }
           } catch (e) {

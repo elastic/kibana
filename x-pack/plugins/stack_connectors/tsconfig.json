@@ -35,6 +35,8 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/alerting-plugin",
     "@kbn/securitysolution-ecs",
+    "@kbn/ui-theme",
+    "@kbn/cases-components",
   ],
   "exclude": [
     "target/**/*",

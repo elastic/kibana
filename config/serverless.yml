@@ -7,6 +7,7 @@ xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.disableProxies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
+xpack.fleet.internal.retrySetupOnBoot: true
 
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'
@@ -41,6 +42,10 @@ xpack.index_management.enableIndexActions: false
 xpack.index_management.enableLegacyTemplates: false
 # Disable index stats information from Index Management UI
 xpack.index_management.enableIndexStats: false
+# Only limited index settings can be edited
+xpack.index_management.editableIndexSettings: limited
+# Disable Storage size column in the Data streams table from Index Management UI
+xpack.index_management.enableDataStreamsStorageColumn: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -51,6 +56,7 @@ xpack.canvas.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
+xpack.screenshotting.enabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false
@@ -84,6 +90,9 @@ xpack.spaces.allowFeatureVisibility: false
 
 # Only display console autocomplete suggestions for ES endpoints that are available in serverless
 console.autocompleteDefinitions.endpointsAvailability: serverless
+
+# Do not check the ES version when running on Serverless
+elasticsearch.ignoreVersionMismatch: true
 
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
 elasticsearch.requestHeadersWhitelist: ['authorization', 'es-client-authentication']

@@ -11,7 +11,8 @@ import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core
 import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
-import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -65,7 +66,7 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
             ...request.params,
           };
-      const { body, headers, meta } = id
+      const { body, headers } = id
         ? await client.asyncSearch.get(
             { ...params, id },
             { ...options.transport, signal: options.abortSignal, meta: true }
@@ -78,11 +79,7 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse(
-        { ...body, response },
-        headers?.warning,
-        meta?.request?.params
-      );
+      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
     };
 
     const cancel = async () => {
@@ -98,7 +95,7 @@ export const enhancedEsSearchStrategyProvider = (
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
       catchError((e) => {
-        throw getKbnServerError(e);
+        throw getKbnSearchError(e);
       })
     );
   }
@@ -135,14 +132,12 @@ export const enhancedEsSearchStrategyProvider = (
       );
 
       const response = esResponse.body as estypes.SearchResponse<any>;
-      const requestParams = esResponse.meta?.request?.params;
       return {
         rawResponse: shimHitsTotal(response, options),
-        ...(requestParams ? { requestParams } : {}),
         ...getTotalLoaded(response),
       };
     } catch (e) {
-      throw getKbnServerError(e);
+      throw getKbnSearchError(e);
     }
   }
 
@@ -152,12 +147,12 @@ export const enhancedEsSearchStrategyProvider = (
      * @param options
      * @param deps `SearchStrategyDependencies`
      * @returns `Observable<IEsSearchResponse<any>>`
-     * @throws `KbnServerError`
+     * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
       if (request.indexType && request.indexType !== 'rollup') {
-        throw new KbnServerError('Unknown indexType', 400);
+        throw new KbnSearchError('Unknown indexType', 400);
       }
 
       if (request.indexType === undefined || !deps.rollupsEnabled) {

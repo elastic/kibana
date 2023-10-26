@@ -12,9 +12,8 @@ import classnames from 'classnames';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
 import { EuiButtonIcon, EuiButtonIconProps, EuiHighlight, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
-import { FieldIcon, getFieldIconProps } from '../field_icon';
-import { fieldNameWildcardMatcher } from '../../utils/field_name_wildcard_matcher';
 import './field_item_button.scss';
 
 /**
@@ -197,7 +196,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       fieldIcon={<FieldIcon {...iconProps} />}
       fieldName={
         <EuiHighlight
-          search={getSearchHighlight(displayName, fieldSearchHighlight)}
+          search={getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight)}
           title={title}
           data-test-subj={`field-${field.name}`}
         >
@@ -232,16 +231,4 @@ function FieldConflictInfoIcon() {
       />
     </EuiToolTip>
   );
-}
-
-function getSearchHighlight(displayName: string, fieldSearchHighlight?: string): string {
-  const searchHighlight = fieldSearchHighlight || '';
-  if (
-    searchHighlight.includes('*') &&
-    fieldNameWildcardMatcher({ name: displayName }, searchHighlight)
-  ) {
-    return displayName;
-  }
-
-  return searchHighlight;
 }

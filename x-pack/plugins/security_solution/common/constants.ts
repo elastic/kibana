@@ -60,7 +60,6 @@ export const DEFAULT_INTERVAL_TYPE = 'manual' as const;
 export const DEFAULT_INTERVAL_VALUE = 300000 as const; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
-export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled' as const;
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51' as const;
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
 export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
@@ -430,7 +429,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.11',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -444,6 +443,7 @@ export enum BulkActionsDryRunErrCode {
   IMMUTABLE = 'IMMUTABLE',
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
+  ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
 }
 
 export const RISKY_HOSTS_DOC_LINK =

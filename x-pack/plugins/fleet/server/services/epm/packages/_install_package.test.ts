@@ -135,9 +135,11 @@ describe('_installPackage', () => {
           disableProxies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
+          retrySetupOnBoot: false,
           registry: {
             kibanaVersionCheckEnabled: true,
             capabilities: [],
+            excludePackages: [],
           },
         },
       })
@@ -192,9 +194,11 @@ describe('_installPackage', () => {
           disableILMPolicies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
+          retrySetupOnBoot: false,
           registry: {
             kibanaVersionCheckEnabled: true,
             capabilities: [],
+            excludePackages: [],
           },
         },
       })
@@ -265,9 +269,11 @@ describe('_installPackage', () => {
             disableProxies: false,
             fleetServerStandalone: false,
             onlyAllowAgentUpgradeToKnownVersions: false,
+            retrySetupOnBoot: false,
             registry: {
               kibanaVersionCheckEnabled: true,
               capabilities: [],
+              excludePackages: [],
             },
           },
         })

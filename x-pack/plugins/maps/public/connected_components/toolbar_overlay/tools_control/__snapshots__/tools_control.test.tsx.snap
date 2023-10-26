@@ -32,6 +32,7 @@ exports[`Should render cancel button when drawing 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="none"
+      repositionToCrossAxis={true}
     >
       <EuiContextMenu
         initialPanelId={0}
@@ -135,6 +136,7 @@ exports[`renders 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionToCrossAxis={true}
 >
   <EuiContextMenu
     initialPanelId={0}

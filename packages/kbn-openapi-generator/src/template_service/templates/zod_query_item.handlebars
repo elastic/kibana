@@ -43,9 +43,17 @@
 {{~/if~}}
 
 {{~#if (eq type "integer")}}
-{{> zod_schema_item}}
+  z.coerce.number().int()
+  {{~#if minimum includeZero=true}}.min({{minimum}}){{/if~}}
+  {{~#if maximum includeZero=true}}.max({{maximum}}){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
 {{~/if~}}
 
 {{~#if (eq type "number")}}
-{{> zod_schema_item}}
+  z.coerce.number()
+  {{~#if minimum includeZero=true}}.min({{minimum}}){{/if~}}
+  {{~#if maximum includeZero=true}}.max({{maximum}}){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
 {{~/if~}}

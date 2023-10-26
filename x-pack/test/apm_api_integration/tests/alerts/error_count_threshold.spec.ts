@@ -26,12 +26,13 @@ import {
 import { cleanupAllState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
-import { waitForRuleStatus } from './helpers/wait_for_rule_status';
+import { waitForActiveRule } from './helpers/wait_for_active_rule';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const supertest = getService('supertest');
   const es = getService('es');
+  const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -133,17 +134,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteActionConnector({ supertest, es, actionId });
-        await deleteRuleById({ supertest, ruleId });
-        await deleteAlertsByRuleId({ es, ruleId });
+        try {
+          await deleteActionConnector({ supertest, es, actionId });
+          await deleteRuleById({ supertest, ruleId });
+          await deleteAlertsByRuleId({ es, ruleId });
+        } catch (e) {
+          logger.info('Could not delete rule or action connector', e);
+        }
       });
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForRuleStatus({
-          ruleId,
-          expectedStatus: 'active',
-          supertest,
-        });
+        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
         expect(ruleStatus).to.be('active');
       });
 
@@ -284,8 +285,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteRuleById({ supertest, ruleId });
-        await deleteAlertsByRuleId({ es, ruleId });
+        try {
+          await deleteRuleById({ supertest, ruleId });
+          await deleteAlertsByRuleId({ es, ruleId });
+        } catch (e) {
+          logger.info('Could not delete rule', e);
+        }
       });
 
       it('produces one alert for the opbeans-php service', async () => {

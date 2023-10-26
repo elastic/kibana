@@ -13,15 +13,15 @@ import { PresentationUtilPluginStart, registerExpressionsLanguage } from '..';
 
 import { capabilitiesServiceFactory } from './capabilities/capabilities.story';
 import { dataViewsServiceFactory } from './data_views/data_views.story';
-import { dashboardsServiceFactory } from './dashboards/dashboards.stub';
 import { labsServiceFactory } from './labs/labs.story';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions.stub';
+import { contentManagementServiceFactory } from './content_management/content_management.stub';
 
 export const providers: PluginServiceProviders<PresentationUtilServices> = {
+  contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
-  dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
 };
 

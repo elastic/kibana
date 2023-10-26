@@ -67,5 +67,6 @@ export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<Metr
     requiresAppContext: false,
     format: formatReason,
     alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
+    priority: 10,
   };
 }

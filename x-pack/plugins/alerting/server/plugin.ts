@@ -111,6 +111,7 @@ export const EVENT_LOG_ACTIONS = {
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
   executeTimeout: 'execute-timeout',
+  untrackedInstance: 'untracked-instance',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -189,6 +190,7 @@ export interface AlertingPluginsStart {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
+  serverless?: ServerlessPluginSetup;
 }
 
 export class AlertingPlugin {
@@ -213,6 +215,7 @@ export class AlertingPlugin {
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
+  private nodeRoles: PluginInitializerContext['node']['roles'];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -220,6 +223,7 @@ export class AlertingPlugin {
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
     this.alertsService = null;
+    this.nodeRoles = initializerContext.node.roles;
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
@@ -239,11 +243,6 @@ export class AlertingPlugin {
 
     const useDataStreamForAlerts = !!plugins.serverless;
     this.dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
-    this.logger.info(
-      `using ${
-        this.dataStreamAdapter.isUsingDataStreams() ? 'datastreams' : 'indexes and aliases'
-      } for persisting alerts`
-    );
 
     core.capabilities.registerProvider(() => {
       return {
@@ -276,15 +275,24 @@ export class AlertingPlugin {
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
     if (this.config.enableFrameworkAlerts) {
-      this.alertsService = new AlertsService({
-        logger: this.logger,
-        pluginStop$: this.pluginStop$,
-        kibanaVersion: this.kibanaVersion,
-        dataStreamAdapter: this.dataStreamAdapter!,
-        elasticsearchClientPromise: core
-          .getStartServices()
-          .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-      });
+      if (this.nodeRoles.migrator) {
+        this.logger.info(`Skipping initialization of AlertsService on migrator node`);
+      } else {
+        this.logger.info(
+          `using ${
+            this.dataStreamAdapter.isUsingDataStreams() ? 'datastreams' : 'indexes and aliases'
+          } for persisting alerts`
+        );
+        this.alertsService = new AlertsService({
+          logger: this.logger,
+          pluginStop$: this.pluginStop$,
+          kibanaVersion: this.kibanaVersion,
+          dataStreamAdapter: this.dataStreamAdapter!,
+          elasticsearchClientPromise: core
+            .getStartServices()
+            .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+        });
+      }
     }
 
     const ruleTypeRegistry = new RuleTypeRegistry({
@@ -494,12 +502,15 @@ export class AlertingPlugin {
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
+      alertsService: this.alertsService,
     });
 
     rulesSettingsClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityPluginStart: plugins.security,
+      isServerless: !!plugins.serverless,
     });
 
     maintenanceWindowClientFactory.initialize({

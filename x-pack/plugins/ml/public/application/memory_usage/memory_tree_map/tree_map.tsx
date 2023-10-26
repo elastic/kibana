@@ -29,7 +29,7 @@ import { useFieldFormatter, useMlKibana } from '../../contexts/kibana';
 import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {
   node?: string;
@@ -73,11 +73,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
     [isDarkTheme]
   );
 
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const { displayErrorToast } = useToastNotificationService();
@@ -177,7 +173,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
         {data.length ? (
           <Chart>
-            <Settings baseTheme={baseTheme} theme={theme.theme} />
+            <Settings baseTheme={baseTheme} theme={theme.theme} locale={i18n.getLocale()} />
             <Partition<MemoryUsageInfo>
               id="memoryUsageTreeMap"
               data={data}

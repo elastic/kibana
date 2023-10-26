@@ -174,6 +174,7 @@ describe('ActionForm - Slack API Connector', () => {
 
     const testProps = {
       ...baseProps,
+      hasAlertsMappings: false,
       actions: testActions,
     };
 
@@ -185,6 +186,6 @@ describe('ActionForm - Slack API Connector', () => {
       </IntlProvider>
     );
 
-    expect(await screen.findByText('Channel is required.')).toBeInTheDocument();
+    expect(await screen.findByText('Channel ID is required.')).toBeInTheDocument();
   });
 });

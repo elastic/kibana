@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { deserializeDataStream, deserializeDataStreamList } from './data_stream_serialization';
+export {
+  deserializeDataStream,
+  deserializeDataStreamList,
+  splitSizeAndUnits,
+} from './data_stream_serialization';
 
 export {
   deserializeTemplate,

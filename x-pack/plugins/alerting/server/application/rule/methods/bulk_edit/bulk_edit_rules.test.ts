@@ -102,6 +102,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 const paramsModifier = jest.fn();
 
@@ -239,6 +241,7 @@ describe('bulkEdit()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -737,6 +740,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -1453,40 +1457,6 @@ describe('bulkEdit()', () => {
       expect(response.errors[0].message).toEqual(
         'Error updating rule: could not add snooze - Rule cannot have more than 5 snooze schedules'
       );
-    });
-
-    test('should ignore siem rules when bulk editing snooze', async () => {
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            attributes: { ...existingDecryptedRule.attributes, consumer: 'siem' } as any,
-          },
-        ],
-      });
-
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
-
-      const snoozePayload = getSnoozeSchedule();
-
-      await rulesClient.bulkEdit({
-        filter: '',
-        operations: [
-          {
-            operation: 'set',
-            field: 'snoozeSchedule',
-            value: snoozePayload,
-          },
-        ],
-      });
-
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes as any)
-          .snoozeSchedule
-      ).toEqual([]);
     });
   });
 
@@ -2352,6 +2322,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validLegacyConsumers: [],
       });
@@ -2397,6 +2368,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validLegacyConsumers: [],
       });

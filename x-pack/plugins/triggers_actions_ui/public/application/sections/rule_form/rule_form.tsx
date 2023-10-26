@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback, Suspense, useMemo } from 'react';
+import React, {
+  Fragment,
+  useState,
+  useEffect,
+  useCallback,
+  Suspense,
+  useMemo,
+  useRef,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -72,7 +80,11 @@ import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
-import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
+import {
+  ruleTypeCompare,
+  ruleTypeGroupCompare,
+  ruleTypeUngroupedCompare,
+} from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { SectionLoading } from '../../components/section_loading';
@@ -137,6 +149,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setConsumer?: (consumer: RuleCreationValidConsumer | null) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
+  hideGrouping?: boolean;
   hideInterval?: boolean;
   connectorFeatureId?: string;
   validConsumers?: RuleCreationValidConsumer[];
@@ -159,6 +172,7 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
+  hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
   validConsumers,
@@ -178,6 +192,7 @@ export const RuleForm = ({
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
+  const flyoutBodyOverflowRef = useRef<HTMLDivElement | HTMLSpanElement | null>(null);
 
   const defaultRuleInterval = getInitialInterval(config.minimumScheduleInterval?.value);
   const defaultScheduleInterval = getDurationNumberInItsUnit(defaultRuleInterval);
@@ -299,6 +314,22 @@ export const RuleForm = ({
       setRuleIntervalUnit(intervalUnit);
     }
   }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
+
+  useEffect(() => {
+    if (!flyoutBodyOverflowRef.current) {
+      // We're using this as a reliable way to reset the scroll position
+      // of the flyout independently of the selected rule type
+      flyoutBodyOverflowRef.current = document.querySelector('.euiFlyoutBody__overflow');
+    }
+  }, []);
+
+  const resetContentScroll = useCallback(() => flyoutBodyOverflowRef?.current?.scroll?.(0, 0), []);
+
+  useEffect(() => {
+    if (rule.ruleTypeId) {
+      resetContentScroll();
+    }
+  }, [rule.ruleTypeId, resetContentScroll]);
 
   const setRuleProperty = useCallback(
     <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
@@ -457,85 +488,93 @@ export const RuleForm = ({
     {}
   );
 
-  const ruleTypeNodes = Object.entries(ruleTypesByProducer)
-    .sort((a, b) => ruleTypeGroupCompare(a, b, solutions))
-    .map(([solution, items], groupIndex) => (
-      <Fragment key={`group${groupIndex}`}>
-        <EuiFlexGroup
-          gutterSize="none"
-          alignItems="center"
-          className="triggersActionsUI__ruleTypeNodeHeading"
-        >
-          <EuiFlexItem>
-            <EuiTitle
-              data-test-subj={`ruleType${groupIndex}Group`}
-              size="xxxs"
-              textTransform="uppercase"
-            >
-              <EuiTextColor color="subdued">
-                {(kibanaFeatures
-                  ? getProducerFeatureName(solution, kibanaFeatures)
-                  : capitalize(solution)) ?? capitalize(solution)}
-              </EuiTextColor>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
-          {items
-            .sort((a, b) => ruleTypeCompare(a, b))
-            .map((item, index) => {
-              const ruleTypeListItemHtml = (
-                <span>
-                  <strong>{item.name}</strong>
-                  <EuiText color="subdued" size="s">
-                    <p>{item.ruleTypeItem.description}</p>
-                  </EuiText>
-                </span>
-              );
-              return (
-                <EuiListGroupItem
-                  wrapText
-                  key={index}
-                  data-test-subj={`${item.id}-SelectOption`}
-                  color="primary"
-                  label={
-                    item.checkEnabledResult.isEnabled ? (
-                      ruleTypeListItemHtml
-                    ) : (
-                      <EuiToolTip
-                        position="top"
-                        data-test-subj={`${item.id}-disabledTooltip`}
-                        content={item.checkEnabledResult.message}
-                      >
-                        {ruleTypeListItemHtml}
-                      </EuiToolTip>
-                    )
-                  }
-                  isDisabled={!item.checkEnabledResult.isEnabled}
-                  onClick={() => {
-                    setRuleProperty('ruleTypeId', item.id);
-                    setRuleTypeModel(item.ruleTypeItem);
-                    setActions([]);
-                    setRuleProperty('params', {});
-                    if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
-                      setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
-                    }
+  const sortedRuleTypeNodes = hideGrouping
+    ? Object.entries(ruleTypesByProducer).sort((a, b) =>
+        ruleTypeUngroupedCompare(a, b, ruleTypeToFilter)
+      )
+    : Object.entries(ruleTypesByProducer).sort((a, b) => ruleTypeGroupCompare(a, b, solutions));
 
-                    if (useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(item.id)) {
-                      setConsumer(solution as RuleCreationValidConsumer);
-                    }
-                  }}
-                />
-              );
-            })}
-        </EuiListGroup>
-        <EuiSpacer />
-      </Fragment>
-    ));
+  const ruleTypeNodes = sortedRuleTypeNodes.map(([solution, items], groupIndex) => (
+    <Fragment key={`group${groupIndex}`}>
+      {!hideGrouping && (
+        <>
+          <EuiFlexGroup
+            gutterSize="none"
+            alignItems="center"
+            className="triggersActionsUI__ruleTypeNodeHeading"
+          >
+            <EuiFlexItem>
+              <EuiTitle
+                data-test-subj={`ruleType${groupIndex}Group`}
+                size="xxxs"
+                textTransform="uppercase"
+              >
+                <EuiTextColor color="subdued">
+                  {(kibanaFeatures
+                    ? getProducerFeatureName(solution, kibanaFeatures)
+                    : capitalize(solution)) ?? capitalize(solution)}
+                </EuiTextColor>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule size="full" margin="xs" />
+        </>
+      )}
+      <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
+        {items
+          .sort((a, b) => ruleTypeCompare(a, b))
+          .map((item, index) => {
+            const ruleTypeListItemHtml = (
+              <span>
+                <strong>{item.name}</strong>
+                <EuiText color="subdued" size="s">
+                  <p>{item.ruleTypeItem.description}</p>
+                </EuiText>
+              </span>
+            );
+            return (
+              <EuiListGroupItem
+                wrapText
+                key={index}
+                data-test-subj={`${item.id}-SelectOption`}
+                color="primary"
+                label={
+                  item.checkEnabledResult.isEnabled ? (
+                    ruleTypeListItemHtml
+                  ) : (
+                    <EuiToolTip
+                      position="top"
+                      data-test-subj={`${item.id}-disabledTooltip`}
+                      content={item.checkEnabledResult.message}
+                    >
+                      {ruleTypeListItemHtml}
+                    </EuiToolTip>
+                  )
+                }
+                isDisabled={!item.checkEnabledResult.isEnabled}
+                onClick={() => {
+                  setRuleProperty('ruleTypeId', item.id);
+                  setRuleTypeModel(item.ruleTypeItem);
+                  setActions([]);
+                  setRuleProperty('params', {});
+                  if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
+                    setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
+                  }
+
+                  if (useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(item.id)) {
+                    setConsumer(solution as RuleCreationValidConsumer);
+                  }
+                }}
+              />
+            );
+          })}
+      </EuiListGroup>
+      <EuiSpacer size="m" />
+    </Fragment>
+  ));
 
   const labelForRuleChecked = [
     i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel', {

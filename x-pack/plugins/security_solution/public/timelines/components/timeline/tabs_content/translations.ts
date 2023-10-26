@@ -46,10 +46,17 @@ export const SECURITY_ASSISTANT = i18n.translate(
   }
 );
 
-export const DISCOVER_IN_TIMELINE_TAB = i18n.translate(
-  'xpack.securitySolution.timeline.tabs.discoverInTimeline',
+export const DISCOVER_ESQL_IN_TIMELINE_TAB = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline',
   {
-    defaultMessage: 'Discover',
+    defaultMessage: 'ES|QL',
+  }
+);
+
+export const DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
   }
 );
 

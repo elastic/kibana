@@ -82,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
       advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
       indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
       savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+      savedQueryManagement: ['all', 'minimal_all'],
       osquery: [
         'all',
         'read',
@@ -104,6 +105,8 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'allFlappingSettings',
         'readFlappingSettings',
+        'allQueryDelaySettings',
+        'readQueryDelaySettings',
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],

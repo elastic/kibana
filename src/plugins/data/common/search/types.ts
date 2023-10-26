@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -87,11 +86,6 @@ export interface IKibanaSearchResponse<RawResponse = any> {
    * The raw response returned by the internal search method (usually the raw ES response)
    */
   rawResponse: RawResponse;
-
-  /**
-   * HTTP request parameters from elasticsearch transport client t
-   */
-  requestParams?: ConnectionRequestParams;
 }
 
 export interface IKibanaSearchRequest<Params = any> {

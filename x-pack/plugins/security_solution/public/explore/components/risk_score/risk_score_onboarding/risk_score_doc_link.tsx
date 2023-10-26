@@ -23,7 +23,7 @@ const RiskScoreDocLinkComponent = ({
 
   return (
     <EuiLink target="_blank" rel="noopener nofollow noreferrer" href={docLink}>
-      {title ? title : LEARN_MORE}
+      {title ? title : LEARN_MORE(riskScoreEntity)}
     </EuiLink>
   );
 };

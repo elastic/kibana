@@ -87,7 +87,7 @@ export async function mountManagementSection(
     fieldFormatEditors: dataViewFieldEditor.fieldFormatEditors,
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
-    spaces,
+    spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
     theme,
     savedObjectsManagement,
   };

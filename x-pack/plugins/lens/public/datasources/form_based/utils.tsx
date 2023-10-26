@@ -19,7 +19,7 @@ import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
 
-import { SearchResponseWarning, OpenIncompleteResultsModalButton } from '@kbn/data-plugin/public';
+import { type SearchResponseWarning, ViewWarningButton } from '@kbn/search-response-warnings';
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
@@ -306,18 +306,16 @@ export function getSearchWarningMessages(
               fixableInEditor: true,
               displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
               shortMessage: '',
-              longMessage: (
+              longMessage: (closePopover) => (
                 <>
                   <EuiText size="s">{warning.message}</EuiText>
                   <EuiSpacer size="s" />
-                  <OpenIncompleteResultsModalButton
-                    theme={theme}
-                    warning={warning}
+                  <ViewWarningButton
+                    onClick={() => {
+                      closePopover();
+                      warning.openInInspector();
+                    }}
                     size="m"
-                    getRequestMeta={() => ({
-                      request,
-                      response,
-                    })}
                     color="primary"
                     isButtonEmpty={true}
                   />

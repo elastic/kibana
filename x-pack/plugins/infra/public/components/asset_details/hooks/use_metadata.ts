@@ -15,16 +15,23 @@ import { throwErrors, createPlainError } from '../../../../common/runtime_types'
 import { getFilteredMetrics } from '../../../pages/metrics/metric_detail/lib/get_filtered_metrics';
 import type { InventoryItemType, InventoryMetric } from '../../../../common/inventory_models/types';
 
-export function useMetadata(
-  nodeId: string,
-  nodeType: InventoryItemType,
-  requiredMetrics: InventoryMetric[],
-  sourceId: string,
+interface UseMetadataProps {
+  assetId: string;
+  assetType: InventoryItemType;
+  requiredMetrics?: InventoryMetric[];
+  sourceId: string;
   timeRange: {
     from: number;
     to: number;
-  }
-) {
+  };
+}
+export function useMetadata({
+  assetId,
+  assetType,
+  sourceId,
+  timeRange,
+  requiredMetrics = [],
+}: UseMetadataProps) {
   const decodeResponse = (response: any) => {
     return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
   };
@@ -32,12 +39,15 @@ export function useMetadata(
     '/api/infra/metadata',
     'POST',
     JSON.stringify({
-      nodeId,
-      nodeType,
+      nodeId: assetId,
+      nodeType: assetType,
       sourceId,
       timeRange,
     }),
-    decodeResponse
+    decodeResponse,
+    undefined,
+    undefined,
+    true
   );
 
   useEffect(() => {
@@ -49,17 +59,13 @@ export function useMetadata(
   return {
     name: (response && response.name) || '',
     filteredRequiredMetrics:
-      (response && getFilteredMetrics(requiredMetrics, response.features)) || [],
+      response && requiredMetrics.length > 0
+        ? getFilteredMetrics(requiredMetrics, response.features)
+        : [],
     error: (error && error.message) || null,
     loading,
     metadata: response,
-    cloudId:
-      (response &&
-        response.info &&
-        response.info.cloud &&
-        response.info.cloud.instance &&
-        response.info.cloud.instance.id) ||
-      '',
+    cloudId: response?.info?.cloud?.instance?.id || '',
     reload: makeRequest,
   };
 }

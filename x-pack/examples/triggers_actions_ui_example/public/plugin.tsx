@@ -21,7 +21,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+import { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/alert_table_config_registry';
 import {
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
@@ -81,8 +81,7 @@ export class TriggersActionsUiExamplePlugin
   ) {
     const {
       alertsTableConfigurationRegistry,
-    }: { alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry> } =
-      triggersActionsUi;
+    }: { alertsTableConfigurationRegistry: AlertTableConfigRegistry } = triggersActionsUi;
 
     const columns: EuiDataGridColumn[] = [
       {

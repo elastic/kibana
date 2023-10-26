@@ -33,6 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     shouldLoginIfPrompted: false,
   };
 
+  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+
   describe('dashboard feature controls security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');

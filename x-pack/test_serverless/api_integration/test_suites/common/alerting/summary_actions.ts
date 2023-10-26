@@ -6,6 +6,25 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  EVENT_KIND,
+  ALERT_ACTION_GROUP,
+  ALERT_FLAPPING,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+  TAGS,
+} from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createIndexConnector, createEsQueryRule } from './helpers/alerting_api_helper';
@@ -21,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('Summary actions', () => {
+  describe('Summary actions', function () {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
@@ -97,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -129,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp2.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -141,51 +161,39 @@ export default function ({ getService }: FtrProviderContext) {
 
       const alertDocument = resp2.hits.hits[0]._source as Record<string, any>;
       expect(omit(alertDocument, fields)).to.eql({
-        event: {
-          kind: 'signal',
+        [EVENT_KIND]: 'signal',
+        ['kibana.alert.title']: "rule 'always fire' matched query",
+        ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.value']: '0',
+        [ALERT_ACTION_GROUP]: 'query matched',
+        [ALERT_FLAPPING]: false,
+        [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_STATUS]: 'active',
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
+        [ALERT_RULE_CONSUMER]: 'alerts',
+        [ALERT_RULE_NAME]: 'always fire',
+        [ALERT_RULE_PARAMETERS]: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+          excludeHitsFromPreviousRun: true,
+          aggType: 'count',
+          groupBy: 'all',
+          searchType: 'esQuery',
         },
-        tags: [],
-        kibana: {
-          space_ids: ['default'],
-          alert: {
-            title: "rule 'always fire' matched query",
-            evaluation: {
-              conditions: 'Number of matching documents is greater than -1',
-              value: 0,
-            },
-            action_group: 'query matched',
-            flapping: false,
-            duration: {},
-            instance: { id: 'query matched' },
-            status: 'active',
-            workflow_status: 'open',
-            rule: {
-              category: 'Elasticsearch query',
-              consumer: 'alerts',
-              name: 'always fire',
-              execution: {},
-              parameters: {
-                size: 100,
-                thresholdComparator: '>',
-                threshold: [-1],
-                index: ['alert-test-data'],
-                timeField: 'date',
-                esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
-                timeWindowSize: 20,
-                timeWindowUnit: 's',
-                excludeHitsFromPreviousRun: true,
-                aggType: 'count',
-                groupBy: 'all',
-                searchType: 'esQuery',
-              },
-              producer: 'stackAlerts',
-              revision: 0,
-              rule_type_id: '.es-query',
-              tags: [],
-              uuid: ruleId,
-            },
-          },
-        },
+        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_REVISION]: 0,
+        [ALERT_RULE_TYPE_ID]: '.es-query',
+        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_UUID]: ruleId,
+        [SPACE_IDS]: ['default'],
+        [TAGS]: [],
       });
     });
 
@@ -229,6 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -261,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp2.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -273,51 +282,39 @@ export default function ({ getService }: FtrProviderContext) {
 
       const alertDocument = resp2.hits.hits[0]._source as Record<string, any>;
       expect(omit(alertDocument, fields)).to.eql({
-        event: {
-          kind: 'signal',
+        [EVENT_KIND]: 'signal',
+        ['kibana.alert.title']: "rule 'always fire' matched query",
+        ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.value']: '0',
+        [ALERT_ACTION_GROUP]: 'query matched',
+        [ALERT_FLAPPING]: false,
+        [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_STATUS]: 'active',
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
+        [ALERT_RULE_CONSUMER]: 'alerts',
+        [ALERT_RULE_NAME]: 'always fire',
+        [ALERT_RULE_PARAMETERS]: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+          excludeHitsFromPreviousRun: true,
+          aggType: 'count',
+          groupBy: 'all',
+          searchType: 'esQuery',
         },
-        tags: [],
-        kibana: {
-          space_ids: ['default'],
-          alert: {
-            title: "rule 'always fire' matched query",
-            evaluation: {
-              conditions: 'Number of matching documents is greater than -1',
-              value: 0,
-            },
-            action_group: 'query matched',
-            flapping: false,
-            duration: {},
-            instance: { id: 'query matched' },
-            status: 'active',
-            workflow_status: 'open',
-            rule: {
-              category: 'Elasticsearch query',
-              consumer: 'alerts',
-              name: 'always fire',
-              execution: {},
-              parameters: {
-                size: 100,
-                thresholdComparator: '>',
-                threshold: [-1],
-                index: ['alert-test-data'],
-                timeField: 'date',
-                esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
-                timeWindowSize: 20,
-                timeWindowUnit: 's',
-                excludeHitsFromPreviousRun: true,
-                aggType: 'count',
-                groupBy: 'all',
-                searchType: 'esQuery',
-              },
-              producer: 'stackAlerts',
-              revision: 0,
-              rule_type_id: '.es-query',
-              tags: [],
-              uuid: ruleId,
-            },
-          },
-        },
+        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_REVISION]: 0,
+        [ALERT_RULE_TYPE_ID]: '.es-query',
+        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_UUID]: ruleId,
+        [SPACE_IDS]: ['default'],
+        [TAGS]: [],
       });
     });
 
@@ -371,6 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -440,6 +438,7 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -468,8 +467,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(resp2.hits.hits.length).to.be(1);
 
-      const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      const document = resp.hits.hits[1];
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -479,8 +478,8 @@ export default function ({ getService }: FtrProviderContext) {
         recoveredIds: '[]',
       });
 
-      const document1 = resp.hits.hits[1];
-      expect(document1._source).to.eql({
+      const document1 = resp.hits.hits[0];
+      expect(omit(document1, '_source.date')._source).to.eql({
         all: '1',
         new: '0',
         newIds: '[]',
@@ -492,51 +491,39 @@ export default function ({ getService }: FtrProviderContext) {
 
       const alertDocument = resp2.hits.hits[0]._source as Record<string, any>;
       expect(omit(alertDocument, fields)).to.eql({
-        event: {
-          kind: 'signal',
+        [EVENT_KIND]: 'signal',
+        ['kibana.alert.title']: "rule 'always fire' matched query",
+        ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.value']: '0',
+        [ALERT_ACTION_GROUP]: 'query matched',
+        [ALERT_FLAPPING]: false,
+        [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_STATUS]: 'active',
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
+        [ALERT_RULE_CONSUMER]: 'alerts',
+        [ALERT_RULE_NAME]: 'always fire',
+        [ALERT_RULE_PARAMETERS]: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+          excludeHitsFromPreviousRun: true,
+          aggType: 'count',
+          groupBy: 'all',
+          searchType: 'esQuery',
         },
-        tags: [],
-        kibana: {
-          space_ids: ['default'],
-          alert: {
-            title: "rule 'always fire' matched query",
-            evaluation: {
-              conditions: 'Number of matching documents is greater than -1',
-              value: 0,
-            },
-            action_group: 'query matched',
-            flapping: false,
-            duration: {},
-            instance: { id: 'query matched' },
-            status: 'active',
-            workflow_status: 'open',
-            rule: {
-              category: 'Elasticsearch query',
-              consumer: 'alerts',
-              name: 'always fire',
-              execution: {},
-              parameters: {
-                size: 100,
-                thresholdComparator: '>',
-                threshold: [-1],
-                index: ['alert-test-data'],
-                timeField: 'date',
-                esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
-                timeWindowSize: 20,
-                timeWindowUnit: 's',
-                excludeHitsFromPreviousRun: true,
-                aggType: 'count',
-                groupBy: 'all',
-                searchType: 'esQuery',
-              },
-              producer: 'stackAlerts',
-              revision: 0,
-              rule_type_id: '.es-query',
-              tags: [],
-              uuid: ruleId,
-            },
-          },
-        },
+        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_REVISION]: 0,
+        [ALERT_RULE_TYPE_ID]: '.es-query',
+        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_UUID]: ruleId,
+        [SPACE_IDS]: ['default'],
+        [TAGS]: [],
       });
     });
   });

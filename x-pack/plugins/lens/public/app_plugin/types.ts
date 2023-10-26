@@ -32,6 +32,7 @@ import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
@@ -161,6 +162,7 @@ export interface LensAppServices {
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;

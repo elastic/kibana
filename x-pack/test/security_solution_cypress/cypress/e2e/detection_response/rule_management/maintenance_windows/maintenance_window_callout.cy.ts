@@ -13,20 +13,23 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Maintenance window callout on Rule Management page',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     let maintenanceWindowId = '';
 
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       login();
 
       const body: AsApiContract<MaintenanceWindowCreateBody> = {
         title: 'My maintenance window',
         duration: 60000, // 1 minute
+        category_ids: ['securitySolution'],
         r_rule: {
           dtstart: new Date().toISOString(),
           tzid: 'Europe/Amsterdam',
@@ -46,19 +49,26 @@ describe(
       });
     });
 
-    after(() => {
+    afterEach(() => {
       // Delete a test maintenance window
-      cy.request({
-        method: 'DELETE',
-        url: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${maintenanceWindowId}`,
-        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
-      });
+      if (maintenanceWindowId) {
+        cy.request({
+          method: 'DELETE',
+          url: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${maintenanceWindowId}`,
+          headers: {
+            'kbn-xsrf': 'cypress-creds',
+            'x-elastic-internal-origin': 'security-solution',
+          },
+        }).then(() => {
+          maintenanceWindowId = '';
+        });
+      }
     });
 
     it('Displays the callout when there are running maintenance windows', () => {
       visit(RULES_MANAGEMENT_URL);
 
-      cy.contains('Maintenance window is running');
+      cy.contains('A maintenance window is running for Security rules');
     });
   }
 );

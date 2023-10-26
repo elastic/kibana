@@ -63,7 +63,7 @@ describe('useEnterpriseSearchContentNav', () => {
         id: 'applications',
         items: [
           {
-            href: '/app/enterprise_search/applications',
+            href: '/app/enterprise_search/applications/search_applications',
             id: 'searchApplications',
             name: 'Search Applications',
           },
@@ -226,7 +226,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
         id: 'applications',
         items: [
           {
-            href: '/app/enterprise_search/applications',
+            href: '/app/enterprise_search/applications/search_applications',
             id: 'searchApplications',
             name: 'Search Applications',
           },
@@ -413,7 +413,7 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
       id: 'applications',
       items: [
         {
-          href: '/app/enterprise_search/applications',
+          href: '/app/enterprise_search/applications/search_applications',
           id: 'searchApplications',
           name: 'Search Applications',
         },

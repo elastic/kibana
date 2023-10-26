@@ -9,15 +9,15 @@
     "configPath": ["xpack", "profiling"],
     "optionalPlugins": [
       "spaces", 
-      "usageCollection"
+      "usageCollection",
+      "cloud",
+      "fleet"
     ],
     "requiredPlugins": [
       "charts",
-      "cloud",
       "data",
       "dataViews",
       "features",
-      "fleet",
       "licensing",
       "observability",
       "observabilityShared",
@@ -30,7 +30,8 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "advancedSettings"
     ]
   }
 }

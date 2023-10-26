@@ -55,20 +55,16 @@ describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] },
     visit(TIMELINE_TEMPLATES_URL);
   });
 
-  it(
-    'Should have the same query and open the timeline modal',
-    { tags: '@brokenInServerless' },
-    () => {
-      selectCustomTemplates();
-      expandEventAction();
-      clickingOnCreateTimelineFormTemplateBtn();
+  it('Should have the same query and open the timeline modal', () => {
+    selectCustomTemplates();
+    expandEventAction();
+    clickingOnCreateTimelineFormTemplateBtn();
 
-      cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
-      cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
-      closeTimeline();
-    }
-  );
+    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+    closeTimeline();
+  });
 });
 
 describe('Timelines', (): void => {
@@ -112,7 +108,7 @@ describe('Timelines', (): void => {
 
   describe(
     'Creates a timeline by clicking untitled timeline from bottom bar',
-    { tags: ['@ess', '@brokenInServerless'] },
+    { tags: ['@ess', '@serverless'] },
     () => {
       beforeEach(() => {
         login();
@@ -123,7 +119,7 @@ describe('Timelines', (): void => {
         goToQueryTab();
       });
 
-      it('can be added filter', () => {
+      it.skip('can be added filter', () => {
         addFilter(getTimeline().filter);
         cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
       });

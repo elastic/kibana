@@ -622,7 +622,13 @@
                 "text": "RequestAdapter"
               },
               ", cb?: ",
-              "WarningHandlerCallback",
+              {
+                "pluginId": "@kbn/search-response-warnings",
+                "scope": "common",
+                "docId": "kibKbnSearchResponseWarningsPluginApi",
+                "section": "def-common.WarningHandlerCallback",
+                "text": "WarningHandlerCallback"
+              },
               " | undefined) => void"
             ],
             "path": "src/plugins/data/public/search/types.ts",
@@ -660,7 +666,13 @@
                   "WarningHandlerCallback - optional callback to intercept warnings"
                 ],
                 "signature": [
-                  "WarningHandlerCallback",
+                  {
+                    "pluginId": "@kbn/search-response-warnings",
+                    "scope": "common",
+                    "docId": "kibKbnSearchResponseWarningsPluginApi",
+                    "section": "def-common.WarningHandlerCallback",
+                    "text": "WarningHandlerCallback"
+                  },
                   " | undefined"
                 ],
                 "path": "src/plugins/data/public/search/types.ts",
@@ -798,184 +810,6 @@
                 "text": "SearchSessionsFindResponse"
               },
               ">; extend: (sessionId: string, expires: string) => Promise<void>; rename: (sessionId: string, newName: string) => Promise<void>; }"
-            ],
-            "path": "src/plugins/data/public/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.Reason",
-        "type": "Interface",
-        "tags": [],
-        "label": "Reason",
-        "description": [],
-        "path": "src/plugins/data/public/search/errors/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.reason",
-            "type": "string",
-            "tags": [],
-            "label": "reason",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.script_stack",
-            "type": "Array",
-            "tags": [],
-            "label": "script_stack",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.position",
-            "type": "Object",
-            "tags": [],
-            "label": "position",
-            "description": [],
-            "signature": [
-              "{ offset: number; start: number; end: number; } | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.lang",
-            "type": "string",
-            "tags": [],
-            "label": "lang",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.script",
-            "type": "string",
-            "tags": [],
-            "label": "script",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.caused_by",
-            "type": "Object",
-            "tags": [],
-            "label": "caused_by",
-            "description": [],
-            "signature": [
-              "{ type: string; reason: string; } | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.SearchResponseIncompleteWarning",
-        "type": "Interface",
-        "tags": [],
-        "label": "SearchResponseIncompleteWarning",
-        "description": [
-          "\nA warning object for a search response with incomplete ES results\nES returns incomplete results when:\n1) Set timeout flag on search and the timeout expires on cluster\n2) Some shard failures on a cluster\n3) skipped remote(s) (skip_unavailable=true)\n  a. all shards failed\n  b. disconnected/not-connected"
-        ],
-        "path": "src/plugins/data/public/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchResponseIncompleteWarning.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\ntype: for sorting out incomplete warnings"
-            ],
-            "signature": [
-              "\"incomplete\""
-            ],
-            "path": "src/plugins/data/public/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchResponseIncompleteWarning.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [
-              "\nmessage: human-friendly message"
-            ],
-            "path": "src/plugins/data/public/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchResponseIncompleteWarning.clusters",
-            "type": "Object",
-            "tags": [],
-            "label": "clusters",
-            "description": [
-              "\nclusters: cluster details."
-            ],
-            "signature": [
-              "{ [x: string]: ",
-              {
-                "pluginId": "@kbn/es-types",
-                "scope": "common",
-                "docId": "kibKbnEsTypesPluginApi",
-                "section": "def-common.ClusterDetails",
-                "text": "ClusterDetails"
-              },
-              "; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false,
@@ -1503,29 +1337,6 @@
           "\"search_sessions\""
         ],
         "path": "src/plugins/data/public/search/session/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.SearchResponseWarning",
-        "type": "Type",
-        "tags": [],
-        "label": "SearchResponseWarning",
-        "description": [
-          "\nA warning object for a search response with warnings"
-        ],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-public.SearchResponseIncompleteWarning",
-            "text": "SearchResponseIncompleteWarning"
-          }
-        ],
-        "path": "src/plugins/data/public/search/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15857,6 +15668,56 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.isAbortResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "isAbortResponse",
+        "description": [],
+        "signature": [
+          "(response?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<any> | undefined) => boolean"
+        ],
+        "path": "src/plugins/data/common/search/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.isAbortResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<any> | undefined"
+            ],
+            "path": "src/plugins/data/common/search/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "true if response is abort"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.isAbsoluteTimeShift",
         "type": "Function",
         "tags": [],
@@ -15962,56 +15823,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.isCompleteResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isCompleteResponse",
-        "description": [],
-        "signature": [
-          "(response?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> | undefined) => boolean"
-        ],
-        "path": "src/plugins/data/common/search/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.isCompleteResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "true if response is completed successfully"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.isDateHistogramBucketAggConfig",
         "type": "Function",
         "tags": [],
@@ -16045,58 +15856,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.isErrorResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isErrorResponse",
-        "description": [
-          "\nFrom https://github.com/elastic/elasticsearch/issues/55572: \"When is_running is false, the query has stopped, which\nmay happen due to ... the search failed, in which case is_partial is set to true to indicate that any results that\nmay be included in the search response come only from a subset of the shards that the query should have hit.\""
-        ],
-        "signature": [
-          "(response?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> | undefined) => boolean"
-        ],
-        "path": "src/plugins/data/common/search/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.isErrorResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "true if response had an error while executing in ES"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.isMetricAggType",
         "type": "Function",
         "tags": [],
@@ -16120,6 +15879,39 @@
               "any"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isMultiFieldKey",
+        "type": "Function",
+        "tags": [],
+        "label": "isMultiFieldKey",
+        "description": [],
+        "signature": [
+          "(field: unknown) => boolean"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.isMultiFieldKey.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -16176,10 +15968,10 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.isPartialResponse",
+        "id": "def-common.isRunningResponse",
         "type": "Function",
         "tags": [],
-        "label": "isPartialResponse",
+        "label": "isRunningResponse",
         "description": [],
         "signature": [
           "(response?: ",
@@ -16198,7 +15990,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.isPartialResponse.$1",
+            "id": "def-common.isRunningResponse.$1",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -16220,7 +16012,7 @@
           }
         ],
         "returnComment": [
-          "true if request is still running an/d response contains partial results"
+          "true if request is still running"
         ],
         "initialIsOpen": false
       },
@@ -28023,23 +27815,6 @@
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IKibanaSearchResponse.requestParams",
-            "type": "Object",
-            "tags": [],
-            "label": "requestParams",
-            "description": [
-              "\nHTTP request parameters from elasticsearch transport client t"
-            ],
-            "signature": [
-              "ConnectionRequestParams",
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -29182,104 +28957,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.Request",
-        "type": "Interface",
-        "tags": [],
-        "label": "Request",
-        "description": [],
-        "path": "src/plugins/data/common/search/search_source/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.Request.docvalue_fields",
-            "type": "Array",
-            "tags": [],
-            "label": "docvalue_fields",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.Request._source",
-            "type": "Unknown",
-            "tags": [],
-            "label": "_source",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.Request.query",
-            "type": "Unknown",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.Request.script_fields",
-            "type": "Unknown",
-            "tags": [],
-            "label": "script_fields",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.Request.sort",
-            "type": "Unknown",
-            "tags": [],
-            "label": "sort",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.Request.stored_fields",
-            "type": "Array",
-            "tags": [],
-            "label": "stored_fields",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.RequestHandlerParams",
         "type": "Interface",
         "tags": [],
@@ -29551,42 +29228,6 @@
               "string | undefined"
             ],
             "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.ResponseWithShardFailure",
-        "type": "Interface",
-        "tags": [],
-        "label": "ResponseWithShardFailure",
-        "description": [],
-        "path": "src/plugins/data/common/search/search_source/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ResponseWithShardFailure._shards",
-            "type": "Object",
-            "tags": [],
-            "label": "_shards",
-            "description": [],
-            "signature": [
-              "{ failed: number; failures: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ShardFailure",
-                "text": "ShardFailure"
-              },
-              "[]; skipped: number; successful: number; total: number; }"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -30843,193 +30484,6 @@
             ],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.ShardFailure",
-        "type": "Interface",
-        "tags": [],
-        "label": "ShardFailure",
-        "description": [],
-        "path": "src/plugins/data/common/search/search_source/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ShardFailure.index",
-            "type": "string",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ShardFailure.node",
-            "type": "string",
-            "tags": [],
-            "label": "node",
-            "description": [],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ShardFailure.reason",
-            "type": "Object",
-            "tags": [],
-            "label": "reason",
-            "description": [],
-            "signature": [
-              "{ caused_by: { reason: string; type: string; }; reason: string; lang?: string | undefined; script?: string | undefined; script_stack?: string[] | undefined; type: string; }"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ShardFailure.shard",
-            "type": "number",
-            "tags": [],
-            "label": "shard",
-            "description": [],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.SortOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "SortOptions",
-        "description": [],
-        "path": "src/plugins/data/common/search/search_source/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SortOptions.mode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "mode",
-            "description": [],
-            "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SortOptions.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"date\" | \"date_nanos\" | \"long\" | \"double\" | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SortOptions.nested",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "nested",
-            "description": [],
-            "signature": [
-              "object | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SortOptions.unmapped_type",
-            "type": "string",
-            "tags": [],
-            "label": "unmapped_type",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SortOptions.distance_type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "distance_type",
-            "description": [],
-            "signature": [
-              "\"arc\" | \"plane\" | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SortOptions.unit",
-            "type": "string",
-            "tags": [],
-            "label": "unit",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SortOptions.ignore_unmapped",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ignore_unmapped",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SortOptions._script",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "_script",
-            "description": [],
-            "signature": [
-              "object | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
@@ -32433,9 +31887,7 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<",
-          "TransportResult",
-          "<T, unknown>>"
+          "<T>"
         ],
         "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
         "deprecated": false,
@@ -32562,41 +32014,6 @@
         "path": "src/plugins/data/common/search/strategies/esql_search/types.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.EsQuerySearchAfter",
-        "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "EsQuerySearchAfter",
-        "description": [],
-        "signature": [
-          "[string | number, string | number]"
-        ],
-        "path": "src/plugins/data/common/search/search_source/types.ts",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -35048,6 +34465,23 @@
           }
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.MULTI_FIELD_KEY_SEPARATOR",
+        "type": "string",
+        "tags": [],
+        "label": "MULTI_FIELD_KEY_SEPARATOR",
+        "description": [
+          "\nMulti-field key separator used in Visualizations (Lens, AggBased, TSVB).\nThis differs from the separator used in the toString method of the MultiFieldKey"
+        ],
+        "signature": [
+          "\" › \""
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
