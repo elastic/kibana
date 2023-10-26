@@ -72,9 +72,7 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
 
       {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
 
-      <SearchResponseWarningsBadge
-        warnings={interceptedWarnings ?? []}
-      />
+      <SearchResponseWarningsBadge warnings={interceptedWarnings ?? []} />
     </EuiFlexGroup>
   );
 };

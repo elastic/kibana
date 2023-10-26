@@ -45,9 +45,7 @@ export function getWarningsTitle(warnings: SearchResponseWarning[]) {
       });
 }
 
-export function getWarningsDescription(
-  warnings: SearchResponseWarning[],
-) {
+export function getWarningsDescription(warnings: SearchResponseWarning[]) {
   const nonSuccessfulClusters = getNonSuccessfulClusters(warnings);
   return nonSuccessfulClusters.size <= 1
     ? i18n.translate('searchResponseWarnings.description.singleCluster', {

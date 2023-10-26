@@ -153,9 +153,7 @@ export function ContextAppContent({
       <WrapperWithPadding>
         {interceptedWarnings.length && (
           <>
-            <SearchResponseWarningsCallout
-              warnings={interceptedWarnings}
-            />
+            <SearchResponseWarningsCallout warnings={interceptedWarnings} />
             <EuiSpacer size="s" />
           </>
         )}

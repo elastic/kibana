@@ -277,9 +277,7 @@ function DiscoverDocumentsComponent({
           textBasedQueryColumns={documents?.textBasedQueryColumns}
           selectedColumns={currentColumns}
         />
-        <SearchResponseWarningsCallout
-          warnings={documentState.interceptedWarnings ?? []}
-        />
+        <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
       </>
     ),
     [

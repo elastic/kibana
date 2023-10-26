@@ -30,9 +30,7 @@ export const SearchResponseWarningsCallout = (props: Props) => {
       data-test-subj="searchResponseWarningsCallout"
     >
       <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
-        <EuiFlexItem grow={false}>
-          {getWarningsDescription(props.warnings)}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{getWarningsDescription(props.warnings)}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ViewDetailsPopover warnings={props.warnings} />
         </EuiFlexItem>

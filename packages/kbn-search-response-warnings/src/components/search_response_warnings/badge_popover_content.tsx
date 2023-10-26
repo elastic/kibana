@@ -53,9 +53,7 @@ export const SearchResponseWarningsBadgePopoverContent = (props: Props) => {
       ) : (
         <EuiContextMenuPanel title={getWarningsTitle(props.warnings)}>
           <EuiPanel color="transparent" paddingSize="s">
-            <EuiText size="s">
-              {getWarningsDescription(props.warnings)}
-            </EuiText>
+            <EuiText size="s">{getWarningsDescription(props.warnings)}</EuiText>
             <EuiButtonEmpty
               color="primary"
               flush="left"
