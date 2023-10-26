@@ -57,13 +57,7 @@ export const StreamComment = ({
   }, [isLastComment, isLoading, isStreaming, reader, regenerateMessage, setComplete]);
   return (
     <MessagePanel
-      body={
-        <MessageText
-          content={message}
-          loading={isLoading || isStreaming}
-          onActionClick={async () => {}}
-        />
-      }
+      body={<MessageText content={message} loading={isLoading || isStreaming} />}
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

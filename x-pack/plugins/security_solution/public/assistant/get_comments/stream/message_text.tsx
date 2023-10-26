@@ -97,6 +97,7 @@ const getPluginDependencies = () => {
 
   processingPlugins[1][1].components = {
     ...components,
+    cursor: Cursor,
     customCodeBlock: (props) => {
       return (
         <>
@@ -105,7 +106,6 @@ const getPluginDependencies = () => {
         </>
       );
     },
-    cursor: Cursor,
     table: (props) => (
       <>
         <div className="euiBasicTable">

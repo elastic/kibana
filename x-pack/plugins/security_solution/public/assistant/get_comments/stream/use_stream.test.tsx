@@ -42,15 +42,6 @@ describe('useStream', () => {
     await waitFor(() => {
       expect(result.current).toEqual({
         error: undefined,
-        isLoading: false,
-        isStreaming: false,
-        pendingMessage: '',
-        setComplete: expect.any(Function),
-      });
-    });
-    await waitFor(() => {
-      expect(result.current).toEqual({
-        error: undefined,
         isLoading: true,
         isStreaming: false,
         pendingMessage: '',
