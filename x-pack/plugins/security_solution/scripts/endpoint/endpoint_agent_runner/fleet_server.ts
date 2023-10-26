@@ -11,9 +11,14 @@ import {
 } from '../common/fleet_server/fleet_server_services';
 import { getRuntimeServices } from './runtime';
 
+/**
+ * @deprecated
+ */
 export const runFleetServerIfNeeded = async (): Promise<
   { fleetServerContainerId: string; fleetServerAgentPolicyId: string | undefined } | undefined
 > => {
+  // TODO:PT remove dependencies on this module and then delete this and just call the code below directly from the CLI tool
+
   const { log, kbnClient } = getRuntimeServices();
 
   // Runs under CI should force fleet server to be installed because the CI process first

@@ -58,6 +58,7 @@ export const createAndEnrollEndpointHost = async ({
   const { url: agentUrl } = await getAgentDownloadUrl(version, useClosestVersionMatch, log);
   const agentDownload = isRunningInCI ? await downloadAndStoreAgent(agentUrl) : undefined;
 
+  // TODO: remove dependency on env. var and keep function pure
   const hostVm = process.env.CI
     ? await createVm({
         type: 'vagrant',
@@ -102,7 +103,7 @@ export const createAndEnrollEndpointHost = async ({
  */
 export const destroyEndpointHost = async (
   kbnClient: KbnClient,
-  createdHost: CreateAndEnrollEndpointHostResponse
+  createdHost: Pick<CreateAndEnrollEndpointHostResponse, 'hostname' | 'agentId'>
 ): Promise<void> => {
   await Promise.all([
     deleteMultipassVm(createdHost.hostname),

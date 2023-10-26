@@ -11,14 +11,14 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { StartedFleetServer } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
+import { startFleetServer } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
 import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
 import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
 import type { LoadedRoleAndUser } from '../../../../scripts/endpoint/common/role_and_user_loader';
 import { EndpointSecurityTestRolesLoader } from '../../../../scripts/endpoint/common/role_and_user_loader';
-import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
-import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
 import {
   sendEndpointActionResponse,
   sendFleetActionResponse,
@@ -290,7 +290,7 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
-  let fleetServerContainerId: string | undefined;
+  let fleetSrv: StartedFleetServer | undefined;
 
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
@@ -304,23 +304,20 @@ export const dataLoadersForRealEndpoints = (
   });
 
   on('before:run', async () => {
-    await startRuntimeServices({
-      kibanaUrl: config.env.KIBANA_URL,
-      elasticUrl: config.env.ELASTICSEARCH_URL,
-      fleetServerUrl: config.env.FLEET_SERVER_URL,
-      username: config.env.KIBANA_USERNAME,
-      password: config.env.KIBANA_PASSWORD,
-      asSuperuser: true,
+    const { kbnClient, log } = await stackServicesPromise;
+
+    fleetSrv = await startFleetServer({
+      kbnClient,
+      logger: log,
+      force: true,
     });
-    const data = await runFleetServerIfNeeded();
-    fleetServerContainerId = data?.fleetServerContainerId;
   });
 
   on('after:run', async () => {
     const { log } = await stackServicesPromise;
-    if (fleetServerContainerId) {
+    if (fleetSrv) {
       try {
-        execa.sync('docker', ['kill', fleetServerContainerId]);
+        await fleetSrv.stop();
       } catch (error) {
         log.error(error);
       }

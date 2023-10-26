@@ -94,7 +94,7 @@ interface StartFleetServerOptions {
   port?: number;
 }
 
-interface StartedFleetServer extends StartedServer {
+export interface StartedFleetServer extends StartedServer {
   /** The Fleet Agent policy id that the fleet-server agent is running with */
   policyId: string;
 }
