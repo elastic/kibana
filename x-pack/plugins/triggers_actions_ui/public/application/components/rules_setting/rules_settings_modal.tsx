@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState, useRef } from 'react';
 import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -151,6 +151,26 @@ export const RulesSettingsModalFormRight = memo((props: RulesSettingsModalFormRi
   );
 });
 
+const useResettableState: <T>(
+  initialValue?: T
+) => [T | undefined, boolean, (next: T, shouldUpdateInitialValue?: boolean) => void, () => void] = (
+  initalValue
+) => {
+  const initialValueRef = useRef(initalValue);
+  const [value, setValue] = useState(initalValue);
+  const [hasChanged, setHasChanged] = useState(false);
+  const reset = () => {
+    setValue(initialValueRef.current);
+    setHasChanged(false);
+  };
+  const updateValue = (next: typeof value, shouldUpdateInitialValue = false) => {
+    setValue(next);
+    setHasChanged(true);
+    if (shouldUpdateInitialValue) initialValueRef.current = next;
+  };
+  return [value, hasChanged, updateValue, reset];
+};
+
 export interface RulesSettingsModalProps {
   isVisible: boolean;
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
@@ -168,20 +188,29 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     rulesSettings: { show, save, writeFlappingSettingsUI, readFlappingSettingsUI },
   } = capabilities;
 
-  const [settings, setSettings] = useState<RulesSettingsFlappingProperties>();
+  const [flappingSettings, hasFlappingChanged, setFlappingSettings, resetFlappingSettings] =
+    useResettableState<RulesSettingsFlappingProperties>();
 
-  const { isLoading, isError: hasError } = useGetFlappingSettings({
+  const { isLoading: isFlappingLoading, isError: hasFlappingError } = useGetFlappingSettings({
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
-      if (!settings) {
-        setSettings({
-          enabled: fetchedSettings.enabled,
-          lookBackWindow: fetchedSettings.lookBackWindow,
-          statusChangeThreshold: fetchedSettings.statusChangeThreshold,
-        });
+      if (!flappingSettings) {
+        setFlappingSettings(
+          {
+            enabled: fetchedSettings.enabled,
+            lookBackWindow: fetchedSettings.lookBackWindow,
+            statusChangeThreshold: fetchedSettings.statusChangeThreshold,
+          },
+          true // Update the initial value so we don't need to fetch it from the server again
+        );
       }
     },
   });
+
+  const onCloseModal = useCallback(() => {
+    resetFlappingSettings();
+    onClose();
+  }, [onClose, resetFlappingSettings]);
 
   const { mutate } = useUpdateFlappingSettings({
     onSave,
@@ -192,23 +221,21 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   // In the future when we have more settings sub-features, we should
   // disassociate the rule settings capabilities (save, show) from the
   // sub-feature capabilities (writeXSettingsUI).
-  const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasError;
+  const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasFlappingError;
   const canShowFlappingSettings = show && readFlappingSettingsUI;
 
   const handleSettingsChange = (
     key: keyof RulesSettingsFlappingProperties,
     value: number | boolean
   ) => {
-    if (!settings) {
+    if (!flappingSettings) {
       return;
     }
-
     const newSettings = {
-      ...settings,
+      ...flappingSettings,
       [key]: value,
     };
-
-    setSettings({
+    setFlappingSettings({
       ...newSettings,
       statusChangeThreshold: Math.min(
         newSettings.lookBackWindow,
@@ -218,10 +245,10 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   };
 
   const handleSave = () => {
-    if (!settings) {
-      return;
+    if (canWriteFlappingSettings && hasFlappingChanged) {
+      mutate(flappingSettings!);
+      setFlappingSettings(flappingSettings!, true);
     }
-    mutate(settings);
   };
 
   if (!isVisible) {
@@ -229,10 +256,10 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   }
 
   const maybeRenderForm = () => {
-    if (hasError || !canShowFlappingSettings) {
+    if (hasFlappingError || !canShowFlappingSettings) {
       return <RulesSettingsErrorPrompt />;
     }
-    if (!settings || isLoading) {
+    if (!flappingSettings || isFlappingLoading) {
       return <CenterJustifiedSpinner />;
     }
     return (
@@ -246,11 +273,11 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
         <EuiFlexGroup>
           <RulesSettingsModalFormLeft
             isSwitchDisabled={!canWriteFlappingSettings}
-            settings={settings}
+            settings={flappingSettings}
             onChange={(e) => handleSettingsChange('enabled', e.target.checked)}
           />
           <RulesSettingsModalFormRight
-            settings={settings}
+            settings={flappingSettings}
             onChange={(key, value) => handleSettingsChange(key, value)}
           />
         </EuiFlexGroup>
@@ -259,7 +286,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   };
 
   return (
-    <EuiModal data-test-subj="rulesSettingsModal" onClose={onClose} maxWidth={880}>
+    <EuiModal data-test-subj="rulesSettingsModal" onClose={onCloseModal} maxWidth={880}>
       <EuiModalHeader>
         <EuiModalHeaderTitle component="h3">
           <FormattedMessage
@@ -281,7 +308,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
         <EuiHorizontalRule margin="none" />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onClose}>
+        <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onCloseModal}>
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesSettings.modal.cancelButton"
             defaultMessage="Cancel"
