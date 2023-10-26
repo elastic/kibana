@@ -229,13 +229,13 @@ function _generateMappings(
       }
       const dynProps : Properties = {
         type: 'object',
-	dynamic: true,
+        dynamic: true,
       }
       ctx.addDynamicMapping({
         path: name,
-	pathMatch: name,
-	matchingType: 'object',
-	properties: dynProps,
+        pathMatch: name,
+        matchingType: 'object',
+        properties: dynProps,
       });
     }
   }
@@ -362,12 +362,15 @@ function _generateMappings(
               type: 'object',
               object_type: subField.object_type ?? subField.type,
             }));
-            _generateMappings(subFields, {
+            const mappings = _generateMappings(subFields, {
               ...ctx,
               groupFieldName: ctx.groupFieldName
                 ? `${ctx.groupFieldName}.${field.name}`
                 : field.name,
             });
+            if (mappings.hasDynamicTemplateMappings) {
+              hasDynamicTemplateMappings = true;
+            }
             break;
           case 'flattened':
             dynProperties.type = field.object_type;
@@ -412,6 +415,7 @@ function _generateMappings(
                 type: 'object',
                 dynamic: true,
               };
+              hasDynamicTemplateMappings = true;
             } else {
               return;
             }
