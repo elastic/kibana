@@ -77,12 +77,6 @@ export const getLifecycleValue = (
   return lifecycle?.data_retention;
 };
 
-export const isDataStreamUnmanaged = (
-  nextGenerationManagedBy?: DataStream['nextGenerationManagedBy']
-) => {
-  return nextGenerationManagedBy?.toLowerCase() === 'unmanaged';
-};
-
 export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
   return (
     dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&

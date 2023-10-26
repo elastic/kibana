@@ -39,7 +39,7 @@ import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getIndexListUri } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
-import { isDataStreamUnmanaged, isDSLWithILMIndices } from '../../../../lib/data_streams';
+import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
 import { updateDataRetention } from '../../../../services/api';
@@ -151,6 +151,16 @@ const configurationFormSchema: FormSchema = {
       }
     ),
   },
+  dataRetentionEnabled: {
+    type: FIELD_TYPES.TOGGLE,
+    defaultValue: false,
+    label: i18n.translate(
+      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionEnabledField',
+      {
+        defaultMessage: 'Enable data retention',
+      }
+    ),
+  },
 };
 
 interface MixedIndicesCalloutProps {
@@ -171,7 +181,7 @@ const MixedIndicesCallout = ({
   dataStreamName,
   history,
 }: MixedIndicesCalloutProps) => {
-  const MAX_VISIBLE_INDICES = 3;
+  const MAX_VISIBLE_INDICES = 1;
   const visibleIndices = dslWithIlmIndices.ilmIndices.slice(0, MAX_VISIBLE_INDICES);
 
   return (
@@ -221,8 +231,6 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 }) => {
   const lifecycle = dataStream?.lifecycle;
   const dataStreamName = dataStream?.name as string;
-  const dataStreamManagedBy = dataStream?.nextGenerationManagedBy;
-  const hasIlmPolicyWithDeletePhase = dataStream?.hasIlmPolicyWithDeletePhase;
 
   const { history } = useAppContext();
   const dslWithIlmIndices = isDSLWithILMIndices(dataStream);
@@ -235,6 +243,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
+      dataRetentionEnabled: lifecycle?.enabled,
       // When data retention is not set and lifecycle is enabled, is the only scenario in
       // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
       // dont have inifinite data retention.
@@ -305,51 +314,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             </>
           )}
 
-          {isDataStreamUnmanaged(dataStreamManagedBy) && (
-            <>
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.unamangedDataStreamTitle',
-                  { defaultMessage: 'This data stream is currently unmanaged' }
-                )}
-                color="warning"
-                iconType="warning"
-                data-test-subj="unamangedDataStreamCallout"
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.unamangedDataStreamBody"
-                    defaultMessage="Configuring data retention will enable lifecycle for this data stream."
-                  />
-                </p>
-              </EuiCallOut>
+          <UseField
+            path="dataRetentionEnabled"
+            component={ToggleField}
+            data-test-subj="dataRetentionEnabledField"
+          />
 
-              <EuiSpacer />
-            </>
-          )}
-
-          {hasIlmPolicyWithDeletePhase && (
-            <>
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.hasIlmPolicyWithDeletePhaseTitle',
-                  { defaultMessage: 'Some indices are managed by ILM' }
-                )}
-                color="warning"
-                iconType="warning"
-                data-test-subj="hasIlmPolicyWithDeletePhaseCallout"
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.hasIlmPolicyWithDeletePhaseBody"
-                    defaultMessage="Keeping data indefinitely is disabled because some indices from this data stream are managed by an ILM policy with a delete phase."
-                  />
-                </p>
-              </EuiCallOut>
-
-              <EuiSpacer />
-            </>
-          )}
           <UseField
             path="dataRetention"
             component={NumericField}
@@ -368,16 +338,14 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             componentProps={{
               fullWidth: false,
               euiFieldProps: {
-                disabled: hasIlmPolicyWithDeletePhase ? false : formData.infiniteRetentionPeriod,
+                disabled: formData.infiniteRetentionPeriod || !formData.dataRetentionEnabled,
                 'data-test-subj': `dataRetentionValue`,
                 min: 1,
                 append: (
                   <UnitField
                     path="timeUnit"
                     options={timeUnits}
-                    disabled={
-                      hasIlmPolicyWithDeletePhase ? false : formData.infiniteRetentionPeriod
-                    }
+                    disabled={formData.infiniteRetentionPeriod || !formData.dataRetentionEnabled}
                     euiFieldProps={{
                       'data-test-subj': 'timeUnit',
                       'aria-label': i18n.translate(
@@ -399,7 +367,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             data-test-subj="infiniteRetentionPeriod"
             componentProps={{
               euiFieldProps: {
-                disabled: hasIlmPolicyWithDeletePhase,
+                disabled: !formData.dataRetentionEnabled,
               },
             }}
           />

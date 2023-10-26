@@ -41,7 +41,6 @@ export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   store_size?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size'];
   store_size_bytes?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size_bytes'];
   maximum_timestamp?: IndicesDataStreamsStatsDataStreamsStatsItem['maximum_timestamp'];
-  hasIlmPolicyWithDeletePhase?: boolean;
   indices: DataStreamIndexFromEs[];
   next_generation_managed_by: string;
   privileges: {
@@ -58,7 +57,6 @@ export interface DataStream {
   health: Health;
   indexTemplateName: string;
   ilmPolicyName?: string;
-  hasIlmPolicyWithDeletePhase?: boolean;
   storageSize?: ByteSize;
   storageSizeBytes?: number;
   maxTimeStamp?: number;
