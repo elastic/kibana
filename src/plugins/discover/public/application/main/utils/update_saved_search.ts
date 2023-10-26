@@ -79,7 +79,7 @@ export function updateSavedSearch({
 
     if (state.breakdownField) {
       savedSearch.breakdownField = state.breakdownField;
-    } else {
+    } else if (savedSearch.breakdownField) {
       savedSearch.breakdownField = undefined;
     }
 
