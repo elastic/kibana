@@ -43,7 +43,6 @@ import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
 import PreviewChart from './components/preview_chart/preview_chart';
-import { ExpressionChart } from './components/expression_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
