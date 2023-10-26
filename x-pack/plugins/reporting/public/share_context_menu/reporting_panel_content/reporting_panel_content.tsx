@@ -21,17 +21,17 @@ import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { BaseParams } from '@kbn/reporting-common-export-types-helpers';
 import {
   CSV_REPORT_TYPE,
   PDF_REPORT_TYPE,
   PDF_REPORT_TYPE_V2,
   PNG_REPORT_TYPE,
   PNG_REPORT_TYPE_V2,
-} from '@kbn/reporting-common/report_types';
+} from '../../../common/constants/report_types';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
+import { BaseParams } from '../../../common/types';
 
 /**
  * Properties for displaying a share menu with Reporting features, including

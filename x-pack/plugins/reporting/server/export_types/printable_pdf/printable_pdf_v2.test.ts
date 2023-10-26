@@ -7,8 +7,11 @@
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken, LocatorParams } from '@kbn/reporting-common';
-import { generatePdfObservableV2, cryptoFactory } from '@kbn/reporting-common-export-types-helpers';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
+import {
+  generatePdfObservableV2,
+  cryptoFactory,
+  TaskPayloadPDFV2,
+} from '@kbn/reporting-common-export-types-helpers';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { of } from 'rxjs';

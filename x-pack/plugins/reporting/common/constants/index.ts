@@ -6,8 +6,8 @@
  */
 
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
-import * as jobTypes from '@kbn/reporting-common/job_types';
-import * as reportTypes from '@kbn/reporting-common/report_types';
+import * as jobTypes from './job_types';
+import * as reportTypes from './report_types';
 
 const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
 
@@ -20,6 +20,16 @@ export const REPORTING_SYSTEM_INDEX = '.reporting';
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
+/**
+ * A way to get the client side route for the reporting redirect app.
+ *
+ * TODO: Add a job ID and a locator to use so that we can redirect without expecting state to
+ * be injected to the page
+ */
+export const getRedirectAppPath = () => {
+  return '/app/reportingRedirect';
+};
+
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
@@ -27,6 +37,8 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'image/png',
   'text/plain',
 ];
+
+export type JobId = string;
 
 type ReportTypeDeclaration = typeof reportTypes;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
@@ -86,7 +98,4 @@ export const REPORT_TABLE_ROW_ID = 'reportJobRow';
 // automation that have no version value in the job params, we assume the
 // intended version is 7.14.0
 export const UNVERSIONED_VERSION = '7.14.0';
-
-export * from '@kbn/reporting-common/job_types';
-export * from '@kbn/reporting-common/report_types';
 export * from './routes';

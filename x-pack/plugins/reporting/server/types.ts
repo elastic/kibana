@@ -11,12 +11,8 @@ import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type {
-  BaseParams,
-  BasePayload,
-  CommonReportingSetup,
-  UrlOrUrlLocatorTuple,
-} from '@kbn/reporting-common';
+import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common';
+import { CommonReportingSetup } from '@kbn/reporting-common-export-types-helpers';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -34,7 +30,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { ReportApiJSON } from '../common/types';
+import { BaseParams, BasePayload, ReportApiJSON } from '../common/types';
 import type { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { ExportTypesRegistry } from './lib';

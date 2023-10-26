@@ -10,9 +10,8 @@ import { mergeMap, tap } from 'rxjs/operators';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { Observable } from 'rxjs';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-import { LocatorParams, ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common';
-import { PdfMetrics } from '@kbn/reporting-common/metrics';
-import { TaskPayloadPDFV2 } from './types';
+import { LocatorParams, ReportingConfigType, PdfMetrics } from '@kbn/reporting-common';
+import { ReportingServerInfo, TaskPayloadPDFV2 } from './types';
 import { getTracker } from './pdf_tracker';
 import { getFullRedirectAppUrl } from '.';
 

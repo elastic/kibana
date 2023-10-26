@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
-import type { BasePayload, JobId } from '@kbn/reporting-common-export-types-helpers';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { Ensure, SerializableRecord } from '@kbn/utility-types';
+import { JobId } from './constants';
+import { TaskRunMetrics, TaskRunResult } from './metrics';
+import { LocatorParams } from './url';
 
 export interface ReportDocumentHead {
   _id: string;
@@ -129,4 +132,50 @@ export interface JobSummary {
 export interface JobSummarySet {
   completed: JobSummary[];
   failed: JobSummary[];
+}
+
+/**
+ * @deprecated
+ */
+export type BaseParams = Ensure<
+  {
+    layout?: LayoutParams;
+    objectType: string;
+    title: string;
+    browserTimezone: string; // to format dates in the user's time zone
+    version: string; // to handle any state migrations
+  },
+  SerializableRecord
+>;
+
+/**
+ * Report job parameters that an application must return from its
+ * getSharingData function.
+ */
+export type BaseParamsV2 = BaseParams & {
+  locatorParams: LocatorParams[];
+};
+
+/**
+ * @deprecated
+ */
+export interface BasePayload extends BaseParams {
+  headers: string;
+  spaceId?: string;
+  isDeprecated?: boolean;
+}
+
+/**
+ * Report job parameters, after they are processed in the request handler.
+ */
+export interface BasePayloadV2 extends BaseParamsV2 {
+  headers: string;
+  spaceId?: string;
+  isDeprecated?: boolean;
+}
+
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
+export interface IlmPolicyStatusResponse {
+  status: IlmPolicyMigrationStatus;
 }

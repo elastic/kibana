@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { NotificationsSetup, ThemeServiceStart, DocLinksStart } from '@kbn/core/public';
-import type { JobId } from '@kbn/reporting-common-export-types-helpers';
+import type { JobId } from '../../common/constants';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
 import { JobSummary, JobSummarySet } from '../../common/types';
 import {

@@ -7,12 +7,17 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TaskRunResult } from '@kbn/reporting-common';
-import type { BaseParamsV2, JobId } from '@kbn/reporting-common-export-types-helpers';
 import moment from 'moment';
 import React from 'react';
-import { JobTypes, JOB_STATUSES } from '../../common/constants';
-import type { ReportApiJSON, ReportFields, ReportOutput, ReportSource } from '../../common/types';
+import { TaskRunResult } from '../../common/metrics';
+import { JobId, JobTypes, JOB_STATUSES } from '../../common/constants';
+import type {
+  BaseParamsV2,
+  ReportApiJSON,
+  ReportFields,
+  ReportOutput,
+  ReportSource,
+} from '../../common/types';
 
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
 

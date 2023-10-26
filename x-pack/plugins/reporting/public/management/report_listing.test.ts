@@ -14,8 +14,8 @@ import { ListingProps as Props } from '.';
 
 import { setup, TestBed, TestDependencies, mockJobs } from './__test__';
 import { Job } from '../lib/job';
-import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/url';
 import { mockConfig } from './__test__/report_listing.test.helpers';
+import { IlmPolicyMigrationStatus } from '../../common/types';
 
 describe('ReportListing', () => {
   let testBed: TestBed;

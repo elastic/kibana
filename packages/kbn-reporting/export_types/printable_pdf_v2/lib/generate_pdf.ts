@@ -9,14 +9,14 @@
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { getFullRedirectAppUrl, getTracker } from '@kbn/reporting-common-export-types-helpers';
-import type {
-  LocatorParams,
-  ReportingConfigType,
+import {
+  getFullRedirectAppUrl,
+  getTracker,
   ReportingServerInfo,
-} from '@kbn/reporting-common';
+  TaskPayloadPDFV2,
+} from '@kbn/reporting-common-export-types-helpers';
+import type { LocatorParams, ReportingConfigType } from '@kbn/reporting-common';
 import { PdfMetrics } from '@kbn/reporting-common/metrics';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 interface PdfResult {

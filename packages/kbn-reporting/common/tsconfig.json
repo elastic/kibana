@@ -19,6 +19,5 @@
     "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
     "@kbn/utility-types",
-    "@kbn/reporting-common-export-types-helpers",
   ]
 }
