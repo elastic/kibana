@@ -29,7 +29,7 @@ export interface UseChatSendProps {
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-interface UseChatSend {
+export interface UseChatSend {
   handleButtonSendMessage: (m: string) => void;
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
@@ -55,6 +55,7 @@ export const useChatSend = ({
   setUserPrompt,
 }: UseChatSendProps): UseChatSend => {
   const { isLoading, sendMessages } = useSendMessages();
+
   const { appendMessage, appendReplacements, clearConversation, removeLastMessage } =
     useConversation();
 

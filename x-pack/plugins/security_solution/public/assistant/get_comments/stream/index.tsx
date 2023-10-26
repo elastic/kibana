@@ -17,6 +17,7 @@ interface Props {
   amendMessage: (message: string) => void;
   content?: string;
   isLastComment: boolean;
+  isFetching?: boolean;
   regenerateMessage: () => void;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
@@ -27,18 +28,23 @@ export const StreamComment = ({
   isLastComment,
   reader,
   regenerateMessage,
+  isFetching = false,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     amendMessage,
     content,
     reader,
   });
-  const message = content ?? pendingMessage;
+  const message = useMemo(() => content ?? pendingMessage, [content, pendingMessage]);
+  const isAnythingLoading = useMemo(
+    () => isFetching || isLoading || isStreaming,
+    [isFetching, isLoading, isStreaming]
+  );
   const controls = useMemo(() => {
     if (reader == null || !isLastComment) {
       return;
     }
-    if (isLoading || isStreaming) {
+    if (isAnythingLoading) {
       return (
         <StopGeneratingButton
           onClick={() => {
@@ -54,10 +60,10 @@ export const StreamComment = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isLastComment, isLoading, isStreaming, reader, regenerateMessage, setComplete]);
+  }, [isAnythingLoading, isLastComment, reader, regenerateMessage, setComplete]);
   return (
     <MessagePanel
-      body={<MessageText content={message} loading={isLoading || isStreaming} />}
+      body={<MessageText content={message} loading={isAnythingLoading} />}
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

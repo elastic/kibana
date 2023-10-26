@@ -105,8 +105,10 @@ export interface UseAssistantContext {
     lastCommentRef,
     showAnonymizedValues,
     amendMessage,
+    isFetchingResponse,
   }: {
     currentConversation: Conversation;
+    isFetchingResponse: boolean;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
     amendMessage: ({
       conversationId,

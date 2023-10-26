@@ -340,7 +340,14 @@ const AssistantComponent: React.FC<Props> = ({
     [messageCodeBlocks]
   );
 
-  const { handleRegenerateResponse } = useChatSend({
+  const {
+    handleButtonSendMessage,
+    handleOnChatCleared,
+    handlePromptChange,
+    handleSendMessage,
+    handleRegenerateResponse,
+    isLoading: isLoadingChatSend,
+  } = useChatSend({
     allSystemPrompts,
     currentConversation,
     setPromptTextPreview,
@@ -362,6 +369,7 @@ const AssistantComponent: React.FC<Props> = ({
             showAnonymizedValues,
             amendMessage,
             regenerateMessage: handleRegenerateResponse,
+            isFetchingResponse: isLoadingChatSend,
           })}
           css={css`
             margin-right: 20px;
@@ -397,6 +405,7 @@ const AssistantComponent: React.FC<Props> = ({
       getComments,
       handleOnSystemPromptSelectionChange,
       handleRegenerateResponse,
+      isLoadingChatSend,
       isSettingsModalVisible,
       promptContexts,
       promptTextPreview,
@@ -507,18 +516,15 @@ const AssistantComponent: React.FC<Props> = ({
           isWelcomeSetup={isWelcomeSetup}
         />
         <ChatSend
-          allSystemPrompts={allSystemPrompts}
-          currentConversation={currentConversation}
           isDisabled={isSendingDisabled}
           shouldRefocusPrompt={shouldRefocusPrompt}
-          setPromptTextPreview={setPromptTextPreview}
           userPrompt={userPrompt}
-          setUserPrompt={setUserPrompt}
-          editingSystemPromptId={editingSystemPromptId}
-          http={http}
-          setEditingSystemPromptId={setEditingSystemPromptId}
-          selectedPromptContexts={selectedPromptContexts}
-          setSelectedPromptContexts={setSelectedPromptContexts}
+          handleButtonSendMessage={handleButtonSendMessage}
+          handleOnChatCleared={handleOnChatCleared}
+          handlePromptChange={handlePromptChange}
+          handleSendMessage={handleSendMessage}
+          handleRegenerateResponse={handleRegenerateResponse}
+          isLoading={isLoadingChatSend}
         />
         {!isDisabled && (
           <QuickPrompts

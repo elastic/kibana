@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { HttpSetup } from '@kbn/core-http-browser';
 
@@ -48,6 +48,9 @@ export const useSendMessages = (): UseSendMessages => {
     },
     [knowledgeBase.assistantLangChain]
   );
-
-  return { isLoading, sendMessages };
+  const retThis = useMemo(() => {
+    console.log('isLoading, at root?', isLoading);
+    return { isLoading, sendMessages };
+  }, [isLoading, sendMessages]);
+  return retThis;
 };
