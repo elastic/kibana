@@ -53,7 +53,7 @@ export const useCanReadSyntheticsIndex = () => {
             resolve({ canRead: true, error: undefined });
           },
           error: (error: { err: { statusCode: number } }) => {
-            if (error.err.statusCode >= 400 && error.err.statusCode < 500) {
+            if (error.err?.statusCode >= 400 && error.err?.statusCode < 500) {
               resolve({ canRead: false, error });
             } else {
               resolve({ canRead: true, error });
