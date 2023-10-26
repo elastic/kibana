@@ -7,36 +7,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import {
-  concatMap,
-  delay,
-  finalize,
-  Observable,
-  of,
-  scan,
-  share,
-  shareReplay,
-  timestamp,
-} from 'rxjs';
+import { share } from 'rxjs';
+import { getDumbObservable, getStreamObservable } from './stream_observable';
 
-export interface PromptObservableState {
-  chunks: Chunk[];
-  message?: string;
-  error?: string;
-  loading: boolean;
-}
-interface ChunkChoice {
-  index: 0;
-  delta: { role: string; content: string };
-  finish_reason: null | string;
-}
-interface Chunk {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  choices: ChunkChoice[];
-}
 interface UseStreamProps {
   amendMessage: (message: string) => void;
   content?: string;
@@ -54,7 +27,6 @@ interface UseStream {
   //  A function to mark the streaming as complete
   setComplete: (complete: boolean) => void;
 }
-const MIN_DELAY = 35;
 /**
  * A hook that takes a ReadableStreamDefaultReader and returns an object with properties and functions
  * that can be used to handle streaming data from a readable stream
@@ -63,104 +35,17 @@ const MIN_DELAY = 35;
  * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
  */
 export const useStream = ({ amendMessage, content, reader }: UseStreamProps): UseStream => {
-  const observer$ = useMemo(
-    () =>
-      content == null && reader != null
-        ? new Observable<PromptObservableState>((observer) => {
-            observer.next({ chunks: [], loading: true });
-            const decoder = new TextDecoder();
-            const chunks: Chunk[] = [];
-            let prev: string = '';
-            function read() {
-              reader
-                ?.read()
-                .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-                  try {
-                    if (done) {
-                      observer.next({
-                        chunks,
-                        message: getMessageFromChunks(chunks),
-                        loading: false,
-                      });
-                      observer.complete();
-                      return;
-                    }
-                    let lines: string[] = (prev + decoder.decode(value)).split('\n');
-                    const lastLine: string = lines[lines.length - 1];
-                    const isPartialChunk: boolean = !!lastLine && lastLine !== 'data: [DONE]';
-                    if (isPartialChunk) {
-                      prev = lastLine;
-                      lines.pop();
-                    } else {
-                      prev = '';
-                    }
-                    lines = lines
-                      .map((str) => str.substr(6))
-                      .filter((str) => !!str && str !== '[DONE]');
-                    const nextChunks: Chunk[] = lines.map((line) => JSON.parse(line));
-                    nextChunks.forEach((chunk) => {
-                      chunks.push(chunk);
-                      observer.next({
-                        chunks,
-                        message: getMessageFromChunks(chunks),
-                        loading: true,
-                      });
-                    });
-                  } catch (err) {
-                    observer.error(err);
-                    return;
-                  }
-                  read();
-                })
-                .catch((err) => {
-                  observer.error(err);
-                });
-            }
-            read();
-            return () => {
-              reader.cancel();
-            };
-          }).pipe(
-            // make sure the request is only triggered once,
-            // even with multiple subscribers
-            shareReplay(1),
-            // append a timestamp of when each value was emitted
-            timestamp(),
-            // use the previous timestamp to calculate a target
-            // timestamp for emitting the next value
-            scan((acc, value) => {
-              const lastTimestamp = acc.timestamp || 0;
-              const emitAt = Math.max(lastTimestamp + MIN_DELAY, value.timestamp);
-              return {
-                timestamp: emitAt,
-                value: value.value,
-              };
-            }),
-            // add the delay based on the elapsed time
-            // using concatMap(of(value).pipe(delay(50))
-            // leads to browser issues because timers
-            // are throttled when the tab is not active
-            concatMap((value) => {
-              const now = Date.now();
-              console.log('VALUE?', value);
-              const delayFor = value.timestamp - now;
-
-              if (delayFor <= 0) {
-                return of(value.value);
-              }
-
-              return of(value.value).pipe(delay(delayFor));
-            }),
-            // set loading to false when the observable completes or errors out
-            finalize(() => setLoading(false))
-          )
-        : new Observable<PromptObservableState>(),
-    [content, reader]
-  );
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [subscription, setSubscription] = useState<Subscription | undefined>();
+  const observer$ = useMemo(
+    () =>
+      content == null && reader != null
+        ? getStreamObservable(reader, setLoading)
+        : getDumbObservable(),
+    [content, reader]
+  );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();
     setLoading(false);
@@ -196,10 +81,3 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
     setComplete,
   };
 };
-function getMessageFromChunks(chunks: Chunk[]) {
-  let message = '';
-  chunks.forEach((chunk) => {
-    message += chunk.choices[0]?.delta.content ?? '';
-  });
-  return message;
-}
