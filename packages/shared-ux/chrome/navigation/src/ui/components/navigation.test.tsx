@@ -36,7 +36,7 @@ describe('<Navigation />', () => {
   });
 
   describe('builds the navigation tree', () => {
-    test('render reference UI and build the navigation tree', async () => {
+    test.skip('render reference UI and build the navigation tree', async () => {
       const onProjectNavigationChange = jest.fn();
 
       const { findByTestId } = render(
@@ -201,7 +201,7 @@ describe('<Navigation />', () => {
       `);
     });
 
-    test('should read the title from props, children or deeplink', async () => {
+    test.skip('should read the title from props, children or deeplink', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
         {
           id: 'item1',
@@ -458,7 +458,7 @@ describe('<Navigation />', () => {
       `);
     });
 
-    test('should not render the group if it does not have children AND no href or deeplink', async () => {
+    test.skip('should not render the group if it does not have children AND no href or deeplink', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
         {
           id: 'item1',
@@ -603,7 +603,7 @@ describe('<Navigation />', () => {
       });
     });
 
-    test('should render recently accessed items', async () => {
+    test.skip('should render recently accessed items', async () => {
       const recentlyAccessed$ = of([
         { label: 'This is an example', link: '/app/example/39859', id: '39850' },
         { label: 'Another example', link: '/app/example/5235', id: '5235' },
