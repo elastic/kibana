@@ -34,6 +34,7 @@ import {
   printFunctionSignature,
   sourceExists,
   columnExists,
+  hasWildcard,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -462,22 +463,37 @@ function validateSource(
         locations: source.location,
       })
     );
-  } else if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
-  } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownPolicy',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
+  } else {
+    // if it is a wildcard and the command does not support wildcards, then throw
+    const isWildcardAndNotSupported =
+      hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
+    if (isWildcardAndNotSupported) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wildcardNotSupportedForCommand',
+          values: { command: commandName, value: source.name },
+          locations: source.location,
+        })
+      );
+    } else {
+      if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownIndex',
+            values: { name: source.name },
+            locations: source.location,
+          })
+        );
+      } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownPolicy',
+            values: { name: source.name },
+            locations: source.location,
+          })
+        );
+      }
+    }
   }
   return messages;
 }
@@ -536,6 +552,21 @@ function validateColumnForCommand(
             })
           );
         }
+      }
+      if (
+        hasWildcard(column.name) &&
+        !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
+      ) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'wildcardNotSupportedForCommand',
+            values: {
+              command: commandName,
+              value: column.name,
+            },
+            locations: column.location,
+          })
+        );
       }
     } else {
       if (column.name) {

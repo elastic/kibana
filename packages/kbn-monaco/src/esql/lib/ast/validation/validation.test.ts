@@ -541,6 +541,10 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as ', [
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
+    testErrorsAndWarnings('from a | rename s* as strings', [
+      'Using wildcards (*) in rename is not allowed [s*]',
+      'Unknown column [strings]',
+    ]);
   });
 
   describe('dissect', () => {
@@ -582,6 +586,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = true', [
       'Invalid value for dissect append_separator: expected a string, but was [true]',
     ]);
+    // testErrorsAndWarnings('from a | dissect s* "%{a}"', [
+    //   'Using wildcards (*) in dissect is not allowed [s*]',
+    // ]);
   });
 
   describe('grok', () => {
@@ -602,6 +609,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | grok numberField "%{a}"', [
       'Grok only supports string type values, found [numberField] of type number',
     ]);
+    // testErrorsAndWarnings('from a | grok s* "%{a}"', [
+    //   'Using wildcards (*) in grok is not allowed [s*]',
+    // ]);
   });
 
   describe('where', () => {
@@ -1191,6 +1201,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a | enrich policy with otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy | eval otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy with var0 = otherField | eval var0`, []);
+    testErrorsAndWarnings('from a | enrich my-pol*', [
+      'Using wildcards (*) in enrich is not allowed [my-pol*]',
+    ]);
   });
 
   describe('shadowing', () => {

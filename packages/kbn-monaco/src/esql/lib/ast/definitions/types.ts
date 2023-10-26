@@ -42,6 +42,7 @@ export interface CommandBaseDefinition {
       optional?: boolean;
       innerType?: string;
       values?: string[];
+      wildcards?: boolean;
     }>;
   };
 }

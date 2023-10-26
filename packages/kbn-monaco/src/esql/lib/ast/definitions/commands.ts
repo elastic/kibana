@@ -42,7 +42,7 @@ export const commandDefinitions: CommandDefinition[] = [
     options: [metadataOption],
     signature: {
       multipleParams: true,
-      params: [{ name: 'index', type: 'source' }],
+      params: [{ name: 'index', type: 'source', wildcards: true }],
     },
   },
   {
@@ -122,7 +122,7 @@ export const commandDefinitions: CommandDefinition[] = [
     options: [],
     signature: {
       multipleParams: true,
-      params: [{ name: 'column', type: 'column' }],
+      params: [{ name: 'column', type: 'column', wildcards: true }],
     },
   },
   {
@@ -134,7 +134,7 @@ export const commandDefinitions: CommandDefinition[] = [
     options: [],
     signature: {
       multipleParams: true,
-      params: [{ name: 'column', type: 'column' }],
+      params: [{ name: 'column', type: 'column', wildcards: true }],
     },
   },
   {

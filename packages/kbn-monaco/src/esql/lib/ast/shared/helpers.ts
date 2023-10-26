@@ -364,7 +364,7 @@ export function getDurationItemsWithQuantifier(quantifier: number = 1) {
 }
 
 function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
-  if (fuzzyName[fuzzyName.length - 1] === '*') {
+  if (hasWildcard(fuzzyName)) {
     const prefix = fuzzyName.substring(0, fuzzyName.length - 1);
     for (const resourceName of resources) {
       if (resourceName.startsWith(prefix)) {
@@ -374,6 +374,10 @@ function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
       }
     }
   }
+}
+
+export function hasWildcard(name: string) {
+  return name[name.length - 1] === '*';
 }
 
 export function columnExists(
