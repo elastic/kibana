@@ -81,12 +81,16 @@ const validateQueryParams = (queryParams: QueryParams): QueryParams => {
 };
 
 /**
- * Parses filter options from the URL.
- * If a filter option is defined as an array in DEFAULT_FILTER_OPTIONS, this function
- * ensures it's returned as an array even if URLSearchParams provides it as a single value.
- * URLSearchParams.getAll() returns an empty array if the param is not defined in the URL.
- * URLSearchParams.get() returns null if the param is not defined in the URL and in case of
- * multiple values, it returns the first value only
+ * Parses filter options from a URL query string.
+ *
+ * The behavior is influenced by the predefined DEFAULT_FILTER_OPTIONS:
+ * - If an option is defined as an array there, it will always be returned as an array.
+ * - Parameters in the query string can have multiple formats:
+ *   1. Comma-separated values (e.g., "status=foo,bar")
+ *   2. A single value (e.g., "status=foo")
+ *   3. Repeated keys (e.g., "status=foo&status=bar")
+ *
+ * This function ensures the output respects the format indicated in DEFAULT_FILTER_OPTIONS.
  */
 const parseURLWithFilterOptions = (search: string) => {
   const urlParams = new URLSearchParams(search);
@@ -95,16 +99,16 @@ const parseURLWithFilterOptions = (search: string) => {
     .map(([key, val]) => (Array.isArray(val) ? key : undefined))
     .filter(Boolean);
 
-  const parsedUrlParams: { [key in string]: string[] | string | null } = {};
-  urlParams.forEach((_, key) => {
+  const parsedUrlParams: { [key in string]: string[] | string } = {};
+  for (const [key, value] of urlParams.entries()) {
     if (paramKeysWithTypeArray.includes(key)) {
-      const values = urlParams.getAll(key);
-      const isEmpty = !values[0];
-      parsedUrlParams[key] = isEmpty ? [] : values;
+      if (!parsedUrlParams[key]) parsedUrlParams[key] = [];
+      const splittedValues = value.split(',');
+      (parsedUrlParams[key] as string[]).push(...splittedValues);
     } else {
-      parsedUrlParams[key] = urlParams.get(key);
+      parsedUrlParams[key] = value;
     }
-  });
+  }
 
   return parsedUrlParams;
 };
