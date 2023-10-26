@@ -7,16 +7,20 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { execSync } from 'child_process';
+import { execSync, ExecSyncOptions } from 'child_process';
 import { dump } from 'js-yaml';
 import { parseLinkHeader } from './parse_link_header';
 import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
 import { Job, JobState } from './types/job';
 
+type ExecType =
+  | ((command: string, execOpts: ExecSyncOptions) => Buffer)
+  | ((command: string, execOpts: ExecSyncOptions) => string);
 export interface BuildkiteClientConfig {
   baseUrl?: string;
   token?: string;
+  exec?: ExecType;
 }
 
 export interface BuildkiteGroup {
@@ -107,6 +111,7 @@ export interface BuildkiteTriggerBuildParams {
 
 export class BuildkiteClient {
   http: AxiosInstance;
+  exec: ExecType;
 
   constructor(config: BuildkiteClientConfig = {}) {
     const BUILDKITE_BASE_URL =
@@ -123,6 +128,8 @@ export class BuildkiteClient {
         Authorization: `Bearer ${BUILDKITE_TOKEN}`,
       },
     });
+
+    this.exec = config.exec ?? execSync;
 
     // this.agentHttp = axios.create({
     //   baseURL: BUILDKITE_AGENT_BASE_URL,
@@ -281,7 +288,7 @@ export class BuildkiteClient {
   };
 
   setMetadata = (key: string, value: string) => {
-    execSync(`buildkite-agent meta-data set '${key}'`, {
+    this.exec(`buildkite-agent meta-data set '${key}'`, {
       input: value,
       stdio: ['pipe', 'inherit', 'inherit'],
     });
@@ -292,20 +299,20 @@ export class BuildkiteClient {
     style: 'info' | 'success' | 'warning' | 'error',
     value: string
   ) => {
-    execSync(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
+    this.exec(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
       input: value,
       stdio: ['pipe', 'inherit', 'inherit'],
     });
   };
 
   uploadArtifacts = (pattern: string) => {
-    execSync(`buildkite-agent artifact upload '${pattern}'`, {
+    this.exec(`buildkite-agent artifact upload '${pattern}'`, {
       stdio: ['ignore', 'inherit', 'inherit'],
     });
   };
 
   uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
-    execSync(`buildkite-agent pipeline upload`, {
+    this.exec(`buildkite-agent pipeline upload`, {
       input: dump({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
     });
