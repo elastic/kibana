@@ -1354,7 +1354,7 @@ components:
       properties:
         allowedChannels:
           type: array
-          description: A list of valid Slack channel identifiers.
+          description: A list of valid Slack channels.
           items:
             type: object
             required:

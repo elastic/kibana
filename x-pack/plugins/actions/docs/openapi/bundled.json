@@ -317,6 +317,9 @@
                 "runServiceNowITOMConnectorRequest": {
                   "$ref": "#/components/examples/run_servicenow_itom_connector_request"
                 },
+                "runSlackConnectorRequest": {
+                  "$ref": "#/components/examples/run_slack_api_connector_request"
+                },
                 "runSwimlaneConnectorRequest": {
                   "$ref": "#/components/examples/run_swimlane_connector_request"
                 }
@@ -387,6 +390,9 @@
                   },
                   "runServiceNowITOMConnectorResponse": {
                     "$ref": "#/components/examples/run_servicenow_itom_connector_response"
+                  },
+                  "runSlackConnectorResponse": {
+                    "$ref": "#/components/examples/run_slack_api_connector_response"
                   },
                   "runSwimlaneConnectorResponse": {
                     "$ref": "#/components/examples/run_swimlane_connector_response"
@@ -976,6 +982,9 @@
                 "runServiceNowITOMConnectorRequest": {
                   "$ref": "#/components/examples/run_servicenow_itom_connector_request"
                 },
+                "runSlackConnectorRequest": {
+                  "$ref": "#/components/examples/run_slack_api_connector_request"
+                },
                 "runSwimlaneConnectorRequest": {
                   "$ref": "#/components/examples/run_swimlane_connector_request"
                 }
@@ -1015,6 +1024,12 @@
                         }
                       ]
                     },
+                    "message": {
+                      "type": "string"
+                    },
+                    "service_message": {
+                      "type": "string"
+                    },
                     "status": {
                       "type": "string",
                       "description": "The status of the action.",
@@ -1037,6 +1052,9 @@
                   },
                   "runServiceNowITOMConnectorResponse": {
                     "$ref": "#/components/examples/run_servicenow_itom_connector_response"
+                  },
+                  "runSlackConnectorResponse": {
+                    "$ref": "#/components/examples/run_slack_api_connector_response"
                   },
                   "runSwimlaneConnectorResponse": {
                     "$ref": "#/components/examples/run_swimlane_connector_response"
@@ -2876,7 +2894,7 @@
         "properties": {
           "allowedChannels": {
             "type": "array",
-            "description": "A list of valid Slack channel identifiers.",
+            "description": "A list of valid Slack channels.",
             "items": {
               "type": "object",
               "required": [
@@ -6093,7 +6111,7 @@
       "run_connector_subaction_validchannelid": {
         "title": "The validChannelId subaction",
         "type": "object",
-        "description": "Validates a Slack channel identifier. It is applicable only when the connector type is `.slack_api`.\n",
+        "description": "Retrieves information about a valid Slack channel identifier. It is applicable only when the connector type is `.slack_api`.\n",
         "required": [
           "subAction",
           "subActionParams"
@@ -6562,6 +6580,20 @@
           }
         }
       },
+      "run_slack_api_connector_request": {
+        "summary": "Run a Slack connector that uses the web API method to post a message on a channel.",
+        "value": {
+          "params": {
+            "subAction": "postMessage",
+            "subActionParams": {
+              "channelIds": [
+                "C123ABC456"
+              ],
+              "text": "A test message."
+            }
+          }
+        }
+      },
       "run_swimlane_connector_request": {
         "summary": "Run a Swimlane connector to create an incident.",
         "value": {
@@ -6774,6 +6806,55 @@
             }
           ],
           "status": "ok"
+        }
+      },
+      "run_slack_api_connector_response": {
+        "summary": "Response from posting a message with a Slack connector.",
+        "value": {
+          "status": "ok",
+          "data": {
+            "ok": true,
+            "channel": "C123ABC456",
+            "ts": "1234567890.123456",
+            "message": {
+              "bot_id": "B12BCDEFGHI",
+              "type": "message",
+              "text": "A test message",
+              "user": "U12A345BC6D",
+              "ts": "1234567890.123456",
+              "app_id": "A01BC2D34EF",
+              "blocks": [
+                {
+                  "type": "rich_text",
+                  "block_id": "/NXe",
+                  "elements": [
+                    {
+                      "type": "rich_text_section",
+                      "elements": [
+                        {
+                          "type": "text",
+                          "text": "A test message."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "team": "T01ABCDE2F",
+              "bot_profile": {
+                "id": "B12BCDEFGHI",
+                "app_id": "A01BC2D34EF",
+                "name": "test",
+                "icons": {
+                  "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png"
+                },
+                "deleted": false,
+                "updated": 1672169705,
+                "team_id": "T01ABCDE2F"
+              }
+            }
+          },
+          "connector_id": ".slack_api"
         }
       },
       "run_swimlane_connector_response": {

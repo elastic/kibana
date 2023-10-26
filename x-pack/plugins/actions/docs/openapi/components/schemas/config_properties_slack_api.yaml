@@ -4,7 +4,7 @@ type: object
 properties:
   allowedChannels:
     type: array
-    description: A list of valid Slack channel identifiers.
+    description: A list of valid Slack channels.
     items:
       type: object
       required:
@@ -20,5 +20,4 @@ properties:
         name:
           type: string
           description: The Slack channel name.
-          # TBD: Is this used to communicate with Slack or only for display purposes in Elastic?
           minLength: 1
