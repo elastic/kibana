@@ -40,6 +40,11 @@ const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
+    cy.task('esArchiverUnload', 'risk_hosts');
+    cy.task('esArchiverUnload', 'risk_hosts_updated');
     cy.task('esArchiverUnload', 'risk_scores_new');
     cy.task('esArchiverUnload', 'risk_scores_new_updated');
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });
