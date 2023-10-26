@@ -85,7 +85,7 @@ export async function getAllSystemConnectors({
   context,
 }: {
   context: GetAllParams['context'];
-}): Promise<FindConnectorResult[]> {
+}): Promise<ConnectorWithExtraFindData[]> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {

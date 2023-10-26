@@ -141,7 +141,6 @@ export interface IndexType {
   [key: string]: unknown;
 }
 
-// TODO: remove once all mute endpoints have been migrated to RuleMuteAlertOptions
 export interface MuteOptions extends IndexType {
   alertId: string;
   alertInstanceId: string;
@@ -180,3 +179,11 @@ export interface RuleBulkOperationAggregation {
     }>;
   };
 }
+
+export type DenormalizedAction = DistributiveOmit<
+  NormalizedAlertActionWithGeneratedValues,
+  'id'
+> & {
+  actionRef: string;
+  actionTypeId: string;
+};

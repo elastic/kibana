@@ -25,6 +25,7 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
+import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -84,6 +85,7 @@ export interface AlertingApiRequestHandlerContext {
  */
 export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
+  actions: ActionsApiRequestHandlerContext;
 }>;
 
 /**
@@ -411,9 +413,9 @@ export interface RawRuleAlertsFilter extends AlertsFilter {
   timeframe?: AlertsFilterTimeframe;
 }
 
-export interface RawRuleAction extends SavedObjectAttributes {
+export interface RawRuleAction {
   uuid: string;
-  group: string;
+  group?: string;
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;
@@ -428,7 +430,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
 // note that the `error` property is "null-able", as we're doing a partial
 // update on the rule when we update this data, but need to ensure we
 // delete any previous error if the current status has no error
-export interface RawRuleExecutionStatus extends SavedObjectAttributes {
+export interface RawRuleExecutionStatus {
   status: RuleExecutionStatuses;
   lastExecutionDate: string;
   lastDuration?: number;
@@ -442,7 +444,7 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   };
 }
 
-export interface RawRule extends SavedObjectAttributes {
+export interface RawRule {
   enabled: boolean;
   name: string;
   tags: string[];
