@@ -292,6 +292,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           forwardCompatibility: migrateOutputEvictionsFromV8100,
         },
       },
+      '2': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              service_token: { type: 'keyword', index: false },
+            },
+          },
+        ],
+      },
     },
     migrations: {
       '7.13.0': migrateOutputToV7130,
