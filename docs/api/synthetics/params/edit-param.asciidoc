@@ -49,8 +49,8 @@ Here is an example of a PUT request to edit a parameter by its ID:
 --------------------------------------------------
 PUT /api/synthetics/params/param_id1
 {
-  "key": "updated_api_key",
-  "value": "updated-api-key-value",
+  "key": "updated_param_key",
+  "value": "updated-param-value",
   "description": "Updated API Key for authentication",
   "tags": ["authentication", "security", "updated"]
 }
@@ -62,8 +62,8 @@ The API returns the updated parameter as follows:
 --------------------------------------------------
 {
   "id": "param_id1",
-  "key": "updated_api_key",
-  "value": "updated-api-key-value",
+  "key": "updated_param_key",
+  "value": "updated-param-value",
   "description": "Updated API Key for authentication",
   "tags": ["authentication", "security", "updated"]
 }

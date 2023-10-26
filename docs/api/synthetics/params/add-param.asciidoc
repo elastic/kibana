@@ -51,8 +51,8 @@ To add a single parameter:
 --------------------------------------------------
 POST /api/synthetics/params
 {
-  "key": "api_key",
-  "value": "your-api-key-value",
+  "key": "your-key-name",
+  "value": "your-parameter-value",
   "description": "API Key for authentication",
   "tags": ["authentication", "security"],
   "share_across_spaces": true
@@ -96,8 +96,8 @@ Here's an example response for a single added parameter:
 --------------------------------------------------
 {
   "id": "unique-parameter-id",
-  "key": "api_key",
-  "value": "your-api-key-value",
+  "key": "your-key-name",
+  "value": "your-param-value",
   "description": "API Key for authentication",
   "tags": ["authentication", "security"],
   "share_across_spaces": true
