@@ -7,7 +7,6 @@
 
 import { isEqual } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
@@ -23,11 +22,10 @@ import {
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
-import { AlertsLocatorParams, getAlertUrl, TimeUnitChar } from '../../../../common';
-import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
+import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import { ObservabilityConfig } from '../../..';
 import { AlertStates, searchConfigurationSchema } from './types';
+import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './translations';
 
 import {
   buildFiredAlertReason,
@@ -45,6 +43,7 @@ import {
   getFormattedGroupBy,
 } from './utils';
 
+import { formatAlertResult } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
@@ -64,7 +63,8 @@ export interface MetricThresholdAlertContext extends Record<string, unknown> {
   group?: object;
   reason?: string;
   timestamp: string; // ISO string
-  value?: Array<number | null> | null;
+  // String type is for [NO DATA]
+  value?: Array<number | string | null>;
 }
 
 export const FIRED_ACTIONS_ID = 'custom_threshold.fired';
@@ -127,6 +127,7 @@ export const createMetricThresholdExecutor = ({
       executionId,
       spaceId,
       rule: { id: ruleId },
+      getTimeRange,
     } = options;
 
     const { criteria } = params;
@@ -191,6 +192,8 @@ export const createMetricThresholdExecutor = ({
       throw new Error('The selected data view does not have a timestamp field');
     }
 
+    // Calculate initial start and end date with no time window, as each criteria has it's own time window
+    const { dateStart, dateEnd } = getTimeRange();
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
@@ -199,8 +202,8 @@ export const createMetricThresholdExecutor = ({
       compositeSize,
       alertOnGroupDisappear,
       logger,
+      { end: dateEnd, start: dateStart },
       state.lastRunTimestamp,
-      { end: startedAt.valueOf() },
       convertStringsToMissingGroupsRecord(previousMissingGroups)
     );
 
@@ -237,14 +240,7 @@ export const createMetricThresholdExecutor = ({
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults
-          .map((result) =>
-            buildFiredAlertReason({
-              ...formatAlertResult(result[group]),
-              group,
-            })
-          )
-          .join('\n');
+        reason = buildFiredAlertReason(alertResults, group, dataView);
       }
 
       /* NO DATA STATE HANDLING
@@ -380,61 +376,3 @@ export const createMetricThresholdExecutor = ({
       },
     };
   };
-
-export const FIRED_ACTIONS = {
-  id: 'custom_threshold.fired',
-  name: i18n.translate('xpack.observability.customThreshold.rule.alerting.custom_threshold.fired', {
-    defaultMessage: 'Alert',
-  }),
-};
-
-export const NO_DATA_ACTIONS = {
-  id: 'custom_threshold.nodata',
-  name: i18n.translate(
-    'xpack.observability.customThreshold.rule.alerting.custom_threshold.nodata',
-    {
-      defaultMessage: 'No Data',
-    }
-  ),
-};
-
-const formatAlertResult = <AlertResult>(
-  alertResult: {
-    metric: string;
-    currentValue: number | null;
-    threshold: number[];
-    comparator: Comparator;
-    timeSize: number;
-    timeUnit: TimeUnitChar;
-  } & AlertResult
-) => {
-  const { metric, currentValue, threshold, comparator } = alertResult;
-  const noDataValue = i18n.translate(
-    'xpack.observability.customThreshold.rule.alerting.threshold.noDataFormattedValue',
-    { defaultMessage: '[NO DATA]' }
-  );
-
-  if (metric.endsWith('.pct')) {
-    const formatter = createFormatter('percent');
-    return {
-      ...alertResult,
-      currentValue:
-        currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
-      threshold: Array.isArray(threshold)
-        ? threshold.map((v: number) => formatter(v))
-        : formatter(threshold),
-      comparator,
-    };
-  }
-
-  const formatter = createFormatter('highPrecision');
-  return {
-    ...alertResult,
-    currentValue:
-      currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
-    threshold: Array.isArray(threshold)
-      ? threshold.map((v: number) => formatter(v))
-      : formatter(threshold),
-    comparator,
-  };
-};

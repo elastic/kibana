@@ -1,0 +1,271 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "alert:9095ee90-b075-11ec-bb3f-1f063f8e1234",
+    "source": {
+      "alert": {
+        "name":"Test investigation fields",
+        "tags":["migration"],
+        "alertTypeId": "siem.queryRule",
+        "consumer": "siem",
+        "revision": 0,
+        "params": {
+          "author": [],
+          "description": "a",
+          "ruleId": "2297be91-894c-4831-830f-b424a0ec84f0",
+          "falsePositives": [],
+          "from": "now-360s",
+          "immutable": false,
+          "license": "",
+          "outputIndex": "",
+          "investigationFields":["client.address","agent.name"],
+          "meta": {
+            "from": "1m",
+            "kibana_siem_app_url": "https://actions.kb.us-central1.gcp.cloud.es.io:9243/app/security"
+          },
+          "maxSignals": 100,
+          "riskScore": 21,
+          "riskScoreMapping": [],
+          "severity": "low",
+          "severityMapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptionsList": [],
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "query": "*:*",
+          "filters": []
+        },
+        "schedule": {
+          "interval": "5m"
+        },
+        "enabled": false,
+        "actions": [],
+        "throttle": null,
+        "notifyWhen": "onActiveAlert",
+        "apiKeyOwner": null,
+        "apiKey": null,
+        "createdBy": "1527796724",
+        "updatedBy": "1527796724",
+        "createdAt": "2022-03-30T22:05:53.511Z",
+        "updatedAt": "2022-03-30T22:05:53.511Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "executionStatus": {
+          "status": "ok",
+          "lastExecutionDate": "2022-03-31T19:53:37.507Z",
+          "error": null,
+          "lastDuration": 2377
+        },
+        "meta": {
+          "versionApiKeyLastmodified": "8.10.0"
+        },
+        "scheduledTaskId": null,
+        "legacyId": "9095ee90-b075-11ec-bb3f-1f063f8e0abc"
+      },
+      "type": "alert",
+      "references": [],
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "8.10.0",
+      "coreMigrationVersion":"8.10.0",
+      "updated_at": "2022-03-31T19:53:39.885Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "alert:9095ee90-b075-11ec-bb3f-1f063f8e5678",
+    "source": {
+      "alert": {
+        "name":"Test investigation fields empty array",
+        "tags":["migration"],
+        "alertTypeId": "siem.queryRule",
+        "consumer": "siem",
+        "revision": 0,
+        "params": {
+          "author": [],
+          "description": "a",
+          "ruleId": "2297be91-894c-4831-830f-b424a0ec5678",
+          "falsePositives": [],
+          "from": "now-360s",
+          "immutable": false,
+          "license": "",
+          "outputIndex": "",
+          "investigationFields":[],
+          "meta": {
+            "from": "1m",
+            "kibana_siem_app_url": "https://actions.kb.us-central1.gcp.cloud.es.io:9243/app/security"
+          },
+          "maxSignals": 100,
+          "riskScore": 21,
+          "riskScoreMapping": [],
+          "severity": "low",
+          "severityMapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptionsList": [],
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "query": "*:*",
+          "filters": []
+        },
+        "schedule": {
+          "interval": "5m"
+        },
+        "enabled": false,
+        "actions": [],
+        "throttle": null,
+        "notifyWhen": "onActiveAlert",
+        "apiKeyOwner": null,
+        "apiKey": null,
+        "createdBy": "1527796724",
+        "updatedBy": "1527796724",
+        "createdAt": "2022-03-30T22:05:53.511Z",
+        "updatedAt": "2022-03-30T22:05:53.511Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "executionStatus": {
+          "status": "ok",
+          "lastExecutionDate": "2022-03-31T19:53:37.507Z",
+          "error": null,
+          "lastDuration": 2377
+        },
+        "meta": {
+          "versionApiKeyLastmodified": "8.10.0"
+        },
+        "scheduledTaskId": null,
+        "legacyId": "9095ee90-b075-11ec-bb3f-1f063f8e0def"
+      },
+      "type": "alert",
+      "references": [],
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "8.10.0",
+      "coreMigrationVersion":"8.10.0",
+      "updated_at": "2022-03-31T19:53:39.885Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "alert:9095ee90-b075-11ec-bb3f-1f063f8e9102",
+    "source": {
+      "alert": {
+        "name":"Test investigation fields object",
+        "tags":["migration"],
+        "alertTypeId": "siem.queryRule",
+        "consumer": "siem",
+        "revision": 0,
+        "params": {
+          "author": [],
+          "description": "a",
+          "ruleId": "2297be91-894c-4831-830f-b424a0ec9102",
+          "falsePositives": [],
+          "from": "now-360s",
+          "immutable": false,
+          "license": "",
+          "outputIndex": "",
+          "investigationFields": {
+            "field_names": ["host.name"]
+          },
+          "meta": {
+            "from": "1m",
+            "kibana_siem_app_url": "https://actions.kb.us-central1.gcp.cloud.es.io:9243/app/security"
+          },
+          "maxSignals": 100,
+          "riskScore": 21,
+          "riskScoreMapping": [],
+          "severity": "low",
+          "severityMapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptionsList": [],
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "query": "*:*",
+          "filters": []
+        },
+        "schedule": {
+          "interval": "5m"
+        },
+        "enabled": false,
+        "actions": [],
+        "throttle": null,
+        "notifyWhen": "onActiveAlert",
+        "apiKeyOwner": null,
+        "apiKey": null,
+        "createdBy": "1527796724",
+        "updatedBy": "1527796724",
+        "createdAt": "2022-03-30T22:05:53.511Z",
+        "updatedAt": "2022-03-30T22:05:53.511Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "executionStatus": {
+          "status": "ok",
+          "lastExecutionDate": "2022-03-31T19:53:37.507Z",
+          "error": null,
+          "lastDuration": 2377
+        },
+        "meta": {
+          "versionApiKeyLastmodified": "8.11.0"
+        },
+        "scheduledTaskId": null,
+        "legacyId": "9095ee90-b075-11ec-bb3f-1f063f8e0ghi"
+      },
+      "type": "alert",
+      "references": [],
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "8.11.0",
+      "coreMigrationVersion":"8.11.0",
+      "updated_at": "2022-03-31T19:53:39.885Z"
+    }
+  }
+}

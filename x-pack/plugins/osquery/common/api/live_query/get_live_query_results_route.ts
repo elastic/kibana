@@ -7,13 +7,14 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import { Direction } from '../../search_strategy';
 
 export const getLiveQueryResultsRequestQuerySchema = t.type({
   kuery: t.union([t.string, t.undefined]),
   page: t.union([toNumberRt, t.undefined]),
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),
-  sortOrder: t.union([t.union([t.literal('asc'), t.literal('desc')]), t.undefined]),
+  sortOrder: t.union([t.literal(Direction.asc), t.literal(Direction.desc), t.undefined]),
 });
 
 export type GetLiveQueryResultsRequestQuerySchema = t.OutputOf<
