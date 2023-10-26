@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         .filter((t: string) => !TEST_TYPES.includes(t))
         .sort();
       expect(types).to.eql([
+        'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
@@ -81,7 +82,6 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:apm.transaction_duration',
         'alerting:apm.transaction_error_rate',
         'alerting:logs.alert.document.count',
-        'alerting:metrics.alert.anomaly',
         'alerting:metrics.alert.inventory.threshold',
         'alerting:metrics.alert.threshold',
         'alerting:monitoring_alert_cluster_health',

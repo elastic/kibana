@@ -22,7 +22,16 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 describe(
   'Automated Response Actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  {
+    tags: [
+      '@ess',
+      '@serverless',
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      '@brokenInServerless',
+    ],
+  },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
@@ -83,7 +92,7 @@ describe(
         }
       });
 
-      it.skip('should have generated endpoint and rule', () => {
+      it('should have generated endpoint and rule', () => {
         loadPage(APP_ENDPOINTS_PATH);
         cy.contains(createdHost.hostname).should('exist');
 

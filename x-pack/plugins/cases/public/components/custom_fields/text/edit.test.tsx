@@ -209,7 +209,7 @@ describe('Edit ', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        value: ['My text test value 1!!!'],
+        value: 'My text test value 1!!!',
       });
     });
   });

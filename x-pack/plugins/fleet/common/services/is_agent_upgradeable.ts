@@ -11,6 +11,8 @@ import semverGt from 'semver/functions/gt';
 
 import type { Agent } from '../types';
 
+export const AGENT_UPGRADE_COOLDOWN_IN_MIN = 10;
+
 export function isAgentUpgradeable(
   agent: Agent,
   latestAgentVersion: string,
@@ -30,6 +32,10 @@ export function isAgentUpgradeable(
   }
   // check that the agent is not already in the process of updating
   if (agent.upgrade_started_at && !agent.upgraded_at) {
+    return false;
+  }
+  // check that the agent has not been upgraded more recently than the monitoring period
+  if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
     return false;
   }
   if (versionToUpgrade !== undefined) {
@@ -56,3 +62,21 @@ const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
 
   return semverGt(versionToUpgradeNumber, agentVersionNumber);
 };
+
+export function getRecentUpgradeInfoForAgent(agent: Agent): {
+  hasBeenUpgradedRecently: boolean;
+  timeToWaitMs: number;
+} {
+  if (!agent.upgraded_at) {
+    return {
+      hasBeenUpgradedRecently: false,
+      timeToWaitMs: 0,
+    };
+  }
+
+  const elaspedSinceUpgradeInMillis = Date.now() - Date.parse(agent.upgraded_at);
+  const timeToWaitMs = AGENT_UPGRADE_COOLDOWN_IN_MIN * 6e4 - elaspedSinceUpgradeInMillis;
+  const hasBeenUpgradedRecently = elaspedSinceUpgradeInMillis / 6e4 < AGENT_UPGRADE_COOLDOWN_IN_MIN;
+
+  return { hasBeenUpgradedRecently, timeToWaitMs };
+}

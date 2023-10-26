@@ -33,11 +33,14 @@ export const getCategoryRequest = (
   fieldName: string,
   from: number | undefined,
   to: number | undefined,
+  filter: estypes.QueryDslQueryContainer,
   { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
   const { index, timeFieldName } = params;
   const query = getQueryWithParams({
     params,
+    termFilters: undefined,
+    filter,
   });
   const { params: request } = createCategoryRequest(
     index,
@@ -63,6 +66,7 @@ export const fetchCategories = async (
   fieldNames: string[],
   from: number | undefined,
   to: number | undefined,
+  filter: estypes.QueryDslQueryContainer,
   logger: Logger,
   // The default value of 1 means no sampling will be used
   sampleProbability: number = 1,
@@ -78,7 +82,7 @@ export const fetchCategories = async (
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) => {
-      const request = getCategoryRequest(params, fieldName, from, to, randomSamplerWrapper);
+      const request = getCategoryRequest(params, fieldName, from, to, filter, randomSamplerWrapper);
       return esClient.search(request, {
         signal: abortSignal,
         maxRetries: 0,
