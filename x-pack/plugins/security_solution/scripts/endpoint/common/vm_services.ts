@@ -9,13 +9,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import chalk from 'chalk';
 import { userInfo } from 'os';
+import { resolve, dirname } from 'path';
+import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
 
 const baseGenerator = new BaseDataGenerator();
 
-interface BaseVmCreateOptions {
+export interface BaseVmCreateOptions {
   name: string;
   /** Number of CPUs */
   cpus?: number;
@@ -25,24 +27,21 @@ interface BaseVmCreateOptions {
   memory?: string;
 }
 
-interface CreateVmOptions extends BaseVmCreateOptions {
-  /** The type of VM manager to use when creating the VM host */
-  type: SupportedVmManager;
-  log?: ToolingLog;
-}
+type CreateVmOptions = CreateMultipassVmOptions | CreateVagrantVmOptions;
 
 /**
  * Creates a new VM
  */
-export const createVm = async ({ type, ...options }: CreateVmOptions): Promise<HostVm> => {
-  if (type === 'multipass') {
+export const createVm = async (options: CreateVmOptions): Promise<HostVm> => {
+  if (options.type === 'multipass') {
     return createMultipassVm(options);
   }
 
-  throw new Error(`VM type ${type} not yet supported`);
+  return createVagrantVm(options);
 };
 
 interface CreateMultipassVmOptions extends BaseVmCreateOptions {
+  type: SupportedVmManager & 'multipass';
   name: string;
   log?: ToolingLog;
 }
@@ -158,4 +157,137 @@ ${chalk.red('NOTE:')} ${chalk.bold(
   }
 
   return '';
+};
+
+interface CreateVagrantVmOptions extends BaseVmCreateOptions {
+  type: SupportedVmManager & 'vagrant';
+
+  name: string;
+  /**
+   * The downloaded agent information. The Agent file will be uploaded to the Vagrant VM and
+   * made available under the default login home directory (`~/agent-filename`)
+   */
+  agentDownload: DownloadedAgentInfo;
+  /**
+   * The path to the Vagrantfile to use to provision the VM. Defaults to Vagrantfile under:
+   * `x-pack/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile`
+   */
+  vagrantFile?: string;
+  log?: ToolingLog;
+}
+
+/**
+ * Creates a new VM using `vagrant`
+ */
+const createVagrantVm = async ({
+  name,
+  log = createToolingLogger(),
+  agentDownload: { fullFilePath: agentFullFilePath, filename: agentFileName },
+  vagrantFile = resolve('../endpoint_agent_runner/Vagrantfile'),
+  memory,
+  cpus,
+  disk,
+}: CreateVagrantVmOptions): Promise<HostVm> => {
+  log.debug(`Using Vagrantfile: ${vagrantFile}`);
+
+  const VAGRANT_CWD = dirname(vagrantFile);
+
+  // Destroy the VM running (if any) with the provided vagrant file before re-creating it
+  try {
+    await execa.command(`vagrant destroy -f`, {
+      env: {
+        VAGRANT_CWD,
+      },
+      // Only `pipe` STDERR to parent process
+      stdio: ['inherit', 'inherit', 'pipe'],
+    });
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  if (memory || cpus || disk) {
+    log.warning(
+      `cpu, memory and disk options ignored for creation of vm via Vagrant. These should be defined in the Vagrantfile`
+    );
+  }
+
+  try {
+    const vagrantUpResponse = (
+      await execa.command(`vagrant up`, {
+        env: {
+          VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
+          VAGRANT_CWD,
+          VMNAME: name,
+          CACHED_AGENT_SOURCE: agentFullFilePath,
+          CACHED_AGENT_FILENAME: agentFileName,
+        },
+        // Only `pipe` STDERR to parent process
+        stdio: ['inherit', 'inherit', 'pipe'],
+      })
+    ).stdout;
+
+    log.debug(`Vagrant up command response: `, vagrantUpResponse);
+  } catch (e) {
+    log.error(e);
+    throw e;
+  }
+
+  return createVagrantHostVmClient(name, log);
+};
+
+/**
+ * Creates a generic interface (`HotVm`) for interacting with a VM creatd by Vagrant
+ * @param name
+ * @param log
+ */
+export const createVagrantHostVmClient = (
+  name: string,
+  log: ToolingLog = createToolingLogger()
+): HostVm => {
+  const exec = async (command: string): Promise<HostVmExecResponse> => {
+    const execResponse = await execa.command(`vagrant ssh ${name} --command="${command}"`);
+
+    log.verbose(execResponse);
+
+    return {
+      stdout: execResponse.stdout,
+      stderr: execResponse.stderr,
+      exitCode: execResponse.exitCode,
+    };
+  };
+
+  const destroy = async (): Promise<void> => {
+    const destroyResponse = await execa.command(`vagrant destroy ${name} -f`, {
+      // Only `pipe` STDERR to parent process
+      stdio: ['inherit', 'inherit', 'pipe'],
+    });
+
+    log.verbose(`VM [${name}] was destroyed successfully`, destroyResponse);
+  };
+
+  const info = () => {
+    return `VM created using Vagrant.
+  VM Name: ${name}
+
+  Shell access: ${chalk.cyan(`vagrant ssh ${name}`)}
+  Delete VM:    ${chalk.cyan(`vagrant destroy ${name} -f`)}
+`;
+  };
+
+  const unmount = async (_: string) => {
+    throw new Error('VM action `unmount`` not currently supported for vagrant');
+  };
+
+  const mount = async (_: string, __: string) => {
+    throw new Error('VM action `mount` not currently supported for vagrant');
+  };
+
+  return {
+    type: 'vagrant',
+    name,
+    exec,
+    destroy,
+    info,
+    mount,
+    unmount,
+  };
 };
