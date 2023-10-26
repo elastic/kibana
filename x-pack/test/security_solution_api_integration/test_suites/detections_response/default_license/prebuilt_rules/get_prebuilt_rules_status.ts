@@ -6,32 +6,29 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  createRule,
+  deleteAllPrebuiltRuleAssets,
   deleteAllRules,
-  deleteRule,
-  getPrebuiltRulesAndTimelinesStatus,
+  getPrebuiltRulesStatus,
+  createRule,
   getSimpleRule,
+  createRuleAssetSavedObject,
+  createPrebuiltRuleAssetSavedObjects,
+  installPrebuiltRules,
+  deleteRule,
+  upgradePrebuiltRules,
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../utils';
-import {
-  createHistoricalPrebuiltRuleAssetSavedObjects,
-  createPrebuiltRuleAssetSavedObjects,
-  createRuleAssetSavedObject,
-} from '../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
-import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
-import { getPrebuiltRulesStatus } from '../../utils/prebuilt_rules/get_prebuilt_rules_status';
-import { installPrebuiltRules } from '../../utils/prebuilt_rules/install_prebuilt_rules';
-import { upgradePrebuiltRules } from '../../utils/prebuilt_rules/upgrade_prebuilt_rules';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
 
-  describe('Prebuilt Rules status', () => {
+  describe('@ess @serverless Prebuilt Rules status', () => {
     describe('get_prebuilt_rules_status', () => {
       beforeEach(async () => {
         await deleteAllPrebuiltRuleAssets(es);

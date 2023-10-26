@@ -31,6 +31,7 @@
     "@kbn/core",
     "@kbn/alerting-plugin",
     "@kbn/core-http-common",
-    "@kbn/securitysolution-ecs"
+    "@kbn/securitysolution-ecs",
+    "@kbn/fleet-plugin",
   ]
 }
