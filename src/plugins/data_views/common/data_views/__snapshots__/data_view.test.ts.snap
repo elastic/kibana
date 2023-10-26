@@ -233,6 +233,14 @@ Object {
     },
     "custom_user_field": Object {
       "aggregatable": true,
+      "conflictDescriptions": Object {
+        "keyword": Array [
+          "index_a",
+        ],
+        "long": Array [
+          "index_b",
+        ],
+      },
       "count": 0,
       "esTypes": Array [
         "conflict",
