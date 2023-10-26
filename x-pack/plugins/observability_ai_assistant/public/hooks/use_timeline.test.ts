@@ -83,6 +83,12 @@ describe('useTimeline', () => {
           messages: [
             {
               message: {
+                role: MessageRole.System,
+                content: 'You are a helpful assistant for Elastic Observability',
+              },
+            },
+            {
+              message: {
                 role: MessageRole.User,
                 content: 'hello',
               },
@@ -122,6 +128,7 @@ describe('useTimeline', () => {
           chatService: {
             chat: () => {},
             hasRenderFunction: () => {},
+            hasFunction: () => {},
           },
         } as unknown as HookProps,
       });
@@ -308,35 +315,71 @@ describe('useTimeline', () => {
             canGiveFeedback: false,
           },
         });
+      });
 
-        act(() => {
-          subject.next({ message: { role: MessageRole.Assistant, content: 'Goodbye' } });
+      describe('and it pushes the next part', () => {
+        beforeEach(() => {
+          act(() => {
+            subject.next({ message: { role: MessageRole.Assistant, content: 'Goodbye' } });
+          });
         });
 
-        expect(hookResult.result.current.items[2]).toMatchObject({
-          role: MessageRole.Assistant,
-          content: 'Goodbye',
-          loading: true,
-          actions: {
-            canRegenerate: false,
-            canGiveFeedback: false,
-          },
+        it('adds the partial response', () => {
+          expect(hookResult.result.current.items[2]).toMatchObject({
+            role: MessageRole.Assistant,
+            content: 'Goodbye',
+            loading: true,
+            actions: {
+              canRegenerate: false,
+              canGiveFeedback: false,
+            },
+          });
         });
 
-        act(() => {
-          subject.complete();
-        });
+        describe('and it completes', () => {
+          beforeEach(async () => {
+            act(() => {
+              subject.complete();
+            });
 
-        await hookResult.waitForNextUpdate(WAIT_OPTIONS);
+            await hookResult.waitForNextUpdate(WAIT_OPTIONS);
+          });
 
-        expect(hookResult.result.current.items[2]).toMatchObject({
-          role: MessageRole.Assistant,
-          content: 'Goodbye',
-          loading: false,
-          actions: {
-            canRegenerate: true,
-            canGiveFeedback: false,
-          },
+          it('adds the completed message', () => {
+            expect(hookResult.result.current.items[2]).toMatchObject({
+              role: MessageRole.Assistant,
+              content: 'Goodbye',
+              loading: false,
+              actions: {
+                canRegenerate: true,
+                canGiveFeedback: false,
+              },
+            });
+          });
+
+          describe('and the user edits a message', () => {
+            beforeEach(() => {
+              act(() => {
+                hookResult.result.current.onEdit(
+                  hookResult.result.current.items[1] as ChatTimelineItem,
+                  {
+                    '@timestamp': new Date().toISOString(),
+                    message: { content: 'Edited message', role: MessageRole.User },
+                  }
+                );
+                subject.next({ message: { role: MessageRole.Assistant, content: '' } });
+                subject.complete();
+              });
+            });
+
+            it('calls onChatUpdate with the edited message', () => {
+              expect(hookResult.result.current.items.length).toEqual(4);
+              expect((hookResult.result.current.items[2] as ChatTimelineItem).content).toEqual(
+                'Edited message'
+              );
+              expect((hookResult.result.current.items[3] as ChatTimelineItem).content).toEqual('');
+            });
+          });
         });
       });
 
@@ -379,7 +422,7 @@ describe('useTimeline', () => {
           });
         });
 
-        describe('and it being regenerated', () => {
+        describe('and it is being regenerated', () => {
           beforeEach(() => {
             act(() => {
               hookResult.result.current.onRegenerate(
@@ -390,6 +433,8 @@ describe('useTimeline', () => {
           });
 
           it('updates the last item in the array to be loading', () => {
+            expect(hookResult.result.current.items.length).toEqual(3);
+
             expect(hookResult.result.current.items[2]).toEqual({
               display: {
                 hide: false,
