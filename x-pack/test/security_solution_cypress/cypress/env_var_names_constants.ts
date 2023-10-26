@@ -24,7 +24,7 @@ export const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
 export const IS_SERVERLESS = 'IS_SERVERLESS';
 
 /**
- * The `IS_SERVERLESS` environment variable specifies wether the currently running
+ * The `CLOUD_SERVERLESS` environment variable specifies wether the currently running
  * environment is a real MKI.
  */
 export const CLOUD_SERVERLESS = 'CLOUD_SERVERLESS';
