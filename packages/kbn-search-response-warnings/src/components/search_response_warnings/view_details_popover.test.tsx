@@ -13,23 +13,35 @@ import type { SearchResponseWarning } from '../../types';
 
 describe('ViewDetailsPopover', () => {
   describe('single warning', () => {
-    test('Clicking "view details" should open warning details', () => {
-      const mockOpenInInspector = jest.fn();
-      const warnings = [
-        {
-          type: 'incomplete',
-          requestName: 'My request',
-          clusters: {
-            remote1: {
-              status: 'partial',
-              indices: '',
-              timed_out: false,
-            },
+    const mockOpenInInspector = jest.fn();
+    const warnings = [
+      {
+        type: 'incomplete',
+        requestName: 'My request',
+        clusters: {
+          remote1: {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
           },
-          openInInspector: mockOpenInInspector,
-        } as SearchResponseWarning,
-      ];
-      render(<ViewDetailsPopover displayAsLink={false} warnings={warnings} />);
+        },
+        openInInspector: mockOpenInInspector,
+      } as SearchResponseWarning,
+    ];
+
+    beforeEach(() => {
+      mockOpenInInspector.mockReset();
+    });
+
+    test('Clicking "view details" button should open warning details', () => {
+      render(<ViewDetailsPopover warnings={warnings} />);
+      const viewDetailsButton = screen.getByRole('button');
+      fireEvent.click(viewDetailsButton);
+      expect(mockOpenInInspector).toHaveBeenCalled();
+    });
+
+    test('Clicking "view details" link should open warning details', () => {
+      render(<ViewDetailsPopover displayAsLink={true} warnings={warnings} />);
       const viewDetailsButton = screen.getByRole('button');
       fireEvent.click(viewDetailsButton);
       expect(mockOpenInInspector).toHaveBeenCalled();
@@ -37,36 +49,54 @@ describe('ViewDetailsPopover', () => {
   });
 
   describe('multiple warnings', () => {
-    test('Clicking "view details" should open popover with button to view details for each warning', () => {
-      const request1MockOpenInInspector = jest.fn();
-      const request2MockOpenInInspector = jest.fn();
-      const warnings = [
-        {
-          type: 'incomplete',
-          requestName: 'My first request',
-          clusters: {
-            remote1: {
-              status: 'partial',
-              indices: '',
-              timed_out: false,
-            },
+    const request1MockOpenInInspector = jest.fn();
+    const request2MockOpenInInspector = jest.fn();
+    const warnings = [
+      {
+        type: 'incomplete',
+        requestName: 'My first request',
+        clusters: {
+          remote1: {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
           },
-          openInInspector: request1MockOpenInInspector,
-        } as SearchResponseWarning,
-        {
-          type: 'incomplete',
-          requestName: 'My second request',
-          clusters: {
-            remote1: {
-              status: 'partial',
-              indices: '',
-              timed_out: false,
-            },
+        },
+        openInInspector: request1MockOpenInInspector,
+      } as SearchResponseWarning,
+      {
+        type: 'incomplete',
+        requestName: 'My second request',
+        clusters: {
+          remote1: {
+            status: 'partial',
+            indices: '',
+            timed_out: false,
           },
-          openInInspector: request2MockOpenInInspector,
-        } as SearchResponseWarning,
-      ];
-      render(<ViewDetailsPopover displayAsLink={false} warnings={warnings} />);
+        },
+        openInInspector: request2MockOpenInInspector,
+      } as SearchResponseWarning,
+    ];
+    beforeEach(() => {
+      request1MockOpenInInspector.mockReset();
+      request2MockOpenInInspector.mockReset();
+    });
+
+    test('Clicking "view details" button should open popover with button to view details for each warning', () => {
+      render(<ViewDetailsPopover warnings={warnings} />);
+      const viewDetailsButton = screen.getByRole('button');
+      fireEvent.click(viewDetailsButton);
+      expect(request1MockOpenInInspector).not.toHaveBeenCalled();
+      expect(request2MockOpenInInspector).not.toHaveBeenCalled();
+
+      const openRequest1Button = screen.getByRole('button', { name: 'My first request' });
+      fireEvent.click(openRequest1Button);
+      expect(request1MockOpenInInspector).toHaveBeenCalled();
+      expect(request2MockOpenInInspector).not.toHaveBeenCalled();
+    });
+
+    test('Clicking "view details" link should open popover with button to view details for each warning', () => {
+      render(<ViewDetailsPopover displayAsLink={true} warnings={warnings} />);
       const viewDetailsButton = screen.getByRole('button');
       fireEvent.click(viewDetailsButton);
       expect(request1MockOpenInInspector).not.toHaveBeenCalled();

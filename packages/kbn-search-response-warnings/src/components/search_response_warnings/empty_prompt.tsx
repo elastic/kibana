@@ -30,7 +30,7 @@ export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
         </h2>
       }
       body={getWarningsDescription(props.warnings)}
-      actions={<ViewDetailsPopover displayAsLink={false} warnings={props.warnings} />}
+      actions={<ViewDetailsPopover warnings={props.warnings} />}
       data-test-subj="searchResponseWarningsEmptyPrompt"
     />
   );
