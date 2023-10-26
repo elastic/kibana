@@ -14,8 +14,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { TypeOf } from '@kbn/config-schema';
-import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID } from './constants';
-import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './translations';
+import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { AdditionalContext } from './utils';
 import { searchConfigurationSchema } from './register_custom_threshold_rule_type';
@@ -49,7 +48,7 @@ export type CustomThresholdAlertContext = AlertContext & {
   value?: Array<number | string | null>;
 };
 export type CustomThresholdSpecificActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof NO_DATA_ACTIONS
+  typeof FIRED_ACTION | typeof NO_DATA_ACTION
 >;
 export type CustomThresholdActionGroup =
   | typeof FIRED_ACTIONS_ID
