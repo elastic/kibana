@@ -676,7 +676,6 @@ examples/share_examples @elastic/appex-sharedux
 src/plugins/share @elastic/appex-sharedux
 packages/kbn-shared-svg @elastic/apm-ui
 packages/shared-ux/avatar/solution @elastic/appex-sharedux
-packages/shared-ux/avatar/user_profile/impl @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/impl @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/mocks @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/types @elastic/appex-sharedux

@@ -32,7 +32,7 @@ export const DATA_QUALITY_TITLE = i18n.translate(
 export const DATE_PICKER_TOOLTIP = i18n.translate(
   'xpack.securitySolution.dataQualityDashboard.datePicker.tooltip',
   {
-    defaultMessage: `Conducting data quality checks is possible solely for the data present within the Ingest and Search Boost window (last 7 days).`,
+    defaultMessage: `Data quality checks are ran on data that was ingested during the Search Boost window. The default window range is 7 days.`,
   }
 );
 

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FINAL_SUMMARY_KQL } from './single_metric_config';
 import { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -96,6 +97,10 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
         formula: "1- (count(kql='summary.down > 0') / count(kql='summary: *'))",
+        columnFilter: {
+          language: 'kuery',
+          query: FINAL_SUMMARY_KQL,
+        },
       },
       {
         label: 'Monitor Errors',
