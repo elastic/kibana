@@ -58,7 +58,20 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
 
 exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroachdb_dynamic_templates.yml 1`] = `
 {
-  "properties": {},
+  "properties": {
+    "cockroachdb": {
+      "properties": {
+        "status": {
+          "properties": {
+            "labels": {
+              "type": "object",
+              "dynamic": true
+            }
+          }
+        }
+      }
+    }
+  },
   "dynamic_templates": [
     {
       "cockroachdb.status.labels": {
@@ -76,6 +89,16 @@ exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroach
         },
         "match_mapping_type": "*",
         "path_match": "cockroachdb.status.*.value"
+      }
+    },
+    {
+      "cockroachdb.status.*": {
+        "mapping": {
+          "type": "object",
+          "dynamic": true
+        },
+        "match_mapping_type": "object",
+        "path_match": "cockroachdb.status.*"
       }
     },
     {
@@ -829,45 +852,6 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 },
                 "dropped": {
                   "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "network_summary": {
-          "properties": {
-            "ip": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
-            },
-            "tcp": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
-            },
-            "udp": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
-            },
-            "udp_lite": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
-            },
-            "icmp": {
-              "properties": {
-                "*": {
-                  "type": "object"
                 }
               }
             }

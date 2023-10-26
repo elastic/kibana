@@ -1213,12 +1213,12 @@ describe('EPM template', () => {
       },
       dynamic_templates: [
         {
-          'group.*': {
-            path_match: 'group.*',
-            match_mapping_type: 'object',
+          'group.*.network.bytes': {
+            match_mapping_type: 'long',
+            path_match: 'group.*.network.bytes',
             mapping: {
-              type: 'object',
-              dynamic: true,
+              type: 'long',
+              time_series_metric: 'counter',
             },
           },
         },
@@ -1233,12 +1233,12 @@ describe('EPM template', () => {
           },
         },
         {
-          'group.*.network.bytes': {
-            match_mapping_type: 'long',
-            path_match: 'group.*.network.bytes',
+          'group.*': {
+            path_match: 'group.*',
+            match_mapping_type: 'object',
             mapping: {
-              type: 'long',
-              time_series_metric: 'counter',
+              type: 'object',
+              dynamic: true,
             },
           },
         },

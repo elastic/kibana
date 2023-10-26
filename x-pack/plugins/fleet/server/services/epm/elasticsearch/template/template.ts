@@ -219,6 +219,25 @@ function _generateMappings(
       runtimeProperties: fieldProps,
     });
     hasDynamicTemplateMappings = true;
+
+    // Add dynamic intermediary objects.
+    let parts = pathMatch.split('.');
+    for (var i = parts.length-1; i > 0; i--) {
+      var name = parts.slice(0, i).join('.');
+      if (!name.includes('*')) {
+        continue;
+      }
+      const dynProps : Properties = {
+        type: 'object',
+	dynamic: true,
+      }
+      ctx.addDynamicMapping({
+        path: name,
+	pathMatch: name,
+	matchingType: 'object',
+	properties: dynProps,
+      });
+    }
   }
 
   // TODO: this can happen when the fields property in fields.yml is present but empty
@@ -497,6 +516,11 @@ function _generateMappings(
         }
         if (field.dimension) {
           fieldProps.time_series_dimension = field.dimension;
+        }
+
+        // Avoid including maps with wildcards, they have generated dynamic mappings.
+        if (field.name.includes('*')) {
+          return;
         }
 
         props[field.name] = fieldProps;
