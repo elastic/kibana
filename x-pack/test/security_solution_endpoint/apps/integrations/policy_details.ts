@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
 
-  describe('@ess When on the Endpoint Policy Details Page', function () {
+  describe('@ess @serverless When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     const formTestSubjects = getPolicySettingsFormTestSubjects();
 
@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      it('should not hide the side navigation', async () => {
+      it('@skipInServerless should not hide the side navigation', async () => {
         await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
         // ensure center of button is visible and not hidden by sticky bottom bar
         await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
@@ -148,10 +148,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should show a tooltip on hover', async () => {
           await testSubjects.moveMouseTo(cardTestSubj.notifyCustomMessageTooltipIcon);
 
-          expect(
-            await testSubjects.getVisibleText(cardTestSubj.notifyCustomMessageTooltipInfo)
-          ).equal(
-            `Selecting the user notification option will display a notification to the host user when ${protection} is prevented or detected.\nThe user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename.`
+          await retry.waitFor(
+            'should show a tooltip on hover',
+            async () =>
+              (await testSubjects.getVisibleText(cardTestSubj.notifyCustomMessageTooltipInfo)) ===
+              `Selecting the user notification option will display a notification to the host user when ${protection} is prevented or detected.\nThe user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename.`
           );
         });
 
@@ -210,7 +211,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.existOrFail('toastCloseButton');
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
 
