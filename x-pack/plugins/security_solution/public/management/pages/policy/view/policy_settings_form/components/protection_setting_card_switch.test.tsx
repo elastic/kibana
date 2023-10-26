@@ -61,7 +61,6 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
 
   it('should render expected output when disabled', () => {
     set(formProps.policy, 'windows.malware.mode', ProtectionModes.off);
-    // set(formProps, 'selected', false);
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'false');
