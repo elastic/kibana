@@ -8,8 +8,9 @@
 
 import { readFileSync } from 'fs';
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
+import * as path from 'path';
 import { getExec } from './prepared_exec';
-import { getGithubClient, BuildkiteClient } from '#pipeline-utils';
+import { getGithubClient, BuildkiteClient, getKibanaDir } from '#pipeline-utils';
 
 const octokit = getGithubClient();
 
@@ -140,12 +141,13 @@ async function addBuildkiteInfoSection(html: string) {
 
 function compareSOSnapshots(previousSha: string, selectedSha: string) {
   const command = `node scripts/snapshot_plugin_types compare --from ${previousSha} --to ${selectedSha}`;
-  exec(`${command} --outputPath 'so_comparison.json'`);
+  const outputPath = path.resolve(getKibanaDir(), 'so_comparison.json');
+  exec(`${command} --outputPath ${outputPath}`, { stdio: 'inherit' });
 
-  const soComparisonResult = JSON.parse(readFileSync('so_comparison.json').toString());
+  const soComparisonResult = JSON.parse(readFileSync(outputPath).toString());
 
   const buildkite = new BuildkiteClient({ exec });
-  buildkite.uploadArtifacts('so_comparison.json');
+  buildkite.uploadArtifacts(outputPath);
 
   return {
     hasChanges: soComparisonResult.hasChanges,
