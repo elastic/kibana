@@ -9,6 +9,7 @@ import Url from 'url';
 
 import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
+import { waitForHostToEnroll } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
@@ -48,19 +49,30 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, 'Default policy');
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
 
-  await new AgentManager(
-    policyEnrollmentKey,
-    config.get('servers.fleetserver.port'),
-    log,
-    kbnClient
-  ).setup();
-  await new AgentManager(
-    policyEnrollmentKeyTwo,
-    config.get('servers.fleetserver.port'),
-    log,
-    kbnClient
-  ).setup();
+  const port = config.get('servers.fleetserver.port');
+  try {
+    await createAndEnrollAgent(policyEnrollmentKey, port, log, kbnClient);
+    await createAndEnrollAgent(policyEnrollmentKeyTwo, port, log, kbnClient);
+  } catch (error) {
+    throw new Error('WTF?', error);
+  }
 }
+
+const createAndEnrollAgent = async (enrollmentKey, port, log, kbnClient, attempt = 1) => {
+  let agent;
+  try {
+    agent = await new AgentManager(enrollmentKey, port, log, kbnClient).setup();
+    const short = agent.substring(0, 12);
+    await waitForHostToEnroll(kbnClient, short);
+  } catch (err) {
+    agent.cleanup();
+    if (attempt < 3) {
+      await createAndEnrollAgent(enrollmentKey, port, log, kbnClient, attempt + 1); // Recursive call with incremented attempt
+    } else {
+      throw new Error('Reached maximum attempts. Exiting recursion.');
+    }
+  }
+};
 
 export async function startOsqueryCypress(context: FtrProviderContext) {
   const config = context.getService('config');

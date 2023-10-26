@@ -8,7 +8,6 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
-import { waitForHostToEnroll } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 
@@ -17,7 +16,6 @@ export class AgentManager extends Manager {
   private policyEnrollmentKey: string;
   private fleetServerPort: string;
   private agentContainerId?: string;
-  private kbnClient?: any;
 
   constructor(
     policyEnrollmentKey: string,
@@ -29,7 +27,6 @@ export class AgentManager extends Manager {
     this.log = log;
     this.fleetServerPort = fleetServerPort;
     this.policyEnrollmentKey = policyEnrollmentKey;
-    this.kbnClient = kbnClient;
   }
 
   public async setup() {
@@ -58,11 +55,8 @@ export class AgentManager extends Manager {
     ];
 
     this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
-
-    if (this.agentContainerId) {
-      const short = this.agentContainerId.substring(0, 12);
-      await waitForHostToEnroll(this.kbnClient, short);
-    }
+    console.log({ thisAgent: this.agentContainerId });
+    return this.agentContainerId;
   }
 
   public cleanup() {

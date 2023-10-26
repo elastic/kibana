@@ -176,6 +176,7 @@ export const waitForHostToEnroll = async (
           showInactive: false,
         }).then((response) => {
           agentId = response.items[0]?.id;
+          console.log('FLEET AFENT ID', agentId);
           return response.items.filter((agent) => agent.status === 'online')[0];
         }),
       RETRYABLE_TRANSIENT_ERRORS
