@@ -172,7 +172,17 @@
             "label": "children",
             "description": [],
             "signature": [
-              "({ link: \"ml:overview\"; } | { link: \"ml:notifications\"; } | { title: string; id: \"anomaly_detection\"; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:anomalyDetection\"; } | { link: \"ml:anomalyExplorer\"; } | { link: \"ml:singleMetricViewer\"; } | { link: \"ml:settings\"; })[]; } | { id: \"data_frame_analytics\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:dataFrameAnalytics\"; } | { link: \"ml:resultExplorer\"; } | { link: \"ml:analyticsMap\"; })[]; } | { id: \"model_management\"; title: string; renderAs: \"accordion\"; children: ({ link: \"ml:nodesOverview\"; } | { link: \"ml:nodes\"; })[]; } | { id: \"data_visualizer\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:fileUpload\"; } | { title: string; link: \"ml:indexDataVisualizer\"; } | { title: string; link: \"ml:dataDrift\"; })[]; } | { id: \"aiops_labs\"; title: string; renderAs: \"accordion\"; children: ({ link: \"ml:logRateAnalysis\"; } | { link: \"ml:logPatternAnalysis\"; } | { link: \"ml:changePointDetections\"; })[]; })[]"
+              "({ link: \"ml:overview\"; } | { link: \"ml:notifications\"; } | { link: \"ml:memoryUsage\"; } | { title: string; link: \"ml:anomalyDetection\"; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:anomalyDetection\"; breadcrumbStatus: \"hidden\"; } | { link: \"ml:anomalyExplorer\"; } | { link: \"ml:singleMetricViewer\"; } | { link: \"ml:settings\"; })[]; } | { link: \"ml:dataFrameAnalytics\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:dataFrameAnalytics\"; breadcrumbStatus: \"hidden\"; } | { link: \"ml:resultExplorer\"; } | { link: \"ml:analyticsMap\"; })[]; } | { id: \"model_management\"; title: string; renderAs: \"accordion\"; children: ({ link: \"ml:nodesOverview\"; } | { link: \"ml:nodes\"; })[]; } | { id: \"data_visualizer\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:fileUpload\"; } | { title: string; link: \"ml:indexDataVisualizer\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; } | { title: string; link: \"ml:dataDrift\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; })[]; } | { id: \"aiops_labs\"; title: string; renderAs: \"accordion\"; children: ({ link: \"ml:logRateAnalysis\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; } | { link: \"ml:logPatternAnalysis\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; } | { link: \"ml:changePointDetections\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; })[]; })[]"
             ],
             "path": "packages/default-nav/ml/default_navigation.ts",
             "deprecated": false,

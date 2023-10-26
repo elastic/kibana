@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../../common/types/api';
+import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
 import { IngestionStatus } from '../../../../types';
@@ -30,8 +31,9 @@ import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncsContextMenu: React.FC = () => {
-  const { productFeatures } = useValues(KibanaLogic);
+  const { config, productFeatures } = useValues(KibanaLogic);
   const {
+    connector,
     hasDocumentLevelSecurityFeature,
     hasIncrementalSyncFeature,
     ingestionMethod,
@@ -43,7 +45,7 @@ export const SyncsContextMenu: React.FC = () => {
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
-  const { connector } = useValues(IndexViewLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -75,6 +77,13 @@ export const SyncsContextMenu: React.FC = () => {
   const shouldShowIncrementalSync =
     productFeatures.hasIncrementalSyncEnabled && hasIncrementalSyncFeature;
 
+  const isEnterpriseSearchNotAvailable = Boolean(
+    config.host && config.canDeployEntSearch && errorConnectingMessage
+  );
+  const isSyncsDisabled =
+    (connector?.is_native && isEnterpriseSearchNotAvailable) ||
+    ingestionStatus === IngestionStatus.INCOMPLETE;
+
   const panels: EuiContextMenuProps['panels'] = [
     {
       id: 0,
@@ -86,7 +95,7 @@ export const SyncsContextMenu: React.FC = () => {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types
                 'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
                 'data-test-subj': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
-                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
+                disabled: isSyncsDisabled,
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.fullSync', {
                   defaultMessage: 'Full Content',
@@ -105,7 +114,7 @@ export const SyncsContextMenu: React.FC = () => {
                   'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
                 'data-test-subj':
                   'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
-                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
+                disabled: isSyncsDisabled,
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
                   defaultMessage: 'Incremental Content',
@@ -126,8 +135,7 @@ export const SyncsContextMenu: React.FC = () => {
                 'data-test-subj':
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
                 disabled: Boolean(
-                  ingestionStatus === IngestionStatus.INCOMPLETE ||
-                    connector?.configuration.use_document_level_security?.value
+                  isSyncsDisabled || !connector?.configuration.use_document_level_security?.value
                 ),
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
