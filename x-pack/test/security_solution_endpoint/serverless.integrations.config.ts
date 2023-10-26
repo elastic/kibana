@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './base.config';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -16,9 +16,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return generateConfig({
     baseConfig: svlBaseConfig,
-    testFiles: [resolve(__dirname, './apps/endpoint')],
-    junitReportName: 'X-Pack Endpoint Functional Tests on Serverless',
-    kbnServerArgs: ['--serverless=security'],
-    mochaGrep: '/^(?!.*@brokenInServerless).*@serverless.*/',
+    testFiles: [resolve(__dirname, './apps/integrations')],
+    junitReportName: 'X-Pack Endpoint Integrations Functional Tests on Serverless',
+    mochaGrep: '/^(?!.*@brokenInServerless|.*@skipInServerless).*@serverless.*/',
+    kbnServerArgs: [
+      '--serverless=security',
+      // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
+      '--xpack.securitySolution.packagerTaskInterval=5s',
+    ],
   });
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { Config } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { services } from './services';
@@ -16,18 +15,20 @@ import {
 
 export const generateConfig = ({
   baseConfig,
+  testFiles,
   junitReportName,
   kbnServerArgs = [],
   mochaGrep,
 }: {
   baseConfig: Config;
+  testFiles: string[];
   junitReportName: string;
   mochaGrep: string;
   kbnServerArgs?: string[];
 }): Config => ({
   ...baseConfig.getAll(),
   pageObjects,
-  testFiles: [resolve(__dirname, './apps/endpoint')],
+  testFiles,
   dockerServers: createEndpointDockerConfig(),
   junit: {
     reportName: junitReportName,
