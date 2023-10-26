@@ -9,7 +9,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { TableId } from '@kbn/securitysolution-data-table';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
@@ -24,7 +24,7 @@ export const getUseActionColumnHook =
   () => {
     const license = useLicense();
     const isEnterprisePlus = license.isEnterprise();
-    const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+    const ACTION_BUTTON_COUNT = tableId === TableId.alertsOnCasePage ? 3 : isEnterprisePlus ? 5 : 4;
 
     const eventContext = useContext(StatefulEventContext);
 
@@ -35,14 +35,12 @@ export const getUseActionColumnHook =
 
     const {
       dataTable: {
-        columns,
+        columns: columnHeaders,
         showCheckboxes,
         selectedEventIds,
         loadingEventIds,
       } = getAlertsDefaultModel(license),
     } = useSelector((state: State) => eventsViewerSelector(state, tableId));
-
-    const columnHeaders = columns;
 
     const renderCustomActionsRow = useCallback(
       ({

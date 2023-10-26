@@ -676,7 +676,6 @@ examples/share_examples @elastic/appex-sharedux
 src/plugins/share @elastic/appex-sharedux
 packages/kbn-shared-svg @elastic/apm-ui
 packages/shared-ux/avatar/solution @elastic/appex-sharedux
-packages/shared-ux/avatar/user_profile/impl @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/impl @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/mocks @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen/types @elastic/appex-sharedux
@@ -891,6 +890,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
+packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 
 # Global Experience
 
