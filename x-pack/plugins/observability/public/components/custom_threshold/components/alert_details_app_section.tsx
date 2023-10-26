@@ -37,19 +37,19 @@ import { ExpressionChart } from './expression_chart';
 import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from './custom_threshold';
 import { MetricsExplorerChartType } from '../hooks/use_metrics_explorer_options';
-import { AlertParams, MetricThresholdRuleTypeParams } from '../types';
+import { AlertParams, CustomThresholdRuleTypeParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
-export type MetricThresholdRule = Rule<MetricThresholdRuleTypeParams>;
-export type MetricThresholdAlert = TopAlert;
+export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
+export type CustomThresholdAlert = TopAlert;
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
 const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 
 interface AppSectionProps {
-  alert: MetricThresholdAlert;
-  rule: MetricThresholdRule;
+  alert: CustomThresholdAlert;
+  rule: CustomThresholdRule;
   ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }

@@ -8,11 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
-import { MetricThresholdAlert, MetricThresholdRule } from '../components/alert_details_app_section';
+import { CustomThresholdAlert, CustomThresholdRule } from '../components/alert_details_app_section';
 
-export const buildMetricThresholdRule = (
-  rule: Partial<MetricThresholdRule> = {}
-): MetricThresholdRule => {
+export const buildCustomThresholdRule = (
+  rule: Partial<CustomThresholdRule> = {}
+): CustomThresholdRule => {
   return {
     alertTypeId: 'metrics.alert.threshold',
     createdBy: 'admin',
@@ -126,9 +126,9 @@ export const buildMetricThresholdRule = (
   };
 };
 
-export const buildMetricThresholdAlert = (
-  alert: Partial<MetricThresholdAlert> = {}
-): MetricThresholdAlert => {
+export const buildCustomThresholdAlert = (
+  alert: Partial<CustomThresholdAlert> = {}
+): CustomThresholdAlert => {
   return {
     link: '/app/metrics/explorer',
     reason: 'system.cpu.user.pct reported no data in the last 1m for ',

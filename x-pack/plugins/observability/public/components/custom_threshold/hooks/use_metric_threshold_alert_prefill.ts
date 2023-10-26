@@ -15,7 +15,7 @@ export interface MetricThresholdPrefillOptions {
   metrics: MetricsExplorerMetric[];
 }
 
-export const useMetricThresholdAlertPrefill = () => {
+export const useCustomThresholdAlertPrefill = () => {
   const [prefillOptionsState, setPrefillOptionsState] = useState<MetricThresholdPrefillOptions>({
     groupBy: undefined,
     filterQuery: undefined,

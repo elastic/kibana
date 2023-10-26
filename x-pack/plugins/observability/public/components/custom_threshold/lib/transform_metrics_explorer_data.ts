@@ -7,10 +7,10 @@
 
 import { first } from 'lodash';
 import { MetricsExplorerResponse } from '../../../../common/custom_threshold_rule/metrics_explorer';
-import { MetricThresholdAlertParams, ExpressionChartSeries } from '../types';
+import { CustomThresholdAlertParams, ExpressionChartSeries } from '../types';
 
 export const transformMetricsExplorerData = (
-  params: MetricThresholdAlertParams,
+  params: CustomThresholdAlertParams,
   data: MetricsExplorerResponse | null
 ) => {
   const { criteria } = params;

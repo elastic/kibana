@@ -68,7 +68,7 @@ export enum AGGREGATION_TYPES {
   CUSTOM = 'custom',
 }
 
-export interface MetricThresholdAlertParams {
+export interface CustomThresholdAlertParams {
   criteria?: MetricExpression[];
   groupBy?: string | string[];
   filterQuery?: string;
@@ -173,7 +173,7 @@ export interface InventoryMetricConditions {
   warningComparator?: Comparator;
 }
 
-export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
+export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
   searchConfiguration: SerializedSearchSourceFields;
   groupBy?: string | string[];
