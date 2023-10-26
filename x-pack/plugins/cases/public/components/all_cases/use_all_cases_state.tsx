@@ -103,6 +103,7 @@ const parseURLWithFilterOptions = (search: string) => {
   for (const [key, value] of urlParams.entries()) {
     if (paramKeysWithTypeArray.includes(key)) {
       if (!parsedUrlParams[key]) parsedUrlParams[key] = [];
+      // only applies if the value is separated by commas (e.g., "foo,bar")
       const splittedValues = value.split(',');
       (parsedUrlParams[key] as string[]).push(...splittedValues);
     } else {
@@ -114,7 +115,7 @@ const parseURLWithFilterOptions = (search: string) => {
 };
 
 /**
- * Previously, 'status' and 'legacy' were represented as single options (strings).
+ * Previously, 'status' and 'severity' were represented as single options (strings).
  * To maintain backward compatibility while transitioning to the new type of string[],
  * we map the legacy type to the new type.
  */

@@ -167,7 +167,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           ) {
             setQueryParams({ sortField: SortFieldCase.closedAt });
           } else if (
-            newFilterOptions.status &&
             [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
               newFilterOptions.status[0]
             ) &&
