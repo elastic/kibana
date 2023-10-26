@@ -19,8 +19,6 @@
     "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
     "@kbn/utility-types",
-    "@kbn/data-plugin",
-    "@kbn/core-http-server",
-    "@kbn/core-http-request-handler-context-server",
+    "@kbn/reporting-common-export-types-helpers",
   ]
 }
