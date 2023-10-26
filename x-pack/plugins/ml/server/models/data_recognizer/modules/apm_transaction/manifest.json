@@ -26,5 +26,6 @@
       "file": "datafeed_apm_tx_metrics.json",
       "job_id": "apm_tx_metrics"
     }
-  ]
+  ],
+  "tags": ["observability"]
 }

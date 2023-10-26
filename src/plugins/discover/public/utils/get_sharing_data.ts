@@ -118,7 +118,7 @@ export async function getSharingData(
 
         searchSource.setField('fields', fields);
       }
-      return searchSource.getSerializedFields(true, false);
+      return searchSource.getSerializedFields(true);
     },
     columns,
   };

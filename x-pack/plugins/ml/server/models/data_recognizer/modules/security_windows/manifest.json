@@ -152,5 +152,8 @@
       "file": "datafeed_v3_windows_anomalous_script.json",
       "job_id": "v3_windows_anomalous_script"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }
