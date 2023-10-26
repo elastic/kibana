@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
-import { IEsErrorAttributes } from '../../common';
+import { IEsErrorAttributes } from '../../../common';
 
 export type IEsError = KibanaServerError<IEsErrorAttributes>;
 

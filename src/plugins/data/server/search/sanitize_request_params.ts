@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
 import type { SanitizedConnectionRequestParams } from '../../common';
 
 export function sanitizeRequestParams(requestParams: ConnectionRequestParams): SanitizedConnectionRequestParams {
