@@ -83,6 +83,7 @@ export interface GetCasesColumn {
 
 export interface UseCasesColumnsReturnValue {
   columns: CasesColumns[];
+  isFetchingColumns: boolean;
 }
 
 export const useCasesColumns = ({
@@ -98,6 +99,7 @@ export const useCasesColumns = ({
 
   const {
     data: { customFields },
+    isFetching: isFetchingColumns,
   } = useGetCaseConfiguration();
 
   const assignCaseAction = useCallback(
@@ -373,7 +375,7 @@ export const useCasesColumns = ({
     }
   }
 
-  return { columns };
+  return { columns, isFetchingColumns };
 };
 
 interface Props {

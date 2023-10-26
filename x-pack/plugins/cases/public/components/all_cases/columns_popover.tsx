@@ -6,7 +6,9 @@
  */
 
 import React, { useCallback, useState } from 'react';
+
 import type { DropResult } from '@elastic/eui';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -81,7 +83,9 @@ export const ColumnsPopover: React.FC<Props> = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
+      anchorPosition="leftUp"
       hasDragDrop
+      zIndex={0}
     >
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiFlexGroup style={{ width: 300 }}>
@@ -105,6 +109,15 @@ export const ColumnsPopover: React.FC<Props> = ({
                           data-test-subj={`column-selection-switch-${field}`}
                           onChange={(e) => toggleColumn({ field, isChecked: e.target.checked })}
                           compressed
+                          labelProps={{
+                            style: {
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              width: '190px',
+                              overflow: 'hidden',
+                            },
+                            title: name,
+                          }}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>

@@ -42,6 +42,7 @@ interface CasesTableProps {
   deselectCases: () => void;
   selectedColumns: CasesColumnSelection[];
   onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
+  isFetchingColumns: boolean;
 }
 
 const Div = styled.div`
@@ -66,6 +67,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   deselectCases,
   selectedColumns,
   onSelectedColumnsChange,
+  isFetchingColumns,
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
@@ -81,7 +83,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
     [goToCreateCase, navigateToCreateCase]
   );
 
-  return isCasesLoading && isDataEmpty ? (
+  return (isCasesLoading && isDataEmpty) || isFetchingColumns ? (
     <Div>
       <EuiSkeletonText data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </Div>

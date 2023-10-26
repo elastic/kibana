@@ -153,6 +153,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
+        "isFetchingColumns": false,
       }
     `);
   });
@@ -246,6 +247,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
+        "isFetchingColumns": false,
       }
     `);
   });
@@ -299,6 +301,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
+        "isFetchingColumns": false,
       }
     `);
   });
@@ -346,6 +349,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
+        "isFetchingColumns": false,
       }
     `);
   });
@@ -393,6 +397,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
+        "isFetchingColumns": false,
       }
     `);
   });
@@ -477,6 +482,7 @@ describe('useCasesColumns ', () => {
             "width": "90px",
           },
         ],
+        "isFetchingColumns": false,
       }
     `);
   });
@@ -497,6 +503,7 @@ describe('useCasesColumns ', () => {
           { key: toggleKey, label: toggleLabel, type: CustomFieldTypes.TOGGLE },
         ],
       },
+      isFetching: false,
     }));
 
     const { result } = renderHook(
@@ -595,6 +602,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
+        "isFetchingColumns": false,
       }
     `);
   });

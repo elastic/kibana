@@ -48,7 +48,10 @@ import { userProfiles, userProfilesMap } from '../../containers/user_profiles/ap
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useLicense } from '../../common/use_license';
 import * as api from '../../containers/api';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
@@ -64,6 +67,7 @@ jest.mock('../app/use_available_owners', () => ({
 jest.mock('../../containers/use_update_case');
 jest.mock('../../common/use_license');
 
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
@@ -99,6 +103,7 @@ describe('AllCasesListGeneric', () => {
     filterStatus: CaseStatuses.open,
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
+    isFetchingColumns: false,
     isSelectorView: false,
     userProfiles: new Map(),
     currentUserProfile: undefined,
@@ -157,8 +162,9 @@ describe('AllCasesListGeneric', () => {
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
     useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], isLoading: false });
     useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
-    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     mockKibana();
