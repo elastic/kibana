@@ -8,7 +8,7 @@
 
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
-import type { EuiAccordionProps, EuiThemeSizes, IconType } from '@elastic/eui';
+import type { EuiThemeSizes, IconType } from '@elastic/eui';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -113,15 +113,27 @@ interface NodeDefinitionBase {
    */
   renderAs?: RenderAs;
   /**
+   * ["group" nodes only] Flag to indicate if the group is initially collapsed or not.
+   *
+   * `undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.
+   *
+   * `false`: the group will be opened event if none of its children nodes matches the current URL.
+   *
+   * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
+   */
+  defaultIsCollapsed?: boolean;
+  /**
    * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
    * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation
    * panel opening on the right of the side nav.
    */
   appendHorizontalRule?: boolean;
   /**
-   * ["group" nodes only] Temp prop. Will be removed once the new navigation is fully implemented.
+   * ["group" nodes only] Flag to indicate if the accordion is collapsible.
+   * Must be used with `renderAs` set to `"accordion"`
+   * @default `true`
    */
-  accordionProps?: Partial<EuiAccordionProps>;
+  isCollapsible?: boolean;
   /**
    * ----------------------------------------------------------------------------------------------
    * -------------------------------- ITEM NODES ONLY PROPS ---------------------------------------

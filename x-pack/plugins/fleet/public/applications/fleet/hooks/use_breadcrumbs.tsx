@@ -24,6 +24,7 @@ const BASE_BREADCRUMB: Breadcrumb = {
   text: i18n.translate('xpack.fleet.breadcrumbs.appTitle', {
     defaultMessage: 'Fleet',
   }),
+  deepLinkId: 'fleet',
 };
 
 const INTEGRATIONS_BASE_BREADCRUMB: Breadcrumb = {
@@ -32,6 +33,7 @@ const INTEGRATIONS_BASE_BREADCRUMB: Breadcrumb = {
     defaultMessage: 'Integrations',
   }),
   useIntegrationsBasePath: true,
+  deepLinkId: 'integrations',
 };
 
 const breadcrumbGetters: {
