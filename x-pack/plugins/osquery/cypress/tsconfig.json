@@ -4,7 +4,7 @@
     "**/*",
     "./cypress.config.ts",
     "./serverless_cypress.config.ts",
-    "../../../test_serverless/shared/lib"
+    "../../../test_serverless/shared/lib",
   ],
   "exclude": [
     "target/**/*",
@@ -23,6 +23,9 @@
     {
       "path": "../../../test_serverless/tsconfig.json"
     },
+    {
+      "path": "../../../test/security_solution_cypress/cypress/tsconfig.json"
+    },
     "@kbn/cypress-config",
     // cypress projects that are nested inside of other ts project use code
     // from the parent ts project in ways that can't be automatically deteceted
@@ -34,5 +37,6 @@
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
+    "@kbn/security-solution-plugin/public/management/cypress",
   ]
 }

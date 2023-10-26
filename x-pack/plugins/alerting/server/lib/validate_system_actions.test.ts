@@ -14,7 +14,7 @@ import { NormalizedSystemAction } from '../rules_client';
 import { RuleActionTypes, RuleSystemAction } from '../types';
 import { validateSystemActions } from './validate_system_actions';
 
-describe('validateSystemActions', () => {
+describe('validateSystemActionsWithoutRuleTypeId', () => {
   const connectorAdapter: ConnectorAdapter = {
     connectorTypeId: '.test',
     ruleActionParamsSchema: schema.object({ foo: schema.string() }),

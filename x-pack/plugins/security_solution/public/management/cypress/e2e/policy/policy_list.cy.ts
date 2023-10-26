@@ -16,11 +16,15 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 describe(
   'Policy List',
   {
+    // Not supported in serverless!
+    // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+    // `internal/kibana/settings` is not accessible in serverless
     tags: ['@ess', '@serverless', '@brokenInServerless'],
     env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
-    describe('Renders policy list with outdated policies', () => {
+    // Today API wont let us create a policy with a manifest version before October 1st 2023
+    describe.skip('Renders policy list with outdated policies', () => {
       const indexedPolicies: IndexedFleetEndpointPolicyResponse[] = [];
 
       const monthAgo = moment.utc().subtract(1, 'months').format('YYYY-MM-DD');

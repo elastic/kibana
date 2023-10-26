@@ -100,7 +100,7 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
         try {
           const body = await esClient.updateByQuery({
             index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-            refresh: false,
+            refresh: true,
             body: {
               script: painlessScript,
               query: {

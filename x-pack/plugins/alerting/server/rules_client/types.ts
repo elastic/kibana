@@ -179,3 +179,11 @@ export interface RuleBulkOperationAggregation {
     }>;
   };
 }
+
+export type DenormalizedAction = DistributiveOmit<
+  NormalizedAlertActionWithGeneratedValues,
+  'id'
+> & {
+  actionRef: string;
+  actionTypeId: string;
+};

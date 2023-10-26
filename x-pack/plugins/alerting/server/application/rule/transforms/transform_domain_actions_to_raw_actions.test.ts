@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { RuleActionTypes } from '../../../../common';
 import { transformDomainActionsToRawActions } from './transform_domain_actions_to_raw_actions';
 
 const defaultAction = {
-  id: 'test-default-action',
   group: 'default',
   uuid: '1',
   actionTypeId: '.test',
+  actionRef: 'action_0',
   params: {},
   frequency: {
     summary: false,
@@ -25,45 +24,17 @@ const defaultAction = {
 };
 
 const systemAction = {
-  id: 'my-system-action-id',
   uuid: '123',
   actionTypeId: '.test-system-action',
+  actionRef: 'system_action:my-system-action-id',
   params: {},
   type: RuleActionTypes.SYSTEM,
 };
 
-const actionsClient = actionsClientMock.create();
-actionsClient.isSystemAction.mockImplementation((id) => id === systemAction.id);
-
-const context = {
-  getActionsClient: jest.fn().mockResolvedValue(actionsClient),
-};
-
 describe('transformDomainActionsToRawActions', () => {
-  actionsClient.getBulk.mockResolvedValue([
-    {
-      id: 'test-default-action',
-      actionTypeId: '.test',
-      name: 'Default action',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    },
-    {
-      id: 'my-system-action-id',
-      actionTypeId: '.test-system-action',
-      name: 'System action',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: true,
-    },
-  ]);
-
   it('transforms the actions correctly', async () => {
-    const res = await transformDomainActionsToRawActions({
+    const res = transformDomainActionsToRawActions({
       actions: [defaultAction, systemAction],
-      // @ts-ignore: no need to pass all properties of the context
-      context,
     });
 
     expect(res).toMatchInlineSnapshot(`

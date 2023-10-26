@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  NormalizedAlertActionWithGeneratedValues,
-  RulesClientContext,
-} from '../../../rules_client';
 import { RuleDomain } from '../types';
 import { RuleAttributes } from '../../../data/rule/types';
 import { getMappedParams } from '../../../rules_client/common';
 import { transformDomainActionsToRawActions } from './transform_domain_actions_to_raw_actions';
+import { DenormalizedAction } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
   legacyId: RuleAttributes['legacyId'];
@@ -19,23 +16,20 @@ interface TransformRuleToEsParams {
   meta?: RuleAttributes['meta'];
 }
 
-export const transformRuleDomainToRuleAttributes = async ({
-  actions,
+export const transformRuleDomainToRuleAttributes = ({
+  actionsWithRefs,
   rule,
   params,
-  context,
 }: {
-  actions: NormalizedAlertActionWithGeneratedValues[];
+  actionsWithRefs: DenormalizedAction[];
   rule: Omit<RuleDomain, 'actions' | 'params'>;
   params: TransformRuleToEsParams;
-  context: RulesClientContext;
-}): Promise<RuleAttributes> => {
+}): RuleAttributes => {
   const { legacyId, paramsWithRefs, meta } = params;
   const mappedParams = getMappedParams(paramsWithRefs);
 
-  const actionsWithRefs = await transformDomainActionsToRawActions({
-    actions,
-    context,
+  const transformedActionsWithRefs = transformDomainActionsToRawActions({
+    actions: actionsWithRefs,
   });
 
   return {
@@ -46,7 +40,7 @@ export const transformRuleDomainToRuleAttributes = async ({
     consumer: rule.consumer,
     legacyId,
     schedule: rule.schedule,
-    actions: actionsWithRefs,
+    actions: transformedActionsWithRefs,
     params: paramsWithRefs,
     ...(Object.keys(mappedParams).length ? { mapped_params: mappedParams } : {}),
     ...(rule.scheduledTaskId !== undefined ? { scheduledTaskId: rule.scheduledTaskId } : {}),

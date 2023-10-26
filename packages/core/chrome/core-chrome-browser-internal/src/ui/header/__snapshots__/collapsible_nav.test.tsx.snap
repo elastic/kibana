@@ -30,7 +30,7 @@ Array [
           class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
           <span
-            class="euiThemeProvider emotion-euiColorMode-dark-colorClassName"
+            class="euiThemeProvider emotion-euiColorMode-dark"
           >
             <ul
               class="euiListGroup emotion-euiListGroup-none"

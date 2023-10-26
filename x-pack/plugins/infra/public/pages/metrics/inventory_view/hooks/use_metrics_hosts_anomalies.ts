@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import { useMemo, useState, useCallback, useEffect, useReducer, useRef } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
@@ -134,6 +134,27 @@ const STATE_DEFAULTS: ReducerStateDefaults = {
   hasNextPage: false,
 };
 
+const initStateReducer =
+  (
+    endTime: number,
+    startTime: number,
+    defaultSortOptions: Sort,
+    defaultPaginationOptions: Pick<Pagination, 'pageSize'>,
+    filteredDatasets?: string[]
+  ) =>
+  (stateDefaults: ReducerStateDefaults): ReducerState => {
+    return {
+      ...stateDefaults,
+      paginationOptions: defaultPaginationOptions,
+      sortOptions: defaultSortOptions,
+      filteredDatasets,
+      timeRange: {
+        start: startTime,
+        end: endTime,
+      },
+    };
+  };
+
 export const useMetricsHostsAnomaliesResults = ({
   endTime,
   startTime,
@@ -154,22 +175,28 @@ export const useMetricsHostsAnomaliesResults = ({
   filteredDatasets?: string[];
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
-    return {
-      ...stateDefaults,
-      paginationOptions: defaultPaginationOptions,
-      sortOptions: defaultSortOptions,
-      filteredDatasets,
-      timeRange: {
-        start: startTime,
-        end: endTime,
-      },
-    };
-  };
 
-  const [reducerState, dispatch] = useReducer(stateReducer, STATE_DEFAULTS, initStateReducer);
+  const abortController = useRef(new AbortController());
+  const [reducerState, dispatch] = useReducer(
+    stateReducer,
+    STATE_DEFAULTS,
+    initStateReducer(
+      endTime,
+      startTime,
+      defaultSortOptions,
+      defaultPaginationOptions,
+      filteredDatasets
+    )
+  );
 
   const [metricsHostsAnomalies, setMetricsHostsAnomalies] = useState<MetricsHostsAnomalies>([]);
+
+  useEffect(() => {
+    const current = abortController?.current;
+    return () => {
+      current.abort();
+    };
+  }, []);
 
   const [getMetricsHostsAnomaliesRequest, getMetricsHostsAnomalies] = useTrackedPromise(
     {
@@ -181,6 +208,9 @@ export const useMetricsHostsAnomaliesResults = ({
           paginationOptions,
           paginationCursor,
         } = reducerState;
+
+        abortController.current.abort();
+        abortController.current = new AbortController();
 
         return await callGetMetricHostsAnomaliesAPI(
           {
@@ -197,7 +227,8 @@ export const useMetricsHostsAnomaliesResults = ({
             },
             hostName,
           },
-          services.http.fetch
+          services.http.fetch,
+          abortController.current.signal
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -318,7 +349,8 @@ interface RequestArgs {
 
 export const callGetMetricHostsAnomaliesAPI = async (
   requestArgs: RequestArgs,
-  fetch: HttpHandler
+  fetch: HttpHandler,
+  signal?: AbortSignal | null
 ) => {
   const {
     sourceId,
@@ -350,6 +382,7 @@ export const callGetMetricHostsAnomaliesAPI = async (
         },
       })
     ),
+    signal,
   });
 
   return decodeOrThrow(getMetricsHostsAnomaliesSuccessReponsePayloadRT)(response);

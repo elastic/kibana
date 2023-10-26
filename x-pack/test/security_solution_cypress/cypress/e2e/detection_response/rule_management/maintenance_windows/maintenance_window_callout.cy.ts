@@ -13,10 +13,9 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Maintenance window callout on Rule Management page',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     let maintenanceWindowId = '';
 
@@ -69,7 +68,7 @@ describe(
     it('Displays the callout when there are running maintenance windows', () => {
       visit(RULES_MANAGEMENT_URL);
 
-      cy.contains('Maintenance window is running');
+      cy.contains('A maintenance window is running for Security rules');
     });
   }
 );

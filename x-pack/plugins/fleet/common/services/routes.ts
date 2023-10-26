@@ -93,6 +93,12 @@ export const epmRouteService = {
   getBulkAssetsPath: () => {
     return EPM_API_ROUTES.BULK_ASSETS_PATTERN;
   },
+  getInputsTemplatesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INPUTS_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
 };
 
 export const packagePolicyRouteService = {
