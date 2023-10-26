@@ -114,7 +114,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.infraHome.clickDismissKubernetesTourButton();
 
-        await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        });
       });
 
       it('renders an empty data prompt for dates with no data', async () => {

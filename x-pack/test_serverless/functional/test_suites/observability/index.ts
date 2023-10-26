@@ -15,7 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./rules/rules_list'));
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./advanced_settings'));
-    loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./ml'));
   });
 }
