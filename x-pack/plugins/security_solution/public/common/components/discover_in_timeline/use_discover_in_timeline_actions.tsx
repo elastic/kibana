@@ -15,11 +15,9 @@ import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/m
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { endTimelineSaving, startTimelineSaving } from '../../../timelines/store/timeline/actions';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
