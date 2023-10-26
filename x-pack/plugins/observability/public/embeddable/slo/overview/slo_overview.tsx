@@ -45,6 +45,12 @@ export function SloOverview({
     refetch();
   }, [lastReloadRequestTime, refetch]);
 
+  useEffect(() => {
+    if (!isLoading) {
+      onRenderComplete();
+    }
+  }, [isLoading, onRenderComplete]);
+
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloNotFound = !isLoading && slo === undefined;
 
@@ -103,9 +109,6 @@ export function SloOverview({
     );
   }
 
-  if (!isLoading) {
-    onRenderComplete();
-  }
   const TargetCopy = i18n.translate('xpack.observability.sloEmbeddable.overview.sloTargetLabel', {
     defaultMessage: 'Target',
   });
