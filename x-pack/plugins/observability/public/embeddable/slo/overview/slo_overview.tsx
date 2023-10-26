@@ -20,7 +20,12 @@ import { paths } from '../../../../common/locators/paths';
 
 import { EmbeddableSloProps } from './types';
 
-export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: EmbeddableSloProps) {
+export function SloOverview({
+  sloId,
+  sloInstanceId,
+  lastReloadRequestTime,
+  onRenderComplete,
+}: EmbeddableSloProps) {
   const {
     uiSettings,
     application: { navigateToUrl },
@@ -96,6 +101,10 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
         </LoadingContent>
       </LoadingContainer>
     );
+  }
+
+  if (!isLoading) {
+    onRenderComplete();
   }
   const TargetCopy = i18n.translate('xpack.observability.sloEmbeddable.overview.sloTargetLabel', {
     defaultMessage: 'Target',
