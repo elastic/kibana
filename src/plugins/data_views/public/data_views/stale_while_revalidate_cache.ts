@@ -6,26 +6,30 @@
  * Side Public License, v 1.
  */
 
-export interface CachedFetchOptions {
-  url: string;
-  fetch: () => Promise<Response>;
-  forceRefresh?: boolean;
+import type { HttpFetchOptions, HttpSetup } from '@kbn/core-http-browser';
+import { format } from 'url';
+
+export interface StaleWhileRevalidateCacheDependencies {
+  http: HttpSetup;
+  cacheName: string;
+  cacheEntryLifetimeMs: number;
+  onOpenCacheError: (e: any) => void;
 }
+
+export type CachedHttpFetchOptions = Pick<HttpFetchOptions, 'query' | 'version'> & {
+  forceRefresh?: boolean;
+};
 
 export class StaleWhileRevalidateCache {
   private readonly activeRequests = new Map<string, Promise<Response>>();
 
-  constructor(
-    private readonly cacheName: string,
-    private readonly cacheEntryLifetimeMs: number,
-    private readonly onOpenCacheError: (e: any) => void
-  ) {}
+  constructor(private readonly deps: StaleWhileRevalidateCacheDependencies) {}
 
   private async openCache() {
     try {
-      return await caches?.open(this.cacheName);
+      return await caches?.open(this.deps.cacheName);
     } catch (e) {
-      this.onOpenCacheError(e);
+      this.deps.onOpenCacheError(e);
     }
   }
 
@@ -33,8 +37,15 @@ export class StaleWhileRevalidateCache {
     return this.activeRequests.get(url) === request;
   }
 
-  async cachedFetch({ url, fetch, forceRefresh }: CachedFetchOptions): Promise<Response> {
+  async fetch(
+    path: string,
+    { forceRefresh, ...fetchOptions }: CachedHttpFetchOptions
+  ): Promise<Response> {
     const cache = await this.openCache();
+    const url = format({
+      pathname: this.deps.http.basePath.prepend(path),
+      ...fetchOptions,
+    });
 
     // Store the expired response from the cache if one exists
     let expiredResponse: Response | undefined;
@@ -51,7 +62,7 @@ export class StaleWhileRevalidateCache {
           const date = new Date(dateHeader);
           const now = new Date();
           const diff = now.getTime() - date.getTime();
-          const isExpired = diff > this.cacheEntryLifetimeMs;
+          const isExpired = diff > this.deps.cacheEntryLifetimeMs;
 
           // If the response is expired we'll still return it,
           // but first we'll make a request to update the cache
@@ -69,12 +80,22 @@ export class StaleWhileRevalidateCache {
       // the expired response if one exists to show results sooner, or we
       // wait for the active request to finish and return its response
       if (activeRequest) {
-        return expiredResponse ?? activeRequest;
+        return expiredResponse ?? activeRequest.then(cloneResponse);
       }
     }
 
-    const currentRequest = fetch()
-      .then((response) => {
+    const currentRequest = this.deps.http
+      .fetch(path, {
+        ...fetchOptions,
+        asResponse: true,
+        rawResponse: true,
+      })
+      .then(({ response }) => {
+        // This shouldn't happen, but just in case
+        if (!response) {
+          throw new Error('Response is undefined');
+        }
+
         if (this.isActiveRequest(url, currentRequest)) {
           // Clone the response so we can cache it
           cache?.put(url, response.clone());
@@ -94,6 +115,9 @@ export class StaleWhileRevalidateCache {
 
     // If there's an expired response, return it immediately,
     // otherwise wait for the current request to finish first
-    return expiredResponse ?? currentRequest;
+    return expiredResponse ?? currentRequest.then(cloneResponse);
   }
 }
+
+// We need to clone responses when reusing them since streams can only be read once
+const cloneResponse = (response: Response) => response.clone();

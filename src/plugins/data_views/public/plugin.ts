@@ -85,11 +85,12 @@ export class DataViewsPublicPlugin
     );
 
     const config = this.initializerContext.config.get<ClientConfigType>();
-    const staleWhileRevalidateCache = new StaleWhileRevalidateCache(
-      SWR_CACHE_NAME,
-      SWR_CACHE_ENTRY_LIFETIME_MS,
-      console.error
-    );
+    const staleWhileRevalidateCache = new StaleWhileRevalidateCache({
+      http,
+      cacheName: SWR_CACHE_NAME,
+      cacheEntryLifetimeMs: SWR_CACHE_ENTRY_LIFETIME_MS,
+      onOpenCacheError: console.error,
+    });
 
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),

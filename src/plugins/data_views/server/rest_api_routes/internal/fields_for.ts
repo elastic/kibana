@@ -111,12 +111,8 @@ const validate: FullValidationConfig<any, any, any> = {
   },
 };
 
-const handler: (
-  isRollupsEnabled: () => boolean
-) => (cacheHeader: boolean) => RequestHandler<{}, IQuery, IBody> =
-  (isRollupsEnabled) =>
-  (cacheHeader = false) =>
-  async (context, request, response) => {
+const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
+  (isRollupsEnabled) => async (context, request, response) => {
     const { asCurrentUser } = (await context.core).elasticsearch.client;
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
     const {
@@ -159,23 +155,11 @@ const handler: (
         indices,
       };
 
-      const headers: Record<string, string> = {
-        'content-type': 'application/json',
-        // Etag?
-        // Expires
-      };
-
-      if (cacheHeader) {
-        // revalidates if 5 minutes passed, otherwise caches for a year
-        // headers['cache-control'] = 'public, max-age=30, stale-while-revalidate=2592000';
-        // headers['cache-control'] = 'max-age=300';
-        // headers['cache-control'] = 'no-cache';
-        // headers.etag = new Date().getTime().toString();
-      }
-
       return response.ok({
         body,
-        headers,
+        headers: {
+          'content-type': 'application/json',
+        },
       });
     } catch (error) {
       if (
@@ -208,16 +192,12 @@ export const registerFieldForWildcard = async (
   const configuredHandler = handler(isRollupsEnabled);
 
   // handler
-  router.versioned
-    .put({ path, access, options: {} })
-    .addVersion({ version, validate }, configuredHandler(false));
-  router.versioned
-    .post({ path, access })
-    .addVersion({ version, validate }, configuredHandler(false));
+  router.versioned.put({ path, access }).addVersion({ version, validate }, configuredHandler);
+  router.versioned.post({ path, access }).addVersion({ version, validate }, configuredHandler);
   router.versioned
     .get({ path, access })
     .addVersion(
       { version, validate: { request: { query: querySchema }, response: validate.response } },
-      configuredHandler(true)
+      configuredHandler
     );
 };

@@ -7,7 +7,6 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { format } from 'url';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
@@ -45,27 +44,15 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       request = this.http.get<T>(url, { query, version });
     } else {
       request = this.staleWhileRevalidateCache
-        .cachedFetch({
-          url: format({
-            pathname: this.http.basePath.prepend(url),
-            query,
-          }),
-          fetch: async () => {
-            const { response } = await this.http.fetch<T>(url, {
-              query,
-              version,
-              asResponse: true,
-              rawResponse: true,
-            });
-
-            return response!;
-          },
-          forceRefresh: cache === 'reload',
-        })
+        .fetch(url, { query, version, forceRefresh: cache === 'reload' })
         .then((resp) => resp.json());
     }
 
     return request.catch((resp) => {
+      if (!resp?.body) {
+        throw resp;
+      }
+
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
       }
