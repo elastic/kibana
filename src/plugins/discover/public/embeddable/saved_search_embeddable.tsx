@@ -732,11 +732,7 @@ export class SavedSearchEmbeddable
     }
   }
 
-  public getSavedSearch(): SavedSearch {
-    if (!this.savedSearch) {
-      throw new Error('Saved search not defined');
-    }
-
+  public getSavedSearch(): SavedSearch | undefined {
     return this.savedSearch;
   }
 
