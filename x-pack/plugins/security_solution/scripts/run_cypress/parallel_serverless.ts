@@ -105,8 +105,9 @@ async function poll<T>(
   return Promise.resolve()
     .then(fn)
     .catch(async function retry(err: Error): Promise<T> {
-      if (retries-- > 0) {
-        retries -= 1;
+      let remainingRetries = retries;
+      if (remainingRetries-- > 0) {
+        remainingRetries -= 1;
         return new Promise((resolve) => setTimeout(resolve, interval)).then(fn).catch(retry);
       }
       throw err;
