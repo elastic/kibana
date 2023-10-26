@@ -170,12 +170,15 @@ export default function ({ getService }: FtrProviderContext) {
           indices: [
             {
               name: indexName,
+              managedBy: 'Data stream lifecycle',
+              preferILM: true,
               uuid,
             },
           ],
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,
+          nextGenerationManagedBy: 'Data stream lifecycle',
           maxTimeStamp: 0,
           hidden: false,
           lifecycle: {
@@ -205,12 +208,15 @@ export default function ({ getService }: FtrProviderContext) {
           indices: [
             {
               name: indexName,
+              managedBy: 'Data stream lifecycle',
+              preferILM: true,
               uuid,
             },
           ],
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,
+          nextGenerationManagedBy: 'Data stream lifecycle',
           maxTimeStamp: 0,
           hidden: false,
           lifecycle: {
