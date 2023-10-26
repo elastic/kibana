@@ -493,7 +493,7 @@ const addFleetServerHostToFleetSettings = async (
       const newFleetHostEntry: PostFleetServerHostsRequest['body'] = {
         name: `Dev fleet server running on localhost`,
         host_urls: [fleetServerHostUrl],
-        is_default: !exitingFleetServerHostList.total,
+        is_default: true,
       };
 
       const { item } = await kbnClient
