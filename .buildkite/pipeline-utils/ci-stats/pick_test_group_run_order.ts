@@ -408,7 +408,7 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest',
             agents: {
-              queue: 'n2-4-spot',
+              queue: 'n2-2-spot',
             },
             retry: {
               automatic: [
@@ -428,7 +428,7 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest-integration',
             agents: {
-              queue: 'n2-4-spot',
+              queue: 'n2-2-spot',
             },
             retry: {
               automatic: [

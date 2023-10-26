@@ -36,7 +36,7 @@ echo "
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
 
-  cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  cmd="NODE_OPTIONS=\"--max-old-space-size=6144\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
   echo "actual full command is:"
   echo "$cmd"
   echo ""
