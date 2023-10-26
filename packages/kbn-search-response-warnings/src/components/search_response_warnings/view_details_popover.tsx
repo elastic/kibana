@@ -31,17 +31,15 @@ export const ViewDetailsPopover = (props: Props) => {
   }
 
   if (props.warnings.length === 1) {
-    return props.displayAsLink
-      ? (
-          <EuiLink color="primary" onClick={props.warnings[0].openInInspector}>
-            {viewDetailsLabel}
-          </EuiLink>
-        )
-      : (
-          <EuiButton color="primary" onClick={props.warnings[0].openInInspector}>
-            {viewDetailsLabel}
-          </EuiButton>
-        );
+    return props.displayAsLink ? (
+      <EuiLink color="primary" onClick={props.warnings[0].openInInspector}>
+        {viewDetailsLabel}
+      </EuiLink>
+    ) : (
+      <EuiButton color="primary" onClick={props.warnings[0].openInInspector}>
+        {viewDetailsLabel}
+      </EuiButton>
+    );
   }
 
   const panels: EuiContextMenuPanelDescriptor[] = [
@@ -63,19 +61,22 @@ export const ViewDetailsPopover = (props: Props) => {
     <EuiPopover
       id="ViewDetailsPopover"
       button={
-        props.displayAsLink
-          ? (
-              <EuiLink color="primary" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-                <>
-                  {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
-                </>
-              </EuiLink>
-            )
-          : (
-              <EuiButton color="primary" onClick={() => setIsPopoverOpen(!isPopoverOpen)} iconSide="right" iconType="arrowRight">
-                {viewDetailsLabel}
-              </EuiButton>
-            )
+        props.displayAsLink ? (
+          <EuiLink color="primary" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+            <>
+              {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
+            </>
+          </EuiLink>
+        ) : (
+          <EuiButton
+            color="primary"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            iconSide="right"
+            iconType="arrowRight"
+          >
+            {viewDetailsLabel}
+          </EuiButton>
+        )
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
