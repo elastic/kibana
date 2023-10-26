@@ -59,34 +59,8 @@ export const ManagedUser = ({
     [getAppUrl]
   );
 
-  if (!managedUser.isLoading && !managedUser.isIntegrationEnabled) {
-    return (
-      <>
-        <EuiTitle size="s">
-          <h5>{i18n.MANAGED_DATA_TITLE}</h5>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <EuiPanel data-test-subj="managedUser-integration-disable-callout">
-          <EuiEmptyPrompt
-            title={<h2>{i18n.NO_ACTIVE_INTEGRATION_TITLE}</h2>}
-            body={<p>{i18n.NO_ACTIVE_INTEGRATION_TEXT}</p>}
-            actions={
-              <EuiButton fill href={installedIntegrationHref}>
-                {i18n.ADD_EXTERNAL_INTEGRATION_BUTTON}
-              </EuiButton>
-            }
-          />
-        </EuiPanel>
-      </>
-    );
-  }
-
   return (
     <>
-      <EuiTitle size="s">
-        <h5>{i18n.MANAGED_DATA_TITLE}</h5>
-      </EuiTitle>
-      <EuiSpacer size="l" />
       <InspectButtonContainer>
         <EuiAccordion
           isLoading={managedUser.isLoading}
@@ -100,7 +74,9 @@ export const ManagedUser = ({
             `,
           }}
           buttonContent={
-            isManagedDataToggleOpen ? i18n.HIDE_AZURE_DATA_BUTTON : i18n.SHOW_AZURE_DATA_BUTTON
+            <EuiTitle size="xs">
+              <h5>{i18n.MANAGED_DATA_TITLE}</h5>
+            </EuiTitle>
           }
           onToggle={onToggleManagedData}
           extraAction={
@@ -138,16 +114,34 @@ export const ManagedUser = ({
             }
           `}
         >
-          <EuiPanel color="subdued">
-            {managedItems || managedUser.isLoading ? (
-              <BasicTable
-                loading={managedUser.isLoading}
-                data-test-subj="managedUser-table"
-                columns={managedUserTableColumns}
-                items={managedItems ?? []}
+          <EuiSpacer size="m" />
+          {!managedUser.isLoading && !managedUser.isIntegrationEnabled ? (
+            <EuiPanel
+              data-test-subj="managedUser-integration-disable-callout"
+              hasShadow={false}
+              hasBorder={true}
+            >
+              <EuiEmptyPrompt
+                title={<h2>{i18n.NO_ACTIVE_INTEGRATION_TITLE}</h2>}
+                titleSize="s"
+                body={<p>{i18n.NO_ACTIVE_INTEGRATION_TEXT}</p>}
+                actions={
+                  <EuiButton fill href={installedIntegrationHref}>
+                    {i18n.ADD_EXTERNAL_INTEGRATION_BUTTON}
+                  </EuiButton>
+                }
               />
-            ) : (
-              <>
+            </EuiPanel>
+          ) : (
+            <>
+              {managedItems || managedUser.isLoading ? (
+                <BasicTable
+                  loading={managedUser.isLoading}
+                  data-test-subj="managedUser-table"
+                  columns={managedUserTableColumns}
+                  items={managedItems ?? []}
+                />
+              ) : (
                 <EuiCallOut
                   data-test-subj="managedUser-no-data"
                   title={i18n.NO_AZURE_DATA_TITLE}
@@ -156,9 +150,9 @@ export const ManagedUser = ({
                 >
                   <p>{i18n.NO_AZURE_DATA_TEXT}</p>
                 </EuiCallOut>
-              </>
-            )}
-          </EuiPanel>
+              )}
+            </>
+          )}
         </EuiAccordion>
       </InspectButtonContainer>
     </>

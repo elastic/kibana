@@ -19,7 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
+import {
+  FormattedRelativePreferenceDate,
+  PreferenceFormattedDate,
+} from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/risk_engine';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 
@@ -75,11 +80,6 @@ export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const formattedDate = useMemo(
-    () => userRiskData && new Date(userRiskData['@timestamp']),
-    [userRiskData]
-  );
-
   const items: TableItem[] = [
     {
       category: 'Alerts',
@@ -101,15 +101,25 @@ export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          {formattedDate && (
-            <span
-              css={css`
-                font-size: ${xsFontSize};
-              `}
-            >
-              <PreferenceFormattedDate value={formattedDate} />
-            </span>
-          )}
+          <span
+            css={css`
+              font-size: ${xsFontSize};
+            `}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.riskUpdatedTime"
+              defaultMessage="Updated {time}"
+              values={{
+                time: (
+                  <FormattedRelativePreferenceDate
+                    value={userRiskData['@timestamp']}
+                    dateFormat="MMM D, YYYY"
+                    relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+                  />
+                ),
+              }}
+            />
+          </span>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
