@@ -32,6 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const toasts = getService('toasts');
   const comboBox = getService('comboBox');
+  const config = getService('config');
 
   const openFirstRule = async (ruleName: string) => {
     await svlTriggersActionsUI.searchRules(ruleName);
@@ -118,7 +119,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const ruleType = await testSubjects.getVisibleText('ruleTypeLabel');
         expect(ruleType).toEqual('Elasticsearch query');
         const owner = await testSubjects.getVisibleText('apiKeyOwnerLabel');
-        expect(owner).toEqual('elastic_serverless');
+        expect(owner).toEqual(config.get('servers.kibana.username'));
       });
 
       it('should disable the rule', async () => {

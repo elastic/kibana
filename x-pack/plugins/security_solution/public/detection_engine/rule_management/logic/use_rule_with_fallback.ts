@@ -8,6 +8,8 @@
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useEffect, useMemo } from 'react';
+import type { InvestigationFieldsCombined } from '../../../../server/lib/detection_engine/rule_schema';
+import type { InvestigationFields } from '../../../../common/api/detection_engine';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
@@ -115,10 +117,49 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
 };
 
 /**
+ * In 8.10.x investigation_fields is mapped as alert, moving forward, it will be mapped
+ * as an object. This util is being used for the use case where a rule is deleted and the
+ * hook falls back to using the alert document to retrieve rule information. In this scenario
+ * we are going to return undefined if field is in legacy format to avoid any possible complexity
+ * in the UI for such flows. See PR 169061
+ * @param investigationFields InvestigationFieldsCombined | undefined
+ * @returns InvestigationFields | undefined
+ */
+export const migrateLegacyInvestigationFields = (
+  investigationFields: InvestigationFieldsCombined | undefined
+): InvestigationFields | undefined => {
+  if (investigationFields && Array.isArray(investigationFields)) {
+    return undefined;
+  }
+
+  return investigationFields;
+};
+
+/**
+ * In 8.10.x investigation_fields is mapped as alert, moving forward, it will be mapped
+ * as an object. This util is being used for the use case where a rule is deleted and the
+ * hook falls back to using the alert document to retrieve rule information. In this scenario
+ * we are going to return undefined if field is in legacy format to avoid any possible complexity
+ * in the UI for such flows. See PR 169061
+ * @param rule Rule
+ * @returns Rule
+ */
+export const migrateRuleWithLegacyInvestigationFieldsFromAlertHit = (rule: Rule): Rule => {
+  if (!rule) return rule;
+
+  return {
+    ...rule,
+    investigation_fields: migrateLegacyInvestigationFields(rule.investigation_fields),
+  };
+};
+
+/**
  * Transforms an alertHit into a Rule
  * @param data raw response containing single alert
  */
-const transformRuleFromAlertHit = (data: AlertSearchResponse<AlertHit>): Rule | undefined => {
+export const transformRuleFromAlertHit = (
+  data: AlertSearchResponse<AlertHit>
+): Rule | undefined => {
   // if results empty, return rule as undefined
   if (data.hits.hits.length === 0) {
     return undefined;
@@ -136,8 +177,8 @@ const transformRuleFromAlertHit = (data: AlertSearchResponse<AlertHit>): Rule | 
       ...expandedRuleWithParams?.kibana?.alert?.rule?.parameters,
     };
     delete expandedRule.parameters;
-    return expandedRule as Rule;
+    return migrateRuleWithLegacyInvestigationFieldsFromAlertHit(expandedRule as Rule);
   }
 
-  return rule;
+  return migrateRuleWithLegacyInvestigationFieldsFromAlertHit(rule);
 };
