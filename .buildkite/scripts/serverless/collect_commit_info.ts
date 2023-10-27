@@ -27,6 +27,9 @@ async function main() {
 
   // Target commit info
   const selectedSha = exec('buildkite-agent meta-data get "commit-sha"');
+  if (!selectedSha) {
+    throw new Error(`Could not find selected commit (by 'commit-sha' in buildkite meta-data)`);
+  }
   const selectedCommit = await shaToCommit(selectedSha);
   const selectedCommitInfo = getReadableInfoOfCommit(selectedCommit);
   await addBuildkiteInfoSection(toCommitInfoHtml('Target commit:', selectedCommitInfo));
