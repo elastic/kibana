@@ -7,7 +7,17 @@
 
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -18,6 +28,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { AlertParams, MetricExpression } from '../types';
 import { RelatedEventsSortBar, SortField } from './alert_details_related_events_sort_bar';
 import { MetricThresholdAlert, MetricThresholdRule } from './alert_details_app_section';
+import LensDocBuilder from './preview_chart/lens_doc_builder';
 
 const cpuMetricPrefix = 'system.cpu';
 const memoryMetricPrefix = 'system.memory';
@@ -31,6 +42,13 @@ const predefinedMetrics = [
 ];
 const fnList = ['avg', 'sum', 'min', 'max'];
 
+const fnOperationTypeMapping: Record<string, string> = {
+  avg: 'average',
+  max: 'max',
+  min: 'min',
+  sum: 'sum',
+} as const;
+
 interface AlertDetailsRelatedEventsProps {
   alert: MetricThresholdAlert;
   rule: MetricThresholdRule;
@@ -43,7 +61,7 @@ export default function AlertDetailsRelatedEvents({
   rule,
   dataView,
 }: AlertDetailsRelatedEventsProps) {
-  const { aiops } = useKibana().services;
+  const { aiops, lens } = useKibana().services;
   const { EmbeddableChangePointChart } = aiops;
   const [relatedMetrics, setRelatedMetrics] = useState<Array<string | undefined>>([]);
   const [metricAggType, setMetricAggType] = useState<string>('avg');
@@ -87,6 +105,26 @@ export default function AlertDetailsRelatedEvents({
 
     relatedMetricsPerCriteria();
   }, [dataView, ruleParams.criteria]);
+
+  const getMetricChart = (metric: string) => {
+    const lensDoc = new LensDocBuilder();
+    lensDoc.modifyVisualization();
+
+    if (dataView?.id && metric) {
+      lensDoc.addDataLayer({
+        layerId: `date_histogram`,
+        accessors: `date_histogram_accessors`,
+        xAccessor: `date_histogram_xAccessor`,
+        dataViewId: dataView.id,
+        timeFieldName: dataView.timeFieldName,
+        operationType: fnOperationTypeMapping[metricAggType],
+        sourceField: metric,
+        label: `${metricAggType} ${metric}`,
+      });
+    }
+
+    return lensDoc.getAttributes();
+  };
 
   const relatedEventsTimeRangeEnd = moment(alert.start).add(
     (ruleParams.criteria[0].timeSize ?? 5) * 2,
@@ -151,8 +189,6 @@ export default function AlertDetailsRelatedEvents({
     }
   };
 
-  const emptyState = () => <></>;
-
   const relatedEventsTab = !!ruleParams.criteria ? (
     <>
       <EuiSpacer size="s" />
@@ -161,7 +197,9 @@ export default function AlertDetailsRelatedEvents({
           <RelatedEventsSortBar loading={false} onChangeSort={onChangeSort} />
         </EuiFlexItem>
         <EuiButton data-test-subj="o11yAlertDetailsRelatedEventsRefreshButton" onClick={onRefresh}>
-          Refresh
+          {i18n.translate('xpack.observability.alertDetailsRelatedEvents.refreshButtonLabel', {
+            defaultMessage: 'Refresh',
+          })}
         </EuiButton>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -174,18 +212,53 @@ export default function AlertDetailsRelatedEvents({
             dataView &&
             dataView.id &&
             relatedMetric && (
-              <EmbeddableChangePointChart
-                id={`relatedMetric${relatedMetricIndex}`}
+              <EuiFlexGroup
                 key={`relatedMetric${relatedMetricIndex}`}
-                dataViewId={dataView.id}
-                timeRange={relatedEventsTimeRange()}
-                fn={metricAggType || 'avg'}
-                metricField={relatedMetric}
-                emptyState={emptyState}
-                onChange={onChangePointDataChange}
-                style={{ marginTop: 10 }}
-                lastReloadRequestTime={lastReloadRequestTime}
-              />
+                direction="row"
+                gutterSize="s"
+              >
+                <EuiFlexItem>
+                  <EmbeddableChangePointChart
+                    id={`relatedMetric${relatedMetricIndex}`}
+                    key={`relatedMetric${relatedMetricIndex}`}
+                    dataViewId={dataView.id}
+                    timeRange={relatedEventsTimeRange()}
+                    fn={metricAggType}
+                    metricField={relatedMetric}
+                    onChange={onChangePointDataChange}
+                    style={{ marginTop: 10, height: 450 }}
+                    lastReloadRequestTime={lastReloadRequestTime}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiPanel
+                    paddingSize="xs"
+                    hasShadow={false}
+                    hasBorder={true}
+                    style={{ marginTop: 10, height: 400 }}
+                  >
+                    <EuiText textAlign="right" size="s" style={{ marginTop: 3 }}>
+                      {metricAggType}
+                      <FormattedMessage
+                        id="xpack.observability.relatedEventsTab.TextLabel"
+                        defaultMessage="("
+                      />
+                      {relatedMetric}
+                      {i18n.translate('xpack.observability.relatedEventsTab.TextLabel', {
+                        defaultMessage: ')',
+                      })}
+                    </EuiText>
+                    <EuiHorizontalRule size="full" margin="xs" />
+                    <lens.EmbeddableComponent
+                      id={`relatedMetricChangeChart${relatedMetricIndex}`}
+                      key={`relatedMetricChangeChart${relatedMetricIndex}`}
+                      style={{ marginTop: 60, height: 320 }}
+                      timeRange={relatedEventsTimeRange()}
+                      attributes={getMetricChart(relatedMetric)}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )
         )}
       </EuiFlexGroup>
