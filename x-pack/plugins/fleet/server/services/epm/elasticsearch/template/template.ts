@@ -129,8 +129,8 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       path: string;
       matchingType: string;
       pathMatch: string;
-      properties: string;
-      runtimeProperties?: string;
+      properties: Properties;
+      runtimeProperties?: Properties;
     }) => {
       const name = dynamicMapping.path;
       if (dynamicTemplateNames.has(name)) {
@@ -194,8 +194,8 @@ function _generateMappings(
   let hasDynamicTemplateMappings = false;
   const props: Properties = {};
 
-  function addParentObjectAsStaticProperty(field: Field) {
-    // Don't add intermediary objects for wildcard names, as it will
+  function addParentObjectAsStaticProperty(field : Field) {
+    // Don't add intermediate objects for wildcard names, as it will
     // be added for its parent object.
     if (field.name.includes('*')) {
       return;
@@ -210,7 +210,7 @@ function _generateMappings(
     hasNonDynamicTemplateMappings = true;
   }
 
-  function addDynamicMappingWithIntermediaryObjects(
+  function addDynamicMappingWithIntermediateObjects(
     path: string,
     pathMatch: string,
     matchingType: string,
@@ -226,7 +226,7 @@ function _generateMappings(
     });
     hasDynamicTemplateMappings = true;
 
-    // Add dynamic intermediary objects.
+    // Add dynamic intermediate objects.
     const parts = pathMatch.split('.');
     for (let i = parts.length - 1; i > 0; i--) {
       const name = parts.slice(0, i).join('.');
@@ -283,7 +283,7 @@ function _generateMappings(
           const fieldProps = generateRuntimeFieldProps(_field);
 
           if (dynProperties && matchingType) {
-            addDynamicMappingWithIntermediaryObjects(
+            addDynamicMappingWithIntermediateObjects(
               path,
               pathMatch,
               matchingType,
@@ -389,7 +389,7 @@ function _generateMappings(
         }
 
         if (dynProperties && matchingType) {
-          addDynamicMappingWithIntermediaryObjects(path, pathMatch, matchingType, dynProperties);
+          addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
 
           // Add the parent object as static property, this is needed for
           // index templates not using `"dynamic": true`.
@@ -408,9 +408,13 @@ function _generateMappings(
             });
             if (mappings.hasNonDynamicTemplateMappings) {
               fieldProps = {
-                properties: mappings.properties,
+                properties: Object.keys(mappings.properties).length > 0? mappings.properties : undefined,
                 ...generateDynamicAndEnabled(field),
               };
+              if (mappings.hasDynamicTemplateMappings) {
+                fieldProps.type = 'object';
+                fieldProps.dynamic = true;
+              }
             } else if (mappings.hasDynamicTemplateMappings) {
               fieldProps = {
                 type: 'object',
@@ -523,13 +527,20 @@ function _generateMappings(
           fieldProps.time_series_dimension = field.dimension;
         }
 
+        // Even if we don't add the property because it has a wildcard, notify
+        // the parent that there is some kind of property, so the intermediate object
+        // is still created.
+        // This is done for legacy packages that include ambiguous mappings with objects
+        // without object type. This is not allowed starting on Package Spec v3.
+        hasNonDynamicTemplateMappings = true;
+
         // Avoid including maps with wildcards, they have generated dynamic mappings.
         if (field.name.includes('*')) {
+          hasDynamicTemplateMappings = true;
           return;
         }
 
         props[field.name] = fieldProps;
-        hasNonDynamicTemplateMappings = true;
       }
     });
   }

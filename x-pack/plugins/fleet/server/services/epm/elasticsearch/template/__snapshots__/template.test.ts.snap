@@ -67,7 +67,9 @@ exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroach
               "type": "object",
               "dynamic": true
             }
-          }
+          },
+          "type": "object",
+          "dynamic": true
         }
       }
     }
@@ -857,6 +859,30 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
             }
           }
         },
+        "network_summary": {
+          "properties": {
+            "ip": {
+              "type": "object",
+              "dynamic": true
+            },
+            "tcp": {
+              "type": "object",
+              "dynamic": true
+            },
+            "udp": {
+              "type": "object",
+              "dynamic": true
+            },
+            "udp_lite": {
+              "type": "object",
+              "dynamic": true
+            },
+            "icmp": {
+              "type": "object",
+              "dynamic": true
+            }
+          }
+        },
         "process": {
           "properties": {
             "state": {
@@ -1069,7 +1095,9 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                       "type": "object",
                       "dynamic": true
                     }
-                  }
+                  },
+                  "type": "object",
+                  "dynamic": true
                 },
                 "memory": {
                   "properties": {
@@ -1347,7 +1375,9 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 }
               }
             }
-          }
+          },
+          "type": "object",
+          "dynamic": true
         },
         "raid": {
           "properties": {
@@ -1385,7 +1415,9 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                   "type": "object",
                   "dynamic": true
                 }
-              }
+              },
+              "type": "object",
+              "dynamic": true
             },
             "blocks": {
               "properties": {
