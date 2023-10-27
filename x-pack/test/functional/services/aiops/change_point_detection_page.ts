@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlTableService } from '../ml/common_table_service';
 
-interface DashboardAttachmentOptions {
+export interface DashboardAttachmentOptions {
   applyTimeRange: boolean;
   maxSeries: number;
 }
