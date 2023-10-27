@@ -36,7 +36,7 @@ steps:
     env:
       SKIP_KIBANA_HOOKS: 1
     commands:
-      - "buildkite-agent annotate --context banner --style warning \"<br />Review the information above, and unblock the build to proceed.\""
+      - "buildkite-agent annotate --context lower-banner --style warning \"<br />Review the information above, and unblock the build to proceed.\""
 
   - block: "Confirm deployment"
     prompt: "Are you sure you want to deploy to production?"
@@ -55,5 +55,5 @@ steps:
     env:
       SKIP_KIBANA_HOOKS: 1
     commands:
-      - "buildkite-agent annotate --context banner --style success \"<h3>Deployment tag successfully created</h3>\""
-      - "buildkite-agent annotate --context banner --style success --append \"<br/>Your deployment will appear here: https://buildkite.com/elastic/kibana-serverless-release/builds?branch=$(buildkite-agent meta-data get deploy-tag)\""
+      - "buildkite-agent annotate --context lower-banner --style success \"<h3>Deploy tag successfully created</h3><br/>\""
+      - "buildkite-agent annotate --context lower-banner --style success --append \"Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=$(buildkite-agent meta-data get deploy-tag)'>here on buildkite.</a>\""
