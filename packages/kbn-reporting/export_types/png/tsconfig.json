@@ -20,6 +20,6 @@
     "@kbn/licensing-plugin",
     "@kbn/utility-types",
     "@kbn/screenshotting-plugin",
-    "@kbn/reporting-common-export-types-helpers",
+    "@kbn/reporting-export-types-helpers-server",
   ]
 }

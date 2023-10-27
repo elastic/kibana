@@ -149,6 +149,6 @@
     "@kbn/reporting-export-types-png",
     "@kbn/reporting-export-types-deprecated",
     "@kbn/reporting-export-types-csv",
-    "@kbn/reporting-common-export-types-helpers",
+    "@kbn/reporting-export-types-helpers-server",
   ]
 }
