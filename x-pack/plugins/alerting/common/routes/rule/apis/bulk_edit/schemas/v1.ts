@@ -38,7 +38,7 @@ const ruleSnoozeScheduleSchemaWithValidation = schema.object(
 );
 
 const ruleActionSchema = schema.object({
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   uuid: schema.maybe(schema.string()),

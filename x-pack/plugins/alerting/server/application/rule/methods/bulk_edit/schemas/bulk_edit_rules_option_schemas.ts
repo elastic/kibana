@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { RuleActionTypes } from '../../../../../../common';
 import { rRuleRequestSchema } from '../../../../r_rule/schemas';
-import { notifyWhenSchema } from '../../../schemas';
+import { notifyWhenSchema, actionAlertsFilterSchema } from '../../../schemas';
 import { validateDuration } from '../../../validation';
 import { validateSnoozeSchedule } from '../validation';
 
@@ -26,7 +27,7 @@ const bulkEditRuleSnoozeScheduleSchemaWithValidation = schema.object(
   { validate: validateSnoozeSchedule }
 );
 
-const bulkEditActionSchema = schema.object({
+const bulkEditDefaultActionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
@@ -38,6 +39,15 @@ const bulkEditActionSchema = schema.object({
       notifyWhen: notifyWhenSchema,
     })
   ),
+  alertsFilter: schema.maybe(actionAlertsFilterSchema),
+  type: schema.literal(RuleActionTypes.DEFAULT),
+});
+
+export const bulkEditSystemActionSchema = schema.object({
+  id: schema.string(),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+  uuid: schema.maybe(schema.string()),
+  type: schema.literal(RuleActionTypes.SYSTEM),
 });
 
 const bulkEditTagSchema = schema.object({
@@ -49,7 +59,7 @@ const bulkEditTagSchema = schema.object({
 const bulkEditActionsSchema = schema.object({
   operation: schema.oneOf([schema.literal('add'), schema.literal('set')]),
   field: schema.literal('actions'),
-  value: schema.arrayOf(bulkEditActionSchema),
+  value: schema.arrayOf(schema.oneOf([bulkEditDefaultActionSchema, bulkEditSystemActionSchema])),
 });
 
 const bulkEditScheduleSchema = schema.object({
