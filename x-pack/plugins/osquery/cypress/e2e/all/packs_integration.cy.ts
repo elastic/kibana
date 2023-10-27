@@ -44,7 +44,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       let REMOVING_PACK: string;
 
       beforeEach(() => {
-        cy.login('elastic');
+        cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
         AGENT_POLICY_NAME = `PackTest` + generateRandomStringName(1)[0];
         REMOVING_PACK = 'removing-pack' + generateRandomStringName(1)[0];
       });
@@ -177,9 +177,10 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Global packs', { tags: ['@ess', '@serverless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169688
+  describe.skip('Global packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
-      cy.login('elastic');
+      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       navigateTo('/app/osquery/packs');
     });
 

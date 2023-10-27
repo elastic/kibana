@@ -34,8 +34,6 @@ export { uptimeRouteWrapper } from './uptime_route_wrapper';
 export const legacyUptimeRestApiRoutes: UMRestApiRouteFactory[] = [
   createGetPingsRoute,
   createGetIndexStatusRoute,
-  createGetDynamicSettingsRoute,
-  createPostDynamicSettingsRoute,
   createGetMonitorDetailsRoute,
   createGetMonitorLocationsRoute,
   createMonitorListRoute,
@@ -49,4 +47,9 @@ export const legacyUptimeRestApiRoutes: UMRestApiRouteFactory[] = [
   createJourneyFailedStepsRoute,
   createLastSuccessfulCheckRoute,
   createJourneyScreenshotBlocksRoute,
+];
+
+export const legacyUptimePublicRestApiRoutes: UMRestApiRouteFactory[] = [
+  createGetDynamicSettingsRoute,
+  createPostDynamicSettingsRoute,
 ];

@@ -11,7 +11,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/left/components/test_ids';
+import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/document_details/left/components/test_ids';
 import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,

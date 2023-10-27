@@ -8,7 +8,7 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { LEFT_SECTION } from './test_ids';
+import { LEFT_SECTION_TEST_ID } from './test_ids';
 
 interface LeftSectionProps {
   /**
@@ -30,7 +30,7 @@ export const LeftSection: React.FC<LeftSectionProps> = ({ component, width }: Le
     [width]
   );
   return (
-    <EuiFlexItem grow data-test-subj={LEFT_SECTION} style={style}>
+    <EuiFlexItem grow data-test-subj={LEFT_SECTION_TEST_ID} style={style}>
       {component}
     </EuiFlexItem>
   );

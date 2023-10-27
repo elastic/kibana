@@ -48,7 +48,6 @@ export const getTagcloudVisualization = ({
       groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
         defaultMessage: 'Proportion',
       }),
-      showExperimentalBadge: true,
     },
   ],
 

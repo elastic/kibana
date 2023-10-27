@@ -182,7 +182,11 @@ export const TestRunsTable = ({
               <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiIconTip type="refresh" content={FINAL_ATTEMPT_LABEL} />
+              <EuiIconTip
+                data-test-subj="isRetestIcon"
+                type="refresh"
+                content={FINAL_ATTEMPT_LABEL}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -209,7 +213,7 @@ export const TestRunsTable = ({
       name: MESSAGE_LABEL,
       textOnly: true,
       css: css`
-        max-width: 600px;
+        max-width: 500px;
       `,
       render: (errorMessage: string) => (
         <EuiText size="s">{errorMessage?.length > 0 ? errorMessage : '-'}</EuiText>
@@ -265,31 +269,16 @@ export const TestRunsTable = ({
     return {
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
-        const targetElem = evt.target as HTMLElement;
-        const isTableRow =
-          targetElem.parentElement?.classList.contains('euiTableCellContent') ||
-          targetElem.parentElement?.classList.contains('euiTableCellContent__text') ||
-          targetElem?.classList.contains('euiTableCellContent') ||
-          targetElem?.classList.contains('euiBadge__text');
-        // we dont want to capture image click event
-        if (
-          isTableRow &&
-          targetElem.tagName !== 'IMG' &&
-          targetElem.tagName !== 'path' &&
-          targetElem.tagName !== 'BUTTON' &&
-          !targetElem.parentElement?.classList.contains('euiLink')
-        ) {
-          if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
-            toggleDetails(item, expandedRows, setExpandedRows);
-          } else {
-            history.push(
-              getTestRunDetailRelativeLink({
-                monitorId,
-                checkGroup: item.monitor.check_group,
-                locationId: selectedLocation?.id,
-              })
-            );
-          }
+        if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
+          toggleDetails(item, expandedRows, setExpandedRows);
+        } else {
+          history.push(
+            getTestRunDetailRelativeLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
         }
       },
     };

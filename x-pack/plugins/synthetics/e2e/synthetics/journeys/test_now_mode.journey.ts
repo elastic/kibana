@@ -31,7 +31,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
       if (
         evt.resourceType() === 'fetch' &&
         (evt.url().includes('service/monitors/trigger/') ||
-          evt.url().includes('uptime/service/monitors/run_once'))
+          evt.url().includes('synthetics/service/monitors/run_once'))
       ) {
         evt
           .response()
@@ -139,7 +139,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
     await page.waitForSelector(
       '.euiTableRowCell--hideForMobile :has-text("Go to https://www.google.com")'
     );
-    await page.waitForSelector('.euiTableRowCell--hideForMobile :has-text("1.42 s")');
+    expect(await page.getByTestId('stepDurationText1').first()).toHaveText('1.4 sec');
     await page.waitForSelector('text=Complete');
   });
 

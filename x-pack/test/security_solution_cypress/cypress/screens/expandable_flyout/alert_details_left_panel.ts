@@ -8,11 +8,11 @@
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/left/tabs/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/left/tabs/test_ids';
 import {
   INSIGHTS_TAB_TEST_ID,
   VISUALIZE_TAB_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/left/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/left/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB =

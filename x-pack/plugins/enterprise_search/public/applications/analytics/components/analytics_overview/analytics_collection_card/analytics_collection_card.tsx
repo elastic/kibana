@@ -190,6 +190,7 @@ export const AnalyticsCollectionCard: React.FC<
               chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
             }}
             showLegend={false}
+            locale={i18n.getLocale()}
           />
           <Tooltip type="none" />
           <AreaSeries

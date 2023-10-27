@@ -25,6 +25,7 @@ import type {
   OutputSOAttributes,
   AgentPolicy,
   OutputSoKafkaAttributes,
+  PolicySecretReference,
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -53,6 +54,12 @@ import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
+import {
+  deleteOutputSecrets,
+  deleteSecrets,
+  extractAndUpdateOutputSecrets,
+  extractAndWriteOutputSecrets,
+} from './secrets';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -101,6 +108,12 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output 
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
+}
+
+function isOutputSecretsEnabled() {
+  const { outputSecretsStorage } = appContextService.getExperimentalFeatures();
+
+  return !!outputSecretsStorage;
 }
 
 async function getAgentPoliciesPerOutput(
@@ -407,7 +420,7 @@ class OutputService {
     output: NewOutput,
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
-    const data: OutputSOAttributes = { ...omit(output, 'ssl') };
+    const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
@@ -526,6 +539,15 @@ class OutputService {
     }
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
+
+    if (isOutputSecretsEnabled()) {
+      const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
+        output,
+        esClient,
+      });
+
+      if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
+    }
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
@@ -668,7 +690,14 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const soDeleteResult = this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+
+    await deleteOutputSecrets({
+      esClient: appContextService.getInternalUserESClient(),
+      output: originalOutput,
+    });
+
+    return soDeleteResult;
   }
 
   public async update(
@@ -680,6 +709,7 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
+    let secretsToDelete: PolicySecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);
@@ -692,7 +722,17 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+    if (isOutputSecretsEnabled()) {
+      const secretsRes = await extractAndUpdateOutputSecrets({
+        oldOutput: originalOutput,
+        outputUpdate: data,
+        esClient,
+      });
+
+      updateData.secrets = secretsRes.outputUpdate.secrets;
+      secretsToDelete = secretsRes.secretsToDelete;
+    }
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
     await validateTypeChanges(
@@ -880,6 +920,16 @@ class OutputService {
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
+    }
+
+    if (secretsToDelete.length) {
+      try {
+        await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
+      } catch (err) {
+        appContextService
+          .getLogger()
+          .warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+      }
     }
   }
 }

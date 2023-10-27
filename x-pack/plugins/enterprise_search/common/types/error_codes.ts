@@ -6,6 +6,7 @@
  */
 
 export enum ErrorCode {
+  ACCESS_CONTROL_DISABLED = 'access_control_disabled',
   ANALYTICS_COLLECTION_ALREADY_EXISTS = 'analytics_collection_already_exists',
   ANALYTICS_COLLECTION_NOT_FOUND = 'analytics_collection_not_found',
   CONNECTOR_DOCUMENT_ALREADY_EXISTS = 'connector_document_already_exists',

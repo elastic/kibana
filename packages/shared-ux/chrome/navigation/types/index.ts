@@ -30,6 +30,7 @@ export interface NavigationServices {
   onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   cloudLinks: CloudLinks;
+  isSideNavCollapsed: boolean;
 }
 
 /**
@@ -45,6 +46,7 @@ export interface NavigationKibanaDependencies {
       navLinks: {
         getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
       };
+      getIsSideNavCollapsed$: () => Observable<boolean>;
     };
     http: {
       basePath: BasePathService;

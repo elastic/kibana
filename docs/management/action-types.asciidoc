@@ -7,9 +7,9 @@ Connectors provide a central place to store connection information for services 
 [cols="2"]
 |===
 
-a| <<bedrock-action-type,AWS Bedrock>>
+a| <<bedrock-action-type,{bedrock}>>
 
-| Send a request to AWS Bedrock.
+| Send a request to {bedrock}.
 
 a| <<d3security-action-type,D3 Security>>
 

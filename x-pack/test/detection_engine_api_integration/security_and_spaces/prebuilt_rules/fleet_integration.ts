@@ -22,7 +22,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('install_prebuilt_rules_from_real_package', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/167056
+  describe.skip('install_prebuilt_rules_from_real_package', () => {
     beforeEach(async () => {
       await deletePrebuiltRulesFleetPackage(supertest);
       await deleteAllRules(supertest, log);

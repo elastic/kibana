@@ -9,7 +9,6 @@
 import { defaults, keyBy, sortBy } from 'lodash';
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
@@ -23,7 +22,6 @@ interface FieldCapabilitiesParams {
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
-  expandWildcards?: ExpandWildcard;
 }
 
 /**
@@ -44,7 +42,6 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     indexFilter,
     metaFields = [],
     fields,
-    expandWildcards,
   } = params;
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
@@ -52,7 +49,6 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     fieldCapsOptions,
     indexFilter,
     fields,
-    expandWildcard: expandWildcards,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');

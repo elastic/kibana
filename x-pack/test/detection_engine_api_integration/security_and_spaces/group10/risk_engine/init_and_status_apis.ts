@@ -244,8 +244,6 @@ export default ({ getService }: FtrProviderContext) => {
                 limit: '1000',
               },
             },
-            hidden: 'true',
-            auto_expand_replicas: '0-1',
           },
         });
 
@@ -274,7 +272,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(dataStream?.settings?.index?.hidden).to.eql('true');
         expect(dataStream?.settings?.index?.number_of_shards).to.eql(1);
-        expect(dataStream?.settings?.index?.auto_expand_replicas).to.eql('0-1');
 
         const indexExist = await es.indices.exists({
           index: latestIndexName,

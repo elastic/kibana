@@ -23,7 +23,7 @@ import { renderParameterTemplates } from './render';
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: BEDROCK_CONNECTOR_ID,
   name: BEDROCK_TITLE,
-  Service: BedrockConnector,
+  getService: (params) => new BedrockConnector(params),
   schema: {
     config: ConfigSchema,
     secrets: SecretsSchema,
@@ -43,7 +43,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.bedrock.configurationErrorApiProvider', {
-        defaultMessage: 'Error configuring AWS Bedrock action: {err}',
+        defaultMessage: 'Error configuring Amazon Bedrock action: {err}',
         values: {
           err,
         },

@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 
 import { DiscoverLink } from '../../../../lib/discover_link';
+import { getLifecycleValue } from '../../../../lib/data_streams';
 import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
 import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
@@ -146,19 +147,6 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
     const getManagementDetails = () => {
       const managementDetails = [];
-
-      if (lifecycle?.data_retention) {
-        managementDetails.push({
-          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
-            defaultMessage: 'Data retention',
-          }),
-          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
-            defaultMessage: 'The amount of time to retain the data in the data stream.',
-          }),
-          content: lifecycle.data_retention,
-          dataTestSubj: 'dataRetentionDetail',
-        });
-      }
 
       if (ilmPolicyName) {
         managementDetails.push({
@@ -278,6 +266,16 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         ),
         dataTestSubj: 'indexTemplateDetail',
       },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
+          defaultMessage: 'Data retention',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
+          defaultMessage: 'The amount of time to retain the data in the data stream.',
+        }),
+        content: getLifecycleValue(lifecycle),
+        dataTestSubj: 'dataRetentionDetail',
+      },
     ];
 
     const managementDetails = getManagementDetails();
@@ -376,7 +374,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             }
           }}
           dataStreamName={dataStreamName}
-          dataRetention={dataStream?.lifecycle?.data_retention as string}
+          lifecycle={dataStream?.lifecycle}
         />
       )}
 

@@ -177,12 +177,14 @@ const credentialOptionsList = [
       defaultMessage: 'Credentials File',
     }),
     value: 'credentials-file',
+    'data-test-subj': 'credentials_file_option_test_id',
   },
   {
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
       defaultMessage: 'Credentials JSON',
     }),
     value: 'credentials-json',
+    'data-test-subj': 'credentials_json_option_test_id',
   },
 ];
 
@@ -546,7 +548,6 @@ const GcpInputVarFields = ({
         {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
             <EuiSelect
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
@@ -560,7 +561,6 @@ const GcpInputVarFields = ({
         {credentialsTypeValue === credentialFieldValue && credentialFilesFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.file'].label}>
             <EuiFieldText
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
               fullWidth
@@ -572,7 +572,6 @@ const GcpInputVarFields = ({
         {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
             <EuiTextArea
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
               id={credentialJSONFields.id}
               fullWidth

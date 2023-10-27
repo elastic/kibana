@@ -17,11 +17,10 @@ import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_
 import { ServerlessRoleName } from '../../support/roles';
 
 const testSpaces = [
-  { name: 'default', tags: ['@ess', '@serverless'] },
+  { name: 'default', tags: ['@ess', '@serverless', '@brokenInServerless'] },
   { name: 'custom-spaces', tags: ['@ess'] },
 ];
-// FLAKY: https://github.com/elastic/kibana/issues/168742
-describe.skip('ALL - Custom space', () => {
+describe('ALL - Custom space', () => {
   testSpaces.forEach((testSpace) => {
     describe(`[${testSpace.name}]`, { tags: testSpace.tags }, () => {
       let packName: string;
@@ -72,7 +71,7 @@ describe.skip('ALL - Custom space', () => {
         }
       });
 
-      it('Discover should be opened in new tab in results table', { tags: ['@ess'] }, () => {
+      it('Discover should be opened in new tab in results table', { tags: testSpace.tags }, () => {
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery('select * from uptime;');

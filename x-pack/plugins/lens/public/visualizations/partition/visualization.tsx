@@ -284,6 +284,7 @@ export const getPieVisualization = ({
         case PieChartTypes.MOSAIC:
           return {
             ...primaryGroupConfigBaseProps,
+            requiredMinDimensionCount: 1,
             groupLabel: i18n.translate('xpack.lens.pie.verticalAxisLabel', {
               defaultMessage: 'Vertical axis',
             }),

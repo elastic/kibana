@@ -30,7 +30,7 @@ pageLoadAssetSize:
   data: 454087
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
-  dataViewManagement: 5000
+  dataViewManagement: 5100
   dataViews: 48300
   dataVisualizer: 27530
   devTools: 38637
@@ -101,7 +101,7 @@ pageLoadAssetSize:
   noDataPage: 5000
   observability: 115443
   observabilityAIAssistant: 25000
-  observabilityLogExplorer: 23686
+  observabilityLogExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import url from 'url';
 import expect from '@kbn/expect';
+import url from 'url';
 import { PluginFunctionalProviderContext } from '../../services';
 
 const getKibanaUrl = (pathname?: string, search?: string) =>
@@ -20,30 +20,96 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
   });
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
+  const log = getService('log');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const config = getService('config');
 
-  // Failing: See https://github.com/elastic/kibana/issues/75963
-  // Failing: See https://github.com/elastic/kibana/issues/166838
-  describe.skip('application using leave confirmation', () => {
+  const waitForUrlToBe = async (pathname?: string, search?: string) => {
+    const expectedUrl = getKibanaUrl(pathname, search);
+    return await retry.waitFor(`Url to be ${expectedUrl}`, async () => {
+      const currentUrl = await browser.getCurrentUrl();
+      log.debug(`waiting for currentUrl ${currentUrl} to be expectedUrl ${expectedUrl}`);
+      return currentUrl === expectedUrl;
+    });
+  };
+
+  const ensureModalOpen = async (
+    defaultTryTimeout: number,
+    attempts: number,
+    timeMultiplier: number,
+    action: 'cancel' | 'confirm',
+    linkText: string = 'home'
+  ): Promise<void> => {
+    let isConfirmCancelModalOpenState = false;
+
+    await retry.tryForTime(defaultTryTimeout * timeMultiplier, async () => {
+      await appsMenu.clickLink(linkText);
+      isConfirmCancelModalOpenState = await testSubjects.exists('confirmModalTitleText', {
+        allowHidden: true,
+        timeout: defaultTryTimeout * timeMultiplier,
+      });
+    });
+    if (isConfirmCancelModalOpenState) {
+      log.debug(`defaultTryTimeout * ${timeMultiplier} is long enough`);
+      return action === 'cancel'
+        ? await PageObjects.common.clickCancelOnModal(true, false)
+        : await PageObjects.common.clickConfirmOnModal();
+    } else {
+      log.debug(`defaultTryTimeout * ${timeMultiplier} is not long enough`);
+      return await ensureModalOpen(
+        defaultTryTimeout,
+        (attempts = attempts > 0 ? attempts - 1 : 0),
+        (timeMultiplier = timeMultiplier < 10 ? timeMultiplier + 1 : 10),
+        action,
+        linkText
+      );
+    }
+  };
+
+  describe('application using leave confirmation', () => {
+    const defaultTryTimeout = config.get('timeouts.try');
+    const attempts = 5;
     describe('when navigating to another app', () => {
+      const timeMultiplier = 10;
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('home');
+      });
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        await appsMenu.clickLink('AppLeave 2');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await waitForUrlToBe('/app/appleave1');
 
-        await testSubjects.existOrFail('appLeaveConfirmModal');
-        await PageObjects.common.clickCancelOnModal(false);
-        expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/appleave1'));
+        await ensureModalOpen(defaultTryTimeout, attempts, timeMultiplier, 'cancel', 'AppLeave 2');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.waitFor('navigate to appleave1', async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          log.debug(`currentUrl ${currentUrl}`);
+          return currentUrl.includes('appleave1');
+        });
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('appleave1');
+        await PageObjects.common.navigateToApp('home');
       });
+
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        await appsMenu.clickLink('AppLeave 2');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await waitForUrlToBe('/app/appleave1');
 
-        await testSubjects.existOrFail('appLeaveConfirmModal');
-        await PageObjects.common.clickConfirmOnModal();
-        expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/appleave2'));
+        await ensureModalOpen(defaultTryTimeout, attempts, timeMultiplier, 'confirm', 'AppLeave 2');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.waitFor('navigate to appleave1', async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          log.debug(`currentUrl ${currentUrl}`);
+          return currentUrl.includes('appleave2');
+        });
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('appleave2');
+        await PageObjects.common.navigateToApp('home');
       });
     });
   });

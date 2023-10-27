@@ -65,17 +65,15 @@ const getHeaders = ({ showIndexStats }) => {
     headers.status = i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
       defaultMessage: 'Status',
     });
-  }
 
-  headers.primary = i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
-    defaultMessage: 'Primaries',
-  });
+    headers.primary = i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
+      defaultMessage: 'Primaries',
+    });
 
-  headers.replica = i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
-    defaultMessage: 'Replicas',
-  });
+    headers.replica = i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
+      defaultMessage: 'Replicas',
+    });
 
-  if (showIndexStats) {
     headers.documents = i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
       defaultMessage: 'Docs count',
     });
@@ -265,13 +263,16 @@ export class IndexTable extends Component {
     const headers = getHeaders({ showIndexStats: config.enableIndexStats });
     return Object.entries(headers).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
+      // we only want to make index name column 25% width when there are more columns displayed
+      const widthClassName =
+        fieldName === 'name' && config.enableIndexStats ? 'indTable__header__width' : '';
       return (
         <EuiTableHeaderCell
           key={fieldName}
           onSort={() => this.onSort(fieldName)}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
-          className={'indTable__header--' + fieldName}
+          className={widthClassName}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
         >
           {label}

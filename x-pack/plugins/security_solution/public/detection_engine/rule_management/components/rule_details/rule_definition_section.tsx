@@ -579,7 +579,8 @@ const prepareDefinitionSectionListItems = (
   return definitionSectionListItems;
 };
 
-export interface RuleDefinitionSectionProps {
+export interface RuleDefinitionSectionProps
+  extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
   isInteractive?: boolean;
   dataTestSubj?: string;
@@ -589,6 +590,7 @@ export const RuleDefinitionSection = ({
   rule,
   isInteractive = false,
   dataTestSubj,
+  ...descriptionListProps
 }: RuleDefinitionSectionProps) => {
   const { savedQuery } = useGetSavedQuery({
     savedQueryId: rule.type === 'saved_query' ? rule.saved_id : '',
@@ -604,11 +606,12 @@ export const RuleDefinitionSection = ({
   return (
     <div data-test-subj={dataTestSubj}>
       <EuiDescriptionList
-        type="column"
+        type={descriptionListProps.type ?? 'column'}
+        rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={definitionSectionListItems}
         columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
         data-test-subj="listItemColumnStepRuleDescription"
+        {...descriptionListProps}
       />
     </div>
   );

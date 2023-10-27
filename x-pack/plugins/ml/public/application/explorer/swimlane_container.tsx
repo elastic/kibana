@@ -452,6 +452,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         xDomain={xDomain}
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
+                        locale={i18n.getLocale()}
                       />
 
                       <Heatmap

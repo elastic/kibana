@@ -15,7 +15,7 @@ export const javascriptDefinition: LanguageDefinition = {
   buildSearchQuery: `// Let's search!
 const searchResult = await client.search({
   index: 'my-index-name',
-  q: '9HY9SWR'
+  q: 'snow'
 });
 
 console.log(searchResult.hits.hits)
@@ -36,12 +36,15 @@ auth: {
   },
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
-  ingestData: `// Sample flight data
+  ingestData: `// Sample books data
 const dataset = [
-{'flight': '9HY9SWR', 'price': 841.2656419677076, 'delayed': false},
-{'flight': 'X98CCZO', 'price': 882.9826615595518, 'delayed': false},
-{'flight': 'UFK2WIZ', 'price': 190.6369038508356, 'delayed': true},
-];
+  {"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470},
+  {"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585},
+  {"name": "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328},
+  {"name": "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227},
+  {"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268},
+  {"name": "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
+  ];
 
 // Index with the bulk helper
 const result = await client.helpers.bulk({
@@ -54,13 +57,13 @@ onDocument (doc) {
 console.log(result);
 /**
 {
-total: 3,
+total: 6,
 failed: 0,
 retry: 0,
-successful: 3,
+successful: 6,
 noop: 0,
-time: 421,
-bytes: 293,
+time: 191,
+bytes: 787,
 aborted: false
 }
 */`,
