@@ -300,6 +300,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
       // click donut from suggestions
+      await testSubjects.click('lensSuggestionsPanelToggleButton');
       await testSubjects.click('lnsSuggestion-donut');
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });

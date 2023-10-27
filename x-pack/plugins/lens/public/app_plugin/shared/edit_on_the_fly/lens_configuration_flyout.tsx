@@ -271,7 +271,6 @@ export function LensEditConfigurationFlyout({
             .euiAccordion__childWrapper {
               overflow-y: auto !important;
               ${euiScrollBarStyles(euiTheme)}
-              // Using Marta's trick to force overflow-x to be visible
               padding-left: ${euiThemeVars.euiFormMaxWidth};
               margin-left: -${euiThemeVars.euiFormMaxWidth};
               .euiAccordion-isOpen & {
