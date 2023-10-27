@@ -8,7 +8,6 @@
 import React, { ComponentType, MemoExoticComponent } from 'react';
 import SemVer from 'semver/classes/semver';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { MAJOR_VERSION } from '../../../../../../../common';
