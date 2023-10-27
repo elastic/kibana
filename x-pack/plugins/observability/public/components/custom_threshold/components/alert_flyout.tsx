@@ -48,8 +48,8 @@ export function AlertFlyout(props: Props) {
 }
 
 export function PrefilledThresholdAlertFlyout({ onClose }: { onClose(): void }) {
-  const { metricThresholdPrefill } = useAlertPrefillContext();
-  const { groupBy, filterQuery, metrics } = metricThresholdPrefill;
+  const { customThresholdPrefill } = useAlertPrefillContext();
+  const { groupBy, filterQuery, metrics } = customThresholdPrefill;
 
   return <AlertFlyout options={{ groupBy, filterQuery, metrics }} visible setVisible={onClose} />;
 }

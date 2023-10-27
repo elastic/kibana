@@ -17,7 +17,7 @@ import {
 let PREFILL: Record<string, any> = {};
 jest.mock('../helpers/use_alert_prefill', () => ({
   useAlertPrefillContext: () => ({
-    metricThresholdPrefill: {
+    customThresholdPrefill: {
       setPrefillOptions(opts: Record<string, any>) {
         PREFILL = opts;
       },

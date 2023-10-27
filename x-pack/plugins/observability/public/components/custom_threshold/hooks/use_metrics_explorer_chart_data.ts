@@ -43,7 +43,7 @@ export const useMetricsExplorerChartData = (
           ? {
               aggregation: 'custom',
               custom_metrics:
-                expression?.metrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ?? [],
+                expression?.metrics?.map(mapCustomThresholdMetricToMetricsExplorerMetric) ?? [],
               equation: expression.equation,
             }
           : { field: expression.metric, aggregation: expression.aggType },
@@ -77,7 +77,7 @@ export const useMetricsExplorerChartData = (
   return useMetricsExplorerData(options, derivedIndexPattern, timestamps);
 };
 
-const mapMetricThresholdMetricToMetricsExplorerMetric = (
+const mapCustomThresholdMetricToMetricsExplorerMetric = (
   metric: CustomThresholdExpressionMetric
 ) => {
   if (metric.aggType === 'count') {

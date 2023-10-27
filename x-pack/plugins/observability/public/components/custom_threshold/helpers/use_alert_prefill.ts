@@ -9,8 +9,8 @@ import createContainer from 'constate';
 import { useCustomThresholdAlertPrefill } from '../hooks/use_metric_threshold_alert_prefill';
 
 const useAlertPrefill = () => {
-  const metricThresholdPrefill = useCustomThresholdAlertPrefill();
-  return { metricThresholdPrefill };
+  const customThresholdPrefill = useCustomThresholdAlertPrefill();
+  return { customThresholdPrefill };
 };
 
 export const [AlertPrefillProvider, useAlertPrefillContext] = createContainer(useAlertPrefill);

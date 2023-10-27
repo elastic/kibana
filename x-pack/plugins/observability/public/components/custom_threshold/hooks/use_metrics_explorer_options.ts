@@ -198,10 +198,10 @@ export const useMetricsExplorerOptions = () => {
   );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
 
-  const { metricThresholdPrefill } = useAlertPrefillContext();
-  // For Jest compatibility; including metricThresholdPrefill as a dep in useEffect causes an
+  const { customThresholdPrefill } = useAlertPrefillContext();
+  // For Jest compatibility; including customThresholdPrefill as a dep in useEffect causes an
   // infinite loop in test environment
-  const prefillContext = useMemo(() => metricThresholdPrefill, [metricThresholdPrefill]);
+  const prefillContext = useMemo(() => customThresholdPrefill, [customThresholdPrefill]);
 
   useEffect(() => {
     if (prefillContext) {

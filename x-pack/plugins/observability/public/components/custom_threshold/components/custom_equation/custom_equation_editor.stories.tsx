@@ -19,7 +19,7 @@ import { TimeUnitChar } from '../../../../../common';
 import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
 import { aggregationType } from '../expression_row';
 import { MetricExpression } from '../../types';
-import { validateMetricThreshold } from '../validation';
+import { validateCustomThreshold } from '../validation';
 
 export default {
   title: 'app/Alerts/CustomEquationEditor',
@@ -67,7 +67,7 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
   );
 
   useEffect(() => {
-    const validationObject = validateMetricThreshold({
+    const validationObject = validateCustomThreshold({
       criteria: [expression as MetricExpressionParams],
       searchConfiguration: {},
     });

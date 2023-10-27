@@ -25,7 +25,7 @@ const isCustomMetricExpressionParams = (
   return subject.aggType === Aggregators.CUSTOM;
 };
 
-export function validateMetricThreshold({
+export function validateCustomThreshold({
   criteria,
   searchConfiguration,
 }: {
