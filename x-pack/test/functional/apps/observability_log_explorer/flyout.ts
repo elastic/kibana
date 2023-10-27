@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DATASET_NAME = 'flyout';
@@ -28,24 +27,12 @@ const docs = [
   },
   {
     ...sharedDoc,
-    time: NOW + 2000,
-    logLevel: 'info',
-  },
-  {
-    ...sharedDoc,
-    time: NOW + 3000,
-    message: 'document without log level',
-  },
-  {
-    ...sharedDoc,
-    time: NOW + 4000,
+    time: NOW,
   },
 ];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const docTable = getService('docTable');
-  const flyout = getService('flyout');
-  const retry = getService('retry');
+  const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer']);
 
@@ -74,54 +61,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should mount the flyout customization content', async () => {
-      await PageObjects.observabilityLogExplorer.openLogFlyout();
+      await dataGrid.clickRowToggle();
       await testSubjects.existOrFail('logExplorerFlyoutDetail');
     });
 
     it('should display a timestamp badge', async () => {
-      await PageObjects.observabilityLogExplorer.openLogFlyout();
+      await dataGrid.clickRowToggle();
       await testSubjects.existOrFail('logExplorerFlyoutLogTimestamp');
     });
 
     it('should display a log level badge when available', async () => {
-      await PageObjects.observabilityLogExplorer.submitQuery('log.level : *');
-      await retry.try(async () => {
-        const rows = await docTable.getBodyRows();
-        expect(rows.length).to.eql(2);
-      });
-
-      await PageObjects.observabilityLogExplorer.openLogFlyout();
+      await dataGrid.clickRowToggle();
       await testSubjects.existOrFail('logExplorerFlyoutLogLevel');
-      await flyout.ensureClosed('docTableDetailsFlyout');
+      await dataGrid.closeFlyout();
 
-      await PageObjects.observabilityLogExplorer.submitQuery('NOT log.level : *');
-      await retry.try(async () => {
-        const rows = await docTable.getBodyRows();
-        expect(rows.length).to.eql(2);
-      });
-
-      await PageObjects.observabilityLogExplorer.openLogFlyout();
+      await dataGrid.clickRowToggle({ rowIndex: 1 });
       await testSubjects.missingOrFail('logExplorerFlyoutLogLevel');
     });
 
     it('should display a message code block when available', async () => {
-      await PageObjects.observabilityLogExplorer.submitQuery('message : *');
-      await retry.try(async () => {
-        const rows = await docTable.getBodyRows();
-        expect(rows.length).to.eql(2);
-      });
-
-      await PageObjects.observabilityLogExplorer.openLogFlyout();
+      await dataGrid.clickRowToggle();
       await testSubjects.existOrFail('logExplorerFlyoutLogMessage');
-      await flyout.ensureClosed('docTableDetailsFlyout');
+      await dataGrid.closeFlyout();
 
-      await PageObjects.observabilityLogExplorer.submitQuery('NOT message : *');
-      await retry.try(async () => {
-        const rows = await docTable.getBodyRows();
-        expect(rows.length).to.eql(2);
-      });
-
-      await PageObjects.observabilityLogExplorer.openLogFlyout();
+      await dataGrid.clickRowToggle({ rowIndex: 1 });
       await testSubjects.missingOrFail('logExplorerFlyoutLogMessage');
     });
   });

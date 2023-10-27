@@ -110,6 +110,7 @@ export function ObservabilityLogExplorerPageObject({
   getService,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
+  const dataGrid = getService('dataGrid');
   const es = getService('es');
   const log = getService('log');
   const supertest = getService('supertest');
@@ -172,12 +173,12 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     async setupDataStream(datasetName: string, namespace: string = 'default') {
-      log.info(`===== Setup initial data stream "${datasetName}". =====`);
       const dataStream = `logs-${datasetName}-${namespace}`;
+      log.info(`===== Setup initial data stream "${dataStream}". =====`);
       await es.indices.createDataStream({ name: dataStream });
 
       return async () => {
-        log.info(`===== Removing data stream "${datasetName}". =====`);
+        log.info(`===== Removing data stream "${dataStream}". =====`);
         await es.indices.deleteDataStream({
           name: dataStream,
         });
@@ -287,8 +288,8 @@ export function ObservabilityLogExplorerPageObject({
       return testSubjects.find('unmanagedDatasets');
     },
 
-    async getFlyoutDetail(docPos: number = 0) {
-      await this.openLogFlyout(docPos);
+    async getFlyoutDetail(rowIndex: number = 0) {
+      await dataGrid.clickRowToggle({ rowIndex });
       return testSubjects.find('logExplorerFlyoutDetail');
     },
 
@@ -307,14 +308,6 @@ export function ObservabilityLogExplorerPageObject({
     async openDatasetSelector() {
       const button = await this.getDatasetSelectorButton();
       return button.click();
-    },
-
-    async openLogFlyout(docPos: number = 0) {
-      const docEntries = await testSubjects.findAll('docTableExpandToggleColumn');
-      const selectedDoc = docEntries[docPos];
-      if (selectedDoc) {
-        await selectedDoc.click();
-      }
     },
 
     async closeDatasetSelector() {
