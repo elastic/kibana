@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -132,6 +132,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const cell = await dataGrid.getCellElement(0, 2);
         expect(await cell.getVisibleText()).to.be('1');
+      });
+    });
+    describe('errors', () => {
+      it('should error messages for syntax errors in query', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        const brokenQueries = [
+          'from logstash-* | limit 10*',
+          'from logstash-* | limit A',
+          'from logstash-* | where a*',
+          'limit 10',
+        ];
+        for (const testQuery of brokenQueries) {
+          await monacoEditor.setCodeEditorValue(testQuery);
+          await testSubjects.click('querySubmitButton');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          // error in fetching documents because of the invalid query
+          await testSubjects.existOrFail('discoverNoResultsError');
+          const message = await testSubjects.getVisibleText('discoverErrorCalloutMessage');
+          expect(message).to.contain(
+            "[esql] > Couldn't parse Elasticsearch ES|QL query. Check your query and try again."
+          );
+          expect(message).to.not.contain('undefined');
+          if (message.includes('line')) {
+            expect((await monacoEditor.getCurrentMarkers('kibanaCodeEditor')).length).to.eql(1);
+          }
+        }
       });
     });
   });
