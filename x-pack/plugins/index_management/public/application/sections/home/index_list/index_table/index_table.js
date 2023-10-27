@@ -310,6 +310,8 @@ export class IndexTable extends Component {
           {value}
         </EuiLink>
       );
+    } else if (fieldName === 'documents') {
+      return Number(value).toLocaleString();
     }
 
     return value;
