@@ -598,6 +598,7 @@
     "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
     "@kbn/reporting-export-types-csv": "link:packages/kbn-reporting/export_types/csv",
     "@kbn/reporting-export-types-deprecated": "link:packages/kbn-reporting/export_types/deprecated",
+    "@kbn/reporting-export-types-helpers-public": "link:packages/kbn-reporting/export_types_helpers_browser",
     "@kbn/reporting-export-types-helpers-server": "link:packages/kbn-reporting/export_types_helpers_server",
     "@kbn/reporting-export-types-pdf": "link:packages/kbn-reporting/export_types/printable_pdf_v2",
     "@kbn/reporting-export-types-png": "link:packages/kbn-reporting/export_types/png",

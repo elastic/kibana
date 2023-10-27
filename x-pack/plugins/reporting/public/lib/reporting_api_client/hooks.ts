@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IlmPolicyStatusResponse } from '../../../common/types';
+import { IlmPolicyStatusResponse } from '@kbn/reporting-export-types-helpers-public';
 import { INTERNAL_ROUTES } from '../../../common/constants';
 import { useKibana, useRequest, UseRequestResponse } from '../../shared_imports';
 

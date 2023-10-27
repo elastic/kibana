@@ -27,7 +27,7 @@ import {
   PDF_REPORT_TYPE_V2,
   PNG_REPORT_TYPE,
   PNG_REPORT_TYPE_V2,
-} from '../../../common/constants/report_types';
+} from '@kbn/reporting-export-types-helpers-public/report_types';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';

@@ -11,7 +11,7 @@ import {
   PDF_REPORT_TYPE,
   PDF_REPORT_TYPE_V2,
   PNG_REPORT_TYPE_V2,
-} from '../../common/constants/report_types';
+} from '@kbn/reporting-export-types-helpers-public/report_types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';

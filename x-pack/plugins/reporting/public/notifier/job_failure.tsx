@@ -10,10 +10,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { DocLinksStart, ThemeServiceStart, ToastInput } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import * as errors from '../../common/errors/errors';
+import * as errors from '@kbn/generate-csv/src/errors';
+import { ManagementLinkFn } from '@kbn/reporting-export-types-helpers-public';
 import type { JobSummary } from '../../common/types';
 import { sharedI18nTexts } from '../shared_i18n_texts';
-import { ManagementLinkFn } from '../../common/url';
 
 export const getFailureToast = (
   errorText: string,

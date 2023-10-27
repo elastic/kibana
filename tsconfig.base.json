@@ -1180,6 +1180,8 @@
       "@kbn/reporting-export-types-csv/*": ["packages/kbn-reporting/export_types/csv/*"],
       "@kbn/reporting-export-types-deprecated": ["packages/kbn-reporting/export_types/deprecated"],
       "@kbn/reporting-export-types-deprecated/*": ["packages/kbn-reporting/export_types/deprecated/*"],
+      "@kbn/reporting-export-types-helpers-public": ["packages/kbn-reporting/export_types_helpers_browser"],
+      "@kbn/reporting-export-types-helpers-public/*": ["packages/kbn-reporting/export_types_helpers_browser/*"],
       "@kbn/reporting-export-types-helpers-server": ["packages/kbn-reporting/export_types_helpers_server"],
       "@kbn/reporting-export-types-helpers-server/*": ["packages/kbn-reporting/export_types_helpers_server/*"],
       "@kbn/reporting-export-types-pdf": ["packages/kbn-reporting/export_types/printable_pdf_v2"],

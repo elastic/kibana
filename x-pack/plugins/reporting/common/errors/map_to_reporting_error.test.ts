@@ -13,7 +13,7 @@ import {
   BrowserUnexpectedlyClosedError,
   InvalidLayoutParametersError,
   UnknownError,
-} from './errors';
+} from '@kbn/generate-csv/src/errors';
 
 describe('mapToReportingError', () => {
   test('Non-Error values', () => {

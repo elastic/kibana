@@ -5264,6 +5264,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-export-types-helpers-public@link:packages/kbn-reporting/export_types_helpers_browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-export-types-helpers-server@link:packages/kbn-reporting/export_types_helpers_server":
   version "0.0.0"
   uid ""

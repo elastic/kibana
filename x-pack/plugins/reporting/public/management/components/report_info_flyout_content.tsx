@@ -16,13 +16,13 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 
+import { VisualReportingSoftDisabledError } from '@kbn/generate-csv/src/errors';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 
 import type { Job } from '../../lib/job';
 import { useKibana } from '../../shared_imports';
 
 import { sharedI18nTexts } from '../../shared_i18n_texts';
-import { VisualReportingSoftDisabledError } from '../../../common/errors/errors';
 
 // TODO: Move all of these i18n texts to ./i18n_texts.tsx
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
