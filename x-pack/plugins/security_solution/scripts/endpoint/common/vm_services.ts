@@ -16,6 +16,7 @@ import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils
 import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
 
 const baseGenerator = new BaseDataGenerator();
+const DEFAULT_VAGRANTFILE = pathJoin(__dirname, 'vagrant', 'Vagrantfile');
 
 export interface BaseVmCreateOptions {
   name: string;
@@ -193,7 +194,7 @@ const createVagrantVm = async ({
   name,
   log = createToolingLogger(),
   agentDownload: { fullFilePath: agentFullFilePath, filename: agentFileName },
-  vagrantFile = pathJoin(__dirname, 'vagrant', 'Vagrantfile'),
+  vagrantFile = DEFAULT_VAGRANTFILE,
   memory,
   cpus,
   disk,
@@ -248,13 +249,48 @@ const createVagrantVm = async ({
  * Creates a generic interface (`HotVm`) for interacting with a VM creatd by Vagrant
  * @param name
  * @param log
+ * @param vagrantFile
  */
 export const createVagrantHostVmClient = (
   name: string,
-  log: ToolingLog = createToolingLogger()
+  log: ToolingLog = createToolingLogger(),
+  vagrantFile: string = DEFAULT_VAGRANTFILE
 ): HostVm => {
+  const VAGRANT_CWD = dirname(vagrantFile);
+  const execaOptions: execa.Options = {
+    env: {
+      VAGRANT_CWD,
+    },
+  };
+
+  log.verbose(`Creating Vagrant VM client for [${name}] with vagrantfile [${vagrantFile}]`);
+
   const exec = async (command: string): Promise<HostVmExecResponse> => {
-    const execResponse = await execa.command(`vagrant ssh ${name} -- ${command}`);
+    //
+    //
+    //
+    // FIXME:PT Remove once output is captured
+    //
+    //
+    //
+    log.info(`${'-'.repeat(100)}
+Machine name: ${name}
+VAGRANT COMMAND: vagrant global-status --machine-readable
+${'-'.repeat(100)}
+
+${(await execa.command('vagrant global-status --machine-readable', execaOptions)).stdout}
+
+${'-'.repeat(100)}
+${'-'.repeat(100)}
+VAGRANT COMMAND: vagrant status --machine-readable
+${'-'.repeat(100)}
+
+${(await execa.command('vagrant status --machine-readable', execaOptions)).stdout}
+
+${'-'.repeat(100)}
+`);
+
+    const execResponse = await execa.command(`vagrant ssh ${name} -- ${command}`, execaOptions);
 
     log.verbose(execResponse);
 
@@ -266,10 +302,7 @@ export const createVagrantHostVmClient = (
   };
 
   const destroy = async (): Promise<void> => {
-    const destroyResponse = await execa.command(`vagrant destroy ${name} -f`, {
-      // Only `pipe` STDERR to parent process
-      stdio: ['inherit', 'inherit', 'pipe'],
-    });
+    const destroyResponse = await execa.command(`vagrant destroy ${name} -f`, execaOptions);
 
     log.verbose(`VM [${name}] was destroyed successfully`, destroyResponse);
   };
@@ -292,11 +325,11 @@ export const createVagrantHostVmClient = (
   };
 
   const start = async () => {
-    await execa.command(`vagrant up ${name}`);
+    await execa.command(`vagrant up ${name}`, execaOptions);
   };
 
   const stop = async () => {
-    await execa.command(`vagrant suspend ${name}`);
+    await execa.command(`vagrant suspend ${name}`, execaOptions);
   };
 
   return {
