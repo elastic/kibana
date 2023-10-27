@@ -249,6 +249,7 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('should not allow users to change a single alert status', () => {
+      // This is due to the reader role which makes everything in security 'read only'
       cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
     });
 
