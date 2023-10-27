@@ -84,7 +84,7 @@
     "@kbn/content-management-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/reporting-common-export-types-helpers",
+    "@kbn/reporting-export-types-helpers-server",
   ],
   "exclude": [
     "target/**/*",

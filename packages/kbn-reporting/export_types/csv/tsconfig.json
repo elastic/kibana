@@ -22,6 +22,6 @@
     "@kbn/data-plugin",
     "@kbn/generate-csv",
     "@kbn/core-http-server",
-    "@kbn/reporting-common-export-types-helpers",
+    "@kbn/reporting-export-types-helpers-server",
   ]
 }
