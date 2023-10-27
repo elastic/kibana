@@ -275,19 +275,41 @@ export const createVagrantHostVmClient = (
     //
     log.info(`${'-'.repeat(100)}
 Machine name: ${name}
+${'-'.repeat(100)}
+VAGRANT COMMAND: vagrant global-status
+${'-'.repeat(100)}
+
+${(await execa.command('vagrant global-status', execaOptions)).stdout}
+
+${'='.repeat(100)}
+${'-'.repeat(100)}
 VAGRANT COMMAND: vagrant global-status --machine-readable
 ${'-'.repeat(100)}
 
 ${(await execa.command('vagrant global-status --machine-readable', execaOptions)).stdout}
 
-${'-'.repeat(100)}
+${'='.repeat(100)}
 ${'-'.repeat(100)}
 VAGRANT COMMAND: vagrant status --machine-readable
 ${'-'.repeat(100)}
 
 ${(await execa.command('vagrant status --machine-readable', execaOptions)).stdout}
 
+${'='.repeat(100)}
 ${'-'.repeat(100)}
+VAGRANT COMMAND: vagrant box list
+${'-'.repeat(100)}
+
+${(await execa.command('vagrant box list', execaOptions)).stdout}
+
+${'='.repeat(100)}
+${'-'.repeat(100)}
+VAGRANT COMMAND: vagrant box list  --machine-readable
+${'-'.repeat(100)}
+
+${(await execa.command('vagrant box list --machine-readable', execaOptions)).stdout}
+
+${'='.repeat(100)}
 `);
 
     const execResponse = await execa.command(`vagrant ssh ${name} -- ${command}`, execaOptions);
@@ -302,7 +324,7 @@ ${'-'.repeat(100)}
   };
 
   const destroy = async (): Promise<void> => {
-    const destroyResponse = await execa.command(`vagrant destroy ${name} -f`, execaOptions);
+    const destroyResponse = await execa.command(`vagrant destroy -f`, execaOptions);
 
     log.verbose(`VM [${name}] was destroyed successfully`, destroyResponse);
   };
@@ -325,11 +347,11 @@ ${'-'.repeat(100)}
   };
 
   const start = async () => {
-    await execa.command(`vagrant up ${name}`, execaOptions);
+    await execa.command(`vagrant up`, execaOptions);
   };
 
   const stop = async () => {
-    await execa.command(`vagrant suspend ${name}`, execaOptions);
+    await execa.command(`vagrant suspend`, execaOptions);
   };
 
   return {
