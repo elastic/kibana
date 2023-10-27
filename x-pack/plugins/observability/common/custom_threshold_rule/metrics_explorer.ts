@@ -137,13 +137,9 @@ export type AfterKey = rt.TypeOf<typeof afterKeyObjectRT>;
 
 export type MetricsExplorerAggregation = rt.TypeOf<typeof metricsExplorerAggregationRT>;
 
-export type MetricsExplorerColumnType = rt.TypeOf<typeof metricsExplorerColumnTypeRT>;
-
 export type MetricsExplorerMetric = rt.TypeOf<typeof metricsExplorerMetricRT>;
 
 export type MetricsExplorerPageInfo = rt.TypeOf<typeof metricsExplorerPageInfoRT>;
-
-export type MetricsExplorerColumn = rt.TypeOf<typeof metricsExplorerColumnRT>;
 
 export type MetricsExplorerRow = rt.TypeOf<typeof metricsExplorerRowRT>;
 

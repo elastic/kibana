@@ -27,10 +27,9 @@ import { SearchConfigurationType } from '../types';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
-import { isCustom } from './metric_expression_params';
 
 export interface EvaluatedRuleParams {
-  criteria: MetricExpressionParams[];
+  criteria: CustomMetricExpressionParams[];
   groupBy: string | undefined | string[];
   searchConfiguration: SearchConfigurationType;
 }
@@ -133,12 +132,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         if (result.trigger || result.value === null) {
           evaluations[key] = {
             ...criterion,
-            metric:
-              criterion.aggType === 'count'
-                ? DOCUMENT_COUNT_I18N
-                : isCustom(criterion)
-                ? getMetric(criterion)
-                : criterion.metric,
+            metric: getMetric(criterion),
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,
