@@ -102,10 +102,13 @@ class ApiService {
   }
 
   public async delete<T>(apiUrl: string, params?: HttpFetchQuery, data?: any) {
+    const { version, ...queryParams } = params;
+
     const response = await this._http!.delete<T>({
       path: apiUrl,
-      query: params,
+      query: queryParams,
       body: JSON.stringify(data),
+      version,
     });
 
     if (response instanceof Error) {
