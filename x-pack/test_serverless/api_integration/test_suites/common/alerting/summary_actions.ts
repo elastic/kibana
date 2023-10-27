@@ -41,9 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Summary actions', function () {
-    // flaky on MKI, see https://github.com/elastic/kibana/issues/169204
-    this.tags(['failsOnMKI']);
-
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
@@ -119,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -151,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp2.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -239,6 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -271,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp2.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -369,6 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -438,6 +438,7 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -466,8 +467,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(resp2.hits.hits.length).to.be(1);
 
-      const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      const document = resp.hits.hits[1];
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -477,8 +478,8 @@ export default function ({ getService }: FtrProviderContext) {
         recoveredIds: '[]',
       });
 
-      const document1 = resp.hits.hits[1];
-      expect(document1._source).to.eql({
+      const document1 = resp.hits.hits[0];
+      expect(omit(document1, '_source.date')._source).to.eql({
         all: '1',
         new: '0',
         newIds: '[]',
