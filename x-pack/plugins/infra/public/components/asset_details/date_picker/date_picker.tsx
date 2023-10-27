@@ -118,7 +118,7 @@ export const DatePicker = () => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ minHeight: '18px' }}>
-        {!autoRefresh?.isPaused && <AutoRefreshTroubleshootMessage />}
+        {autoRefresh && !autoRefresh.isPaused && <AutoRefreshTroubleshootMessage />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
