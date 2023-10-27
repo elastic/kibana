@@ -497,8 +497,8 @@ export function getFormBasedDatasource({
               ? column.label
               : operationDefinitionMap[column.operationType].getDefaultLabel(
                   column,
-                  indexPatternsMap[layer.indexPatternId],
-                  layer.columns
+                  layer.columns,
+                  indexPatternsMap[layer.indexPatternId]
                 )
           );
         });

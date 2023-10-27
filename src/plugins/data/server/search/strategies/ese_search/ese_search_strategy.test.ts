@@ -260,38 +260,6 @@ describe('ES search strategy', () => {
 
         expect(mockApiCaller).toBeCalledTimes(0);
       });
-
-      it('should delete when aborted', async () => {
-        mockSubmitCaller.mockResolvedValueOnce({
-          ...mockAsyncResponse,
-          body: {
-            ...mockAsyncResponse.body,
-            is_running: true,
-          },
-        });
-
-        const params = { index: 'logstash-*', body: { query: {} } };
-        const esSearch = await enhancedEsSearchStrategyProvider(
-          mockLegacyConfig$,
-          mockSearchConfig,
-          mockLogger
-        );
-        const abortController = new AbortController();
-        const abortSignal = abortController.signal;
-
-        // Abort after an incomplete first response is returned
-        setTimeout(() => abortController.abort(), 100);
-
-        let err: KbnServerError | undefined;
-        try {
-          await esSearch.search({ params }, { abortSignal }, mockDeps).toPromise();
-        } catch (e) {
-          err = e;
-        }
-        expect(mockSubmitCaller).toBeCalled();
-        expect(err).not.toBeUndefined();
-        expect(mockDeleteCaller).toBeCalled();
-      });
     });
 
     describe('with sessionId', () => {
@@ -398,44 +366,6 @@ describe('ES search strategy', () => {
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).not.toHaveProperty('keep_alive');
-      });
-
-      it('should not delete a saved session when aborted', async () => {
-        mockSubmitCaller.mockResolvedValueOnce({
-          ...mockAsyncResponse,
-          body: {
-            ...mockAsyncResponse.body,
-            is_running: true,
-          },
-        });
-
-        const params = { index: 'logstash-*', body: { query: {} } };
-        const esSearch = await enhancedEsSearchStrategyProvider(
-          mockLegacyConfig$,
-          mockSearchConfig,
-          mockLogger
-        );
-        const abortController = new AbortController();
-        const abortSignal = abortController.signal;
-
-        // Abort after an incomplete first response is returned
-        setTimeout(() => abortController.abort(), 100);
-
-        let err: KbnServerError | undefined;
-        try {
-          await esSearch
-            .search(
-              { params },
-              { abortSignal, sessionId: '1', isSearchStored: true, isStored: true },
-              mockDeps
-            )
-            .toPromise();
-        } catch (e) {
-          err = e;
-        }
-        expect(mockSubmitCaller).toBeCalled();
-        expect(err).not.toBeUndefined();
-        expect(mockDeleteCaller).not.toBeCalled();
       });
     });
 

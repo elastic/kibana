@@ -903,7 +903,8 @@
                 "docId": "kibSavedSearchPluginApi",
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
-              }
+              },
+              " | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false,

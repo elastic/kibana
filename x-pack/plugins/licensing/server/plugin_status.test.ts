@@ -9,49 +9,33 @@ import { TestScheduler } from 'rxjs/testing';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import { licenseMock } from '../common/licensing.mock';
 import { getPluginStatus$ } from './plugin_status';
-import { ILicense } from '../common/types';
+import type { ILicense } from '../common/types';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => {
     expect(actual).toEqual(expected);
   });
 
-const degradedStatus = {
-  level: ServiceStatusLevels.degraded,
-  summary: expect.any(String),
-};
 const availableStatus = {
   level: ServiceStatusLevels.available,
   summary: expect.any(String),
 };
+
 const unavailableStatus = {
   level: ServiceStatusLevels.unavailable,
   summary: expect.any(String),
 };
 
 describe('getPluginStatus$', () => {
-  it('emits an initial `degraded` status', () => {
-    getTestScheduler().run(({ expectObservable, hot }) => {
-      const license$ = hot<ILicense>('|');
-      const stop$ = hot<void>('');
-      const expected = '(a|)';
-
-      expectObservable(getPluginStatus$(license$, stop$)).toBe(expected, {
-        a: degradedStatus,
-      });
-    });
-  });
-
   it('emits an `available` status once the license emits', () => {
     getTestScheduler().run(({ expectObservable, hot }) => {
       const license$ = hot<ILicense>('--a', {
         a: licenseMock.createLicenseMock(),
       });
       const stop$ = hot<void>('');
-      const expected = 'a-b';
+      const expected = '--b';
 
       expectObservable(getPluginStatus$(license$, stop$)).toBe(expected, {
-        a: degradedStatus,
         b: availableStatus,
       });
     });
@@ -66,10 +50,9 @@ describe('getPluginStatus$', () => {
         a: errorLicense,
       });
       const stop$ = hot<void>('');
-      const expected = 'a-b';
+      const expected = '--b';
 
       expectObservable(getPluginStatus$(license$, stop$)).toBe(expected, {
-        a: degradedStatus,
         b: unavailableStatus,
       });
     });
@@ -86,10 +69,9 @@ describe('getPluginStatus$', () => {
         b: validLicense,
       });
       const stop$ = hot<void>('');
-      const expected = 'a-b--c';
+      const expected = '--b--c';
 
       expectObservable(getPluginStatus$(license$, stop$)).toBe(expected, {
-        a: degradedStatus,
         b: unavailableStatus,
         c: availableStatus,
       });
@@ -103,10 +85,9 @@ describe('getPluginStatus$', () => {
         b: licenseMock.createLicenseMock(),
       });
       const stop$ = hot<void>('----a', { a: undefined });
-      const expected = 'a-b-|';
+      const expected = '--b-|';
 
       expectObservable(getPluginStatus$(license$, stop$)).toBe(expected, {
-        a: degradedStatus,
         b: availableStatus,
       });
     });

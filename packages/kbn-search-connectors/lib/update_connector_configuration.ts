@@ -30,7 +30,7 @@ export const updateConnectorConfiguration = async (
       connector.status === ConnectorStatus.CREATED
         ? ConnectorStatus.CONFIGURED
         : connector.status;
-    const updatedConfig = Object.keys(connector.configuration)
+    const updatedConfig: ConnectorConfiguration = Object.keys(connector.configuration)
       .map((key) => {
         const configEntry = connector.configuration[key];
         return isConfigEntry(configEntry)
