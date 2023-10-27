@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
 import _ from 'lodash';
@@ -39,6 +40,11 @@ import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 
+export interface LayerError {
+  title: string;
+  error: string;
+}
+
 export interface ILayer {
   getBounds(
     getDataRequestContext: (layerId: string) => DataRequestContext
@@ -70,7 +76,7 @@ export interface ILayer {
   isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
-  getErrors(): string;
+  getErrors(): LayerError[];
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
@@ -389,13 +395,24 @@ export class AbstractLayer implements ILayer {
   }
 
   hasErrors(): boolean {
-    return _.get(this._descriptor, '__isInErrorState', false);
+    return this.getErrors().length > 0;
   }
 
-  getErrors(): string {
-    return this.hasErrors() && this._descriptor.__errorMessage
-      ? this._descriptor.__errorMessage
-      : '';
+  _getSourceErrorTitle() {
+    return i18n.translate('xpack.maps.layer.sourceErrorTitle', {
+      defaultMessage: `An error occurred when loading layer data`,
+    });
+  }
+
+  getErrors(): LayerError[] {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const error = sourceDataRequest?.getError();
+    return error
+      ? [{
+          title: this._getSourceErrorTitle(),
+          error
+        }]
+      : [];
   }
 
   async syncData(syncContext: DataRequestContext) {

@@ -49,7 +49,7 @@ import {
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
-import { LayerIcon, ILayer } from '../layer';
+import { LayerIcon, ILayer, LayerError } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { isSpatialJoin } from '../../joins/is_spatial_join';
 import { IField } from '../../fields/field';
@@ -265,6 +265,31 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
       return !joinDataRequest || joinDataRequest.isLoading();
     });
+  }
+
+  _getSourceErrorTitle() {
+    return i18n.translate('xpack.maps.vectorLayer.sourceErrorTitle', {
+      defaultMessage: `An error occurred when loading layer features`,
+    });
+  }
+
+  getErrors(): LayerError[] {
+    const errors = super.getErrors();
+
+    this.getValidJoins().forEach(join => {
+      const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
+      const error = joinDataRequest?.getError();
+      if (error) {
+        errors.push({
+          title: i18n.translate('xpack.maps.vectorLayer.joinErrorTitle', {
+            defaultMessage: `An error occurred when loading join metrics`,
+          }),
+          error,
+        });
+      }
+    });
+
+    return errors;
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {

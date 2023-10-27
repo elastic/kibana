@@ -18,7 +18,6 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FilterEditor } from './filter_editor';
@@ -130,19 +129,18 @@ export class EditLayerPanel extends Component<Props, State> {
       return null;
     }
 
-    return (
-      <Fragment>
+    return this.props.selectedLayer.getErrors().map(({ title, error }, index) => (
+      <div key={index}>
         <EuiCallOut
-          color="warning"
-          title={i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
-            defaultMessage: 'Unable to load layer',
-          })}
+          color="danger"
+          iconType="error"
+          title={title}
         >
-          <p data-test-subj="layerErrorMessage">{this.props.selectedLayer.getErrors()}</p>
+          {error}
         </EuiCallOut>
         <EuiSpacer size="m" />
-      </Fragment>
-    );
+      </div>
+    ));
   }
 
   _renderFilterSection() {

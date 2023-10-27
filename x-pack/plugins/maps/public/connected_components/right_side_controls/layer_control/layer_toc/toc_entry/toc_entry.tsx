@@ -272,7 +272,7 @@ export class TOCEntry extends Component<Props, State> {
     return (
       <div
         className={
-          layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.hasErrors()
+          layer.isVisible() && layer.showAtZoomLevel(zoom)
             ? 'mapTocEntry-visible'
             : 'mapTocEntry-notVisible'
         }

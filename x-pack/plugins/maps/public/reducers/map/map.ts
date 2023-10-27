@@ -206,7 +206,15 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         action.meta
       );
     case LAYER_DATA_LOAD_ERROR:
-      return stopDataRequest(state, action.layerId, action.dataId, action.requestToken);
+      return stopDataRequest(
+        state,
+        action.layerId,
+        action.dataId,
+        action.requestToken,
+        undefined, // responseMeta meta
+        undefined, // response data
+        action.errorMessage
+      );
     case LAYER_DATA_LOAD_ENDED:
       return stopDataRequest(
         state,

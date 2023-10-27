@@ -133,8 +133,7 @@ function getDataRequestContext(
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    onJoinError: (errorMessage: string) =>
-      dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage)),
+    onJoinError: (errorMessage: string) => {},
     updateSourceData: (newData: object) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
@@ -315,11 +314,6 @@ function endDataLoad(
       requestToken,
     });
 
-    // Clear any data-load errors when there is a succesful data return.
-    // Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
-    // This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
-    dispatch(setLayerDataLoadErrorStatus(layerId, null));
-
     dispatch(updateStyleMeta(layerId));
   };
 }
@@ -349,10 +343,9 @@ function onDataLoadError(
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
       dataId,
+      errorMessage,
       requestToken,
     });
-
-    dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
   };
 }
 
