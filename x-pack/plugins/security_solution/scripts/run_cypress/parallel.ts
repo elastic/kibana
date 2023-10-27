@@ -61,7 +61,7 @@ const retrieveIntegrations = (integrationsPaths: string[]) => {
 };
 
 // Necessary for https://github.com/currents-dev/cypress-debugger
-process.env.ELECTRON_EXTRA_LAUNCH_ARGS = '--remote-debugging-port=9222';
+// process.env.ELECTRON_EXTRA_LAUNCH_ARGS = '--remote-debugging-port=9222';
 
 export const cli = () => {
   run(
