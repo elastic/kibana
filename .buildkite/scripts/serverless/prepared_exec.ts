@@ -54,7 +54,7 @@ const mockExec = (id: string) => {
   console.warn("--- Using mock exec, don't use this on CI. ---");
   const calls = callStorage[id];
 
-  const mockExecInstance = (command: string, opts: ExecSyncOptions = {}): string => {
+  const mockExecInstance = (command: string, opts: ExecSyncOptions = {}): string | null => {
     const responses = loadFakeResponses();
     calls.push({ command, opts });
 
@@ -72,10 +72,14 @@ const mockExec = (id: string) => {
   return mockExecInstance;
 };
 
-const exec = (command: string, opts: any = {}) =>
-  execSync(command, { encoding: 'utf-8', cwd: kibanaDir, ...opts })
-    .toString()
-    .trim();
+const exec = (command: string, opts: any = {}) => {
+  const result = execSync(command, { encoding: 'utf-8', cwd: kibanaDir, ...opts });
+  if (result) {
+    return result.toString().trim();
+  } else {
+    return null;
+  }
+};
 
 const randomId = () => (Math.random() * 10e15).toString(36);
 

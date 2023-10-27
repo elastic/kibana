@@ -15,8 +15,9 @@ import { Build, BuildStatus } from './types/build';
 import { Job, JobState } from './types/job';
 
 type ExecType =
-  | ((command: string, execOpts: ExecSyncOptions) => Buffer)
-  | ((command: string, execOpts: ExecSyncOptions) => string);
+  | ((command: string, execOpts: ExecSyncOptions) => Buffer | null)
+  | ((command: string, execOpts: ExecSyncOptions) => string | null);
+
 export interface BuildkiteClientConfig {
   baseUrl?: string;
   token?: string;
