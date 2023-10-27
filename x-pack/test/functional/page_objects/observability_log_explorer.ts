@@ -112,6 +112,7 @@ export function ObservabilityLogExplorerPageObject({
   const dataGrid = getService('dataGrid');
   const es = getService('es');
   const log = getService('log');
+  const queryBar = getService('queryBar');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
@@ -389,24 +390,13 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     // Query Bar
-    getQueryBar() {
-      return testSubjects.find('queryInput');
-    },
-
-    async getQueryBarValue() {
-      const queryBar = await testSubjects.find('queryInput');
-      return queryBar.getAttribute('value');
-    },
-
-    async typeInQueryBar(query: string) {
-      const queryBar = await this.getQueryBar();
-      await queryBar.clearValueWithKeyboard();
-      return queryBar.type(query);
+    getQueryBarValue() {
+      return queryBar.getQueryString();
     },
 
     async submitQuery(query: string) {
-      await this.typeInQueryBar(query);
-      await testSubjects.click('querySubmitButton');
+      await queryBar.setQuery(query);
+      await queryBar.clickQuerySubmitButton();
     },
   };
 }
