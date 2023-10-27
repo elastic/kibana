@@ -33,25 +33,21 @@ export function createConfig(
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
 
-  const { kibanaServer: reportingServer, statefulSettings } = config;
+  const { kibanaServer: reportingServer } = config;
   const serverInfo = core.http.getServerInfo();
   // set kibanaServer.hostname, default to server.host, don't allow "0.0.0.0" as it breaks in Windows
   let kibanaServerHostname = reportingServer.hostname
     ? reportingServer.hostname
     : serverInfo.hostname;
 
-  if (statefulSettings.enabled === false) {
-    logger.info(
-      `Found 'server.host: "0.0.0.0"' in Kibana configuration. Overriding 'xpack.reporting.kibanaServer.hostname' with 'localhost'`
-    );
-  } else if (
+  if (
     ipaddr.isValid(kibanaServerHostname) &&
     !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
   ) {
-    // user can add 'xpack.reporting.kibanaServer.hostname: localhost' in kibana.yml to prevent this log
     logger.info(
-      `Overriding server host address "0.0.0.0" in Reporting runtime config,` +
-        ` using "xpack.reporting.kibanaServer.hostname: localhost".`
+      `Found 'server.host: "0.0.0.0"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname.` +
+        ` To enable PNG/PDF Reporting to work, 'xpack.reporting.kibanaServer.hostname: localhost' is automatically set in the configuration.` +
+        ` You can prevent this message by adding 'xpack.reporting.kibanaServer.hostname: localhost' in kibana.yml.`
     );
     kibanaServerHostname = 'localhost';
   }
