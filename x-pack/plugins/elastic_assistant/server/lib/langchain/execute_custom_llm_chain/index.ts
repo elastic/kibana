@@ -55,7 +55,8 @@ export const callAgentExecutor = async ({
     );
   }
 
-  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
+  // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
+  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
   const tools: Tool[] = [
     new ChainTool({

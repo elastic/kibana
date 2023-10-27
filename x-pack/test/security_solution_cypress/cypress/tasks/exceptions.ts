@@ -44,6 +44,8 @@ import {
   EXCEPTION_ITEM_HEADER_ACTION_MENU,
   EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT,
   EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE,
+  EXCEPTIONS_ITEM_ERROR_CALLOUT,
+  EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON,
 } from '../screens/exceptions';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
@@ -187,6 +189,12 @@ export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).should('not.exist');
 };
 
+export const submitNewExceptionItemWithFailure = () => {
+  cy.get(CONFIRM_BTN).should('exist');
+  cy.get(CONFIRM_BTN).click();
+  cy.get(CONFIRM_BTN).should('exist');
+};
+
 export const submitEditedExceptionItem = () => {
   cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
   cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('not.exist');
@@ -210,6 +218,19 @@ export const selectOs = (os: string) => {
 
 export const addExceptionComment = (comment: string) => {
   cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`${comment}`);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
+};
+
+export const addExceptionHugeComment = (comment: string) => {
+  cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).invoke('val', comment);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`!{backspace}`);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
+};
+
+export const editExceptionComment = (comment: string) => {
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).clear();
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`${comment}`);
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
 };
@@ -298,4 +319,14 @@ export const validateHighlightedFieldsPopulatedAsExceptionConditions = (
   highlightedFields: string[]
 ) => {
   return highlightedFields.every((field) => validateExceptionConditionField(field));
+};
+
+export const dismissExceptionItemErrorCallOut = () => {
+  cy.get(EXCEPTIONS_ITEM_ERROR_CALLOUT).should(
+    'include.text',
+    'An error occured submitting exception'
+  );
+
+  // Click dismiss button
+  cy.get(EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON).click();
 };
