@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SupertestProvider as svlSupertestProvider } from '../../../test_serverless/shared/services/supertest';
 import { services as xPackFunctionalServices } from '../../functional/services';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
@@ -14,6 +13,7 @@ import { TimelineTestService } from '../../security_solution_ftr/services/timeli
 import { DetectionsTestService } from '../../security_solution_ftr/services/detections';
 import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
 import { EndpointArtifactsTestResources } from './endpoint_artifacts';
+import { KibanaSupertestWithCertProvider } from './supertest_with_cert';
 
 export const services = {
   ...xPackFunctionalServices,
@@ -26,5 +26,5 @@ export const services = {
   endpointArtifactTestResources: EndpointArtifactsTestResources,
   policyTestResources: EndpointPolicyTestResourcesProvider,
 
-  supertest: svlSupertestProvider,
+  supertest: KibanaSupertestWithCertProvider,
 };
