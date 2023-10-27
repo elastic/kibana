@@ -111,26 +111,18 @@ export const destroyEndpointHost = async (
   ]);
 };
 
-export const deleteMultipassVm = async (vmName: string): Promise<void> => {
-  const hostVm = process.env.CI
-    ? createVagrantHostVmClient(vmName)
-    : createMultipassHostVmClient(vmName);
+const getHostVmClient = (vmName: string): HostVm => {
+  return process.env.CI ? createVagrantHostVmClient(vmName) : createMultipassHostVmClient(vmName);
+};
 
-  await hostVm.destroy();
+export const deleteMultipassVm = async (vmName: string): Promise<void> => {
+  await getHostVmClient(vmName).destroy();
 };
 
 export async function stopEndpointHost(hostName: string): Promise<void> {
-  const hostVm = process.env.CI
-    ? createVagrantHostVmClient(hostName)
-    : createMultipassHostVmClient(hostName);
-
-  await hostVm.stop();
+  await getHostVmClient(hostName).stop();
 }
 
 export async function startEndpointHost(hostName: string): Promise<void> {
-  const hostVm = process.env.CI
-    ? createVagrantHostVmClient(hostName)
-    : createMultipassHostVmClient(hostName);
-
-  await hostVm.start();
+  await getHostVmClient(hostName).start();
 }
