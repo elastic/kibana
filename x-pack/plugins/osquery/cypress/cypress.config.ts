@@ -6,10 +6,10 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-
 import path from 'path';
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
+import { debuggerPlugin } from 'cypress-debugger';
 
 import type { YamlRoleDefinitions } from '../../../test_serverless/shared/lib';
 import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
@@ -58,6 +58,10 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
     setupNodeEvents(on, config) {
+      debuggerPlugin(on, config, {
+        failedTestsOnly: true,
+        targetDirectory: '../../../../target/kibana-osquery/cypress/traces',
+      });
       setupUserDataLoader(on, config, { roleDefinitions, additionalRoleName: 'viewer' });
 
       return config;

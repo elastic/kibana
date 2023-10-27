@@ -38,6 +38,10 @@ import { ServerlessRoleName } from './roles';
 import 'cypress-react-selector';
 import { waitUntil } from '../tasks/wait_until';
 import { isServerless } from '../tasks/serverless';
+// if used import it complains about "Dynamic require of "@neuralegion/cypress-har-generator/commands" is not supported"
+const { debuggerSupport } = require('cypress-debugger');
+
+debuggerSupport();
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

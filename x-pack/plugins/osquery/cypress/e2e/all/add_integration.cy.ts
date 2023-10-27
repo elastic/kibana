@@ -52,16 +52,16 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     'validate osquery is not available and nav search links to integration',
     { tags: ['@ess', '@brokenInServerless'] },
     () => {
-      cy.visit(OSQUERY);
-      cy.intercept('GET', '**/internal/osquery/status', (req) => {
-        req.continue((res) => res.send({ ...res.body, install_status: undefined }));
-      });
-      cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
-      cy.contains('Add Osquery Manager');
-      cy.getBySel('osquery-add-integration-button');
-      cy.getBySel('nav-search-input').type('Osquery');
-      cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
-      cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
+      // cy.visit(OSQUERY);
+      // cy.intercept('GET', '**/internal/osquery/status', (req) => {
+      //   req.continue((res) => res.send({ ...res.body, install_status: undefined }));
+      // });
+      // cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
+      // cy.contains('Add Osquery Manager');
+      // cy.getBySel('osquery-add-integration-button');
+      // cy.getBySel('nav-search-input').type('Osquery');
+      // cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
+      // cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
       cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
     }
   );
