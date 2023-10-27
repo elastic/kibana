@@ -39,6 +39,7 @@ export const useCanReadSyntheticsIndex = () => {
       dataPublicPluginStart.search
         .search(
           {
+            terminate_after: 1,
             params: {
               index: SYNTHETICS_INDEX_PATTERN,
               size: 0,
