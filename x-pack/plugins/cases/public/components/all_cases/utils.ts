@@ -72,7 +72,7 @@ export const mergeSelectedColumnsWithConfiguration = ({
 
   missingColumns.forEach((field) => {
     // can be an empty string
-    if (casesColumnsConfig[field].field) {
+    if (casesColumnsConfig[field].field && casesColumnsConfig[field].canDisplay) {
       result.push({
         field: casesColumnsConfig[field].field,
         name: casesColumnsConfig[field].name,

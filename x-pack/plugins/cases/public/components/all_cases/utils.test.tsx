@@ -129,5 +129,20 @@ describe('utils', () => {
         { field: 'bar', name: 'bar', isChecked: false },
       ]);
     });
+
+    it('result does not include columns missing in the selectedColumns when canDisplay=false', () => {
+      expect(
+        mergeSelectedColumnsWithConfiguration({
+          selectedColumns: [],
+          casesColumnsConfig: {
+            ...mockConfiguration,
+            foobar: { field: 'foobar', name: 'foobar', canDisplay: false },
+          },
+        })
+      ).toStrictEqual([
+        { field: 'foo', name: 'foo', isChecked: false },
+        { field: 'bar', name: 'bar', isChecked: false },
+      ]);
+    });
   });
 });
