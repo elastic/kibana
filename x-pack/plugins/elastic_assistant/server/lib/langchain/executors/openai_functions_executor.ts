@@ -64,7 +64,7 @@ export const callOpenAIFunctionsExecutor = async ({
   });
 
   await executor.call({ input: latestMessage[0].content });
-
+  console.log('is openai functions executor running???');
   return {
     connector_id: connectorId,
     data: llm.getActionResultData(), // the response from the actions framework

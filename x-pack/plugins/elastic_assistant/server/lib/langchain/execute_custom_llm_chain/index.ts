@@ -69,14 +69,48 @@ export const callAgentExecutor = async ({
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
     agentType: 'chat-conversational-react-description',
     memory,
-    verbose: false,
+    verbose: true,
+    callbacks: [
+      {
+        handleLLMNewToken(token: string) {
+          console.log('handleLLMNewToken in executor definition', token);
+        },
+      },
+    ],
   });
+  //
+  // const resp = await executor.stream(
+  //   { input: latestMessage[0].content },
+  //   {
+  //     callbacks: [
+  //       {
+  //         handleLLMNewToken(token: string) {
+  //           console.log('handleLLMNewToken in stream call', token);
+  //         },
+  //       },
+  //     ],
+  //   }
+  // );
+  //
+  await executor.call(
+    { input: latestMessage[0].content }
+    // {
+    //   callbacks: [
+    //     {
+    //       handleLLMNewToken(token: string) {
+    //         console.log('handleLLMNewToken in call', token);
+    //       },
+    //     },
+    //   ],
+    // }
+  );
+  // console.log('hello world custom llm chain resp', resp);
+  console.log('hello world getActionResultStream resp', llm.getActionResultStream());
 
-  await executor.call({ input: latestMessage[0].content });
-
-  return {
-    connector_id: connectorId,
-    data: llm.getActionResultData(), // the response from the actions framework
-    status: 'ok',
-  };
+  return llm.getActionResultStream();
+  // {
+  //   connector_id: connectorId,
+  //   data: llm.getActionResultStream(), // the response from the actions framework
+  //   status: 'ok',
+  // };
 };

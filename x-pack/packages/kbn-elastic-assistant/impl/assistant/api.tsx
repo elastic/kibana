@@ -63,6 +63,7 @@ export const fetchConnectorExecuteAction = async ({
   // In part 2 I will make enhancements to invokeAI to make it work with both openA, but to keep it to a Security Soltuion only review on this PR,
   // I'm calling the stream action directly
   const isStream = true;
+
   const requestBody = isStream
     ? {
         params: {

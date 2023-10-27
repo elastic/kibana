@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { Readable } from 'stream';
 import { RequestBody, ResponseBody } from '../types';
 
 export interface AgentExecutorParams {
@@ -24,7 +25,7 @@ export interface AgentExecutorParams {
   elserId?: string;
 }
 
-export type AgentExecutorResponse = Promise<ResponseBody>;
+export type AgentExecutorResponse = Promise<ResponseBody | Readable>;
 
 export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
 
