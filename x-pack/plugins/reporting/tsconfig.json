@@ -46,6 +46,7 @@
     "@kbn/core-http-common",
     "@kbn/react-kibana-context-theme",
     "@kbn/reporting-export-types-helpers-server",
+    "@kbn/reporting-export-types-helpers-public",
   ],
   "exclude": [
     "target/**/*",
