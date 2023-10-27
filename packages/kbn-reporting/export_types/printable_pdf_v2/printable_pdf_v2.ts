@@ -44,6 +44,7 @@ import {
   JobParamsPDFV2,
   TaskPayloadPDFV2,
 } from '@kbn/reporting-export-types-helpers-server';
+import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;
@@ -116,7 +117,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       }),
       mergeMap(({ logo, headers }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
-        let urls: UrlOrUrlLocatorTuple[];
+        let urls: UrlOrUrlWithContext[];
         if (locatorParams) {
           urls = locatorParams.map((locator) => [
             getFullRedirectAppUrl(
@@ -126,7 +127,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
               payload.forceNow
             ),
             locator,
-          ]) as unknown as UrlOrUrlLocatorTuple[];
+          ]) as unknown as UrlOrUrlWithContext[];
         }
 
         apmGetAssets?.end();

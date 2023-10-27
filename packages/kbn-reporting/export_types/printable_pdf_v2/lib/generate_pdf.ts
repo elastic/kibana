@@ -17,6 +17,7 @@ import {
 } from '@kbn/reporting-export-types-helpers-server';
 import type { LocatorParams, ReportingConfigType } from '@kbn/reporting-common';
 import { PdfMetrics } from '@kbn/reporting-common/metrics';
+import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 interface PdfResult {
   buffer: Uint8Array | null;
@@ -43,7 +44,7 @@ export function generatePdfObservable(
   const urls = locatorParams.map((locator) => [
     getFullRedirectAppUrl(config, serverInfo, job.spaceId, job.forceNow),
     locator,
-  ]) as UrlOrUrlLocatorTuple[];
+  ]) as unknown as UrlOrUrlWithContext[];
   const screenshots$ = getScreenshots({ ...options, urls }).pipe(
     tap(({ metrics }) => {
       if (metrics.cpu) {
