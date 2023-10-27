@@ -17,12 +17,11 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import type { HostRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
-import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
 import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
 import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -35,7 +34,6 @@ export const getHostRiskScoreColumns = ({
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
-    width: '35%',
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
         return (
@@ -55,19 +53,6 @@ export const getHostRiskScoreColumns = ({
             <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
           </SecurityCellActions>
         );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    field: RiskScoreFields.timestamp,
-    name: i18n.LAST_UPDATED,
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: true,
-    render: (lastSeen: Maybe<string>) => {
-      if (lastSeen != null) {
-        return <FormattedRelativePreferenceDate value={lastSeen} />;
       }
       return getEmptyTagValue();
     },

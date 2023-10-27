@@ -86,6 +86,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         altInspectId: '[data-test-subj="events-viewer-panel"]',
         id: EVENT_CONTAINER_TABLE_NOT_LOADING,
       },
+
       {
         title: 'Host risk',
         tab: RISK_DETAILS_NAV,

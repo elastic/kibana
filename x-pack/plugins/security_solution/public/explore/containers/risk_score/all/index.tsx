@@ -125,6 +125,13 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
     }
   }, [defaultIndex, refetch, refetchDeprecated]);
 
+  // since query does not take timerange arg, we need to manually refetch when time range updates
+  // the results can be different if the user has run the ML for the first time since pressing refresh
+  useEffect(() => {
+    refetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timerange?.to, timerange?.from]);
+
   const riskScoreResponse = useMemo(
     () => ({
       data: response.data,
@@ -161,7 +168,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
                   }
                 : undefined,
             sort,
-            timerange: requestTimerange,
+            timerange: onlyLatest ? undefined : requestTimerange,
             alertsTimerange: includeAlertsCount ? requestTimerange : undefined,
           }
         : null,
@@ -173,6 +180,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       querySize,
       sort,
       requestTimerange,
+      onlyLatest,
       riskEntity,
       includeAlertsCount,
     ]
