@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { writeFileSync } from 'fs';
-import { execSync } from 'child_process';
-import * as path from 'path';
-import { BuildkiteClient, BuildkiteInputStep } from '#pipeline-utils';
+import { buildkite, exec, SELECTED_COMMIT_META_KEY } from './shared';
+import { BuildkiteInputStep } from '#pipeline-utils';
 
 interface CommitData {
   commits: Array<{
@@ -20,11 +18,9 @@ interface CommitData {
 }
 
 async function main() {
-  const [outputPath, commitCount] = process.argv.slice(2);
+  const [commitCount] = process.argv.slice(2);
 
   const commitData = await collectAvailableCommits(commitCount);
-
-  writeFileSync(path.resolve(outputPath), JSON.stringify(commitData, null, 2));
 
   await generateCommitSelectionInput(commitData);
 }
@@ -32,12 +28,12 @@ async function main() {
 async function collectAvailableCommits(commitCount: string): Promise<CommitData> {
   console.log('--- Collecting recent kibana commits');
 
-  const kibanaDir = execSync('git rev-parse --show-toplevel').toString().trim();
-  const exec = (command: string) =>
-    execSync(command, { encoding: 'utf-8', cwd: kibanaDir }).toString().trim();
-
-  const currentKibanaCommit = exec('git rev-parse HEAD');
+  const currentKibanaCommit = exec('git rev-parse HEAD')!;
   const kibanaCommits = exec(`git log --pretty=format:"%s<@>%H" -n ${commitCount}`);
+
+  if (!kibanaCommits) {
+    throw new Error('Could not find any, while listing recent commits');
+  }
 
   const kibanaCommitList = kibanaCommits.split('\n').map((commit) => {
     const [message, hash] = commit.split('<@>');
@@ -55,7 +51,6 @@ async function generateCommitSelectionInput(commitData: CommitData) {
 
   const commits = commitData.commits;
 
-  const bk = new BuildkiteClient();
   const inputStep: BuildkiteInputStep = {
     input: 'Select commit to deploy',
     prompt: 'Select commit to deploy.',
@@ -63,19 +58,19 @@ async function generateCommitSelectionInput(commitData: CommitData) {
     fields: [
       {
         select: 'Select commit to deploy',
-        key: 'commit-sha',
+        key: SELECTED_COMMIT_META_KEY,
         // TODO: Enrich this with build stats?
         options: commits.map((commit) => ({ label: commit.message, value: commit.hash })),
       },
     ],
   };
 
-  bk.uploadSteps([inputStep]);
+  buildkite.uploadSteps([inputStep]);
 }
 
 main()
   .then(() => {
-    console.log('Uploded input step.');
+    console.log('Commit selector generated, added as a buildkite input step.');
   })
   .catch((error) => {
     console.error(error);
