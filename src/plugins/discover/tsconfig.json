@@ -67,7 +67,6 @@
     "@kbn/content-management-plugin",
     "@kbn/unified-doc-viewer",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/serverless",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/unified-data-table",
@@ -75,7 +74,8 @@
     "@kbn/rule-data-utils",
     "@kbn/global-search-plugin",
     "@kbn/resizable-layout",
-    "@kbn/unsaved-changes-badge"
+    "@kbn/unsaved-changes-badge",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": [
     "target/**/*"
