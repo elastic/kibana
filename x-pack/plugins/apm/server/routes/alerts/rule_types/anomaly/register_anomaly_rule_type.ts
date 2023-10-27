@@ -12,7 +12,6 @@ import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
   getAlertUrl,
-  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
 } from '@kbn/observability-plugin/common';
@@ -65,7 +64,6 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 export function registerAnomalyRuleType({
   alerting,
   alertsLocator,
-  apmConfig,
   getApmIndices,
   basePath,
   logger,
@@ -97,9 +95,7 @@ export function registerAnomalyRuleType({
         ],
       },
       category: DEFAULT_APP_CATEGORIES.observability.id,
-      producer: apmConfig.rules.useO11yFeatureIdAsOwner
-        ? observabilityFeatureId
-        : APM_SERVER_FEATURE_ID,
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({

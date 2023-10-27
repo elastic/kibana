@@ -12,7 +12,6 @@ import {
   asDuration,
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
-  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
@@ -88,9 +87,9 @@ export const transactionDurationActionVariables = [
 
 export function registerTransactionDurationRuleType({
   alerting,
+  apmConfig,
   ruleDataClient,
   getApmIndices,
-  apmConfig,
   logger,
   basePath,
 }: RegisterRuleDependencies) {
@@ -109,9 +108,7 @@ export function registerTransactionDurationRuleType({
       context: transactionDurationActionVariables,
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
-    producer: apmConfig.rules.useO11yFeatureIdAsOwner
-      ? observabilityFeatureId
-      : APM_SERVER_FEATURE_ID,
+    producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({

@@ -10,7 +10,6 @@ import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
   getAlertUrl,
-  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
@@ -84,9 +83,9 @@ export const transactionErrorRateActionVariables = [
 export function registerTransactionErrorRateRuleType({
   alerting,
   alertsLocator,
+  apmConfig,
   basePath,
   getApmIndices,
-  apmConfig,
   logger,
   ruleDataClient,
 }: RegisterRuleDependencies) {
@@ -106,9 +105,7 @@ export function registerTransactionErrorRateRuleType({
         context: transactionErrorRateActionVariables,
       },
       category: DEFAULT_APP_CATEGORIES.observability.id,
-      producer: apmConfig.rules.useO11yFeatureIdAsOwner
-        ? observabilityFeatureId
-        : APM_SERVER_FEATURE_ID,
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({

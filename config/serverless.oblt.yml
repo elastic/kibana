@@ -26,10 +26,10 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 xpack.fleet.agentIdVerificationEnabled: false
 
 ## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
+## The value need to be a featureId observability Or stackAlerts Or siem
+xpack.alerting.rules.overwriteProducer: 'observability'
 xpack.observability.createO11yGenericFeatureId: true
-xpack.apm.rules.useO11yFeatureIdAsOwner: true
-xpack.observability.slo.rules.useO11yFeatureIdAsOwner: true
-xpack.stack_alerts.esQuery.useO11yFeatureIdAsOwner: true
+e
 
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true

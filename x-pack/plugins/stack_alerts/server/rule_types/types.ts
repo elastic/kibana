@@ -6,7 +6,6 @@
  */
 
 import { CoreSetup, Logger } from '@kbn/core/server';
-import { Config } from '..';
 import { AlertingSetup, StackAlertsStartDeps } from '../types';
 
 export interface RegisterRuleTypesParams {
@@ -14,5 +13,4 @@ export interface RegisterRuleTypesParams {
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
   alerting: AlertingSetup;
   core: CoreSetup;
-  config: Config;
 }

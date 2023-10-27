@@ -80,9 +80,6 @@ const configSchema = schema.object({
       options: { defaultValue: schema.contextRef('serverless') },
     }),
   }),
-  rules: schema.object({
-    useO11yFeatureIdAsOwner: schema.boolean({ defaultValue: false }),
-  }),
 });
 
 // plugin config

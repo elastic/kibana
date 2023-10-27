@@ -10,7 +10,6 @@ import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
   getAlertUrl,
-  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
@@ -76,7 +75,6 @@ export const errorCountActionVariables = [
 export function registerErrorCountRuleType({
   alerting,
   alertsLocator,
-  apmConfig,
   basePath,
   getApmIndices,
   logger,
@@ -98,9 +96,7 @@ export function registerErrorCountRuleType({
         context: errorCountActionVariables,
       },
       category: DEFAULT_APP_CATEGORIES.observability.id,
-      producer: apmConfig.rules.useO11yFeatureIdAsOwner
-        ? observabilityFeatureId
-        : APM_SERVER_FEATURE_ID,
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({

@@ -58,7 +58,6 @@ export const createRuleTypeMocks = () => {
     } as IBasePath,
     apmConfig: {
       searchAggregatedTransactions: true,
-      rules: { useO11yFeatureIdAsOwner: false },
     } as any as APMConfig,
     getApmIndices: async () => ({
       error: 'apm-*',
