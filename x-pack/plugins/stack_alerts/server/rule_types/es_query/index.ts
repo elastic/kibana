@@ -9,6 +9,6 @@ import type { RegisterRuleTypesParams } from '../types';
 import { getRuleType } from './rule_type';
 
 export function register(params: RegisterRuleTypesParams) {
-  const { alerting, core } = params;
-  alerting.registerType(getRuleType(core));
+  const { alerting, core, config } = params;
+  alerting.registerType(getRuleType(core, config));
 }

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
-import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { STACK_ALERTS_AAD_CONFIG } from '..';
 import { RuleType } from '../../types';
@@ -23,9 +23,11 @@ import { ExecutorOptions } from './types';
 import { ActionGroupId } from './constants';
 import { executor } from './executor';
 import { isSearchSourceRule } from './util';
+import { Config } from '../..';
 
 export function getRuleType(
-  core: CoreSetup
+  core: CoreSetup,
+  config: Config
 ): RuleType<
   EsQueryRuleParams,
   EsQueryRuleParamsExtractedParams,
@@ -200,7 +202,9 @@ export function getRuleType(
       return await executor(core, options);
     },
     category: DEFAULT_APP_CATEGORIES.management.id,
-    producer: STACK_ALERTS_FEATURE_ID,
+    producer: config?.esQuery?.useO11yFeatureIdAsOwner
+      ? AlertConsumers.OBSERVABILITY
+      : STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
     alerts: STACK_ALERTS_AAD_CONFIG,
   };

@@ -29,6 +29,7 @@ xpack.fleet.agentIdVerificationEnabled: false
 xpack.observability.createO11yGenericFeatureId: true
 xpack.apm.rules.useO11yFeatureIdAsOwner: true
 xpack.observability.slo.rules.useO11yFeatureIdAsOwner: true
+xpack.stack_alerts.esQuery.useO11yFeatureIdAsOwner: true
 
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
@@ -57,7 +58,7 @@ xpack.fleet.packages:
     version: latest
 # fleet_server package installed to publish agent metrics
   - name: fleet_server
-    version: latest  
+    version: latest
 ## Disable APM UI components and API calls
 xpack.apm.featureFlags.agentConfigurationAvailable: false
 xpack.apm.featureFlags.configurableIndicesAvailable: false

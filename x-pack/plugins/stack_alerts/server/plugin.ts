@@ -10,19 +10,21 @@ import { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/s
 import { StackAlertsDeps, StackAlertsStartDeps } from './types';
 import { registerBuiltInRuleTypes } from './rule_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
+import { Config } from '.';
 
 export class AlertingBuiltinsPlugin
   implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps>
 {
   private readonly logger: Logger;
 
-  constructor(ctx: PluginInitializerContext) {
+  constructor(private readonly ctx: PluginInitializerContext) {
+    this.ctx = ctx;
     this.logger = ctx.logger.get();
   }
 
   public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
-
+    const config = this.ctx.config.get<Config>();
     registerBuiltInRuleTypes({
       logger: this.logger,
       data: core
@@ -30,6 +32,7 @@ export class AlertingBuiltinsPlugin
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerting,
       core,
+      config,
     });
   }
 

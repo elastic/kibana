@@ -59,6 +59,7 @@ import {
   RuleActionAlertsFilterProperty,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -261,7 +262,10 @@ export const RuleForm = ({
 
     const solutionsResult = availableRuleTypesResult.reduce(
       (result: Map<string, string>, ruleTypeItem) => {
-        if (!result.has(ruleTypeItem.ruleType.producer)) {
+        if (
+          !result.has(ruleTypeItem.ruleType.producer) &&
+          ruleTypeItem.ruleType.producer !== AlertConsumers.OBSERVABILITY
+        ) {
           result.set(
             ruleTypeItem.ruleType.producer,
             (kibanaFeatures
@@ -274,9 +278,10 @@ export const RuleForm = ({
       },
       new Map()
     );
-    setSolutions(
-      new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
-    );
+    const solutionsEntries = [...solutionsResult.entries()];
+    if (solutionsEntries.length > 0) {
+      setSolutions(new Map(solutionsEntries.sort(([, a], [, b]) => a.localeCompare(b))));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     ruleTypes,
