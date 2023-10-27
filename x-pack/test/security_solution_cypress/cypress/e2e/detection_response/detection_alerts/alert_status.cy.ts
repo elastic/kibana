@@ -9,10 +9,8 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getNewRule } from '../../../objects/rule';
 import {
   ALERTS_COUNT,
-  CLOSE_ALERT_BTN,
   CLOSE_SELECTED_ALERTS_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
-  OPEN_ALERT_BTN,
   SELECTED_ALERTS,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
@@ -30,7 +28,6 @@ import {
   goToOpenedAlerts,
   openAlerts,
   openFirstAlert,
-  expandFirstAlertActions,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
