@@ -1,11 +1,14 @@
 ## Creates deploy@<timestamp> tag on Kibana
+
 agents:
  queue: kibana-default
 
 steps:
   - label: "Set initial banner"
+    env:
+      SKIP_KIBANA_HOOKS: 1
     commands:
-      - "buildkite-agent annotate --append --context banner --style info \"<h3>Deploying Kibana Serverless to production</h3>\""
+      - "buildkite-agent annotate --append --context banner --style info \"<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>\""
       - "buildkite-agent annotate --append --context banner --style info \"<br/>Please follow the steps in the build.\""
 
   - label: "Select target commit to deploy"
@@ -15,6 +18,13 @@ steps:
 
   - wait: ~
 
+  - label: "Update banner"
+    env:
+      SKIP_KIBANA_HOOKS: 1
+    commands:
+      - "buildkite-agent annotate --append --context banner --style info \"<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>\""
+      - "buildkite-agent annotate --append --context banner --style info \"<br/>:hourglass: Please wait while we're collecting info about the commit.\""
+
   - label: "Collect commit info"
     command: .buildkite/scripts/serverless/collect_commit_info.sh
     key: collect_data
@@ -23,9 +33,10 @@ steps:
   - wait: ~
 
   - label: "Update banner"
+    env:
+      SKIP_KIBANA_HOOKS: 1
     commands:
-      - "buildkite-agent annotate --context banner --style info \"<h3>Deploying Kibana Serverless to production</h3>\""
-      - "buildkite-agent annotate --context banner --append --style info \"<br />Review the information, and unblock the build to proceed.\""
+      - "buildkite-agent annotate --context banner --style warning \"<br />Review the information above, and unblock the build to proceed.\""
 
   - block: "Confirm deployment"
     prompt: "Are you sure you want to deploy to production?"
@@ -33,13 +44,16 @@ steps:
 
   - wait: ~
 
-  - label: ":ship: Create Deployment Tag"
-    command: .buildkite/scripts/serverless/create_deployment_tag.sh
+  - label: ":ship: Create Deploy Tag"
+    command: .buildkite/scripts/serverless/create_deploy_tag.sh
     env:
       DRY_RUN: $DRY_RUN
 
   - wait: ~
 
   - label: "Update banner"
+    env:
+      SKIP_KIBANA_HOOKS: 1
     commands:
-      - "buildkite-agent annotate --context banner --style success \"<h3>Deploying Kibana Serverless to production successful</h3>\""
+      - "buildkite-agent annotate --context banner --style success \"<h3>Deployment tag successfully created</h3>\""
+      - "buildkite-agent annotate --context banner --style success --append \"<br/>Your deployment will appear here: https://buildkite.com/elastic/kibana-serverless-release/builds?branch=$(buildkite-agent meta-data get deploy-tag)\""
