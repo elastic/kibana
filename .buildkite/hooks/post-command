@@ -2,6 +2,8 @@
 
 if [[ "$BUILDKITE_AGENT_NAME" =~ ^bk-agent ]]; then
   echo "Pipeline file triggered from outside the kibana executors, skipping post_command"
+elif [[ "$SKIP_KIBANA_HOOKS" =~ ^(1|true)$ ]]; then
+  echo "Skipping post_command due to SKIP_KIBANA_HOOKS=$SKIP_KIBANA_HOOKS"
 else
   .buildkite/scripts/lifecycle/post_command.sh
 fi
