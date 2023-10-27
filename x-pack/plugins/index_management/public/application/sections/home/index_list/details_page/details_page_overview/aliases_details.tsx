@@ -28,12 +28,22 @@ import {
 import { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
 
+const MAX_VISIBLE_ALIASES = 3;
+
 export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = ({ aliases }) => {
   const [isShowingAliases, setIsShowingAliases] = useState<boolean>(false);
   if (!Array.isArray(aliases)) {
     return null;
   }
-  const aliasesBadges = aliases.slice(0, 3).map((alias) => <EuiBadge>{alias}</EuiBadge>);
+  const aliasesBadges = aliases.slice(0, 3).map((alias) => (
+    <EuiBadge
+      css={css`
+        max-width: 250px;
+      `}
+    >
+      {alias}
+    </EuiBadge>
+  ));
   return (
     <>
       <OverviewCard
@@ -81,7 +91,9 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
           left: (
             <EuiBadgeGroup gutterSize="s">
               {aliasesBadges}
-              {aliases.length > 3 && <EuiBadge color="hollow">+{aliases.length - 3}</EuiBadge>}
+              {aliases.length > MAX_VISIBLE_ALIASES && (
+                <EuiBadge color="hollow">+{aliases.length - MAX_VISIBLE_ALIASES}</EuiBadge>
+              )}
             </EuiBadgeGroup>
           ),
         }}
@@ -98,9 +110,9 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiListGroup>
+            <EuiListGroup maxWidth={false}>
               {aliases.map((alias) => (
-                <EuiListGroupItem key={alias} label={alias} />
+                <EuiListGroupItem wrapText={true} key={alias} label={alias} />
               ))}
             </EuiListGroup>
           </EuiFlyoutBody>
