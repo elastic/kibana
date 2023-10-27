@@ -21,7 +21,7 @@ export const getQueryColumns = async (
   deps: LensPluginStartDependencies
 ) => {
   // Fetching only columns for ES|QL for performance reasons with limit 0
-  // Important note: The warnings are not returned for 0 limit,
+  // Important note: ES doesnt return the warnings for 0 limit,
   // I am skipping them in favor of performance now
   // but we should think another way to get them (from Lens embeddable or store)
   const performantQuery = { ...query };

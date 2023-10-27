@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
-  EuiSpacer,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -316,9 +315,7 @@ export function LensEditConfigurationFlyout({
               />
             </EuiFlexItem>
           )}
-
           <EuiFlexItem grow={isLayerAccordionOpen ? 1 : false}>
-            <EuiSpacer size="s" />
             <EuiAccordion
               id="layer-configuration"
               buttonContent={
@@ -336,6 +333,11 @@ export function LensEditConfigurationFlyout({
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
               paddingSize="none"
+              css={css`
+                margin-top: ${euiThemeVars.euiSizeS};
+                margin-bottom: ${euiThemeVars.euiSizeS};
+              }
+            `}
             >
               <LayerConfiguration
                 attributes={attributes}
@@ -348,7 +350,6 @@ export function LensEditConfigurationFlyout({
                 setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
               />
             </EuiAccordion>
-            <EuiSpacer size="s" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={!isLayerAccordionOpen ? 1 : false}>
