@@ -45,12 +45,10 @@ export async function getDeprecationsInfo(
   const config = reportingCore.getConfig();
   const deprecatedRoles = config.roles.allow || ['reporting_user'];
 
-  return config.statefulSettings.enabled
-    ? [
-        ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
-        ...(await getRoleMappingsDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
-      ]
-    : [];
+  return [
+    ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
+    ...(await getRoleMappingsDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
+  ];
 }
 
 async function getUsersDeprecations(
@@ -150,9 +148,7 @@ async function getRoleMappingsDeprecations(
   deprecatedRoles: string[],
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
-  const usingDeprecatedConfig =
-    !reportingCore.getContract().usesUiCapabilities() &&
-    reportingCore.getConfig().statefulSettings.enabled;
+  const usingDeprecatedConfig = !reportingCore.getContract().usesUiCapabilities();
   const strings = {
     title: i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.title', {
       defaultMessage: `The "{reportingUserRoleName}" role is deprecated: check role mappings`,

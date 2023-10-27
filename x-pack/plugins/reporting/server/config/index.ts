@@ -21,7 +21,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     unused('capture.viewport', { level: 'warning' }), // deprecated as unused since 7.16
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
-      if (reporting?.roles?.enabled !== false && reporting?.statefulSettings?.enabled) {
+      if (reporting?.roles?.enabled !== false) {
         addDeprecation({
           configPath: `${fromPath}.roles.enabled`,
           level: 'warning',
