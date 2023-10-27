@@ -40,18 +40,14 @@ export async function buildCoverageOverviewDashboardModel(
 
     for (const technique of tactic.techniques) {
       for (const ruleId of apiResponse.coverage[technique.id] ?? []) {
-        if (apiResponse.coverage[tactic.id] && apiResponse.coverage[tactic.id].includes(ruleId)) {
+        if (apiResponse.coverage[tactic.id]?.includes(ruleId)) {
           addRule(technique, ruleId, apiResponse.rules_data[ruleId]);
         }
       }
 
       for (const subtechnique of technique.subtechniques) {
         for (const ruleId of apiResponse.coverage[subtechnique.id] ?? []) {
-          if (
-            apiResponse.coverage[tactic.id] &&
-            apiResponse.coverage[technique.id] &&
-            apiResponse.coverage[tactic.id].includes(ruleId)
-          ) {
+          if (apiResponse.coverage[tactic.id]?.includes(ruleId)) {
             addRule(subtechnique, ruleId, apiResponse.rules_data[ruleId]);
           }
         }
