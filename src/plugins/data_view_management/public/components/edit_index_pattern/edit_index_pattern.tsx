@@ -301,19 +301,17 @@ export const EditIndexPattern = withRouter(
                 data-test-subj="dataViewMappingConflict"
               >
                 <p>{mappingConflictLabel}</p>
-                {
-                  <EuiLink
-                    data-test-subj="viewDataViewMappingConflictsButton"
-                    href={conflictFieldsUrl}
-                  >
-                    {i18n.translate(
-                      'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
-                      {
-                        defaultMessage: 'View conflicts',
-                      }
-                    )}
-                  </EuiLink>
-                }
+                <EuiLink
+                  data-test-subj="viewDataViewMappingConflictsButton"
+                  href={conflictFieldsUrl}
+                >
+                  {i18n.translate(
+                    'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
+                    {
+                      defaultMessage: 'View conflicts',
+                    }
+                  )}
+                </EuiLink>
               </EuiCallOut>
             </>
           )}

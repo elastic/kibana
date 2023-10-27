@@ -203,7 +203,7 @@ export const Tabs: React.FC<TabsProps> = ({
     );
   }, [indexedFieldTypeFilter, indexedFieldTypes]);
 
-  const filteredSchemaFiledTypeFilter = useMemo(() => {
+  const filteredSchemaFieldTypeFilter = useMemo(() => {
     return uniq(
       schemaFieldTypeFilter.filter((schemaFieldType) =>
         SCHEMA_ITEMS.some((item) => item.value === schemaFieldType)
@@ -393,8 +393,8 @@ export const Tabs: React.FC<TabsProps> = ({
                         onClick={() => setIsSchemaFilterOpen(!isSchemaFilterOpen)}
                         isSelected={isSchemaFilterOpen}
                         numFilters={SCHEMA_ITEMS.length}
-                        hasActiveFilters={filteredSchemaFiledTypeFilter.length > 0}
-                        numActiveFilters={filteredSchemaFiledTypeFilter.length}
+                        hasActiveFilters={filteredSchemaFieldTypeFilter.length > 0}
+                        numActiveFilters={filteredSchemaFieldTypeFilter.length}
                       >
                         {schemaFilterLabel}
                       </EuiFilterButton>
@@ -403,7 +403,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     closePopover={() => setIsSchemaFilterOpen(false)}
                   >
                     {SCHEMA_ITEMS.map((item) => {
-                      const isSelected = filteredSchemaFiledTypeFilter.includes(item.value);
+                      const isSelected = filteredSchemaFieldTypeFilter.includes(item.value);
                       return (
                         <EuiFilterSelectItem
                           checked={isSelected ? 'on' : undefined}
@@ -411,8 +411,8 @@ export const Tabs: React.FC<TabsProps> = ({
                           onClick={() => {
                             updateSchemaFieldTypeFilter(
                               isSelected
-                                ? filteredSchemaFiledTypeFilter.filter((f) => f !== item.value)
-                                : [...filteredSchemaFiledTypeFilter, item.value]
+                                ? filteredSchemaFieldTypeFilter.filter((f) => f !== item.value)
+                                : [...filteredSchemaFieldTypeFilter, item.value]
                             );
                           }}
                           data-test-subj={`schemaFieldTypeFilterDropdown-option-${item.value}${
@@ -490,7 +490,7 @@ export const Tabs: React.FC<TabsProps> = ({
     },
     [
       fieldFilter,
-      filteredSchemaFiledTypeFilter,
+      filteredSchemaFieldTypeFilter,
       filteredIndexedFieldTypeFilter,
       indexedFieldTypes,
       isIndexedFilterOpen,
@@ -524,7 +524,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     fieldFilter={fieldFilter}
                     fieldWildcardMatcher={fieldWildcardMatcherDecorated}
                     indexedFieldTypeFilter={filteredIndexedFieldTypeFilter}
-                    schemaFieldTypeFilter={filteredSchemaFiledTypeFilter}
+                    schemaFieldTypeFilter={filteredSchemaFieldTypeFilter}
                     helpers={{
                       editField: openFieldEditor,
                       deleteField,
@@ -602,7 +602,7 @@ export const Tabs: React.FC<TabsProps> = ({
       history,
       indexPattern,
       filteredIndexedFieldTypeFilter,
-      filteredSchemaFiledTypeFilter,
+      filteredSchemaFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
