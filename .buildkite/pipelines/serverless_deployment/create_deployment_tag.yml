@@ -3,6 +3,11 @@ agents:
  queue: kibana-default
 
 steps:
+  - label: "Set initial banner"
+    commands:
+      - "buildkite-agent annotate --append --context banner --style info \"<h3>Deploying Kibana Serverless to production</h3>\""
+      - "buildkite-agent annotate --append --context banner --style info \"<br/>Please follow the steps in the build.\""
+
   - label: "Select target commit to deploy"
     command: ts-node .buildkite/scripts/serverless/generate_commit_selector.ts commits.json 50
     key: select_commit
@@ -17,11 +22,24 @@ steps:
 
   - wait: ~
 
+  - label: "Update banner"
+    commands:
+      - "buildkite-agent annotate --context banner --style info \"<h3>Deploying Kibana Serverless to production</h3>\""
+      - "buildkite-agent annotate --context banner --append --style info \"<br />Review the information, and unblock the build to proceed.\""
+
   - block: "Confirm deployment"
     prompt: "Are you sure you want to deploy to production?"
     depends_on: collect_data
+
+  - wait: ~
 
   - label: ":ship: Create Deployment Tag"
     command: .buildkite/scripts/serverless/create_deployment_tag.sh
     env:
       DRY_RUN: $DRY_RUN
+
+  - wait: ~
+
+  - label: "Update banner"
+    commands:
+      - "buildkite-agent annotate --context banner --style success \"<h3>Deploying Kibana Serverless to production successful</h3>\""
