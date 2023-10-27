@@ -259,10 +259,10 @@ describe('licensing plugin', () => {
 
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
 
-        await license$.pipe(take(1)).toPromise();
+        await firstValueFrom(license$);
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
 
-        refresh();
+        await refresh();
         await flushPromises();
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(2);
       });
@@ -305,7 +305,7 @@ describe('licensing plugin', () => {
         expect(customLicense.isAvailable).toBe(true);
         expect(customLicense.type).toBe('gold');
 
-        expect(await license$.pipe(take(1)).toPromise()).not.toBe(customLicense);
+        expect(await firstValueFrom(license$)).not.toBe(customLicense);
       });
 
       it('creates a poller with a manual refresh control', async () => {
