@@ -593,6 +593,7 @@ packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 packages/kbn-reporting/export_types/csv @elastic/appex-sharedux
 packages/kbn-reporting/export_types/deprecated @elastic/appex-sharedux
+packages/kbn-reporting/export_types_helpers_browser @elastic/appex-sharedux
 packages/kbn-reporting/export_types_helpers_server @elastic/appex-sharedux
 packages/kbn-reporting/export_types/printable_pdf_v2 @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png @elastic/appex-sharedux
