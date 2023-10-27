@@ -4,42 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RecursivePartial } from '@elastic/eui';
+import { RecursivePartial } from '@elastic/eui';
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { merge } from 'lodash';
 import { ProfilingESClient } from './profiling_es_client';
 
 export interface ProfilingSetupOptions {
   client: ProfilingESClient;
+  clientWithProfilingAuth: ProfilingESClient;
   soClient: SavedObjectsClientContract;
-  packagePolicyClient: PackagePolicyClient;
   logger: Logger;
   spaceId: string;
-  isCloudEnabled: boolean;
+}
+
+export interface SetupStateType {
+  type: 'self-managed';
+  setupState: SetupState;
 }
 
 export interface SetupState {
-  cloud: {
-    available: boolean;
-    required: boolean;
-  };
   data: {
     available: boolean;
   };
   permissions: {
     configured: boolean;
-  };
-  policies: {
-    collector: {
-      installed: boolean;
-    };
-    symbolizer: {
-      installed: boolean;
-    };
-    apm: {
-      profilingEnabled: boolean;
-    };
   };
   resource_management: {
     enabled: boolean;
@@ -57,26 +45,11 @@ export type PartialSetupState = RecursivePartial<SetupState>;
 
 export function createDefaultSetupState(): SetupState {
   return {
-    cloud: {
-      available: false,
-      required: true,
-    },
     data: {
       available: false,
     },
     permissions: {
       configured: false,
-    },
-    policies: {
-      collector: {
-        installed: false,
-      },
-      symbolizer: {
-        installed: false,
-      },
-      apm: {
-        profilingEnabled: false,
-      },
     },
     resource_management: {
       enabled: false,
@@ -93,9 +66,6 @@ export function createDefaultSetupState(): SetupState {
 
 export function areResourcesSetup(state: SetupState): boolean {
   return (
-    state.policies.collector.installed &&
-    state.policies.symbolizer.installed &&
-    !state.policies.apm.profilingEnabled &&
     state.resource_management.enabled &&
     state.resources.created &&
     state.permissions.configured &&
@@ -107,9 +77,9 @@ function mergeRecursivePartial<T>(base: T, partial: RecursivePartial<T>): T {
   return merge(base, partial);
 }
 
-export function mergePartialSetupStates(
-  base: SetupState,
-  partials: PartialSetupState[]
-): SetupState {
-  return partials.reduce<SetupState>(mergeRecursivePartial, base);
+export function mergePartialSetupStates<T extends SetupState>(
+  base: T,
+  partials: Array<RecursivePartial<T>>
+): T {
+  return partials.reduce<T>(mergeRecursivePartial, base);
 }
