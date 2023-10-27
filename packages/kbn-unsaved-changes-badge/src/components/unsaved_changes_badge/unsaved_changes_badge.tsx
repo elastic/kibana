@@ -54,8 +54,8 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
     prefix: 'unsavedChangesPopover',
   });
 
-  const openPopover = () => {
-    setPopover(true);
+  const togglePopover = () => {
+    setPopover((value) => !value);
   };
 
   const closePopover = () => {
@@ -151,7 +151,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
       color="warning"
       iconType="arrowDown"
       iconSide="right"
-      onClick={openPopover}
+      onClick={togglePopover}
       onClickAriaLabel={i18n.translate('unsavedChangesBadge.contextMenu.openButton', {
         defaultMessage: 'View available actions',
       })}
