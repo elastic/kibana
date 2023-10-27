@@ -41,7 +41,7 @@ export function createConfig(
     : serverInfo.hostname;
 
   if (statefulSettings.enabled === false) {
-    logger.warn(
+    logger.info(
       `Found 'server.host: "0.0.0.0"' in Kibana configuration. Overriding 'xpack.reporting.kibanaServer.hostname' with 'localhost'`
     );
   } else if (
