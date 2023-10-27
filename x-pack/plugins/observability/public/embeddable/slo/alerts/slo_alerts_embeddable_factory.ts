@@ -51,9 +51,12 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
     try {
-      const [{ uiSettings, application, http, i18n: i18nService }] = await this.getStartServices();
+      const [
+        { uiSettings, application, http, i18n: i18nService, notifications },
+        { triggersActionsUi },
+      ] = await this.getStartServices();
       return new SLOAlertsEmbeddable(
-        { uiSettings, application, http, i18n: i18nService },
+        { uiSettings, application, http, i18n: i18nService, triggersActionsUi, notifications },
         initialInput,
         parent
       );

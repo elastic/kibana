@@ -5,6 +5,8 @@
  * 2.0.
  */
 import React from 'react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +20,8 @@ import {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
 
@@ -26,7 +30,11 @@ interface SloEmbeddableDeps {
   http: CoreStart['http'];
   i18n: CoreStart['i18n'];
   application: ApplicationStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
+
+const ALERTS_PER_PAGE = 10;
+const ALERTS_TABLE_ID = 'xpack.observability.sloEmbeddable.alert.table';
 
 export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, EmbeddableOutput> {
   public readonly type = SLO_ALERTS_EMBEDDABLE;
@@ -39,6 +47,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);
+    this.deps = deps;
 
     this.subscription = new Subscription();
     this.subscription.add(this.getInput$().subscribe(() => this.reload()));
@@ -58,29 +67,37 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
     );
     this.input.lastReloadRequestTime = Date.now();
 
-    // const { sloId, sloInstanceId } = this.getInput();
+    // const { sloId, sloInstanceId } = this.getInput(); // TODO uncomment once I implement handling explicit input
 
     const I18nContext = this.deps.i18n.Context;
+    const {
+      triggersActionsUi: {
+        alertsTableConfigurationRegistry,
+        getAlertsStateTable: AlertsStateTable,
+      },
+    } = this.deps;
+    const { sloId, sloInstanceId } = this.getInput(); // TODO fix types
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={this.deps}>
           <AlertsStateTable
-            alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-            configurationId={AlertConsumers.OBSERVABILITY}
-            id={ALERTS_TABLE_ID}
-            data-test-subj="alertTable"
-            featureIds={[AlertConsumers.SLO]}
             query={{
               bool: {
                 filter: [
-                  { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.instanceId': slo.instanceId ?? ALL_VALUE } },
+                  // { term: { 'slo.id': sloId } },
+                  // { term: { 'slo.instanceId': sloInstanceId ?? ALL_VALUE } },
+                  { term: { 'slo.id': '7bd92700-743d-11ee-bd9f-0fb31b48b974' } }, // TEMP hardcode it, until I implement explicit input
+                  { term: { 'slo.instanceId': ALL_VALUE } },
                 ],
               },
             }}
-            showExpandToDetails={false}
+            alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+            configurationId={AlertConsumers.OBSERVABILITY}
+            featureIds={[AlertConsumers.SLO]}
+            hideLazyLoader
+            id={ALERTS_TABLE_ID}
+            pageSize={ALERTS_PER_PAGE}
             showAlertStatusWithFlapping
-            pageSize={100}
           />
         </KibanaContextProvider>
       </I18nContext>,
