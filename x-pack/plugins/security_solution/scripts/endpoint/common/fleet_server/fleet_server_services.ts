@@ -43,6 +43,7 @@ import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } fro
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../../common/endpoint/data_loaders/utils';
@@ -108,21 +109,16 @@ export const startFleetServer = async ({
 }: StartFleetServerOptions): Promise<StartedFleetServer> => {
   logger.info(`Starting Fleet Server and connecting it to Kibana`);
 
-  const response = await logger.indent(4, async () => {
+  return logger.indent(4, async () => {
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
 
     // Check if fleet already running if `force` is false
-    if (!force) {
-      const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
-
-      if (currentFleetServerUrl && (await isFleetServerRunning(currentFleetServerUrl))) {
-        throw new Error(
-          `Fleet server is already configured for this instance of Kibana and available at: ${currentFleetServerUrl}.\n(Use 'force' option to bypass this error)`
-        );
-      }
+    if (!force && (await isFleetServerRunning(kbnClient))) {
+      throw new Error(
+        `Fleet server is already configured and running for this instance of Kibana.\n(Use 'force' option to bypass this error)`
+      );
     }
 
-    // Only fetch/create a fleet-server policy
     const policyId =
       policy || !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
     const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
@@ -140,8 +136,6 @@ export const startFleetServer = async ({
       policyId,
     };
   });
-
-  return response;
 };
 
 const getOrCreateFleetServerAgentPolicyId = async (
@@ -609,12 +603,22 @@ const updateFleetElasticsearchOutputHostNames = async (
 };
 
 /**
- * Checks to see if the fleet server at the given URL is up and running by calling
- * the status api
- * @param serverUrl
+ * Checks to see if Fleet Server is setup with Fleet and if so, check to see if that
+ * server is up and running by calling its status api
+ * @param kbnClient
+ * @param log
  */
-export const isFleetServerRunning = async (serverUrl: string): Promise<boolean> => {
-  const url = new URL(serverUrl);
+export const isFleetServerRunning = async (
+  kbnClient: KbnClient,
+  log: ToolingLog = createToolingLogger()
+): Promise<boolean> => {
+  const fleetServerUrl = await fetchFleetServerUrl(kbnClient);
+
+  if (!fleetServerUrl) {
+    return false;
+  }
+
+  const url = new URL(fleetServerUrl);
   url.pathname = '/api/status';
 
   return axios
@@ -625,10 +629,13 @@ export const isFleetServerRunning = async (serverUrl: string): Promise<boolean> 
       // Custom agent to ensure we don't get cert errors
       httpsAgent: new https.Agent({ rejectUnauthorized: false }),
     })
-    .then(() => {
+    .then((response) => {
+      log.verbose(`Fleet server is up and running as [${fleetServerUrl}]`, response.data);
       return true;
     })
-    .catch(() => {
+    .catch(catchAxiosErrorFormatAndThrow)
+    .catch((e) => {
+      log.verbose(`Fleet server not up. Attempt to call [${url.toString()}] failed with:`, e);
       return false;
     });
 };
