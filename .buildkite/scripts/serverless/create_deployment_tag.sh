@@ -21,7 +21,10 @@ git tag -a "$DEPLOYMENT_TAG" "$KIBANA_COMMIT_SHA" \
 
 # Push the tag to GitHub
 if [[ -z "${DRY_RUN:-}" ]]; then
-  git push origin --tags
+  echo "Pushing tag to GitHub"
+  # git push origin --tags
+else
+  echo "Skipping push to GitHub due to DRY_RUN=$DRY_RUN"
 fi
 
 echo "Created deployment tag: $DEPLOYMENT_TAG"
