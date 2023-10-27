@@ -280,6 +280,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logsUIEnabled (any)',
+        'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
 
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
