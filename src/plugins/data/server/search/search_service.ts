@@ -437,11 +437,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
   };
 
-  private cancel = async (
-    deps: SearchStrategyDependencies,
-    id: string,
-    options: ISearchOptions = {}
-  ) => {
+  private cancel = (deps: SearchStrategyDependencies, id: string, options: ISearchOptions = {}) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
       throw new KbnServerError(
