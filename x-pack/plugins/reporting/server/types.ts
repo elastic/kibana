@@ -40,7 +40,6 @@ import { ExportTypesRegistry } from './lib';
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
-  getSpaceId: ReportingCore['getSpaceId'];
   getScreenshots?: ReportingCore['getScreenshots'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls

@@ -7,9 +7,9 @@
 
 import { getCanvasFeature } from './feature';
 import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
-import { CommonReportingSetup } from '@kbn/reporting-export-types-helpers-server';
+import { ReportingStart } from '@kbn/reporting-plugin/server/types';
 
-let mockReportingPlugin: CommonReportingSetup;
+let mockReportingPlugin: ReportingStart;
 beforeEach(() => {
   mockReportingPlugin = reportingMock.createStart();
 });
