@@ -1,8 +1,6 @@
 superuser:elastic_serverless
 system_indices_superuser:system_indices_superuser
 
-viewer:viewer
-editor:editor
 t1_analyst:t1_analyst
 t2_analyst:t2_analyst
 t3_analyst:t3_analyst
