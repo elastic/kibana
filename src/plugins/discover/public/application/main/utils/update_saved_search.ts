@@ -60,32 +60,17 @@ export function updateSavedSearch({
     if (state.grid) {
       savedSearch.grid = state.grid;
     }
-    if (typeof state.hideChart !== 'undefined') {
-      savedSearch.hideChart = state.hideChart;
-    }
-    if (typeof state.rowHeight !== 'undefined') {
-      savedSearch.rowHeight = state.rowHeight;
-    }
-    if (typeof state.rowsPerPage !== 'undefined') {
-      savedSearch.rowsPerPage = state.rowsPerPage;
-    }
-    if (typeof state.sampleSize !== 'undefined') {
-      savedSearch.sampleSize = state.sampleSize;
-    }
+    savedSearch.hideChart = state.hideChart;
+    savedSearch.rowHeight = state.rowHeight;
+    savedSearch.rowsPerPage = state.rowsPerPage;
+    savedSearch.sampleSize = state.sampleSize;
 
     if (state.viewMode) {
       savedSearch.viewMode = state.viewMode;
     }
 
-    if (state.breakdownField) {
-      savedSearch.breakdownField = state.breakdownField;
-    } else if (savedSearch.breakdownField) {
-      savedSearch.breakdownField = undefined;
-    }
-
-    if (state.hideAggregatedPreview) {
-      savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
-    }
+    savedSearch.breakdownField = state.breakdownField || undefined; // `undefined` instead of an empty string
+    savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
 
     // add a flag here to identify text based language queries
     // these should be filtered out from the visualize editor

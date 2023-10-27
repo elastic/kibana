@@ -251,12 +251,13 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   // at least one change in saved search attributes
   const hasChangesInSavedSearch = [...keys].some((key: string) => {
     if (
+      ['usesAdHocDataView', 'hideChart'].includes(key) &&
       // @ts-expect-error
       typeof prevSavedSearch[key] === 'undefined' &&
       // @ts-expect-error
       nextSavedSearchWithoutSearchSource[key] === false
     ) {
-      return false; // ignoring when default values are set
+      return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
     }
 
     // @ts-expect-error
