@@ -467,6 +467,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
       percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
       queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
+      queryESQL: `${ELASTICSEARCH_DOCS}esql.html`,
     },
     search: {
       sessions: `${KIBANA_DOCS}search-sessions.html`,

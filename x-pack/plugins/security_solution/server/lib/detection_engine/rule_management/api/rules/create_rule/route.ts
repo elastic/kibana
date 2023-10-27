@@ -15,7 +15,7 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -43,7 +43,7 @@ export const createRuleRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidation(CreateRuleRequestBody),
+            body: buildRouteValidationWithZod(CreateRuleRequestBody),
           },
         },
       },
@@ -109,12 +109,9 @@ export const createRuleRoute = (
             params: request.body,
           });
 
-          const [validated, errors] = transformValidate(createdRule);
-          if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
-          } else {
-            return response.ok({ body: validated });
-          }
+          return response.ok({
+            body: transformValidate(createdRule),
+          });
         } catch (err) {
           const error = transformError(err as Error);
           return siemResponse.error({
