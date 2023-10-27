@@ -146,5 +146,6 @@
     "@kbn/ecs",
     "@kbn/coloring",
     "@kbn/es",
+    "@kbn/data-view-editor-plugin",
   ]
 }
