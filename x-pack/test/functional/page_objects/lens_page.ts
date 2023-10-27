@@ -1381,16 +1381,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async createAndAddLensFromDashboard({
       title,
       redirectToOrigin,
+      indexPattern = '',
     }: {
       title?: string;
       redirectToOrigin?: boolean;
+      indexPattern?: string;
     }) {
       log.debug(`createAndAddLens${title}`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
+
       await dashboardAddPanel.clickCreateNewLink();
+
+      if (indexPattern) {
+        await this.switchDataPanelIndexPattern(indexPattern);
+      }
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
