@@ -84,7 +84,6 @@
     "@kbn/content-management-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/reporting-common",
     "@kbn/reporting-common-export-types-helpers",
   ],
   "exclude": [
