@@ -9,21 +9,18 @@ import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
-import { isEmpty } from 'lodash';
 
-export const findCaseRoute = createCasesRoute({
-  method: 'get',
-  path: `${CASES_URL}/_find`,
+export const searchCasesRoute = createCasesRoute({
+  method: 'post',
+  path: `${CASES_URL}/_search`,
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      if(!isEmpty(request.query) && request.query?.customFields) {
-        throw new Error('Custom fields are not allowed in query params.');
-      }
+      console.log('search_cases server routes POST', {request});
 
-      const options = request.query as caseApiV1.CasesFindRequest;
+      const options = request.body as caseApiV1.CasesFindRequest;
 
       const res: caseApiV1.CasesFindResponse = await casesClient.cases.find({ ...options });
 

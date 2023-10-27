@@ -16,10 +16,12 @@ import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions, constructSearch } from '../utils';
 import { Operations } from '../../authorization';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesFindQueryParams } from '../types';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { casesCustomFields } from '../../custom_fields';
+import { CustomFieldsConfiguration } from '@kbn/cases-plugin/common/types/domain';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -28,7 +30,8 @@ import { decodeOrThrow } from '../../../common/api/runtime_types';
  */
 export const find = async (
   params: CasesFindRequest,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient,
 ): Promise<CasesFindResponse> => {
   const {
     services: { caseService, licensingService },
@@ -39,13 +42,15 @@ export const find = async (
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
+    const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
+    const configurations = await casesClient.configure.get(configArgs);
 
     /**
      * Assign users to a case is only available to Platinum+
      */
 
-    if (!isEmpty(queryParams.assignees)) {
+    if (!isEmpty(paramArgs.assignees)) {
       const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 
       if (!hasPlatinumLicenseOrGreater) {
@@ -57,39 +62,65 @@ export const find = async (
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
+    /**
+     * Verify if custom field type is filterable
+     */
+    if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
+      let customFieldsConfiguration: CustomFieldsConfiguration = [];
+
+      if(configurations.length) {
+        customFieldsConfiguration = paramArgs.owner ? configurations[0].customFields : configurations.map(config => config.customFields).flat();
+      }
+
+      Object.keys(paramArgs.customFields).forEach(customFieldKey => {
+        const customFieldConfig = customFieldsConfiguration.find(item => item.key === customFieldKey);
+
+        if (customFieldConfig) {
+          const mapping = casesCustomFields.get(customFieldConfig.type);
+          
+          if(!mapping?.isFilterable) {
+            throw Boom.forbidden(
+              `Filtering by custom filed of type ${customFieldConfig.type} is not allowed.`
+            );
+          }
+        }
+      });
+    }
+
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 
-    const queryArgs: CasesFindQueryParams = {
-      tags: queryParams.tags,
-      reporters: queryParams.reporters,
-      sortField: queryParams.sortField,
-      status: queryParams.status,
-      severity: queryParams.severity,
-      owner: queryParams.owner,
-      from: queryParams.from,
-      to: queryParams.to,
-      assignees: queryParams.assignees,
-      category: queryParams.category,
+    const options: CasesFindQueryParams = {
+      tags: paramArgs.tags,
+      reporters: paramArgs.reporters,
+      sortField: paramArgs.sortField,
+      status: paramArgs.status,
+      severity: paramArgs.severity,
+      owner: paramArgs.owner,
+      from: paramArgs.from,
+      to: paramArgs.to,
+      assignees: paramArgs.assignees,
+      category: paramArgs.category,
+      customFields: paramArgs.customFields,
     };
 
     const statusStatsOptions = constructQueryOptions({
-      ...queryArgs,
+      ...options,
       status: undefined,
       authorizationFilter,
     });
 
-    const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
+    const caseQueryOptions = constructQueryOptions({ ...options, authorizationFilter });
 
-    const caseSearch = constructSearch(queryParams.search, spaceId, savedObjectsSerializer);
+    const caseSearch = constructSearch(paramArgs.search, spaceId, savedObjectsSerializer);
 
     const [cases, statusStats] = await Promise.all([
       caseService.findCasesGroupedByID({
         caseOptions: {
-          ...queryParams,
+          ...paramArgs,
           ...caseQueryOptions,
           ...caseSearch,
-          searchFields: asArray(queryParams.searchFields),
+          searchFields: asArray(paramArgs.searchFields),
         },
       }),
       caseService.getCaseStatusStats({

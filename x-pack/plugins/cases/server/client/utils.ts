@@ -336,6 +336,26 @@ export const buildAssigneesFilter = ({
   return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
 };
 
+export const buildCustomFieldsFilter = ({
+  customFields,
+}: { 
+  customFields : CasesFindQueryParams['customFields']
+}): KueryNode | undefined => {
+  if(customFields === undefined) {
+    return;
+  }
+
+  const customFieldsAsArray = Array.isArray(customFields) ? customFields : [customFields];
+
+  if (customFieldsAsArray.length === 0) {
+    return;
+  }
+
+  const customFieldsFilter = customFieldsAsArray.map((filter) => {
+    
+  })
+}
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -348,6 +368,7 @@ export const constructQueryOptions = ({
   to,
   assignees,
   category,
+  customFields,
 }: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
@@ -357,7 +378,8 @@ export const constructQueryOptions = ({
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
-  const categoryFilter = buildCategoryFilter(category);
+  const categoryFilter = buildCategoryFilter(category); 
+  const customFieldsFilter = buildCustomFieldsFilter({customFields});
 
   const filters = combineFilters([
     statusFilter,
@@ -368,6 +390,7 @@ export const constructQueryOptions = ({
     ownerFilter,
     assigneesFilter,
     categoryFilter,
+    customFieldsFilter,
   ]);
 
   return {
