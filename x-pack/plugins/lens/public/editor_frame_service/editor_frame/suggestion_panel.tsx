@@ -521,59 +521,58 @@ export function SuggestionPanel({
   };
 
   return (
-    <div className="lnsSuggestionPanel">
-      <EuiAccordion
-        id="lensSuggestionsPanel"
-        buttonProps={{ 'data-test-subj': 'lensSuggestionsPanelToggleButton' }}
-        buttonContent={
-          <EuiTitle size="xxs">
-            <h3>
-              <FormattedMessage
-                id="xpack.lens.editorFrame.suggestionPanelTitle"
-                defaultMessage="Suggestions"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        forceState={hideSuggestions ? 'closed' : 'open'}
-        onToggle={toggleSuggestions}
-        extraAction={
-          existsStagedPreview &&
-          !hideSuggestions && (
-            <EuiToolTip
-              content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
-                defaultMessage: 'Refresh the suggestions based on the selected visualization.',
-              })}
+    <EuiAccordion
+      id="lensSuggestionsPanel"
+      buttonProps={{ 'data-test-subj': 'lensSuggestionsPanelToggleButton' }}
+      className="lnsSuggestionPanel"
+      buttonContent={
+        <EuiTitle size="xxs">
+          <h3>
+            <FormattedMessage
+              id="xpack.lens.editorFrame.suggestionPanelTitle"
+              defaultMessage="Suggestions"
+            />
+          </h3>
+        </EuiTitle>
+      }
+      forceState={hideSuggestions ? 'closed' : 'open'}
+      onToggle={toggleSuggestions}
+      extraAction={
+        existsStagedPreview &&
+        !hideSuggestions && (
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+              defaultMessage: 'Refresh the suggestions based on the selected visualization.',
+            })}
+          >
+            <EuiButtonEmpty
+              data-test-subj="lensSubmitSuggestion"
+              size="xs"
+              iconType="refresh"
+              onClick={() => {
+                dispatchLens(submitSuggestion());
+              }}
             >
-              <EuiButtonEmpty
-                data-test-subj="lensSubmitSuggestion"
-                size="xs"
-                iconType="refresh"
-                onClick={() => {
-                  dispatchLens(submitSuggestion());
-                }}
-              >
-                {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
-                  defaultMessage: 'Refresh',
-                })}
-              </EuiButtonEmpty>
-            </EuiToolTip>
-          )
-        }
+              {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButtonEmpty>
+          </EuiToolTip>
+        )
+      }
+    >
+      <div
+        className="lnsSuggestionPanel__suggestions"
+        data-test-subj="lnsSuggestionsPanel"
+        role="list"
+        tabIndex={0}
+        css={css`
+          flex-wrap: ${wrapSuggestions ? 'wrap' : 'nowrap'};
+        `}
       >
-        <div
-          className="lnsSuggestionPanel__suggestions"
-          data-test-subj="lnsSuggestionsPanel"
-          role="list"
-          tabIndex={0}
-          css={css`
-            flex-wrap: ${wrapSuggestions ? 'wrap' : 'nowrap'};
-          `}
-        >
-          {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
-        </div>
-      </EuiAccordion>
-    </div>
+        {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
+      </div>
+    </EuiAccordion>
   );
 }
 

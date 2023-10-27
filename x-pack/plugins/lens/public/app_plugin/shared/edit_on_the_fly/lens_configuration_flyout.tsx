@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
+  EuiSpacer,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -317,6 +318,7 @@ export function LensEditConfigurationFlyout({
           )}
 
           <EuiFlexItem grow={isLayerAccordionOpen ? 1 : false}>
+            <EuiSpacer size="s" />
             <EuiAccordion
               id="layer-configuration"
               buttonContent={
@@ -330,12 +332,6 @@ export function LensEditConfigurationFlyout({
               }
               initialIsOpen={isLayerAccordionOpen}
               forceState={isLayerAccordionOpen ? 'open' : 'closed'}
-              css={css`
-                // styles needed to display extra drop targets that are outside of the config panel main area
-                .euiAccordion__childWrapper {
-                  overflow: visible;
-                }
-              `}
               onToggle={() => {
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
@@ -352,6 +348,7 @@ export function LensEditConfigurationFlyout({
                 setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
               />
             </EuiAccordion>
+            <EuiSpacer size="s" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={!isLayerAccordionOpen ? 1 : false}>
