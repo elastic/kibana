@@ -67,7 +67,6 @@ import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
-import { TechPreviewCallout } from './esql_tech_preview_callout';
 
 const containerStyles = css`
   position: relative;
@@ -113,7 +112,7 @@ function DiscoverDocumentsComponent({
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions, docLinks } = services;
+  const { dataViews, capabilities, uiSettings, uiActions } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index, sampleSizeState] =
     useAppStateSelector((state) => {
       return [
@@ -273,7 +272,7 @@ function DiscoverDocumentsComponent({
             data-test-subj="discoverMainError"
           />
         )}
-        <TechPreviewCallout isPlainRecord={isTextBasedQuery} docLinks={docLinks} />
+        {/* <TechPreviewCallout isPlainRecord={isTextBasedQuery} docLinks={docLinks} /> */}
         <SelectedVSAvailableCallout
           isPlainRecord={isTextBasedQuery}
           textBasedQueryColumns={documents?.textBasedQueryColumns}
@@ -291,7 +290,6 @@ function DiscoverDocumentsComponent({
     [
       dataState.error,
       isTextBasedQuery,
-      docLinks,
       documents?.textBasedQueryColumns,
       currentColumns,
       documentState.interceptedWarnings,

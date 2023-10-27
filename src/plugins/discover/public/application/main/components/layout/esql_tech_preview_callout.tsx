@@ -33,7 +33,7 @@ export const TechPreviewCallout = ({ isPlainRecord, docLinks }: SelectedVSAvaila
             title={
               <FormattedMessage
                 id="discover.textBasedMode.techPreviewCalloutMessage"
-                defaultMessage="ES|QL is currently in technical preview. Please review the {link} before proceeding."
+                defaultMessage="ES|QL is currently in technical preview. Please review the {link}."
                 values={{
                   link: (
                     <EuiLink href={docLinks.links.query.queryESQL} target="_blank">
