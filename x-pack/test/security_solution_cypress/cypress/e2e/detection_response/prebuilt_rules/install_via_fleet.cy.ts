@@ -8,14 +8,14 @@
 import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
 import type { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 
-import { resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
-import { INSTALL_ALL_RULES_BUTTON, TOASTER } from '../../../../screens/alerts_detection_rules';
-import { getRuleAssets } from '../../../../tasks/api_calls/prebuilt_rules';
-import { login } from '../../../../tasks/login';
-import { addElasticRulesButtonClick } from '../../../../tasks/prebuilt_rules';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
+import { INSTALL_ALL_RULES_BUTTON, TOASTER } from '../../../screens/alerts_detection_rules';
+import { getRuleAssets } from '../../../tasks/api_calls/prebuilt_rules';
+import { login } from '../../../tasks/login';
+import { addElasticRulesButtonClick } from '../../../tasks/prebuilt_rules';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
-describe.skip(
+describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
   { tags: ['@ess', '@serverless'] },
   () => {
@@ -27,6 +27,9 @@ describe.skip(
         cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackageBulk');
         cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*').as(
           'installPackage'
+        );
+        cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
+          'installPrebuiltRules'
         );
         visitRulesManagementTable();
       });
@@ -86,9 +89,17 @@ describe.skip(
             addElasticRulesButtonClick();
 
             cy.get(INSTALL_ALL_RULES_BUTTON).should('be.enabled').click();
-            cy.get(TOASTER)
-              .should('be.visible')
-              .should('have.text', `${numberOfRulesToInstall} rules installed successfully.`);
+            cy.wait('@installPrebuiltRules', {
+              timeout: 60000,
+            }).then(() => {
+              cy.get(TOASTER)
+                .should('be.visible')
+                .should(
+                  'have.text',
+                  // i18n uses en-US format for numbers, which uses a comma as a thousands separator
+                  `${numberOfRulesToInstall.toLocaleString('en-US')} rules installed successfully.`
+                );
+            });
           });
         };
         /* Retrieve how many rules were installed from the Fleet package */

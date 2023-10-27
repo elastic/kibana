@@ -103,8 +103,9 @@ describe(
 
     beforeEach(() => {
       deleteAlertsAndRules();
-      login();
+      deleteDataView(DATA_VIEW_ID);
 
+      login();
       postDataView(DATA_VIEW_ID);
 
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA);
@@ -125,10 +126,6 @@ describe(
         TESTED_TERMS_RULE_DATA.name,
         TESTED_CUSTOM_QUERY_RULE_DATA_2.name,
       ]);
-    });
-
-    afterEach(() => {
-      deleteDataView(DATA_VIEW_ID);
     });
 
     it('Add index patterns to custom rules with configured data view: all rules are skipped', () => {
