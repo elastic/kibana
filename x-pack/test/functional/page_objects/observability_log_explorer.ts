@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { extractTimeFields } from '@kbn/data-view-editor-plugin/public/lib';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
