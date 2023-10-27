@@ -19,18 +19,13 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import {
-  CancellationToken,
-  AuthenticationExpiredError,
-  ReportingError,
-  TaskRunResult,
-  byteSizeValueToNumber,
-} from '@kbn/reporting-common';
+import { CancellationToken, TaskRunResult, byteSizeValueToNumber } from '@kbn/reporting-common';
 import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { i18nTexts } from './i18n_texts';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { CONTENT_TYPE_CSV } from './constants';
+import { AuthenticationExpiredError, ReportingError } from './errors';
 
 interface Clients {
   es: IScopedClusterClient;
