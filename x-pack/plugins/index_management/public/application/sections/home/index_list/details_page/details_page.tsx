@@ -222,6 +222,10 @@ export const DetailsPage: FunctionComponent<
             navigateToAllIndices={navigateToAllIndices}
           />,
         ]}
+        rightSideGroupProps={{
+          wrap: false,
+        }}
+        responsive="reverse"
         tabs={headerTabs}
       />
 
