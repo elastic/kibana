@@ -19,7 +19,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the use of the of the product navigation from shared-ux package in the Security Solution app
    */
-  platformNavEnabled: false,
+  platformNavEnabled: true,
 });
 
 type ServerlessExperimentalConfigKeys = Array<keyof ServerlessExperimentalFeatures>;

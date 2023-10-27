@@ -314,7 +314,7 @@
             "label": "workplaceSearch",
             "description": [],
             "signature": [
-              "{ readonly apiKeys: string; readonly box: string; readonly confluenceCloud: string; readonly confluenceCloudConnectorPackage: string; readonly confluenceServer: string; readonly contentSources: string; readonly customConnectorPackage: string; readonly customSources: string; readonly customSourcePermissions: string; readonly documentPermissions: string; readonly dropbox: string; readonly externalSharePointOnline: string; readonly externalIdentities: string; readonly gitHub: string; readonly gettingStarted: string; readonly gmail: string; readonly googleDrive: string; readonly indexingSchedule: string; readonly jiraCloud: string; readonly jiraServer: string; readonly networkDrive: string; readonly oneDrive: string; readonly permissions: string; readonly privateSourcePermissions: string; readonly salesforce: string; readonly security: string; readonly serviceNow: string; readonly sharePoint: string; readonly sharePointServer: string; readonly slack: string; readonly synch: string; readonly zendesk: string; }"
+              "{ readonly apiKeys: string; readonly box: string; readonly confluenceCloud: string; readonly confluenceCloudConnectorPackage: string; readonly confluenceServer: string; readonly contentSources: string; readonly customConnectorPackage: string; readonly customSources: string; readonly customSourcePermissions: string; readonly documentPermissions: string; readonly dropbox: string; readonly externalSharePointOnline: string; readonly externalIdentities: string; readonly gatedFormBlog: string; readonly gitHub: string; readonly gettingStarted: string; readonly gmail: string; readonly googleDrive: string; readonly indexingSchedule: string; readonly jiraCloud: string; readonly jiraServer: string; readonly networkDrive: string; readonly oneDrive: string; readonly permissions: string; readonly privateSourcePermissions: string; readonly salesforce: string; readonly security: string; readonly serviceNow: string; readonly sharePoint: string; readonly sharePointServer: string; readonly slack: string; readonly synch: string; readonly zendesk: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -896,7 +896,7 @@
             "label": "legal",
             "description": [],
             "signature": [
-              "{ readonly privacyStatement: string; }"
+              "{ readonly privacyStatement: string; readonly generalPrivacyStatement: string; readonly termsOfService: string; readonly dataUse: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
