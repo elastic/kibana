@@ -38,6 +38,7 @@ import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connect
 import { ConnectorAdapter } from '../../../../connector_adapters/types';
 import { RuleAttributes } from '../../../../data/rule/types';
 import { SavedObject } from '@kbn/core/server';
+import { bulkEditOperationsSchema } from './schemas';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -1661,6 +1662,9 @@ describe('bulkEdit()', () => {
     });
 
     test('should skip operation when params modifiers does not modify index pattern array', async () => {
+      const originalValidate = bulkEditOperationsSchema.validate;
+      bulkEditOperationsSchema.validate = jest.fn();
+
       paramsModifier.mockResolvedValue({
         modifiedParams: {
           index: ['test-1', 'test-2'],
@@ -1670,13 +1674,7 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        operations: [
-          {
-            field: 'tags',
-            operation: 'add',
-            value: ['test-tag'],
-          },
-        ],
+        operations: [],
         paramsModifier,
       });
 
@@ -1685,6 +1683,8 @@ describe('bulkEdit()', () => {
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
+
+      bulkEditOperationsSchema.validate = originalValidate;
     });
   });
 
