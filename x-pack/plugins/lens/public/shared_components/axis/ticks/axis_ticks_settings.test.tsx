@@ -6,56 +6,41 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { AxisTicksSettings, AxisTicksSettingsProps } from './axis_ticks_settings';
+import { render, screen } from '@testing-library/react';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
+const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTicksSettingsProps>) => {
+  const rtlRender = render(
+    <AxisTicksSettings
+      isAxisLabelVisible={true}
+      axis="x"
+      updateTicksVisibilityState={jest.fn()}
+      {...propsOverrides}
+    />
+  );
   return {
-    ...original,
-    debounce: (fn: unknown) => fn,
+    tickLabelsSwitch: screen.getByLabelText('Tick labels'),
+    ...rtlRender,
   };
-});
+};
 
 describe('Axes Ticks settings', () => {
-  let props: AxisTicksSettingsProps;
-  beforeEach(() => {
-    props = {
-      isAxisLabelVisible: true,
-      axis: 'x',
-      updateTicksVisibilityState: jest.fn(),
-    };
-  });
   it('should show the ticks switch as on', () => {
-    const component = mount(<AxisTicksSettings {...props} />);
-    expect(
-      component.find('[data-test-subj="lnsshowxAxisTickLabels"]').first().prop('checked')
-    ).toBe(true);
+    const { tickLabelsSwitch } = renderAxisTicksSettings();
+    expect(tickLabelsSwitch).toBeChecked();
   });
 
   it('should show the ticks switch as off is the isAxisLabelVisible is set to false', () => {
-    const component = mount(<AxisTicksSettings {...props} isAxisLabelVisible={false} />);
-    expect(
-      component.find('[data-test-subj="lnsshowxAxisTickLabels"]').first().prop('checked')
-    ).toBe(false);
+    const { tickLabelsSwitch } = renderAxisTicksSettings({ isAxisLabelVisible: false });
+    expect(tickLabelsSwitch).not.toBeChecked();
   });
 
   it('should call the updateTicksVisibilityState when changing the switch status', () => {
     const updateTicksVisibilityStateSpy = jest.fn();
-    const component = mount(
-      <AxisTicksSettings {...props} updateTicksVisibilityState={updateTicksVisibilityStateSpy} />
-    );
-
-    // switch mode
-    act(() => {
-      component.find(EuiSwitch).first().prop('onChange')({
-        target: { checked: false },
-      } as EuiSwitchEvent);
+    const { tickLabelsSwitch } = renderAxisTicksSettings({
+      updateTicksVisibilityState: updateTicksVisibilityStateSpy,
     });
-
+    tickLabelsSwitch.click();
     expect(updateTicksVisibilityStateSpy.mock.calls.length).toBe(1);
   });
 });
