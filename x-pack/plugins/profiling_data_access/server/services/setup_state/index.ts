@@ -58,7 +58,7 @@ export async function getSetupState({
   }
 
   const setupState = await selfManagedSetupState({
-    client: profilingESClient,
+    client: kibanaInternalProfilingESClient,
     clientWithProfilingAuth: profilingESClient,
     logger,
     soClient,
