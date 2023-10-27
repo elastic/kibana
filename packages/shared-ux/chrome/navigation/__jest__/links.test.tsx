@@ -22,7 +22,7 @@ import {
   type ProjectNavigationChangeListener,
 } from './utils';
 
-describe('builds navigation tree', () => {
+describe('Links', () => {
   test('should filter out unknown deeplinks', async () => {
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
     const unknownLinkId = 'unknown';
