@@ -12,7 +12,6 @@ import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Color } from './color_palette';
 import { metricsExplorerMetricRT } from './metrics_explorer';
 import { TimeUnitChar } from '../utils/formatters/duration';
-import { SNAPSHOT_CUSTOM_AGGREGATIONS } from './constants';
 
 type DeepPartialArray<T> = Array<DeepPartial<T>>;
 
@@ -32,32 +31,6 @@ export const ThresholdFormatterTypeRT = rt.keyof({
   highPrecision: null,
 });
 export type ThresholdFormatterType = rt.TypeOf<typeof ThresholdFormatterTypeRT>;
-
-const pointRT = rt.type({
-  timestamp: rt.number,
-  value: rt.number,
-});
-
-export type Point = rt.TypeOf<typeof pointRT>;
-
-const serieRT = rt.type({
-  id: rt.string,
-  points: rt.array(pointRT),
-});
-
-const seriesRT = rt.array(serieRT);
-
-export type Series = rt.TypeOf<typeof seriesRT>;
-
-export const getLogAlertsChartPreviewDataSuccessResponsePayloadRT = rt.type({
-  data: rt.type({
-    series: seriesRT,
-  }),
-});
-
-export type GetLogAlertsChartPreviewDataSuccessResponsePayload = rt.TypeOf<
-  typeof getLogAlertsChartPreviewDataSuccessResponsePayloadRT
->;
 
 /**
  * Properties specific to the Metrics Source Configuration.
@@ -268,23 +241,3 @@ export enum InfraFormatterType {
   bits = 'bits',
   percent = 'percent',
 }
-
-export type SnapshotCustomAggregation = typeof SNAPSHOT_CUSTOM_AGGREGATIONS[number];
-const snapshotCustomAggregationKeys = SNAPSHOT_CUSTOM_AGGREGATIONS.reduce<
-  Record<SnapshotCustomAggregation, null>
->((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<SnapshotCustomAggregation, null>);
-
-export const SnapshotCustomAggregationRT = rt.keyof(snapshotCustomAggregationKeys);
-
-export const SnapshotCustomMetricInputRT = rt.intersection([
-  rt.type({
-    type: rt.literal('custom'),
-    field: rt.string,
-    aggregation: SnapshotCustomAggregationRT,
-    id: rt.string,
-  }),
-  rt.partial({
-    label: rt.string,
-  }),
-]);
-export type SnapshotCustomMetricInput = rt.TypeOf<typeof SnapshotCustomMetricInputRT>;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
 export const METRIC_EXPLORER_AGGREGATIONS = [
   'avg',
   'max',

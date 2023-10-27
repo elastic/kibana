@@ -24,15 +24,12 @@ import {
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { TimeUnitChar } from '../../../common/utils/formatters';
 import { MetricsExplorerSeries } from '../../../common/custom_threshold_rule/metrics_explorer';
 import {
-  Comparator,
   CustomMetricExpressionParams,
   MetricExpressionParams,
   MetricsSourceStatus,
   NonCountMetricExpressionParams,
-  SnapshotCustomMetricInput,
 } from '../../../common/custom_threshold_rule/types';
 import { ObservabilityPublicStart } from '../../plugin';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
@@ -161,17 +158,6 @@ export const SnapshotMetricTypeKeys = {
 export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
-export interface InventoryMetricConditions {
-  metric: SnapshotMetricType;
-  timeSize: number;
-  timeUnit: TimeUnitChar;
-  sourceId?: string;
-  threshold: number[];
-  comparator: Comparator;
-  customMetric?: SnapshotCustomMetricInput;
-  warningThreshold?: number[];
-  warningComparator?: Comparator;
-}
 
 export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
