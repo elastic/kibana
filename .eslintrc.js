@@ -928,7 +928,6 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/aiops/**/!(*.test.tsx).tsx',
         'x-pack/plugins/apm/**/!(*.test.tsx).tsx',
         'x-pack/plugins/exploratory_view/**/!(*.test.tsx).tsx',
         'x-pack/plugins/infra/**/!(*.test.tsx).tsx',
