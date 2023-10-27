@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import fs from 'fs';
 import { esArchiver } from './support/es_archiver';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,8 +18,10 @@ export default defineCypressConfig({
   responseTimeout: 60000,
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: false,
+  video: true,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
+  videoCompression: true,
+  videoCompression: 15,
   viewportHeight: 946,
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
@@ -30,6 +34,18 @@ export default defineCypressConfig({
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
+      on('after:spec', (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
+        if (results && results.video) {
+          // Do we have failures for any retry attempts?
+          const failures = results.tests.some((test) =>
+            test.attempts.some((attempt) => attempt.state === 'failed')
+          );
+          if (!failures) {
+            // delete the video if the spec passed and no tests retried
+            fs.unlinkSync(results.video);
+          }
+        }
+      });
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
