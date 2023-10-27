@@ -40,6 +40,11 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
+  beforeEach(() => {
+    cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
+    navigateTo('/app/osquery');
+  });
+
   after(() => {
     cleanupSavedQuery(savedQueryId);
   });
@@ -68,7 +73,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     let policyId: string;
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       interceptAgentPolicyId((agentPolicyId) => {
         console.log({ agentPolicyId });
         policyId = agentPolicyId;
@@ -99,7 +103,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     let policyId: string;
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
@@ -140,7 +143,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });

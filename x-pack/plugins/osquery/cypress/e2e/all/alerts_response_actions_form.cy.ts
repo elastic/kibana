@@ -20,11 +20,7 @@ import {
   RESPONSE_ACTIONS_ITEM_2,
 } from '../../tasks/response_actions';
 import { clickRuleName, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
-import {
-  closeDateTabIfVisible,
-  closeToastIfVisible,
-  waitAndClickRuleEdit,
-} from '../../tasks/integrations';
+import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
 describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
   let multiQueryPackId: string;
@@ -59,7 +55,9 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
   it('adds response actions with osquery with proper validation and form values', () => {
     cy.visit('/app/security/rules');
     clickRuleName(ruleName);
-    waitAndClickRuleEdit();
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
+    cy.getBySel('editRuleSettingsLink').click();
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
     closeDateTabIfVisible();
     cy.getBySel('edit-rule-actions-tab').click();
     cy.contains('Response actions are run on each rule execution.');
@@ -102,8 +100,9 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.contains(`${ruleName} was saved`).should('exist');
     closeToastIfVisible();
 
-    waitAndClickRuleEdit();
-
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
+    cy.getBySel('editRuleSettingsLink').click();
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.getBySel('edit-rule-actions-tab').click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('select * from uptime1');
@@ -152,7 +151,10 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.contains(`${ruleName} was saved`).should('exist');
     closeToastIfVisible();
 
-    waitAndClickRuleEdit();
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
+    cy.getBySel('editRuleSettingsLink').click();
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
+
     cy.getBySel('edit-rule-actions-tab').click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
       .within(() => {
