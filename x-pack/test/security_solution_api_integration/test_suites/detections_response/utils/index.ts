@@ -8,6 +8,9 @@ export * from './rules';
 export * from './exception_list_and_item';
 export * from './alerts';
 export * from './actions';
+export * from './get_rule_so_by_id';
+export * from './create_rule_saved_object';
+export * from './get_rule_with_legacy_investigation_fields';
 
 export * from './count_down_test';
 export * from './count_down_es';

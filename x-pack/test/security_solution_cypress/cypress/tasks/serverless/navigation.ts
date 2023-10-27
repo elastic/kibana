@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-const serverlessLocator = {
-  alerts: '[data-test-subj="solutionSideNavItemLink-alerts"]',
-};
+import { ALERTS } from '../../screens/serverless_security_header';
 
 const navigateTo = (page: string) => {
   cy.get(page).click();
 };
 
 export const navigateToAlertsPageInServerless = () => {
-  navigateTo(serverlessLocator.alerts);
+  navigateTo(ALERTS);
 };
