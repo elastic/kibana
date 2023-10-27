@@ -62,7 +62,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
   const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
 
-  const { parsedResults, link } = searchSourceRule
+  const { parsedResults, link, index } = searchSourceRule
     ? await fetchSearchSourceQuery({
         ruleId,
         alertLimit,
@@ -145,6 +145,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       baseContext: baseActiveContext,
       params,
       ...(isGroupAgg ? { group: alertId } : {}),
+      index,
     });
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
@@ -199,6 +200,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       params,
       isRecovered: true,
       ...(isGroupAgg ? { group: alertId } : {}),
+      index,
     });
     alertsClient?.setAlertData({
       id: alertId,

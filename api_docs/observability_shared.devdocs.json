@@ -1111,7 +1111,13 @@
         "description": [],
         "signature": [
           "(extraCrumbs: ",
-          "EuiBreadcrumbProps",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumb",
+            "text": "ChromeBreadcrumb"
+          },
           "[], app?: { id: string; label: string; } | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
@@ -1126,7 +1132,13 @@
             "label": "extraCrumbs",
             "description": [],
             "signature": [
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
