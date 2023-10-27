@@ -32,7 +32,6 @@ import { MANAGED_BY_FLEET } from '../../../constants';
 const { stripEmptyFields } = serializers;
 
 const getDescriptionText = (data: any) => {
-  // const hasEntries = !!data || (data && Object.entries(data).length > 0);
   const hasEntries = data && Object.entries(data).length > 0;
 
   return hasEntries ? (
@@ -55,7 +54,7 @@ interface Props {
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
   ({ dataStreams, componentTemplate }) => {
-    const { name, allow_auto_create: allowAutoCreate } = componentTemplate;
+    const { name } = componentTemplate;
 
     const serializedComponentTemplate = serializeComponentTemplate(
       stripEmptyFields(componentTemplate, {
@@ -91,17 +90,6 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                   <EuiDescriptionListDescription>{serializedVersion}</EuiDescriptionListDescription>
                 </>
               )}
-
-              {/* Allow auto create */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
-                  defaultMessage="Allow auto create"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(allowAutoCreate)}
-              </EuiDescriptionListDescription>
 
               {/* Index settings */}
               <EuiDescriptionListTitle>
