@@ -360,10 +360,16 @@ describe('Test discover state actions', () => {
     const { searchSource, ...savedSearch } = state.savedSearchState.getState();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],
+        "hideAggregatedPreview": undefined,
+        "hideChart": undefined,
         "refreshInterval": undefined,
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "sampleSize": undefined,
         "sort": Array [],
         "timeRange": undefined,
         "usesAdHocDataView": false,
