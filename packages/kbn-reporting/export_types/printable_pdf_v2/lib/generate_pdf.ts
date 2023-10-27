@@ -44,7 +44,7 @@ export function generatePdfObservable(
   const urls = locatorParams.map((locator) => [
     getFullRedirectAppUrl(config, serverInfo, job.spaceId, job.forceNow),
     locator,
-  ]) as unknown as UrlOrUrlWithContext[];
+  ]) as UrlOrUrlLocatorTuple[];
   const screenshots$ = getScreenshots({ ...options, urls }).pipe(
     tap(({ metrics }) => {
       if (metrics.cpu) {

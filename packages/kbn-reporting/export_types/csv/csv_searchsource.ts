@@ -54,7 +54,6 @@ export class CsvSearchSourceExportType extends ExportType<
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
-  declare startDeps: CsvSearchSourceExportTypeStartDeps;
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
@@ -62,7 +61,7 @@ export class CsvSearchSourceExportType extends ExportType<
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    return { ...jobParams, isDeprecated: false };
+    return { ...jobParams };
   };
 
   public runTask = async (

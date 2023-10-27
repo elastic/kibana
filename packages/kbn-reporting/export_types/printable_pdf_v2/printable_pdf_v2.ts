@@ -109,7 +109,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     const { encryptionKey } = this.config;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(async () => await decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
+      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap(async (headers: Headers) => {
         const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
@@ -117,7 +117,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       }),
       mergeMap(({ logo, headers }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
-        let urls: UrlOrUrlWithContext[];
+        let urls: UrlOrUrlLocatorTuple[];
         if (locatorParams) {
           urls = locatorParams.map((locator) => [
             getFullRedirectAppUrl(
@@ -127,12 +127,12 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
               payload.forceNow
             ),
             locator,
-          ]) as unknown as UrlOrUrlWithContext[];
+          ]) as unknown as UrlOrUrlLocatorTuple[];
         }
 
         apmGetAssets?.end();
 
-        apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
+        apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
         return generatePdfObservableV2(
           this.config,
           this.getServerInfo(),
@@ -178,7 +178,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
 
     const stop$ = fromEventPattern(cancellationToken.on);
 
-    apmTrans?.end();
+    apmTrans.end();
     return firstValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }
