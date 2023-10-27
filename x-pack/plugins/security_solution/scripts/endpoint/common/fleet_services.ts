@@ -620,26 +620,30 @@ export const enrollHostVmWithFleet = async ({
 
   log.info(`Installing Elastic Agent`);
 
-  // Mount the directory where the agent download cache is located
-  if (useAgentCache) {
-    const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
+  // For multipass, we need to place the Agent archive in the VM - either mounting local cache
+  // directory or downloading it directly from inside of the VM.
+  // For Vagrant, the archive is already in the VM - it was done during VM creation.
+  if (hostVm.type === 'multipass') {
+    if (useAgentCache) {
+      const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
 
-    log.debug(
-      `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
-    );
-    const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
+      log.debug(
+        `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
+      );
+      const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
 
-    log.debug(`Extracting download archive on host VM`);
-    await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
+      log.debug(`Extracting download archive on host VM`);
+      await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
 
-    await downloadsMount.unmount();
-  } else {
-    log.debug(`Downloading Elastic Agent to host VM`);
-    await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentDownload.filename}`);
+      await downloadsMount.unmount();
+    } else {
+      log.debug(`Downloading Elastic Agent to host VM`);
+      await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentDownload.filename}`);
 
-    log.debug(`Extracting download archive on host VM`);
-    await hostVm.exec(`tar -zxf ${agentDownload.filename}`);
-    await hostVm.exec(`rm -f ${agentDownload.filename}`);
+      log.debug(`Extracting download archive on host VM`);
+      await hostVm.exec(`tar -zxf ${agentDownload.filename}`);
+      await hostVm.exec(`rm -f ${agentDownload.filename}`);
+    }
   }
 
   const policyId = agentPolicyId || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
