@@ -137,8 +137,11 @@ export function createCreateIndexStream({
 
     if (isSavedObjectIndex(index) && !isArchiveInExceptionList) {
       throw new Error(
-        `esArchiver doesn't support modifying the existing Saved Objects index: '${index}',
-      please update its definition in mappings.json`
+        `'esArchiver' no longer supports defining saved object indices, your archive is modifying '${index}'.
+      The recommendation is to use 'kbnArchiver' to import saved objects in your tests.
+      If you absolutely need to load some non-importable SOs, please stick to the official saved object indices created by Kibana at startup.
+      You can achieve that by simply removing your saved object index definitions from 'mappings.json' (likely removing the file altogether).
+      Find more information here: https://github.com/elastic/kibana/issues/161882`
       );
     }
 
