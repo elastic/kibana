@@ -148,13 +148,14 @@ export const toExpression = (
     progressDirection: state.progressDirection as LayoutDirection,
     color: state.color || getDefaultColor(state, isMetricNumeric),
     icon: state.icon,
-    palette: state.palette?.params
-      ? [
-          paletteService
-            .get(CUSTOM_PALETTE)
-            .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
-        ]
-      : [],
+    palette:
+      isMetricNumeric && state.palette?.params
+        ? [
+            paletteService
+              .get(CUSTOM_PALETTE)
+              .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
+          ]
+        : [],
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,

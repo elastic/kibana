@@ -143,78 +143,77 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
   const defaultPrefix = columnName || '';
 
   return (
-    <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.metric.prefixText.label', {
-          defaultMessage: 'Prefix',
-        })}
-      >
-        <>
-          <EuiButtonGroup
-            isFullWidth
-            buttonSize="compressed"
-            legend={i18n.translate('xpack.lens.metric.prefix.label', {
-              defaultMessage: 'Prefix',
-            })}
-            data-test-subj="lnsMetric_prefix_buttons"
-            options={[
-              {
-                id: `${idPrefix}auto`,
-                label: i18n.translate('xpack.lens.metric.prefix.auto', {
-                  defaultMessage: 'Auto',
-                }),
-                'data-test-subj': 'lnsMetric_prefix_auto',
-                value: undefined,
-              },
-              {
-                id: `${idPrefix}custom`,
-                label: i18n.translate('xpack.lens.metric.prefix.custom', {
-                  defaultMessage: 'Custom',
-                }),
-                'data-test-subj': 'lnsMetric_prefix_custom',
-                value: defaultPrefix,
-              },
-              {
-                id: `${idPrefix}none`,
-                label: i18n.translate('xpack.lens.metric.prefix.none', {
-                  defaultMessage: 'None',
-                }),
-                'data-test-subj': 'lnsMetric_prefix_none',
-                value: '',
-              },
-            ]}
-            idSelected={`${idPrefix}${
-              state.secondaryPrefix === undefined
-                ? 'auto'
-                : state.secondaryPrefix === ''
-                ? 'none'
-                : 'custom'
-            }`}
-            onChange={(_id, secondaryPrefix) => {
+    <EuiFormRow
+      display="columnCompressed"
+      fullWidth
+      label={i18n.translate('xpack.lens.metric.prefixText.label', {
+        defaultMessage: 'Prefix',
+      })}
+    >
+      <>
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="compressed"
+          legend={i18n.translate('xpack.lens.metric.prefix.label', {
+            defaultMessage: 'Prefix',
+          })}
+          data-test-subj="lnsMetric_prefix_buttons"
+          options={[
+            {
+              id: `${idPrefix}auto`,
+              label: i18n.translate('xpack.lens.metric.prefix.auto', {
+                defaultMessage: 'Auto',
+              }),
+              'data-test-subj': 'lnsMetric_prefix_auto',
+              value: undefined,
+            },
+            {
+              id: `${idPrefix}custom`,
+              label: i18n.translate('xpack.lens.metric.prefix.custom', {
+                defaultMessage: 'Custom',
+              }),
+              'data-test-subj': 'lnsMetric_prefix_custom',
+              value: defaultPrefix,
+            },
+            {
+              id: `${idPrefix}none`,
+              label: i18n.translate('xpack.lens.metric.prefix.none', {
+                defaultMessage: 'None',
+              }),
+              'data-test-subj': 'lnsMetric_prefix_none',
+              value: '',
+            },
+          ]}
+          idSelected={`${idPrefix}${
+            state.secondaryPrefix === undefined
+              ? 'auto'
+              : state.secondaryPrefix === ''
+              ? 'none'
+              : 'custom'
+          }`}
+          onChange={(_id, secondaryPrefix) => {
+            setState({
+              ...state,
+              secondaryPrefix,
+            });
+          }}
+        />
+        <EuiSpacer size="s" />
+        {state.secondaryPrefix && (
+          <DebouncedInput
+            data-test-subj="lnsMetric_prefix_custom_input"
+            compressed
+            value={state.secondaryPrefix}
+            onChange={(newPrefix) => {
               setState({
                 ...state,
-                secondaryPrefix,
+                secondaryPrefix: newPrefix,
               });
             }}
           />
-          <EuiSpacer size="s" />
-          {state.secondaryPrefix && (
-            <DebouncedInput
-              compressed
-              value={state.secondaryPrefix}
-              onChange={(newPrefix) => {
-                setState({
-                  ...state,
-                  secondaryPrefix: newPrefix,
-                });
-              }}
-            />
-          )}
-        </>
-      </EuiFormRow>
-    </div>
+        )}
+      </>
+    </EuiFormRow>
   );
 }
 
@@ -581,7 +580,6 @@ export function DimensionEditorAdditionalSection({
             }`}
             onChange={(id) => {
               const supportingVisualizationType = id.split('--')[1] as SupportingVisType;
-
               switch (supportingVisualizationType) {
                 case 'trendline':
                   setState({
