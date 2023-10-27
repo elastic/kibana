@@ -38,12 +38,16 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       mode: 'edit',
       'data-test-subj': 'test',
       protection: 'malware',
+      selected: true,
       protectionLabel: 'Malware',
       osList: ['windows', 'mac', 'linux'],
     };
 
     render = () => {
-      renderResult = mockedContext.render(<ProtectionSettingCardSwitch {...formProps} />);
+      const selected = formProps.policy.windows[formProps.protection].mode !== ProtectionModes.off;
+      renderResult = mockedContext.render(
+        <ProtectionSettingCardSwitch {...formProps} selected={selected} />
+      );
       return renderResult;
     };
   });

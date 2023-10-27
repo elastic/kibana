@@ -55,7 +55,6 @@ export const AlertsTabContent = () => {
               pageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
               showAlertStatusWithFlapping
-              showExpandToDetails={false}
             />
           </EuiFlexItem>
         )}
