@@ -18,10 +18,16 @@ export const MessageConversion: Conversion = {
   convert(record: LogRecord) {
     // Error stack is much more useful than just the message.
     const str = record.error?.stack || record.message;
-    // We need to validate it's a string because, despite types, there are use case where it's not a string :/
 
-    return typeof str === 'string'
-      ? str.replace(CONTROL_CHAR_REGEXP, (substr) => encodeURI(substr))
+    return typeof str === 'string' // We need to validate it's a string because, despite types, there are use case where it's not a string :/
+      ? str.replace(
+          CONTROL_CHAR_REGEXP,
+          // Escaping control chars via JSON.stringify to maintain consistency with `meta` and the JSON layout.
+          // This way, post analysis of the logs is easier as we can search the same patterns.
+          // Our benchmark didn't show a big difference in performance between custom-escaping vs. JSON.stringify one.
+          // The slice is removing the double-quotes.
+          (substr) => JSON.stringify(substr).slice(1, -1)
+        )
       : str;
   },
 };
