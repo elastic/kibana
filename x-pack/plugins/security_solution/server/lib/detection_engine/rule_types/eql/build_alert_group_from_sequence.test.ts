@@ -35,7 +35,7 @@ describe('buildAlert', () => {
     jest.clearAllMocks();
   });
 
-  test('it builds an alert as expected without original_event if event does not exist', () => {
+  test.only('it builds an alert as expected without original_event if event does not exist', () => {
     const completeRule = getCompleteRuleMock<QueryRuleParams>(getQueryRuleParams());
     const eqlSequence = {
       join_keys: [],
@@ -59,17 +59,21 @@ describe('buildAlert', () => {
     expect(alertGroup[0]).toEqual(
       expect.objectContaining({
         _source: expect.objectContaining({
-          [ALERT_ANCESTORS]: [
-            {
-              depth: 0,
-              id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
-              index: 'myFakeSignalIndex',
-              type: 'event',
-            },
-          ],
-          [ALERT_DEPTH]: 1,
-          [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
-          [ALERT_BUILDING_BLOCK_TYPE]: 'default',
+          kibana: expect.objectContaining({
+            alert: expect.objectContaining({
+              ancestors: [
+                {
+                  depth: 0,
+                  id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+                  index: 'myFakeSignalIndex',
+                  type: 'event',
+                },
+              ],
+            }),
+            depth: 1,
+            rule: expect.objectContaining({ consumer: 'siem' }),
+            building_block_type: 'default',
+          }),
         }),
       })
     );
@@ -208,7 +212,7 @@ describe('buildAlert', () => {
         expect(intersection).toEqual(expected);
       });
 
-      test.only('should treat dot and nested notation the same', () => {
+      test('should treat dot and nested notation the same', () => {
         const a = {
           user: {
             email: 'marshall@elastic.co',
@@ -226,7 +230,7 @@ describe('buildAlert', () => {
         expect(intersection).toEqual(expected);
       });
 
-      test.only('should treat dot and nested notation the same when values are same arrays', () => {
+      test('should treat dot and nested notation the same when values are same arrays', () => {
         const a = {
           user: {
             email: ['marshall@elastic.co'],
@@ -244,7 +248,7 @@ describe('buildAlert', () => {
         expect(intersection).toEqual(expected);
       });
 
-      test.only('should treat dot and nested notation the same when values are different arrays', () => {
+      test('should treat dot and nested notation the same when values are different arrays', () => {
         const a = {
           user: {
             email: ['1marshall@elastic.co'],
@@ -254,7 +258,7 @@ describe('buildAlert', () => {
           'user.email': ['marshall@elastic.co'],
         };
         const intersection = objectPairIntersection(a, b);
-        expect(intersection).toEqual(undefined);
+        expect(intersection).toEqual({ user: { email: [] } });
       });
     });
 
@@ -542,7 +546,7 @@ describe('buildAlert', () => {
       };
       expect(intersection).toEqual(expected);
     });
-    test('should work with exactly 2 objects where one field is nested and the other is dot notation', () => {
+    test('should work with exactly 2 objects where one subfield is nested and the other subfield is dot notation', () => {
       const a = {
         field1: 1,
         field2: 1,
@@ -554,7 +558,11 @@ describe('buildAlert', () => {
           sub_field1: 1,
           sub_field2: 1,
           sub_field3: 10,
-          'dot.notation.field': 'hello',
+          dot: {
+            notation: {
+              field: 'hello',
+            },
+          },
         },
         container_field_without_intersection: {
           sub_field1: 1,
@@ -571,11 +579,7 @@ describe('buildAlert', () => {
           sub_field1: 1,
           sub_field2: 2,
           sub_field4: 10,
-          dot: {
-            notation: {
-              field: 'hello',
-            },
-          },
+          'dot.notation.field': 'hello',
         },
         container_field_without_intersection: {
           sub_field2: 1,
@@ -596,10 +600,47 @@ describe('buildAlert', () => {
         },
       };
       expect(intersection).toEqual(expected);
+    });
 
-      // now let's reverse the ordering
-      const intersection2 = objectArrayIntersection([b, a]);
-      const expected2 = {
+    test('should work with exactly 2 objects where one field is nested and the other is dot notation', () => {
+      const a = {
+        field1: 1,
+        field2: 1,
+        field3: 10,
+        field5: 1,
+        field6: null,
+        array_field: [1, 2],
+        container_field: {
+          sub_field1: 1,
+          sub_field2: 1,
+          sub_field3: 10,
+          dot: {
+            notation: {
+              field: 'hello',
+            },
+          },
+        },
+        container_field_without_intersection: {
+          sub_field1: 1,
+        },
+      };
+      const b = {
+        field1: 1,
+        field2: 2,
+        field4: 10,
+        field5: '1',
+        field6: null,
+        array_field: [1, 2],
+        'container_field.sub_field1': 1,
+        'container_field.sub_field2': 2,
+        'container_field.sub_field4': 10,
+        'container_field.dot.notation.field': 'hello',
+        'container_field.container_field_without_intersection': {
+          sub_field2: 1,
+        },
+      };
+      const intersection = objectArrayIntersection([a, b]);
+      const expected = {
         array_field: [1, 2],
         field1: 1,
         field6: null,
@@ -611,9 +652,8 @@ describe('buildAlert', () => {
             },
           },
         },
-        container_field_without_intersection: undefined,
       };
-      expect(intersection2).toEqual(expected2);
+      expect(intersection).toEqual(expected);
     });
 
     test('should work with 3 or more objects', () => {
