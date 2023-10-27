@@ -86,7 +86,7 @@
     "**/html-minifier/uglify-js": "^3.14.3",
     "**/isomorphic-fetch/node-fetch": "^2.6.7",
     "**/json-schema": "^0.4.0",
-    "**/pdfkit/crypto-js": "4.0.0",
+    "**/pdfkit/crypto-js": "4.2.0",
     "**/react-syntax-highlighter": "^15.3.1",
     "**/recursive-readdir/minimatch": "^3.1.2",
     "**/remark-parse/trim": "1.0.1",
