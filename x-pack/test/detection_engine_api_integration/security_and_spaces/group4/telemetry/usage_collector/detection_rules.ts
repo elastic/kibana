@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+
 import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
@@ -35,6 +36,9 @@ import {
   waitForSignalsToBePresent,
   updateRule,
   deleteAllEventLogExecutionEvents,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  createRuleThroughAlertingEndpoint,
 } from '../../../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -241,16 +245,25 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('legacy investigation fields', () => {
-        before(async () => {
-          await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
+        beforeEach(async () => {
+          await deleteAllRules(supertest, log);
+          await createRuleThroughAlertingEndpoint(
+            supertest,
+            getRuleSavedObjectWithLegacyInvestigationFields()
           );
+          await createRuleThroughAlertingEndpoint(
+            supertest,
+            getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+          );
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-with-investigation-field'),
+            name: 'Test investigation fields object',
+            investigation_fields: { field_names: ['host.name'] },
+          });
         });
 
-        after(async () => {
-          await esArchiver.unload(
-            'x-pack/test/functional/es_archives/security_solution/legacy_investigation_fields'
-          );
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
         });
 
         it('should show "legacy_investigation_fields" to be greater than 0 when a rule has "investigation_fields" set to array or empty array', async () => {

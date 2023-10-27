@@ -5596,10 +5596,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-avatar-user-profile-components@link:packages/shared-ux/avatar/user_profile/impl":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-button-exit-full-screen-mocks@link:packages/shared-ux/button/exit_full_screen/mocks":
   version "0.0.0"
   uid ""

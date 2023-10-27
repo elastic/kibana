@@ -23,6 +23,10 @@ export const SAVE_LABEL: string = i18n.translate('xpack.serverlessSearch.save', 
   defaultMessage: 'Save',
 });
 
+export const UPDATE_LABEL: string = i18n.translate('xpack.serverlessSearch.update', {
+  defaultMessage: 'Update',
+});
+
 export const BACK_LABEL: string = i18n.translate('xpack.serverlessSearch.back', {
   defaultMessage: 'Back',
 });
@@ -72,5 +76,16 @@ export const COPY_CONNECTOR_ID_LABEL = i18n.translate(
   'xpack.serverlessSearch.connectors.copyConnectorIdLabel',
   {
     defaultMessage: 'Copy connector id',
+  }
+);
+
+export const OVERVIEW_LABEL = i18n.translate('xpack.serverlessSearch.connectors.overviewLabel', {
+  defaultMessage: 'Overview',
+});
+
+export const CONFIGURATION_LABEL = i18n.translate(
+  'xpack.serverlessSearch.connectors.configurationLabel',
+  {
+    defaultMessage: 'Configuration',
   }
 );

@@ -9,7 +9,7 @@ import {
   METADATA_VERSION,
   PROFILING_READER_ROLE_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
-import { ProfilingSetupOptions } from './types';
+import { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common/setup';
 
 export async function setSecurityRole({ client }: ProfilingSetupOptions) {
   const esClient = client.getEsClient();

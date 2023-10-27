@@ -20,7 +20,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/build_api_docs.sh
-    label: 'Build API Docs'
+    label: 'Check Types and Build API Docs'
     agents:
       queue: n2-4-spot
     key: build_api_docs
@@ -63,7 +63,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
@@ -135,7 +135,7 @@ steps:
       queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 10
     retry:
       automatic:
         - exit_status: '*'
@@ -146,8 +146,8 @@ steps:
     agents:
       queue: n2-4-virt
     depends_on: build
-    timeout_in_minutes: 120
-    parallelism: 2
+    timeout_in_minutes: 60
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
@@ -158,7 +158,7 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 120
+    timeout_in_minutes: 60
     parallelism: 2
     retry:
       automatic:
@@ -170,7 +170,7 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 50
+    timeout_in_minutes: 60
     parallelism: 6
     retry:
       automatic:
@@ -182,7 +182,7 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 50
+    timeout_in_minutes: 60
     parallelism: 6
     retry:
       automatic:
@@ -227,16 +227,6 @@ steps:
     label: 'Checks'
     agents:
       queue: n2-2-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/check_types.sh
-    label: 'Check Types'
-    agents:
-      queue: n2-16-spot
     timeout_in_minutes: 60
     retry:
       automatic:
