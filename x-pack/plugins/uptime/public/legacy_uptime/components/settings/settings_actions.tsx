@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiText,
-  EuiThemeProvider,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SettingsPageFieldErrors } from '../../pages/settings';
@@ -48,23 +41,21 @@ export const SettingsActions = ({
         </WarningText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiThemeProvider colorMode="dark">
-          <EuiButtonEmpty
-            color="text"
-            size="s"
-            iconType="cross"
-            data-test-subj="discardSettingsButton"
-            isDisabled={!isFormDirty || isFormDisabled}
-            onClick={() => {
-              onCancel();
-            }}
-          >
-            <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiThemeProvider>
+        <EuiButton
+          color="text"
+          size="s"
+          iconType="cross"
+          data-test-subj="discardSettingsButton"
+          isDisabled={!isFormDirty || isFormDisabled}
+          onClick={() => {
+            onCancel();
+          }}
+        >
+          <FormattedMessage
+            id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
