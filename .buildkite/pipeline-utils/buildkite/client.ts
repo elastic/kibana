@@ -151,11 +151,16 @@ export class BuildkiteClient {
     return resp.data as Build;
   };
 
-  getBuildsAfterDate(pipelineSlug: string, date: string, numberOfBuilds: number): Promise<Build[]> {
-    return this.http.get(
+  getBuildsAfterDate = async (
+    pipelineSlug: string,
+    date: string,
+    numberOfBuilds: number
+  ): Promise<Build[]> => {
+    const response = await this.http.get(
       `v2/organizations/elastic/pipelines/${pipelineSlug}/builds?created_from=${date}&per_page=${numberOfBuilds}`
     );
-  }
+    return response.data as Build[];
+  };
 
   getCurrentBuild = (includeRetriedJobs = false) => {
     if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
