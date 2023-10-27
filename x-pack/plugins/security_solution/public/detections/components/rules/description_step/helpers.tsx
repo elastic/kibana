@@ -27,13 +27,17 @@ import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
-import type { RequiredFieldArray } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+import type {
+  RequiredFieldArray,
+  Threshold,
+  AlertSuppressionMissingFieldsStrategy,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import type { Threshold } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -49,7 +53,6 @@ import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import type { LicenseService } from '../../../../../common/license';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -619,7 +622,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
   }
 
   const description =
-    value === AlertSuppressionMissingFieldsStrategy.Suppress
+    value === AlertSuppressionMissingFieldsStrategyEnum.suppress
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
