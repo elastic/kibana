@@ -28,7 +28,7 @@ Here is what you can expect:
 * *Enrichment:* Use the enrich command to enhance your query dataset with fields from another dataset, complete with in-context suggestions for the selected policy, such as hinting the matching field and enriched columns.
 * *In-line visualization editing:* Edit {esql} visualizations directly within **Discover** and dashboards. No need to navigate to **Lens** for quick edits, so you can make changes seamlessly. 
 * *Dashboard integration:* Save your {esql} visualizations to a dashboard directly from **Discover** once you’re satisfied with the results. 
-* *Alerting:* Use {esql} for observability and security alerts, setting aggregated values as thresholds. Enhance detection accuracy and receive actionable notifications by emphasizing meaningful trends over isolated incidents, reducing false positives. 
+* *Alerting:* Use {esql} for Observability and Security alerts, setting aggregated values as thresholds. Enhance detection accuracy and receive actionable notifications by emphasizing meaningful trends over isolated incidents, reducing false positives. 
 
 {esql} in **Discover** brings efficiency and power to your data investigations, streamlining your path to insights. 
 
@@ -136,7 +136,7 @@ More importantly, in the future the new inference API will support both internal
 [discrete]
 ==== AIOps: Log rate analysis supports text fields 
 
-preview:[] Continuing enhancing log analysis capabilities with smart AIOps tools for drastically shorter MTTR, we now support detection of log rate changes that are due to text fields, for example the common **message** log field. Previously log rate change was limited to detecting spikes and dips caused by keyword fields. With the addition of text fields, we integrate pattern analysis into log rate analysis and patterns and events that were previously taking very long to detect and diagnose (or may go unnoticed for long) are now surfaced effortlessly in seconds.
+preview:[] Continuing enhancing log analysis capabilities with smart AIOps tools for drastically shorter mean time to repair. We now support detection of log rate changes that are due to text fields, for example the common **message** log field. Previously log rate change was limited to detecting spikes and dips caused by keyword fields. By adding text fields, we've incorporated pattern analysis into log rate analysis. That has significantly reduced the time it takes to detect and diagnose events that used to go unnoticed for periods of time. 
 
 [role="screenshot"]
 image::images/text-field-support.png[An example of log rate analysis supporting text fields]
