@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
       assertHas(param, testParam);
 
       await supertestAPI
-        .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}/${param.id}}`)
+        .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}/${param.id}`)
         .set('kbn-xsrf', 'true')
         .send(expectedUpdatedParam)
         .expect(200);
