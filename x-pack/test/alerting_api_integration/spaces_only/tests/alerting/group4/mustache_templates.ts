@@ -95,7 +95,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         });
 
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
-        expect(body).to.be("back'tic -- `*bold*` -- `'*bold*'` -- &lt;&amp;&gt;");
+        expect(body).to.be("back'tic -- *bold* -- '*bold*' -- &lt;&amp;&gt;");
       });
 
       it('should handle context variable object expansion', async () => {
