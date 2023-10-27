@@ -59,13 +59,7 @@ describe('Create enrich policy', () => {
     });
 
     await act(async () => {
-      testBed = await setup(httpSetup, {
-        services: {
-          httpService: {
-            httpClient: httpSetup,
-          },
-        },
-      });
+      testBed = await setup(httpSetup);
     });
 
     testBed.component.update();

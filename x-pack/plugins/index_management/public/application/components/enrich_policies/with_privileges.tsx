@@ -29,7 +29,7 @@ export const EnrichPoliciesWithPrivileges: FunctionComponent = ({
       <PageError
         title={
           <FormattedMessage
-            id="xpack.idxMgmt.home.componentTemplates.checkingPrivilegesErrorMessage"
+            id="xpack.idxMgmt.home.enrichPolicies.checkingPrivilegesErrorMessage"
             defaultMessage="Error fetching user privileges from the server."
           />
         }
@@ -57,6 +57,7 @@ export const EnrichPoliciesWithPrivileges: FunctionComponent = ({
         if (!hasPrivileges) {
           return (
             <NotAuthorizedSection
+              dataTestSubj="enrichPoliciesInsuficientPrivileges"
               title={
                 <FormattedMessage
                   id="xpack.idxMgmt.home.enrichPolicies.deniedPrivilegeTitle"
