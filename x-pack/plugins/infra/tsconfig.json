@@ -72,6 +72,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/metrics-data-access-plugin",
     "@kbn/expressions-plugin",
+    "@kbn/chart-icons",
     "@kbn/advanced-settings-plugin",
     "@kbn/cloud-plugin"
   ],
