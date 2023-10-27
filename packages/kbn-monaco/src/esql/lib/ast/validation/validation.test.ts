@@ -36,6 +36,7 @@ function getCallbackMocks() {
               name: `listField`,
               type: `list`,
             },
+            { name: '@timestamp', type: 'date' },
           ]
         : [
             { name: 'otherField', type: 'string' },
@@ -473,6 +474,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | keep s*', []);
     testErrorsAndWarnings('from index | keep s*, n*', []);
     testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
+    testErrorsAndWarnings('from index | keep *', []);
   });
 
   describe('drop', () => {
@@ -495,6 +497,20 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | drop s*', []);
     testErrorsAndWarnings('from index | drop s*, n*', []);
     testErrorsAndWarnings('from index | drop m*', ['Unknown column [m*]']);
+    testErrorsAndWarnings('from index | drop *', ['Removing all fields is not allowed [*]']);
+    testErrorsAndWarnings('from index | drop stringField, *', [
+      'Removing all fields is not allowed [*]',
+    ]);
+    testErrorsAndWarnings(
+      'from index | drop @timestamp',
+      [],
+      ['Drop [@timestamp] will remove all time filters to the search results']
+    );
+    testErrorsAndWarnings(
+      'from index | drop stringField, @timestamp',
+      [],
+      ['Drop [@timestamp] will remove all time filters to the search results']
+    );
   });
 
   describe('mv_expand', () => {
