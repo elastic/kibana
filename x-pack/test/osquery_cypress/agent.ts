@@ -17,12 +17,7 @@ export class AgentManager extends Manager {
   private fleetServerPort: string;
   private agentContainerId?: string;
 
-  constructor(
-    policyEnrollmentKey: string,
-    fleetServerPort: string,
-    log: ToolingLog,
-    kbnClient: any
-  ) {
+  constructor(policyEnrollmentKey: string, fleetServerPort: string, log: ToolingLog) {
     super();
     this.log = log;
     this.fleetServerPort = fleetServerPort;
@@ -55,7 +50,6 @@ export class AgentManager extends Manager {
     ];
 
     this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
-    console.log({ thisAgent: this.agentContainerId });
     return this.agentContainerId;
   }
 

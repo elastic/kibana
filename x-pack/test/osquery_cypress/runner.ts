@@ -50,24 +50,20 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
 
   const port = config.get('servers.fleetserver.port');
-  try {
-    await createAndEnrollAgent(policyEnrollmentKey, port, log, kbnClient);
-    await createAndEnrollAgent(policyEnrollmentKeyTwo, port, log, kbnClient);
-  } catch (error) {
-    throw new Error('WTF?', error);
-  }
+  await createAndEnrollAgent(policyEnrollmentKey, port, log, kbnClient);
+  await createAndEnrollAgent(policyEnrollmentKeyTwo, port, log, kbnClient);
 }
 
 const createAndEnrollAgent = async (enrollmentKey, port, log, kbnClient, attempt = 1) => {
   let agent;
   try {
     agent = await new AgentManager(enrollmentKey, port, log, kbnClient).setup();
-    const short = agent.substring(0, 12);
-    await waitForHostToEnroll(kbnClient, short);
+    const hostname = agent.substring(0, 12);
+    await waitForHostToEnroll(kbnClient, hostname);
   } catch (err) {
     agent.cleanup();
     if (attempt < 3) {
-      await createAndEnrollAgent(enrollmentKey, port, log, kbnClient, attempt + 1); // Recursive call with incremented attempt
+      await createAndEnrollAgent(enrollmentKey, port, log, kbnClient, attempt + 1);
     } else {
       throw new Error('Reached maximum attempts. Exiting recursion.');
     }
