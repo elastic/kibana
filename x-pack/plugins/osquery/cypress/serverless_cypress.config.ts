@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import fs from 'fs';
 import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 
 // eslint-disable-next-line import/no-default-export
@@ -21,7 +22,9 @@ export default defineCypressConfig({
   responseTimeout: 60000,
   screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: false,
+  video: true,
+  videosFolder: '../../../target/kibana-osquery/cypress/videos',
+  videoCompression: true,
   viewportHeight: 946,
   viewportWidth: 1680,
 
@@ -40,6 +43,20 @@ export default defineCypressConfig({
     numTestsKeptInMemory: 3,
     setupNodeEvents: (on, config) => {
       setupUserDataLoader(on, config, { additionalRoleName: 'viewer' });
+
+      on('after:spec', (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
+        console.log({ results });
+        if (results && results.video) {
+          // Do we have failures for any retry attempts?
+          const failures = results.tests.some((test) =>
+            test.attempts.some((attempt) => attempt.state === 'failed')
+          );
+          if (!failures) {
+            // delete the video if the spec passed and no tests retried
+            fs.unlinkSync(results.video);
+          }
+        }
+      });
 
       return config;
     },

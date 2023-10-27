@@ -88,7 +88,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('euiFlyoutCloseButton').click();
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
       cy.getBySel('saveIntegration').click();
-      cy.contains(`Successfully updated '${integrationName}'`);
+      cy.contains(`Successsfully updated '${integrationName}'`);
       policyContainsIntegration(integrationName, policyName);
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });

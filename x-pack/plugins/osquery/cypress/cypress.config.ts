@@ -36,8 +36,9 @@ export default defineCypressConfig({
 
   screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: false,
+  video: true,
   videosFolder: '../../../target/kibana-osquery/cypress/videos',
+  videoCompression: true,
   viewportHeight: 900,
   viewportWidth: 1440,
   experimentalStudio: true,
