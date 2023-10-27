@@ -9,7 +9,15 @@ import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react'
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiAccordion, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiAccordion,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  euiScrollBarStyles,
+} from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -43,7 +51,7 @@ export function LensEditConfigurationFlyout({
   displayFlyoutHeader,
   canEditTextBasedQuery,
 }: EditConfigPanelProps) {
-  const { euiTheme } = useEuiTheme();
+  const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
@@ -249,6 +257,28 @@ export function LensEditConfigurationFlyout({
         <EuiFlexGroup
           css={css`
             block-size: 100%;
+            .euiFlexItem,
+            .euiAccordion,
+            .euiAccordion__triggerWrapper,
+            .euiAccordion__childWrapper {
+              min-block-size: 0;
+            }
+            .euiAccordion {
+              display: flex;
+              flex: 1;
+              flex-direction: column;
+            }
+            .euiAccordion__childWrapper {
+              overflow-y: auto !important;
+              ${euiScrollBarStyles(euiTheme)}
+              // Using Marta's trick to force overflow-x to be visible
+              padding-left: ${euiThemeVars.euiFormMaxWidth};
+              margin-left: -${euiThemeVars.euiFormMaxWidth};
+              .euiAccordion-isOpen & {
+                block-size: auto !important;
+                flex: 1;
+              }
+            }
           `}
           direction="column"
           gutterSize="none"
@@ -287,9 +317,7 @@ export function LensEditConfigurationFlyout({
             </EuiFlexItem>
           )}
 
-          <EuiFlexItem
-            grow={isLayerAccordionOpen ? 1 : false} // todo: conditionally change false to 1 when accordion is open
-          >
+          <EuiFlexItem grow={isLayerAccordionOpen ? 1 : false}>
             <EuiAccordion
               id="layer-configuration"
               buttonContent={
@@ -304,7 +332,6 @@ export function LensEditConfigurationFlyout({
               initialIsOpen={isLayerAccordionOpen}
               forceState={isLayerAccordionOpen ? 'open' : 'closed'}
               css={css`
-                padding: ${euiTheme.size.s};
                 // styles needed to display extra drop targets that are outside of the config panel main area
                 .euiAccordion__childWrapper {
                   overflow: visible;
@@ -313,8 +340,8 @@ export function LensEditConfigurationFlyout({
               onToggle={() => {
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
+              paddingSize="none"
             >
-              {/* todo: make interior accordion contents vertically scrollable */}
               <LayerConfiguration
                 attributes={attributes}
                 coreStart={coreStart}
@@ -328,28 +355,19 @@ export function LensEditConfigurationFlyout({
             </EuiAccordion>
           </EuiFlexItem>
 
-          <EuiFlexItem
-            grow={!isLayerAccordionOpen ? 1 : false} // todo: conditionally change false to 1 when accordion is open
-          >
-            <div
-              css={css`
-                padding: ${euiTheme.size.s};
-              `}
-            >
-              {/* todo: make interior accordion contents vertically scrollable */}
-              <SuggestionPanel
-                ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
-                frame={framePublicAPI}
-                core={coreStart}
-                nowProvider={startDependencies.data.nowProvider}
-                showOnlyIcons
-                wrapSuggestions
-                isAccordionOpen={!isLayerAccordionOpen}
-                toggleAccordionCb={setIsLayerAccordionOpen}
-              />
-            </div>
+          <EuiFlexItem grow={!isLayerAccordionOpen ? 1 : false}>
+            <SuggestionPanel
+              ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              frame={framePublicAPI}
+              core={coreStart}
+              nowProvider={startDependencies.data.nowProvider}
+              showOnlyIcons
+              wrapSuggestions
+              isAccordionOpen={!isLayerAccordionOpen}
+              toggleAccordionCb={setIsLayerAccordionOpen}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </FlyoutWrapper>
