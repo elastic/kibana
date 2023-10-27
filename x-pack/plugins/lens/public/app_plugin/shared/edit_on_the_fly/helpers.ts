@@ -21,9 +21,9 @@ export const getQueryColumns = async (
   deps: LensPluginStartDependencies
 ) => {
   // Fetching only columns for ES|QL for performance reasons with limit 0
-  // Important note: The warnings are not sent for 0 limit,
-  // I have asked from ES to enable them. Until then the warnings are not being rendered
-  // If they don't do it, we will have to find another way to render them
+  // Important note: The warnings are not returned for 0 limit,
+  // I am skipping them in favor of performance now
+  // but we should think another way to get them (from Lens embeddable or store)
   const performantQuery = { ...query };
   if ('esql' in performantQuery && performantQuery.esql) {
     performantQuery.esql = `${performantQuery.esql} | limit 0`;
@@ -76,7 +76,7 @@ export const getSuggestions = async (
     const allSuggestions =
       suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
 
-    // Lens might not return suggestions for some cases, i.e. incomplete number of columns
+    // Lens might not return suggestions for some cases, i.e. in case of errors
     if (!allSuggestions.length) return undefined;
 
     const firstSuggestion = allSuggestions[0];
