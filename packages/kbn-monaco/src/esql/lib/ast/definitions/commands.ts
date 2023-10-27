@@ -7,6 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isColumnItem } from '../shared/helpers';
+import { ESQLColumn, ESQLCommand, ESQLMessage } from '../types';
 import {
   appendSeparatorOption,
   asOption,
@@ -135,6 +137,34 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
+    },
+    validate: (command: ESQLCommand) => {
+      const messages: ESQLMessage[] = [];
+      const wildcardItems = command.args.filter((arg) => isColumnItem(arg) && arg.name === '*');
+      if (wildcardItems.length) {
+        messages.push(
+          ...wildcardItems.map((column) => ({
+            location: (column as ESQLColumn).location,
+            text: i18n.translate('monaco.esql.validation.dropAllColumnsError', {
+              defaultMessage: 'Removing all fields is not allowed [*]',
+            }),
+            type: 'error' as const,
+          }))
+        );
+      }
+      const droppingTimestamp = command.args.find(
+        (arg) => isColumnItem(arg) && arg.name === '@timestamp'
+      );
+      if (droppingTimestamp) {
+        messages.push({
+          location: (droppingTimestamp as ESQLColumn).location,
+          text: i18n.translate('monaco.esql.validation.dropTimestampWarning', {
+            defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
+          }),
+          type: 'warning',
+        });
+      }
+      return messages;
     },
   },
   {

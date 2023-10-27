@@ -385,7 +385,8 @@ function validateOption(
   // use dedicate validate fn if provided
   if (optionDef.validate) {
     messages.push(...optionDef.validate(option));
-  } else {
+  }
+  if (!optionDef.skipCommonValidation) {
     option.args.forEach((arg, index) => {
       if (!Array.isArray(arg)) {
         if (!optionDef.signature.multipleParams) {
@@ -592,6 +593,10 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
   }
   // do not check the command exists, the grammar is already picking that up
   const commandDef = getCommandDefinition(command.name);
+
+  if (commandDef.validate) {
+    messages.push(...commandDef.validate(command));
+  }
 
   // Now validate arguments
   for (const commandArg of command.args) {

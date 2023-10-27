@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
+import type { ESQLCommand, ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
 
 export interface FunctionDefinition {
   name: string;
@@ -50,12 +50,14 @@ export interface CommandBaseDefinition {
 export interface CommandOptionsDefinition extends CommandBaseDefinition {
   wrapped?: string[];
   optional: boolean;
+  skipCommonValidation?: boolean;
   validate?: (option: ESQLCommandOption) => ESQLMessage[];
 }
 
 export interface CommandDefinition extends CommandBaseDefinition {
   options: CommandOptionsDefinition[];
   examples: string[];
+  validate?: (option: ESQLCommand) => ESQLMessage[];
 }
 
 export interface Literals {
