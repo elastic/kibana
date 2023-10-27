@@ -14,16 +14,7 @@
   },
   "servers": [
     {
-<<<<<<< HEAD
       "url": "/"
-=======
-      "url": "https://{kibanaUrl}",
-      "variables": {
-        "kibanaUrl": {
-          "default": "localhost:5601"
-        }
-      }
->>>>>>> d3608f10db8 ([OAS] Custom fields in case APIs (#169327))
     }
   ],
   "security": [
