@@ -21,7 +21,7 @@ const services = getServicesMock();
 export type ProjectNavigationChangeListener = (projectNavigation: ChromeProjectNavigation) => void;
 export type TestType = 'treeDef' | 'uiComponents';
 
-export const renderNavigation = async ({
+export const renderNavigation = ({
   navTreeDef,
   navigationElement,
   services: overrideServices = {},
@@ -31,7 +31,7 @@ export const renderNavigation = async ({
   navigationElement?: React.ReactElement;
   services?: Partial<NavigationServices>;
   onProjectNavigationChange?: ProjectNavigationChangeListener;
-}): Promise<RenderResult> => {
+}): RenderResult => {
   const element = navigationElement ?? <DefaultNavigation navigationTree={navTreeDef} />;
 
   const renderResult = render(
@@ -47,6 +47,14 @@ export const renderNavigation = async ({
   );
 
   return renderResult;
+};
+
+export const errorHandler = (type: TestType) => (e: Error) => {
+  const err = new Error(`Failed to run tests for ${type}.`);
+  err.stack = e.stack;
+  // eslint-disable-next-line no-console
+  console.error(err.message);
+  throw err;
 };
 
 type ArgsType<T> = T extends (...args: infer A) => any ? A : never;

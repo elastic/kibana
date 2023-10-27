@@ -18,27 +18,12 @@ import type { RootNavigationItemDefinition } from '../src/ui/types';
 import {
   getMockFn,
   renderNavigation,
-  TestType,
+  errorHandler,
+  type TestType,
   type ProjectNavigationChangeListener,
 } from './utils';
 
-const errorHandler = (type: TestType) => (e: Error) => {
-  const err = new Error(`Failed to run tests for ${type}.`);
-  err.stack = e.stack;
-  // eslint-disable-next-line no-console
-  console.error(err.message);
-  throw err;
-};
-
 describe('builds navigation tree', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   test('render reference UI and build the navigation tree', async () => {
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
@@ -67,7 +52,7 @@ describe('builds navigation tree', () => {
 
     // -- Default navigation
     {
-      const renderResult = await renderNavigation({
+      const renderResult = renderNavigation({
         navTreeDef: {
           body: [
             {
@@ -233,7 +218,7 @@ describe('builds navigation tree', () => {
 
     // -- With UI Components
     {
-      const renderResult = await renderNavigation({
+      const renderResult = renderNavigation({
         navigationElement: (
           <Navigation>
             <Navigation.Group id="group1" defaultIsCollapsed={false}>
@@ -435,7 +420,7 @@ describe('builds navigation tree', () => {
         },
       ];
 
-      const renderResult = await renderNavigation({
+      const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
         services: { navLinks$ },
         onProjectNavigationChange,
@@ -450,7 +435,7 @@ describe('builds navigation tree', () => {
 
     // -- With UI components
     {
-      await renderNavigation({
+      renderNavigation({
         navigationElement: (
           <Navigation>
             <Navigation.Group id="root">
@@ -529,7 +514,7 @@ describe('builds navigation tree', () => {
         },
       ];
 
-      const renderResult = await renderNavigation({
+      const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
         services: { navLinks$ },
         onProjectNavigationChange,
@@ -543,7 +528,7 @@ describe('builds navigation tree', () => {
 
     // -- With UI components
     {
-      const renderResult = await renderNavigation({
+      const renderResult = renderNavigation({
         navigationElement: (
           <Navigation>
             <Navigation.Group id="root" isCollapsible={false}>
@@ -603,10 +588,8 @@ describe('builds navigation tree', () => {
         },
       ];
 
-      const renderResult = await renderNavigation({
-        navTreeDef: {
-          body: navigationBody,
-        },
+      const renderResult = renderNavigation({
+        navTreeDef: { body: navigationBody },
         onProjectNavigationChange,
       });
 
@@ -618,7 +601,7 @@ describe('builds navigation tree', () => {
 
     // -- With UI Components
     {
-      await renderNavigation({
+      renderNavigation({
         navigationElement: (
           <Navigation>
             <Navigation.Group preset="analytics" />
@@ -659,10 +642,8 @@ describe('builds navigation tree', () => {
         },
       ];
 
-      const renderResult = await renderNavigation({
-        navTreeDef: {
-          body: navigationBody,
-        },
+      const renderResult = renderNavigation({
+        navTreeDef: { body: navigationBody },
         services: { recentlyAccessed$ },
       });
 
@@ -672,7 +653,7 @@ describe('builds navigation tree', () => {
 
     // -- With UI Components
     {
-      const renderResult = await renderNavigation({
+      const renderResult = renderNavigation({
         navigationElement: (
           <Navigation>
             <Navigation.Group id="root">
