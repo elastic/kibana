@@ -104,7 +104,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const query = savedSearch.searchSource.getField('query');
+    const query = savedSearch?.searchSource.getField('query');
 
     // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
     if (query && Boolean(query && 'sql' in query)) {
@@ -121,11 +121,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       throw new IncompatibleActionError();
     }
 
-    if (this.isDownloading) {
+    const savedSearch = embeddable.getSavedSearch();
+
+    if (!savedSearch || this.isDownloading) {
       return;
     }
 
-    const savedSearch = embeddable.getSavedSearch();
     const { columns, getSearchSource } = await this.getSharingData(savedSearch);
 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({

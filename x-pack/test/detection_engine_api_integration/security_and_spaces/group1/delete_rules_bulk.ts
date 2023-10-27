@@ -6,9 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -25,6 +27,9 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getLegacyActionSO,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -442,6 +447,74 @@ export default ({ getService }: FtrProviderContext): void => {
         // legacy sidecar action should be gone
         const sidecarActionsPostResults = await getLegacyActionSO(es);
         expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('DELETE - should delete a single rule with investigation field', async () => {
+        // delete the rule in bulk
+        const { body } = await supertest
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            { rule_id: 'rule-with-investigation-field' },
+            { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
+            { rule_id: ruleWithLegacyInvestigationField.params.ruleId },
+          ])
+          .expect(200);
+        const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
+        expect(investigationFields).to.eql([
+          { field_names: ['host.name'] },
+          undefined,
+          { field_names: ['client.address', 'agent.name'] },
+        ]);
+      });
+
+      it('POST - should delete a single rule with investigation field', async () => {
+        // delete the rule in bulk
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            { rule_id: 'rule-with-investigation-field' },
+            { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
+            { rule_id: ruleWithLegacyInvestigationField.params.ruleId },
+          ])
+          .expect(200);
+        const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
+        expect(investigationFields).to.eql([
+          { field_names: ['host.name'] },
+          undefined,
+          { field_names: ['client.address', 'agent.name'] },
+        ]);
       });
     });
   });
