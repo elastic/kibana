@@ -103,7 +103,7 @@ export function registerEndpointRoutes(
       withEndpointAuthz(
         { all: ['canReadSecuritySolution'] },
         logger,
-        getMetadataTransformStatsHandler(endpointAppContext, logger)
+        getMetadataTransformStatsHandler(logger)
       )
     );
 }
