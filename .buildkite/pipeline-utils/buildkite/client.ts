@@ -151,6 +151,12 @@ export class BuildkiteClient {
     return resp.data as Build;
   };
 
+  getBuildsAfterDate(pipelineSlug: string, date: string, numberOfBuilds: number): Promise<Build[]> {
+    return this.http.get(
+      `v2/organizations/elastic/pipelines/${pipelineSlug}/builds?created_from=${date}&per_page=${numberOfBuilds}`
+    );
+  }
+
   getCurrentBuild = (includeRetriedJobs = false) => {
     if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
       throw new Error(

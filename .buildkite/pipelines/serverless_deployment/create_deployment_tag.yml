@@ -3,6 +3,8 @@
 agents:
  queue: kibana-default
 
+# TODO: Replace inline buildkite-agent commands with a central script that manages contexts/banners better
+
 steps:
   - label: "Set initial banner"
     env:
@@ -12,9 +14,8 @@ steps:
       - "buildkite-agent annotate --append --context banner --style info \"<br/>Please follow the steps in the build.\""
 
   - label: "Select target commit to deploy"
-    command: ts-node .buildkite/scripts/serverless/generate_commit_selector.ts commits.json 50
+    command: ts-node .buildkite/scripts/serverless/create_deploy_tag/generate_commit_selector.ts 50
     key: select_commit
-    # will save data to the meta: `commit-sha`
 
   - wait: ~
 
@@ -26,7 +27,7 @@ steps:
       - "buildkite-agent annotate --append --context banner --style info \"<br/>:hourglass: Please wait while we're collecting info about the commit.\""
 
   - label: "Collect commit info"
-    command: .buildkite/scripts/serverless/collect_commit_info.sh
+    command: .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.sh
     key: collect_data
     depends_on: select_commit
 
@@ -45,7 +46,7 @@ steps:
   - wait: ~
 
   - label: ":ship: Create Deploy Tag"
-    command: .buildkite/scripts/serverless/create_deploy_tag.sh
+    command: .buildkite/scripts/serverless/create_deploy_tag/create_deploy_tag.sh
     env:
       DRY_RUN: $DRY_RUN
 
