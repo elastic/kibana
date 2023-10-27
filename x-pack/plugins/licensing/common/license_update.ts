@@ -17,7 +17,6 @@ import {
   takeUntil,
   finalize,
   startWith,
-  debounceTime,
 } from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import type { ILicense } from './types';
@@ -30,7 +29,7 @@ export function createLicenseUpdate(
 ) {
   const manuallyRefresh$ = new Subject<void>();
 
-  const fetched$ = merge(triggerRefresh$, manuallyRefresh$.pipe(debounceTime(1000))).pipe(
+  const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(
     takeUntil(stop$),
     exhaustMap(fetcher),
     share()
