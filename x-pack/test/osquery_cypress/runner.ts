@@ -50,25 +50,13 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
 
   const port = config.get('servers.fleetserver.port');
-  await createAndEnrollAgent(policyEnrollmentKey, port, log, kbnClient);
-  await createAndEnrollAgent(policyEnrollmentKeyTwo, port, log, kbnClient);
+  const agent = await new AgentManager(policyEnrollmentKey, port, log).setup();
+  const hostname = agent.substring(0, 12);
+  await waitForHostToEnroll(kbnClient, hostname);
+  const agentTwo = await new AgentManager(policyEnrollmentKeyTwo, port, log).setup();
+  const hostnameTwo = agentTwo.substring(0, 12);
+  await waitForHostToEnroll(kbnClient, hostnameTwo);
 }
-
-const createAndEnrollAgent = async (enrollmentKey, port, log, kbnClient, attempt = 1) => {
-  let agent;
-  try {
-    agent = await new AgentManager(enrollmentKey, port, log, kbnClient).setup();
-    const hostname = agent.substring(0, 12);
-    await waitForHostToEnroll(kbnClient, hostname);
-  } catch (err) {
-    agent.cleanup();
-    if (attempt < 3) {
-      await createAndEnrollAgent(enrollmentKey, port, log, kbnClient, attempt + 1);
-    } else {
-      throw new Error('Reached maximum attempts. Exiting recursion.');
-    }
-  }
-};
 
 export async function startOsqueryCypress(context: FtrProviderContext) {
   const config = context.getService('config');
