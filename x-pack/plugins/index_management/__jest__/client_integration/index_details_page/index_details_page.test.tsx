@@ -10,8 +10,14 @@ import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 
 import React from 'react';
-import { IndexDetailsSection } from '../../../common/constants';
+
+import {
+  IndexDetailsSection,
+  IndexDetailsTab,
+  IndexDetailsTabIds,
+} from '../../../common/constants';
 import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
+
 import {
   breadcrumbService,
   IndexManagementBreadcrumb,
@@ -843,6 +849,60 @@ describe('<IndexDetailsPage />', () => {
         `${API_BASE_PATH}/stats/${encodeURIComponent(percentSignName)}`,
         requestOptions
       );
+    });
+  });
+  describe('extension service tabs', () => {
+    const testTabId = 'testTab' as IndexDetailsTabIds;
+    const testContent = 'Test content';
+    const additionalTab: IndexDetailsTab = {
+      id: testTabId,
+      name: 'Test tab',
+      renderTabContent: () => {
+        return <span>{testContent}</span>;
+      },
+      order: 1,
+    };
+    beforeAll(async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [additionalTab],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+    });
+
+    it('renders an additional tab', async () => {
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toEqual(testContent);
+    });
+
+    it('additional tab is the first in the order', () => {
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Test tab', 'Overview', 'Mappings', 'Settings', 'Statistics']);
+    });
+
+    it('additional tab is the last in the order', async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [{ ...additionalTab, order: 100 }],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Overview', 'Mappings', 'Settings', 'Statistics', 'Test tab']);
     });
   });
 });

@@ -14,7 +14,7 @@ import {
 import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 
-import { IndexDetailsSection } from '../../../common/constants';
+import { IndexDetailsTabIds } from '../../../common/constants';
 import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
@@ -35,7 +35,8 @@ export interface IndexDetailsPageTestBed extends TestBed {
   routerMock: typeof reactRouterMock;
   actions: {
     getHeader: () => string;
-    clickIndexDetailsTab: (tab: IndexDetailsSection) => Promise<void>;
+    clickIndexDetailsTab: (tab: IndexDetailsTabIds) => Promise<void>;
+    getIndexDetailsTabs: () => string[];
     getActiveTabContent: () => string;
     mappings: {
       getCodeBlockContent: () => string;
@@ -126,11 +127,17 @@ export const setup = async ({
     return component.find('[data-test-subj="indexDetailsHeader"] h1').text();
   };
 
-  const clickIndexDetailsTab = async (tab: IndexDetailsSection) => {
+  const clickIndexDetailsTab = async (tab: IndexDetailsTabIds) => {
     await act(async () => {
       find(`indexDetailsTab-${tab}`).simulate('click');
     });
     component.update();
+  };
+
+  const getIndexDetailsTabs = () => {
+    return component
+      .find('div[role="tablist"] button[data-test-subj^="indexDetailsTab"]')
+      .map((tab) => tab.text());
   };
 
   const getActiveTabContent = () => {
@@ -315,6 +322,7 @@ export const setup = async ({
     actions: {
       getHeader,
       clickIndexDetailsTab,
+      getIndexDetailsTabs,
       getActiveTabContent,
       mappings,
       settings,

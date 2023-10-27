@@ -254,7 +254,7 @@ steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
     agents:
-      queue: n2-2-spot
+      queue: n2-4-spot
     timeout_in_minutes: 60
     retry:
       automatic:
