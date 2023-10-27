@@ -136,7 +136,8 @@ export function ObservabilityLogExplorerPageObject({
     getInstalledPackages: () => {
       return supertest
         .get(`/api/fleet/epm/packages/installed?dataStreamType=logs&perPage=1000`)
-        .set('kbn-xsrf', 'xxxx');
+        .set('kbn-xsrf', 'xxxx')
+        .set('elastic-api-version', '2023-10-31');
     },
 
     async removeInstalledPackages(): Promise<IntegrationPackage[]> {

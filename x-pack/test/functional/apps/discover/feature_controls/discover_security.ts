@@ -316,6 +316,7 @@ export default function (ctx: FtrProviderContext) {
       it(`shows the visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
         await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');

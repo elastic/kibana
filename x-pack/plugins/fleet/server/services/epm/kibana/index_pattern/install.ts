@@ -36,6 +36,7 @@ export function getFleetManagedDataViewDefinitions(): Array<
       timeFieldName: '@timestamp',
       allowNoIndex: true,
     },
+    managed: true,
   }));
 }
 

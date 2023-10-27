@@ -28,7 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
      */
     it('is displayed on a fresh install with Fleet setup executed', async () => {
       // Setup Fleet and verify the metrics index pattern was created
-      await kibanaServer.request({ path: '/api/fleet/setup', method: 'POST' });
+      await kibanaServer.request({
+        path: '/api/fleet/setup',
+        method: 'POST',
+        headers: { 'elastic-api-version': '2023-10-31' },
+      });
 
       // Reload the home screen and verify the interstitial is displayed
       await PageObjects.common.navigateToUrl('home', undefined, { disableWelcomePrompt: false });

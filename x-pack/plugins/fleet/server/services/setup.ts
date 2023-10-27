@@ -392,6 +392,8 @@ export async function ensureFleetManagedDataViews({
       existingDataView.attributes.title !== matchingDataView.attributes.title;
     const shouldUpdateName = existingDataView.attributes.name !== matchingDataView.attributes.name;
 
+    const shouldUpdateManaged = !existingDataView.managed;
+
     let updateAttributes: Partial<DataViewSavedObjectAttrs> = {};
 
     if (shouldUpdateTitle) {
@@ -401,17 +403,28 @@ export async function ensureFleetManagedDataViews({
       updateAttributes = { ...updateAttributes, name: matchingDataView.attributes.name };
     }
 
-    if (!isEmpty(updateAttributes)) {
-      logger.info(
-        `Found outdated Fleet managed data view with id: ${matchingDataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
-      );
+    if (!isEmpty(updateAttributes) || shouldUpdateManaged) {
+      if (!isEmpty(updateAttributes)) {
+        logger.info(
+          `Found outdated Fleet managed data view with id: ${matchingDataView.id}. Updating name to "${updateAttributes.name}" and title to "${updateAttributes.title}".`
+        );
+      }
+
+      if (shouldUpdateManaged) {
+        logger.info(
+          `Outdated Fleet managed data view ${matchingDataView.id} is not marked as managed. Updating.`
+        );
+      }
 
       await pRetry(
         () =>
-          savedObjectsClient.update(
+          savedObjectsClient.update<DataViewSavedObjectAttrs & { managed: boolean }>(
             KibanaSavedObjectType.indexPattern,
             matchingDataView.id,
-            updateAttributes
+            {
+              ...updateAttributes,
+              managed: shouldUpdateManaged,
+            }
           ),
         {
           retries: 3,

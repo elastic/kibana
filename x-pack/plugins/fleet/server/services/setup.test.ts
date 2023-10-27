@@ -303,12 +303,12 @@ describe('ensureFleetManagedDataViews', () => {
     expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
       'index-pattern',
       'logs-*',
-      expect.objectContaining({ name: 'logs-*' })
+      expect.objectContaining({ name: 'logs-*', managed: true })
     );
     expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
       'index-pattern',
       'metrics-*',
-      expect.objectContaining({ name: 'metrics-*' })
+      expect.objectContaining({ name: 'metrics-*', managed: true })
     );
   });
 });
