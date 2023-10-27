@@ -12,6 +12,8 @@ import * as path from 'path';
 import { getExec } from './prepared_exec';
 import { getGithubClient, BuildkiteClient, getKibanaDir } from '#pipeline-utils';
 
+const KIBANA_PR_BASE = 'https://github.com/elastic/kibana/pulls';
+
 const octokit = getGithubClient();
 
 const exec = getExec(!process.env.CI);
@@ -29,12 +31,6 @@ async function main() {
   const selectedCommitInfo = getReadableInfoOfCommit(selectedCommit);
   await addBuildkiteInfoSection(toCommitInfoHtml('Target commit:', selectedCommitInfo));
 
-  const { url: selectedBuildUrl, buildNumber: selectedBuildNumber } = await getBuildkiteBuild(
-    selectedSha
-  );
-  await addBuildkiteInfoSection(
-    `<div><a href="${selectedBuildUrl}">Buildkite build #${selectedBuildNumber} </a></div>`
-  );
   // Buildkite build info
   const buildkiteBuild = await getBuildkiteBuild(selectedSha);
   await addBuildkiteInfoSection(toBuildkiteBuildInfoHtml(buildkiteBuild));
@@ -107,12 +103,7 @@ async function getBuildkiteBuild(commitSha: string) {
   );
 
   if (!buildkiteStatus) {
-    return {
-      success: false,
-      stateEmoji: '❓',
-      url: '',
-      buildNumber: '',
-    };
+    return null;
   }
 
   const buildkiteURL = buildkiteStatus.target_url;
@@ -120,10 +111,10 @@ async function getBuildkiteBuild(commitSha: string) {
   const state = buildkiteStatus.state as 'failure' | 'pending' | 'success';
   const stateEmoji =
     {
-      failure: '❌',
-      pending: '🌕',
-      success: '✅',
-    }[state] || '❓';
+      failure: ':x:',
+      pending: ':hourglass:',
+      success: ':white_check_mark:',
+    }[state] || ':question:';
 
   return {
     success: state === 'success',
@@ -167,21 +158,29 @@ function toCommitInfoHtml(
     link: string;
   }
 ): string {
+  const titleWithLink = commitInfo.title.replace(
+    /#(\d{4,6})/,
+    `<a href="${KIBANA_PR_BASE}/$1">$&</a>`
+  );
+
   return `<div>
-<div><h3>${sectionTitle}</h3></div>
+<div><h4>${sectionTitle}</h4></div>
 <div><a href="${commitInfo.link}">${commitInfo.sha}</a> by ${commitInfo.author} on ${commitInfo.date}</div>
-<div><small>(${commitInfo.title})</small></div>
+<div><small>:merged-pr: ${titleWithLink}</small></div>
 </div>`;
 }
 
-function toBuildkiteBuildInfoHtml({
-  url,
-  stateEmoji,
-  buildNumber,
-}: Awaited<ReturnType<typeof getBuildkiteBuild>>): string {
-  return `<div>
+function toBuildkiteBuildInfoHtml(
+  buildkiteBuildInfo: Awaited<ReturnType<typeof getBuildkiteBuild>>
+): string {
+  if (buildkiteBuildInfo === null) {
+    return `<div>[:question:] Cannot find related buildkite build</div>`;
+  } else {
+    const { url, stateEmoji, buildNumber } = buildkiteBuildInfo;
+    return `<div>
 <a href="${url}">[${stateEmoji}] Buildkite build #${buildNumber}</a>
 </div>`;
+  }
 }
 
 function toSOComparisonBlockHtml(comparisonResult: {
@@ -190,10 +189,10 @@ function toSOComparisonBlockHtml(comparisonResult: {
   command: string;
 }): string {
   return `<div>
-<h3>Plugin Saved Object migration changes: ${comparisonResult.hasChanges}</h3>
+<h4>Plugin Saved Object migration changes: ${comparisonResult.hasChanges}</h4>
 <div>Changed plugins: ${comparisonResult.changed.join(', ')}</div>
 <i>Find detailed info in the archived artifacts, or run the command yourself: </i>
-<pre>${comparisonResult.command}</pre>
+<div><pre>${comparisonResult.command}</pre></div>
 </div>`;
 }
 
