@@ -13,7 +13,7 @@ import {
 } from '../../../lib';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { RouteOptions } from '../../..';
-import {
+import type {
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
   CreateRuleResponseV1,
