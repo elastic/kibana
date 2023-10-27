@@ -26,89 +26,84 @@ export const StorageDetails: FunctionComponent<{
     return null;
   }
   return (
-    <EuiFlexItem>
-      <OverviewCard
-        data-test-subj="indexDetailsStorage"
-        title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.cardTitle', {
-          defaultMessage: 'Storage',
-        })}
-        content={{
-          left: (
-            <EuiFlexGroup gutterSize="xs" alignItems="baseline">
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  css={css`
-                    font-size: ${euiThemeVars.euiFontSizeL};
-                  `}
-                >
-                  {primarySize}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTextColor color="subdued">
-                  {i18n.translate(
-                    'xpack.idxMgmt.indexDetails.overviewTab.storage.primarySizeLabel',
-                    {
-                      defaultMessage: 'Primary',
-                    }
-                  )}
-                </EuiTextColor>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          right: (
-            <EuiFlexGroup gutterSize="xs" alignItems="baseline">
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  css={css`
-                    font-size: ${euiThemeVars.euiFontSizeL};
-                  `}
-                >
-                  {size}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTextColor color="subdued">
-                  {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.totalSizeLabel', {
-                    defaultMessage: 'Total',
-                  })}
-                </EuiTextColor>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        }}
-        footer={{
-          left: (
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="shard" color="subdued" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTextColor color="subdued">
-                  {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.shardsLabel', {
-                    defaultMessage: 'Shards',
-                  })}
-                </EuiTextColor>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          right: (
-            <EuiTextColor color="subdued">
-              {i18n.translate(
-                'xpack.idxMgmt.indexDetails.overviewTab.storage.primariesReplicasLabel',
-                {
-                  defaultMessage:
-                    '{primary, plural, one {# Primary} other {# Primaries}} / {replica, plural, one {# Replica} other {# Replicas}} ',
-                  values: {
-                    primary,
-                    replica,
-                  },
-                }
-              )}
-            </EuiTextColor>
-          ),
-        }}
-      />
-    </EuiFlexItem>
+    <OverviewCard
+      data-test-subj="indexDetailsStorage"
+      title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.cardTitle', {
+        defaultMessage: 'Storage',
+      })}
+      content={{
+        left: (
+          <EuiFlexGroup gutterSize="xs" alignItems="baseline">
+            <EuiFlexItem grow={false}>
+              <EuiText
+                css={css`
+                  font-size: ${euiThemeVars.euiFontSizeL};
+                `}
+              >
+                {primarySize}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTextColor color="subdued">
+                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.primarySizeLabel', {
+                  defaultMessage: 'Primary',
+                })}
+              </EuiTextColor>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        right: (
+          <EuiFlexGroup gutterSize="xs" alignItems="baseline">
+            <EuiFlexItem grow={false}>
+              <EuiText
+                css={css`
+                  font-size: ${euiThemeVars.euiFontSizeL};
+                `}
+              >
+                {size}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTextColor color="subdued">
+                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.totalSizeLabel', {
+                  defaultMessage: 'Total',
+                })}
+              </EuiTextColor>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      }}
+      footer={{
+        left: (
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="shard" color="subdued" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTextColor color="subdued">
+                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.shardsLabel', {
+                  defaultMessage: 'Shards',
+                })}
+              </EuiTextColor>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        right: (
+          <EuiTextColor color="subdued">
+            {i18n.translate(
+              'xpack.idxMgmt.indexDetails.overviewTab.storage.primariesReplicasLabel',
+              {
+                defaultMessage:
+                  '{primary, plural, one {# Primary} other {# Primaries}} / {replica, plural, one {# Replica} other {# Replicas}} ',
+                values: {
+                  primary,
+                  replica,
+                },
+              }
+            )}
+          </EuiTextColor>
+        ),
+      }}
+    />
   );
 };

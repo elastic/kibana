@@ -77,7 +77,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   return (
     <>
-      <EuiFlexGrid columns={isLarge ? 3 : 2}>
+      <EuiFlexGrid columns={isLarge ? 3 : 1}>
         <StorageDetails size={size} primarySize={primarySize} primary={primary} replica={replica} />
 
         <StatusDetails
@@ -89,11 +89,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
         <AliasesDetails aliases={aliases} />
 
-        {dataStream && (
-          <EuiFlexItem>
-            <DataStreamDetails dataStreamName={dataStream} />
-          </EuiFlexItem>
-        )}
+        {dataStream && <DataStreamDetails dataStreamName={dataStream} />}
       </EuiFlexGrid>
 
       <EuiSpacer />

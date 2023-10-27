@@ -36,58 +36,56 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
   const aliasesBadges = aliases.slice(0, 3).map((alias) => <EuiBadge>{alias}</EuiBadge>);
   return (
     <>
-      <EuiFlexItem>
-        <OverviewCard
-          data-test-subj="indexDetailsAliases"
-          title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.aliases.cardTitle', {
-            defaultMessage: 'Aliases',
-          })}
-          content={{
-            left: (
-              <EuiFlexGroup gutterSize="xs" alignItems="baseline">
-                <EuiFlexItem grow={false}>
-                  <EuiText
-                    css={css`
-                      font-size: ${euiThemeVars.euiFontSizeL};
-                    `}
-                  >
-                    {aliases.length}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTextColor color="subdued">
-                    {i18n.translate(
-                      'xpack.idxMgmt.indexDetails.overviewTab.aliases.aliasesCountLabel',
-                      {
-                        defaultMessage: '{aliases, plural, one {Alias} other {Aliases}}',
-                        values: { aliases: aliases.length },
-                      }
-                    )}
-                  </EuiTextColor>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            right: (
-              <EuiButton
-                size="s"
-                onClick={() => {
-                  setIsShowingAliases(true);
-                }}
-              >
-                View all aliases
-              </EuiButton>
-            ),
-          }}
-          footer={{
-            left: (
-              <EuiBadgeGroup gutterSize="s">
-                {aliasesBadges}
-                {aliases.length > 3 && <EuiBadge color="hollow">+{aliases.length - 3}</EuiBadge>}
-              </EuiBadgeGroup>
-            ),
-          }}
-        />
-      </EuiFlexItem>
+      <OverviewCard
+        data-test-subj="indexDetailsAliases"
+        title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.aliases.cardTitle', {
+          defaultMessage: 'Aliases',
+        })}
+        content={{
+          left: (
+            <EuiFlexGroup gutterSize="xs" alignItems="baseline">
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  css={css`
+                    font-size: ${euiThemeVars.euiFontSizeL};
+                  `}
+                >
+                  {aliases.length}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTextColor color="subdued">
+                  {i18n.translate(
+                    'xpack.idxMgmt.indexDetails.overviewTab.aliases.aliasesCountLabel',
+                    {
+                      defaultMessage: '{aliases, plural, one {Alias} other {Aliases}}',
+                      values: { aliases: aliases.length },
+                    }
+                  )}
+                </EuiTextColor>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          right: (
+            <EuiButton
+              size="s"
+              onClick={() => {
+                setIsShowingAliases(true);
+              }}
+            >
+              View all aliases
+            </EuiButton>
+          ),
+        }}
+        footer={{
+          left: (
+            <EuiBadgeGroup gutterSize="s">
+              {aliasesBadges}
+              {aliases.length > 3 && <EuiBadge color="hollow">+{aliases.length - 3}</EuiBadge>}
+            </EuiBadgeGroup>
+          ),
+        }}
+      />
       {isShowingAliases && (
         <EuiFlyout ownFocus onClose={() => setIsShowingAliases(false)}>
           <EuiFlyoutHeader hasBorder>

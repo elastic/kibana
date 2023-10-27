@@ -30,36 +30,38 @@ export const OverviewCard: FunctionComponent<Props> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   return (
-    <EuiSplitPanel.Outer grow hasBorder={true} data-test-subj={dataTestSubj}>
-      <EuiSplitPanel.Inner>
-        <EuiTitle size="xxxs">
-          <h4>{title}</h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup
-          gutterSize="none"
-          justifyContent="spaceBetween"
-          wrap={true}
-          alignItems="center"
-          css={css`
-            min-height: ${euiThemeVars.euiButtonHeightSmall};
-          `}
-        >
-          <EuiFlexItem grow={false}>{contentLeft}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{contentRight}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
-        <EuiFlexGroup
-          gutterSize="none"
-          justifyContent="spaceBetween"
-          alignItems="center"
-          wrap={true}
-        >
-          {footerLeft && <EuiFlexItem grow={false}>{footerLeft}</EuiFlexItem>}
-          {footerRight && <EuiFlexItem grow={false}>{footerRight}</EuiFlexItem>}
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+    <EuiFlexItem>
+      <EuiSplitPanel.Outer grow hasBorder={true} data-test-subj={dataTestSubj}>
+        <EuiSplitPanel.Inner>
+          <EuiTitle size="xxxs">
+            <h4>{title}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            gutterSize="none"
+            justifyContent="spaceBetween"
+            wrap={true}
+            alignItems="center"
+            css={css`
+              min-height: ${euiThemeVars.euiButtonHeightSmall};
+            `}
+          >
+            <EuiFlexItem grow={false}>{contentLeft}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{contentRight}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={false} color="subdued">
+          <EuiFlexGroup
+            gutterSize="none"
+            justifyContent="spaceBetween"
+            alignItems="center"
+            wrap={true}
+          >
+            {footerLeft && <EuiFlexItem grow={false}>{footerLeft}</EuiFlexItem>}
+            {footerRight && <EuiFlexItem grow={false}>{footerRight}</EuiFlexItem>}
+          </EuiFlexGroup>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </EuiFlexItem>
   );
 };
