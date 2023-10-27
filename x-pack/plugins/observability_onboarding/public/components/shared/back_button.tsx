@@ -8,20 +8,14 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { useWizard } from '.';
 
 export function BackButton({ onBack }: { onBack: () => void }) {
-  const { getPath } = useWizard();
-  const history = useHistory();
-
   return (
     <EuiButtonEmpty
       data-test-subj="observabilityOnboardingBackButtonBackButton"
       iconType="arrowLeft"
       color="primary"
       onClick={onBack}
-      disabled={history.length === 1 || getPath().length === 1}
     >
       {i18n.translate('xpack.observability_onboarding.steps.back', {
         defaultMessage: 'Back',
