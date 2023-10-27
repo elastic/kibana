@@ -24,7 +24,9 @@ import {
   tlog,
   createTaskMetric,
   formatValueListMetaData,
+  createUsageCounterLabel,
 } from '../helpers';
+import { usageLabelPrefix } from '../sender';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -43,10 +45,14 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const usageCollector = sender.getTelemetryUsageCluster();
+
       const startTime = Date.now();
       const taskName = 'Security Solution Lists Telemetry';
       try {
-        let count = 0;
+        let trustedApplicationsCount = 0;
+        let endpointExceptionsCount = 0;
+        let endpointEventFiltersCount = 0;
 
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
@@ -73,7 +79,13 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_TRUSTED_APPLICATION
           );
           tlog(logger, `Trusted Apps: ${trustedAppsJson}`);
-          count += trustedAppsJson.length;
+          trustedApplicationsCount = trustedAppsJson.length;
+
+          usageCollector?.incrementCounter({
+            counterName: createUsageCounterLabel(usageLabelPrefix.concat(['security_lists'])),
+            counterType: 'trusted_apps_count',
+            incrementBy: trustedApplicationsCount,
+          });
 
           const batches = batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch);
           for (const batch of batches) {
@@ -92,7 +104,13 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_ENDPOINT_EXCEPTION
           );
           tlog(logger, `EP Exceptions: ${epExceptionsJson}`);
-          count += epExceptionsJson.length;
+          endpointExceptionsCount = epExceptionsJson.length;
+
+          usageCollector?.incrementCounter({
+            counterName: createUsageCounterLabel(usageLabelPrefix.concat(['security_lists'])),
+            counterType: 'endpoint_exceptions_count',
+            incrementBy: endpointExceptionsCount,
+          });
 
           const batches = batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch);
           for (const batch of batches) {
@@ -111,7 +129,13 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_ENDPOINT_EVENT_FILTER
           );
           tlog(logger, `EP Event Filters: ${epFiltersJson}`);
-          count += epFiltersJson.length;
+          endpointEventFiltersCount = epFiltersJson.length;
+
+          usageCollector?.incrementCounter({
+            counterName: createUsageCounterLabel(usageLabelPrefix.concat(['security_lists'])),
+            counterType: 'endpoint_event_filters_count',
+            incrementBy: endpointEventFiltersCount,
+          });
 
           const batches = batchTelemetryRecords(epFiltersJson, maxTelemetryBatch);
           for (const batch of batches) {
@@ -135,7 +159,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return count;
+        return trustedApplicationsCount + endpointExceptionsCount + endpointEventFiltersCount;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),

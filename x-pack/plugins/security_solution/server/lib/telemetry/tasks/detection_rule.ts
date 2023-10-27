@@ -11,7 +11,14 @@ import {
   TELEMETRY_CHANNEL_LISTS,
   TASK_METRICS_CHANNEL,
 } from '../constants';
-import { batchTelemetryRecords, templateExceptionList, tlog, createTaskMetric } from '../helpers';
+import {
+  batchTelemetryRecords,
+  templateExceptionList,
+  tlog,
+  createTaskMetric,
+  createUsageCounterLabel,
+} from '../helpers';
+import { usageLabelPrefix } from '../sender';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
@@ -21,7 +28,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
   return {
     type: 'security:telemetry-detection-rules',
     title: 'Security Solution Detection Rule Lists Telemetry',
-    interval: '24h',
+    interval: '2m',
     timeout: '10m',
     version: '1.0.0',
     runTask: async (
@@ -31,9 +38,13 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const usageCollector = sender.getTelemetryUsageCluster();
+
       const startTime = Date.now();
       const taskName = 'Security Solution Detection Rule Lists Telemetry';
       try {
+        let detectionRuleCount = 0;
+
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
           receiver.fetchLicenseInfo(),
@@ -98,6 +109,14 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           LIST_DETECTION_RULE_EXCEPTION
         );
         tlog(logger, `Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
+
+        detectionRuleCount = detectionRuleExceptionsJson.length;
+        usageCollector?.incrementCounter({
+          counterName: createUsageCounterLabel(usageLabelPrefix.concat(['detection_rule'])),
+          counterType: 'detection_rule_count',
+          incrementBy: detectionRuleCount,
+        });
+
         const batches = batchTelemetryRecords(detectionRuleExceptionsJson, maxTelemetryBatch);
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
@@ -105,7 +124,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return detectionRuleExceptions.length;
+        return detectionRuleCount;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
