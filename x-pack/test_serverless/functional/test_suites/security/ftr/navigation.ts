@@ -6,19 +6,25 @@
  */
 
 import expect from '@kbn/expect';
+import { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlSecLandingPage = getPageObject('svlSecLandingPage');
   const svlSecNavigation = getService('svlSecNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165629
-  describe.skip('navigation', function () {
+  describe('navigation', function () {
     before(async () => {
+      await svlCommonPage.login();
       await svlSecNavigation.navigateToLandingPage();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
     });
 
     it('has security serverless side nav', async () => {
@@ -30,7 +36,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectExists();
       // TODO: use `deepLinkId` instead of `text`, once security deep links are available in @kbn/core-chrome-browser
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
-      await testSubjects.click('solutionSideNavItemLink-alerts');
+      await svlCommonNavigation.sidenav.clickLink({
+        deepLinkId: 'securitySolutionUI:alerts' as AppDeepLinkId,
+      });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Alerts' });
       await svlCommonNavigation.breadcrumbs.clickHome();
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
@@ -38,8 +46,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
-      await svlCommonNavigation.search.searchFor('dashboards');
-      await svlCommonNavigation.search.clickOnOption(1);
+      await svlCommonNavigation.search.searchFor('security dashboards');
+      await svlCommonNavigation.search.clickOnOption(0);
       await svlCommonNavigation.search.hideSearch();
 
       await expect(await browser.getCurrentUrl()).contain('app/security/dashboards');
@@ -49,11 +57,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlSecLandingPage.assertSvlSecSideNavExists();
       await svlCommonNavigation.expectExists();
 
-      expect(await testSubjects.existOrFail('solutionSideNavItemLink-cases'));
+      await svlCommonNavigation.sidenav.expectLinkExists({
+        deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId,
+      });
     });
 
     it('navigates to cases app', async () => {
-      await testSubjects.click('solutionSideNavItemLink-cases');
+      await svlCommonNavigation.sidenav.clickLink({
+        deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId,
+      });
 
       expect(await browser.getCurrentUrl()).contain('/app/security/cases');
       await testSubjects.existOrFail('cases-all-title');

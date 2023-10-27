@@ -25,7 +25,6 @@ export {
   PageLoading,
   PageError,
   SectionLoading,
-  EuiCodeEditor,
 } from '@kbn/es-ui-shared-plugin/public';
 
 export type {

@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CreateExceptionListSchema,
@@ -23,6 +24,9 @@ import {
   deleteAllRules,
   createExceptionList,
   deleteAllAlerts,
+  getRuleSOById,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
 } from '../../../utils';
 import {
   deleteAllExceptions,
@@ -245,6 +249,51 @@ export default ({ getService }: FtrProviderContext) => {
         message:
           'Unable to add exception to rule - rule with id:"4656dc92-5832-11ea-8e2d-0242ac130003" not found',
         status_code: 500,
+      });
+    });
+
+    // TODO: When available this tag should be @skipInServerless
+    // This use case is not relevant to serverless.
+    describe('@brokenInServerless legacy investigation_fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('creates and associates a `rule_default` exception list to a rule with a legacy investigation_field', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/${ruleWithLegacyInvestigationField.id}/exceptions`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            items: [getRuleExceptionItemMock()],
+          })
+          .expect(200);
+
+        /**
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change will
+         * NOT include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
+        expect(
+          ruleSO?.alert.params.exceptionsList.some((list) => list.type === 'rule_default')
+        ).to.eql(true);
+        expect(ruleSO?.alert.params.investigationFields).to.eql(['client.address', 'agent.name']);
       });
     });
   });
