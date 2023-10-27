@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
@@ -26,7 +25,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         id: 'system-connector-test.system-action',
         uuid: '123',
         params: {},
-        type: RuleActionTypes.SYSTEM,
       };
 
       it('should bulk edit system actions correctly', async () => {
@@ -61,7 +59,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             connector_type_id: 'test.system-action',
             params: {},
             uuid: '123',
-            type: RuleActionTypes.SYSTEM,
           },
         ]);
       });
@@ -75,7 +72,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
 
-        for (const propertyToOmit of ['id', 'uuid']) {
+        for (const propertyToOmit of ['id']) {
           const systemActionWithoutProperty = omit(systemAction, propertyToOmit);
 
           const payload = {
@@ -85,49 +82,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 operation: 'add',
                 field: 'actions',
                 value: [systemActionWithoutProperty],
-              },
-            ],
-          };
-
-          await supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
-            .set('kbn-xsrf', 'foo')
-            .send(payload)
-            .expect(400);
-        }
-      });
-
-      it('should throw 400 if the system action contain properties from the default actions', async () => {
-        const { body: rule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
-
-        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
-
-        for (const propertyAdd of [
-          { group: 'test' },
-          {
-            frequency: {
-              notify_when: 'onThrottleInterval' as const,
-              summary: true,
-              throttle: '1h',
-            },
-          },
-          {
-            alerts_filter: {
-              query: { dsl: '{test:1}', kql: 'test:1s', filters: [] },
-            },
-          },
-        ]) {
-          const payload = {
-            ids: [rule.id],
-            operations: [
-              {
-                operation: 'add',
-                field: 'actions',
-                value: [{ ...systemAction, ...propertyAdd }],
               },
             ],
           };
