@@ -511,7 +511,7 @@ function augmentActionGroupsWithReserved<
 
   return {
     ...ruleType,
-    ...(config.rules.overwriteProducer ? { producer: config.rules.overwriteProducer } : {}),
+    ...(config?.rules?.overwriteProducer ? { producer: config.rules.overwriteProducer } : {}),
     actionGroups: [...actionGroups, ...reservedActionGroups],
     recoveryActionGroup: recoveryActionGroup ?? RecoveredActionGroup,
     validLegacyConsumers: getRuleTypeIdValidLegacyConsumers(id),
