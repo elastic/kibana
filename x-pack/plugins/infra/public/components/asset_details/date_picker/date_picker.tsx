@@ -108,11 +108,11 @@ export const DatePicker = () => {
           commonlyUsedRanges={COMMONLY_USED_RANGES}
           start={dateRange.from}
           end={dateRange.to}
-          isPaused={autoRefresh && autoRefresh.isPaused}
+          isPaused={autoRefresh?.isPaused}
           onTimeChange={handleTimeChange}
           onRefresh={autoRefresh && handleRefresh}
           onRefreshChange={autoRefresh && handleAutoRefreshChange}
-          refreshInterval={autoRefresh && autoRefresh.interval}
+          refreshInterval={autoRefresh?.interval}
           onClick={handleOnClick}
           width="full"
         />
