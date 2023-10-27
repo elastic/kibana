@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ExportType } from '@kbn/reporting-common-export-types-helpers';
+import { ExportType } from '@kbn/reporting-export-types-helpers-server';
 import { KibanaShuttingDownError } from '../../../common/errors/errors';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

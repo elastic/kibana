@@ -42,7 +42,7 @@ import {
   ExportType,
   getFullRedirectAppUrl,
   generatePngObservable,
-} from '@kbn/reporting-common-export-types-helpers';
+} from '@kbn/reporting-export-types-helpers-server';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {

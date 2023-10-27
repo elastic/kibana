@@ -13,7 +13,7 @@ import { createMockConfigSchema, createMockReportingCore } from '../../../test_h
 import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
 import { RequestHandler } from './request_handler';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated/printable_pdf';
-import { CommonReportingSetup, TaskPayloadPDFV2 } from '@kbn/reporting-common-export-types-helpers';
+import { CommonReportingSetup, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-helpers-server';
 
 jest.mock(
   'puid',
@@ -25,7 +25,7 @@ jest.mock(
     }
 );
 
-jest.mock('@kbn/reporting-common-export-types-helpers/crypto', () => ({
+jest.mock('@kbn/reporting-export-types-helpers-server/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),

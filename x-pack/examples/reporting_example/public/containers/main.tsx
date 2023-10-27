@@ -37,7 +37,7 @@ import type { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png';
 import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated';
 import type { LocatorParams } from '@kbn/reporting-common/url';
-import type { JobParamsPDFV2 } from '@kbn/reporting-common-export-types-helpers';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-helpers-server';
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';

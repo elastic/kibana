@@ -1,6 +1,6 @@
 {
     "type": "shared-server",
-    "id": "@kbn/reporting-common-export-types-helpers",
+    "id": "@kbn/reporting-export-types-helpers-server",
     "owner": "@elastic/appex-sharedux",
     "plugin": {
       "server": true,

@@ -27,8 +27,8 @@ import type {
   BaseExportTypeStartDeps,
   ReportingRequestHandlerContext,
   JobParamsDownloadCSV,
-} from '@kbn/reporting-common-export-types-helpers';
-import { getFieldFormats, ExportType } from '@kbn/reporting-common-export-types-helpers';
+} from '@kbn/reporting-export-types-helpers-server';
+import { getFieldFormats, ExportType } from '@kbn/reporting-export-types-helpers-server';
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceImmediateExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;

@@ -35,7 +35,6 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 import {
   generatePdfObservableV2,
   decryptJobHeaders,
@@ -44,7 +43,7 @@ import {
   ExportType,
   JobParamsPDFV2,
   TaskPayloadPDFV2,
-} from '@kbn/reporting-common-export-types-helpers';
+} from '@kbn/reporting-export-types-helpers-server';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;

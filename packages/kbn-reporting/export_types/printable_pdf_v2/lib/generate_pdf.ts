@@ -14,10 +14,9 @@ import {
   getTracker,
   ReportingServerInfo,
   TaskPayloadPDFV2,
-} from '@kbn/reporting-common-export-types-helpers';
+} from '@kbn/reporting-export-types-helpers-server';
 import type { LocatorParams, ReportingConfigType } from '@kbn/reporting-common';
 import { PdfMetrics } from '@kbn/reporting-common/metrics';
-import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 interface PdfResult {
   buffer: Uint8Array | null;

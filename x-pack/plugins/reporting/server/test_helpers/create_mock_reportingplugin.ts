@@ -21,7 +21,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { setFieldFormats } from '@kbn/reporting-common-export-types-helpers';
+import { setFieldFormats } from '@kbn/reporting-export-types-helpers-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

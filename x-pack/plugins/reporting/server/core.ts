@@ -40,7 +40,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
-import { ExportType, ReportingServerInfo } from '@kbn/reporting-common-export-types-helpers';
+import { ExportType, ReportingServerInfo } from '@kbn/reporting-export-types-helpers-server';
 import {
   CsvV2ExportType,
   CsvSearchSourceImmediateExportType,

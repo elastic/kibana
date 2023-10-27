@@ -12,7 +12,7 @@ import type {
   BaseParamsV2,
   BasePayload,
   BasePayloadV2,
-} from '@kbn/reporting-common-export-types-helpers';
+} from '@kbn/reporting-export-types-helpers-server';
 
 interface BaseParamsCSV {
   searchSource: SerializedSearchSourceFields;

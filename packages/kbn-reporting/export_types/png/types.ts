@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { BaseParams, BasePayload } from '@kbn/reporting-common-export-types-helpers';
+import type { BaseParams, BasePayload } from '@kbn/reporting-export-types-helpers-server';
 import type { LocatorParams } from '@kbn/reporting-common/url';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 

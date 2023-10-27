@@ -7,7 +7,7 @@
 
 import { ResponseHeaders } from '@kbn/core-http-server';
 import { CSV_JOB_TYPE } from '@kbn/reporting-common';
-import { ExportType } from '@kbn/reporting-common-export-types-helpers';
+import { ExportType } from '@kbn/reporting-export-types-helpers-server';
 import { Stream } from 'stream';
 import { ReportingCore } from '../../..';
 import { CSV_JOB_TYPE_DEPRECATED } from '../../../../common/constants';

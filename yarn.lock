@@ -5248,10 +5248,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-common-export-types-helpers@link:packages/kbn-reporting/export_types_helpers":
-  version "0.0.0"
-  uid ""
-
 "@kbn/reporting-common@link:packages/kbn-reporting/common":
   version "0.0.0"
   uid ""
@@ -5265,6 +5261,10 @@
   uid ""
 
 "@kbn/reporting-export-types-deprecated@link:packages/kbn-reporting/export_types/deprecated":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-export-types-helpers-server@link:packages/kbn-reporting/export_types_helpers_server":
   version "0.0.0"
   uid ""
 

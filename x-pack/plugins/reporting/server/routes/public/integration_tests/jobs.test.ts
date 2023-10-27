@@ -19,7 +19,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../../..';
 import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
-import { ExportType } from '@kbn/reporting-common-export-types-helpers';
+import { ExportType } from '@kbn/reporting-export-types-helpers-server';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
 import { reportingMock } from '../../../mocks';
 import {

@@ -27,7 +27,7 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerGenerationRoutesPublic } from '../generate_from_jobparams';
-import { CommonReportingSetup } from '@kbn/reporting-common-export-types-helpers';
+import { CommonReportingSetup } from '@kbn/reporting-export-types-helpers-server';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

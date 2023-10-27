@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JobParamsDownloadCSV } from '@kbn/reporting-common-export-types-helpers';
+import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-helpers-server';
 import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated';
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv';

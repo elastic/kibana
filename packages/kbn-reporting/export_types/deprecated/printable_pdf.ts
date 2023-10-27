@@ -34,7 +34,7 @@ import {
   validateUrls,
   BaseParams,
   TaskPayloadPDF,
-} from '@kbn/reporting-common-export-types-helpers';
+} from '@kbn/reporting-export-types-helpers-server';
 
 interface BaseParamsPDF {
   layout: LayoutParams;

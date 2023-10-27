@@ -29,7 +29,7 @@ import {
   ExportType,
   getFieldFormats,
   ReportingRequestHandlerContext,
-} from '@kbn/reporting-common-export-types-helpers';
+} from '@kbn/reporting-export-types-helpers-server';
 import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from './types';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { JobParamsDownloadCSV } from '@kbn/reporting-common-export-types-helpers';
+import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-helpers-server';
 import supertest from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
 

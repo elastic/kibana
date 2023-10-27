@@ -12,13 +12,13 @@ import {
   generatePdfObservable,
   cryptoFactory,
   TaskPayloadPDF,
-} from '@kbn/reporting-common-export-types-helpers';
+} from '@kbn/reporting-export-types-helpers-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { createMockConfigSchema } from '../../test_helpers';
 import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
 import { of } from 'rxjs';
 
-jest.mock('@kbn/reporting-common-export-types-helpers/generate_pdf');
+jest.mock('@kbn/reporting-export-types-helpers-server/generate_pdf');
 
 let content: string;
 let mockPdfExportType: PdfV1ExportType;
