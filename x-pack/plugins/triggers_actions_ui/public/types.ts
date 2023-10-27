@@ -547,7 +547,6 @@ export type AlertsTableProps = {
   pageSizeOptions: number[];
   id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
-  showExpandToDetails: boolean;
   showAlertStatusWithFlapping?: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;

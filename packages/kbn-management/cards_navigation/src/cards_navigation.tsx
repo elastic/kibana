@@ -184,7 +184,7 @@ export const CardsNavigation = ({
                 <EuiCard
                   data-test-subj={`app-card-${app.id}`}
                   layout="horizontal"
-                  icon={<EuiIcon type={app.icon} size={'l'} />}
+                  icon={<EuiIcon type={app.icon} size="l" color="darkShade" />}
                   titleSize="xs"
                   title={app.title}
                   description={app.description}
