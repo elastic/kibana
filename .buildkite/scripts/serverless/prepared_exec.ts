@@ -54,7 +54,7 @@ const mockExec = (id: string) => {
   console.warn("--- Using mock exec, don't use this on CI. ---");
   const calls = callStorage[id];
 
-  const mockExecInstance = (command: string, opts: ExecSyncOptions = {}) => {
+  const mockExecInstance = (command: string, opts: ExecSyncOptions = {}): string => {
     const responses = loadFakeResponses();
     calls.push({ command, opts });
 
