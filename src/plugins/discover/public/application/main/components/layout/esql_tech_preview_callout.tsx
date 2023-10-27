@@ -11,48 +11,45 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 
-const ESQL_TECH_PREVIEW_CALLOUT = 'ESQL_TECH_PREVIEW_CALLOUT_HIDDEN';
+const ESQL_TECH_PREVIEW_CALLOUT = 'discover.esqlTechPreviewCalloutHidden';
 
-interface SelectedVSAvailableCallout {
-  isPlainRecord: boolean;
+interface ESQLTechPreviewCallout {
   docLinks: DocLinksStart;
 }
 
-export const TechPreviewCallout = ({ isPlainRecord, docLinks }: SelectedVSAvailableCallout) => {
+export const ESQLTechPreviewCallout = ({ docLinks }: ESQLTechPreviewCallout) => {
   const [hideCallout, setHideCallout] = useLocalStorage(ESQL_TECH_PREVIEW_CALLOUT, false);
 
   const onDismiss = useCallback(() => {
-    setHideCallout(!hideCallout);
-  }, [hideCallout, setHideCallout]);
+    setHideCallout(true);
+  }, [setHideCallout]);
+
+  if (hideCallout) {
+    return null;
+  }
 
   return (
-    <>
-      {isPlainRecord && !hideCallout && (
-        <>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="discover.textBasedMode.techPreviewCalloutMessage"
-                defaultMessage="ES|QL is currently in technical preview. Find more information in the {link}."
-                values={{
-                  link: (
-                    <EuiLink href={docLinks.links.query.queryESQL} target="_blank">
-                      <FormattedMessage
-                        id="discover.textBasedMode.techPreviewCalloutLink"
-                        defaultMessage="documentation"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
-            color="primary"
-            iconType="beaker"
-            onDismiss={onDismiss}
-            size="s"
-          />
-        </>
-      )}
-    </>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="discover.textBasedMode.techPreviewCalloutMessage"
+          defaultMessage="ES|QL is currently in technical preview. Find more information in the {link}."
+          values={{
+            link: (
+              <EuiLink href={docLinks.links.query.queryESQL} target="_blank">
+                <FormattedMessage
+                  id="discover.textBasedMode.techPreviewCalloutLink"
+                  defaultMessage="documentation"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      }
+      color="primary"
+      iconType="beaker"
+      onDismiss={onDismiss}
+      size="s"
+    />
   );
 };

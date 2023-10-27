@@ -54,7 +54,7 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
-import { TechPreviewCallout } from './esql_tech_preview_callout';
+import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -209,7 +209,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return (
       <>
         {/* Temporarily display a tech preview callout for ES|QL*/}
-        <TechPreviewCallout isPlainRecord={isPlainRecord} docLinks={docLinks} />
+        {isPlainRecord && <ESQLTechPreviewCallout docLinks={docLinks} />}
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
           dataView={dataView}
