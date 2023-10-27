@@ -20,7 +20,10 @@ export const getQueryColumns = async (
   dataView: DataView,
   deps: LensPluginStartDependencies
 ) => {
-  // fetch only columns for ES|QL for performance reasons with limit 0
+  // Fetching only columns for ES|QL for performance reasons with limit 0
+  // Important note: The warnings are not sent for 0 limit,
+  // I have asked from ES to enable them. Until then the warnings are not being rendered
+  // If they don't do it, we will have to find another way to render them
   const performantQuery = { ...query };
   if ('esql' in performantQuery && performantQuery.esql) {
     performantQuery.esql = `${performantQuery.esql} | limit 0`;
