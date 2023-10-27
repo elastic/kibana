@@ -57,6 +57,7 @@ describe('Rule deletion', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
+  // Flaky test run
   it('User can delete multiple selected rules via a bulk action', () => {
     getRulesManagementTableRows().then((rules) => {
       const rulesToDelete = ['Rule 1', 'Rule 2'] as const;
