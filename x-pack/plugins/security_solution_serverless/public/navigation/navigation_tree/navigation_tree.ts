@@ -52,9 +52,7 @@ export const formatNavigationTree = (
         breadcrumbStatus: 'hidden',
         defaultIsCollapsed: false,
         children: bodyChildren,
-        accordionProps: {
-          arrowProps: { css: { display: 'none' } },
-        },
+        isCollapsible: false,
       },
     ],
     footer: formatFooterNodesFromLinks(footerNavItems, footerCategories),
