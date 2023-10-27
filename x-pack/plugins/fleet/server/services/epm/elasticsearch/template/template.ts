@@ -194,7 +194,7 @@ function _generateMappings(
   let hasDynamicTemplateMappings = false;
   const props: Properties = {};
 
-  function addParentObjectAsStaticProperty(field : Field) {
+  function addParentObjectAsStaticProperty(field: Field) {
     // Don't add intermediate objects for wildcard names, as it will
     // be added for its parent object.
     if (field.name.includes('*')) {
@@ -408,7 +408,8 @@ function _generateMappings(
             });
             if (mappings.hasNonDynamicTemplateMappings) {
               fieldProps = {
-                properties: Object.keys(mappings.properties).length > 0? mappings.properties : undefined,
+                properties:
+                  Object.keys(mappings.properties).length > 0 ? mappings.properties : undefined,
                 ...generateDynamicAndEnabled(field),
               };
               if (mappings.hasDynamicTemplateMappings) {
