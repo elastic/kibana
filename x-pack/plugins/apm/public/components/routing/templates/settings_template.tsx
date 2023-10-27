@@ -46,7 +46,9 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const agentConfigurationAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.AgentConfigurationAvailable
   );
-  const schemaAvailable = useApmFeatureFlag(ApmFeatureFlagName.SchemaAvailable);
+  const migrationToFleetAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.MigrationToFleetAvailable
+  );
   const indicesAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.ConfigurableIndicesAvailable
   );
@@ -57,7 +59,7 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
     router,
     defaultEnvironment,
     agentConfigurationAvailable,
-    schemaAvailable,
+    migrationToFleetAvailable,
     indicesAvailable,
   });
 
@@ -82,7 +84,7 @@ function getTabs({
   router,
   defaultEnvironment,
   agentConfigurationAvailable,
-  schemaAvailable,
+  migrationToFleetAvailable,
   indicesAvailable,
 }: {
   core: CoreStart;
@@ -90,7 +92,7 @@ function getTabs({
   router: ApmRouter;
   defaultEnvironment: Environment;
   agentConfigurationAvailable: boolean;
-  schemaAvailable: boolean;
+  migrationToFleetAvailable: boolean;
   indicesAvailable: boolean;
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
@@ -169,7 +171,7 @@ function getTabs({
         ]
       : []),
 
-    ...(schemaAvailable
+    ...(migrationToFleetAvailable
       ? [
           {
             key: 'schema' as const,

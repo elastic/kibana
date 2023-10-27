@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { niceTimeFormatter, TooltipValue } from '@elastic/charts';
+import { niceTimeFormatter, TooltipProps } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
@@ -17,9 +17,8 @@ import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../
 
 type Series = GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series'];
 
-export const tooltipProps = {
-  headerFormatter: (tooltipValue: TooltipValue) =>
-    moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss'),
+export const tooltipProps: TooltipProps = {
+  headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss'),
 };
 
 export const NUM_BUCKETS = 20;

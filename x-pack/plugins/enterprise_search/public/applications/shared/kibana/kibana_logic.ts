@@ -21,7 +21,9 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
 
@@ -50,6 +52,8 @@ interface KibanaLogicProps {
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
+  share: SharePluginStart;
+  ml: MlPluginStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -89,6 +93,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
+    share: [props.share, {}],
+    ml: [props.ml, {}],
     uiSettings: [props.uiSettings, {}],
   }),
   selectors: ({ selectors }) => ({

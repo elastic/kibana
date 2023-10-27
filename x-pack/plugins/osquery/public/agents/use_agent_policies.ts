@@ -10,6 +10,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { GetOneAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -20,7 +21,10 @@ export const useAgentPolicies = (policyIds: string[] = []) => {
   const agentResponse = useQueries({
     queries: policyIds.map((policyId) => ({
       queryKey: ['agentPolicy', policyId],
-      queryFn: () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
+      queryFn: () =>
+        http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`, {
+          version: API_VERSIONS.internal.v1,
+        }),
       enabled: policyIds.length > 0,
       onSuccess: () => setErrorToast(),
 

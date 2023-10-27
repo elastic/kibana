@@ -9,7 +9,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { PersistedLogViewReference } from '../../../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { LogEntryCategory } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';

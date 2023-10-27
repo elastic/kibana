@@ -182,13 +182,9 @@ export const getHostEndpoint = async (
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 
     const pendingActions = fleetAgentId
-      ? getPendingActionsSummary(
-          esClient.asInternalUser,
-          endpointMetadataService,
-          logger,
-          [fleetAgentId],
-          endpointContext.experimentalFeatures.pendingActionResponsesWithAck
-        )
+      ? getPendingActionsSummary(esClient.asInternalUser, endpointMetadataService, logger, [
+          fleetAgentId,
+        ])
           .then((results) => {
             return results[0].pending_actions;
           })

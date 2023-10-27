@@ -25,6 +25,7 @@ import {
   RuleActionFrequency,
   RuleActionParam,
 } from '@kbn/alerting-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -68,6 +69,7 @@ export interface ActionAccordionFormProps {
     index: number
   ) => void;
   featureId: string;
+  producerId: string;
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
@@ -78,11 +80,13 @@ export interface ActionAccordionFormProps {
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
   defaultSummaryMessage?: string;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultRuleFrequency?: RuleActionFrequency;
-  showActionAlertsFilter?: boolean;
+  ruleTypeId?: string;
+  hasFieldsForAAD?: boolean;
+  disableErrorMessages?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -112,11 +116,14 @@ export const ActionForm = ({
   hideActionHeader,
   hideNotifyWhen,
   defaultSummaryMessage,
-  hasSummary,
+  hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultRuleFrequency = DEFAULT_FREQUENCY,
-  showActionAlertsFilter,
+  ruleTypeId,
+  producerId,
+  hasFieldsForAAD,
+  disableErrorMessages,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -242,6 +249,7 @@ export const ActionForm = ({
         group: defaultActionGroupId,
         params: {},
         frequency: defaultRuleFrequency,
+        uuid: uuidv4(),
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     } else {
@@ -255,6 +263,7 @@ export const ActionForm = ({
           group: defaultActionGroupId,
           params: {},
           frequency: DEFAULT_FREQUENCY,
+          uuid: uuidv4(),
         });
         setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
       }
@@ -427,7 +436,7 @@ export const ActionForm = ({
               actionItem={actionItem}
               actionConnector={actionConnector}
               index={index}
-              key={`action-form-action-at-${index}`}
+              key={`action-form-action-at-${actionItem.uuid}`}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
               setActionAlertsFilterProperty={setActionAlertsFilterProperty}
@@ -484,11 +493,15 @@ export const ActionForm = ({
               }}
               hideNotifyWhen={hideNotifyWhen}
               defaultSummaryMessage={defaultSummaryMessage}
-              hasSummary={hasSummary}
+              hasAlertsMappings={hasAlertsMappings}
               minimumThrottleInterval={minimumThrottleInterval}
               notifyWhenSelectOptions={notifyWhenSelectOptions}
               defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
-              showActionAlertsFilter={showActionAlertsFilter}
+              featureId={featureId}
+              producerId={producerId}
+              ruleTypeId={ruleTypeId}
+              hasFieldsForAAD={hasFieldsForAAD}
+              disableErrorMessages={disableErrorMessages}
             />
           );
         })}

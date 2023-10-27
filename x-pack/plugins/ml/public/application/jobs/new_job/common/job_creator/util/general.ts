@@ -8,25 +8,22 @@
 import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  mlCategory,
+  type Field,
+  type AggFieldPair,
+  type SparseDataAggregation,
+  DOC_COUNT,
+  _DOC_COUNT,
+  EVENT_RATE_FIELD_ID,
+  MLCATEGORY,
+  ML_JOB_AGGREGATION,
+  SPARSE_DATA_AGGREGATIONS,
+} from '@kbn/ml-anomaly-utils';
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
-import {
-  ML_JOB_AGGREGATION,
-  SPARSE_DATA_AGGREGATIONS,
-} from '../../../../../../../common/constants/aggregation_types';
-import {
-  MLCATEGORY,
-  DOC_COUNT,
-  _DOC_COUNT,
-} from '../../../../../../../common/constants/field_types';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import {
-  EVENT_RATE_FIELD_ID,
-  Field,
-  AggFieldPair,
-  mlCategory,
-} from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
@@ -225,7 +222,7 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   // return true
   if (distinctCountField === undefined) {
     for (const detector of detectors) {
-      if (SPARSE_DATA_AGGREGATIONS.includes(detector.function as ML_JOB_AGGREGATION)) {
+      if (SPARSE_DATA_AGGREGATIONS.includes(detector.function as SparseDataAggregation)) {
         return true;
       }
     }

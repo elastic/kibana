@@ -8,12 +8,12 @@
 import * as rt from 'io-ts';
 
 import type { SavedObject } from '@kbn/core/server';
-import type { ConfigurationAttributes } from '../../../common/api';
+import type { ConfigurationAttributes } from '../../../common/types/domain';
 import {
   ConfigurationActivityFieldsRt,
-  ConfigurationBasicWithoutOwnerRt,
   ConfigurationAttributesRt,
-} from '../../../common/api';
+  ConfigurationBasicWithoutOwnerRt,
+} from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { User } from './user';
 
@@ -25,7 +25,15 @@ export interface ConfigurationPersistedAttributes {
   created_by: User;
   updated_at: string | null;
   updated_by: User | null;
+  customFields?: PersistedCustomFieldsConfiguration;
 }
+
+type PersistedCustomFieldsConfiguration = Array<{
+  key: string;
+  type: string;
+  label: string;
+  required: boolean;
+}>;
 
 export type ConfigurationTransformedAttributes = ConfigurationAttributes;
 export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;

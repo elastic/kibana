@@ -32,7 +32,6 @@ describe('RiskScoreHeaderContent', () => {
   beforeEach(() => {
     res = render(
       <RiskScoreHeaderContent
-        entityDocLink="https://www.elastic.co/guide/en/security/current/user-risk-score.html"
         entityLinkProps={{
           deepLinkId: SecurityPageName.users,
           onClick: jest.fn(),
@@ -51,7 +50,7 @@ describe('RiskScoreHeaderContent', () => {
   });
 
   it('should render learn more button', () => {
-    expect(res.getByText(`Learn more`)).toBeInTheDocument();
+    expect(res.getByText(`How is risk score calculated?`)).toBeInTheDocument();
   });
 
   it('should render severity filter group', () => {
@@ -65,7 +64,6 @@ describe('RiskScoreHeaderContent', () => {
   it('should not render if toggleStatus = false', () => {
     res = render(
       <RiskScoreHeaderContent
-        entityDocLink="https://www.elastic.co/guide/en/security/current/user-risk-score.html"
         entityLinkProps={{
           deepLinkId: SecurityPageName.users,
           onClick: jest.fn(),

@@ -9,9 +9,6 @@ import { URL } from 'url';
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { AuthenticationResult } from '../authentication';
-import { AuditAction } from '../saved_objects/saved_objects_security_extension';
 import {
   httpRequestEvent,
   savedObjectEvent,
@@ -23,6 +20,9 @@ import {
   userLogoutEvent,
   userSessionConcurrentLimitLogoutEvent,
 } from './audit_events';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { AuthenticationResult } from '../authentication';
+import { AuditAction } from '../saved_objects/saved_objects_security_extension';
 
 describe('#savedObjectEvent', () => {
   test('creates event with `unknown` outcome', () => {

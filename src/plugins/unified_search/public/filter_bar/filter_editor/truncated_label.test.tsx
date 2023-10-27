@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { mount } from 'enzyme';
 import { TruncatedLabel } from './truncated_label';
 
 describe('truncated_label', () => {
-  const defaultProps = {
+  const defaultProps: ComponentProps<typeof TruncatedLabel> = {
     defaultFont: '14px Inter',
-    // jest-canvas-mock mocks measureText as the number of string characters, thats why the width is so low
-    width: 30,
     defaultComboboxWidth: 130,
     comboboxPaddings: 100,
-    comboBoxRef: React.createRef<HTMLInputElement>(),
+    comboBoxWrapperRef: React.createRef<HTMLDivElement>(),
     search: '',
     label: 'example_field',
   };

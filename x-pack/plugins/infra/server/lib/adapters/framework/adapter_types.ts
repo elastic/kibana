@@ -24,6 +24,9 @@ import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plu
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import { LogsSharedPluginSetup, LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
+import { VersionedRouteConfig } from '@kbn/core-http-server';
+import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -37,11 +40,14 @@ export interface InfraServerPluginSetupDeps {
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
   ml?: MlPluginSetup;
+  logsShared: LogsSharedPluginSetup;
+  metricsDataAccess: MetricsDataPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
+  logsShared: LogsSharedPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {
@@ -173,3 +179,7 @@ export interface InfraFieldDef {
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
 } & RouteConfig<Params, Query, Body, Method>;
+
+export type InfraVersionedRouteConfig<Method extends RouteMethod> = {
+  method: RouteMethod;
+} & VersionedRouteConfig<Method>;

@@ -9,7 +9,7 @@ import { replaceParamsQuery } from './replace_params_query';
 
 describe('replaceParamsQuery', () => {
   it('should return unchanged query, and skipped true', () => {
-    const query = 'SELECT * FROM processes WHERE version = {{params.version}}';
+    const query = 'SELECT * FROM processes WHERE version = {{rule.params.version}}';
     const { result, skipped } = replaceParamsQuery(query, {});
     expect(result).toBe(query);
     expect(skipped).toBe(true);
@@ -46,7 +46,7 @@ describe('replaceParamsQuery', () => {
     expect(result).toBe(expectedQuery);
     expect(skipped).toBe(false);
   });
-  it('should return skipped true if {{params}} field not found', () => {
+  it('should return skipped true if {{rule.params}} field not found', () => {
     const query =
       'SELECT * FROM processes WHERE version = {{kibana.version}} {{not.existing}} {{agent.name}}';
     const { result, skipped } = replaceParamsQuery(query, {

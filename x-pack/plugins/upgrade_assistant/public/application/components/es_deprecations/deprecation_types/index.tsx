@@ -10,3 +10,4 @@ export { IndexSettingsTableRow } from './index_settings';
 export { DefaultTableRow } from './default';
 export { ReindexTableRow } from './reindex';
 export { ClusterSettingsTableRow } from './cluster_settings';
+export { HealthIndicatorTableRow } from './health_indicator';

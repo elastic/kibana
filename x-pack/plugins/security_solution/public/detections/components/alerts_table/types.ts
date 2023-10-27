@@ -8,8 +8,9 @@
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { NoteResult } from '../../../../common/types/timeline/note';
+import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { Status } from '../../../../common/api/detection_engine';
+import type { Note } from '../../../../common/api/timeline';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import type { inputsModel } from '../../../common/store';
@@ -65,7 +66,7 @@ export interface CreateTimelineProps {
   from: string;
   timeline: TimelineModel;
   to: string;
-  notes: NoteResult[] | null;
+  notes: Note[] | null;
   ruleNote?: string;
   ruleAuthor?: string | string[];
 }
@@ -78,3 +79,5 @@ export interface ThresholdAggregationData {
   thresholdTo: string;
   dataProviders: DataProvider[];
 }
+
+export type AlertTableContextMenuItem = EuiContextMenuPanelItemDescriptorEntry;

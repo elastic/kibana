@@ -1,12 +1,22 @@
 {
   "rollup.get_jobs": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_rollup/job/{id}",
-      "_rollup/job/"
+      "_rollup/job"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-job.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-job.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

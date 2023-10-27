@@ -5,61 +5,40 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import React from 'react';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
-import { metadataTab, processesTab } from './tabs';
+import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 export interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
 }
 
-const NODE_TYPE = 'host' as InventoryItemType;
+export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
+  const { source } = useSourceContext();
+  const { parsedDateRange } = useUnifiedSearchContext();
 
-export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const currentTimeRange = useMemo(
-    () => ({
-      ...getDateRangeAsTimestamp(),
-      interval: '1m',
-    }),
-    [getDateRangeAsTimestamp]
-  );
-
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutUrlState();
-
-  return (
+  return source ? (
     <AssetDetails
-      node={node}
-      nodeType={NODE_TYPE}
-      currentTimeRange={currentTimeRange}
-      activeTabId={hostFlyoutOpen?.selectedTabId}
+      assetId={name}
+      assetName={name}
+      assetType="host"
+      dateRange={parsedDateRange}
       overrides={{
         metadata: {
-          query: hostFlyoutOpen?.metadataSearch,
           showActionsColumn: true,
         },
-        processes: {
-          query: hostFlyoutOpen?.processSearch,
-        },
       }}
-      onTabsStateChange={(state) =>
-        setHostFlyoutOpen({
-          metadataSearch: state.metadata?.query,
-          processSearch: state.processes?.query,
-          selectedTabId: state.activeTabId as HostFlyout['selectedTabId'],
-        })
-      }
-      tabs={[metadataTab, processesTab]}
-      links={['apmServices', 'uptime']}
+      tabs={commonFlyoutTabs}
+      links={['apmServices', 'nodeDetails']}
       renderMode={{
-        showInFlyout: true,
+        mode: 'flyout',
         closeFlyout,
       }}
+      metricAlias={source.configuration.metricAlias}
     />
-  );
+  ) : null;
 };

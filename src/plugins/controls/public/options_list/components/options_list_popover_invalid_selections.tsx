@@ -18,12 +18,18 @@ import {
 
 import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const OptionsListPopoverInvalidSelections = () => {
   const optionsList = useOptionsList();
 
-  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
+
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -31,7 +37,7 @@ export const OptionsListPopoverInvalidSelections = () => {
     const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
       return {
         key,
-        label: key,
+        label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
         'data-test-subj': `optionsList-control-ignored-selection-${key}`,
@@ -46,7 +52,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       };
     });
     setSelectableOptions(options);
-  }, [invalidSelections]);
+  }, [fieldFormatter, invalidSelections]);
 
   return (
     <>

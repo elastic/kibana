@@ -21,7 +21,8 @@
       "usageCollection",
       "cloud",
       "security",
-      "infra"
+      "infra",
+      "logsShared"
     ],
     "requiredBundles": [
       "esUiShared",

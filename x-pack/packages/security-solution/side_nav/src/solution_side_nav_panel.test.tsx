@@ -12,7 +12,8 @@ import { BETA_LABEL } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TelemetryContextProvider } from './telemetry/telemetry_context';
-import type { SolutionSideNavItem, LinkCategories } from './types';
+import type { SolutionSideNavItem } from './types';
+import { type LinkCategories, LinkCategoryType } from '@kbn/security-solution-navigation';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {
@@ -52,11 +53,15 @@ const betaMockItemsCount = mockItems.filter((item) => item.isBeta).length;
 const mockCategories: LinkCategories = [
   {
     label: 'HOSTS CATEGORY',
-    linkIds: ['hosts'],
+    linkIds: ['hosts', 'network'],
   },
   {
     label: 'Empty category',
     linkIds: [],
+  },
+  {
+    type: LinkCategoryType.separator,
+    linkIds: ['kubernetes'],
   },
 ];
 
@@ -92,9 +97,6 @@ describe('SolutionSideNavPanel', () => {
 
     mockItems.forEach((item) => {
       expect(result.getByText(item.label)).toBeInTheDocument();
-      if (item.description) {
-        expect(result.getByText(item.description)).toBeInTheDocument();
-      }
     });
     expect(result.queryAllByText(BETA_LABEL).length).toBe(betaMockItemsCount);
   });
@@ -103,11 +105,22 @@ describe('SolutionSideNavPanel', () => {
     const result = renderNavPanel({ categories: mockCategories });
 
     mockCategories.forEach((mockCategory) => {
-      if (mockCategory.linkIds.length) {
+      if (!mockCategory.label) return; // omit separator categories
+      if (mockCategory.linkIds?.length) {
         expect(result.getByText(mockCategory.label)).toBeInTheDocument();
       } else {
         expect(result.queryByText(mockCategory.label)).not.toBeInTheDocument();
       }
+    });
+  });
+
+  it('should render separator categories with items', () => {
+    const result = renderNavPanel({ categories: mockCategories });
+    mockCategories.forEach((mockCategory) => {
+      if (mockCategory.type !== LinkCategoryType.separator) return; // omit non-separator categories
+      mockCategory.linkIds?.forEach((linkId) => {
+        expect(result.queryByTestId(`solutionSideNavPanelLink-${linkId}`)).toBeInTheDocument();
+      });
     });
   });
 

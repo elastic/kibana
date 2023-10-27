@@ -18,9 +18,12 @@ import type { SecurityCellActionExecutionContext } from '../../types';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { TimelineId } from '../../../../common/types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const services = createStartServicesMock();
-const mockFilterManager = services.data.query.filterManager;
+const mockGlobalFilterManager = services.data.query.filterManager;
+const mockTimelineFilterManager = createFilterManagerMock();
+const mockWarningToast = services.notifications.toasts.addWarning;
 
 const mockState = {
   ...mockGlobalState,
@@ -30,7 +33,7 @@ const mockState = {
       ...mockGlobalState.timeline.timelineById,
       [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById[TimelineId.active],
-        filterManager: createFilterManagerMock(),
+        filterManager: mockTimelineFilterManager,
       },
     },
   },
@@ -48,7 +51,12 @@ describe('createFilterOutCellActionFactory', () => {
   });
 
   const context = {
-    field: { name: 'user.name', value: 'the value', type: 'text' },
+    data: [
+      {
+        field: { name: 'user.name', type: 'string' },
+        value: 'the value',
+      },
+    ],
   } as SecurityCellActionExecutionContext;
 
   it('should return display name', () => {
@@ -63,43 +71,109 @@ describe('createFilterOutCellActionFactory', () => {
     it('should return true if everything is okay', async () => {
       expect(await filterOutAction.isCompatible(context)).toEqual(true);
     });
+
     it('should return false if field not allowed', async () => {
       expect(
         await filterOutAction.isCompatible({
           ...context,
-          field: { ...context.field, name: 'signal.reason' },
+          data: [
+            {
+              field: { ...context.data[0].field, name: 'signal.reason' },
+            },
+          ],
+        })
+      ).toEqual(false);
+    });
+
+    it('should return false if Kbn type is unsupported', async () => {
+      expect(
+        await filterOutAction.isCompatible({
+          ...context,
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, type: KBN_FIELD_TYPES.OBJECT },
+            },
+          ],
         })
       ).toEqual(false);
     });
   });
 
-  describe('generic scope execution', () => {
-    const dataTableContext = {
-      ...context,
-      metadata: { scopeId: TableId.alertsOnAlertsPage },
-    } as SecurityCellActionExecutionContext;
+  describe('execute', () => {
+    describe('generic scope execution', () => {
+      const dataTableContext = {
+        ...context,
+        metadata: { scopeId: TableId.alertsOnAlertsPage },
+      } as SecurityCellActionExecutionContext;
 
-    it('should execute using generic filterManager', async () => {
-      await filterOutAction.execute(dataTableContext);
-      expect(mockFilterManager.addFilters).toHaveBeenCalled();
-      expect(
-        mockState.timeline.timelineById[TimelineId.active].filterManager?.addFilters
-      ).not.toHaveBeenCalled();
+      it('should execute using generic filterManager', async () => {
+        await filterOutAction.execute(dataTableContext);
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalled();
+        expect(mockTimelineFilterManager.addFilters).not.toHaveBeenCalled();
+      });
+
+      it('should show warning if value type is unsupported', async () => {
+        await filterOutAction.execute({
+          ...dataTableContext,
+          data: [
+            {
+              ...context.data[0],
+              value: [{ test: 'value' }],
+            },
+          ],
+        });
+        expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(mockTimelineFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(mockWarningToast).toHaveBeenCalled();
+      });
     });
-  });
 
-  describe('timeline scope execution', () => {
-    const timelineContext = {
-      ...context,
-      metadata: { scopeId: TimelineId.active },
-    } as SecurityCellActionExecutionContext;
+    describe('timeline scope execution', () => {
+      const timelineContext = {
+        ...context,
+        metadata: { scopeId: TimelineId.active },
+      } as SecurityCellActionExecutionContext;
 
-    it('should execute using timeline filterManager', async () => {
-      await filterOutAction.execute(timelineContext);
-      expect(
-        mockState.timeline.timelineById[TimelineId.active].filterManager?.addFilters
-      ).toHaveBeenCalled();
-      expect(mockFilterManager.addFilters).not.toHaveBeenCalled();
+      it('should execute using timeline filterManager', async () => {
+        await filterOutAction.execute(timelineContext);
+        expect(mockTimelineFilterManager.addFilters).toHaveBeenCalled();
+        expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('negateFilters', () => {
+      it('if negateFilters is false, negate should be true (exclude)', async () => {
+        await filterOutAction.execute({
+          ...context,
+          metadata: {
+            negateFilters: false,
+          },
+        });
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalledWith(
+          expect.objectContaining({
+            meta: expect.objectContaining({
+              negate: true,
+            }),
+          })
+        );
+      });
+
+      it('if negateFilters is true, negate should be false (do not exclude)', async () => {
+        await filterOutAction.execute({
+          ...context,
+          metadata: {
+            negateFilters: true,
+          },
+        });
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalledWith(
+          expect.objectContaining({
+            meta: expect.objectContaining({
+              negate: false,
+            }),
+          })
+        );
+      });
     });
   });
 });

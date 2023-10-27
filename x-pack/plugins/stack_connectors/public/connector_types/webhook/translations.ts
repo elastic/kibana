@@ -42,6 +42,13 @@ export const PASSWORD_LABEL = i18n.translate(
   }
 );
 
+export const PASSPHRASE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.webhook.passphraseTextFieldLabel',
+  {
+    defaultMessage: 'Passphrase',
+  }
+);
+
 export const ADD_HEADERS_LABEL = i18n.translate(
   'xpack.stackConnectors.components.webhook.viewHeadersSwitch',
   {
@@ -109,5 +116,87 @@ export const PASSWORD_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.webhook.error.requiredWebhookPasswordText',
   {
     defaultMessage: 'Password is required.',
+  }
+);
+
+export const AUTHENTICATION_NONE = i18n.translate(
+  'xpack.stackConnectors.components.webhook.authenticationMethodNoneLabel',
+  {
+    defaultMessage: 'None',
+  }
+);
+
+export const AUTHENTICATION_BASIC = i18n.translate(
+  'xpack.stackConnectors.components.webhook.authenticationMethodBasicLabel',
+  {
+    defaultMessage: 'Basic authentication',
+  }
+);
+
+export const AUTHENTICATION_SSL = i18n.translate(
+  'xpack.stackConnectors.components.webhook.authenticationMethodSSLLabel',
+  {
+    defaultMessage: 'SSL authentication',
+  }
+);
+
+export const CERT_TYPE_CRT_KEY = i18n.translate(
+  'xpack.stackConnectors.components.webhook.certTypeCrtKeyLabel',
+  {
+    defaultMessage: 'CRT and KEY file',
+  }
+);
+export const CERT_TYPE_PFX = i18n.translate(
+  'xpack.stackConnectors.components.webhook.certTypePfxLabel',
+  {
+    defaultMessage: 'PFX file',
+  }
+);
+
+export const CRT_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookCRTText',
+  {
+    defaultMessage: 'CRT file is required.',
+  }
+);
+
+export const KEY_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookKEYText',
+  {
+    defaultMessage: 'KEY file is required.',
+  }
+);
+
+export const PFX_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookPFXText',
+  {
+    defaultMessage: 'PFX file is required.',
+  }
+);
+
+export const CA_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookCAText',
+  {
+    defaultMessage: 'CA file is required.',
+  }
+);
+
+export const ADD_CA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.webhook.viewCertificateAuthoritySwitch',
+  {
+    defaultMessage: 'Add certificate authority',
+  }
+);
+
+export const VERIFICATION_MODE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.webhook.verificationModeFieldLabel',
+  { defaultMessage: 'Verification mode' }
+);
+
+export const EDIT_CA_CALLOUT = i18n.translate(
+  'xpack.stackConnectors.components.webhook.editCACallout',
+  {
+    defaultMessage:
+      'This webhook has an existing certificate authority file. Upload a new one to replace it.',
   }
 );

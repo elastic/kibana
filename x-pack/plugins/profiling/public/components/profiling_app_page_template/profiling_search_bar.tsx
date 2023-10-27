@@ -20,6 +20,7 @@ export function ProfilingSearchBar({
   onRefresh,
   onRefreshClick,
   showSubmitButton = true,
+  dataTestSubj = 'profilingUnifiedSearchBar',
 }: {
   kuery: string;
   rangeFrom: string;
@@ -34,6 +35,7 @@ export function ProfilingSearchBar({
   onRefresh: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
   onRefreshClick: () => void;
   showSubmitButton?: boolean;
+  dataTestSubj?: string;
 }) {
   const {
     start: { dataViews },
@@ -75,6 +77,7 @@ export function ProfilingSearchBar({
       indexPatterns={compact([dataView])}
       onRefresh={onRefresh}
       displayStyle="inPage"
+      dataTestSubj={dataTestSubj}
     />
   );
 }

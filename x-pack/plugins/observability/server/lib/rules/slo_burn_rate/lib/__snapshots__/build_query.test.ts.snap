@@ -1,0 +1,1375 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildQuery() should return a valid query for occurrences 1`] = `
+Object {
+  "aggs": Object {
+    "instances": Object {
+      "aggs": Object {
+        "WINDOW_0_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T22:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_0_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_0_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 14.4,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_0_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_0_LONG>good",
+              "total": "WINDOW_0_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_0_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T23:52:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_0_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_0_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 14.4,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_0_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_0_SHORT>good",
+              "total": "WINDOW_0_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_1_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T17:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_1_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_1_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 6,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_1_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_1_LONG>good",
+              "total": "WINDOW_1_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_1_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T23:27:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_1_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_1_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 6,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_1_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_1_SHORT>good",
+              "total": "WINDOW_1_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_2_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-30T23:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_2_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_2_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 3,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_2_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_2_LONG>good",
+              "total": "WINDOW_2_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_2_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T21:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_2_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_2_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 3,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_2_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_2_SHORT>good",
+              "total": "WINDOW_2_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_3_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-28T23:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_3_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_3_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 1,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_3_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_3_LONG>good",
+              "total": "WINDOW_3_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_3_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T17:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_3_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_3_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 1,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_3_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_3_SHORT>good",
+              "total": "WINDOW_3_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "evaluation": Object {
+          "bucket_selector": Object {
+            "buckets_path": Object {
+              "WINDOW_0_LONG_ABOVE_THRESHOLD": "WINDOW_0_LONG_ABOVE_THRESHOLD",
+              "WINDOW_0_SHORT_ABOVE_THRESHOLD": "WINDOW_0_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_1_LONG_ABOVE_THRESHOLD": "WINDOW_1_LONG_ABOVE_THRESHOLD",
+              "WINDOW_1_SHORT_ABOVE_THRESHOLD": "WINDOW_1_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_2_LONG_ABOVE_THRESHOLD": "WINDOW_2_LONG_ABOVE_THRESHOLD",
+              "WINDOW_2_SHORT_ABOVE_THRESHOLD": "WINDOW_2_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_3_LONG_ABOVE_THRESHOLD": "WINDOW_3_LONG_ABOVE_THRESHOLD",
+              "WINDOW_3_SHORT_ABOVE_THRESHOLD": "WINDOW_3_SHORT_ABOVE_THRESHOLD",
+            },
+            "script": Object {
+              "source": "(params.WINDOW_0_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_0_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_1_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_1_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_2_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_2_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_3_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_3_LONG_ABOVE_THRESHOLD == 1)",
+            },
+          },
+        },
+      },
+      "composite": Object {
+        "size": 1000,
+        "sources": Array [
+          Object {
+            "instanceId": Object {
+              "terms": Object {
+                "field": "slo.instanceId",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "slo.id": "test-slo",
+          },
+        },
+        Object {
+          "term": Object {
+            "slo.revision": 1,
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "2022-12-28T23:57:00.000Z",
+              "lt": "2022-12-31T23:57:00.000Z",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+}
+`;
+
+exports[`buildQuery() should return a valid query for timeslices 1`] = `
+Object {
+  "aggs": Object {
+    "instances": Object {
+      "aggs": Object {
+        "WINDOW_0_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+            "total": Object {
+              "value_count": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T22:56:00.000Z",
+                "lt": "2022-12-31T23:56:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_0_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_0_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 14.4,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_0_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_0_LONG>good",
+              "total": "WINDOW_0_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.98,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_0_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+            "total": Object {
+              "value_count": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T23:51:00.000Z",
+                "lt": "2022-12-31T23:56:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_0_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_0_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 14.4,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_0_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_0_SHORT>good",
+              "total": "WINDOW_0_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.98,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_1_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+            "total": Object {
+              "value_count": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T17:56:00.000Z",
+                "lt": "2022-12-31T23:56:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_1_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_1_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 6,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_1_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_1_LONG>good",
+              "total": "WINDOW_1_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.98,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_1_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+            "total": Object {
+              "value_count": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T23:26:00.000Z",
+                "lt": "2022-12-31T23:56:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_1_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_1_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 6,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_1_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_1_SHORT>good",
+              "total": "WINDOW_1_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.98,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_2_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+            "total": Object {
+              "value_count": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-30T23:56:00.000Z",
+                "lt": "2022-12-31T23:56:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_2_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_2_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 3,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_2_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_2_LONG>good",
+              "total": "WINDOW_2_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.98,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_2_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+            "total": Object {
+              "value_count": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T21:56:00.000Z",
+                "lt": "2022-12-31T23:56:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_2_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_2_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 3,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_2_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_2_SHORT>good",
+              "total": "WINDOW_2_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.98,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_3_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+            "total": Object {
+              "value_count": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-28T23:56:00.000Z",
+                "lt": "2022-12-31T23:56:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_3_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_3_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 1,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_3_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_3_LONG>good",
+              "total": "WINDOW_3_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.98,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_3_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+            "total": Object {
+              "value_count": Object {
+                "field": "slo.isGoodSlice",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T17:56:00.000Z",
+                "lt": "2022-12-31T23:56:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_3_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_3_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 1,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_3_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_3_SHORT>good",
+              "total": "WINDOW_3_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.98,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "evaluation": Object {
+          "bucket_selector": Object {
+            "buckets_path": Object {
+              "WINDOW_0_LONG_ABOVE_THRESHOLD": "WINDOW_0_LONG_ABOVE_THRESHOLD",
+              "WINDOW_0_SHORT_ABOVE_THRESHOLD": "WINDOW_0_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_1_LONG_ABOVE_THRESHOLD": "WINDOW_1_LONG_ABOVE_THRESHOLD",
+              "WINDOW_1_SHORT_ABOVE_THRESHOLD": "WINDOW_1_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_2_LONG_ABOVE_THRESHOLD": "WINDOW_2_LONG_ABOVE_THRESHOLD",
+              "WINDOW_2_SHORT_ABOVE_THRESHOLD": "WINDOW_2_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_3_LONG_ABOVE_THRESHOLD": "WINDOW_3_LONG_ABOVE_THRESHOLD",
+              "WINDOW_3_SHORT_ABOVE_THRESHOLD": "WINDOW_3_SHORT_ABOVE_THRESHOLD",
+            },
+            "script": Object {
+              "source": "(params.WINDOW_0_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_0_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_1_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_1_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_2_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_2_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_3_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_3_LONG_ABOVE_THRESHOLD == 1)",
+            },
+          },
+        },
+      },
+      "composite": Object {
+        "size": 1000,
+        "sources": Array [
+          Object {
+            "instanceId": Object {
+              "terms": Object {
+                "field": "slo.instanceId",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "slo.id": "test-slo",
+          },
+        },
+        Object {
+          "term": Object {
+            "slo.revision": 1,
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "2022-12-28T23:56:00.000Z",
+              "lt": "2022-12-31T23:56:00.000Z",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+}
+`;
+
+exports[`buildQuery() should return a valid query with afterKey 1`] = `
+Object {
+  "aggs": Object {
+    "instances": Object {
+      "aggs": Object {
+        "WINDOW_0_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T22:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_0_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_0_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 14.4,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_0_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_0_LONG>good",
+              "total": "WINDOW_0_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_0_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T23:52:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_0_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_0_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 14.4,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_0_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_0_SHORT>good",
+              "total": "WINDOW_0_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_1_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T17:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_1_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_1_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 6,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_1_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_1_LONG>good",
+              "total": "WINDOW_1_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_1_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T23:27:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_1_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_1_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 6,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_1_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_1_SHORT>good",
+              "total": "WINDOW_1_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_2_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-30T23:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_2_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_2_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 3,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_2_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_2_LONG>good",
+              "total": "WINDOW_2_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_2_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T21:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_2_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_2_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 3,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_2_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_2_SHORT>good",
+              "total": "WINDOW_2_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_3_LONG": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-28T23:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_3_LONG_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_3_LONG_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 1,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_3_LONG_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_3_LONG>good",
+              "total": "WINDOW_3_LONG>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "WINDOW_3_SHORT": Object {
+          "aggs": Object {
+            "good": Object {
+              "sum": Object {
+                "field": "slo.numerator",
+              },
+            },
+            "total": Object {
+              "sum": Object {
+                "field": "slo.denominator",
+              },
+            },
+          },
+          "filter": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "2022-12-31T17:57:00.000Z",
+                "lt": "2022-12-31T23:57:00.000Z",
+              },
+            },
+          },
+        },
+        "WINDOW_3_SHORT_ABOVE_THRESHOLD": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "burnRate": "WINDOW_3_SHORT_BURN_RATE",
+            },
+            "script": Object {
+              "params": Object {
+                "threshold": 1,
+              },
+              "source": "params.burnRate >= params.threshold ? 1 : 0",
+            },
+          },
+        },
+        "WINDOW_3_SHORT_BURN_RATE": Object {
+          "bucket_script": Object {
+            "buckets_path": Object {
+              "good": "WINDOW_3_SHORT>good",
+              "total": "WINDOW_3_SHORT>total",
+            },
+            "script": Object {
+              "params": Object {
+                "target": 0.999,
+              },
+              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+            },
+          },
+        },
+        "evaluation": Object {
+          "bucket_selector": Object {
+            "buckets_path": Object {
+              "WINDOW_0_LONG_ABOVE_THRESHOLD": "WINDOW_0_LONG_ABOVE_THRESHOLD",
+              "WINDOW_0_SHORT_ABOVE_THRESHOLD": "WINDOW_0_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_1_LONG_ABOVE_THRESHOLD": "WINDOW_1_LONG_ABOVE_THRESHOLD",
+              "WINDOW_1_SHORT_ABOVE_THRESHOLD": "WINDOW_1_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_2_LONG_ABOVE_THRESHOLD": "WINDOW_2_LONG_ABOVE_THRESHOLD",
+              "WINDOW_2_SHORT_ABOVE_THRESHOLD": "WINDOW_2_SHORT_ABOVE_THRESHOLD",
+              "WINDOW_3_LONG_ABOVE_THRESHOLD": "WINDOW_3_LONG_ABOVE_THRESHOLD",
+              "WINDOW_3_SHORT_ABOVE_THRESHOLD": "WINDOW_3_SHORT_ABOVE_THRESHOLD",
+            },
+            "script": Object {
+              "source": "(params.WINDOW_0_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_0_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_1_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_1_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_2_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_2_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_3_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_3_LONG_ABOVE_THRESHOLD == 1)",
+            },
+          },
+        },
+      },
+      "composite": Object {
+        "after": Object {
+          "instanceId": "example",
+        },
+        "size": 1000,
+        "sources": Array [
+          Object {
+            "instanceId": Object {
+              "terms": Object {
+                "field": "slo.instanceId",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "slo.id": "test-slo",
+          },
+        },
+        Object {
+          "term": Object {
+            "slo.revision": 1,
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "2022-12-28T23:57:00.000Z",
+              "lt": "2022-12-31T23:57:00.000Z",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+}
+`;

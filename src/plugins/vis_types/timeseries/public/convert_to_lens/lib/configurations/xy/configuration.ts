@@ -7,7 +7,8 @@
  */
 
 import { Position } from '@elastic/charts';
-import { XYConfiguration, XYLayerConfig } from '@kbn/visualizations-plugin/common';
+import { XYCurveTypes } from '@kbn/visualizations-plugin/public';
+import type { XYConfiguration, XYLayerConfig } from '@kbn/visualizations-plugin/common';
 import { Panel } from '../../../../../common/types';
 import { getYExtents } from './extents';
 
@@ -18,6 +19,7 @@ export const getConfigurationForTimeseries = (
   const extents = getYExtents(model);
   return {
     layers,
+    curveType: model.series[0].steps === 1 ? XYCurveTypes.CURVE_STEP_AFTER : undefined,
     fillOpacity: Number(model.series[0].fill) ?? 0.3,
     legend: {
       isVisible: Boolean(model.show_legend),

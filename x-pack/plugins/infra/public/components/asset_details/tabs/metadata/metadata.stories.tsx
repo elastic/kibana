@@ -8,42 +8,24 @@
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import { Metadata, MetadataProps } from './metadata';
-import { DecorateWithKibanaContext } from '../../__stories__/decorator';
+import { Metadata } from './metadata';
+import {
+  DecorateWithKibanaContext,
+  DecorateWithAssetDetailsStateContext,
+} from '../../__stories__/decorator';
 
-const stories: Meta<MetadataProps> = {
+const stories: Meta = {
   title: 'infra/Asset Details View/Components/Metadata',
-  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
+  decorators: [
+    decorateWithGlobalStorybookThemeProviders,
+    DecorateWithKibanaContext,
+    DecorateWithAssetDetailsStateContext,
+  ],
   component: Metadata,
-  args: {
-    currentTimeRange: {
-      from: 1679316685686,
-      to: 1679585836087,
-      interval: '1m',
-    },
-    nodeType: 'host',
-    node: {
-      id: 'host-1',
-      name: 'host-1',
-      ip: '192.168.0.1',
-      os: 'iOS',
-      title: {
-        name: 'host-1',
-        cloudProvider: 'gcp',
-      },
-      rx: 0,
-      tx: 0,
-      memory: 0.5445920331099282,
-      cpu: 0.2000718443867342,
-      diskLatency: 0,
-      memoryTotal: 16777216,
-    },
-    showActionsColumn: false,
-  },
 };
 
-const Template: Story<MetadataProps> = (args) => {
-  return <Metadata {...args} />;
+const Template: Story = () => {
+  return <Metadata />;
 };
 
 export const Default = Template.bind({});

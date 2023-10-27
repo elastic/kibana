@@ -8,9 +8,9 @@
 import type {
   DataViewId,
   IndexPatternArray,
-} from '../../../../../../../common/detection_engine/rule_schema';
-import type { RuleDataSource } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_field_types';
-import { DataSourceType } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_field_types';
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleDataSource } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { DataSourceType } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const extractRuleDataSource = (
   indexPatterns: IndexPatternArray | undefined,

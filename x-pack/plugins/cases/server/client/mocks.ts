@@ -11,11 +11,11 @@ import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 
-import type { CasesFindRequest } from '../../common/api';
+import type { CasesFindRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
@@ -24,8 +24,7 @@ import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
-import { CaseStatuses } from '../../common';
-import { CaseSeverity } from '../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
@@ -58,6 +57,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     getTags: jest.fn(),
     getReporters: jest.fn(),
     getCasesByAlertID: jest.fn(),
+    getCategories: jest.fn(),
   };
 };
 

@@ -7,6 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
+import { sortBy } from 'lodash';
+
+import { DATA_TIERS } from '../../common/constants';
+
 import { appContextService } from '../services';
 
 export interface AgentLogsData {
@@ -29,10 +33,16 @@ export async function getAgentLogsTopErrors(
     const queryTopMessages = (index: string) =>
       esClient.search({
         index,
-        size: 0,
+        size: 100,
+        _source: ['message'],
         query: {
           bool: {
             filter: [
+              {
+                terms: {
+                  _tier: DATA_TIERS,
+                },
+              },
               {
                 term: {
                   'log.level': 'error',
@@ -48,35 +58,32 @@ export async function getAgentLogsTopErrors(
             ],
           },
         },
-        aggs: {
-          message_sample: {
-            sampler: {
-              shard_size: 200,
-            },
-            aggs: {
-              categories: {
-                categorize_text: {
-                  field: 'message',
-                  size: 10,
-                },
-              },
-            },
-          },
-        },
       });
 
-    const transformBuckets = (resp: any) =>
-      ((resp?.aggregations?.message_sample as any)?.categories?.buckets ?? [])
+    const getTopErrors = (resp: any) => {
+      const counts = (resp?.hits.hits ?? []).reduce((acc: any, curr: any) => {
+        if (!acc[curr._source.message]) {
+          acc[curr._source.message] = 0;
+        }
+        acc[curr._source.message]++;
+        return acc;
+      }, {});
+      const top3 = sortBy(
+        Object.entries(counts).map(([key, value]) => ({ key, value })),
+        'value'
+      )
         .slice(0, 3)
-        .map((bucket: any) => bucket.key);
+        .reverse();
+      return top3.map(({ key, value }) => key);
+    };
 
     const agentResponse = await queryTopMessages('logs-elastic_agent-*');
 
     const fleetServerResponse = await queryTopMessages('logs-elastic_agent.fleet_server-*');
 
     return {
-      agent_logs_top_errors: transformBuckets(agentResponse),
-      fleet_server_logs_top_errors: transformBuckets(fleetServerResponse),
+      agent_logs_top_errors: getTopErrors(agentResponse),
+      fleet_server_logs_top_errors: getTopErrors(fleetServerResponse),
     };
   } catch (error) {
     if (error.statusCode === 404) {

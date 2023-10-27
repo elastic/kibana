@@ -13,8 +13,6 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { displayPossibleDocsDiffInfoAlert } from '../main/hooks/use_alert_results_toast';
 import { getAlertUtils, QueryParams } from './view_alert_utils';
 
-const DISCOVER_MAIN_ROUTE = '/';
-
 type NonNullableEntry<T> = { [K in keyof T]: NonNullable<T[keyof T]> };
 
 const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntry<QueryParams> => {
@@ -22,7 +20,7 @@ const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntr
 };
 
 export function ViewAlertRoute() {
-  const { core, data, locator, toastNotifications } = useDiscoverServices();
+  const { core, data, locator, toastNotifications, dataViews } = useDiscoverServices();
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const { search } = useLocation();
@@ -48,7 +46,8 @@ export function ViewAlertRoute() {
       queryParams,
       toastNotifications,
       core,
-      data
+      data,
+      dataViews
     );
 
     const navigateWithDiscoverState = (state: DiscoverAppLocatorParams) => {
@@ -58,14 +57,24 @@ export function ViewAlertRoute() {
       locator.navigate(state);
     };
 
-    const navigateToDiscoverRoot = () => history.push(DISCOVER_MAIN_ROUTE);
+    const navigateToDiscoverRoot = () => locator.navigate({});
 
     fetchAlert(id)
       .then(fetchSearchSource)
       .then(buildLocatorParams)
       .then(navigateWithDiscoverState)
       .catch(navigateToDiscoverRoot);
-  }, [core, data, history, id, locator, openActualAlert, queryParams, toastNotifications]);
+  }, [
+    core,
+    data,
+    dataViews,
+    history,
+    id,
+    locator,
+    openActualAlert,
+    queryParams,
+    toastNotifications,
+  ]);
 
   return null;
 }

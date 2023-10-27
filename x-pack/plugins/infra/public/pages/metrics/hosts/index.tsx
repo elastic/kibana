@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FeatureFeedbackButton } from '../../../components/feature_feedback_button';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -19,12 +20,12 @@ import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
 import { MetricsDataViewProvider } from './hooks/use_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
-import { ExperimentalBadge } from '../../../components/experimental_badge';
+import { BetaBadge } from '../../../components/beta_badge';
 import { NoRemoteCluster } from '../../../components/empty_states';
 
-const HOSTS_FEEDBACK_LINK = 'https://ela.st/host-feedback';
+const HOSTS_FEEDBACK_LINK =
+  'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
 
 export const HostsPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
@@ -71,22 +72,19 @@ export const HostsPage = () => {
                 `}
               >
                 <h1>{hostsTitle}</h1>
-                <ExperimentalBadge />
+                <BetaBadge
+                  tooltipContent={i18n.translate('xpack.infra.hostsViewPage.betaBadgeDescription', {
+                    defaultMessage:
+                      'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or share your feedback via the "Tell us what you think!" feedback button.',
+                  })}
+                />
               </div>
             ),
             rightSideItems: [
-              <EuiButton
+              <FeatureFeedbackButton
                 data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
-                href={HOSTS_FEEDBACK_LINK}
-                target="_blank"
-                color="warning"
-                iconType="editorComment"
-              >
-                <FormattedMessage
-                  id="xpack.infra.hostsPage.tellUsWhatYouThinkLink"
-                  defaultMessage="Tell us what you think!"
-                />
-              </EuiButton>,
+                formUrl={HOSTS_FEEDBACK_LINK}
+              />,
             ],
           }}
           pageSectionProps={{
@@ -97,9 +95,7 @@ export const HostsPage = () => {
         >
           {source && (
             <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
-              <UnifiedSearchProvider>
-                <HostContainer />
-              </UnifiedSearchProvider>
+              <HostContainer />
             </MetricsDataViewProvider>
           )}
         </MetricsPageTemplate>

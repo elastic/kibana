@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RulePreviewLogs } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RulePreviewLogs } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * This is the typical output of a simple rule preview, with errors and warnings coming up from the rule

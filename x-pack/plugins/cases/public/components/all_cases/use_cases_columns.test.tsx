@@ -17,7 +17,7 @@ import { connectors } from '../configure_cases/__mock__';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 describe('useCasesColumns ', () => {
@@ -87,6 +87,13 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -114,6 +121,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -150,6 +158,13 @@ describe('useCasesColumns ', () => {
             "width": "55%",
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -160,6 +175,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -220,6 +236,13 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -247,6 +270,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -304,6 +328,13 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -331,6 +362,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -383,6 +415,13 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -410,6 +449,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -467,6 +507,13 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "closedAt",
             "name": "Closed on",
             "render": [Function],
@@ -494,6 +541,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -524,6 +572,13 @@ describe('useCasesColumns ', () => {
             "width": "55%",
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -534,6 +589,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -563,6 +619,13 @@ describe('useCasesColumns ', () => {
             "width": "55%",
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -573,6 +636,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -626,6 +690,13 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "100px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -653,6 +724,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
         ],
       }
@@ -719,6 +791,7 @@ describe('useCasesColumns ', () => {
                   name: 'None',
                   config: {},
                   isPreconfigured: false,
+                  isSystemAction: false,
                   isDeprecated: false,
                 },
               ]}

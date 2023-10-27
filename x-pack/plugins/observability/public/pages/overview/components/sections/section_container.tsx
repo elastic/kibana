@@ -15,8 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAppServices } from '../../../../application/types';
+import { useKibana } from '../../../../utils/kibana_react';
 import { ErrorPanel } from './error_panel/error_panel';
 import { ExperimentalBadge } from '../../../../components/experimental_badge';
 
@@ -42,7 +41,7 @@ export function SectionContainer({
   initialIsOpen = true,
   showExperimentalBadge = false,
 }: Props) {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const { http } = useKibana().services;
   return (
     <EuiPanel color="subdued">
       <EuiAccordion

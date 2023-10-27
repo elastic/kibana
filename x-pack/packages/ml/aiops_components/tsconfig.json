@@ -22,6 +22,10 @@
     "@kbn/i18n-react",
     "@kbn/aiops-utils",
     "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/field-formats-plugin",
   ],
   "exclude": [
     "target/**/*",

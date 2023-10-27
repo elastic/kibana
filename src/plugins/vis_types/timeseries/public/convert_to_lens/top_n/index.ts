@@ -37,7 +37,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
   const dataViews = getDataViewsStart();
   try {
     const extendedLayers: Record<number, ExtendedLayer> = {};
-    const seriesNum = model.series.filter((series) => !series.hidden).length;
+    const visibleSeries = model.series.filter((series) => !series.hidden);
+    const seriesNum = visibleSeries.length;
 
     // handle multiple layers/series
     for (const [layerIdx, series] of model.series.entries()) {
@@ -85,6 +86,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
 
       const layerId = uuidv4();
       extendedLayers[layerIdx] = {
+        ignoreGlobalFilters: Boolean(
+          model.ignore_global_filter ||
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            visibleSeries.some(({ ignore_global_filter }) => ignore_global_filter)
+        ),
         indexPatternId,
         layerId,
         columns: [...metricsColumns, ...bucketsColumns],

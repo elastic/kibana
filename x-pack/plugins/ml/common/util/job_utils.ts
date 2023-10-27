@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { each, isEmpty, isEqual, pick } from 'lodash';
+import { cloneDeep, each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -17,13 +17,19 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+import {
+  type MlEntityField,
+  ES_AGGREGATION,
+  ML_JOB_AGGREGATION,
+  MLCATEGORY,
+} from '@kbn/ml-anomaly-utils';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
 import type {
   CombinedJob,
+  CombinedJobWithStats,
   CustomSettings,
   Datafeed,
   Job,
@@ -31,8 +37,6 @@ import type {
 } from '../types/anomaly_detection_jobs';
 import type { MlServerLimits } from '../types/ml_server_info';
 import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
-import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
@@ -932,4 +936,15 @@ export function extractInfluencers(jobs: Job | Job[]): string[] {
     }
   }
   return Array.from(influencers);
+}
+
+export function removeNodeInfo(job: CombinedJobWithStats) {
+  const newJob = cloneDeep(job);
+  if (newJob.node !== undefined) {
+    delete newJob.node;
+  }
+  if (newJob.datafeed_config?.node !== undefined) {
+    delete newJob.datafeed_config.node;
+  }
+  return newJob;
 }

@@ -37,17 +37,16 @@ const LensComponentWrapper = styled.div<{
 }>`
   height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
-  > div {
-    background-color: transparent;
-    ${({ $addHoverActionsPadding }) =>
-      $addHoverActionsPadding ? `padding: ${HOVER_ACTIONS_PADDING}px 0 0 0;` : ``}
+
+  ${({ $addHoverActionsPadding }) =>
+    $addHoverActionsPadding ? `.embPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }` : ''}
+
+  .embPanel__header {
+    z-index: 2;
+    position: absolute;
+    right: 0;
   }
-  .lnsExpressionRenderer .echLegend {
-    ${({ $height, $addHoverActionsPadding }) =>
-      $height && $height > HOVER_ACTIONS_PADDING && $addHoverActionsPadding
-        ? `height: ${$height - HOVER_ACTIONS_PADDING * 1.5}px;`
-        : ''}
-  }
+
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
   }
@@ -188,7 +187,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 
   const onFilterCallback = useCallback(
     async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
+      if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area') {
         return;
       }
       // Update timerange when clicking on a dot in an area chart
@@ -300,6 +299,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       )}
     </>
   );
+};
+
+const isClickTriggerEvent = (
+  e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
+): e is ClickTriggerEvent['data'] => {
+  return Array.isArray(e.data) && 'column' in e.data[0];
 };
 
 export const LensEmbeddable = React.memo(LensEmbeddableComponent);

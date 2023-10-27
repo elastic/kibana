@@ -15,8 +15,8 @@ describe('getRawRecordType', () => {
     expect(mode).toEqual(RecordRawType.DOCUMENT);
   });
 
-  it('returns sql for Query type query', () => {
-    const mode = getRawRecordType({ sql: 'SELECT * from foo' });
+  it('returns esql for Query type query', () => {
+    const mode = getRawRecordType({ esql: 'from foo' });
 
     expect(mode).toEqual(RecordRawType.PLAIN);
   });

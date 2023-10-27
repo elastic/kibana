@@ -12,6 +12,12 @@ import { getBucketSize } from '../../common/utils/get_bucket_size';
 import { getPreferredBucketSizeAndDataSource } from '../../common/utils/get_preferred_bucket_size_and_data_source';
 import { useTimeRangeMetadata } from '../context/time_range_metadata/use_time_range_metadata_context';
 
+/**
+ * Hook to get the source and interval based on Time Range Metadata API
+ *
+ * @param {number} numBuckets - The number of buckets. Should be 20 for SparkPlots or 100 for Other charts.
+
+ */
 export function usePreferredDataSourceAndBucketSize<
   TDocumentType extends
     | ApmDocumentType.ServiceTransactionMetric

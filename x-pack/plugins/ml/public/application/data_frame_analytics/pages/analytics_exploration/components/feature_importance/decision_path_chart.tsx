@@ -40,12 +40,6 @@ const baselineStyle: LineAnnotationStyle = {
     stroke: euiColorFullShade,
     opacity: 0.75,
   },
-  details: {
-    fontFamily: 'Arial',
-    fontSize: 10,
-    fill: euiColorMediumShade,
-    padding: 0,
-  },
 };
 
 const axes: RecursivePartial<AxisStyle> = {
@@ -136,6 +130,7 @@ export const DecisionPathChart = ({
           // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
           theme={theme}
           rotation={90}
+          locale={i18n.getLocale()}
         />
         {regressionBaselineData && (
           <LineAnnotation
@@ -157,7 +152,9 @@ export const DecisionPathChart = ({
               values: { predictionFieldName, xAxisLabel },
             }
           )}
-          showGridLines={false}
+          gridLine={{
+            visible: false,
+          }}
           position={Position.Top}
           showOverlappingTicks
           domain={
@@ -169,7 +166,13 @@ export const DecisionPathChart = ({
               : undefined
           }
         />
-        <Axis showGridLines={true} id="left" position={Position.Left} />
+        <Axis
+          gridLine={{
+            visible: true,
+          }}
+          id="left"
+          position={Position.Left}
+        />
         <LineSeries
           id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathLine'}
           name={xAxisLabel}

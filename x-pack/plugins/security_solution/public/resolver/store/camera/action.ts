@@ -5,112 +5,132 @@
  * 2.0.
  */
 
+import actionCreatorFactory from 'typescript-fsa';
 import type { Vector2 } from '../../types';
 
-interface TimestampedPayload {
+const actionCreator = actionCreatorFactory('x-pack/security_solution/analyzer');
+
+export const userSetZoomLevel = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+  /**
+   * A number whose value is always between 0 and 1 and will be the new scaling factor for the projection.
+   */
+  readonly zoomLevel: number;
+}>('USER_SET_ZOOM_LEVEL');
+
+export const userClickedZoomOut = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+}>('USER_CLICKED_ZOOM_OUT');
+
+export const userClickedZoomIn = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+}>('USER_CLICKED_ZOOM_IN');
+
+export const userZoomed = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+  /**
+   * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
+   * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
+   */
+  readonly zoomChange: number;
   /**
    * Time (since epoch in milliseconds) when this action was dispatched.
    */
   readonly time: number;
-}
+}>('USER_ZOOMED');
 
-interface UserSetZoomLevel {
-  readonly type: 'userSetZoomLevel';
+export const userSetRasterSize = actionCreator<{
   /**
-   * A number whose value is always between 0 and 1 and will be the new scaling factor for the projection.
+   * Id that identify the scope of analyzer
    */
-  readonly payload: number;
-}
-
-interface UserClickedZoomOut {
-  readonly type: 'userClickedZoomOut';
-}
-
-interface UserClickedZoomIn {
-  readonly type: 'userClickedZoomIn';
-}
-
-interface UserZoomed {
-  readonly type: 'userZoomed';
-  readonly payload: {
-    /**
-     * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
-     * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
-     */
-    readonly zoomChange: number;
-  } & TimestampedPayload;
-}
-
-interface UserSetRasterSize {
-  readonly type: 'userSetRasterSize';
+  readonly id: string;
   /**
    * The dimensions of the Resolver component in pixels. The Resolver component should not be scrollable itself.
    */
-  readonly payload: Vector2;
-}
+  readonly dimensions: Vector2;
+}>('USER_SET_RASTER_SIZE');
 
 /**
  * When the user warps the camera to an exact point instantly.
  */
-interface UserSetPositionOfCamera {
-  readonly type: 'userSetPositionOfCamera';
+export const userSetPositionOfCamera = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
   /**
    * The world transform of the camera
    */
-  readonly payload: Vector2;
-}
+  readonly cameraView: Vector2;
+}>('USER_SET_CAMERA_POSITION');
 
-interface UserStartedPanning {
-  readonly type: 'userStartedPanning';
+export const userStartedPanning = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+  /**
+   * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen)
+   * relative to the Resolver component.
+   * Represents a starting position during panning for a pointing device.
+   */
+  readonly screenCoordinates: Vector2;
+  /**
+   * Time (since epoch in milliseconds) when this action was dispatched.
+   */
+  readonly time: number;
+}>('USER_STARTED_PANNING');
 
-  readonly payload: {
-    /**
-     * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen)
-     * relative to the Resolver component.
-     * Represents a starting position during panning for a pointing device.
-     */
-    readonly screenCoordinates: Vector2;
-  } & TimestampedPayload;
-}
+export const userStoppedPanning = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+  readonly time: number;
+}>('USER_STOPPED_PANNING');
 
-interface UserStoppedPanning {
-  readonly type: 'userStoppedPanning';
-
-  readonly payload: TimestampedPayload;
-}
-
-interface UserNudgedCamera {
-  readonly type: 'userNudgedCamera';
+export const userNudgedCamera = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
   /**
    * String that represents the direction in which Resolver can be panned
    */
-  readonly payload: {
-    /**
-     * A cardinal direction to move the users perspective in.
-     */
-    readonly direction: Vector2;
-  } & TimestampedPayload;
-}
+  /**
+   * A cardinal direction to move the users perspective in.
+   */
+  readonly direction: Vector2;
+  /**
+   * Time (since epoch in milliseconds) when this action was dispatched.
+   */
+  readonly time: number;
+}>('USER_NUDGE_CAMERA');
 
-interface UserMovedPointer {
-  readonly type: 'userMovedPointer';
-  readonly payload: {
-    /**
-     * A vector in screen coordinates relative to the Resolver component.
-     * The payload should be contain clientX and clientY minus the client position of the Resolver component.
-     */
-    screenCoordinates: Vector2;
-  } & TimestampedPayload;
-}
-
-export type CameraAction =
-  | UserSetZoomLevel
-  | UserSetRasterSize
-  | UserSetPositionOfCamera
-  | UserStartedPanning
-  | UserStoppedPanning
-  | UserZoomed
-  | UserMovedPointer
-  | UserClickedZoomOut
-  | UserClickedZoomIn
-  | UserNudgedCamera;
+export const userMovedPointer = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+  /**
+   * A vector in screen coordinates relative to the Resolver component.
+   * The payload should be contain clientX and clientY minus the client position of the Resolver component.
+   */
+  readonly screenCoordinates: Vector2;
+  /**
+   * Time (since epoch in milliseconds) when this action was dispatched.
+   */
+  readonly time: number;
+}>('USER_MOVED_POINTER');

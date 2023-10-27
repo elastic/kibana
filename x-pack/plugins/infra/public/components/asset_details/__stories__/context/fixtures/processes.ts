@@ -5,7 +5,51 @@
  * 2.0.
  */
 
-import { ProcessListAPIResponse } from '../../../../../../common/http_api';
+import {
+  ProcessListAPIResponse,
+  ProcessListAPIChartResponse,
+} from '../../../../../../common/http_api';
+
+const processChart: ProcessListAPIChartResponse = {
+  cpu: {
+    id: 'cpu',
+    columns: [
+      {
+        name: 'timestamp',
+        type: 'date',
+      },
+      {
+        name: 'metric_0',
+        type: 'number',
+      },
+    ],
+    rows: [
+      {
+        metric_0: null,
+        timestamp: Date.now(),
+      },
+    ],
+  },
+  memory: {
+    id: 'memory',
+    columns: [
+      {
+        name: 'timestamp',
+        type: 'date',
+      },
+      {
+        name: 'metric_0',
+        type: 'number',
+      },
+    ],
+    rows: [
+      {
+        metric_0: null,
+        timestamp: Date.now(),
+      },
+    ],
+  },
+};
 
 const processes: ProcessListAPIResponse = {
   processList: [
@@ -111,6 +155,10 @@ const processes: ProcessListAPIResponse = {
 };
 
 const summary: ProcessListAPIResponse['summary'] = { running: 366, total: 366 };
+
+export const processesChartHttpResponse = {
+  default: () => Promise.resolve(processChart),
+};
 
 export const processesHttpResponse = {
   default: () => Promise.resolve({ ...processes, summary }),

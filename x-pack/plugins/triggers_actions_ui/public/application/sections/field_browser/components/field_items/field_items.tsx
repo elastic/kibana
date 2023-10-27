@@ -21,7 +21,7 @@ import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { EcsFlat } from '@kbn/ecs';
 import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
-import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';
 import { FieldName } from '../field_name';
 import * as i18n from '../../translations';
@@ -41,6 +41,10 @@ import {
 const getFieldItemName = (name: string): string => {
   if (name === ALERT_CASE_IDS) {
     return i18n.CASES;
+  }
+
+  if (name === ALERT_MAINTENANCE_WINDOW_IDS) {
+    return i18n.MAINTENANCE_WINDOWS;
   }
 
   return name;

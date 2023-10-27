@@ -6,3 +6,4 @@
  */
 
 export { WorkspacePanel } from './workspace_panel';
+export { VisualizationToolbar } from './workspace_panel_wrapper';

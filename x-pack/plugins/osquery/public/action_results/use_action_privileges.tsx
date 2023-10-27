@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 
 export const useActionResultsPrivileges = () => {
@@ -13,7 +14,7 @@ export const useActionResultsPrivileges = () => {
 
   return useQuery(
     ['actionResultsPrivileges'],
-    () => http.get('/internal/osquery/privileges_check'),
+    () => http.get('/internal/osquery/privileges_check', { version: API_VERSIONS.internal.v1 }),
     {
       keepPreviousData: true,
     }

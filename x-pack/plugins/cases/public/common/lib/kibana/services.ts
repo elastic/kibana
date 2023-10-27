@@ -7,8 +7,10 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { CasesUiConfigType } from '../../../../common/ui/types';
+import type { CasesPluginStart } from '../../../types';
 
-type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'theme'>;
+type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'theme'> &
+  Pick<CasesPluginStart, 'serverless'>;
 
 export class KibanaServices {
   private static kibanaVersion?: string;
@@ -19,13 +21,14 @@ export class KibanaServices {
     application,
     config,
     http,
+    serverless,
     kibanaVersion,
     theme,
   }: GlobalServices & {
     kibanaVersion: string;
     config: CasesUiConfigType;
   }) {
-    this.services = { application, http, theme };
+    this.services = { application, http, theme, serverless };
     this.kibanaVersion = kibanaVersion;
     this.config = config;
   }

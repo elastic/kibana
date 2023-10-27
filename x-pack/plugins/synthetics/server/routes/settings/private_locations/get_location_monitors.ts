@@ -6,7 +6,7 @@
  */
 
 import { IKibanaResponse } from '@kbn/core/server';
-import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
 

@@ -15,7 +15,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const tagManagementPage = PageObjects.tagManagement;
 
-  describe('edit tag', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/167560
+  describe.skip('edit tag', () => {
     let tagModal: typeof tagManagementPage['tagModal'];
 
     before(async () => {

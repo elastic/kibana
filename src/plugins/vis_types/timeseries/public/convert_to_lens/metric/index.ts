@@ -117,6 +117,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     const [bucket] = uniqueBuckets;
 
     const extendedLayer: ExtendedLayer = {
+      ignoreGlobalFilters: Boolean(
+        model.ignore_global_filter ||
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          visibleSeries.some(({ ignore_global_filter }) => ignore_global_filter)
+      ),
       indexPatternId: indexPatternId as string,
       layerId: uuidv4(),
       columns: [...metrics, ...(bucket ? [bucket] : [])],

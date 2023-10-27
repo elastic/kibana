@@ -5,56 +5,60 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { type FC } from 'react';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import { i18n } from '@kbn/i18n';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-utils';
+import { DocumentCountChart, type BrushSelectionUpdateHandler } from '@kbn/aiops-components';
 
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { DocumentCountStats } from '../../../get_document_stats';
 
-import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
 
-const clearSelectionLabel = i18n.translate(
-  'xpack.aiops.documentCountContent.clearSelectionAriaLabel',
-  {
-    defaultMessage: 'Clear selection',
-  }
-);
-
 export interface DocumentCountContentProps {
-  brushSelectionUpdateHandler: (d: WindowParameters) => void;
-  clearSelectionHandler: () => void;
+  brushSelectionUpdateHandler: BrushSelectionUpdateHandler;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
+  isBrushCleared: boolean;
   totalCount: number;
   sampleProbability: number;
+  initialAnalysisStart?: number | WindowParameters;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
   windowParameters?: WindowParameters;
-  incomingInitialAnalysisStart?: number;
+  incomingInitialAnalysisStart?: number | WindowParameters;
+  baselineLabel?: string;
+  deviationLabel?: string;
+  barStyleAccessor?: BarStyleAccessor;
+  baselineAnnotationStyle?: RectAnnotationSpec['style'];
+  deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   brushSelectionUpdateHandler,
-  clearSelectionHandler,
   documentCountStats,
   documentCountStatsSplit,
   documentCountStatsSplitLabel = '',
+  isBrushCleared,
   totalCount,
   sampleProbability,
+  initialAnalysisStart,
+  barColorOverride,
+  barHighlightColorOverride,
   windowParameters,
   incomingInitialAnalysisStart,
+  ...docCountChartProps
 }) => {
-  const [isBrushCleared, setIsBrushCleared] = useState(true);
-  const [initialAnalysisStart, setInitialAnalysisStart] = useState<number | undefined>(
-    incomingInitialAnalysisStart
-  );
-
-  useEffect(() => {
-    setIsBrushCleared(windowParameters === undefined);
-  }, [windowParameters]);
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
@@ -74,14 +78,14 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     ) : null;
   }
 
-  const chartPoints: DocumentCountChartPoint[] = Object.entries(documentCountStats.buckets).map(
+  const chartPoints: LogRateHistogramItem[] = Object.entries(documentCountStats.buckets).map(
     ([time, value]) => ({
       time: +time,
       value,
     })
   );
 
-  let chartPointsSplit: DocumentCountChartPoint[] | undefined;
+  let chartPointsSplit: LogRateHistogramItem[] | undefined;
   if (documentCountStatsSplit?.buckets !== undefined) {
     chartPointsSplit = Object.entries(documentCountStatsSplit?.buckets).map(([time, value]) => ({
       time: +time,
@@ -89,52 +93,30 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     }));
   }
 
-  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
-    if (!isBrushCleared || force) {
-      brushSelectionUpdateHandler(d);
-    }
-    if (force) {
-      setIsBrushCleared(false);
-    }
-  }
-
-  function clearSelection() {
-    setIsBrushCleared(true);
-    setInitialAnalysisStart(undefined);
-    clearSelectionHandler();
-  }
-
   return (
-    <>
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem>
-          <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
-        </EuiFlexItem>
-        {!isBrushCleared && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={clearSelection}
-              size="xs"
-              data-test-subj="aiopsClearSelectionBadge"
-            >
-              {clearSelectionLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+    <EuiFlexGroup gutterSize="m" direction="column">
+      <EuiFlexItem>
+        <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+      </EuiFlexItem>
       {documentCountStats.interval !== undefined && (
-        <DocumentCountChart
-          brushSelectionUpdateHandler={brushSelectionUpdate}
-          chartPoints={chartPoints}
-          chartPointsSplit={chartPointsSplit}
-          timeRangeEarliest={timeRangeEarliest}
-          timeRangeLatest={timeRangeLatest}
-          interval={documentCountStats.interval}
-          chartPointsSplitLabel={documentCountStatsSplitLabel}
-          isBrushCleared={isBrushCleared}
-          autoAnalysisStart={initialAnalysisStart}
-        />
+        <EuiFlexItem>
+          <DocumentCountChart
+            dependencies={{ data, uiSettings, fieldFormats, charts }}
+            brushSelectionUpdateHandler={brushSelectionUpdateHandler}
+            chartPoints={chartPoints}
+            chartPointsSplit={chartPointsSplit}
+            timeRangeEarliest={timeRangeEarliest}
+            timeRangeLatest={timeRangeLatest}
+            interval={documentCountStats.interval}
+            chartPointsSplitLabel={documentCountStatsSplitLabel}
+            isBrushCleared={isBrushCleared}
+            autoAnalysisStart={initialAnalysisStart}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
+            {...docCountChartProps}
+          />
+        </EuiFlexItem>
       )}
-    </>
+    </EuiFlexGroup>
   );
 };

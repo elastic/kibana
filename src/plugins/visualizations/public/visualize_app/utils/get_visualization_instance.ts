@@ -9,11 +9,7 @@ import { cloneDeep } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
-import {
-  getSavedSearch,
-  SavedSearch,
-  throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import {
@@ -37,25 +33,17 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { data, createVisEmbeddableFromObject, savedObjects, spaces, savedObjectsTagging } =
-    visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedSearch: savedSearchApi } = visualizeServices;
 
   let savedSearch: SavedSearch | undefined;
 
   if (vis.data.savedSearchId) {
     try {
-      savedSearch = await getSavedSearch(vis.data.savedSearchId, {
-        search: data.search,
-        savedObjectsClient: savedObjects.client,
-        spaces,
-        savedObjectsTagging,
-      });
+      savedSearch = vis.data.savedSearchId
+        ? await savedSearchApi.get(vis.data.savedSearchId)
+        : await savedSearchApi.getNew();
     } catch (e) {
       // skip this catch block
-    }
-
-    if (savedSearch) {
-      await throwErrorOnSavedSearchUrlConflict(savedSearch);
     }
   }
 

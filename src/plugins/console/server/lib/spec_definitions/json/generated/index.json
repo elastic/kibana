@@ -1,27 +1,40 @@
 {
   "index": {
     "url_params": {
-      "wait_for_active_shards": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "if_primary_term": "",
+      "if_seq_no": "",
       "op_type": [
         "index",
         "create"
       ],
+      "pipeline": "",
       "refresh": [
         "true",
         "false",
         "wait_for"
       ],
       "routing": "",
-      "timeout": "",
+      "timeout": [
+        "1m",
+        "-1",
+        "0"
+      ],
       "version": "",
       "version_type": [
         "internal",
         "external",
-        "external_gte"
+        "external_gte",
+        "force"
       ],
-      "if_seq_no": "",
-      "if_primary_term": "",
-      "pipeline": "",
+      "wait_for_active_shards": [
+        "1",
+        "all",
+        "index-setting"
+      ],
       "require_alias": "__flag__"
     },
     "methods": [
@@ -29,9 +42,13 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_doc/{id}",
-      "{indices}/_doc"
+      "{index}/_doc/{id}",
+      "{index}/_doc"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

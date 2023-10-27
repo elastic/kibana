@@ -24,7 +24,7 @@ export const stateContainsFilters = (
 export const cleanFiltersForSerialize = (filters?: Filter[]): Filter[] => {
   if (!filters) return [];
   return filters.map((filter) => {
-    if (filter.meta.value) delete filter.meta.value;
+    if (filter.meta?.value) delete filter.meta.value;
     return filter;
   });
 };

@@ -6,7 +6,7 @@
  */
 
 import { createContext } from 'react';
-import { Field, Aggregation } from '../../../../../../common/types/fields';
+import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { JobCreatorType, SingleMetricJobCreator } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';

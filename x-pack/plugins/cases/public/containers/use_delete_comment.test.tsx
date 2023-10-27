@@ -62,7 +62,6 @@ describe('useDeleteComment', () => {
     expect(spyOnDeleteComment).toBeCalledWith({
       caseId: basicCaseId,
       commentId,
-      signal: expect.any(AbortSignal),
     });
   });
 
@@ -122,7 +121,6 @@ describe('useDeleteComment', () => {
     expect(spyOnDeleteComment).toBeCalledWith({
       caseId: basicCaseId,
       commentId,
-      signal: expect.any(AbortSignal),
     });
 
     expect(addError).toHaveBeenCalled();

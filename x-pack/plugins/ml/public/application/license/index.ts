@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export {
-  checkBasicLicense,
-  checkFullLicense,
-  hasLicenseExpired,
-  isFullLicense,
-  setLicenseCache,
-} from './check_license';
+export { hasLicenseExpired, isFullLicense, setLicenseCache } from './check_license';

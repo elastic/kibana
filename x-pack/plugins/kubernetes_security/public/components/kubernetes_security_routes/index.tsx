@@ -6,17 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -40,13 +32,12 @@ import {
 import { PercentWidget } from '../percent_widget';
 import { CountWidget } from '../count_widget';
 import { KubernetesSecurityDeps } from '../../types';
-import { AggregateResult } from '../../../common/types/aggregate';
+import { AggregateResult } from '../../../common/types';
 import { useLastUpdated } from '../../hooks';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
 import { ChartsToggle } from '../charts_toggle';
 import {
-  BETA,
   COUNT_WIDGET_CLUSTERS,
   COUNT_WIDGET_NAMESPACE,
   COUNT_WIDGET_NODES,
@@ -96,16 +87,13 @@ const KubernetesSecurityRoutesComponent = ({
   }, [setShouldHideCharts, shouldHideCharts]);
 
   return (
-    <Switch>
+    <Routes>
       <Route strict exact path={KUBERNETES_PATH}>
         {filter}
         <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1 css={styles.titleText}>
-                {KUBERNETES_TITLE}
-                <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-              </h1>
+              <h1 css={styles.titleText}>{KUBERNETES_TITLE}</h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.titleActions}>
@@ -287,7 +275,7 @@ const KubernetesSecurityRoutesComponent = ({
           indexPattern={indexPattern}
         />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 

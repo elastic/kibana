@@ -14,6 +14,7 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { defineChangeUserPasswordRoutes } from './change_password';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../../authentication';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
@@ -23,7 +24,6 @@ import { type Session, SessionMissingError } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineChangeUserPasswordRoutes } from './change_password';
 
 describe('Change password', () => {
   let router: jest.Mocked<SecurityRouter>;

@@ -16,7 +16,7 @@ export default function canvasCustomElementTest({
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['canvas', 'common']);
+  const PageObjects = getPageObjects(['canvas']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
@@ -26,12 +26,9 @@ export default function canvasCustomElementTest({
 
     before(async () => {
       await kibanaServer.importExport.load(archive);
-      // open canvas home
-      await PageObjects.common.navigateToApp('canvas');
       // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-      });
+      await PageObjects.canvas.goToListingPage();
+      await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
     });
 
     after(async () => {

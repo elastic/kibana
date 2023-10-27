@@ -37,6 +37,33 @@ describe('getModelVersionDelta', () => {
     ]);
   });
 
+  it('accepts adding types for upward delta', () => {
+    const result = getModelVersionDelta({
+      currentVersions: {
+        a: '10.1.0',
+      },
+      targetVersions: {
+        a: '10.2.0',
+        b: '10.1.0',
+      },
+      deletedTypes: [],
+    });
+
+    expect(result.status).toEqual('upward');
+    expect(result.diff).toEqual([
+      {
+        name: 'a',
+        current: '10.1.0',
+        target: '10.2.0',
+      },
+      {
+        name: 'b',
+        current: undefined,
+        target: '10.1.0',
+      },
+    ]);
+  });
+
   it('generates a downward delta', () => {
     const result = getModelVersionDelta({
       currentVersions: {
@@ -61,6 +88,33 @@ describe('getModelVersionDelta', () => {
         name: 'b',
         current: '10.2.0',
         target: '7.17.2',
+      },
+    ]);
+  });
+
+  it('accepts removing types for downward delta', () => {
+    const result = getModelVersionDelta({
+      currentVersions: {
+        a: '10.4.0',
+        b: '10.2.0',
+      },
+      targetVersions: {
+        a: '10.1.0',
+      },
+      deletedTypes: [],
+    });
+
+    expect(result.status).toEqual('downward');
+    expect(result.diff).toEqual([
+      {
+        name: 'a',
+        current: '10.4.0',
+        target: '10.1.0',
+      },
+      {
+        name: 'b',
+        current: '10.2.0',
+        target: undefined,
       },
     ]);
   });

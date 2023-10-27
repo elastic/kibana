@@ -223,7 +223,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createIndex(
       indices: string,
-      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping
+      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping,
+      settings?: Record<string, estypes.IndicesIndexSettings> | estypes.IndicesIndexSettings
     ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
@@ -233,7 +234,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       const body = await es.indices.create({
         index: indices,
-        ...(mappings ? { body: { mappings } } : {}),
+        body: {
+          ...(mappings ? { mappings } : {}),
+          ...(settings ? { settings } : {}),
+        },
       });
       expect(body)
         .to.have.property('acknowledged')
@@ -1065,6 +1069,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async getGroups(space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/internal/ml/jobs/groups`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
+
+      return body;
+    },
+
     async getAnnotations(jobId: string) {
       log.debug(`Fetching annotations for job '${jobId}'...`);
 
@@ -1248,7 +1261,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async syncSavedObjects(simulate: boolean = false, space?: string) {
       const { body, status } = await kbnSupertest
         .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
-        .set(getCommonRequestHeader('2023-05-15'));
+        .set(getCommonRequestHeader('2023-10-31'));
       this.assertResponseStatusCode(200, status, body);
 
       return body;
@@ -1328,6 +1341,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
+    async getTrainedModelStatsES(): Promise<estypes.MlGetTrainedModelsStatsResponse> {
+      log.debug(`Getting trained models stats`);
+      const { body, status } = await esSupertest.get(`/_ml/trained_models/_stats`);
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model stats fetched');
+      return body;
+    },
+
     async deleteTrainedModelES(modelId: string) {
       log.debug(`Deleting trained model with id "${modelId}"`);
       const { body, status } = await esSupertest
@@ -1350,10 +1372,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async stopTrainedModelDeploymentES(modelId: string) {
-      log.debug(`Stopping trained model deployment with id "${modelId}"`);
+    async stopTrainedModelDeploymentES(deploymentId: string) {
+      log.debug(`Stopping trained model deployment with id "${deploymentId}"`);
       const { body, status } = await esSupertest.post(
-        `/_ml/trained_models/${modelId}/deployment/_stop`
+        `/_ml/trained_models/${deploymentId}/deployment/_stop`
       );
       this.assertResponseStatusCode(200, status, body);
 
@@ -1362,13 +1384,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async stopAllTrainedModelDeploymentsES() {
       log.debug(`Stopping all trained model deployments`);
-      const getModelsRsp = await this.getTrainedModelsES();
-      for (const model of getModelsRsp.trained_model_configs) {
-        if (this.isInternalModelId(model.model_id)) {
-          log.debug(`> Skipping internal ${model.model_id}`);
+      const getModelsRsp = await this.getTrainedModelStatsES();
+      for (const modelStats of getModelsRsp.trained_model_stats) {
+        if (this.isInternalModelId(modelStats.model_id)) {
+          log.debug(`> Skipping internal ${modelStats.model_id}`);
           continue;
         }
-        await this.stopTrainedModelDeploymentES(model.model_id);
+        if (modelStats.deployment_stats === undefined) {
+          log.debug(`> Skipping, no deployment stats for ${modelStats.model_id} found`);
+          continue;
+        }
+        await this.stopTrainedModelDeploymentES(modelStats.deployment_stats.deployment_id);
       }
     },
 
@@ -1485,16 +1511,43 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         });
       this.assertResponseStatusCode(200, status, ingestPipeline);
 
-      log.debug('> Ingest pipeline crated');
+      log.debug('> Ingest pipeline created');
       return ingestPipeline;
     },
 
-    async deleteIngestPipeline(modelId: string) {
+    async deleteIngestPipeline(modelId: string, usePrefix: boolean = true) {
       log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
-      const { body, status } = await esSupertest.delete(`/_ingest/pipeline/pipeline_${modelId}`);
+      const { body, status } = await esSupertest.delete(
+        `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
+      );
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
+    },
+
+    async assureMlStatsIndexExists(timeout: number = 60 * 1000) {
+      const params = {
+        index: '.ml-stats-000001',
+        id: 'noop_job_test_id',
+        body: {
+          type: 'analytics_memory_usage',
+          job_id: 'noop_job',
+          timestamp: 1687437633705,
+          peak_usage_bytes: 148148,
+          status: 'ok',
+        },
+        refresh: 'wait_for',
+      } as const;
+      await es.index(params);
+
+      await retry.waitForWithTimeout(`Stats index to exist`, timeout, async () => {
+        const statsIndices = await es.cat.indices({ format: 'json', index: '.ml-stats*' });
+        if (statsIndices[0]?.health === 'green') {
+          return true;
+        } else {
+          throw new Error(`expected stats index to exist`);
+        }
+      });
     },
 
     async setupModule(
@@ -1510,6 +1563,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, module);
 
       log.debug('Module set up');
+      return module;
+    },
+
+    async getModule(moduleId: string) {
+      log.debug(`Get module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .get(`/internal/ml/modules/get_module/${moduleId}`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
       return module;
     },
   };

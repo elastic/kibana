@@ -14,6 +14,7 @@ import type {
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
 import type { IndexMapping, IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
@@ -132,10 +133,16 @@ export interface BaseState extends ControlState {
    */
   readonly versionIndex: string;
   /**
-   * An alias on the target index used as part of an "reindex block" that
+   * A temporary index used as part of an "reindex block" that
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
+  /**
+   * An alias to the tempIndex used to prevent ES from auto-creating the temp
+   * index if one node deletes it while another writes to it
+   * e.g. `.kibana_7.11.0_reindex_temp_alias`.
+   */
+  readonly tempIndexAlias: string;
   /**
    * When upgrading to a more recent kibana version, some saved object types
    * might be conflicting or no longer used.
@@ -180,6 +187,9 @@ export interface BaseState extends ControlState {
    * }
    */
   readonly indexTypesMap: IndexTypesMap;
+
+  /** Capabilities of the ES cluster we're using */
+  readonly esCapabilities: ElasticsearchCapabilities;
 }
 
 export interface InitState extends BaseState {
@@ -368,6 +378,7 @@ export interface CheckTargetMappingsState extends PostInitState {
 export interface UpdateTargetMappingsPropertiesState extends PostInitState {
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES';
+  readonly updatedTypesQuery: Option.Option<QueryDslQueryContainer>;
 }
 
 export interface UpdateTargetMappingsPropertiesWaitForTaskState extends PostInitState {
@@ -453,6 +464,14 @@ export interface MarkVersionIndexReady extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
+export interface MarkVersionIndexReadySync extends PostInitState {
+  /** Single "client.indices.updateAliases" operation
+   * to update multiple indices' aliases simultaneously
+   * */
+  readonly controlState: 'MARK_VERSION_INDEX_READY_SYNC';
+  readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
+}
+
 export interface MarkVersionIndexReadyConflict extends PostInitState {
   /**
    * If the MARK_VERSION_INDEX_READY step fails another instance was
@@ -535,6 +554,7 @@ export type State = Readonly<
   | LegacyReindexWaitForTaskState
   | LegacySetWriteBlockState
   | MarkVersionIndexReady
+  | MarkVersionIndexReadySync
   | MarkVersionIndexReadyConflict
   | OutdatedDocumentsRefresh
   | OutdatedDocumentsSearchClosePit

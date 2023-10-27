@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import {
+  Logger,
   KibanaRequest,
   KibanaResponseFactory,
   RouteRegistrar,
@@ -25,9 +26,17 @@ import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
 import { VersionedRouteRegistrar } from '@kbn/core-http-server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
+import { APMCore, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
+import { APMConfig } from '../..';
+import {
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from '../../types';
 
 const inspectRt = t.exact(
   t.partial({
@@ -99,6 +108,14 @@ export function registerRoutes({
           runtimeType
         );
 
+        const getApmIndices = async () => {
+          const coreContext = await context.core;
+          const apmIndices = await plugins.apmDataAccess.setup.getApmIndices(
+            coreContext.savedObjects.client
+          );
+          return apmIndices;
+        };
+
         const { aborted, data } = await Promise.race([
           handler({
             request,
@@ -109,6 +126,7 @@ export function registerRoutes({
             core,
             plugins,
             telemetryUsageCounter,
+            getApmIndices,
             params: merge(
               {
                 query: {
@@ -170,6 +188,7 @@ export function registerRoutes({
           body: {
             message: error.message,
             attributes: {
+              data: {},
               _inspect: inspectableEsQueriesMap.get(request),
             },
           },
@@ -181,6 +200,7 @@ export function registerRoutes({
 
         if (Boom.isBoom(error)) {
           opts.statusCode = error.output.statusCode;
+          opts.body.attributes.data = error?.data;
         }
 
         // capture error with APM node agent
@@ -228,4 +248,30 @@ export function registerRoutes({
       );
     }
   });
+}
+
+type Plugins = {
+  [key in keyof APMPluginSetupDependencies]: {
+    setup: Required<APMPluginSetupDependencies>[key];
+    start: () => Promise<Required<APMPluginStartDependencies>[key]>;
+  };
+};
+
+export interface APMRouteHandlerResources {
+  request: KibanaRequest;
+  context: ApmPluginRequestHandlerContext;
+  params: {
+    query: {
+      _inspect: boolean;
+    };
+  };
+  config: APMConfig;
+  featureFlags: ApmFeatureFlags;
+  logger: Logger;
+  core: APMCore;
+  plugins: Plugins;
+  ruleDataClient: IRuleDataClient;
+  telemetryUsageCounter?: TelemetryUsageCounter;
+  kibanaVersion: string;
+  getApmIndices: () => Promise<APMIndices>;
 }

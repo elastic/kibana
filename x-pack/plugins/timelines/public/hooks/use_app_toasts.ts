@@ -93,8 +93,10 @@ export const esErrorToErrorStack = (error: IEsError & MaybeESError): Error => {
       ? `(${error.statusCode})`
       : '';
   const stringifiedError = getStringifiedStack(maybeUnWrapped);
-  const adaptedError = new Error(`${error.attributes?.reason ?? error.message} ${statusCode}`);
-  adaptedError.name = error.attributes?.reason ?? error.message;
+  const adaptedError = new Error(
+    `${error.attributes?.error?.reason ?? error.message} ${statusCode}`
+  );
+  adaptedError.name = error.attributes?.error?.reason ?? error.message;
   if (stringifiedError != null) {
     adaptedError.stack = stringifiedError;
   }

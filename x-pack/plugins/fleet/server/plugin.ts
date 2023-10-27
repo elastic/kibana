@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
@@ -62,14 +63,10 @@ import {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INTEGRATIONS_PLUGIN_ID,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-  getFileMetadataIndexName,
-  getFileDataIndexName,
 } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
-import { FleetFromHostFilesClient } from './services/files/client_from_host';
-
-import type { FleetFromHostFileClientInterface } from './services/files/types';
+import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -125,13 +122,16 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
-import { getRequestStore } from './services/request_store';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
-import type { FleetToHostFileClientInterface } from './services/files/types';
-import { FleetToHostFilesClient } from './services/files/client_to_host';
+import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
+import type { FilesClientFactory } from './services/files/types';
+import { PolicyWatcher } from './services/agent_policy_watch';
+import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
+import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
+import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -169,6 +169,7 @@ export interface FleetAppContext {
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
+  kibanaInstanceId: PluginInitializerContext['env']['instanceUuid'];
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -231,31 +232,15 @@ export interface FleetStartContract {
    * @param type
    * @param maxSizeBytes
    */
-  createFilesClient: Readonly<{
-    /**
-     * Client to interact with files that will be sent to a host.
-     * @param packageName
-     * @param maxSizeBytes
-     */
-    toHost: (
-      /** The integration package name */
-      packageName: string,
-      /** Max file size allow to be created (in bytes) */
-      maxSizeBytes?: number
-    ) => FleetToHostFileClientInterface;
-
-    /**
-     * Client to interact with files that were sent from the host
-     * @param packageName
-     */
-    fromHost: (
-      /** The integration package name */
-      packageName: string
-    ) => FleetFromHostFileClientInterface;
-  }>;
+  createFilesClient: Readonly<FilesClientFactory>;
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
+  createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
+  /*
+  Function exported to allow creating unique ids for saved object tags
+   */
+  getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
 }
 
 export class FleetPlugin
@@ -269,6 +254,7 @@ export class FleetPlugin
   private isProductionMode: FleetAppContext['isProductionMode'];
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'];
   private httpSetup?: HttpServiceSetup;
   private securitySetup!: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
@@ -277,16 +263,19 @@ export class FleetPlugin
   private bulkActionsResolver?: BulkActionsResolver;
   private fleetUsageSender?: FleetUsageSender;
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
+  private fleetMetricsTask?: FleetMetricsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
+  private policyWatcher?: PolicyWatcher;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
+    this.kibanaInstanceId = this.initializerContext.env.instanceUuid;
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
@@ -415,42 +404,38 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
-        const requestStore = getRequestStore();
+        return {
+          get agentClient() {
+            const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
 
-        return requestStore.run(request, () => {
-          return {
-            get agentClient() {
-              const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
+            return {
+              asCurrentUser: agentService.asScoped(request),
+              asInternalUser: agentService.asInternalUser,
+            };
+          },
+          get packagePolicyService() {
+            const service = plugin.setupPackagePolicyService();
 
-              return {
-                asCurrentUser: agentService.asScoped(request),
-                asInternalUser: agentService.asInternalUser,
-              };
-            },
-            get packagePolicyService() {
-              const service = plugin.setupPackagePolicyService();
+            return {
+              asCurrentUser: service.asScoped(request),
+              asInternalUser: service.asInternalUser,
+            };
+          },
+          authz,
+          get internalSoClient() {
+            // Use a lazy getter to avoid constructing this client when not used by a request handler
+            return getInternalSoClient();
+          },
+          get spaceId() {
+            return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+          },
 
-              return {
-                asCurrentUser: service.asScoped(request),
-                asInternalUser: service.asInternalUser,
-              };
-            },
-            authz,
-            get internalSoClient() {
-              // Use a lazy getter to avoid constructing this client when not used by a request handler
-              return getInternalSoClient();
-            },
-            get spaceId() {
-              return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-            },
-
-            get limitedToPackages() {
-              if (routeAuthz && routeAuthz.granted) {
-                return routeAuthz.scopeDataToPackages;
-              }
-            },
-          };
-        });
+          get limitedToPackages() {
+            if (routeAuthz && routeAuthz.granted) {
+              return routeAuthz.scopeDataToPackages;
+            }
+          },
+        };
       }
     );
 
@@ -460,6 +445,10 @@ export class FleetPlugin
       await fetchFleetUsage(core, config, abortController);
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
+
+    const fetchAgents = async (abortController: AbortController) =>
+      await fetchAgentMetrics(core, abortController);
+    this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
@@ -511,6 +500,7 @@ export class FleetPlugin
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
+      kibanaInstanceId: this.kibanaInstanceId,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
@@ -520,14 +510,18 @@ export class FleetPlugin
       uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
     startFleetUsageLogger(plugins.taskManager);
+    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
 
     const logger = appContextService.getLogger();
+
+    this.policyWatcher = new PolicyWatcher(core.savedObjects, core.elasticsearch, logger);
+
+    this.policyWatcher.start(licenseService);
 
     const fleetSetupPromise = (async () => {
       try {
@@ -551,9 +545,39 @@ export class FleetPlugin
           )
           .toPromise();
 
-        await setupFleet(
-          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-          core.elasticsearch.client.asInternalUser
+        // Retry Fleet setup w/ backoff
+        await backOff(
+          async () => {
+            await setupFleet(
+              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.elasticsearch.client.asInternalUser
+            );
+          },
+          {
+            // We only retry when this feature flag is enabled
+            numOfAttempts: this.configInitialValue.internal?.retrySetupOnBoot ? Infinity : 1,
+            // 250ms initial backoff
+            startingDelay: 250,
+            // 5m max backoff
+            maxDelay: 60000 * 5,
+            timeMultiple: 2,
+            // avoid HA contention with other Kibana instances
+            jitter: 'full',
+            retry: (error: any, attemptCount: number) => {
+              const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
+              logger.debug(summary, { error: { message: error } });
+
+              this.fleetStatus$.next({
+                level: ServiceStatusLevels.available,
+                summary,
+                meta: {
+                  attemptCount,
+                  error,
+                },
+              });
+              return true;
+            },
+          }
         );
 
         this.fleetStatus$.next({
@@ -561,8 +585,7 @@ export class FleetPlugin
           summary: 'Fleet is available',
         });
       } catch (error) {
-        logger.warn('Fleet setup failed');
-        logger.warn(error);
+        logger.warn('Fleet setup failed', { error: { message: error } });
 
         this.fleetStatus$.next({
           // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
@@ -604,34 +627,24 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
-      createFilesClient: Object.freeze({
-        fromHost: (packageName) => {
-          return new FleetFromHostFilesClient(
-            core.elasticsearch.client.asInternalUser,
-            this.initializerContext.logger.get('fleetFiles', packageName),
-            getFileMetadataIndexName(packageName),
-            getFileDataIndexName(packageName)
-          );
-        },
-
-        toHost: (packageName, maxFileBytes) => {
-          return new FleetToHostFilesClient(
-            core.elasticsearch.client.asInternalUser,
-            this.initializerContext.logger.get('fleetFiles', packageName),
-            // FIXME:PT define once we have new index patterns (defend workflows team issue #6553)
-            getFileMetadataIndexName(packageName),
-            getFileDataIndexName(packageName),
-            maxFileBytes
-          );
-        },
-      }),
+      createFilesClient: Object.freeze(
+        getFilesClientFactory({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.initializerContext.logger,
+        })
+      ),
       messageSigningService,
       uninstallTokenService,
+      createFleetActionsClient(packageName: string) {
+        return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
+      },
+      getPackageSpecTagId,
     };
   }
 
-  public async stop() {
+  public stop() {
     appContextService.stop();
+    this.policyWatcher?.stop();
     licenseService.stop();
     this.telemetryEventsSender.stop();
     this.fleetStatus$.complete();

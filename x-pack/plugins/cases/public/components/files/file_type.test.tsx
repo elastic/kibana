@@ -5,18 +5,17 @@
  * 2.0.
  */
 import type { JsonValue } from '@kbn/utility-types';
-
+import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 
 import type { ExternalReferenceAttachmentViewProps } from '../../client/attachment_framework/types';
 import type { AppMockRenderer } from '../../common/mock';
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 import { createAppMockRenderer } from '../../common/mock';
 import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
-import userEvent from '@testing-library/user-event';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
 describe('getFileType', () => {
   const fileType = getFileType();
@@ -25,7 +24,7 @@ describe('getFileType', () => {
     expect(fileType).toStrictEqual({
       id: FILE_ATTACHMENT_TYPE,
       icon: 'document',
-      displayName: 'File Attachment Type',
+      displayName: 'Files',
       getAttachmentViewObject: expect.any(Function),
       getAttachmentRemovalObject: expect.any(Function),
     });
@@ -34,11 +33,12 @@ describe('getFileType', () => {
   describe('getFileAttachmentViewObject', () => {
     let appMockRender: AppMockRenderer;
 
-    const attachmentViewProps = {
+    const attachmentViewProps: ExternalReferenceAttachmentViewProps = {
       externalReferenceId: basicFileMock.id,
+      // @ts-expect-error: files is a proper JSON
       externalReferenceMetadata: { files: [basicFileMock] },
       caseData: { title: basicCase.title, id: basicCase.id },
-    } as unknown as ExternalReferenceAttachmentViewProps;
+    };
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -47,7 +47,7 @@ describe('getFileType', () => {
     it('event renders a clickable name if the file is an image', async () => {
       appMockRender = createAppMockRenderer();
 
-      // @ts-ignore
+      // @ts-expect-error: event is defined
       appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).event);
 
       expect(await screen.findByText('my-super-cool-screenshot.png')).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe('getFileType', () => {
     it('clicking the name rendered in event opens the file preview', async () => {
       appMockRender = createAppMockRenderer();
 
-      // @ts-ignore
+      // @ts-expect-error: event is a React element
       appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).event);
 
       userEvent.click(await screen.findByText('my-super-cool-screenshot.png'));
@@ -71,18 +71,17 @@ describe('getFileType', () => {
 
       expect(attachmentViewObject).not.toBeUndefined();
 
-      // @ts-ignore
+      // @ts-expect-error: object is defined
       const actions = attachmentViewObject.getActions();
 
       expect(actions.length).toBe(2);
       expect(actions[0]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Download file',
         render: expect.any(Function),
       });
 
-      // @ts-ignore
+      // @ts-expect-error: render exists on CustomAttachmentAction
       appMockRender.render(actions[0].render());
 
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
@@ -95,18 +94,17 @@ describe('getFileType', () => {
 
       expect(attachmentViewObject).not.toBeUndefined();
 
-      // @ts-ignore
+      // @ts-expect-error: object is defined
       const actions = attachmentViewObject.getActions();
 
       expect(actions.length).toBe(2);
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Delete file',
         render: expect.any(Function),
       });
 
-      // @ts-ignore
+      // @ts-expect-error: render exists on CustomAttachmentAction
       appMockRender.render(actions[1].render());
 
       expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
@@ -119,18 +117,17 @@ describe('getFileType', () => {
 
       expect(attachmentViewObject).not.toBeUndefined();
 
-      // @ts-ignore
+      // @ts-expect-error: object is defined
       const actions = attachmentViewObject.getActions();
 
       expect(actions.length).toBe(2);
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Delete file',
         render: expect.any(Function),
       });
 
-      // @ts-ignore
+      // @ts-expect-error: render exists on CustomAttachmentAction
       appMockRender.render(actions[1].render());
 
       const deleteButton = await screen.findByTestId('cases-files-delete-button');
@@ -149,7 +146,6 @@ describe('getFileType', () => {
         event: 'added an unknown file',
         hideDefaultActions: true,
         timelineAvatar: 'document',
-        type: 'regular',
         getActions: expect.any(Function),
       });
     });
@@ -188,7 +184,7 @@ describe('getFileType', () => {
 
   describe('getFileAttachmentRemovalObject', () => {
     it('event renders the right message', async () => {
-      // @ts-ignore
+      // @ts-expect-error: object is defined
       expect(fileType.getAttachmentRemovalObject().event).toBe('removed file');
     });
   });

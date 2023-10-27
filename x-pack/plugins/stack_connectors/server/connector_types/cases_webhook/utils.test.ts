@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AxiosHeaders } from 'axios';
 import {
   getObjectValueByKeyAsString,
   stringifyObjValues,
@@ -60,6 +61,7 @@ describe('cases_webhook/utils', () => {
       config: {
         method: 'post',
         url: 'https://poster.com',
+        headers: new AxiosHeaders({}),
       },
     };
     it('Throws error when missing content-type', () => {

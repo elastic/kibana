@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
+
 import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
-import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -36,6 +36,9 @@ import {
   waitForSignalsToBePresent,
   updateRule,
   deleteAllEventLogExecutionEvents,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  createRuleThroughAlertingEndpoint,
 } from '../../../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -73,32 +76,28 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            query: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -109,38 +108,30 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            query: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -152,30 +143,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            query: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              notifications_disabled: 1,
+              disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              notifications_disabled: 1,
+              disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -189,32 +170,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            query: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -226,26 +197,21 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-              },
+
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            query: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -259,69 +225,99 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            query: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
+        });
+      });
+
+      describe('legacy investigation fields', () => {
+        beforeEach(async () => {
+          await deleteAllRules(supertest, log);
+          await createRuleThroughAlertingEndpoint(
+            supertest,
+            getRuleSavedObjectWithLegacyInvestigationFields()
+          );
+          await createRuleThroughAlertingEndpoint(
+            supertest,
+            getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+          );
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-with-investigation-field'),
+            name: 'Test investigation fields object',
+            investigation_fields: { field_names: ['host.name'] },
+          });
+        });
+
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('should show "legacy_investigation_fields" to be greater than 0 when a rule has "investigation_fields" set to array or empty array', async () => {
+          await retry.try(async () => {
+            const stats = await getStats(supertest, log);
+            const expected: RulesTypeUsage = {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+              query: {
+                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+                alerts: 0,
+                enabled: 0,
+                disabled: 3,
+                legacy_investigation_fields: 2,
+              },
+              custom_total: {
+                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+                alerts: 0,
+                enabled: 0,
+                disabled: 3,
+                legacy_investigation_fields: 2,
+              },
+            };
+            expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
+          });
         });
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/156088
-    describe.skip('"eql" rule type', () => {
+    describe('"eql" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
         const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
         await createRule(supertest, log, rule);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            eql: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -332,38 +328,30 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            eql: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -375,30 +363,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            eql: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              notifications_disabled: 1,
+              disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              notifications_disabled: 1,
+              disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -412,32 +390,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            eql: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -449,26 +417,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            eql: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -482,32 +444,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            eql: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
     });
@@ -524,32 +476,28 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threshold: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threshold: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -566,38 +514,30 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threshold: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threshold: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -615,30 +555,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threshold: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threshold: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
+              notifications_disabled: 1,
+              disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              notifications_disabled: 1,
+              disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -658,32 +588,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threshold: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threshold: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -701,30 +621,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threshold: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threshold: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -744,32 +654,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threshold: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threshold: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
     });
@@ -781,33 +681,28 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                machine_learning: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
-                    .machine_learning,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            machine_learning: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.machine_learning,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -816,37 +711,28 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                machine_learning: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
-                    .machine_learning,
-                  enabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            machine_learning: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.machine_learning,
+              enabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -858,31 +744,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                machine_learning: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
-                    .machine_learning,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            machine_learning: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.machine_learning,
+              notifications_disabled: 1,
+              disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              notifications_disabled: 1,
+              disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -894,31 +769,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                machine_learning: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
-                    .machine_learning,
-                  enabled: 1,
-                  notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            machine_learning: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.machine_learning,
+              enabled: 1,
+              notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -930,31 +794,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                machine_learning: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
-                    .machine_learning,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            machine_learning: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.machine_learning,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -966,31 +819,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                machine_learning: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
-                    .machine_learning,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            machine_learning: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.machine_learning,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
     });
@@ -1001,32 +843,28 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threat_match: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threat_match: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -1052,38 +890,30 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threat_match: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threat_match: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_notifications_disabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_investigation_fields: 0,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -1095,30 +925,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threat_match: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threat_match: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              notifications_disabled: 1,
+              disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              notifications_disabled: 1,
+              disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -1147,32 +967,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threat_match: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threat_match: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -1184,30 +994,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threat_match: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threat_match: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
@@ -1236,32 +1036,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
-
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                threat_match: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            threat_match: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
     });
@@ -1295,6 +1085,7 @@ export default ({ getService }: FtrProviderContext) => {
             legacy_notifications_disabled: 0,
             notifications_enabled: 0,
             notifications_disabled: 0,
+            legacy_investigation_fields: 0,
           });
         });
       });
@@ -1325,6 +1116,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_legacy_notification: false,
             has_notification: false,
+            has_legacy_investigation_field: false,
           });
         });
       });
@@ -1362,6 +1154,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_notification: true,
             has_legacy_notification: false,
+            has_legacy_investigation_field: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1414,6 +1207,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_notification: true,
             has_legacy_notification: false,
+            has_legacy_investigation_field: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1466,6 +1260,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_notification: false,
             has_legacy_notification: true,
+            has_legacy_investigation_field: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1518,6 +1313,7 @@ export default ({ getService }: FtrProviderContext) => {
             cases_count_total: 0,
             has_notification: false,
             has_legacy_notification: true,
+            has_legacy_investigation_field: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled

@@ -357,7 +357,12 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="mlAnalyticsEditFlyoutCancelButton"
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+            >
               {i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutCancelButtonText', {
                 defaultMessage: 'Cancel',
               })}

@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
@@ -43,7 +43,7 @@ const NetworkContainerComponent = () => {
   );
 
   return (
-    <Switch>
+    <Routes>
       <Route
         exact
         strict
@@ -74,7 +74,7 @@ const NetworkContainerComponent = () => {
         }) => (
           <Redirect
             to={{
-              pathname: getPathWithFlowType(detailName, flowTarget),
+              pathname: getPathWithFlowType(detailName, flowTarget as FlowTargetSourceDest),
               search,
             }}
           />
@@ -87,7 +87,7 @@ const NetworkContainerComponent = () => {
           }}
         />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 

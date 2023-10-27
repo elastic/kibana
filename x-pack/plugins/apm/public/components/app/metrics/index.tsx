@@ -22,13 +22,6 @@ export function Metrics() {
   const { agentName, runtimeName, serverlessType } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgent(serverlessType);
 
-  if (
-    !isAWSLambda &&
-    (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName))
-  ) {
-    return <JvmMetricsOverview />;
-  }
-
   if (isAWSLambda) {
     return <ServerlessMetrics />;
   }
@@ -38,6 +31,7 @@ export function Metrics() {
     runtimeName,
     serverlessType,
   });
+
   if (hasStaticDashboard) {
     return (
       <JsonMetricsDashboard
@@ -46,6 +40,13 @@ export function Metrics() {
         serverlessType={serverlessType}
       />
     );
+  }
+
+  if (
+    !isAWSLambda &&
+    (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName))
+  ) {
+    return <JvmMetricsOverview />;
   }
 
   return <ServiceMetrics />;

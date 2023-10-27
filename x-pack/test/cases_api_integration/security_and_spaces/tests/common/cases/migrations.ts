@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
@@ -18,6 +18,7 @@ import {
   getCase,
   getCaseSavedObjectsFromES,
   resolveCase,
+  findCases,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
 
@@ -71,6 +72,62 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         expect(body).key('settings');
         expect(body.settings).to.eql({
           syncAlerts: true,
+        });
+      });
+
+      it('should return the cases correctly', async () => {
+        const cases = await findCases({ supertest });
+        const theCase = cases.cases[0];
+
+        const { version, ...caseWithoutVersion } = theCase;
+        const { cases: _, ...caseStats } = cases;
+
+        expect(cases.cases.length).to.eql(1);
+
+        expect(caseStats).to.eql({
+          count_closed_cases: 0,
+          count_in_progress_cases: 0,
+          count_open_cases: 1,
+          page: 1,
+          per_page: 20,
+          total: 1,
+        });
+
+        expect(caseWithoutVersion).to.eql({
+          assignees: [],
+          category: null,
+          closed_at: null,
+          closed_by: null,
+          comments: [],
+          connector: {
+            fields: null,
+            id: 'connector-1',
+            name: 'none',
+            type: '.none',
+          },
+          created_at: '2020-09-28T11:43:52.158Z',
+          created_by: {
+            email: null,
+            full_name: null,
+            username: 'elastic',
+          },
+          customFields: [],
+          description: 'This is a brand new case of a bad meanie defacing data',
+          duration: null,
+          external_service: null,
+          id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+          owner: 'securitySolution',
+          settings: {
+            syncAlerts: true,
+          },
+          severity: 'low',
+          status: 'open',
+          tags: ['defacement'],
+          title: 'Super Bad Security Issue',
+          totalAlerts: 0,
+          totalComment: 1,
+          updated_at: null,
+          updated_by: null,
         });
       });
     });
@@ -337,7 +394,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               includeComments: true,
             });
 
-            const comment = theCase.comments![0] as AttributesTypeUser;
+            const comment = theCase.comments![0] as UserCommentAttachmentAttributes;
             expect(comment.comment).to.be('a comment');
             expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
           });

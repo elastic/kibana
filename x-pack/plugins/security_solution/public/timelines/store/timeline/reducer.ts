@@ -59,6 +59,8 @@ import {
   applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
+  updateSavedSearchId,
+  setIsDiscoverSavedSearchLoaded,
 } from './actions';
 
 import {
@@ -102,7 +104,7 @@ import {
 
 import type { TimelineState } from './types';
 import { EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -527,6 +529,26 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         loadingEventIds: [],
+      },
+    },
+  }))
+  .case(updateSavedSearchId, (state, { id, savedSearchId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        savedSearchId,
+      },
+    },
+  }))
+  .case(setIsDiscoverSavedSearchLoaded, (state, { id, isDiscoverSavedSearchLoaded }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isDiscoverSavedSearchLoaded,
       },
     },
   }))

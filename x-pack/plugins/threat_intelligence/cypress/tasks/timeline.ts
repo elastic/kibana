@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
+import { openBarchartPopoverMenu } from './common';
 import {
   CLOSE_TIMELINE_BTN,
   FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM,
@@ -15,6 +17,7 @@ import {
   UNTITLED_TIMELINE_BUTTON,
 } from '../screens/timeline';
 import {
+  ADDED_TO_TIMELINE_TOAST,
   BARCHART_TIMELINE_BUTTON,
   FLYOUT_BLOCK_MORE_ACTIONS_BUTTON,
   FLYOUT_TABLE_MORE_ACTIONS_BUTTON,
@@ -25,7 +28,15 @@ import {
  * Add data to timeline from barchart legend menu item
  */
 export const addToTimelineFromBarchartLegend = () => {
-  cy.get(BARCHART_TIMELINE_BUTTON).should('exist').first().click();
+  recurse(
+    () => {
+      openBarchartPopoverMenu();
+      cy.get(BARCHART_TIMELINE_BUTTON).first().click();
+      openBarchartPopoverMenu();
+      return cy.get(ADDED_TO_TIMELINE_TOAST).should(Cypress._.noop);
+    },
+    ($el) => !!$el.length
+  );
 };
 /**
  * Add data to timeline from indicators table cell menu
@@ -53,16 +64,33 @@ export const closeTimeline = () => {
  * Add data to timeline from flyout overview tab table
  */
 export const addToTimelineFromFlyoutOverviewTabTable = () => {
-  cy.get(FLYOUT_TABLE_MORE_ACTIONS_BUTTON).first().click({ force: true });
-  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON).should('exist').first().click();
+  recurse(
+    () => {
+      cy.get(FLYOUT_TABLE_MORE_ACTIONS_BUTTON).first().click({ force: true });
+      cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON).first().click();
+      cy.get(FLYOUT_TABLE_MORE_ACTIONS_BUTTON).first().click({ force: true });
+
+      return cy.get(ADDED_TO_TIMELINE_TOAST).should(Cypress._.noop);
+    },
+    ($el) => !!$el.length
+  );
 };
 
 /**
  * Add data to timeline from flyout overview tab block
  */
 export const addToTimelineFromFlyoutOverviewTabBlock = () => {
-  cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).first().click({ force: true });
-  cy.get(FLYOUT_OVERVIEW_TAB_BLOCKS_TIMELINE_BUTTON).should('exist').first().click();
+  recurse(
+    () => {
+      cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).first().click({ force: true });
+
+      cy.get(FLYOUT_OVERVIEW_TAB_BLOCKS_TIMELINE_BUTTON).first().click();
+      cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).first().click({ force: true });
+
+      return cy.get(ADDED_TO_TIMELINE_TOAST).should(Cypress._.noop);
+    },
+    ($el) => !!$el.length
+  );
 };
 
 /**

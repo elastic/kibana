@@ -9,7 +9,7 @@ import { fromExpression, toExpression, Ast } from '@kbn/interpreter';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererFactory } from '../../../../types';
 import { StartInitializer } from '../../../plugin';
@@ -97,7 +97,7 @@ export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> =
       );
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>{filter}</KibanaThemeProvider>,
+        <KibanaThemeProvider theme={{ theme$: core.theme.theme$ }}>{filter}</KibanaThemeProvider>,
         domNode,
         () => handlers.done()
       );

@@ -16,7 +16,7 @@ import * as i18n from '../translations';
 import type { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 const LineClampTextContainer = styled.span`
   text-overflow: ellipsis;
@@ -69,7 +69,7 @@ export const getCommonColumns = ({
     render: (title: string, timelineResult: OpenTimelineResult) =>
       timelineResult.savedObjectId != null ? (
         <EuiLink
-          data-test-subj={`title-${timelineResult.savedObjectId}`}
+          data-test-subj={`timeline-title-${timelineResult.savedObjectId}`}
           onClick={() =>
             onOpenTimeline({
               duplicate: false,

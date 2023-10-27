@@ -7,17 +7,20 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
-  CreateMetricsExplorerViewAttributesRequestPayload,
+  CreateMetricsExplorerViewResponsePayload,
   createMetricsExplorerViewRequestPayloadRT,
+  FindMetricsExplorerViewResponsePayload,
   findMetricsExplorerViewResponsePayloadRT,
+  GetMetricsExplorerViewResponsePayload,
   getMetricsExplorerViewUrl,
   metricsExplorerViewResponsePayloadRT,
+  UpdateMetricsExplorerViewResponsePayload,
+  CreateMetricsExplorerViewAttributesRequestPayload,
   UpdateMetricsExplorerViewAttributesRequestPayload,
 } from '../../../common/http_api/latest';
 import {
   DeleteMetricsExplorerViewError,
   FetchMetricsExplorerViewError,
-  MetricsExplorerView,
   UpsertMetricsExplorerViewError,
 } from '../../../common/metrics_explorer_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
@@ -26,7 +29,7 @@ import { IMetricsExplorerViewsClient } from './types';
 export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   constructor(private readonly http: HttpStart) {}
 
-  async findMetricsExplorerViews(): Promise<MetricsExplorerView[]> {
+  async findMetricsExplorerViews(): Promise<FindMetricsExplorerViewResponsePayload['data']> {
     const response = await this.http.get(getMetricsExplorerViewUrl()).catch((error) => {
       throw new FetchMetricsExplorerViewError(`Failed to fetch metrics explorer views: ${error}`);
     });
@@ -40,7 +43,9 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     return data;
   }
 
-  async getMetricsExplorerView(metricsExplorerViewId: string): Promise<MetricsExplorerView> {
+  async getMetricsExplorerView(
+    metricsExplorerViewId: string
+  ): Promise<GetMetricsExplorerViewResponsePayload> {
     const response = await this.http
       .get(getMetricsExplorerViewUrl(metricsExplorerViewId))
       .catch((error) => {
@@ -62,7 +67,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
 
   async createMetricsExplorerView(
     metricsExplorerViewAttributes: CreateMetricsExplorerViewAttributesRequestPayload
-  ): Promise<MetricsExplorerView> {
+  ): Promise<CreateMetricsExplorerViewResponsePayload> {
     const response = await this.http
       .post(getMetricsExplorerViewUrl(), {
         body: JSON.stringify(
@@ -91,7 +96,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   async updateMetricsExplorerView(
     metricsExplorerViewId: string,
     metricsExplorerViewAttributes: UpdateMetricsExplorerViewAttributesRequestPayload
-  ): Promise<MetricsExplorerView> {
+  ): Promise<UpdateMetricsExplorerViewResponsePayload> {
     const response = await this.http
       .put(getMetricsExplorerViewUrl(metricsExplorerViewId), {
         body: JSON.stringify(

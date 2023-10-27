@@ -18,6 +18,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     after(async () => {
       await tearDown(getService);
     });
+
     loadTestFile(require.resolve('./connector_types/oauth_access_token'));
     loadTestFile(require.resolve('./connector_types/cases_webhook'));
     loadTestFile(require.resolve('./connector_types/jira'));
@@ -38,7 +39,9 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/xmatters'));
     loadTestFile(require.resolve('./connector_types/tines'));
     loadTestFile(require.resolve('./connector_types/torq'));
-    loadTestFile(require.resolve('./connector_types/gen_ai'));
+    loadTestFile(require.resolve('./connector_types/openai'));
+    loadTestFile(require.resolve('./connector_types/d3security'));
+    loadTestFile(require.resolve('./connector_types/bedrock'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
@@ -46,10 +49,12 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./bulk_enqueue'));
 
     /**
      * Sub action framework
      */
-    // loadTestFile(require.resolve('./sub_action_framework'));
+
+    loadTestFile(require.resolve('./sub_action_framework'));
   });
 }

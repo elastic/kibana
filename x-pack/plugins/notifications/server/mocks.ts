@@ -12,6 +12,7 @@ import type { NotificationsPlugin } from './plugin';
 
 const emailServiceMock: jest.Mocked<EmailService> = {
   sendPlainTextEmail: jest.fn(),
+  sendHTMLEmail: jest.fn(),
 };
 
 const createEmailServiceMock = () => {
@@ -43,6 +44,7 @@ export const notificationsMock = {
   createStart: createStartMock,
   clear: () => {
     emailServiceMock.sendPlainTextEmail.mockClear();
+    emailServiceMock.sendHTMLEmail.mockClear();
     startMock.getEmailService.mockClear();
     startMock.isEmailServiceAvailable.mockClear();
     notificationsPluginMock.setup.mockClear();

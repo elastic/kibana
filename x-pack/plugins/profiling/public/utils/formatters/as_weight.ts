@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { asNumber } from './as_number';
 
 const ONE_POUND_TO_A_KILO = 0.45359237;
@@ -14,11 +13,5 @@ export function asWeight(valueInPounds: number): string {
   const lbs = asNumber(valueInPounds);
   const kgs = asNumber(Number(valueInPounds * ONE_POUND_TO_A_KILO));
 
-  return i18n.translate('xpack.profiling.formatters.weight', {
-    defaultMessage: `{lbs} lbs / {kgs} kg`,
-    values: {
-      lbs,
-      kgs,
-    },
-  });
+  return `${lbs} lbs / ${kgs} kg`;
 }

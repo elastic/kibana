@@ -57,31 +57,36 @@ const props = {
   timelineId: 'alerts-page',
 };
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    remove: jest.fn(),
-  }),
-  useKibana: () => ({
-    services: {
-      timelines: { ...mockTimelines },
-      application: {
-        capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    }),
+    useKibana: () => ({
+      services: {
+        timelines: { ...mockTimelines },
+        application: {
+          capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+        },
+        cases: mockCasesContract(),
       },
-      cases: mockCasesContract(),
-    },
-  }),
-  useGetUserCasesPermissions: jest.fn().mockReturnValue({
-    all: true,
-    create: true,
-    read: true,
-    update: true,
-    delete: true,
-    push: true,
-  }),
-}));
+    }),
+    useGetUserCasesPermissions: jest.fn().mockReturnValue({
+      all: true,
+      create: true,
+      read: true,
+      update: true,
+      delete: true,
+      push: true,
+    }),
+  };
+});
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
@@ -94,7 +99,7 @@ const markAsOpenButton = '[data-test-subj="open-alert-status"]';
 const markAsAcknowledgedButton = '[data-test-subj="acknowledged-alert-status"]';
 const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
-const openAlertDetailsPageButton = '[data-test-subj="open-alert-details-page-menu-item"]';
+const applyAlertTagsButton = '[data-test-subj="alert-tags-context-menu-item"]';
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
@@ -283,41 +288,15 @@ describe('Alert table context menu', () => {
     });
   });
 
-  describe('Open  alert details action', () => {
-    test('it does not render the open alert details page action if kibana.alert.rule.uuid is not set', () => {
-      const nonAlertProps = {
-        ...props,
-        ecsRowData: {
-          ...ecsRowData,
-          kibana: {
-            alert: {
-              workflow_status: ['open'],
-              rule: {
-                parameters: {},
-                uuid: [],
-              },
-            },
-          },
-        },
-      };
-
-      const wrapper = mount(<AlertContextMenu {...nonAlertProps} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders,
-      });
-
-      wrapper.find(actionMenuButton).simulate('click');
-
-      expect(wrapper.find(openAlertDetailsPageButton).first().exists()).toEqual(false);
-    });
-
-    test('it renders the open alert details action button', () => {
+  describe('Apply alert tags action', () => {
+    test('it renders the apply alert tags action button', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
         wrappingComponent: TestProviders,
       });
 
       wrapper.find(actionMenuButton).simulate('click');
 
-      expect(wrapper.find(openAlertDetailsPageButton).first().exists()).toEqual(true);
+      expect(wrapper.find(applyAlertTagsButton).first().exists()).toEqual(true);
     });
   });
 });

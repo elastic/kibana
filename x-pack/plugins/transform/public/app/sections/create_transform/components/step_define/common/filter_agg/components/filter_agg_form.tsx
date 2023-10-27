@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
-import type { RuntimeMappings } from '../../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
 
 /**

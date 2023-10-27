@@ -28,7 +28,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   describe('Metrics Explorer', function () {
-    this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -98,11 +97,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const chartType = await pageObjects.infraMetricsExplorer.getChartType(charts[0]);
         expect(chartType).to.equal('bar chart');
       });
+
+      it('renders the metrics explorer survey link', async () => {
+        await pageObjects.infraMetricsExplorer.ensureMetricsExplorerFeedbackLinkIsVisible();
+      });
     });
 
     describe('Saved Views', function () {
-      // FLAKY: https://github.com/elastic/kibana/issues/157738
-      this.tags('skipFirefox');
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.infraHome.goToMetricExplorer();
@@ -132,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
       });
 
-      it('should laod a clicked view from the manage views section', async () => {
+      it('should load a clicked view from the manage views section', async () => {
         const views = await pageObjects.infraSavedViews.getManageViewsEntries();
         await views[0].click();
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');

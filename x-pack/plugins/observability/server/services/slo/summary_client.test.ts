@@ -7,12 +7,11 @@
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
-
-import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
-import { DefaultSummaryClient } from './summary_client';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
+import { DefaultSummaryClient } from './summary_client';
 
 const commonEsResponse = {
   took: 100,
@@ -55,33 +54,30 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await summaryClient.fetchSummary([slo]);
+        const result = await summaryClient.computeSummary(slo);
 
-        expect(result[slo.id]).toMatchSnapshot();
-        // @ts-ignore
-        expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-          {
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.revision': slo.revision } },
-                  {
-                    range: {
-                      '@timestamp': { gte: expect.anything(), lt: expect.anything() },
-                    },
+        expect(result).toMatchSnapshot();
+        expect(esClientMock.search.mock.calls[0][0]).toEqual({
+          index: SLO_DESTINATION_INDEX_PATTERN,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'slo.id': slo.id } },
+                { term: { 'slo.revision': slo.revision } },
+                {
+                  range: {
+                    '@timestamp': { gte: expect.anything(), lt: expect.anything() },
                   },
-                ],
-              },
-            },
-            aggs: {
-              good: { sum: { field: 'slo.numerator' } },
-              total: { sum: { field: 'slo.denominator' } },
+                },
+              ],
             },
           },
-        ]);
+          aggs: {
+            good: { sum: { field: 'slo.numerator' } },
+            total: { sum: { field: 'slo.denominator' } },
+          },
+        });
       });
     });
 
@@ -93,35 +89,32 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        await summaryClient.fetchSummary([slo]);
+        await summaryClient.computeSummary(slo);
 
-        // @ts-ignore
-        expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-          {
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.revision': slo.revision } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: expect.anything(),
-                        lt: expect.anything(),
-                      },
+        expect(esClientMock.search.mock.calls[0][0]).toEqual({
+          index: SLO_DESTINATION_INDEX_PATTERN,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'slo.id': slo.id } },
+                { term: { 'slo.revision': slo.revision } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: expect.anything(),
+                      lt: expect.anything(),
                     },
                   },
-                ],
-              },
-            },
-            aggs: {
-              good: { sum: { field: 'slo.numerator' } },
-              total: { sum: { field: 'slo.denominator' } },
+                },
+              ],
             },
           },
-        ]);
+          aggs: {
+            good: { sum: { field: 'slo.numerator' } },
+            total: { sum: { field: 'slo.denominator' } },
+          },
+        });
       });
     });
 
@@ -139,41 +132,38 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await summaryClient.fetchSummary([slo]);
+        const result = await summaryClient.computeSummary(slo);
 
-        expect(result[slo.id]).toMatchSnapshot();
-        // @ts-ignore searches not typed properly
-        expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-          {
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.revision': slo.revision } },
-                  {
-                    range: {
-                      '@timestamp': { gte: expect.anything(), lt: expect.anything() },
-                    },
+        expect(result).toMatchSnapshot();
+        expect(esClientMock.search.mock.calls[0][0]).toEqual({
+          index: SLO_DESTINATION_INDEX_PATTERN,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'slo.id': slo.id } },
+                { term: { 'slo.revision': slo.revision } },
+                {
+                  range: {
+                    '@timestamp': { gte: expect.anything(), lt: expect.anything() },
                   },
-                ],
+                },
+              ],
+            },
+          },
+          aggs: {
+            good: {
+              sum: {
+                field: 'slo.isGoodSlice',
               },
             },
-            aggs: {
-              good: {
-                sum: {
-                  field: 'slo.isGoodSlice',
-                },
-              },
-              total: {
-                value_count: {
-                  field: 'slo.isGoodSlice',
-                },
+            total: {
+              value_count: {
+                field: 'slo.isGoodSlice',
               },
             },
           },
-        ]);
+        });
       });
     });
 
@@ -191,44 +181,42 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await summaryClient.fetchSummary([slo]);
+        const result = await summaryClient.computeSummary(slo);
 
-        expect(result[slo.id]).toMatchSnapshot();
-        // @ts-ignore searches not typed properly
-        expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-          {
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.revision': slo.revision } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: expect.anything(),
-                        lt: expect.anything(),
-                      },
+        expect(result).toMatchSnapshot();
+
+        expect(esClientMock.search.mock.calls[0][0]).toEqual({
+          index: SLO_DESTINATION_INDEX_PATTERN,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'slo.id': slo.id } },
+                { term: { 'slo.revision': slo.revision } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: expect.anything(),
+                      lt: expect.anything(),
                     },
                   },
-                ],
+                },
+              ],
+            },
+          },
+          aggs: {
+            good: {
+              sum: {
+                field: 'slo.isGoodSlice',
               },
             },
-            aggs: {
-              good: {
-                sum: {
-                  field: 'slo.isGoodSlice',
-                },
-              },
-              total: {
-                value_count: {
-                  field: 'slo.isGoodSlice',
-                },
+            total: {
+              value_count: {
+                field: 'slo.isGoodSlice',
               },
             },
           },
-        ]);
+        });
       });
     });
   });

@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { Observable, of, Subject } from 'rxjs';
 
-import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
+import { TaskPollingLifecycle, claimAvailableTasks, TaskLifecycleEvent } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskStoreMock } from './task_store.mock';
@@ -48,6 +48,7 @@ describe('TaskPollingLifecycle', () => {
       poll_interval: 6000000,
       version_conflict_threshold: 80,
       request_capacity: 1000,
+      allow_reading_invalid_state: false,
       monitored_aggregated_stats_refresh_rate: 5000,
       monitored_stats_health_verbose_log: {
         enabled: false,
@@ -76,6 +77,12 @@ describe('TaskPollingLifecycle', () => {
         warn_threshold: 5000,
       },
       worker_utilization_running_average_window: 5,
+      requeue_invalid_tasks: {
+        enabled: false,
+        delay: 3000,
+        max_attempts: 20,
+      },
+      metrics_reset_interval: 3000,
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
@@ -281,10 +288,99 @@ describe('TaskPollingLifecycle', () => {
       );
     });
   });
+
+  describe('workerUtilization events', () => {
+    test('should emit event when polling is successful', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        of(
+          asOk({
+            docs: [],
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksRejected: 0 },
+          })
+        )
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('workerUtilizationEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
+        );
+      });
+    });
+
+    test('should emit event when polling error occurs', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() => {
+        throw new Error('booo');
+      });
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('workerUtilizationEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
+        );
+      });
+    });
+  });
 });
 
 function getFirstAsPromise<T>(obs$: Observable<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     obs$.subscribe(resolve, reject);
   });
+}
+
+type RetryableFunction = () => boolean;
+
+const RETRY_UNTIL_DEFAULT_COUNT = 20;
+const RETRY_UNTIL_DEFAULT_WAIT = 1000; // milliseconds
+
+async function retryUntil(
+  label: string,
+  fn: RetryableFunction,
+  count: number = RETRY_UNTIL_DEFAULT_COUNT,
+  wait: number = RETRY_UNTIL_DEFAULT_WAIT
+): Promise<boolean> {
+  while (count > 0) {
+    count--;
+
+    if (fn()) return true;
+
+    // eslint-disable-next-line no-console
+    console.log(`attempt failed waiting for "${label}", attempts left: ${count}`);
+
+    if (count === 0) return false;
+    await delay(wait);
+  }
+
+  return false;
+}
+
+async function delay(millis: number) {
+  await new Promise((resolve) => setTimeout(resolve, millis));
 }

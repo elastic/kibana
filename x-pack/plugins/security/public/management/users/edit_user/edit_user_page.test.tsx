@@ -11,9 +11,9 @@ import React from 'react';
 
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
+import { EditUserPage } from './edit_user_page';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
-import { EditUserPage } from './edit_user_page';
 
 const userMock = {
   username: 'jdoe',

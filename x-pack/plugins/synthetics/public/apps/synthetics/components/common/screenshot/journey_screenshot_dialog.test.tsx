@@ -57,22 +57,22 @@ describe('JourneyScreenshotDialog', () => {
   });
 
   it('shows loading indicator when image is loading', async () => {
-    const { queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
+    const { getByTestId, queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
 
     expect(queryByTestId('screenshotImageLoadingProgress')).not.toBeInTheDocument();
-    userEvent.click(queryByTestId('screenshotImageNextButton'));
+    userEvent.click(getByTestId('screenshotImageNextButton'));
   });
 
   it('respects maxSteps', () => {
-    const { queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
+    const { getByTestId, queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
 
     expect(queryByTestId('screenshotImageLoadingProgress')).not.toBeInTheDocument();
-    userEvent.click(queryByTestId('screenshotImageNextButton'));
-    expect(queryByTestId('screenshotImageNextButton')).toHaveProperty('disabled');
+    userEvent.click(getByTestId('screenshotImageNextButton'));
+    expect(getByTestId('screenshotImageNextButton')).toHaveProperty('disabled');
   });
 
   it('shows correct image source and step name', () => {
-    const { queryByTestId, getByText } = render(<JourneyScreenshotDialog {...testProps} />);
+    const { getByText, queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
     expect(queryByTestId('stepScreenshotThumbnail')).toHaveProperty(
       'src',
       'http://localhost/test-img-url-1'

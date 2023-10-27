@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
@@ -15,8 +15,8 @@ import { TabNavigation } from '../../../common/components/navigation/tab_navigat
 import { Users } from './users';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
-import { LandingPageComponent } from '../../../common/components/landing_page';
 
+jest.mock('../../../common/components/landing_page');
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
@@ -84,7 +84,7 @@ describe('Users - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
+    expect(wrapper.find(`[data-test-subj="siem-landing-page"]`).exists()).toBe(true);
   });
 
   test('it should render tab navigation', async () => {

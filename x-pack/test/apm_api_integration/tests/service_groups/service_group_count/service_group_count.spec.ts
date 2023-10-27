@@ -7,8 +7,12 @@
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { waitForActiveAlert } from '../../../common/utils/wait_for_active_alert';
-import { createApmRule } from '../../alerts/alerting_api_helper';
+import {
+  createApmRule,
+  deleteRuleById,
+  deleteApmAlerts,
+} from '../../alerts/helpers/alerting_api_helper';
+import { waitForActiveApmAlert } from '../../alerts/helpers/wait_for_active_apm_alerts';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
@@ -21,7 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
-  const esClient = getService('es');
+  const es = getService('es');
   const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
@@ -33,8 +37,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         serviceName: 'synth-go',
         transactionType: undefined,
-        windowSize: 99,
-        windowUnit: 'y',
+        windowSize: 5,
+        windowUnit: 'h',
         threshold: 100,
         aggregationType: AggregationType.Avg,
         environment: 'testing',
@@ -84,12 +88,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        await waitForActiveAlert({ ruleId, esClient, log });
+        await waitForActiveApmAlert({ ruleId, esClient: es, log });
       });
 
       after(async () => {
-        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-        await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+        await deleteRuleById({ supertest, ruleId });
+        await deleteApmAlerts(es);
       });
 
       it('returns the correct number of alerts', async () => {

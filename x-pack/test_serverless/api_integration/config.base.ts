@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
@@ -17,15 +16,28 @@ export function createTestConfig(options: CreateTestConfigOptions) {
     return {
       ...svlSharedConfig.getAll(),
 
-      services,
+      services: {
+        ...services,
+        ...options.services,
+      },
+      esTestCluster: {
+        ...svlSharedConfig.get('esTestCluster'),
+        serverArgs: [
+          ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          ...(options.esServerArgs ?? []),
+        ],
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-          `--serverless${options.serverlessProject ? `=${options.serverlessProject}` : ''}`,
+          `--serverless=${options.serverlessProject}`,
+          ...(options.kbnServerArgs || []),
         ],
       },
       testFiles: options.testFiles,
+      junit: options.junit,
+      suiteTags: options.suiteTags,
     };
   };
 }

@@ -6,11 +6,12 @@
  */
 
 import './app/index.scss';
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { TransformUiPlugin } from './plugin';
 
 /** @public */
-export const plugin = () => {
-  return new TransformUiPlugin();
+export const plugin = (ctx: PluginInitializerContext) => {
+  return new TransformUiPlugin(ctx);
 };
 
 export { getTransformHealthRuleType } from './alerting';

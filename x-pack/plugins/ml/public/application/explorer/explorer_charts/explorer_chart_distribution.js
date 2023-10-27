@@ -12,19 +12,20 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
 import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
 
-import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
-import { formatValue } from '../../formatters/format_value';
+import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+
+import { formatValue } from '../../formatters/format_value';
 import {
   getChartType,
   getTickValues,

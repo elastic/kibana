@@ -6,33 +6,60 @@
  */
 
 import {
+  EuiBadge,
+  EuiButton,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiCard,
   EuiHorizontalRule,
-  EuiButtonEmpty,
-  EuiBadge,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
+import styled from '@emotion/styled';
 import { breadcrumbsApp } from '../../../application/app';
+import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
+import apacheIcon from '../../../icons/apache.svg';
+import apmIcon from '../../../icons/apm.svg';
+import awsIcon from '../../../icons/aws.svg';
+import azureIcon from '../../../icons/azure.svg';
+import gcpIcon from '../../../icons/gcp.svg';
+import kinesisIcon from '../../../icons/kinesis.svg';
+import kubernetesIcon from '../../../icons/kubernetes.svg';
+import loggingIcon from '../../../icons/logging.svg';
+import nginxIcon from '../../../icons/nginx.svg';
+import opentelemetryIcon from '../../../icons/opentelemetry.svg';
+import systemIcon from '../../../icons/system.svg';
+
+const StyledItem = styled(EuiFlexItem)`
+  flex-direction: row;
+  &:before {
+    content: '•';
+    margin-right: 20px;
+  }
+`;
 
 export function Home() {
   useBreadcrumbs([], breadcrumbsApp);
+  const { euiTheme } = useEuiTheme();
 
   const { navigateToKibanaUrl } = useKibanaNavigation();
 
-  const handleClickSystemLogs = () => {};
+  const handleClickSystemLogs = () => {
+    navigateToKibanaUrl('/app/observabilityOnboarding/systemLogs');
+  };
   const handleClickCustomLogs = () => {
     navigateToKibanaUrl('/app/observabilityOnboarding/customLogs');
   };
   const handleClickApmSetupGuide = () => {
-    navigateToKibanaUrl('/app/home#/tutorial/apm');
+    navigateToKibanaUrl('/app/apm/tutorial');
   };
   const handleClickKubernetesSetupGuide = () => {
     navigateToKibanaUrl('/app/integrations/detail/kubernetes');
@@ -43,261 +70,327 @@ export function Home() {
   const handleClickSampleData = () => {
     navigateToKibanaUrl('/app/home#/tutorial_directory/sampleData');
   };
-  const handleClickSkip = () => {
-    navigateToKibanaUrl('/app/observability/overview');
+  const handleClickUploadFile = () => {
+    navigateToKibanaUrl('/app/home#/tutorial_directory/fileDataViz');
   };
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      alignItems="center"
-      style={{ margin: 'auto', maxWidth: 800 }}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="l" />
-        <EuiTitle size="l">
-          <h1>
-            {i18n.translate('xpack.observability_onboarding.home.title', {
-              defaultMessage: 'Get started with Observability',
-            })}
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText color="subdued" style={{ textAlign: 'center' }}>
-          <p>
-            {i18n.translate('xpack.observability_onboarding.home.description', {
-              defaultMessage:
-                'Monitor and gain insights across your cloud-native and distributed systems on a single platform.',
-            })}
-          </p>
-        </EuiText>
-        <EuiSpacer size="xl" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: '100%' }}>
-        <EuiFlexGroup alignItems="stretch">
-          <EuiFlexItem>
-            <EuiCard
-              icon={
-                <EuiBadge color="hollow" iconType="bolt">
-                  {i18n.translate(
+    <EuiPanel hasShadow={false} color="transparent">
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        style={{ margin: 'auto', maxWidth: 800 }}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiSpacer />
+          <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
+            <h1>
+              {i18n.translate('xpack.observability_onboarding.home.title', {
+                defaultMessage: 'Collect and analyze logs',
+              })}
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" style={{ textAlign: 'center' }}>
+            <p>
+              {i18n.translate(
+                'xpack.observability_onboarding.home.description',
+                {
+                  defaultMessage:
+                    'Select your method for collecting data into Observability.',
+                }
+              )}
+            </p>
+          </EuiText>
+          <EuiSpacer />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: '100%' }}>
+          <EuiFlexGroup alignItems="stretch">
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon type={systemIcon} size="l" />}
+                betaBadgeProps={{
+                  'data-test-subj': 'obltOnboardingHomeQuickstartBadge',
+                  color: 'accent',
+                  label: i18n.translate(
                     'xpack.observability_onboarding.card.systemLogs.quickstartBadge',
-                    {
-                      defaultMessage: 'Quickstart',
-                    }
-                  )}
-                </EuiBadge>
-              }
-              title={i18n.translate(
-                'xpack.observability_onboarding.card.systemLogs.title',
-                { defaultMessage: 'Collect system logs' }
-              )}
-              selectable={{
-                onClick: handleClickSystemLogs,
-                color: 'primary',
-                fill: true,
-                fullWidth: false,
-                style: { margin: 'auto' },
-              }}
-              paddingSize="xl"
-            >
-              <EuiHorizontalRule
-                margin="m"
-                style={{
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  width: '80%',
+                    { defaultMessage: 'Quick start' }
+                  ),
                 }}
-              />
-              <EuiText color="subdued" size="s" textAlign="left">
-                <p>
-                  {i18n.translate(
-                    'xpack.observability_onboarding.card.systemLogs.description1',
-                    {
-                      defaultMessage:
-                        'The quickest path to onboard log data and start analysing it straight away.',
-                    }
-                  )}
-                </p>
-                <p>
-                  {i18n.translate(
-                    'xpack.observability_onboarding.card.systemLogs.description2',
-                    {
-                      defaultMessage:
-                        'Monitor servers, personal computers and more by collecting logs from your machine.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            </EuiCard>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCard
-              icon={
-                <EuiBadge color="hollow" iconType="launch">
-                  {i18n.translate(
-                    'xpack.observability_onboarding.card.customLogs.fewMinutesBadge',
-                    { defaultMessage: 'In a few minutes' }
-                  )}
-                </EuiBadge>
-              }
-              title={i18n.translate(
-                'xpack.observability_onboarding.card.customLogs.title',
-                { defaultMessage: 'Collect custom logs' }
-              )}
-              selectable={{
-                onClick: handleClickCustomLogs,
-                color: 'primary',
-                fill: true,
-                fullWidth: false,
-                style: { margin: 'auto' },
-              }}
-              paddingSize="xl"
-            >
-              <EuiHorizontalRule
-                margin="m"
+                title={i18n.translate(
+                  'xpack.observability_onboarding.card.systemLogs.title',
+                  { defaultMessage: 'Stream host system logs' }
+                )}
+                footer={
+                  <EuiButton
+                    onClick={handleClickSystemLogs}
+                    color="primary"
+                    fill
+                    data-test-subj="obltOnboardingHomeStartSystemLogStream"
+                  >
+                    {getStartedLabel}
+                  </EuiButton>
+                }
                 style={{
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  width: '80%',
+                  borderColor: euiTheme.colors.accent,
+                  borderWidth: 2,
                 }}
-              />
-              <EuiText color="subdued" size="s" textAlign="left">
-                <p>
-                  {i18n.translate(
-                    'xpack.observability_onboarding.card.customLogs.description.text',
-                    {
-                      defaultMessage:
-                        'Choose what logs to collect, configure an ingest pipeline, and explore your data.',
-                    }
-                  )}
-                </p>
-                <ul>
-                  <li>
+                paddingSize="m"
+                display="plain"
+                hasBorder
+                onClick={handleClickSystemLogs}
+              >
+                <EuiSpacer size="s" />
+                <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
+                <EuiSpacer size="m" />
+                <EuiText color="subdued" size="s" textAlign="center">
+                  <p>
                     {i18n.translate(
-                      'xpack.observability_onboarding.card.customLogs.description.example.streamlogs',
-                      { defaultMessage: 'Stream custom logs' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.card.customLogs.description.example.networkStream',
+                      'xpack.observability_onboarding.card.systemLogs.description1',
                       {
-                        defaultMessage: 'Collect network streaming logs',
+                        defaultMessage:
+                          'The quickest path to onboard log data from your own machine or server.',
                       }
                     )}
-                  </li>
-                  <li>
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </EuiCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon type={loggingIcon} size="l" />}
+                title={i18n.translate(
+                  'xpack.observability_onboarding.card.customLogs.title',
+                  { defaultMessage: 'Stream log files' }
+                )}
+                footer={
+                  <EuiButton
+                    onClick={handleClickCustomLogs}
+                    color="primary"
+                    fill
+                    data-test-subj="obltOnboardingHomeStartLogFileStream"
+                  >
+                    {getStartedLabel}
+                  </EuiButton>
+                }
+                paddingSize="m"
+                display="plain"
+                hasBorder
+                onClick={handleClickCustomLogs}
+              >
+                <EuiSpacer size="s" />
+                <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
+                <EuiSpacer size="m" />
+                <EuiText color="subdued" size="s" textAlign="center">
+                  <p>
                     {i18n.translate(
-                      'xpack.observability_onboarding.card.customLogs.description.example.uploadLogFile',
-                      { defaultMessage: 'Upload log files' }
+                      'xpack.observability_onboarding.card.customLogs.description.text',
+                      {
+                        defaultMessage:
+                          'Stream any logs into Elastic in a simple way and explore their data.',
+                      }
                     )}
-                  </li>
-                  <li>
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </EuiCard>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: '100%' }}>
+          <EuiFlexGroup alignItems="stretch">
+            <EuiFlexItem>
+              <EuiCard
+                icon={
+                  <EuiFlexGroup gutterSize="m" justifyContent="center">
+                    <EuiIcon type={apmIcon} size="l" />
+                    <EuiIcon type={opentelemetryIcon} size="l" />
+                  </EuiFlexGroup>
+                }
+                title={i18n.translate(
+                  'xpack.observability_onboarding.card.apm.title',
+                  {
+                    defaultMessage: 'Collect application performance data',
+                  }
+                )}
+                description={
+                  <EuiText color="subdued" size="s" textAlign="center">
+                    <p>
+                      {i18n.translate(
+                        'xpack.observability_onboarding.card.apm.description',
+                        {
+                          defaultMessage:
+                            'Collect traces, logs, and metrics from OpenTelemetry or APM custom agent.',
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                }
+                footer={
+                  <EuiButton
+                    onClick={handleClickApmSetupGuide}
+                    color="primary"
+                    data-test-subj="obltOnboardingHomeStartApmTutorial"
+                  >
+                    {getStartedLabel}
+                  </EuiButton>
+                }
+                paddingSize="m"
+                titleSize="xs"
+                display="plain"
+                hasBorder
+                onClick={handleClickApmSetupGuide}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon type={kubernetesIcon} size="l" />}
+                title={i18n.translate(
+                  'xpack.observability_onboarding.card.k8s.title',
+                  { defaultMessage: 'Collect Kubernetes clusters data' }
+                )}
+                description={
+                  <EuiText color="subdued" size="s" textAlign="center">
+                    <p>
+                      {i18n.translate(
+                        'xpack.observability_onboarding.card.k8s.description',
+                        {
+                          defaultMessage:
+                            'Collect logs and metrics from Kubernetes clusters with Elastic Agent.',
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                }
+                footer={
+                  <EuiButton
+                    onClick={handleClickKubernetesSetupGuide}
+                    color="primary"
+                    data-test-subj="obltOnboardingHomeGoToKubernetesIntegration"
+                  >
+                    {getStartedLabel}
+                  </EuiButton>
+                }
+                titleSize="xs"
+                paddingSize="m"
+                display="plain"
+                hasBorder
+                onClick={handleClickKubernetesSetupGuide}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: '100%' }}>
+          <EuiCard
+            icon={
+              <EuiFlexGroup gutterSize="m" justifyContent="center">
+                <EuiIcon type={kinesisIcon} size="l" />
+                <EuiIcon type={awsIcon} size="l" />
+                <EuiIcon type={apacheIcon} size="l" />
+                <EuiIcon type={nginxIcon} size="l" />
+                <EuiIcon type={gcpIcon} size="l" />
+                <EuiIcon type={azureIcon} size="l" />
+              </EuiFlexGroup>
+            }
+            title={i18n.translate(
+              'xpack.observability_onboarding.card.integrations.title',
+              {
+                defaultMessage:
+                  'Explore 300+ ways of ingesting data with our integrations',
+              }
+            )}
+            footer={
+              <>
+                <EuiButton
+                  onClick={handleClickIntegrations}
+                  color="primary"
+                  data-test-subj="obltOnboardingHomeExploreIntegrations"
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.card.integrations.start',
+                    { defaultMessage: 'Start exploring' }
+                  )}
+                </EuiButton>
+                <EuiHorizontalRule margin="m" />
+                <EuiFlexGroup justifyContent="center" alignItems="center">
+                  <EuiFlexItem grow={false}>
                     {i18n.translate(
-                      'xpack.observability_onboarding.card.customLogs.description.example.andMore',
-                      { defaultMessage: '... and more' }
+                      'xpack.observability_onboarding.card.integrations.quickLinks',
+                      { defaultMessage: 'Quick links:' }
                     )}
-                  </li>
-                </ul>
-              </EuiText>
-            </EuiCard>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: '100%' }}>
-        <EuiFlexGroup alignItems="stretch">
-          <EuiFlexItem>
-            <EuiCard
-              betaBadgeProps={{ label: setupGuideBadgeLabel }}
-              title={i18n.translate(
-                'xpack.observability_onboarding.card.apm.title',
-                {
-                  defaultMessage:
-                    'Monitor my application performance (APM / tracing)',
-                }
-              )}
-              titleSize="xs"
-              paddingSize="xl"
-              onClick={handleClickApmSetupGuide}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCard
-              betaBadgeProps={{ label: setupGuideBadgeLabel }}
-              title={i18n.translate(
-                'xpack.observability_onboarding.card.k8s.title',
-                { defaultMessage: 'Monitor my kubernetes clusters' }
-              )}
-              titleSize="xs"
-              paddingSize="xl"
-              onClick={handleClickKubernetesSetupGuide}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: '100%' }}>
-        <EuiHorizontalRule margin="l" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: '100%' }}>
-        <EuiFlexGroup alignItems="stretch">
-          <EuiFlexItem>
-            <EuiCard
-              betaBadgeProps={{
-                label: i18n.translate(
-                  'xpack.observability_onboarding.card.integrations.badgeLabel',
-                  { defaultMessage: 'Integrations' }
-                ),
-              }}
-              title={i18n.translate(
-                'xpack.observability_onboarding.card.integrations.title',
-                {
-                  defaultMessage:
-                    'Explore 300+ ways of ingesting data with our Integrations',
-                }
-              )}
-              titleSize="xs"
-              paddingSize="xl"
-              onClick={handleClickIntegrations}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCard
-              betaBadgeProps={{
-                label: i18n.translate(
-                  'xpack.observability_onboarding.card.sampleData.badgeLabel',
-                  { defaultMessage: 'Sample data' }
-                ),
-              }}
-              title={i18n.translate(
-                'xpack.observability_onboarding.card.sampleData.title',
-                {
-                  defaultMessage:
-                    'Explore data, visualizations, and dashboards samples',
-                }
-              )}
-              titleSize="xs"
-              paddingSize="xl"
-              onClick={handleClickSampleData}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: '100%' }}>
-        <EuiHorizontalRule margin="l" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleClickSkip}>
-          {i18n.translate('xpack.observability_onboarding.skipLinkLabel', {
-            defaultMessage: 'Skip for now',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      style={{ flexWrap: 'nowrap' }}
+                      alignItems="flexStart"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiLink
+                          onClick={handleClickSampleData}
+                          data-test-subj="obltOnboardingHomeUseSampleData"
+                        >
+                          {i18n.translate(
+                            'xpack.observability_onboarding.card.integrations.sampleData',
+                            { defaultMessage: 'Use sample data' }
+                          )}
+                        </EuiLink>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <StyledItem>
+                          <EuiLink
+                            onClick={handleClickUploadFile}
+                            data-test-subj="obltOnboardingHomeUploadAFile"
+                          >
+                            {i18n.translate(
+                              'xpack.observability_onboarding.card.integrations.uploadFile',
+                              { defaultMessage: 'Upload a file' }
+                            )}
+                          </EuiLink>
+                        </StyledItem>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <StyledItem>
+                          <EuiLink
+                            data-test-subj="observabilityOnboardingHomeAwsFirehoseLink"
+                            href="https://www.elastic.co/guide/en/kinesis/current/aws-firehose-setup-guide.html"
+                            target="_blank"
+                            external
+                            style={{
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {i18n.translate(
+                              'xpack.observability_onboarding.card.integrations.awsFirehose',
+                              { defaultMessage: 'AWS Firehose' }
+                            )}
+                          </EuiLink>
+                        </StyledItem>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+              </>
+            }
+            titleSize="xs"
+            paddingSize="m"
+            display="plain"
+            hasBorder
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }
 
-const setupGuideBadgeLabel = i18n.translate(
-  'xpack.observability_onboarding.card.setupGuide',
-  { defaultMessage: 'Setup guide' }
+const getStartedLabel = i18n.translate(
+  'xpack.observability_onboarding.card.getStarted',
+  { defaultMessage: 'Get started' }
+);
+
+const elasticAgentLabel = i18n.translate(
+  'xpack.observability_onboarding.card.elasticAgent',
+  { defaultMessage: 'Elastic Agent' }
 );

@@ -33,11 +33,7 @@ import {
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
-import {
-  DebouncedInput,
-  useDebouncedValue,
-  IconSelect,
-} from '@kbn/visualization-ui-components/public';
+import { DebouncedInput, useDebouncedValue, IconSelect } from '@kbn/visualization-ui-components';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
@@ -223,7 +219,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
 }
 
 function PrimaryMetricEditor(props: SubProps) {
-  const { state, setState, frame, accessor, idPrefix } = props;
+  const { state, setState, frame, accessor, idPrefix, isInlineEditing } = props;
 
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
@@ -364,6 +360,10 @@ function PrimaryMetricEditor(props: SubProps) {
                 siblingRef={props.panelRef}
                 isOpen={isPaletteOpen}
                 handleClose={togglePalette}
+                title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
+                  defaultMessage: 'Color',
+                })}
+                isInlineEditing={isInlineEditing}
               >
                 <CustomizablePalette
                   palettes={props.paletteService}

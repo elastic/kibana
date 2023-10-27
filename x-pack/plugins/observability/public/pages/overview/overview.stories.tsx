@@ -84,7 +84,9 @@ const withCore = makeDecorator({
           logs: { enabled: false },
           metrics: { enabled: false },
           uptime: { enabled: false },
+          observability: { enabled: false },
         },
+        thresholdRule: { enabled: false },
       },
     };
 

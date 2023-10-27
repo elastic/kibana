@@ -14,7 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiSpacer,
-  EuiBetaBadge,
+  EuiCallOut,
   EuiCodeBlock,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -54,6 +54,8 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/consta
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
+import { useLicense } from '../../../../hooks/use_license';
+import { isProviderValid } from './helpers';
 import * as i18n from './translations';
 
 interface InsightComponentProps {
@@ -64,7 +66,7 @@ interface InsightComponentProps {
   relativeTo?: string;
 }
 
-const insightPrefix = '!{investigate';
+export const insightPrefix = '!{investigate';
 
 export const parser: Plugin = function () {
   const Parser = this.Parser;
@@ -132,8 +134,7 @@ export const parser: Plugin = function () {
 
 const resultFormat = '0,0.[000]a';
 
-// receives the configuration from the parser and renders
-const InsightComponent = ({
+const LicensedInsightComponent = ({
   label,
   description,
   providers,
@@ -208,9 +209,8 @@ const InsightComponent = ({
       };
     }
   }, [oldestTimestamp, relativeTimerange]);
-
   if (isQueryLoading) {
-    return <EuiLoadingSpinner size="l" />;
+    return <EuiLoadingSpinner />;
   } else {
     return (
       <>
@@ -228,6 +228,43 @@ const InsightComponent = ({
         </InvestigateInTimelineButton>
         <div>{description}</div>
       </>
+    );
+  }
+};
+
+// receives the configuration from the parser and renders
+const InsightComponent = ({
+  label,
+  description,
+  providers,
+  relativeFrom,
+  relativeTo,
+}: InsightComponentProps) => {
+  const isPlatinum = useLicense().isPlatinumPlus();
+
+  if (isPlatinum === false) {
+    return (
+      <>
+        <EuiButton
+          isDisabled={true}
+          iconSide={'left'}
+          iconType={'timeline'}
+          data-test-subj="insight-investigate-in-timeline-button"
+        >
+          {`${label}`}
+        </EuiButton>
+        <div>{description}</div>
+      </>
+    );
+  } else {
+    return (
+      <LicensedInsightComponent
+        label={label}
+        description={description}
+        providers={providers}
+        relativeFrom={relativeFrom}
+        relativeTo={relativeTo}
+      />
     );
   }
 };
@@ -352,9 +389,16 @@ const InsightEditorComponent = ({
     [relativeTimerangeController.field]
   );
   const disableSubmit = useMemo(() => {
-    const labelOrEmpty = labelController.field.value ? labelController.field.value : '';
-    return labelOrEmpty.trim() === '' || providers.length === 0;
-  }, [labelController.field.value, providers]);
+    const labelOrEmpty = labelController.field.value ?? '';
+    const flattenedProviders = providers.flat();
+    return (
+      labelOrEmpty.trim() === '' ||
+      flattenedProviders.length === 0 ||
+      flattenedProviders.some(
+        (provider) => !isProviderValid(provider, dataView?.getFieldByName(provider.field))
+      )
+    );
+  }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
     const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
     return [
@@ -371,6 +415,8 @@ const InsightEditorComponent = ({
       },
     ];
   }, [indexPattern]);
+  const isPlatinum = useLicense().isAtLeast('platinum');
+
   return (
     <>
       <EuiModalHeader
@@ -393,13 +439,15 @@ const InsightEditorComponent = ({
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge color={'hollow'} label={i18n.TECH_PREVIEW} size="s" />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-
+      {isPlatinum === false && (
+        <EuiCallOut
+          title="To add suggested queries to an investigation guide, please upgrade to platinum"
+          iconType="timeline"
+        />
+      )}
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
@@ -409,7 +457,10 @@ const InsightEditorComponent = ({
             <EuiFormRow
               label={i18n.LABEL}
               helpText={i18n.LABEL_TEXT}
-              isInvalid={labelController.field.value != null}
+              isInvalid={
+                labelController.field.value !== undefined &&
+                labelController.field.value.trim().length === 0
+              }
               fullWidth
             >
               <EuiFieldText
@@ -434,7 +485,7 @@ const InsightEditorComponent = ({
                   filters={filtersStub}
                   onChange={onChange}
                   dataView={dataView}
-                  maxDepth={2}
+                  maxDepth={1}
                 />
               ) : (
                 <></>
@@ -480,29 +531,36 @@ const exampleInsight = `${insightPrefix}{
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [
-    [     
+    [
       {"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase", "excluded": "false"}
     ],
-    [  
+    [
       {"field": "event.action", "value": "", "queryType": "exists", "excluded": "false"},
       {"field": "process.pid", "value": "{{process.pid}}", "queryType": "phrase", "excluded":"false"}
     ]
   ]
 }}`;
 
-export const plugin = {
-  name: 'insights',
-  button: {
-    label: 'Insights',
-    iconType: 'aggregate',
-  },
-  helpText: (
-    <div>
-      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {exampleInsight}
-      </EuiCodeBlock>
-      <EuiSpacer size="s" />
-    </div>
-  ),
-  editor: InsightEditor,
+export const plugin = ({
+  insightsUpsellingMessage,
+}: {
+  insightsUpsellingMessage: string | null;
+}) => {
+  return {
+    name: 'insights',
+    button: {
+      label: insightsUpsellingMessage ?? i18n.INVESTIGATE,
+      iconType: 'timelineWithArrow',
+      isDisabled: !!insightsUpsellingMessage,
+    },
+    helpText: (
+      <div>
+        <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
+          {exampleInsight}
+        </EuiCodeBlock>
+        <EuiSpacer size="s" />
+      </div>
+    ),
+    editor: InsightEditor,
+  };
 };

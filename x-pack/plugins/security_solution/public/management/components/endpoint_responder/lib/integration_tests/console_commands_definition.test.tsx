@@ -25,11 +25,6 @@ describe('When displaying Endpoint Response Actions', () => {
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
-    testSetup.setExperimentalFlag({
-      responseActionGetFileEnabled: true,
-      responseActionExecuteEnabled: true,
-    });
-
     const endpointMetadata = new EndpointMetadataGenerator().generate();
     const commands = getEndpointConsoleCommands({
       endpointAgentId: '123',
@@ -70,6 +65,7 @@ describe('When displaying Endpoint Response Actions', () => {
       'suspend-process --pid',
       'get-file --path',
       'execute --command',
+      'upload --file',
     ]);
   });
 });

@@ -8,11 +8,16 @@
 
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
-import { getAggregateQueryMode, isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  getAggregateQueryMode,
+  isOfQueryType,
+  isOfAggregateQueryType,
+  getLanguageDisplayName,
+} from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -47,7 +52,10 @@ import {
 } from '../dataview_picker';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import './query_bar.scss';
 
 export const strings = {
@@ -63,6 +71,10 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
       defaultMessage: 'Run query',
     }),
+  getDisabledDatePickerLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
+      defaultMessage: 'All time',
+    }),
 };
 
 const getWrapperWithTooltip = (
@@ -72,13 +84,14 @@ const getWrapperWithTooltip = (
 ) => {
   if (enableTooltip && query && isOfAggregateQueryType(query)) {
     const textBasedLanguage = getAggregateQueryMode(query);
+    const displayName = getLanguageDisplayName(textBasedLanguage);
     return (
       <EuiToolTip
         position="top"
         content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
           defaultMessage:
-            'Date range selection for {language} queries requires the presence of an @timestamp field in the dataset.',
-          values: { language: textBasedLanguage },
+            'Date range selection for {language} queries requires an @timestamp field in the dataset.',
+          values: { language: displayName },
         })}
       >
         {children}
@@ -96,6 +109,7 @@ const SuperDatePicker = React.memo(
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
   customSubmitButton?: any;
+  dataViewPickerOverride?: ReactNode;
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -130,6 +144,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
+  textBasedLanguageModeWarning?: string;
+  hideTextBasedRunQueryLabel?: boolean;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
@@ -142,6 +158,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   submitButtonStyle?: 'auto' | 'iconOnly' | 'full';
   suggestionsSize?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
   onTextLangQueryChange: (query: AggregateQuery) => void;
@@ -393,7 +410,7 @@ export const QueryBarTopRow = React.memo(
     );
 
     function shouldRenderQueryInput(): boolean {
-      return Boolean(showQueryInput && props.indexPatterns && props.query && storage);
+      return Boolean(showQueryInput && props.query && storage);
     }
 
     function shouldRenderDatePicker(): boolean {
@@ -419,14 +436,22 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderDatePicker()) {
         return null;
       }
-      let isDisabled = props.isDisabled;
+      let isDisabled: boolean | { display: React.ReactNode } = Boolean(props.isDisabled);
       let enableTooltip = false;
       // On text based mode the datepicker is always on when the user has unsaved changes.
       // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field
       if (Boolean(isQueryLangSelected) && !props.isDirty) {
         const adHocDataview = props.indexPatterns?.[0];
         if (adHocDataview && typeof adHocDataview !== 'string') {
-          isDisabled = !Boolean(adHocDataview.timeFieldName);
+          if (!adHocDataview.timeFieldName) {
+            isDisabled = {
+              display: (
+                <span data-test-subj="kbnQueryBar-datePicker-disabled">
+                  {strings.getDisabledDatePickerLabel()}
+                </span>
+              ),
+            };
+          }
           enableTooltip = !Boolean(adHocDataview.timeFieldName);
         }
       }
@@ -547,6 +572,7 @@ export const QueryBarTopRow = React.memo(
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
               isDisabled={props.isDisabled}
+              suggestionsAbstraction={props.suggestionsAbstraction}
             />
           </EuiFlexItem>
         )
@@ -592,6 +618,7 @@ export const QueryBarTopRow = React.memo(
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
+                suggestionsAbstraction={props.suggestionsAbstraction}
                 isDisabled={props.isDisabled}
                 appName={appName}
                 submitOnBlur={props.submitOnBlur}
@@ -629,6 +656,7 @@ export const QueryBarTopRow = React.memo(
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
             isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
+            warning={props.textBasedLanguageModeWarning}
             detectTimestamp={detectTimestamp}
             onTextLangQuerySubmit={() =>
               onSubmit({
@@ -637,6 +665,7 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
+            hideRunQueryText={props.hideTextBasedRunQueryLabel}
             data-test-subj="unifiedTextLangEditor"
           />
         )
@@ -662,7 +691,7 @@ export const QueryBarTopRow = React.memo(
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
-              {renderDataViewsPicker()}
+              {props.dataViewPickerOverride || renderDataViewsPicker()}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}

@@ -10,6 +10,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getEventMetadata } from './get_event_metadata';
 import { processorEventRt } from '../../../common/processor_event';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { rangeRt } from '../default_api_types';
 
 const eventMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
@@ -19,20 +20,22 @@ const eventMetadataRoute = createApmServerRoute({
       processorEvent: processorEventRt,
       id: t.string,
     }),
+    query: rangeRt,
   }),
   handler: async (
     resources
   ): Promise<{ metadata: Partial<Record<string, unknown[]>> }> => {
     const apmEventClient = await getApmEventClient(resources);
-
-    const {
-      path: { processorEvent, id },
-    } = resources.params;
+    const { params } = resources;
+    const { start, end } = params.query;
+    const { processorEvent, id } = params.path;
 
     const metadata = await getEventMetadata({
       apmEventClient,
       processorEvent,
       id,
+      start,
+      end,
     });
 
     return {

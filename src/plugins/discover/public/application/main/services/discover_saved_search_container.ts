@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  getNewSavedSearch,
-  getSavedSearch,
-  SavedSearch,
-  saveSavedSearch,
-} from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
@@ -23,6 +18,7 @@ import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from '../utils/get_state_defaults';
+import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 
 export interface UpdateParams {
   /**
@@ -111,10 +107,12 @@ export interface DiscoverSavedSearchContainer {
 
 export function getSavedSearchContainer({
   services,
+  globalStateContainer,
 }: {
   services: DiscoverServices;
+  globalStateContainer: DiscoverGlobalStateContainer;
 }): DiscoverSavedSearchContainer {
-  const initialSavedSearch = getNewSavedSearch(services.data);
+  const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
@@ -135,13 +133,14 @@ export function getSavedSearchContainer({
   const newSavedSearch = async (nextDataView: DataView | undefined) => {
     addLog('[savedSearch] new', { nextDataView });
     const dataView = nextDataView ?? getState().searchSource.getField('index');
-    const nextSavedSearch = await getNewSavedSearch(services.data);
+    const nextSavedSearch = services.savedSearch.getNew();
     nextSavedSearch.searchSource.setField('index', dataView);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
     const nextSavedSearchToSet = updateSavedSearch({
       savedSearch: { ...nextSavedSearch },
       dataView,
       state: newAppState,
+      globalStateContainer,
       services,
     });
     return set(nextSavedSearchToSet);
@@ -149,14 +148,14 @@ export function getSavedSearchContainer({
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
-    updateSavedSearch({ savedSearch: nextSavedSearch, services }, true);
+    updateSavedSearch({
+      savedSearch: nextSavedSearch,
+      globalStateContainer,
+      services,
+      useFilterAndQueryServices: true,
+    });
 
-    const id = await saveSavedSearch(
-      nextSavedSearch,
-      saveOptions || {},
-      services.core.savedObjects.client,
-      services.savedObjectsTagging
-    );
+    const id = await services.savedSearch.save(nextSavedSearch, saveOptions || {});
 
     if (id) {
       set(nextSavedSearch);
@@ -171,15 +170,14 @@ export function getSavedSearchContainer({
       ? nextDataView
       : previousSavedSearch.searchSource.getField('index')!;
 
-    const nextSavedSearch = updateSavedSearch(
-      {
-        savedSearch: { ...previousSavedSearch },
-        dataView,
-        state: nextState || {},
-        services,
-      },
-      useFilterAndQueryServices
-    );
+    const nextSavedSearch = updateSavedSearch({
+      savedSearch: { ...previousSavedSearch },
+      dataView,
+      state: nextState || {},
+      globalStateContainer,
+      services,
+      useFilterAndQueryServices,
+    });
 
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
     hasChanged$.next(hasChanged);
@@ -191,12 +189,9 @@ export function getSavedSearchContainer({
 
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
     addLog('[savedSearch] load', { id, dataView });
-    const loadedSavedSearch = await getSavedSearch(id, {
-      search: services.data.search,
-      savedObjectsClient: services.core.savedObjects.client,
-      spaces: services.spaces,
-      savedObjectsTagging: services.savedObjectsTagging,
-    });
+
+    const loadedSavedSearch = await services.savedSearch.get(id);
+
     if (!loadedSavedSearch.searchSource.getField('index') && dataView) {
       loadedSavedSearch.searchSource.setField('index', dataView);
     }

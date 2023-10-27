@@ -124,6 +124,11 @@ export class ControlsPlugin
       const editControlAction = new EditControlAction(deleteControlAction);
       uiActions.registerAction(editControlAction);
       uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
+
+      const { ClearControlAction } = await import('./control_group/actions/clear_control_action');
+      const clearControlAction = new ClearControlAction();
+      uiActions.registerAction(clearControlAction);
+      uiActions.attachAction(PANEL_HOVER_TRIGGER, clearControlAction.id);
     });
 
     const { getControlFactory, getControlTypes } = controlsService;

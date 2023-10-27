@@ -7,9 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import type { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './types';
 import { ALL_SPACES_ID } from '../../common/constants';
 import type { SpacesService } from '../plugin';
-import type { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './types';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (
   request: KibanaRequest

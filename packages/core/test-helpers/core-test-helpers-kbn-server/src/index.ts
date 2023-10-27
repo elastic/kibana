@@ -15,4 +15,12 @@ export {
   request,
 } from './create_root';
 
+export { createTestServerlessInstances } from './create_serverless_root';
+
+export type {
+  TestServerlessUtils,
+  TestServerlessESUtils,
+  TestServerlessKibanaUtils,
+} from './create_serverless_root';
+
 export type { HttpMethod, TestElasticsearchUtils, TestKibanaUtils, TestUtils } from './create_root';

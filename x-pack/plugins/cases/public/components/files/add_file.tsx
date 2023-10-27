@@ -20,11 +20,11 @@ import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import type { Owner } from '../../../common/constants/types';
 
-import { CommentType, ExternalReferenceStorageType } from '../../../common';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -70,7 +70,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
           caseOwner: owner[0],
           attachments: [
             {
-              type: CommentType.externalReference,
+              type: AttachmentType.externalReference,
               externalReferenceId: file.id,
               externalReferenceStorage: {
                 type: ExternalReferenceStorageType.savedObject,
@@ -98,8 +98,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
         // error toast is handled inside  createAttachments
 
         // we need to delete the file if attachment creation failed
-        const abortCtrlRef = new AbortController();
-        return deleteFileAttachments({ caseId, fileIds: [file.id], signal: abortCtrlRef.signal });
+        return deleteFileAttachments({ caseId, fileIds: [file.id] });
       }
 
       closeModal();

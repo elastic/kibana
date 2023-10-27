@@ -137,11 +137,12 @@ export const CodeEditor: React.FC<Props> = ({
   value,
   onChange,
   width,
+  height = '100px',
   options,
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
-  useDarkTheme,
+  useDarkTheme: useDarkThemeProp,
   transparentBackground,
   suggestionProvider,
   signatureProvider,
@@ -154,7 +155,8 @@ export const CodeEditor: React.FC<Props> = ({
   isCopyable = false,
   allowFullScreen = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const { colorMode, euiTheme } = useEuiTheme();
+  const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
 
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -477,7 +479,7 @@ export const CodeEditor: React.FC<Props> = ({
           onChange={onChange}
           width={isFullScreen ? '100vw' : width}
           // previously defaulted to height which defaulted to 100% but this makes it unviewable
-          height={isFullScreen ? '100vh' : '100px'}
+          height={isFullScreen ? '100vh' : height}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
           options={{

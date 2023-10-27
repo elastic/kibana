@@ -1,0 +1,114 @@
+summary: Retrieve information about a rule that has conditional actions.
+value:
+  page: 1
+  total: 1
+  per_page: 10
+  data:
+    - id: 6107a8f0-f401-11ed-9f8e-399c75a2deeb
+      name: security_rule
+      consumer: siem
+      enabled: true
+      tags: []
+      throttle: null
+      revision: 1
+      running: false
+      schedule:
+        interval: 1m
+      params:
+        author: []
+        description: A security threshold rule.
+        ruleId: an_internal_rule_id
+        falsePositives: []
+        from: now-3660s
+        immutable: false
+        license: ""
+        outputIndex: ""
+        meta:
+          from: 1h
+          kibana_siem_app_url: https://localhost:5601/app/security
+        maxSignals: 100
+        riskScore: 21
+        riskScoreMapping: []
+        severity: low
+        severityMapping: []
+        threat: []
+        to: now
+        references: []
+        version: 1
+        exceptionsList: []
+        type: threshold
+        language: kuery
+        index: ["kibana_sample_data_logs"]
+        query: "*"
+        filters: []
+        threshold:
+          field: ["bytes"]
+          value: 1
+          cardinality: []
+      rule_type_id: siem.thresholdRule
+      created_by: elastic
+      updated_by: elastic
+      created_at: '2023-05-16T15:50:28.358Z'
+      updated_at: '2023-05-16T20:25:42.559Z'
+      api_key_owner: elastic
+      notify_when: null
+      mute_all: false
+      muted_alert_ids: []
+      scheduled_task_id: 6107a8f0-f401-11ed-9f8e-399c75a2deeb
+      execution_status:
+        status: ok
+        last_execution_date: '2023-05-16T20:26:49.590Z'
+        last_duration: 166
+      actions:
+        - group: default
+          id: 49eae970-f401-11ed-9f8e-399c75a2deeb
+          params:
+            documents:
+              - rule_id: {{rule.id}}
+                rule_name: {{rule.name}}
+                alert_id: {{alert.id}}
+                context_message: {{context.message}}
+          connector_type_id: .index
+          frequency:
+            summary: true
+            notify_when: onActiveAlert
+            throttle: null
+          uuid: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
+          alerts_filter:
+            timeframe:
+              days: [7]
+              timezone: UTC
+              hours:
+                start: 08:00
+                end: 17:00
+            query:
+              kql: ""
+              filters:
+                - meta:
+                    disabled: false
+                    negate: false
+                    alias: null
+                    index: c4bdca79-e69e-4d80-82a1-e5192c621bea
+                    key: client.geo.region_iso_code
+                    field: client.geo.region_iso_code
+                    params:
+                      query: CA-QC
+                      type: phrase
+                  $state:
+                    store: appState
+                  query:
+                    match_phrase:
+                      client.geo.region_iso_code: CA-QC
+      last_run:
+        alerts_count:
+          new: 0
+          ignored: 0
+          recovered: 0
+          active: 0
+        outcome_msg:
+          - Rule execution completed successfully
+        outcome_order: 0
+        warning: null
+        outcome: succeeded
+      next_run: '2023-05-16T20:27:49.507Z'
+      api_key_created_by_user: false

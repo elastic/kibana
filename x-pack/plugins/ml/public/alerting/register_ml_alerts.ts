@@ -11,7 +11,7 @@ import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-action
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import { PLUGIN_ID } from '../../common/constants/app';
+import { ML_APP_ROUTE, PLUGIN_ID } from '../../common/constants/app';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { validateLookbackInterval, validateTopNBucket } from './validators';
 import { registerJobsHealthAlertingRule } from './jobs_health_rule';
@@ -149,6 +149,6 @@ export function registerNavigation(alerting: AlertingSetup) {
       ]),
     ];
 
-    return formatExplorerUrl('/app/ml', { jobIds });
+    return formatExplorerUrl(ML_APP_ROUTE, { jobIds });
   });
 }

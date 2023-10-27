@@ -7,6 +7,8 @@
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 
+import type { UserProfileAvatarData } from '@kbn/user-profile-components';
+
 import type { AuthenticatedUser } from './authenticated_user';
 import { getUserDisplayName } from './user';
 
@@ -71,31 +73,6 @@ export type UserProfileData = Record<string, unknown>;
  * Type of the user profile labels structure (currently
  */
 export type UserProfileLabels = Record<string, string>;
-
-/**
- * Avatar stored in user profile.
- */
-export interface UserProfileAvatarData {
-  /**
-   * Optional initials (two letters) of the user to use as avatar if avatar picture isn't specified.
-   */
-  initials?: string;
-  /**
-   * Background color of the avatar when initials are used.
-   */
-  color?: string;
-  /**
-   * Base64 data URL for the user avatar image.
-   */
-  imageUrl?: string | null;
-}
-
-/**
- * User settings stored in the data object of the User Profile
- */
-export interface UserSettingsData {
-  darkMode?: string;
-}
 
 /**
  * Extended user information returned in user profile (both basic and security related properties).

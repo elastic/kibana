@@ -15,6 +15,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { InfraClientStartDeps } from '../types';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
+import { hostLensFormulas } from '../common/visualizations';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -29,6 +30,8 @@ const mockDataView = {
   fields: [],
   metaFields: [],
 } as unknown as jest.Mocked<DataView>;
+
+const normalizedLoad1m = hostLensFormulas.normalizedLoad1m;
 
 const lensPluginMockStart = lensPluginMock.createStartContract();
 const mockUseKibana = () => {
@@ -48,27 +51,56 @@ describe('useHostTable hook', () => {
   it('should return the basic lens attributes', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
-        visualizationType: 'lineChart',
-        type: 'load',
-        options: {
-          title: 'Injected Normalized Load',
-        },
+        visualizationType: 'lnsXY',
+        layers: [
+          {
+            data: [normalizedLoad1m],
+            type: 'visualization',
+            options: {
+              buckets: {
+                type: 'date_histogram',
+              },
+              breakdown: {
+                field: 'host.name',
+                type: 'top_values',
+                params: {
+                  size: 10,
+                },
+              },
+            },
+          },
+          {
+            data: [
+              {
+                value: '1',
+                format: {
+                  id: 'percent',
+                  params: {
+                    decimals: 0,
+                  },
+                },
+              },
+            ],
+            type: 'referenceLines',
+          },
+        ],
+        title: 'Injected Normalized Load',
         dataView: mockDataView,
       })
     );
     await waitForNextUpdate();
 
     const { state, title } = result.current.attributes ?? {};
-    const { datasourceStates, filters } = state ?? {};
+    const { datasourceStates } = state ?? {};
 
     expect(title).toBe('Injected Normalized Load');
     expect(datasourceStates).toEqual({
       formBased: {
         layers: {
-          layer1: {
-            columnOrder: ['hosts_aggs_breakdown', 'x_date_histogram', 'formula_accessor'],
+          layer_0: {
+            columnOrder: ['aggs_breakdown', 'x_date_histogram', 'formula_accessor_0_0'],
             columns: {
-              hosts_aggs_breakdown: {
+              aggs_breakdown: {
                 dataType: 'string',
                 isBucketed: true,
                 label: 'Top 10 values of host.name',
@@ -104,12 +136,12 @@ describe('useHostTable hook', () => {
                 scale: 'interval',
                 sourceField: '@timestamp',
               },
-              formula_accessor: {
-                customLabel: false,
+              formula_accessor_0_0: {
+                customLabel: true,
                 dataType: 'number',
                 filter: undefined,
                 isBucketed: false,
-                label: 'average(system.load.1) / max(system.load.cores)',
+                label: 'Normalized Load',
                 operationType: 'formula',
                 params: {
                   format: {
@@ -128,10 +160,10 @@ describe('useHostTable hook', () => {
             },
             indexPatternId: 'mock-id',
           },
-          referenceLayer: {
-            columnOrder: ['referenceColumn'],
+          layer_1_reference: {
+            columnOrder: ['formula_accessor_1_0_reference_column'],
             columns: {
-              referenceColumn: {
+              formula_accessor_1_0_reference_column: {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
@@ -145,7 +177,7 @@ describe('useHostTable hook', () => {
                       decimals: 0,
                     },
                   },
-                  value: 1,
+                  value: '1',
                 },
                 references: [],
                 scale: 'ratio',
@@ -158,25 +190,18 @@ describe('useHostTable hook', () => {
         },
       },
     });
-    expect(filters).toEqual([
-      {
-        meta: {
-          index: 'mock-id',
-        },
-        query: {
-          exists: {
-            field: 'host.name',
-          },
-        },
-      },
-    ]);
   });
 
   it('should return extra actions', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
-        visualizationType: 'lineChart',
-        type: 'load',
+        visualizationType: 'lnsXY',
+        layers: [
+          {
+            data: [normalizedLoad1m],
+            type: 'visualization',
+          },
+        ],
         dataView: mockDataView,
       })
     );
@@ -209,6 +234,6 @@ describe('useHostTable hook', () => {
       ],
     });
 
-    expect(extraActions.openInLens).not.toBeNull();
+    expect(extraActions).toHaveLength(1);
   });
 });

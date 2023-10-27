@@ -11,9 +11,9 @@ import React from 'react';
 
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-import type { EnrollmentToken } from '../common';
 import { decodeEnrollmentToken, EnrollmentTokenForm } from './enrollment_token_form';
 import { Providers } from './plugin';
+import type { EnrollmentToken } from '../common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,

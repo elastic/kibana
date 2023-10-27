@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_GROUP_ID,
+  PROCESSOR_EVENT,
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
-import { AlertParams } from '../../route';
+import { AlertParams, PreviewChartResponse } from '../../route';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
-
-export type TransactionErrorCountChartPreviewResponse = Array<{
-  x: number;
-  y: number;
-}>;
+import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
+import {
+  BarSeriesDataMap,
+  getFilteredBarSeries,
+} from '../utils/get_filtered_series_for_preview_chart';
 
 export async function getTransactionErrorCountChartPreview({
   apmEventClient,
@@ -26,17 +33,42 @@ export async function getTransactionErrorCountChartPreview({
 }: {
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
-}): Promise<TransactionErrorCountChartPreviewResponse> {
-  const { serviceName, environment, errorGroupingKey, interval, start, end } =
-    alertParams;
+}): Promise<PreviewChartResponse> {
+  const {
+    serviceName,
+    environment,
+    errorGroupingKey,
+    interval,
+    start,
+    end,
+    groupBy: groupByFields,
+    searchConfiguration,
+  } = alertParams;
+
+  const allGroupByFields = getAllGroupByFields(
+    ApmRuleType.ErrorCount,
+    groupByFields
+  );
+
+  const termFilterQuery = !searchConfiguration
+    ? [
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(ERROR_GROUP_ID, errorGroupingKey, {
+          queryEmptyString: false,
+        }),
+        ...environmentQuery(environment),
+      ]
+    : [];
 
   const query = {
     bool: {
       filter: [
-        ...termQuery(SERVICE_NAME, serviceName),
-        ...termQuery(ERROR_GROUP_ID, errorGroupingKey),
+        ...termFilterQuery,
+        ...getParsedFilterQuery(searchConfiguration?.query?.query as string),
         ...rangeQuery(start, end),
-        ...environmentQuery(environment),
+        { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
       ],
     },
   };
@@ -49,6 +81,15 @@ export async function getTransactionErrorCountChartPreview({
         extended_bounds: {
           min: start,
           max: end,
+        },
+      },
+      aggs: {
+        series: {
+          multi_terms: {
+            terms: getGroupByTerms(allGroupByFields),
+            size: 1000,
+            order: { _count: 'desc' as const },
+          },
         },
       },
     },
@@ -65,13 +106,37 @@ export async function getTransactionErrorCountChartPreview({
   );
 
   if (!resp.aggregations) {
-    return [];
+    return { series: [], totalGroups: 0 };
   }
 
-  return resp.aggregations.timeseries.buckets.map((bucket) => {
-    return {
-      x: bucket.key,
-      y: bucket.doc_count,
-    };
-  });
+  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
+    (acc, bucket) => {
+      const x = bucket.key;
+      bucket.series.buckets.forEach((seriesBucket) => {
+        const bucketKey = seriesBucket.key.join('_');
+        const y = seriesBucket.doc_count;
+
+        if (acc[bucketKey]) {
+          acc[bucketKey].push({ x, y });
+        } else {
+          acc[bucketKey] = [{ x, y }];
+        }
+      });
+
+      return acc;
+    },
+    {} as BarSeriesDataMap
+  );
+
+  const series = Object.keys(seriesDataMap).map((key) => ({
+    name: key,
+    data: seriesDataMap[key],
+  }));
+
+  const filteredSeries = getFilteredBarSeries(series);
+
+  return {
+    series: filteredSeries,
+    totalGroups: series.length,
+  };
 }

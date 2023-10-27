@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
-import { FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   buildDegradingSummary,
   buildHealthySummary,
@@ -43,7 +43,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   },
   timeWindow: {
     duration: '30d',
-    isRolling: true,
+    type: 'rolling',
   },
   objective: { target: 0.98 },
   budgetingMethod: 'occurrences',
@@ -62,6 +62,8 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       isEstimated: false,
     },
   },
+  groupBy: ALL_VALUE,
+  instanceId: ALL_VALUE,
   tags: ['k8s', 'production', 'critical'],
   enabled: true,
   createdAt: now,

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
+import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllRules } from '../../utils';
 
@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
 
       expect(response.status).to.equal(400);
@@ -50,11 +51,12 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
 
       expect(response.status).to.equal(400);
       expect(response.body.message).to.be(
-        '[request body]: Array size (4) is out of bounds: min: 1, max: 3'
+        '[request body]: new_terms_fields: Array must contain at most 3 element(s)'
       );
     });
   });

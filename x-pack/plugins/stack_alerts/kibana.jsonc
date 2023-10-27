@@ -22,7 +22,9 @@
       "kibanaUtils"
     ],
     "requiredBundles": [
-      "esUiShared"
-    ]
+      "esUiShared",
+      "textBasedLanguages"
+    ],
+    "extraPublicDirs": ["common"]
   }
 }

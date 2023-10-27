@@ -6,7 +6,7 @@
  */
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import type { RuleAlertType } from '../../../rule_schema';
 
 describe('addItemsToArray', () => {
@@ -374,6 +374,41 @@ describe('ruleParamsModifier', () => {
         ])
       ).toThrow(
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+      );
+    });
+
+    test('should throw error on adding index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditType.add_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow("Index patterns can't be added. ES|QL rule doesn't have index patterns property");
+    });
+
+    test('should throw error on deleting index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditType.delete_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow("Index patterns can't be deleted. ES|QL rule doesn't have index patterns property");
+    });
+
+    test('should throw error on overwriting index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditType.set_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow(
+        "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
       );
     });
   });

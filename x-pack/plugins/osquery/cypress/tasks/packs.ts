@@ -6,6 +6,7 @@
  */
 
 import { some } from 'lodash';
+import { API_VERSIONS } from '../../common/constants';
 import type { UsePacksResponse } from '../../public/packs/use_packs';
 import { request } from './common';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
@@ -45,6 +46,9 @@ export const cleanupAllPrebuiltPacks = () => {
   request<UsePacksResponse>({
     method: 'GET',
     url: '/api/osquery/packs',
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
   }).then((response) => {
     const prebuiltPacks = response.body.data?.filter((pack) =>
       some(pack.references, { type: 'osquery-pack-asset' })

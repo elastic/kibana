@@ -6,14 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getAllPrivateLocations } from './get_private_locations';
+import { SyntheticsRestApiRouteFactory } from '../../types';
+import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
-import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { PrivateLocation } from '../../../../common/runtime_types';
+import type { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
+import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { toClientContract, toSavedObjectContract } from './helpers';
 
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),
@@ -23,34 +25,41 @@ export const PrivateLocationSchema = schema.object({
   tags: schema.maybe(schema.arrayOf(schema.string())),
   geo: schema.maybe(
     schema.object({
-      lat: schema.oneOf([schema.number(), schema.string()]),
-      lon: schema.oneOf([schema.number(), schema.string()]),
+      lat: schema.number(),
+      lon: schema.number(),
     })
   ),
 });
 
-export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => ({
+export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<
+  SyntheticsPrivateLocations
+> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
   validate: {
     body: PrivateLocationSchema,
   },
   writeAccess: true,
-  handler: async ({ request, server, savedObjectsClient }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }) => {
     const location = request.body as PrivateLocation;
 
-    const { locations } = await getAllPrivateLocations(savedObjectsClient);
-    const existingLocations = locations.filter((loc) => loc.id !== location.agentPolicyId);
+    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
+      savedObjectsClient,
+      syntheticsMonitorClient
+    );
 
-    const result = await savedObjectsClient.create(
+    const existingLocations = locations.filter((loc) => loc.id !== location.agentPolicyId);
+    const formattedLocation = toSavedObjectContract(location);
+
+    const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
       privateLocationsSavedObjectName,
-      { locations: [...existingLocations, location] },
+      { locations: [...existingLocations, formattedLocation] },
       {
         id: privateLocationsSavedObjectId,
         overwrite: true,
       }
     );
 
-    return result.attributes;
+    return toClientContract(result.attributes, agentPolicies);
   },
 });

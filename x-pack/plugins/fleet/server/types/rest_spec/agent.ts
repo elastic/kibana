@@ -9,16 +9,27 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
 
-import { SO_SEARCH_LIMIT } from '../../constants';
+import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
+
+import { validateKuery } from '../../routes/utils/filter_utils';
 
 export const GetAgentsRequestSchema = {
   query: schema.object(
     {
       page: schema.number({ defaultValue: 1 }),
       perPage: schema.number({ defaultValue: 20 }),
-      kuery: schema.maybe(schema.string()),
+      kuery: schema.maybe(
+        schema.string({
+          validate: (value: string) => {
+            const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+            if (validationObj?.error) {
+              return validationObj?.error;
+            }
+          },
+        })
+      ),
       showInactive: schema.boolean({ defaultValue: false }),
       withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),
@@ -206,7 +217,16 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),
-    kuery: schema.maybe(schema.string()),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
   }),
 };
 
@@ -221,7 +241,6 @@ export const GetActionStatusRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 0 }),
     perPage: schema.number({ defaultValue: 20 }),
-    kuery: schema.maybe(schema.string()),
     errorSize: schema.number({ defaultValue: 5 }),
   }),
 };

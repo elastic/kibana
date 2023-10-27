@@ -32,7 +32,6 @@ export const ML_SEVERITY_COLOR_RAMP = [
 
 /**
  * Custom enum for anomaly result type
- * @type {{ readonly BUCKET: "bucket"; readonly RECORD: "record"; readonly INFLUENCER: "influencer"; }}
  */
 export const ML_ANOMALY_RESULT_TYPE = {
   BUCKET: 'bucket',
@@ -42,18 +41,15 @@ export const ML_ANOMALY_RESULT_TYPE = {
 
 /**
  * Array of partition fields.
- * @type {readonly ["partition_field", "over_field", "by_field"]}
  */
 export const ML_PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
 
 /**
  * Machine learning job id attribute name.
- * @type {"job_id"}
  */
 export const ML_JOB_ID = 'job_id';
 
 /**
  * Machine learning partition field value attribute name.
- * @type {"partition_field_value"}
  */
 export const ML_PARTITION_FIELD_VALUE = 'partition_field_value';

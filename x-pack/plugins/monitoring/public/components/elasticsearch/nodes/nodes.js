@@ -15,7 +15,6 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -501,7 +500,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
         </EuiScreenReaderOnly>
         {renderClusterStatus()}
         {setupModeCallout}
-        <EuiPageContent>
+        <EuiPanel>
           <EuiMonitoringSSPTable
             className="elasticsearchNodesTable"
             rows={nodes}
@@ -524,7 +523,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             onTableChange={onTableChange}
             {...props}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

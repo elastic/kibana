@@ -1,0 +1,49 @@
+{
+  "id": "noDataPage",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "noDataPage",
+      "id": "def-public.NoDataPagePluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "NoDataPagePluginStart",
+      "description": [],
+      "signature": [
+        {
+          "pluginId": "noDataPage",
+          "scope": "public",
+          "docId": "kibNoDataPagePluginApi",
+          "section": "def-public.NoDataPagePluginSetup",
+          "text": "NoDataPagePluginSetup"
+        }
+      ],
+      "path": "src/plugins/no_data_page/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

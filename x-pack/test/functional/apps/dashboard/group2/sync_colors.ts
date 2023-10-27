@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     return colorMapping;
   }
+
   describe('sync colors', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -51,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should sync colors on dashboard by default', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.dashboard.clickCreateDashboardPrompt();
       await dashboardAddPanel.clickCreateNewLink();
@@ -67,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
+        palette: { mode: 'legacy', id: 'default' },
       });
 
       await PageObjects.lens.save('vis1', false, true);
@@ -83,6 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
+        palette: { mode: 'legacy', id: 'default' },
       });
 
       await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });

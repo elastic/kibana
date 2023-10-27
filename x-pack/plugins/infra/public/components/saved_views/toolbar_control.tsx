@@ -10,35 +10,30 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NonEmptyString } from '@kbn/io-ts-utils';
+import {
+  SavedViewState,
+  SavedViewOperations,
+  SavedViewItem,
+  BasicAttributes,
+} from '../../../common/saved_views';
 import { ManageViewsFlyout } from './manage_views_flyout';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
-import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
-import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
 
-type UseViewProps =
-  | 'currentView'
-  | 'views'
-  | 'isFetchingViews'
-  | 'isFetchingCurrentView'
-  | 'isCreatingView'
-  | 'isUpdatingView';
-
-type UseViewResult = UseInventoryViewsResult | UseMetricsExplorerViewsResult;
-type InventoryViewsResult = Pick<UseInventoryViewsResult, UseViewProps>;
-type MetricsExplorerViewsResult = Pick<UseMetricsExplorerViewsResult, UseViewProps>;
-
-interface Props<ViewState> extends InventoryViewsResult, MetricsExplorerViewsResult {
-  viewState: ViewState & { time?: number };
-  onCreateView: UseViewResult['createView'];
-  onDeleteView: UseViewResult['deleteViewById'];
-  onUpdateView: UseViewResult['updateViewById'];
-  onLoadViews: UseViewResult['fetchViews'];
-  onSetDefaultView: UseViewResult['setDefaultViewById'];
-  onSwitchView: UseViewResult['switchViewById'];
+interface Props<TSingleSavedViewState extends SavedViewItem, TViewState>
+  extends SavedViewState<TSingleSavedViewState> {
+  viewState: TViewState & BasicAttributes;
+  onCreateView: SavedViewOperations<TSingleSavedViewState>['createView'];
+  onDeleteView: SavedViewOperations<TSingleSavedViewState>['deleteViewById'];
+  onUpdateView: SavedViewOperations<TSingleSavedViewState>['updateViewById'];
+  onLoadViews: SavedViewOperations<TSingleSavedViewState>['fetchViews'];
+  onSetDefaultView: SavedViewOperations<TSingleSavedViewState>['setDefaultViewById'];
+  onSwitchView: SavedViewOperations<TSingleSavedViewState>['switchViewById'];
 }
 
-export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
+export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedViewItem, TViewState>(
+  props: Props<TSingleSavedViewState, TViewState>
+) {
   const {
     currentView,
     views,

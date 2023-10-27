@@ -11,6 +11,15 @@
   display: 'inline-block';
 }
 
+.mlJobMapLegend__ingestPipeline {
+  height: $euiSizeM;
+  width: $euiSizeM;
+  background-color: $euiColorGhost;
+  border: $euiBorderWidthThick solid $euiColorVis7;
+  border-radius: $euiBorderRadiusSmall;
+  display: 'inline-block';
+}
+
 .mlJobMapLegend__transform {
   height: $euiSizeM;
   width: $euiSizeM;

@@ -21,7 +21,10 @@
       "dataViews",
       "dataViewEditor",
       "alerting",
-      "actions"
+      "actions",
+      "dashboard",
+      "licensing",
+      "expressions"
     ],
     "optionalPlugins": [
       "cloud",

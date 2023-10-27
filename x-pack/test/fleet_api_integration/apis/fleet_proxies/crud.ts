@@ -43,6 +43,7 @@ export default function (providerContext: FtrProviderContext) {
     const fleetServerHostId = 'test-fleetserver-123';
     const policyId = 'test-policy-123';
     const outputId = 'test-output-123';
+    let downloadSourceId: string;
 
     before(async function () {
       await kibanaServer.savedObjects.clean({
@@ -79,6 +80,19 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
+      const { body: downloadSourceResponse } = await supertest
+        .post(`/api/fleet/agent_download_sources`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'My download source',
+          host: 'http://test.fr:443',
+          proxy_id: existingId,
+          is_default: false,
+        })
+        .expect(200);
+
+      downloadSourceId = downloadSourceResponse.item.id;
+
       await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -88,6 +102,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           fleet_server_host_id: fleetServerHostId,
           data_output_id: outputId,
+          download_source_id: downloadSourceId,
         })
         .expect(200);
     });
@@ -151,6 +166,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(
           'https://testupdated.fr:3232'
         );
+        expect(fleetPolicyAfter?.data?.agent.download.proxy_url).to.be(
+          'https://testupdated.fr:3232'
+        );
       });
 
       it('should return a 404 when updating a non existing fleet proxy', async function () {
@@ -174,6 +192,7 @@ export default function (providerContext: FtrProviderContext) {
         const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
         expect(fleetPolicyAfter?.data?.fleet?.proxy_url).to.be(undefined);
         expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(undefined);
+        expect(fleetPolicyAfter?.data?.agent.download.proxy_url).to.be(undefined);
       });
     });
   });

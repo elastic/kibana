@@ -12,7 +12,6 @@ import { areaVisTypeDefinition } from './area';
 import { lineVisTypeDefinition } from './line';
 import { histogramVisTypeDefinition } from './histogram';
 import { horizontalBarVisTypeDefinition } from './horizontal_bar';
-import { convertToLens } from '../convert_to_lens';
 
 export const visTypesDefinitions = [
   areaVisTypeDefinition,
@@ -22,8 +21,12 @@ export const visTypesDefinitions = [
 ].map<VisTypeDefinition<VisParams>>((defenition) => {
   return {
     ...defenition,
-    navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+    navigateToLens: async (vis, timefilter) => {
+      const { convertToLens } = await import('../convert_to_lens');
+      return vis ? convertToLens(vis, timefilter) : null;
+    },
     getExpressionVariables: async (vis, timeFilter) => {
+      const { convertToLens } = await import('../convert_to_lens');
       return {
         canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
       };

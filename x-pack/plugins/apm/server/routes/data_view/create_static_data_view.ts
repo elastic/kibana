@@ -17,9 +17,8 @@ import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
-
-import { APMRouteHandlerResources } from '../typings';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
 export type CreateDataViewResponse = Promise<
   | { created: boolean; dataView: DataView }

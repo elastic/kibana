@@ -30,20 +30,6 @@ import * as i18n from './translations';
 import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
-const DescriptionListStyled = styled(EuiDescriptionList)`
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.s}) {
-    .euiDescriptionList__title {
-      width: 30% !important;
-    }
-
-    .euiDescriptionList__description {
-      width: 70% !important;
-    }
-  }
-`;
-
-DescriptionListStyled.displayName = 'DescriptionListStyled';
-
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;
   additionalRequests?: string[] | null;
@@ -209,7 +195,11 @@ export const ModalInspectQuery = ({
       content: (
         <>
           <EuiSpacer />
-          <DescriptionListStyled listItems={statistics} type="column" />
+          <EuiDescriptionList
+            listItems={statistics}
+            type="responsiveColumn"
+            columnWidths={[3, 7]}
+          />
         </>
       ),
     },

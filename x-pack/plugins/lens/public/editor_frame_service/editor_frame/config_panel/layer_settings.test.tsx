@@ -65,8 +65,8 @@ describe('LayerSettings', () => {
   });
 
   it('should call the custom renderer if available', async () => {
-    mockVisualization.renderLayerHeader = jest.fn();
+    mockVisualization.LayerHeaderComponent = jest.fn().mockImplementation(() => <div />);
     await mountWithProvider(<LayerSettings {...getDefaultProps()} />);
-    expect(mockVisualization.renderLayerHeader).toHaveBeenCalled();
+    expect(mockVisualization.LayerHeaderComponent).toHaveBeenCalled();
   });
 });

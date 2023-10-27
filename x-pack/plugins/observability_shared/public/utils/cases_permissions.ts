@@ -12,4 +12,5 @@ export const noCasesPermissions = () => ({
   update: false,
   delete: false,
   push: false,
+  connectors: false,
 });

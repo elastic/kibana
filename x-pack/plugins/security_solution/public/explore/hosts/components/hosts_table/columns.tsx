@@ -20,8 +20,8 @@ import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
-import { RiskScore } from '../../../components/risk_score/severity/common';
-import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
+import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
+import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
@@ -42,11 +42,9 @@ export const getHostsColumns = (
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'host.name',
+              data={{
                 value: hostName[0],
-                type: 'keyword',
-                aggregatable: true,
+                field: 'host.name',
               }}
             >
               <HostDetailsLink hostName={hostName[0]} />
@@ -100,10 +98,9 @@ export const getHostsColumns = (
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'host.os.name',
+              data={{
                 value: hostOsName[0],
-                type: 'keyword',
+                field: 'host.os.name',
               }}
             >
               {hostOsName}
@@ -127,10 +124,9 @@ export const getHostsColumns = (
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'host.os.version',
+              data={{
                 value: hostOsVersion[0],
-                type: 'keyword',
+                field: 'host.os.version',
               }}
             >
               {hostOsVersion}
@@ -145,21 +141,14 @@ export const getHostsColumns = (
   if (showRiskColumn) {
     columns.push({
       field: 'node.risk',
-      name: (
-        <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
-          <>
-            {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
-            <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
-      ),
+      name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
       render: (riskScore: RiskSeverity) => {
         if (riskScore != null) {
           return (
-            <RiskScore
+            <RiskScoreLevel
               toolTipContent={
                 <EuiLink onClick={() => dispatchSeverityUpdate(riskScore)}>
                   <EuiText size="xs">{VIEW_HOSTS_BY_SEVERITY(riskScore.toLowerCase())}</EuiText>

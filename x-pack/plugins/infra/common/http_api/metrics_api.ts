@@ -10,11 +10,16 @@ import * as rt from 'io-ts';
 import { MetricsUIAggregationRT } from '../inventory_models/types';
 import { afterKeyObjectRT } from './metrics_explorer';
 
-export const MetricsAPITimerangeRT = rt.type({
-  from: rt.number,
-  to: rt.number,
-  interval: rt.string,
-});
+export const MetricsAPITimerangeRT = rt.intersection([
+  rt.type({
+    from: rt.number,
+    to: rt.number,
+    interval: rt.string,
+  }),
+  rt.partial({
+    timeFieldName: rt.string,
+  }),
+]);
 
 const groupByRT = rt.union([rt.string, rt.null, rt.undefined]);
 

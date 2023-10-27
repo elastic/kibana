@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-
+import type { Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
@@ -15,7 +15,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { CaseUI } from '../../../../common';
 import { isLensEmbeddable, hasInput, getLensCaseAttachment } from './utils';
 
-import type { ActionContext, CasesUIActionProps, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext, CasesUIActionProps } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
 import { ActionWrapper } from './action_wrapper';
@@ -26,7 +26,7 @@ export const ACTION_ID = 'embeddable_addToExistingCase';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
 interface Props {
-  embeddable: DashboardVisualizationEmbeddable;
+  embeddable: LensEmbeddable;
   onSuccess: () => void;
   onClose: (theCase?: CaseUI) => void;
 }
@@ -38,9 +38,10 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ embeddable, onClose, onS
   });
 
   const attachments = useMemo(() => {
-    const { attributes, timeRange } = embeddable.getInput();
-
-    return [getLensCaseAttachment({ attributes, timeRange })];
+    const { timeRange } = embeddable.getInput();
+    const attributes = embeddable.getFullAttributes();
+    // we've checked attributes exists before rendering (isCompatible), attributes should not be undefined here
+    return attributes != null ? [getLensCaseAttachment({ attributes, timeRange })] : [];
   }, [embeddable]);
   useEffect(() => {
     modal.open({ getAttachments: () => attachments });

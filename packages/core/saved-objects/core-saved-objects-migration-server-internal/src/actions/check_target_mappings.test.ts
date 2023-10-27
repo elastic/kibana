@@ -8,22 +8,33 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { checkTargetMappings } from './check_target_mappings';
-import { diffMappings } from '../core/build_active_mappings';
+import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import {
+  checkTargetMappings,
+  type ComparedMappingsChanged,
+  type ComparedMappingsMatch,
+} from './check_target_mappings';
+import { getUpdatedHashes } from '../core/build_active_mappings';
 
 jest.mock('../core/build_active_mappings');
 
-const diffMappingsMock = diffMappings as jest.MockedFn<typeof diffMappings>;
+const getUpdatedHashesMock = getUpdatedHashes as jest.MockedFn<typeof getUpdatedHashes>;
 
-const actualMappings: IndexMapping = {
-  properties: {
-    field: { type: 'integer' },
-  },
+const properties: SavedObjectsMappingProperties = {
+  type1: { type: 'long' },
+  type2: { type: 'long' },
+};
+
+const migrationMappingPropertyHashes = {
+  type1: 'type1Hash',
+  type2: 'type2Hash',
 };
 
 const expectedMappings: IndexMapping = {
-  properties: {
-    field: { type: 'long' },
+  properties,
+  dynamic: 'strict',
+  _meta: {
+    migrationMappingPropertyHashes,
   },
 };
 
@@ -32,48 +43,92 @@ describe('checkTargetMappings', () => {
     jest.clearAllMocks();
   });
 
-  it('returns match=false if source mappings are not defined', async () => {
-    const task = checkTargetMappings({
-      expectedMappings,
+  describe('when actual mappings are incomplete', () => {
+    it("returns 'actual_mappings_incomplete' if actual mappings are not defined", async () => {
+      const task = checkTargetMappings({
+        expectedMappings,
+      });
+
+      const result = await task();
+      expect(result).toEqual(Either.left({ type: 'actual_mappings_incomplete' as const }));
     });
 
-    const result = await task();
-    expect(diffMappings).not.toHaveBeenCalled();
-    expect(result).toEqual(Either.right({ match: false }));
+    it("returns 'actual_mappings_incomplete' if actual mappings do not define _meta", async () => {
+      const task = checkTargetMappings({
+        expectedMappings,
+        actualMappings: {
+          properties,
+          dynamic: 'strict',
+        },
+      });
+
+      const result = await task();
+      expect(result).toEqual(Either.left({ type: 'actual_mappings_incomplete' as const }));
+    });
+
+    it("returns 'actual_mappings_incomplete' if actual mappings do not define migrationMappingPropertyHashes", async () => {
+      const task = checkTargetMappings({
+        expectedMappings,
+        actualMappings: {
+          properties,
+          dynamic: 'strict',
+          _meta: {},
+        },
+      });
+
+      const result = await task();
+      expect(result).toEqual(Either.left({ type: 'actual_mappings_incomplete' as const }));
+    });
+
+    it("returns 'actual_mappings_incomplete' if actual mappings define a different value for 'dynamic' property", async () => {
+      const task = checkTargetMappings({
+        expectedMappings,
+        actualMappings: {
+          properties,
+          dynamic: false,
+          _meta: { migrationMappingPropertyHashes },
+        },
+      });
+
+      const result = await task();
+      expect(result).toEqual(Either.left({ type: 'actual_mappings_incomplete' as const }));
+    });
   });
 
-  it('calls diffMappings() with the source and target mappings', async () => {
-    const task = checkTargetMappings({
-      actualMappings,
-      expectedMappings,
+  describe('when actual mappings are complete', () => {
+    describe('and mappings do not match', () => {
+      it('returns the lists of changed root fields and types', async () => {
+        const task = checkTargetMappings({
+          expectedMappings,
+          actualMappings: expectedMappings,
+        });
+
+        getUpdatedHashesMock.mockReturnValueOnce(['type1', 'type2', 'someRootField']);
+
+        const result = await task();
+        const expected: ComparedMappingsChanged = {
+          type: 'compared_mappings_changed' as const,
+          updatedHashes: ['type1', 'type2', 'someRootField'],
+        };
+        expect(result).toEqual(Either.left(expected));
+      });
     });
 
-    await task();
-    expect(diffMappings).toHaveBeenCalledTimes(1);
-    expect(diffMappings).toHaveBeenCalledWith(actualMappings, expectedMappings);
-  });
+    describe('and mappings match', () => {
+      it('returns a compared_mappings_match response', async () => {
+        const task = checkTargetMappings({
+          expectedMappings,
+          actualMappings: expectedMappings,
+        });
 
-  it('returns match=true if diffMappings() match', async () => {
-    diffMappingsMock.mockReturnValueOnce(undefined);
+        getUpdatedHashesMock.mockReturnValueOnce([]);
 
-    const task = checkTargetMappings({
-      actualMappings,
-      expectedMappings,
+        const result = await task();
+        const expected: ComparedMappingsMatch = {
+          type: 'compared_mappings_match' as const,
+        };
+        expect(result).toEqual(Either.right(expected));
+      });
     });
-
-    const result = await task();
-    expect(result).toEqual(Either.right({ match: true }));
-  });
-
-  it('returns match=false if diffMappings() finds differences', async () => {
-    diffMappingsMock.mockReturnValueOnce({ changedProp: 'field' });
-
-    const task = checkTargetMappings({
-      actualMappings,
-      expectedMappings,
-    });
-
-    const result = await task();
-    expect(result).toEqual(Either.right({ match: false }));
   });
 });

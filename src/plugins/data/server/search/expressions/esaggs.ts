@@ -72,7 +72,7 @@ export function getFunctionDefinition({
             query: get(input, 'query', undefined) as any,
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,
-            disableShardWarnings: false,
+            disableWarningToasts: false,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
           })

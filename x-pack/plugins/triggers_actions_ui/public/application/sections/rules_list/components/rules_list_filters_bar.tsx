@@ -28,6 +28,7 @@ import { TypeFilter, TypeFilterProps } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
+import { KqlSearchBar } from './kql_search_bar';
 
 interface RulesListFiltersBarProps {
   actionTypes: ActionType[];
@@ -39,7 +40,8 @@ interface RulesListFiltersBarProps {
   rulesStatusesTotal: Record<string, number>;
   showActionFilter: boolean;
   showErrors: boolean;
-  tags: string[];
+  canLoadRules: boolean;
+  refresh?: Date;
   onClearSelection: () => void;
   onRefreshRules: () => void;
   onToggleRuleErrors: () => void;
@@ -63,7 +65,8 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     setInputText,
     showActionFilter = true,
     showErrors,
-    tags,
+    canLoadRules,
+    refresh,
     updateFilters,
   } = props;
 
@@ -76,7 +79,8 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       return [
         <RuleTagFilter
           isGrouped
-          tags={tags}
+          refresh={refresh}
+          canLoadRules={canLoadRules}
           selectedTags={filters.tags}
           onChange={(value) => updateFilters({ filter: 'tags', value })}
         />,
@@ -148,6 +152,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     }
   };
 
+  const isRuleKqlBarActive = getIsExperimentalFeatureEnabled('ruleKqlBar');
   return (
     <>
       <RulesListErrorBanner
@@ -159,6 +164,11 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
           updateFilters({ filter: 'ruleLastRunOutcomes', value })
         }
       />
+      {isRuleKqlBarActive && (
+        <KqlSearchBar
+          onQuerySubmit={(kueryNode) => updateFilters({ filter: 'kueryNode', value: kueryNode })}
+        />
+      )}
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldSearch

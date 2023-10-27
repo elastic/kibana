@@ -1100,6 +1100,43 @@
       },
       {
         "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartTagcloud",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartTagcloud",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => JSX.Element"
+        ],
+        "path": "packages/kbn-chart-icons/src/assets/chart_tagcloud.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartTagcloud.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "packages/kbn-chart-icons/src/assets/chart_tagcloud.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
         "id": "def-common.IconChartTreemap",
         "type": "Function",
         "tags": [],

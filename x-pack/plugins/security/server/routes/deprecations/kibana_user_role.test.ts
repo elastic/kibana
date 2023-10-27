@@ -13,10 +13,10 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
 import { securityMock } from '../../mocks';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
 
 function createMockUser(user: Partial<estypes.SecurityUser> = {}) {
   return { enabled: true, username: 'userA', roles: ['roleA'], metadata: {}, ...user };

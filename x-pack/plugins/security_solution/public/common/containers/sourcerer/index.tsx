@@ -372,6 +372,7 @@ export const useSourcererDataView = (
     []
   );
   const {
+    defaultDataView,
     signalIndexName,
     selectedDataView,
     sourcererScope: { missingPatterns, selectedPatterns: scopeSelectedPatterns, loading },
@@ -383,6 +384,7 @@ export const useSourcererDataView = (
       sourcererScope,
     };
   });
+
   const selectedPatterns = useMemo(
     () => sortWithExcludesAtEnd(scopeSelectedPatterns),
     [scopeSelectedPatterns]
@@ -431,15 +433,23 @@ export const useSourcererDataView = (
             scopeId,
             signalIndexName,
             patternList: sourcererDataView.patternList,
+            isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
           }),
-    [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
+    [
+      defaultDataView.id,
+      loading,
+      scopeId,
+      signalIndexName,
+      sourcererDataView.id,
+      sourcererDataView.loading,
+      sourcererDataView.patternList,
+    ]
   );
 
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
       sourcererDataView.patternList.join(','),
-      sourcererDataView.fields,
-      false
+      sourcererDataView.fields
     );
     return dataViewBrowserFields;
   }, [sourcererDataView.fields, sourcererDataView.patternList]);

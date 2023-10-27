@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { identity, pickBy } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -20,6 +19,7 @@ import { getComparisonEnabled } from '../../../time_comparison/get_comparison_en
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import { APMQueryParams } from '../../url_helpers';
 import { APMLinkExtendProps, getLegacyApmHref } from '../apm_link';
+import { MaxGroupsMessage } from '../max_groups_message';
 
 export const txGroupsDroppedBucketName = '_other';
 
@@ -28,7 +28,7 @@ interface Props extends APMLinkExtendProps {
   traceId?: string;
   transactionId?: string;
   transactionName: string;
-  transactionType: string;
+  transactionType?: string;
   latencyAggregationType?: string;
   environment?: string;
   comparisonEnabled?: boolean;
@@ -107,10 +107,7 @@ export function TransactionDetailLink({
           iconType="warning"
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
-            <FormattedMessage
-              defaultMessage="The APM server has reached the maximum capacity that it can currently handle in terms of showing individual transaction groups. Please consider scaling-up your APM server capacity and/or tuning the application instrumentation in order to view all of the data."
-              id="xpack.apm.transactionDetail.maxGroup.message"
-            />
+            <MaxGroupsMessage />
           </EuiText>
         </PopoverTooltip>
       </EuiFlexItem>

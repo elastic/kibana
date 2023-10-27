@@ -9,6 +9,10 @@ import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import {
+  ObservabilityAIAssistantActionMenuItem,
+  useObservabilityAIAssistantOptional,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EmbedAction } from '../../header/embed_action';
 import { ObservabilityAppServices } from '../../../../../application/types';
@@ -28,6 +32,8 @@ export function ExpViewActionMenuContent({
   const [isSaveOpen, setIsSaveOpen] = useState(false);
 
   const LensSaveModalComponent = lens.SaveModalComponent;
+
+  const service = useObservabilityAIAssistantOptional();
 
   return (
     <>
@@ -93,6 +99,11 @@ export function ExpViewActionMenuContent({
             })}
           </EuiButton>
         </EuiFlexItem>
+        {service?.isEnabled() ? (
+          <EuiFlexItem>
+            <ObservabilityAIAssistantActionMenuItem />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
 
       {isSaveOpen && lensAttributes && (

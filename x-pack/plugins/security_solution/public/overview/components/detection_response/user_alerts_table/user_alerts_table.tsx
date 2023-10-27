@@ -26,7 +26,7 @@ import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -36,6 +36,7 @@ import type { UserAlertsItem } from './use_user_alerts_items';
 import { useUserAlertsItems } from './use_user_alerts_items';
 import { SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface UserAlertsTableProps {
   signalIndexName: string | null;
@@ -86,7 +87,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
   const columns = useMemo(() => getTableColumns(openUserInAlerts), [openUserInAlerts]);
 
   return (
-    <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+    <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>
       <EuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID}
@@ -149,14 +150,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
       <SecurityCellActions
-        field={{
-          name: 'user.name',
+        data={{
           value: userName,
-          type: 'keyword',
-          aggregatable: true,
+          field: 'user.name',
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        sourcererScopeId={SourcererScopeName.detections}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
         }}
@@ -178,14 +178,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'user.name',
+            data={{
               value: userName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'critical' },
@@ -213,14 +212,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'user.name',
+            data={{
               value: userName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'high' },
@@ -245,14 +243,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'user.name',
+            data={{
               value: userName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'medium' },
@@ -277,14 +274,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'user.name',
+            data={{
               value: userName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'low' },

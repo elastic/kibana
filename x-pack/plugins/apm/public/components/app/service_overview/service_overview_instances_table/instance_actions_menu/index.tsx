@@ -15,6 +15,10 @@ import {
   SectionSubtitle,
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/es_fields/apm';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
@@ -40,10 +44,7 @@ export function InstanceActionsMenu({
   kuery,
   onClose,
 }: Props) {
-  const {
-    core,
-    infra: { locators },
-  } = useApmPluginContext();
+  const { core, infra, share } = useApmPluginContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
     serviceNodeName,
@@ -54,6 +55,10 @@ export function InstanceActionsMenu({
   });
   const metricOverviewHref = useMetricOverviewHref(serviceName);
   const history = useHistory();
+
+  const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
+    ALL_DATASETS_LOCATOR_ID
+  )!;
 
   if (isPending(status)) {
     return (
@@ -92,7 +97,8 @@ export function InstanceActionsMenu({
     basePath: core.http.basePath,
     onFilterByInstanceClick: handleFilterByInstanceClick,
     metricsHref,
-    infraLocators: locators,
+    infraLocators: infra?.locators,
+    allDatasetsLocator,
   });
 
   return (

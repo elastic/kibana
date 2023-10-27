@@ -22,6 +22,42 @@ import type {
 } from '../..';
 import type { FormulaIndexPatternColumn } from '../formula';
 
+function createNewSection(
+  label: string,
+  description: string,
+  functionsToDocument: string[],
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  return {
+    label,
+    description,
+    items: functionsToDocument.sort().map((key) => {
+      const fnDescription = getFunctionDescriptionAndExamples(key, operationDefinitionMap);
+      return {
+        label: key,
+        description: (
+          <>
+            <h3>{getFunctionSignatureLabel(key, operationDefinitionMap, false)}</h3>
+
+            {fnDescription ? <Markdown markdown={fnDescription} /> : null}
+          </>
+        ),
+      };
+    }),
+  };
+}
+
+function getFunctionDescriptionAndExamples(
+  label: string,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  if (tinymathFunctions[label]) {
+    const [description, examples] = tinymathFunctions[label].help.split(`\`\`\``);
+    return `${description.replace(/\n/g, '\n\n')}${examples ? `\`\`\`${examples}\`\`\`` : ''}`;
+  }
+  return operationDefinitionMap[label].documentation?.description;
+}
+
 export function getDocumentationSections({
   indexPattern,
   operationDefinitionMap,
@@ -159,22 +195,12 @@ max(system.network.in.bytes, reducedTimeRange="30m")
     ],
   });
 
-  helpGroups.push({
-    label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
-      defaultMessage: 'Elasticsearch',
-    }),
-    description: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
-      defaultMessage:
-        'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
-    }),
-    items: [],
-  });
-
   const {
-    elasticsearch: esFunction,
-    calculation: calculationFunction,
+    elasticsearch: esFunctions,
+    calculation: calculationFunctions,
     math: mathOperations,
     comparison: comparisonOperations,
+    constants: constantsOperations,
   } = groupBy(getPossibleFunctions(indexPattern), (key) => {
     if (key in operationDefinitionMap) {
       return operationDefinitionMap[key].documentation?.section;
@@ -185,122 +211,78 @@ max(system.network.in.bytes, reducedTimeRange="30m")
   });
 
   // Es aggs
-  helpGroups[2].items.push(
-    ...esFunction.sort().map((key) => ({
-      label: key,
-      description: (
-        <>
-          <h3>
-            {key}({operationDefinitionMap[key].documentation?.signature})
-          </h3>
-
-          {operationDefinitionMap[key].documentation?.description ? (
-            <Markdown markdown={operationDefinitionMap[key].documentation!.description} />
-          ) : null}
-        </>
-      ),
-    }))
-  );
-
-  helpGroups.push({
-    label: i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
-      defaultMessage: 'Column calculations',
-    }),
-    description: i18n.translate(
-      'xpack.lens.formulaDocumentation.columnCalculationSectionDescription',
-      {
+  helpGroups.push(
+    createNewSection(
+      i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
+        defaultMessage: 'Elasticsearch',
+      }),
+      i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
         defaultMessage:
-          'These functions are executed for each row, but are provided with the whole column as context. This is also known as a window function.',
-      }
-    ),
-    items: [],
-  });
+          'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
+      }),
+
+      esFunctions,
+      operationDefinitionMap
+    )
+  );
 
   // Calculations aggs
-  helpGroups[3].items.push(
-    ...calculationFunction.sort().map((key) => ({
-      label: key,
-      description: (
-        <>
-          <h3>
-            {key}({operationDefinitionMap[key].documentation?.signature})
-          </h3>
+  helpGroups.push(
+    createNewSection(
+      i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
+        defaultMessage: 'Column calculations',
+      }),
+      i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSectionDescription', {
+        defaultMessage:
+          'These functions are executed for each row, but are provided with the whole column as context. This is also known as a window function.',
+      }),
 
-          {operationDefinitionMap[key].documentation?.description ? (
-            <Markdown markdown={operationDefinitionMap[key].documentation!.description} />
-          ) : null}
-        </>
-      ),
-    }))
+      calculationFunctions,
+      operationDefinitionMap
+    )
   );
 
-  helpGroups.push({
-    label: i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
-      defaultMessage: 'Math',
-    }),
-    description: i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
-      defaultMessage:
-        'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
-    }),
-    items: [],
-  });
+  helpGroups.push(
+    createNewSection(
+      i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
+        defaultMessage: 'Math',
+      }),
+      i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
+        defaultMessage:
+          'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
+      }),
 
-  const mathFns = mathOperations.sort().map((key) => {
-    const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
-    return {
-      label: key,
-      description: description.replace(/\n/g, '\n\n'),
-      examples: examples ? `\`\`\`${examples}\`\`\`` : '',
-    };
-  });
-
-  helpGroups[4].items.push(
-    ...mathFns.map(({ label, description, examples }) => {
-      return {
-        label,
-        description: (
-          <>
-            <h3>{getFunctionSignatureLabel(label, operationDefinitionMap)}</h3>
-
-            <Markdown markdown={`${description}${examples}`} />
-          </>
-        ),
-      };
-    })
+      mathOperations,
+      operationDefinitionMap
+    )
   );
 
-  helpGroups.push({
-    label: i18n.translate('xpack.lens.formulaDocumentation.comparisonSection', {
-      defaultMessage: 'Comparison',
-    }),
-    description: i18n.translate('xpack.lens.formulaDocumentation.comparisonSectionDescription', {
-      defaultMessage: 'These functions are used to perform value comparison.',
-    }),
-    items: [],
-  });
+  helpGroups.push(
+    createNewSection(
+      i18n.translate('xpack.lens.formulaDocumentation.comparisonSection', {
+        defaultMessage: 'Comparison',
+      }),
+      i18n.translate('xpack.lens.formulaDocumentation.comparisonSectionDescription', {
+        defaultMessage: 'These functions are used to perform value comparison.',
+      }),
 
-  const comparisonFns = comparisonOperations.sort().map((key) => {
-    const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
-    return {
-      label: key,
-      description: description.replace(/\n/g, '\n\n'),
-      examples: examples ? `\`\`\`${examples}\`\`\`` : '',
-    };
-  });
+      comparisonOperations,
+      operationDefinitionMap
+    )
+  );
 
-  helpGroups[5].items.push(
-    ...comparisonFns.map(({ label, description, examples }) => {
-      return {
-        label,
-        description: (
-          <>
-            <h3>{getFunctionSignatureLabel(label, operationDefinitionMap)}</h3>
-
-            <Markdown markdown={`${description}${examples}`} />
-          </>
-        ),
-      };
-    })
+  helpGroups.push(
+    createNewSection(
+      i18n.translate('xpack.lens.formulaDocumentation.constantsSection', {
+        defaultMessage: 'Kibana context',
+      }),
+      i18n.translate('xpack.lens.formulaDocumentation.constantsSectionDescription', {
+        defaultMessage:
+          'These functions are used to retrieve Kibana context variables, which are the date histogram `interval`, the current `now` and the selected `time_range` and help you to compute date math operations.',
+      }),
+      constantsOperations,
+      operationDefinitionMap
+    )
   );
 
   const sections = {
@@ -353,7 +335,7 @@ Use the symbols +, -, /, and * to perform basic math.
 export function getFunctionSignatureLabel(
   name: string,
   operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap'],
-  firstParam?: { label: string | [number, number] } | null
+  getFullSignature: boolean = true
 ): string {
   if (tinymathFunctions[name]) {
     return `${name}(${tinymathFunctions[name].positionalArguments
@@ -363,26 +345,28 @@ export function getFunctionSignatureLabel(
   if (operationDefinitionMap[name]) {
     const def = operationDefinitionMap[name];
     const extraArgs: string[] = [];
-    if (def.filterable) {
-      extraArgs.push(
-        i18n.translate('xpack.lens.formula.kqlExtraArguments', {
-          defaultMessage: '[kql]?: string, [lucene]?: string',
-        })
-      );
-    }
-    if (def.shiftable) {
-      extraArgs.push(
-        i18n.translate('xpack.lens.formula.shiftExtraArguments', {
-          defaultMessage: '[shift]?: string',
-        })
-      );
-    }
-    if (def.canReduceTimeRange) {
-      extraArgs.push(
-        i18n.translate('xpack.lens.formula.reducedTimeRangeExtraArguments', {
-          defaultMessage: '[reducedTimeRange]?: string',
-        })
-      );
+    if (getFullSignature) {
+      if (def.filterable) {
+        extraArgs.push(
+          i18n.translate('xpack.lens.formula.kqlExtraArguments', {
+            defaultMessage: '[kql]?: string, [lucene]?: string',
+          })
+        );
+      }
+      if (def.shiftable) {
+        extraArgs.push(
+          i18n.translate('xpack.lens.formula.shiftExtraArguments', {
+            defaultMessage: '[shift]?: string',
+          })
+        );
+      }
+      if (def.canReduceTimeRange) {
+        extraArgs.push(
+          i18n.translate('xpack.lens.formula.reducedTimeRangeExtraArguments', {
+            defaultMessage: '[reducedTimeRange]?: string',
+          })
+        );
+      }
     }
     const extraComma = extraArgs.length ? ', ' : '';
     return `${name}(${def.documentation?.signature}${extraComma}${extraArgs.join(', ')})`;

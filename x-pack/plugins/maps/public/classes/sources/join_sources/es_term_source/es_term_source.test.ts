@@ -6,6 +6,7 @@
  */
 
 import { AGG_TYPE } from '../../../../../common/constants';
+import { DataFilters } from '../../../../../common/descriptor_types';
 import type { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
@@ -117,8 +118,9 @@ describe('getSyncMeta', () => {
       indexPatternId: 'foobar',
       size: 10,
     });
-    expect(source.getSyncMeta()).toEqual({
+    expect(source.getSyncMeta({} as unknown as DataFilters)).toEqual({
       indexPatternId: 'foobar',
+      metrics: ['__kbnjoin__count__1234'],
       size: 10,
       term: 'myTermField',
     });

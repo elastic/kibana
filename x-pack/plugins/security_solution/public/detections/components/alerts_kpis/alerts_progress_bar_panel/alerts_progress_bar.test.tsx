@@ -27,7 +27,6 @@ describe('Alert by grouping', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('progress bars renders correctly', () => {
@@ -73,7 +72,7 @@ describe('Alert by grouping', () => {
           ).toContain(parsedAlerts[i].label);
           expect(
             container.querySelector(`[data-test-subj="progress-bar-${alert.key}"]`)?.textContent
-          ).toContain(parsedAlerts[i].percentage.toString());
+          ).toContain(parsedAlerts[i].percentageLabel);
         }
       });
     });

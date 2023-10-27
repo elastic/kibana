@@ -34,34 +34,17 @@ export const deleteTransforms = async (
   }
   await Promise.all(
     transformIds.map(async (transformId) => {
-      // get the index the transform
-      const transformResponse = await esClient.transform.getTransform(
-        { transform_id: transformId },
-        { ignore: [404] }
-      );
-
       await stopTransforms([transformId], esClient);
       await esClient.transform.deleteTransform(
-        { force: true, transform_id: transformId },
+        {
+          force: true,
+          transform_id: transformId,
+          // @ts-expect-error ES type needs to be updated
+          delete_dest_index: deleteDestinationIndices,
+        },
         { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
       );
       logger.info(`Deleted: ${transformId}`);
-      if (deleteDestinationIndices && transformResponse?.transforms) {
-        // expect this to be 1
-        for (const transform of transformResponse.transforms) {
-          await esClient.transport.request(
-            {
-              method: 'DELETE',
-              path: `/${transform?.dest?.index}`,
-            },
-            {
-              ignore: [404],
-            }
-          );
-        }
-      } else {
-        logger.warn(`cannot find transform for ${transformId}`);
-      }
     })
   );
 };

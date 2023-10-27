@@ -14,6 +14,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListExamplesPluginSetup {}
@@ -32,4 +33,5 @@ export interface AppPluginStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
+  uiActions: UiActionsStart;
 }

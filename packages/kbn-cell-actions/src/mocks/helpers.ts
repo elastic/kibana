@@ -27,11 +27,17 @@ export const makeActionContext = (
   override: Partial<CellActionExecutionContext> = {}
 ): CellActionExecutionContext => ({
   trigger: { id: 'triggerId' },
-  field: {
-    name: 'fieldName',
-    type: 'keyword',
-    value: 'some value',
-  },
+  data: [
+    {
+      field: {
+        name: 'fieldName',
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+      value: 'some value',
+    },
+  ],
   nodeRef: {} as MutableRefObject<HTMLElement>,
   metadata: undefined,
   ...override,

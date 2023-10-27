@@ -13,20 +13,20 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 
+import { useDataSource } from '../contexts/ml/data_source_context';
 import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '../components/field_stats_flyout';
-import { useMlContext } from '../contexts/ml';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
+import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
+  const { showNodeInfo } = useEnabledFeatures();
 
-  const context = useMlContext();
-  const dataView = context.currentDataView;
-  const savedSearch = context.selectedSavedSearch;
+  const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
   return (
     <>
@@ -47,6 +47,7 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
+          showFrozenDataTierChoice={showNodeInfo}
           appDependencies={{
             ...pick(services, [
               'application',
@@ -62,6 +63,11 @@ export const ChangePointDetectionPage: FC = () => {
               'unifiedSearch',
               'theme',
               'lens',
+              'presentationUtil',
+              'embeddable',
+              'cases',
+              'i18n',
+              'usageCollection',
             ]),
             fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}

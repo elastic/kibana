@@ -14,7 +14,7 @@ import type {
   InstalledPackage,
   InstalledPackageArray,
   InstalledPackageBasicInfo,
-} from '../../../../../../common/detection_engine/fleet_integrations';
+} from '../../../../../../common/api/detection_engine/fleet_integrations';
 
 export interface IInstalledIntegrationSet {
   addPackage(fleetPackage: PackageListItem): void;
@@ -49,7 +49,7 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
     }
 
     // Actual `installed_version` is buried in SO, root `version` is latest package version available
-    const installedPackageVersion = fleetPackage.savedObject.attributes.install_version;
+    const installedPackageVersion = fleetPackage.savedObject?.attributes.install_version || '';
 
     // Policy templates correspond to package's integrations.
     const packagePolicyTemplates = fleetPackage.policy_templates ?? [];

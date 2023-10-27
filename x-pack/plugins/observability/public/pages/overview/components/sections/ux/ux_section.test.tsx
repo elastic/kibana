@@ -16,7 +16,7 @@ import {
   LEGEND_GOOD_LABEL,
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_POOR_LABEL,
-} from '../../../../../components/core_web_vitals/translations';
+} from './core_web_vitals/translations';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({

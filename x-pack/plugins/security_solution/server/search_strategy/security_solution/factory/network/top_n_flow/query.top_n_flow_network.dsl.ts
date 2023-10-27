@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  SortField,
-  FlowTargetSourceDest,
-  NetworkTopTablesFields,
-  NetworkTopNFlowRequestOptions,
-} from '../../../../../../common/search_strategy';
+import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getOppositeField } from '../helpers';
 import { getQueryOrder } from './helpers';
@@ -28,10 +24,12 @@ export const buildTopNFlowQuery = ({
   filterQuery,
   flowTarget,
   sort,
-  pagination: { querySize },
+  pagination,
   timerange: { from, to },
   ip,
 }: NetworkTopNFlowRequestOptions) => {
+  const querySize = pagination?.querySize ?? 10;
+
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -82,7 +80,7 @@ export const buildTopNFlowQuery = ({
 };
 
 const getFlowTargetAggs = (
-  sort: SortField<NetworkTopTablesFields>,
+  sort: NetworkTopNFlowRequestOptions['sort'],
   flowTarget: FlowTargetSourceDest,
   querySize: number
 ) => ({

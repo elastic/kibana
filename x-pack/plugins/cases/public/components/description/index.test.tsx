@@ -14,6 +14,7 @@ import { basicCase } from '../../containers/mock';
 import { Description } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions, TestProviders } from '../../common/mock';
+import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -109,6 +110,30 @@ describe('Description', () => {
     });
   });
 
+  it('shows an error when description is too long', async () => {
+    const longDescription = Array(MAX_DESCRIPTION_LENGTH / 2 + 1)
+      .fill('a')
+      .toString();
+
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), longDescription);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'The length of the description is too long. The maximum length is 30000 characters.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
+    });
+  });
+
   it('should hide the edit button when the user does not have update permissions', () => {
     appMockRender.render(
       <TestProviders permissions={noUpdateCasesPermissions()}>
@@ -125,12 +150,6 @@ describe('Description', () => {
 
     beforeEach(() => {
       sessionStorage.setItem(draftStorageKey, 'value set in storage');
-    });
-
-    it('should show unsaved draft message correctly', async () => {
-      appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
-
-      expect(screen.getByTestId('description-unsaved-draft')).toBeInTheDocument();
     });
 
     it('should not show unsaved draft message when loading', async () => {

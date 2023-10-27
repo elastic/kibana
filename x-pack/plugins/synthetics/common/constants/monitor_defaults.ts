@@ -132,7 +132,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   [ConfigKey.ENABLED]: true,
-  [ConfigKey.ALERT_CONFIG]: { status: { enabled: true } },
+  [ConfigKey.ALERT_CONFIG]: { status: { enabled: true }, tls: { enabled: true } },
   [ConfigKey.SCHEDULE]: {
     number: '3',
     unit: ScheduleUnit.MINUTES,
@@ -149,6 +149,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.CONFIG_HASH]: '',
   [ConfigKey.MONITOR_QUERY_ID]: '',
   [ConfigKey.PARAMS]: '',
+  [ConfigKey.MAX_ATTEMPTS]: 2,
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {

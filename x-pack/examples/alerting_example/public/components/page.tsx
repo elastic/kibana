@@ -10,13 +10,12 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
   EuiBreadcrumbs,
   EuiSpacer,
+  EuiPageSection,
 } from '@elastic/eui';
 
 type PageProps = RouteComponentProps & {
@@ -54,9 +53,7 @@ export const Page = withRouter(({ title, crumb, children, isHome = false, histor
       </EuiPageHeader>
       <EuiBreadcrumbs responsive={false} breadcrumbs={breadcrumbs} />
       <EuiSpacer />
-      <EuiPageContent>
-        <EuiPageContentBody>{children}</EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageSection>{children}</EuiPageSection>
     </EuiPageBody>
   );
 });

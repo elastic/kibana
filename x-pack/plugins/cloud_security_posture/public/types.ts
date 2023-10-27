@@ -7,9 +7,16 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ToastsStart } from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
@@ -40,6 +47,7 @@ export interface CspClientPluginSetupDeps {
   data: DataPublicPluginSetup;
   fleet: FleetSetup;
   cloud: CloudSetup;
+  uiActions: UiActionsSetup;
   // optional
   usageCollection?: UsageCollectionSetup;
 }
@@ -47,12 +55,19 @@ export interface CspClientPluginSetupDeps {
 export interface CspClientPluginStartDeps {
   // required
   data: DataPublicPluginStart;
+  dataViews: DataViewsServicePublic;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
+  fieldFormats: FieldFormatsStart;
+  toastNotifications: ToastsStart;
   charts: ChartsPluginStart;
   discover: DiscoverStart;
   fleet: FleetStart;
   licensing: LicensingPluginStart;
   share: SharePluginStart;
+  storage: Storage;
+
   // optional
   usageCollection?: UsageCollectionStart;
 }

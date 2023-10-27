@@ -15,8 +15,9 @@ import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
+import type { DashboardContainerInput } from '../../../common';
+import { SavedDashboardPanel } from '../../../common/content_management';
 import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
-import type { DashboardContainerInput, SavedDashboardPanel } from '../../../common';
 
 /**
  * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).

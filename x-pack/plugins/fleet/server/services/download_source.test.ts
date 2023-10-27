@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import type { DownloadSourceAttributes } from '../types';
+import type { DownloadSourceSOAttributes } from '../types';
 
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -158,7 +158,7 @@ describe('Download Service', () => {
 
       // ID should always be the same for a predefined id
       expect(soClient.create.mock.calls[0][2]?.id).toEqual('download-source-test');
-      expect((soClient.create.mock.calls[0][1] as DownloadSourceAttributes).source_id).toEqual(
+      expect((soClient.create.mock.calls[0][1] as DownloadSourceSOAttributes).source_id).toEqual(
         'download-source-test'
       );
     });

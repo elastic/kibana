@@ -27,6 +27,7 @@ const MyEuiFilterGroup = styled(EuiFilterGroup)`
 `;
 
 const FilterAllButton = styled(EuiFilterButton)`
+  &,
   & .euiFilterButton__textShift {
     min-width: 28px;
   }

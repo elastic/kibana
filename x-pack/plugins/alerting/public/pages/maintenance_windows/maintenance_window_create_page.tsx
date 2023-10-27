@@ -13,10 +13,10 @@ import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
 import * as i18n from './translations';
 import { PageHeader } from './components/page_header';
 import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
-import { AlertingDeepLinkId } from '../../config';
+import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
 
 export const MaintenanceWindowsCreatePage = React.memo(() => {
-  useBreadcrumbs(AlertingDeepLinkId.maintenanceWindowsCreate);
+  useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate);
   const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
 
   return (

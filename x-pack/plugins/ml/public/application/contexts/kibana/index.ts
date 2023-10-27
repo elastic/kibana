@@ -15,3 +15,4 @@ export { useMlLocator, useMlLink } from './use_create_url';
 export { useMlApiContext } from './use_ml_api_context';
 export { useFieldFormatter } from './use_field_formatter';
 export { useCurrentThemeVars } from './use_current_theme';
+export { useMlLicenseInfo } from './use_ml_license';

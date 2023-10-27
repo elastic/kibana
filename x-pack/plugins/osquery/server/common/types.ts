@@ -44,11 +44,13 @@ export interface SavedQuerySavedObject {
   snapshot?: boolean;
   removed?: boolean;
   platform: string;
-  ecs_mapping?: Array<Record<string, unknown>>;
+  ecs_mapping?: Array<{ key: string; value: Record<string, object> }>;
   created_at: string;
   created_by: string | undefined;
   updated_at: string;
   updated_by: string | undefined;
+  prebuilt?: boolean;
+  version: number;
 }
 
 export interface HTTPError extends Error {

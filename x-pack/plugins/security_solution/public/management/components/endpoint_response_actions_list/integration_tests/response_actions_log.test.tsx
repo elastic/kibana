@@ -7,12 +7,13 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../common/mock/endpoint';
 import { ResponseActionsLog } from '../response_actions_log';
 import type {
@@ -29,7 +30,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
-import { waitFor } from '@testing-library/react';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
@@ -239,9 +239,9 @@ describe('Response actions history', () => {
         agentIds: undefined,
         commands: [],
         statuses: [],
+        types: [],
         userIds: [],
         withOutputs: [],
-        withAutomatedActions: false,
         startDate: 'now-24h/h',
         endDate: 'now',
       },
@@ -312,9 +312,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -470,7 +470,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should expand each row to show details', async () => {
+    it('should expand/collapse each row to show/hide details', async () => {
       render();
       const { getAllByTestId, queryAllByTestId } = renderResult;
 
@@ -961,8 +961,7 @@ describe('Response actions history', () => {
 
       const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
       expandButtons.map((button) => userEvent.click(button));
-      const outputs = getAllByTestId(`${testPrefix}-details-tray-output`);
-      return outputs;
+      return getAllByTestId(`${testPrefix}-details-tray-output`);
     };
 
     it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
@@ -1160,9 +1159,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: ['failed', 'pending'],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1362,9 +1361,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );

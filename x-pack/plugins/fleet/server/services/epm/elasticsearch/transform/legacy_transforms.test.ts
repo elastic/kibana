@@ -168,14 +168,6 @@ describe('test transform install with legacy schema', () => {
       esReferences: previousInstallation.installed_es,
     });
 
-    expect(esClient.transform.getTransform.mock.calls).toEqual([
-      [
-        {
-          transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
-        },
-        { ignore: [404] },
-      ],
-    ]);
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
       [
         {
@@ -190,16 +182,7 @@ describe('test transform install with legacy schema', () => {
         {
           transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
           force: true,
-        },
-        { ignore: [404] },
-      ],
-    ]);
-
-    expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'DELETE',
-          path: '/index',
+          delete_dest_index: true,
         },
         { ignore: [404] },
       ],
@@ -464,15 +447,6 @@ describe('test transform install with legacy schema', () => {
       esReferences: previousInstallation.installed_es,
     });
 
-    expect(esClient.transform.getTransform.mock.calls).toEqual([
-      [
-        {
-          transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
-        },
-        { ignore: [404] },
-      ],
-    ]);
-
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
       [
         {
@@ -488,16 +462,7 @@ describe('test transform install with legacy schema', () => {
         {
           transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
           force: true,
-        },
-        { ignore: [404] },
-      ],
-    ]);
-
-    expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'DELETE',
-          path: '/index',
+          delete_dest_index: true,
         },
         { ignore: [404] },
       ],

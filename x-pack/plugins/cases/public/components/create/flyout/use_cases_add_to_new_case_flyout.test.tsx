@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { alertComment } from '../../../containers/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';

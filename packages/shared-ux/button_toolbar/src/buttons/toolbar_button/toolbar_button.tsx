@@ -18,7 +18,10 @@ type ToolbarButtonTypes = 'primary' | 'empty';
  * Props for `PrimaryButton`.
  */
 export interface Props
-  extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType' | 'iconSide' | 'data-test-subj'> {
+  extends Pick<
+    EuiButtonPropsForButton,
+    'onClick' | 'iconType' | 'iconSide' | 'size' | 'data-test-subj' | 'isDisabled'
+  > {
   label: string;
   type?: ToolbarButtonTypes;
 }
@@ -27,16 +30,24 @@ export const ToolbarButton: React.FunctionComponent<Props> = ({
   label,
   type = 'empty',
   iconSide = 'left',
+  size = 'm',
+  isDisabled,
   ...rest
 }) => {
   const euiTheme = useEuiTheme();
-  const toolbarButtonStyleProps: EuiButtonPropsForButton =
-    type === 'primary'
+  const toolbarButtonStyleProps: EuiButtonPropsForButton = !isDisabled
+    ? type === 'primary'
       ? { color: 'primary', fill: true }
-      : { color: 'text', css: ToolbarButtonStyles(euiTheme).emptyButton };
+      : { color: 'text', css: ToolbarButtonStyles(euiTheme).emptyButton }
+    : {};
 
   return (
-    <EuiButton size="m" {...toolbarButtonStyleProps} {...{ iconSide, ...rest }}>
+    <EuiButton
+      size={size}
+      isDisabled={isDisabled}
+      {...toolbarButtonStyleProps}
+      {...{ iconSide, ...rest }}
+    >
       {label}
     </EuiButton>
   );

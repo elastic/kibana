@@ -31,13 +31,16 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'cpu',
       },
       {
-        type: 'diskLatency',
+        type: 'diskSpaceUsage',
       },
       {
         type: 'memory',
       },
       {
-        type: 'memoryTotal',
+        type: 'memoryFree',
+      },
+      {
+        type: 'normalizedLoad1m',
       },
       {
         type: 'rx',
@@ -93,9 +96,10 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             metrics: [
               { name: 'cpu', value: 0.44708333333333333 },
-              { name: 'diskLatency', value: null },
+              { name: 'diskSpaceUsage', value: 0 },
               { name: 'memory', value: 0.4563333333333333 },
-              { name: 'memoryTotal', value: 15768948736 },
+              { name: 'memoryFree', value: 8573890560 },
+              { name: 'normalizedLoad1m', value: 0.7375000000000002 },
               { name: 'rx', value: null },
               { name: 'tx', value: null },
             ],
@@ -242,7 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
+          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx"'
         );
       });
 

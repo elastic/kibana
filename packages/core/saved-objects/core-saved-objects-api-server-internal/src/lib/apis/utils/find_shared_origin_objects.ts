@@ -9,13 +9,22 @@
 import * as esKuery from '@kbn/es-query';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getObjectKey } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsCollectMultiNamespaceReferencesPurpose } from '@kbn/core-saved-objects-api-server/src/apis';
+import {
+  KQL_FUNCTION_AND,
+  KQL_FUNCTION_IS,
+  KQL_FUNCTION_NOT,
+  KQL_FUNCTION_OR,
+} from '@kbn/es-query/src/kuery/functions';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 
 interface ObjectOrigin {
   /** The object's type. */
   type: string;
-  /** The object's origin is its `originId` field, or its `id` field if that is unavailable. */
-  origin: string;
+  /** The object's ID. */
+  id: string;
+  /** The object's origin is its `originId` field */
+  origin: string | undefined;
 }
 
 /**
@@ -26,14 +35,15 @@ interface ObjectOrigin {
 export async function findSharedOriginObjects(
   createPointInTimeFinder: CreatePointInTimeFinderFn,
   objects: ObjectOrigin[],
-  perPage?: number
+  perPage?: number,
+  purpose?: SavedObjectsCollectMultiNamespaceReferencesPurpose
 ) {
   if (!objects.length) {
     return new Map<string, Set<string>>();
   }
 
   const uniqueObjectTypes = objects.reduce((acc, { type }) => acc.add(type), new Set<string>());
-  const filter = createAliasKueryFilter(objects);
+  const filter = createOriginKueryFilter(objects, purpose);
   const finder = createPointInTimeFinder(
     {
       type: [...uniqueObjectTypes],
@@ -80,17 +90,54 @@ export async function findSharedOriginObjects(
   return objectsMap;
 }
 
-function createAliasKueryFilter(objects: Array<{ type: string; origin: string }>) {
+function createOriginKueryFilter(
+  objects: ObjectOrigin[],
+  purpose?: SavedObjectsCollectMultiNamespaceReferencesPurpose
+) {
   const { buildNode } = esKuery.nodeTypes.function;
   // Note: these nodes include '.attributes' for type-level fields because these are eventually passed to `validateConvertFilterToKueryNode`, which requires it
   const kueryNodes = objects
-    .reduce<unknown[]>((acc, { type, origin }) => {
+    .reduce<unknown[]>((acc, { type, id, origin }) => {
       // Escape Kuery values to prevent parsing errors and unintended behavior (object types/IDs can contain KQL special characters/operators)
-      const match1 = buildNode('is', `${type}.id`, esKuery.escapeKuery(`${type}:${origin}`)); // here we are looking for the raw document `_id` field, which has a `type:` prefix
-      const match2 = buildNode('is', `${type}.originId`, esKuery.escapeKuery(origin)); // here we are looking for the saved object's `originId` field, which does not have a `type:` prefix
-      acc.push([match1, match2]);
+
+      // Look for objects with an ID that matches the origin or ID (has a `type:` prefix)
+      const idMatchesOrigin = buildNode(
+        KQL_FUNCTION_IS,
+        `${type}.id`,
+        esKuery.escapeKuery(`${type}:${origin || id}`)
+      );
+
+      // Look for objects with an `originId` that matches the origin or ID (does not have a `type:` prefix)
+      const originMatch = buildNode(
+        KQL_FUNCTION_IS,
+        `${type}.originId`,
+        esKuery.escapeKuery(origin || id)
+      );
+
+      // If we are updating an object's spaces (as opposed to copying)...
+      if (purpose === 'updateObjectsSpaces') {
+        // we never want to match on the raw document `_id` fields.
+        // If they are equal, this just means that the object already exists in that space and it's ok.
+        const notIdMatch = buildNode(
+          KQL_FUNCTION_NOT,
+          buildNode(KQL_FUNCTION_IS, `${type}.id`, esKuery.escapeKuery(`${type}:${id}`))
+        );
+
+        // If this object has an origin ID, then we do still want to match if another object's ID matches the
+        // object's origin (idMatchesOrigin), or if another object's origin matches the object's origin (originMatch).
+        // But if this object does not have an origin ID, we can skip the idMatchesOrigin part altogether
+        // and just check if another object's origin ID matches this object's ID (originMatch).
+        // (maybe slightly more efficient?)
+        acc.push(
+          buildNode(KQL_FUNCTION_AND, [
+            notIdMatch,
+            origin ? buildNode(KQL_FUNCTION_OR, [idMatchesOrigin, originMatch]) : originMatch,
+          ])
+        );
+      } else acc.push([idMatchesOrigin, originMatch]); // If we are copying, things are much simpler
+
       return acc;
     }, [])
     .flat();
-  return buildNode('or', kueryNodes);
+  return buildNode(KQL_FUNCTION_OR, kueryNodes);
 }

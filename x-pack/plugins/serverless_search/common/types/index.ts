@@ -11,3 +11,12 @@ export interface CreateAPIKeyArgs {
   name: string;
   role_descriptors?: Record<string, any>;
 }
+
+export interface IndexData {
+  name: string;
+  count: number;
+}
+
+export interface FetchIndicesResult {
+  indices: IndexData[];
+}

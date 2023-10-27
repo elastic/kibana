@@ -54,7 +54,7 @@
             "section": "def-common.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
-          ", \"resolve\">]>; createHandler: jest.MockInstance<(request: ",
+          ", \"resolve\">], unknown>; createHandler: jest.MockInstance<(request: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -102,7 +102,7 @@
             "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
-          ">]>; } & ",
+          ">], unknown>; } & ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",

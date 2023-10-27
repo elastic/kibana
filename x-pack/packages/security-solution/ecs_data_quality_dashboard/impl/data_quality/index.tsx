@@ -11,22 +11,26 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
+import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
   defaultNumberFormat: string;
   defaultBytesFormat: string;
+  endDate?: string | null;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -42,6 +46,8 @@ interface Props {
   };
   httpFetch: HttpHandler;
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
+  isILMAvailable: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -51,23 +57,33 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
+  reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
+  reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
   setLastChecked: (lastChecked: string) => void;
-  theme: Theme;
+  startDate?: string | null;
+  theme?: PartialTheme;
 }
 
 /** Renders the `Data Quality` dashboard content */
 const DataQualityPanelComponent: React.FC<Props> = ({
   addSuccessToast,
+  baseTheme,
   canUserCreateAndReadCases,
   defaultBytesFormat,
   defaultNumberFormat,
+  endDate,
   getGroupByFieldsOnClick,
   httpFetch,
   ilmPhases,
+  isAssistantEnabled,
+  isILMAvailable,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
+  reportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted,
   setLastChecked,
+  startDate,
   theme,
 }) => {
   const formatBytes = useCallback(
@@ -82,20 +98,33 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     [defaultNumberFormat]
   );
 
+  const telemetryEvents = useMemo(
+    () => ({ reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked }),
+    [reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked]
+  );
+
   return (
-    <DataQualityProvider httpFetch={httpFetch}>
+    <DataQualityProvider
+      httpFetch={httpFetch}
+      telemetryEvents={telemetryEvents}
+      isILMAvailable={isILMAvailable}
+    >
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
+        endDate={endDate}
         formatBytes={formatBytes}
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
         ilmPhases={ilmPhases}
+        isAssistantEnabled={isAssistantEnabled}
         lastChecked={lastChecked}
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
         setLastChecked={setLastChecked}
+        startDate={startDate}
         theme={theme}
+        baseTheme={baseTheme}
       />
     </DataQualityProvider>
   );

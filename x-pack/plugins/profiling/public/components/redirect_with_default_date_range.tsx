@@ -8,9 +8,9 @@ import React from 'react';
 import { useDateRangeRedirect } from '../hooks/use_default_date_range_redirect';
 
 export function RedirectWithDefaultDateRange({ children }: { children: React.ReactElement }) {
-  const { redirect, isDateRangeSet } = useDateRangeRedirect();
+  const { redirect, isDateRangeSet, skipDataRangeSet } = useDateRangeRedirect();
 
-  if (isDateRangeSet) {
+  if (isDateRangeSet || skipDataRangeSet) {
     return children;
   }
 

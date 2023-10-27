@@ -27,7 +27,7 @@ export const getBaseMigratorParams = ({
       algorithm: migrationAlgorithm,
       zdt: {
         metaPickupSyncDelaySec: 5,
-        runOnNonMigratorNodes,
+        runOnRoles: runOnNonMigratorNodes ? ['ui', 'migrator'] : ['migrator'],
       },
     },
   },

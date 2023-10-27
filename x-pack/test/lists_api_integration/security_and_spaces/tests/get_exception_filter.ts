@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import {
-  EXCEPTION_FILTER,
+  INTERNAL_EXCEPTION_FILTER,
   EXCEPTION_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -39,8 +39,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return an exception filter if correctly passed exception items', async () => {
         const { body } = await supertest
-          .post(`${EXCEPTION_FILTER}`)
+          .post(`${INTERNAL_EXCEPTION_FILTER}`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send(getExceptionFilterFromExceptionItemsSchemaMock())
           .expect(200);
 
@@ -119,8 +120,9 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
         const { body } = await supertest
-          .post(`${EXCEPTION_FILTER}`)
+          .post(`${INTERNAL_EXCEPTION_FILTER}`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send(getExceptionFilterFromExceptionIdsSchemaMock())
           .expect(200);
 

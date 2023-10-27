@@ -236,7 +236,7 @@ describe('Response actions history page', () => {
           return {
             id: `agent-id-${i}`,
             name: `Host-name-${i}`,
-            selected: [0, 1, 3, 5].includes(i) ? true : false,
+            selected: [0, 1, 3, 5].includes(i),
           };
         }),
         page: 0,
@@ -423,7 +423,7 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
       );
     });
 

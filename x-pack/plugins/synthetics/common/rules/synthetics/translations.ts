@@ -72,3 +72,55 @@ export const SyntheticsMonitorStatusTranslations = {
     defaultMessage: 'Alert when a monitor is down.',
   }),
 };
+
+export const TlsTranslations = {
+  defaultActionMessage: i18n.translate('xpack.synthetics.rules.tls.defaultActionMessage', {
+    defaultMessage: `TLS certificate {commonName} {status} - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
+    values: {
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
+      summary: '{{context.summary}}',
+      status: '{{context.status}}',
+      monitorName: '{{context.monitorName}}',
+      monitorUrl: '{{{context.monitorUrl}}}',
+      monitorType: '{{context.monitorType}}',
+      locationName: '{{context.locationName}}',
+    },
+  }),
+  defaultRecoveryMessage: i18n.translate('xpack.synthetics.rules.tls.defaultRecoveryMessage', {
+    defaultMessage: `TLS alert for monitor "{monitorName}" has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- New status : {newStatus}\n- Previous status: {previousStatus}\n- Monitor: {monitorName}  \n- URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
+    values: {
+      summary: '{{context.summary}}',
+      previousStatus: '{{context.previousStatus}}',
+      newStatus: '{{context.newStatus}}',
+      monitorName: '{{context.monitorName}}',
+      monitorUrl: '{{{context.monitorUrl}}}',
+      monitorType: '{{context.monitorType}}',
+      locationName: '{{context.locationName}}',
+    },
+  }),
+  name: i18n.translate('xpack.synthetics.rules.tls.clientName', {
+    defaultMessage: 'Synthetics TLS',
+  }),
+  description: i18n.translate('xpack.synthetics.rules.tls.description', {
+    defaultMessage: 'Alert when the TLS certificate of a Synthetics monitor is about to expire.',
+  }),
+  defaultSubjectMessage: i18n.translate(
+    'xpack.synthetics.alerts.syntheticsMonitorTLS.defaultSubjectMessage',
+    {
+      defaultMessage: 'Alert triggered for certificate {commonName} - Elastic Synthetics',
+      values: {
+        commonName: '{{context.commonName}}',
+      },
+    }
+  ),
+  defaultRecoverySubjectMessage: i18n.translate(
+    'xpack.synthetics.alerts.syntheticsMonitorTLS.defaultRecoverySubjectMessage',
+    {
+      defaultMessage: 'Alert has resolved for certificate {commonName} - Elastic Synthetics',
+      values: {
+        commonName: '{{context.commonName}}',
+      },
+    }
+  ),
+};

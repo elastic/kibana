@@ -9,13 +9,14 @@ import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
 import {
   ALERT_APP,
   APM_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
+  UNIVERSAL_PROFILING_APP,
   UPTIME_APP,
   UX_APP,
 } from '../constants';
@@ -24,7 +25,6 @@ import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from './get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 import { ApmIndicesConfig } from '../../../common/typings';
-import { ObservabilityAppServices } from '../../application/types';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
@@ -55,10 +55,11 @@ const apps: DataContextApps[] = [
   INFRA_METRICS_APP,
   UX_APP,
   ALERT_APP,
+  UNIVERSAL_PROFILING_APP,
 ];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const { http } = useKibana().services;
   const [forceUpdate, setForceUpdate] = useState('');
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
@@ -123,6 +124,10 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
                   hasData: resultInfraMetrics?.hasData,
                   indices: resultInfraMetrics?.indices,
                 });
+                break;
+              case UNIVERSAL_PROFILING_APP:
+                // Profiling only shows the empty section for now
+                updateState({ hasData: false });
                 break;
             }
           } catch (e) {

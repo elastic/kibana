@@ -5,32 +5,43 @@
  * 2.0.
  */
 
-import { RollingTimeWindow, TimeWindow } from '../../../domain/models/time_window';
-import { oneWeek, sevenDays, sixHours, thirtyDays } from './duration';
-
-export function sixHoursRolling(): TimeWindow {
-  return {
-    duration: sixHours(),
-    isRolling: true,
-  };
-}
+import {
+  CalendarAlignedTimeWindow,
+  RollingTimeWindow,
+  TimeWindow,
+} from '../../../domain/models/time_window';
+import { ninetyDays, oneMonth, oneWeek, sevenDays, thirtyDays } from './duration';
 
 export function sevenDaysRolling(): RollingTimeWindow {
   return {
     duration: sevenDays(),
-    isRolling: true,
+    type: 'rolling',
   };
 }
 export function thirtyDaysRolling(): RollingTimeWindow {
   return {
     duration: thirtyDays(),
-    isRolling: true,
+    type: 'rolling',
   };
 }
 
-export function weeklyCalendarAligned(): TimeWindow {
+export function ninetyDaysRolling(): TimeWindow {
+  return {
+    duration: ninetyDays(),
+    type: 'rolling',
+  };
+}
+
+export function weeklyCalendarAligned(): CalendarAlignedTimeWindow {
   return {
     duration: oneWeek(),
-    isCalendar: true,
+    type: 'calendarAligned',
+  };
+}
+
+export function monthlyCalendarAligned(): CalendarAlignedTimeWindow {
+  return {
+    duration: oneMonth(),
+    type: 'calendarAligned',
   };
 }

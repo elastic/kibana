@@ -11,6 +11,9 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import pMap from 'p-map';
+import { isResponseError } from '@kbn/es-errors';
+
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
@@ -36,6 +39,10 @@ interface Properties {
 
 interface MultiFields {
   [key: string]: object;
+}
+
+interface RuntimeFields {
+  [key: string]: any;
 }
 
 export interface IndexTemplateMapping {
@@ -115,6 +122,7 @@ export function getTemplate({
 export function generateMappings(fields: Field[]): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
+  const runtimeFields: RuntimeFields = {};
 
   const { properties } = _generateMappings(fields, {
     addDynamicMapping: (dynamicMapping: {
@@ -122,15 +130,19 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       matchingType: string;
       pathMatch: string;
       properties: string;
+      runtimeProperties?: string;
     }) => {
       const name = dynamicMapping.path;
       if (dynamicTemplateNames.has(name)) {
         return;
       }
 
-      const dynamicTemplate: Properties = {
-        mapping: dynamicMapping.properties,
-      };
+      const dynamicTemplate: Properties = {};
+      if (dynamicMapping.runtimeProperties !== undefined) {
+        dynamicTemplate.runtime = dynamicMapping.runtimeProperties;
+      } else {
+        dynamicTemplate.mapping = dynamicMapping.properties;
+      }
 
       if (dynamicMapping.matchingType) {
         dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
@@ -139,17 +151,23 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       if (dynamicMapping.pathMatch) {
         dynamicTemplate.path_match = dynamicMapping.pathMatch;
       }
+
       dynamicTemplateNames.add(name);
       dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
     },
+    addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
+      runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
+    },
   });
 
-  return dynamicTemplates.length
-    ? {
-        properties,
-        dynamic_templates: dynamicTemplates,
-      }
-    : { properties };
+  const indexTemplateMappings: IndexTemplateMappings = { properties };
+  if (dynamicTemplates.length > 0) {
+    indexTemplateMappings.dynamic_templates = dynamicTemplates;
+  }
+  if (Object.keys(runtimeFields).length > 0) {
+    indexTemplateMappings.runtime = runtimeFields;
+  }
+  return indexTemplateMappings;
 }
 
 /**
@@ -164,6 +182,7 @@ function _generateMappings(
   fields: Field[],
   ctx: {
     addDynamicMapping: any;
+    addRuntimeField: any;
     groupFieldName?: string;
   }
 ): {
@@ -179,6 +198,53 @@ function _generateMappings(
       // If type is not defined, assume keyword
       const type = field.type || 'keyword';
 
+      if (field.runtime !== undefined) {
+        const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
+        let runtimeFieldProps: Properties = getDefaultProperties(field);
+
+        // Is it a dynamic template?
+        if (type === 'object' && field.object_type) {
+          const pathMatch = path.includes('*') ? path : `${path}.*`;
+
+          const dynProperties: Properties = getDefaultProperties(field);
+          let matchingType: string | undefined;
+          switch (field.object_type) {
+            case 'keyword':
+              dynProperties.type = field.object_type;
+              matchingType = field.object_type_mapping_type ?? 'string';
+              break;
+            case 'double':
+            case 'long':
+            case 'boolean':
+              dynProperties.type = field.object_type;
+              dynProperties.time_series_metric = field.metric_type;
+              matchingType = field.object_type_mapping_type ?? field.object_type;
+            default:
+              break;
+          }
+
+          // get the runtime properies of this field assuming type equals to object_type
+          const _field = { ...field, type: field.object_type };
+          const fieldProps = generateRuntimeFieldProps(_field);
+
+          if (dynProperties && matchingType) {
+            ctx.addDynamicMapping({
+              path,
+              pathMatch,
+              matchingType,
+              properties: dynProperties,
+              runtimeProperties: fieldProps,
+            });
+          }
+          return;
+        }
+        const fieldProps = generateRuntimeFieldProps(field);
+        runtimeFieldProps = { ...runtimeFieldProps, ...fieldProps };
+
+        ctx.addRuntimeField({ path, properties: runtimeFieldProps });
+        return; // runtime fields should not be added as a property
+      }
+
       if (type === 'object' && field.object_type) {
         const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
         const pathMatch = path.includes('*') ? path : `${path}.*`;
@@ -190,26 +256,74 @@ function _generateMappings(
             dynProperties = histogram(field);
             matchingType = field.object_type_mapping_type ?? '*';
             break;
-          case 'text':
-            dynProperties.type = field.object_type;
-            matchingType = field.object_type_mapping_type ?? 'string';
-            break;
+          case 'ip':
           case 'keyword':
+          case 'match_only_text':
+          case 'text':
+          case 'wildcard':
             dynProperties.type = field.object_type;
             matchingType = field.object_type_mapping_type ?? 'string';
             break;
-          case 'byte':
+          case 'scaled_float':
+            dynProperties = scaledFloat(field);
+            matchingType = field.object_type_mapping_type ?? '*';
+            break;
+          case 'aggregate_metric_double':
+            dynProperties.type = field.object_type;
+            dynProperties.metrics = field.metrics;
+            dynProperties.default_metric = field.default_metric;
+            matchingType = field.object_type_mapping_type ?? '*';
+            break;
           case 'double':
           case 'float':
+          case 'half_float':
+            dynProperties.type = field.object_type;
+            dynProperties.time_series_metric = field.metric_type;
+            matchingType = field.object_type_mapping_type ?? 'double';
+            break;
+          case 'byte':
           case 'long':
           case 'short':
-          case 'boolean':
-            dynProperties = {
-              type: field.object_type,
-            };
-            matchingType = field.object_type_mapping_type ?? field.object_type;
-          default:
+          case 'unsigned_long':
+            dynProperties.type = field.object_type;
+            dynProperties.time_series_metric = field.metric_type;
+            matchingType = field.object_type_mapping_type ?? 'long';
             break;
+          case 'integer':
+            // Map integers as long, as in other cases.
+            dynProperties.type = 'long';
+            dynProperties.time_series_metric = field.metric_type;
+            matchingType = field.object_type_mapping_type ?? 'long';
+            break;
+          case 'boolean':
+            dynProperties.type = field.object_type;
+            dynProperties.time_series_metric = field.metric_type;
+            matchingType = field.object_type_mapping_type ?? field.object_type;
+            break;
+          case 'group':
+            if (!field?.fields) {
+              break;
+            }
+            const subFields = field.fields.map((subField) => ({
+              ...subField,
+              type: 'object',
+              object_type: subField.object_type ?? subField.type,
+            }));
+            _generateMappings(subFields, {
+              ...ctx,
+              groupFieldName: ctx.groupFieldName
+                ? `${ctx.groupFieldName}.${field.name}`
+                : field.name,
+            });
+            break;
+          case 'flattened':
+            dynProperties.type = field.object_type;
+            matchingType = field.object_type_mapping_type ?? 'object';
+            break;
+          default:
+            throw new Error(
+              `no dynamic mapping generated for field ${path} of type ${field.object_type}`
+            );
         }
 
         if (dynProperties && matchingType) {
@@ -434,6 +548,30 @@ function generateDateMapping(field: Field): IndexTemplateMapping {
   return mapping;
 }
 
+function generateRuntimeFieldProps(field: Field): IndexTemplateMapping {
+  let mapping: IndexTemplateMapping = {};
+  const type = field.type || keyword;
+  switch (type) {
+    case 'integer':
+      mapping.type = 'long';
+      break;
+    case 'date':
+      const dateMappings = generateDateMapping(field);
+      mapping = { ...mapping, ...dateMappings, type: 'date' };
+      break;
+    default:
+      mapping.type = type;
+  }
+
+  if (typeof field.runtime === 'string') {
+    const scriptObject = {
+      source: field.runtime.trim(),
+    };
+    mapping.script = scriptObject;
+  }
+  return mapping;
+}
+
 /**
  * Generates the template name out of the given information
  */
@@ -444,9 +582,15 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
 /**
  * Given a data stream name, return the indexTemplate name
  */
-function dataStreamNameToIndexTemplateName(dataStreamName: string): string {
-  const [type, dataset] = dataStreamName.split('-'); // ignore namespace at the end
-  return [type, dataset].join('-');
+async function getIndexTemplate(
+  esClient: ElasticsearchClient,
+  dataStreamName: string
+): Promise<string> {
+  const dataStream = await esClient.indices.getDataStream({
+    name: dataStreamName,
+    expand_wildcards: ['open', 'hidden'],
+  });
+  return dataStream.data_streams[0].template;
 }
 
 export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
@@ -564,7 +708,11 @@ function getBaseTemplate({
 export const updateCurrentWriteIndices = async (
   esClient: ElasticsearchClient,
   logger: Logger,
-  templates: IndexTemplateEntry[]
+  templates: IndexTemplateEntry[],
+  options?: {
+    ignoreMappingUpdateErrors?: boolean;
+    skipDataStreamRollover?: boolean;
+  }
 ): Promise<void> => {
   if (!templates.length) return;
 
@@ -579,7 +727,7 @@ export const updateCurrentWriteIndices = async (
     return true;
   });
   if (!allUpdatablesIndices.length) return;
-  return updateAllDataStreams(allUpdatablesIndices, esClient, logger);
+  return updateAllDataStreams(allUpdatablesIndices, esClient, logger, options);
 };
 
 function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
@@ -631,25 +779,42 @@ const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClien
 const updateAllDataStreams = async (
   indexNameWithTemplates: CurrentDataStream[],
   esClient: ElasticsearchClient,
-  logger: Logger
+  logger: Logger,
+  options?: {
+    ignoreMappingUpdateErrors?: boolean;
+    skipDataStreamRollover?: boolean;
+  }
 ): Promise<void> => {
-  const updatedataStreamPromises = indexNameWithTemplates.map((templateEntry) => {
-    return updateExistingDataStream({
-      esClient,
-      logger,
-      dataStreamName: templateEntry.dataStreamName,
-    });
-  });
-  await Promise.all(updatedataStreamPromises);
+  await pMap(
+    indexNameWithTemplates,
+    (templateEntry) => {
+      return updateExistingDataStream({
+        esClient,
+        logger,
+        dataStreamName: templateEntry.dataStreamName,
+        options,
+      });
+    },
+    {
+      // Limit concurrent putMapping/rollover requests to avoid overhwhelming ES cluster
+      concurrency: 20,
+    }
+  );
 };
+
 const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
   logger,
+  options,
 }: {
   dataStreamName: string;
   esClient: ElasticsearchClient;
   logger: Logger;
+  options?: {
+    ignoreMappingUpdateErrors?: boolean;
+    skipDataStreamRollover?: boolean;
+  };
 }) => {
   const existingDs = await esClient.indices.get({
     index: dataStreamName,
@@ -664,16 +829,19 @@ const updateExistingDataStream = async ({
 
   let settings: IndicesIndexSettings;
   let mappings: MappingTypeMapping;
+  let lifecycle: any;
 
   try {
-    const simulateResult = await retryTransientEsErrors(() =>
+    const simulateResult = await retryTransientEsErrors(async () =>
       esClient.indices.simulateTemplate({
-        name: dataStreamNameToIndexTemplateName(dataStreamName),
+        name: await getIndexTemplate(esClient, dataStreamName),
       })
     );
 
     settings = simulateResult.template.settings;
     mappings = simulateResult.template.mappings;
+    // @ts-expect-error template is not yet typed with DLM
+    lifecycle = simulateResult.template.lifecycle;
 
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
@@ -683,7 +851,7 @@ const updateExistingDataStream = async ({
       delete mappings.properties.data_stream;
     }
 
-    logger.debug(`Updating mappings for ${dataStreamName}`);
+    logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
@@ -696,19 +864,63 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    logger.error(`Mappings update for ${dataStreamName} failed`);
-    logger.error(err);
-
-    await rolloverDataStream(dataStreamName, esClient);
-    return;
+    if (
+      isResponseError(err) &&
+      err.statusCode === 400 &&
+      err.body?.error?.type === 'illegal_argument_exception'
+    ) {
+      logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+      if (options?.skipDataStreamRollover === true) {
+        logger.info(
+          `Skipping rollover for ${dataStreamName} as "skipDataStreamRollover" is enabled`
+        );
+        return;
+      } else {
+        logger.info(`Triggering a rollover for ${dataStreamName}`);
+        await rolloverDataStream(dataStreamName, esClient);
+        return;
+      }
+    }
+    logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
+    if (options?.ignoreMappingUpdateErrors === true) {
+      logger.info(`Ignore mapping update errors as "ignoreMappingUpdateErrors" is enabled`);
+      return;
+    } else {
+      throw err;
+    }
   }
 
   // Trigger a rollover if the index mode or source type has changed
   if (currentIndexMode !== settings?.index?.mode || currentSourceType !== mappings?._source?.mode) {
-    logger.info(
-      `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
-    );
-    await rolloverDataStream(dataStreamName, esClient);
+    if (options?.skipDataStreamRollover === true) {
+      logger.info(
+        `Index mode or source type has changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
+      );
+      return;
+    } else {
+      logger.info(
+        `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
+      );
+      await rolloverDataStream(dataStreamName, esClient);
+    }
+  }
+
+  if (lifecycle?.data_retention) {
+    try {
+      logger.debug(`Updating lifecycle for ${dataStreamName}`);
+
+      await retryTransientEsErrors(
+        () =>
+          esClient.transport.request({
+            method: 'PUT',
+            path: `_data_stream/${dataStreamName}/_lifecycle`,
+            body: { data_retention: lifecycle.data_retention },
+          }),
+        { logger }
+      );
+    } catch (err) {
+      throw new Error(`could not update lifecycle settings for ${dataStreamName}: ${err.message}`);
+    }
   }
 
   // update settings after mappings was successful to ensure

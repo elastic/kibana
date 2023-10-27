@@ -6,10 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { EventAnnotationService } from './event_annotation_service';
 import {
   manualPointEventAnnotation,
@@ -18,14 +27,21 @@ import {
   eventAnnotationGroup,
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface EventAnnotationStartDependencies {
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
   data: DataPublicPluginStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 interface SetupDependencies {
   expressions: ExpressionsSetup;
+  visualizations: VisualizationsSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 /** @public */
@@ -47,12 +63,22 @@ export class EventAnnotationPlugin
     dependencies.expressions.registerFunction(
       getFetchEventAnnotations({ getStartServices: core.getStartServices })
     );
+
+    dependencies.contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: i18n.translate('eventAnnotation.content.name', {
+        defaultMessage: 'Annotation group',
+      }),
+    });
   }
 
   public start(
     core: CoreStart,
     startDependencies: EventAnnotationStartDependencies
   ): EventAnnotationService {
-    return new EventAnnotationService(core, startDependencies.savedObjectsManagement);
+    return new EventAnnotationService(core, startDependencies.contentManagement);
   }
 }

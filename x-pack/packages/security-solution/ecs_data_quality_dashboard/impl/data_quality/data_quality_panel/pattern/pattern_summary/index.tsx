@@ -15,7 +15,7 @@ import { StatsRollup } from './stats_rollup';
 interface Props {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
-  ilmExplainPhaseCounts: IlmExplainPhaseCounts;
+  ilmExplainPhaseCounts: IlmExplainPhaseCounts | undefined;
   incompatible: number | undefined;
   indices: number | undefined;
   indicesChecked: number | undefined;

@@ -20,6 +20,8 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
+import type { StartServices } from '../../../types';
+import { getAlertConfigIdByScopeId } from '../../../common/lib/triggers_actions_ui/alert_table_scope_config';
 
 const ICON = 'listAdd';
 const COLUMN_TOGGLE = i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.label', {
@@ -33,25 +35,44 @@ const NESTED_COLUMN = (field: string) =>
   });
 
 export const createToggleColumnCellActionFactory = createCellActionFactory(
-  ({ store }: { store: SecurityAppStore }): CellActionTemplate<SecurityCellAction> => ({
+  ({
+    store,
+    services,
+  }: {
+    store: SecurityAppStore;
+    services: StartServices;
+  }): CellActionTemplate<SecurityCellAction> => ({
     type: SecurityCellActionType.TOGGLE_COLUMN,
     getIconType: () => ICON,
     getDisplayName: () => COLUMN_TOGGLE,
-    getDisplayNameTooltip: ({ field, metadata }) =>
-      metadata?.isObjectArray ? NESTED_COLUMN(field.name) : COLUMN_TOGGLE,
-    isCompatible: async ({ field, metadata }) => {
+    getDisplayNameTooltip: ({ data, metadata }) =>
+      metadata?.isObjectArray ? NESTED_COLUMN(data[0]?.field.name) : COLUMN_TOGGLE,
+    isCompatible: async ({ data, metadata }) => {
+      const field = data[0]?.field;
+
       return (
+        data.length === 1 &&
         fieldHasCellActions(field.name) &&
         !!metadata?.scopeId &&
         (isTimelineScope(metadata.scopeId) || isInTableScope(metadata.scopeId))
       );
     },
-    execute: async ({ metadata, field }) => {
+
+    execute: async ({ metadata, data }) => {
+      const field = data[0]?.field;
       const scopeId = metadata?.scopeId;
       if (!scopeId) return;
 
       const scopedActions = getScopedActions(scopeId);
       if (!scopedActions) {
+        return;
+      }
+
+      const alertTableConfigurationId = getAlertConfigIdByScopeId(scopeId);
+      if (alertTableConfigurationId) {
+        services.triggersActionsUi.alertsTableConfigurationRegistry
+          .getActions(alertTableConfigurationId)
+          .toggleColumn(field.name);
         return;
       }
 

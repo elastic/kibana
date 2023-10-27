@@ -9,11 +9,10 @@ import { setMockValues } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { rerender } from '../../../test_helpers';
 
@@ -26,7 +25,7 @@ describe('SchemaRouter', () => {
   const wrapper = shallow(<SchemaRouter />);
 
   it('renders', () => {
-    expect(wrapper.find(Switch)).toHaveLength(1);
+    expect(wrapper.find(Routes)).toHaveLength(1);
     expect(wrapper.find(Route)).toHaveLength(2);
   });
 

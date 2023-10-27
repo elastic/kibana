@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComment, EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
+import { EuiComment, EuiErrorBoundary } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
@@ -22,6 +22,7 @@ import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
 
+// eslint-disable-next-line react/display-name
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
   ({ actionId, ruleName, startDate, ecsData }) => {
     const { read } = useKibana().services.application.capabilities.osquery;
@@ -39,9 +40,8 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
 
     return (
       <AlertAttachmentContext.Provider value={ecsData}>
-        <EuiSpacer size="s" />
         <EuiComment
-          username={ruleName && ruleName[0]}
+          username={ruleName}
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}
           data-test-subj={'osquery-results-comment'}
@@ -58,7 +58,6 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
             />
           )}
         </EuiComment>
-        <EuiSpacer size="s" />
       </AlertAttachmentContext.Provider>
     );
   }

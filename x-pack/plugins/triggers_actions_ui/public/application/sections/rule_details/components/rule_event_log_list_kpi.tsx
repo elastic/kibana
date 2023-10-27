@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
 import {
   ComponentOpts as RuleApis,
@@ -62,6 +62,7 @@ export type RuleEventLogListKPIProps = {
   message?: string;
   refreshToken?: RefreshToken;
   namespaces?: Array<string | undefined>;
+  filteredRuleTypes?: string[];
 } & Pick<RuleApis, 'loadExecutionKPIAggregations' | 'loadGlobalExecutionKPIAggregations'>;
 
 export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
@@ -73,6 +74,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
     message,
     refreshToken,
     namespaces,
+    filteredRuleTypes,
     loadExecutionKPIAggregations,
     loadGlobalExecutionKPIAggregations,
   } = props;
@@ -103,6 +105,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
         outcomeFilter,
         message,
         ...(namespaces ? { namespaces } : {}),
+        ruleTypeIds: filteredRuleTypes,
       });
       setKpi(newKpi);
     } catch (e) {
@@ -130,12 +133,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   const isLoadingData = useMemo(() => isLoading || !kpi, [isLoading, kpi]);
 
   const getStatDescription = (element: React.ReactNode) => {
-    return (
-      <>
-        {element}
-        <EuiSpacer size="s" />
-      </>
-    );
+    return <span style={{ paddingBottom: '8px', display: 'flex' }}>{element}</span>;
   };
 
   return (

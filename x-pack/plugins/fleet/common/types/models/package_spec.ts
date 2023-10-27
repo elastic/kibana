@@ -31,6 +31,12 @@ export interface PackageSpecManifest {
     RegistryElasticsearch,
     'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
   >;
+  asset_tags?: PackageSpecTags[];
+}
+export interface PackageSpecTags {
+  text: string;
+  asset_types?: string[];
+  asset_ids?: string[];
 }
 
 export type PackageSpecPackageType = 'integration' | 'input';
@@ -50,9 +56,7 @@ export type PackageSpecCategory =
   | 'config_management'
   | 'connector'
   | 'connector_client'
-  | 'connector_package'
   | 'containers'
-  | 'content_source'
   | 'crawler'
   | 'credential_management'
   | 'crm'
@@ -101,7 +105,8 @@ export type PackageSpecCategory =
   | 'web'
   | 'web_application_firewall'
   | 'websphere'
-  | 'workplace_search';
+  | 'workplace_search'
+  | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
   kibana: {

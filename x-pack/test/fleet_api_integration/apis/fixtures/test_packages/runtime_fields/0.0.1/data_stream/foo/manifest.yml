@@ -1,0 +1,21 @@
+title: "Foo"
+type: logs
+streams:
+  - input: logfile
+    title: Sample logs
+    description: Collect sample logs
+    vars:
+      - name: paths
+        type: text
+        title: Paths
+        multi: true
+        default:
+          - /var/log/*.log
+elasticsearch:
+  index_template:
+    mappings:
+      runtime:
+        day_of_week_two:
+          type: keyword
+          script:
+            source: "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))"

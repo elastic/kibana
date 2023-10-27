@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import type { ESQuery } from '../../typed_json';
 import type {
   ActionsStrategyResponse,
   ActionsRequestOptions,
@@ -19,7 +17,7 @@ import type {
 import type { AgentsStrategyResponse, AgentsRequestOptions } from './agents';
 import type { ResultsStrategyResponse, ResultsRequestOptions } from './results';
 
-import type { DocValueFields, SortField, PaginationInputPaginated } from '../common';
+import type { SortField, PaginationInputPaginated } from '../common';
 
 export * from './actions';
 export * from './agents';
@@ -36,9 +34,7 @@ export enum OsqueryQueries {
 export type FactoryQueryTypes = OsqueryQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
-  filterQuery: ESQuery | string | undefined;
-  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
-  docValueFields?: DocValueFields[];
+  kuery?: string;
   factoryQueryType?: FactoryQueryTypes;
   componentTemplateExists?: boolean;
 }

@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);
 
-      await testSubjects.click('breadcrumb first');
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveSearch('my classic search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 

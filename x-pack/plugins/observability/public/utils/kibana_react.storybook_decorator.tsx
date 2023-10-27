@@ -31,9 +31,12 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
+        observability: { enabled: false },
       },
+      thresholdRule: { enabled: false },
     },
   };
+
   const mockTheme: CoreTheme = {
     darkMode: false,
   };

@@ -24,7 +24,9 @@ const calculateLowerBound = (from: string, forceNow?: Date): undefined | Moment 
 const calculateUpperBound = (to: string, forceNow?: Date): undefined | Moment =>
   dateMath.parse(to, { roundUp: true, forceNow });
 
-const isRelativeTime = (value: string): boolean => value.includes('now');
+const isRelativeTime = (value: string | Moment): boolean => {
+  return typeof value === 'string' && value.includes('now');
+};
 
 export function calculateBounds(
   timeRange: TimeRange,

@@ -10,16 +10,19 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '../../../../../../common/types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { SettingsCheckableCard } from '../../shared/settings_checkable_card/settings_checkable_card';
 
 interface PipelineSettingsFormProps {
+  extractionDisabled: boolean;
   ingestionMethod: string;
   pipeline: IngestPipelineParams;
   setPipeline: (pipeline: IngestPipelineParams) => void;
 }
 
 export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
+  extractionDisabled,
   ingestionMethod,
   setPipeline,
   pipeline,
@@ -33,6 +36,7 @@ export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <SettingsCheckableCard
+          disabled={extractionDisabled}
           data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-extractBinaryContent`}
           description={i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDescription',

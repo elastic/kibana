@@ -208,3 +208,43 @@ test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters
 
   expect(env4.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 });
+
+describe('packageInfo.buildFlavor', () => {
+  it('is set to `serverless` when the `serverless` cli flag is `true`', () => {
+    mockPackage.raw = {
+      branch: 'some-branch',
+      version: 'some-version',
+    };
+
+    const env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        configs: ['/test/cwd/config/kibana.yml'],
+        cliArgs: {
+          serverless: true,
+        },
+      })
+    );
+
+    expect(env.packageInfo.buildFlavor).toEqual('serverless');
+  });
+
+  it('is set to `traditional` when the `serverless` cli flag is `false`', () => {
+    mockPackage.raw = {
+      branch: 'some-branch',
+      version: 'some-version',
+    };
+
+    const env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        configs: ['/test/cwd/config/kibana.yml'],
+        cliArgs: {
+          serverless: false,
+        },
+      })
+    );
+
+    expect(env.packageInfo.buildFlavor).toEqual('traditional');
+  });
+});

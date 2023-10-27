@@ -10,6 +10,12 @@
 /* eslint-disable dot-notation */
 
 import { mockTelemetryService } from '../mocks';
+import {
+  FetchSnapshotTelemetry,
+  INTERNAL_VERSION,
+  OptInRoute,
+  UserHasSeenNoticeRoute,
+} from '../../common/routes';
 
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
@@ -17,7 +23,8 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService();
 
       await telemetryService.fetchTelemetry();
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
+      expect(telemetryService['http'].post).toBeCalledWith(FetchSnapshotTelemetry, {
+        ...INTERNAL_VERSION,
         body: JSON.stringify({ unencrypted: false, refreshCache: false }),
       });
     });
@@ -64,7 +71,8 @@ describe('TelemetryService', () => {
       const optedIn = true;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/optIn', {
+      expect(telemetryService['http'].post).toBeCalledWith(OptInRoute, {
+        ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
       });
     });
@@ -77,7 +85,8 @@ describe('TelemetryService', () => {
       const optedIn = false;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/optIn', {
+      expect(telemetryService['http'].post).toBeCalledWith(OptInRoute, {
+        ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
       });
     });
@@ -110,7 +119,7 @@ describe('TelemetryService', () => {
         config: { allowChangingOptInStatus: true },
       });
       telemetryService['http'].post = jest.fn().mockImplementation((url: string) => {
-        if (url === '/api/telemetry/v2/optIn') {
+        if (url === OptInRoute) {
           throw Error('failed to update opt in.');
         }
       });
@@ -146,7 +155,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/xpack/v2/send"`
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-snapshot"`
       );
     });
 
@@ -156,7 +165,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/xpack/v2/send"`
+        `"https://telemetry.elastic.co/v3/send/kibana-snapshot"`
       );
     });
   });
@@ -168,7 +177,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/opt_in_status/v2/send"`
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-opt-in-reports"`
       );
     });
 
@@ -178,7 +187,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/opt_in_status/v2/send"`
+        `"https://telemetry.elastic.co/v3/send/kibana-opt-in-reports"`
       );
     });
   });
@@ -203,7 +212,7 @@ describe('TelemetryService', () => {
       });
 
       telemetryService['http'].put = jest.fn().mockImplementation((url: string) => {
-        if (url === '/api/telemetry/v2/userHasSeenNotice') {
+        if (url === UserHasSeenNoticeRoute) {
           throw Error('failed to update opt in.');
         }
       });

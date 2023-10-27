@@ -18,6 +18,3 @@ export const BLOCK_LIST_VALUE_INPUT = (iocId: string) =>
   `[data-test-subj="blocklist-form-values-input-${iocId}"]`;
 export const SAVED_BLOCK_LIST_NAME = `[data-test-subj="blocklistPage-card-header-title"]`;
 export const SAVED_BLOCK_LIST_DESCRIPTION = `[data-test-subj="blocklistPage-card-description"]`;
-export const SAVED_BLOCK_LIST_ACTION_MENU = `[data-test-subj="blocklistPage-card-header-actions-button"]`;
-export const SAVED_BLOCK_LIST_DELETE_BUTTON = `[data-test-subj="blocklistPage-card-cardDeleteAction"]`;
-export const SAVED_BLOCK_LIST_CONFIRM_DELETE_BUTTON = `[data-test-subj="blocklistPage-deleteModal-submitButton"]`;

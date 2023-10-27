@@ -148,7 +148,7 @@ function getDurationUnitKey(max: number): DurationTimeUnit {
   if (max > toMicroseconds(10, 'minutes')) {
     return 'minutes';
   }
-  if (max > toMicroseconds(10, 'seconds')) {
+  if (max > toMicroseconds(1, 'seconds')) {
     return 'seconds';
   }
   if (max > toMicroseconds(1, 'milliseconds')) {

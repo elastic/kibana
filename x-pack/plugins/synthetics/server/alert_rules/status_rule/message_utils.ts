@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON_MSG } from '../action_variables';
 import { MonitorSummaryStatusRule } from './types';
 import {
   MONITOR_ID,
@@ -21,7 +22,6 @@ import {
 } from '../../../common/field_names';
 import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { ALERT_REASON_MSG } from '../../legacy_uptime/lib/alerts/action_variables';
 
 export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule) => ({
   [MONITOR_ID]: monitorSummary.monitorId,

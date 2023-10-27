@@ -195,6 +195,22 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.HttpFetchOptions.rawResponse",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawResponse",
+            "description": [
+              "\nWhen true, the response from the `fetch` call will be returned as is, without being awaited or processed.\nDefaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.HttpFetchOptions.context",
             "type": "Object",
             "tags": [],
@@ -849,7 +865,7 @@
                 "section": "def-common.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -1226,7 +1242,7 @@
                 "section": "def-common.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",

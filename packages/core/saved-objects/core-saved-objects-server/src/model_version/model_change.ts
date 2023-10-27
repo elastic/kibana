@@ -7,7 +7,10 @@
  */
 
 import type { SavedObjectsMappingProperties } from '../mapping_definition';
-import type { SavedObjectModelDataBackfillFn } from './transformations';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelUnsafeTransformFn,
+} from './transformations';
 
 /**
  * Represents a change of model associated with a given {@link SavedObjectsModelVersion}.
@@ -16,13 +19,20 @@ import type { SavedObjectModelDataBackfillFn } from './transformations';
  *   - 'mappings_addition' ({@link SavedObjectsModelMappingsAdditionChange}
  *   - 'mappings_deprecation' ({@link SavedObjectsModelMappingsDeprecationChange}
  *   - 'data_backfill' ({@link SavedObjectsModelDataBackfillChange}
+ *   - 'data_removal' ({@link SavedObjectsModelDataRemovalChange})
+ *   - 'unsafe_transform' ({@link SavedObjectsModelUnsafeTransformChange})
+ *
+ * @remark Please refer to the model version documentation for more details on all change types
+ *         and examples of using them for concrete migration usages.
  *
  * @public
  */
 export type SavedObjectsModelChange =
   | SavedObjectsModelMappingsAdditionChange
   | SavedObjectsModelMappingsDeprecationChange
-  | SavedObjectsModelDataBackfillChange;
+  | SavedObjectsModelDataBackfillChange
+  | SavedObjectsModelDataRemovalChange
+  | SavedObjectsModelUnsafeTransformChange;
 
 /**
  * A {@link SavedObjectsModelChange | model change} adding new mappings.
@@ -78,18 +88,19 @@ export interface SavedObjectsModelMappingsDeprecationChange {
 }
 
 /**
- * A {@link SavedObjectsModelChange | model change} used to backfill fields introduced in the same model version.
+ * A {@link SavedObjectsModelChange | model change} backfilling fields introduced in the same model version.
  *
  * @example
- * ```
+ * ```ts
  * let change: SavedObjectsModelDataBackfillChange = {
  *   type: 'data_backfill',
- *   transform: (document) => {
- *     document.attributes.someAddedField = 'defaultValue';
- *     return { document };
+ *   backfillFn: (document, ctx) => {
+ *     return { attributes: { someAddedField: 'defaultValue' } };
  *   },
  * };
  * ```
+ * @remark Combining the document's attributes with the ones returned from the function
+ *         will be done using a deep merge policy.
  *
  * @remark This type of model change should only be used to backfill newly introduced fields.
  *         Even if no check is performed to ensure that, using such transformations to mutate
@@ -103,5 +114,58 @@ export interface SavedObjectsModelDataBackfillChange<
   /**
    * The backfill function to run.
    */
-  transform: SavedObjectModelDataBackfillFn<PreviousAttributes, NewAttributes>;
+  backfillFn: SavedObjectModelDataBackfillFn<PreviousAttributes, NewAttributes>;
+}
+
+/**
+ * A {@link SavedObjectsModelChange | model change} removing data from all documents of the type.
+ *
+ * @example
+ * ```ts
+ * let change: SavedObjectsModelDataRemovalChange = {
+ *   type: 'data_removal',
+ *   removedAttributePaths: ['someRootAttributes', 'some.nested.attribute'],
+ * };
+ * ```
+ *
+ * @remark Due to backward compatibility, field utilization must be stopped in a prior release
+ *         before actual data removal (in case of rollback). Please refer to the modelVersion documentation
+ *         for more information and examples.
+ */
+export interface SavedObjectsModelDataRemovalChange {
+  type: 'data_removal';
+  /**
+   * The list of attribute paths to remove.
+   */
+  removedAttributePaths: string[];
+}
+
+/**
+ * A {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.
+ *
+ * @example
+ * ```ts
+ * let change: SavedObjectsModelUnsafeTransformChange = {
+ *   type: 'unsafe_transform',
+ *   transformFn: (document) => {
+ *     document.attributes.someAddedField = 'defaultValue';
+ *     return { document };
+ *   },
+ * };
+ * ```
+ *
+ * @remark Such transformations are potentially (well, likely) unsafe, given the migration system will have
+ *         no knowledge of which kind of operations will effectively be executed against the documents.
+ *         Those should only be used when there's no other way to cover one's migration needs.
+ *         Please reach out to the Core team if you think you need to use this, as you theoretically shouldn't.
+ */
+export interface SavedObjectsModelUnsafeTransformChange<
+  PreviousAttributes = any,
+  NewAttributes = any
+> {
+  type: 'unsafe_transform';
+  /**
+   * The transform function to execute.
+   */
+  transformFn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>;
 }

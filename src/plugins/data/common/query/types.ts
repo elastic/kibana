@@ -19,6 +19,7 @@ export type SavedQueryTimeFilter = TimeRange & {
 export interface SavedQuery {
   id: string;
   attributes: SavedQueryAttributes;
+  namespaces: string[];
 }
 
 export interface SavedQueryAttributes {

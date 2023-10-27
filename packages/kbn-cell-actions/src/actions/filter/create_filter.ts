@@ -13,10 +13,10 @@ import {
   type PhraseFilter,
   type Filter,
 } from '@kbn/es-query';
+import { DefaultActionsSupportedValue } from '../types';
 
-export const isEmptyFilterValue = (
-  value: string[] | string | null | undefined
-): value is null | undefined | never[] => value == null || value.length === 0;
+export const isEmptyFilterValue = (value: Array<string | number | boolean>) =>
+  value.length === 0 || value.every((v) => v === '');
 
 const createExistsFilter = ({ key, negate }: { key: string; negate: boolean }): ExistsFilter => ({
   meta: { key, negate, type: FILTERS.EXISTS, value: 'exists' },
@@ -28,12 +28,17 @@ const createPhraseFilter = ({
   negate,
   value,
 }: {
-  value: string;
+  value: string | number | boolean;
   key: string;
   negate?: boolean;
 }): PhraseFilter => ({
-  meta: { key, negate, type: FILTERS.PHRASE, params: { query: value } },
-  query: { match_phrase: { [key]: { query: value } } },
+  meta: {
+    key,
+    negate,
+    type: FILTERS.PHRASE,
+    params: { query: value.toString() },
+  },
+  query: { match_phrase: { [key]: { query: value.toString() } } },
 });
 
 const createCombinedFilter = ({
@@ -41,7 +46,7 @@ const createCombinedFilter = ({
   key,
   negate,
 }: {
-  values: string[];
+  values: DefaultActionsSupportedValue;
   key: string;
   negate: boolean;
 }): CombinedFilter => ({
@@ -60,18 +65,16 @@ export const createFilter = ({
   negate,
 }: {
   key: string;
-  value: string[] | string | null | undefined;
+  value: DefaultActionsSupportedValue;
   negate: boolean;
 }): Filter => {
-  if (isEmptyFilterValue(value)) {
+  if (value.length === 0) {
     return createExistsFilter({ key, negate });
   }
-  if (Array.isArray(value)) {
-    if (value.length > 1) {
-      return createCombinedFilter({ key, negate, values: value });
-    } else {
-      return createPhraseFilter({ key, negate, value: value[0] });
-    }
+
+  if (value.length > 1) {
+    return createCombinedFilter({ key, negate, values: value });
+  } else {
+    return createPhraseFilter({ key, negate, value: value[0] });
   }
-  return createPhraseFilter({ key, negate, value });
 };

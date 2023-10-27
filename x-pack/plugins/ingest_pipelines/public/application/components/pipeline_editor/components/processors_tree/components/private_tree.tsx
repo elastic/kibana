@@ -7,7 +7,9 @@
 
 import React, { FunctionComponent, MutableRefObject, useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { AutoSizer, List, WindowScroller } from 'react-virtualized';
+import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
+import List from 'react-virtualized/dist/commonjs/List';
+import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
 
 import { DropSpecialLocations } from '../../../constants';
 import { ProcessorInternal, ProcessorSelector } from '../../../types';

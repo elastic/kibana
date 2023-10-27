@@ -14,18 +14,22 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
+import { deleteConnectorById } from '@kbn/search-connectors';
+import {
+  fetchConnectorByIndexName,
+  fetchConnectors,
+} from '@kbn/search-connectors/lib/fetch_connectors';
+
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type { AttachMlInferencePipelineResponse } from '../../../common/types/pipelines';
 
-import { deleteConnectorById } from '../../lib/connectors/delete_connector';
-
-import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices, fetchSearchIndices } from '../../lib/indices/fetch_indices';
@@ -43,6 +47,7 @@ import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
+import { getIndexPipelineParameters } from '../../lib/pipelines/get_index_pipeline';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { revertCustomPipeline } from '../../lib/pipelines/revert_custom_pipeline';
@@ -51,6 +56,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
+  isNotFoundException,
   isPipelineIsInUseException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
@@ -110,7 +116,7 @@ export function registerIndexRoutes({
         from,
         size
       );
-      const connectors = await fetchConnectors(client, indexNames);
+      const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
       const crawlers = await fetchCrawlers(client, indexNames);
       const enrichedIndices = indices.map((index) => ({
         ...index,
@@ -183,7 +189,7 @@ export function registerIndexRoutes({
 
       try {
         const crawler = await fetchCrawlerByIndexName(client, indexName);
-        const connector = await fetchConnectorByIndexName(client, indexName);
+        const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
 
         if (crawler) {
           const crawlerRes = await enterpriseSearchRequestHandler.createRequest({
@@ -196,10 +202,11 @@ export function registerIndexRoutes({
         }
 
         if (connector) {
-          await deleteConnectorById(client, connector.id);
+          await deleteConnectorById(client.asCurrentUser, connector.id);
         }
 
         await deleteIndexPipelines(client, indexName);
+        await deleteAccessControlIndex(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 
@@ -338,7 +345,7 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
       const [defaultPipeline, customPipelines] = await Promise.all([
-        getPipeline(DEFAULT_PIPELINE_NAME, client),
+        getPipeline(DEFAULT_PIPELINE_NAME, client).catch(() => ({})),
         getCustomPipelines(indexName, client),
       ]);
       return response.ok({
@@ -346,6 +353,26 @@ export function registerIndexRoutes({
           ...defaultPipeline,
           ...customPipelines,
         },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipeline_parameters',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const body = await getIndexPipelineParameters(indexName, client);
+      return response.ok({
+        body,
         headers: { 'content-type': 'application/json' },
       });
     })
@@ -367,7 +394,7 @@ export function registerIndexRoutes({
         savedObjects: { client: savedObjectsClient },
       } = await context.core;
       const trainedModelsProvider = ml
-        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        ? ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
       const mlInferencePipelineProcessorConfigs = await fetchMlInferencePipelineProcessors(
@@ -391,22 +418,12 @@ export function registerIndexRoutes({
           indexName: schema.string(),
         }),
         body: schema.object({
-          destination_field: schema.maybe(schema.nullable(schema.string())),
           field_mappings: schema.maybe(
             schema.arrayOf(
               schema.object({ sourceField: schema.string(), targetField: schema.string() })
             )
           ),
-          inference_config: schema.maybe(
-            schema.object({
-              zero_shot_classification: schema.maybe(
-                schema.object({
-                  labels: schema.arrayOf(schema.string()),
-                })
-              ),
-            })
-          ),
-          model_id: schema.maybe(schema.string()),
+          model_id: schema.string(),
           pipeline_definition: schema.maybe(
             schema.object({
               description: schema.maybe(schema.string()),
@@ -415,7 +432,6 @@ export function registerIndexRoutes({
             })
           ),
           pipeline_name: schema.string(),
-          source_field: schema.maybe(schema.string()),
         }),
       },
     },
@@ -427,40 +443,8 @@ export function registerIndexRoutes({
         model_id: modelId,
         pipeline_name: pipelineName,
         pipeline_definition: pipelineDefinition,
-        source_field: sourceField,
-        destination_field: destinationField,
-        inference_config: inferenceConfig,
         field_mappings: fieldMappings,
       } = request.body;
-
-      // additional validations
-      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField || modelId)) {
-        return createError({
-          errorCode: ErrorCode.PARAMETER_CONFLICT,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError',
-            {
-              defaultMessage:
-                'pipeline_definition and field_mappings should only be provided if source_field and destination_field and model_id are not provided',
-            }
-          ),
-          response,
-          statusCode: 400,
-        });
-      } else if (!((pipelineDefinition && fieldMappings) || (sourceField && modelId))) {
-        return createError({
-          errorCode: ErrorCode.PARAMETER_CONFLICT,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterMissingError',
-            {
-              defaultMessage:
-                'either pipeline_definition AND fieldMappings or source_field AND model_id must be provided',
-            }
-          ),
-          response,
-          statusCode: 400,
-        });
-      }
 
       try {
         // Create the sub-pipeline for inference
@@ -469,10 +453,7 @@ export function registerIndexRoutes({
           pipelineName,
           pipelineDefinition,
           modelId,
-          sourceField,
-          destinationField,
           fieldMappings,
-          inferenceConfig,
           client.asCurrentUser
         );
         return response.ok({
@@ -597,7 +578,10 @@ export function registerIndexRoutes({
         });
       }
 
-      const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+      const connector = await fetchConnectorByIndexName(
+        client.asCurrentUser,
+        request.body.index_name
+      );
 
       if (connector) {
         return createError({
@@ -948,6 +932,47 @@ export function registerIndexRoutes({
         body: pipelines,
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/pipelines/{pipelineName}',
+      validate: {
+        params: schema.object({
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const pipeline = await getPipeline(pipelineName, client);
+        return response.ok({
+          body: pipeline,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.PIPELINE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.indices.pipelines.pipelineNotFoundError',
+              {
+                defaultMessage: 'The pipeline {pipelineName} does not exist',
+                values: {
+                  pipelineName,
+                },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
     })
   );
 

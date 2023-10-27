@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
+import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+
+import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
 
 export interface TestData {
   testName: string;
   esArchive?: string;
-  dataGenerator?: string;
-  requestBody: ApiExplainLogRateSpikes['body'];
+  dataGenerator?: LogRateAnalysisDataGenerator;
+  requestBody: AiopsApiLogRateAnalysis['body'];
   expected: {
     chunksLength: number;
     chunksLengthGroupOnly: number;

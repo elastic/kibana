@@ -8,6 +8,8 @@
 import { omit, sortBy } from 'lodash';
 import expect from '@kbn/expect';
 import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { INSTALLED_VERSION } from '../services/private_location_test_service';
+import { commonVars } from './test_project_monitor_policy';
 
 interface PolicyProps {
   name?: string;
@@ -29,7 +31,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     version: 'WzE2MjYsMV0=',
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
-    package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.1' },
+    package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
     inputs: [
@@ -55,6 +57,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
               'service.name': { type: 'text' },
               timeout: { type: 'text' },
               proxy_url: { type: 'text' },
+              processors: { type: 'yaml' },
               proxy_use_local_resolver: { value: false, type: 'bool' },
               tags: { type: 'yaml' },
               'check.send': { type: 'text' },
@@ -67,11 +70,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
               'ssl.supported_protocols': { type: 'yaml' },
               location_name: { value: 'Fleet managed', type: 'text' },
               id: { type: 'text' },
-              config_id: { type: 'text' },
-              run_once: { value: false, type: 'bool' },
               origin: { type: 'text' },
-              'monitor.project.id': { type: 'text' },
-              'monitor.project.name': { type: 'text' },
               ipv4: { type: 'bool', value: true },
               ipv6: { type: 'bool', value: true },
               mode: { type: 'text' },
@@ -104,11 +103,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
               tags: { type: 'yaml' },
               location_name: { value: 'Fleet managed', type: 'text' },
               id: { type: 'text' },
-              config_id: { type: 'text' },
-              run_once: { value: false, type: 'bool' },
               origin: { type: 'text' },
-              'monitor.project.id': { type: 'text' },
-              'monitor.project.name': { type: 'text' },
               ipv4: { type: 'bool', value: true },
               ipv6: { type: 'bool', value: true },
               mode: { type: 'text' },
@@ -149,6 +144,7 @@ export const getHttpInput = ({
     timeout: { type: 'text' },
     max_redirects: { type: 'integer' },
     proxy_url: { type: 'text' },
+    processors: { type: 'yaml' },
     proxy_headers: { type: 'yaml' },
     tags: { type: 'yaml' },
     username: { type: 'text' },
@@ -172,12 +168,9 @@ export const getHttpInput = ({
     'ssl.supported_protocols': { type: 'yaml' },
     location_id: { value: 'fleet_managed', type: 'text' },
     location_name: { value: 'Fleet managed', type: 'text' },
+    ...commonVars,
     id: { type: 'text' },
-    config_id: { type: 'text' },
-    run_once: { value: false, type: 'bool' },
     origin: { type: 'text' },
-    'monitor.project.id': { type: 'text' },
-    'monitor.project.name': { type: 'text' },
     ipv4: { type: 'bool', value: true },
     ipv6: { type: 'bool', value: true },
     mode: { type: 'text' },
@@ -190,17 +183,33 @@ export const getHttpInput = ({
     },
     enabled: { value: true, type: 'bool' },
     type: { value: 'http', type: 'text' },
-    name: { value: name, type: 'text' },
+    name: { value: JSON.stringify(name), type: 'text' },
     schedule: { value: '"@every 5m"', type: 'text' },
-    urls: { value: 'https://nextjs-test-synthetics.vercel.app/api/users', type: 'text' },
-    'service.name': { value: '', type: 'text' },
+    urls: { value: '"https://nextjs-test-synthetics.vercel.app/api/users"', type: 'text' },
+    'service.name': { value: null, type: 'text' },
     timeout: { value: '3ms', type: 'text' },
     max_redirects: { value: '3', type: 'integer' },
-    proxy_url: { value: proxyUrl ?? 'http://proxy.com', type: 'text' },
+    processors: {
+      type: 'yaml',
+      value: JSON.stringify([
+        {
+          add_fields: {
+            fields: {
+              'monitor.fleet_managed': true,
+              config_id: id,
+              'monitor.project.name': projectId,
+              'monitor.project.id': projectId,
+            },
+            target: '',
+          },
+        },
+      ]),
+    },
+    proxy_url: { value: proxyUrl ?? '"http://proxy.com"', type: 'text' },
     proxy_headers: { value: null, type: 'yaml' },
     tags: { value: '["tag1","tag2"]', type: 'yaml' },
-    username: { value: 'test-username', type: 'text' },
-    password: { value: 'test', type: 'password' },
+    username: { value: '"test-username"', type: 'text' },
+    password: { value: '"test"', type: 'password' },
     'response.include_headers': { value: true, type: 'bool' },
     'response.include_body': { value: 'never', type: 'text' },
     'response.include_body_max_bytes': { value: '1024', type: 'text' },
@@ -231,13 +240,13 @@ export const getHttpInput = ({
       type: 'text',
       value: location.id ?? 'aaa3c150-f94d-11ed-9895-d36d5472fafd',
     },
-    location_name: { value: location.name ?? 'Test private location 0', type: 'text' },
-    id: { value: id, type: 'text' },
-    config_id: { value: id, type: 'text' },
-    run_once: { value: false, type: 'bool' },
+    location_name: {
+      value: JSON.stringify(location.name) ?? '"Test private location 0"',
+      type: 'text',
+    },
+    ...commonVars,
+    id: { value: JSON.stringify(id), type: 'text' },
     origin: { value: projectId ? 'project' : 'ui', type: 'text' },
-    'monitor.project.id': { type: 'text', value: projectId ?? null },
-    'monitor.project.name': { type: 'text', value: projectId ?? null },
     ipv4: { type: 'bool', value: true },
     ipv6: { type: 'bool', value: true },
     mode: { type: 'text', value: 'any' },
@@ -256,6 +265,7 @@ export const getHttpInput = ({
     schedule: '@every 5m',
     timeout: '3ms',
     max_redirects: 3,
+    max_attempts: 2,
     proxy_url: proxyUrl ?? 'http://proxy.com',
     tags: ['tag1', 'tag2'],
     username: 'test-username',
@@ -288,6 +298,9 @@ export const getHttpInput = ({
           fields: {
             config_id: id,
             'monitor.fleet_managed': true,
+            ...(projectId
+              ? { 'monitor.project.id': projectId, 'monitor.project.name': projectId }
+              : {}),
           },
           target: '',
         },
@@ -418,11 +431,7 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
         },
         location_name: { value: 'Test private location 0', type: 'text' },
         id: { value: id, type: 'text' },
-        config_id: { value: id, type: 'text' },
-        run_once: { value: false, type: 'bool' },
         origin: { value: 'ui', type: 'text' },
-        'monitor.project.id': { value: projectId ?? null, type: 'text' },
-        'monitor.project.name': { value: projectId ?? null, type: 'text' },
       }
     : {
         __ui: { type: 'yaml' },
@@ -457,11 +466,7 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
         location_name: { value: 'Fleet managed', type: 'text' },
         location_id: { value: 'Fleet managed', type: 'text' },
         id: { type: 'text' },
-        config_id: { type: 'text' },
-        run_once: { value: false, type: 'bool' },
         origin: { type: 'text' },
-        'monitor.project.id': { type: 'text' },
-        'monitor.project.name': { type: 'text' },
       };
 
   return {
@@ -471,30 +476,14 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
     streams: [
       {
         enabled: true,
-        data_stream: {
-          type: 'synthetics',
-          dataset: 'browser',
-          elasticsearch: {
-            privileges: {
-              indices: ['auto_configure', 'create_doc', 'read'],
-            },
-          },
-        },
+        data_stream: getDataStream('browser'),
         vars: browserVars,
         id: 'synthetics/browser-browser-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         compiled_stream: compiledBrowser,
       },
       {
         enabled: true,
-        data_stream: {
-          type: 'synthetics',
-          dataset: 'browser.network',
-          elasticsearch: {
-            privileges: {
-              indices: ['auto_configure', 'create_doc', 'read'],
-            },
-          },
-        },
+        data_stream: getDataStream('browser.network'),
         id: 'synthetics/browser-browser.network-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         compiled_stream: {
           processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
@@ -502,15 +491,7 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
       },
       {
         enabled: true,
-        data_stream: {
-          type: 'synthetics',
-          dataset: 'browser.screenshot',
-          elasticsearch: {
-            privileges: {
-              indices: ['auto_configure', 'create_doc', 'read'],
-            },
-          },
-        },
+        data_stream: getDataStream('browser.screenshot'),
         id: 'synthetics/browser-browser.screenshot-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         compiled_stream: {
           processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
@@ -519,6 +500,16 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
     ],
   };
 };
+
+export const getDataStream = (dataset: string) => ({
+  dataset,
+  type: 'synthetics',
+  elasticsearch: {
+    privileges: {
+      indices: ['auto_configure', 'create_doc', 'read'],
+    },
+  },
+});
 
 export const omitIds = (policy: PackagePolicy) => {
   policy.inputs = sortBy(policy.inputs, 'type');

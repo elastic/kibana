@@ -12,19 +12,18 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DOC_TABLE_LEGACY } from '../../../../../common';
+import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 
 async function saveDataSource({
-  navigateTo,
   savedSearch,
   saveOptions,
   services,
   state,
   navigateOrReloadSavedSearch,
 }: {
-  navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
@@ -45,7 +44,7 @@ async function saveDataSource({
       });
       if (navigateOrReloadSavedSearch) {
         if (id !== prevSavedSearchId) {
-          navigateTo(`/view/${encodeURIComponent(id)}`);
+          services.locator.navigate({ savedSearchId: id });
         } else {
           // Update defaults so that "reload saved query" functions correctly
           state.actions.undoSavedSearchChanges();
@@ -78,14 +77,12 @@ async function saveDataSource({
 }
 
 export async function onSaveSearch({
-  navigateTo,
   savedSearch,
   services,
   state,
   onClose,
   onSaveCb,
 }: {
-  navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: DiscoverStateContainer;
@@ -114,6 +111,7 @@ export async function onSaveSearch({
     const currentTitle = savedSearch.title;
     const currentTimeRestore = savedSearch.timeRestore;
     const currentRowsPerPage = savedSearch.rowsPerPage;
+    const currentSampleSize = savedSearch.sampleSize;
     const currentDescription = savedSearch.description;
     const currentTags = savedSearch.tags;
     savedSearch.title = newTitle;
@@ -122,6 +120,15 @@ export async function onSaveSearch({
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
       : state.appState.getState().rowsPerPage;
+
+    // save the custom value or reset it if it's invalid
+    const appStateSampleSize = state.appState.getState().sampleSize;
+    const allowedSampleSize = getAllowedSampleSize(appStateSampleSize, uiSettings);
+    savedSearch.sampleSize =
+      appStateSampleSize && allowedSampleSize === appStateSampleSize
+        ? appStateSampleSize
+        : undefined;
+
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
@@ -139,7 +146,6 @@ export async function onSaveSearch({
     const response = await saveDataSource({
       saveOptions,
       services,
-      navigateTo,
       savedSearch,
       state,
       navigateOrReloadSavedSearch,
@@ -149,6 +155,7 @@ export async function onSaveSearch({
       savedSearch.title = currentTitle;
       savedSearch.timeRestore = currentTimeRestore;
       savedSearch.rowsPerPage = currentRowsPerPage;
+      savedSearch.sampleSize = currentSampleSize;
       savedSearch.description = currentDescription;
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;

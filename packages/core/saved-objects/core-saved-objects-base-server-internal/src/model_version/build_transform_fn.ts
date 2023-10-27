@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { merge as lodashMerge, unset } from 'lodash';
 import type {
   SavedObjectsModelChange,
   SavedObjectModelTransformationFn,
+  SavedObjectsModelUnsafeTransformChange,
+  SavedObjectsModelDataBackfillChange,
+  SavedObjectsModelDataRemovalChange,
 } from '@kbn/core-saved-objects-server';
 
 /**
@@ -20,10 +24,44 @@ export const buildModelVersionTransformFn = (
   const transformFns: SavedObjectModelTransformationFn[] = [];
   modelChanges.forEach((change) => {
     if (change.type === 'data_backfill') {
-      transformFns.push(change.transform);
+      transformFns.push(dataBackfillChangeToTransformFn(change));
+    }
+    if (change.type === 'data_removal') {
+      transformFns.push(dataRemovalChangeToTransformFn(change));
+    }
+    if (change.type === 'unsafe_transform') {
+      transformFns.push(unsafeTransformChangeToTransformFn(change));
     }
   });
   return mergeTransformFunctions(transformFns);
+};
+
+export const dataRemovalChangeToTransformFn = (
+  change: SavedObjectsModelDataRemovalChange
+): SavedObjectModelTransformationFn => {
+  return (document, context) => {
+    const attributes = document.attributes;
+    change.removedAttributePaths.forEach((path) => {
+      unset(attributes, path);
+    });
+    return { document };
+  };
+};
+
+export const dataBackfillChangeToTransformFn = (
+  change: SavedObjectsModelDataBackfillChange
+): SavedObjectModelTransformationFn => {
+  return (document, context) => {
+    const result = change.backfillFn(document, context);
+    const mergedAttributes = lodashMerge({}, document.attributes, result.attributes ?? {});
+    return { document: { ...document, attributes: mergedAttributes } };
+  };
+};
+
+export const unsafeTransformChangeToTransformFn = (
+  change: SavedObjectsModelUnsafeTransformChange
+): SavedObjectModelTransformationFn => {
+  return change.transformFn;
 };
 
 const mergeTransformFunctions = (

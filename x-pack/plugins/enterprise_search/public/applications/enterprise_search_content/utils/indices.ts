@@ -9,8 +9,9 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { SyncStatus, ConnectorStatus } from '@kbn/search-connectors';
+
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
-import { SyncStatus, ConnectorStatus } from '../../../../common/types/connectors';
 import {
   ConnectorIndex,
   CrawlerIndex,
@@ -106,6 +107,17 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
 
 export function getLastUpdated(index?: ElasticsearchIndexWithIngestion): string | null {
   return isConnectorIndex(index) ? index.connector.last_synced ?? 'never' : null;
+}
+
+export function getContentExtractionDisabled(index?: ElasticsearchIndexWithIngestion): boolean {
+  if (!index) return false;
+  if (isConnectorIndex(index)) {
+    const contentExtractionDisabled =
+      index.connector.configuration?.use_text_extraction_service?.value;
+    return !!contentExtractionDisabled;
+  }
+
+  return false;
 }
 
 export function indexToViewIndex(index: ElasticsearchIndex): ConnectorViewIndex;

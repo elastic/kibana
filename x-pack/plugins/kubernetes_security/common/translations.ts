@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BETA = i18n.translate('xpack.kubernetesSecurity.beta', {
-  defaultMessage: 'Beta',
-});
-
 export const SEARCH_GROUP_CLUSTER = i18n.translate('xpack.kubernetesSecurity.searchGroup.cluster', {
   defaultMessage: 'Cluster',
 });

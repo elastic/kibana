@@ -35,7 +35,7 @@ const testBoxes = [
     description:
       'Get deeper visibility into your applications with extensive support for popular languages, OpenTelemetry, and distributed tracing.',
     addTitle: 'Add data',
-    addLink: '/app/home#/tutorial/apm',
+    addLink: '/app/apm/tutorial',
     learnMoreLink: 'http://lean-more-link-example.com',
     goToAppTitle: 'Show services inventory',
     goToAppLink: '/app/apm/services',
@@ -75,7 +75,7 @@ const testBoxes = [
     description:
       'Collect, measure, and analyze performance data that reflects real-world user experiences.',
     addTitle: 'Add data',
-    addLink: '/app/home#/tutorial/apm',
+    addLink: '/app/apm/tutorial',
     learnMoreLink: 'http://lean-more-link-example.com',
     goToAppTitle: 'Show dashboard',
     goToAppLink: '/app/ux',

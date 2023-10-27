@@ -8,9 +8,9 @@
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
-import { RUNTIME_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
@@ -34,18 +34,6 @@ export interface Field {
   type: KBN_FIELD_TYPES | TIME_SERIES_METRIC_TYPES.COUNTER;
 }
 
-type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-
-export interface RuntimeField {
-  type: RuntimeType;
-  script?:
-    | string
-    | {
-        source: string;
-      };
-}
-
-export type RuntimeMappings = Record<string, RuntimeField>;
 export interface StepDefineExposedState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;

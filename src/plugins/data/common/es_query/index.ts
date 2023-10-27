@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getEsQueryConfig } from './get_es_query_config';
+export { getEsQueryConfig } from '@kbn/data-service/src/es_query';

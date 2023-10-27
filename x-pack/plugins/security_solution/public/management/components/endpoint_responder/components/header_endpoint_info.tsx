@@ -9,10 +9,10 @@ import React, { memo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiSkeletonText,
-  EuiToolTip,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -88,7 +88,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
                 id="xpack.securitySolution.responder.header.lastSeen"
                 defaultMessage="Last seen {date}"
                 values={{
-                  date: <FormattedRelative value={endpointDetails.metadata['@timestamp']} />,
+                  date: <FormattedRelative value={endpointDetails.last_checkin} />,
                 }}
               />
             </EuiText>

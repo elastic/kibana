@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { UserName } from './user_name';

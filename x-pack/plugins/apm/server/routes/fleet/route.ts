@@ -13,6 +13,7 @@ import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
+import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { createInternalESClientWithContext } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -29,6 +30,14 @@ import {
   runMigrationCheck,
   RunMigrationCheckResponse,
 } from './run_migration_check';
+
+function throwNotFoundIfFleetMigrationNotAvailable(
+  featureFlags: ApmFeatureFlags
+): void {
+  if (!featureFlags.migrationToFleetAvailable) {
+    throw Boom.notFound();
+  }
+}
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_apm_policies',
@@ -60,7 +69,7 @@ const fleetAgentsRoute = createApmServerRoute({
 });
 
 const saveApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/fleet/apm_server_schema 2023-05-22',
+  endpoint: 'POST /api/apm/fleet/apm_server_schema 2023-10-31',
   options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({
@@ -68,6 +77,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<void> => {
+    throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { params, logger, core } = resources;
     const coreStart = await core.start();
     const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
@@ -87,6 +97,7 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
+    throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { context } = resources;
     const savedObjectsClient = (await context.core).savedObjects.client;
     return {
@@ -100,6 +111,7 @@ const getMigrationCheckRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<RunMigrationCheckResponse> => {
     const { core, plugins, context, config, request } = resources;
+    throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
 
     const { fleet, security } = plugins;
 
@@ -141,11 +153,13 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       coreStart,
       fleetPluginStart,
       securityPluginStart,
+      apmIndices,
     ] = await Promise.all([
       (await context.core).savedObjects.client,
       resources.core.start(),
       plugins.fleet.start(),
       plugins.security.start(),
+      resources.getApmIndices(),
     ]);
 
     const esClient = coreStart.elasticsearch.client.asScoped(
@@ -162,7 +176,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      config: resources.config,
+      apmIndices,
     });
 
     const cloudApmPackagePolicy = await createCloudApmPackgePolicy({

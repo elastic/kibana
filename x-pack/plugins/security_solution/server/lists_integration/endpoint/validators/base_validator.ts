@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -19,6 +20,7 @@ import {
   isArtifactByPolicy,
 } from '../../../../common/endpoint/service/artifacts';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 import type { FeatureKeys } from '../../../endpoint/services/feature_usage/service';
 
 export const BasicEndpointExceptionDataSchema = schema.object(
@@ -71,6 +73,14 @@ export class BaseValidator {
       (!this.isItemByPolicy(item) && !featureKey.endsWith('_BY_POLICY'))
     ) {
       this.endpointAppContext.getFeatureUsageService().notifyUsage(featureKey);
+    }
+  }
+
+  protected async validateHasEndpointExceptionsPrivileges(
+    privilege: keyof EndpointAuthz
+  ): Promise<void> {
+    if (!(await this.endpointAuthzPromise)[privilege]) {
+      throw new EndpointExceptionsValidationError('Endpoint exceptions authorization failure', 403);
     }
   }
 

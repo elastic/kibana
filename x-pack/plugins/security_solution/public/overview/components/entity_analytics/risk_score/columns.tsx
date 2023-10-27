@@ -7,16 +7,17 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
-import { RiskScore } from '../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
 import { CELL_ACTIONS_TELEMETRY } from '../../../../explore/components/risk_score/constants';
 import type {
   HostRiskScore,
+  Maybe,
   RiskSeverity,
   UserRiskScore,
 } from '../../../../../common/search_strategy';
@@ -29,6 +30,7 @@ import {
   SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -54,10 +56,9 @@ export const getRiskScoreColumns = (
           <>
             <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
             <StyledCellActions
-              field={{
-                name: 'host.name',
+              data={{
                 value: entityName,
-                type: 'keyword',
+                field: 'host.name',
               }}
               triggerId={SecurityCellActionsTrigger.DEFAULT}
               mode={CellActionsMode.INLINE}
@@ -75,10 +76,9 @@ export const getRiskScoreColumns = (
           <>
             <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
             <StyledCellActions
-              field={{
-                name: 'user.name',
+              data={{
                 value: entityName,
-                type: 'keyword',
+                field: 'user.name',
               }}
               triggerId={SecurityCellActionsTrigger.DEFAULT}
               mode={CellActionsMode.INLINE}
@@ -89,6 +89,21 @@ export const getRiskScoreColumns = (
             />
           </>
         );
+      }
+      return getEmptyTagValue();
+    },
+  },
+
+  {
+    field: RiskScoreFields.timestamp,
+    name: i18n.LAST_UPDATED,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: true,
+    width: '20%',
+    render: (lastSeen: Maybe<string>) => {
+      if (lastSeen != null) {
+        return <FormattedRelativePreferenceDate value={lastSeen} />;
       }
       return getEmptyTagValue();
     },
@@ -116,20 +131,13 @@ export const getRiskScoreColumns = (
   {
     field:
       riskEntity === RiskScoreEntity.host ? RiskScoreFields.hostRisk : RiskScoreFields.userRisk,
-    width: '30%',
-    name: (
-      <EuiToolTip content={i18n.ENTITY_RISK_TOOLTIP(riskEntity)}>
-        <>
-          {i18n.ENTITY_RISK_CLASSIFICATION(riskEntity)}
-          <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-        </>
-      </EuiToolTip>
-    ),
+    width: '25%',
+    name: i18n.ENTITY_RISK_LEVEL(riskEntity),
     truncateText: false,
     mobileOptions: { show: true },
     render: (risk: RiskSeverity) => {
       if (risk != null) {
-        return <RiskScore severity={risk} />;
+        return <RiskScoreLevel severity={risk} />;
       }
       return getEmptyTagValue();
     },
@@ -155,11 +163,9 @@ export const getRiskScoreColumns = (
           <FormattedCount count={alertCount} />
         </EuiLink>
         <StyledCellActions
-          field={{
-            name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+          data={{
             value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
-            type: 'keyword',
-            aggregatable: true,
+            field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
           }}
           mode={CellActionsMode.INLINE}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}

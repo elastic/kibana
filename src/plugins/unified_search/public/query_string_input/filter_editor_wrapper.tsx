@@ -16,6 +16,7 @@ import type { IUnifiedSearchPluginServices } from '../types';
 import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 interface QueryDslFilter {
   queryDsl: string;
@@ -32,6 +33,7 @@ interface FilterEditorWrapperProps {
   onFiltersUpdated?: (filters: Filter[]) => void;
   onLocalFilterUpdate?: (filter: Filter | QueryDslFilter) => void;
   onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
@@ -44,6 +46,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   onFiltersUpdated,
   onLocalFilterUpdate,
   onLocalFilterCreate,
+  suggestionsAbstraction,
 }: FilterEditorWrapperProps) {
   const fetchIndexAbortController = useRef<AbortController>();
 
@@ -114,6 +117,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
           onLocalFilterCreate={onLocalFilterCreate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={filtersForSuggestions}
+          suggestionsAbstraction={suggestionsAbstraction}
           docLinks={docLinks}
         />
       )}

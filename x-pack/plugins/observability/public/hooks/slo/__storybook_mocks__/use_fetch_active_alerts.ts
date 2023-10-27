@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { UseFetchActiveAlerts } from '../use_fetch_active_alerts';
+import { ActiveAlerts, UseFetchActiveAlerts } from '../use_fetch_active_alerts';
 
 export const useFetchActiveAlerts = ({
-  sloIds = [],
+  sloIdsAndInstanceIds = [],
 }: {
-  sloIds: string[];
+  sloIdsAndInstanceIds: Array<[string, string]>;
 }): UseFetchActiveAlerts => {
+  const data = sloIdsAndInstanceIds.reduce(
+    (acc, item, index) => ({
+      ...acc,
+      ...(index % 2 === 0 && { [item.join('|')]: 2 }),
+    }),
+    {}
+  );
   return {
     isLoading: false,
     isSuccess: false,
     isError: false,
-    data: sloIds.reduce(
-      (acc, sloId, index) => ({
-        ...acc,
-        ...(index % 2 === 0 && { [sloId]: { count: 2, ruleIds: ['rule-1', 'rule-2'] } }),
-      }),
-      {}
-    ),
+    data: new ActiveAlerts(data),
   };
 };

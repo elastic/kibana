@@ -19,7 +19,7 @@ import { applicationServiceFactory } from './application/application_service';
 import { chromeServiceFactory } from './chrome/chrome_service';
 import { coreContextServiceFactory } from './core_context/core_context_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
-import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage_service';
+import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup_service';
 import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links_service';
@@ -38,22 +38,25 @@ import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_ser
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 import { analyticsServiceFactory } from './analytics/analytics_service';
-import { dashboardSavedObjectServiceFactory } from './dashboard_saved_object/dashboard_saved_object_service';
 import { customBrandingServiceFactory } from './custom_branding/custom_branding_service';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
+import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
+import { contentManagementServiceFactory } from './content_management/content_management_service';
+import { serverlessServiceFactory } from './serverless/serverless_service';
+import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
-  dashboardSavedObject: new PluginServiceProvider(dashboardSavedObjectServiceFactory, [
-    'dashboardSessionStorage',
+  dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
     'savedObjectsTagging',
     'initializerContext',
+    'dashboardBackup',
     'screenshotMode',
     'notifications',
     'embeddable',
     'spaces',
     'data',
   ]),
-  dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory, [
+  dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory, [
     'notifications',
     'spaces',
   ]),
@@ -82,6 +85,9 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   customBranding: new PluginServiceProvider(customBrandingServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
+  contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
+  serverless: new PluginServiceProvider(serverlessServiceFactory),
+  noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

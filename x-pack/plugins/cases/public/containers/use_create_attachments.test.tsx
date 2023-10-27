@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CommentType } from '../../common/api';
+import { AttachmentType } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useCreateAttachments } from './use_create_attachments';
 import { basicCaseId } from './mock';
@@ -30,11 +30,10 @@ describe('useCreateAttachments', () => {
     addSuccess,
   });
 
-  const abortCtrl = new AbortController();
   const attachmentsWithoutOwner = [
     {
       comment: 'a comment',
-      type: CommentType.user as const,
+      type: AttachmentType.user as const,
     },
   ];
 
@@ -69,7 +68,7 @@ describe('useCreateAttachments', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(attachmentsWithOwner, request.caseId, abortCtrl.signal);
+    expect(spy).toHaveBeenCalledWith({ attachments: attachmentsWithOwner, caseId: request.caseId });
   });
 
   it('does not show a success toaster', async () => {

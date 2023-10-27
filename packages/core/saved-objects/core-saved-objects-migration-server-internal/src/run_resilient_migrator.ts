@@ -8,7 +8,10 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
@@ -17,7 +20,7 @@ import type {
   MigrationResult,
   IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { Defer } from './kibana_migrator_utils';
+import type { WaitGroup } from './kibana_migrator_utils';
 import type { TransformRawDocs } from './types';
 import { next } from './next';
 import { model } from './model';
@@ -25,6 +28,7 @@ import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import type { State } from './state';
+import type { AliasAction } from './actions';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we
@@ -48,8 +52,9 @@ export interface RunResilientMigratorParams {
   indexTypesMap: IndexTypesMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
-  readyToReindex: Defer<any>;
-  doneReindexing: Defer<any>;
+  readyToReindex: WaitGroup<void>;
+  doneReindexing: WaitGroup<void>;
+  updateRelocationAliases: WaitGroup<AliasAction[]>;
   logger: Logger;
   transformRawDocs: TransformRawDocs;
   coreMigrationVersionPerType: SavedObjectsMigrationVersion;
@@ -58,6 +63,7 @@ export interface RunResilientMigratorParams {
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 /**
@@ -76,6 +82,7 @@ export async function runResilientMigrator({
   preMigrationScript,
   readyToReindex,
   doneReindexing,
+  updateRelocationAliases,
   transformRawDocs,
   coreMigrationVersionPerType,
   migrationVersionPerType,
@@ -83,6 +90,7 @@ export async function runResilientMigrator({
   migrationsConfig,
   typeRegistry,
   docLinks,
+  esCapabilities,
 }: RunResilientMigratorParams): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
@@ -98,12 +106,19 @@ export async function runResilientMigrator({
     typeRegistry,
     docLinks,
     logger,
+    esCapabilities,
   });
   const migrationClient = client.child(MIGRATION_CLIENT_OPTIONS);
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(migrationClient, transformRawDocs, readyToReindex, doneReindexing),
+    next: next(
+      migrationClient,
+      transformRawDocs,
+      readyToReindex,
+      doneReindexing,
+      updateRelocationAliases
+    ),
     model,
     abort: async (state?: State) => {
       // At this point, we could reject this migrator's defers and unblock other migrators

@@ -39,6 +39,12 @@ const updateVerbs: Verbs = {
   past: 'updated',
 };
 
+const pushVerbs: Verbs = {
+  present: 'push',
+  progressive: 'pushing',
+  past: 'pushed',
+};
+
 const deleteVerbs: Verbs = {
   present: 'delete',
   progressive: 'deleting',
@@ -164,7 +170,7 @@ const CaseOperations = {
     ecsType: EVENT_TYPES.change,
     name: WriteOperations.PushCase as const,
     action: 'case_push',
-    verbs: updateVerbs,
+    verbs: pushVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
@@ -366,5 +372,13 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
+  [ReadOperations.GetCategories]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_categories_get',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
 };

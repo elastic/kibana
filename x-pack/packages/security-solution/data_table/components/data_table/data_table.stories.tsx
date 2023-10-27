@@ -7,10 +7,10 @@
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CellValueElementProps } from '@kbn/timelines-plugin/common';
+import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import { DragDropContext, DropResult, ResponderProvided } from '@hello-pangea/dnd';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -37,7 +37,7 @@ interface Props {
   cellActions?: Action[];
 }
 
-const StoryCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => (
+const StoryCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
   <>
     {getMappedNonEcsValue({
       data,
@@ -84,6 +84,7 @@ export const DataTable = () => {
     <StoryProviders>
       <DataTableComponent
         browserFields={{}}
+        getFieldSpec={() => undefined}
         data={mockTimelineData}
         id={TableId.test}
         renderCellValue={StoryCellRenderer}

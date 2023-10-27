@@ -5,32 +5,22 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
-import type { HttpStart } from '@kbn/core/public';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import { jsonSchemaProvider } from './json_schema';
-import { HttpService } from '../http_service';
 
-import { annotationsApiProvider } from './annotations';
-import { dataFrameAnalyticsApiProvider } from './data_frame_analytics';
-import { filtersApiProvider } from './filters';
-import { resultsApiProvider } from './results';
-import { jobsApiProvider } from './jobs';
-import { savedObjectsApiProvider } from './saved_objects';
-import { trainedModelsApiProvider } from './trained_models';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { HttpStart } from '@kbn/core/public';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   MlServerDefaults,
   MlServerLimits,
   MlNodeCount,
 } from '../../../../common/types/ml_server_info';
-
 import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import type {
-  BucketSpanEstimatorData,
-  ResetJobsResponse,
-} from '../../../../common/types/job_service';
+import type { BucketSpanEstimatorData } from '../../../../common/types/job_service';
 import type {
   Job,
   JobStats,
@@ -41,16 +31,32 @@ import type {
   ModelSnapshot,
   IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
-import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
 import type {
   DataRecognizerConfigResponse,
   Module,
   RecognizeResult,
 } from '../../../../common/types/modules';
-import { getHttp } from '../../util/dependency_cache';
-import type { RuntimeMappings } from '../../../../common/types/fields';
 import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
+
+import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
+import { getHttp } from '../../util/dependency_cache';
+
+import { HttpService } from '../http_service';
+
+import { jsonSchemaProvider } from './json_schema';
+import { annotationsApiProvider } from './annotations';
+import { dataFrameAnalyticsApiProvider } from './data_frame_analytics';
+import { filtersApiProvider } from './filters';
+import { resultsApiProvider } from './results';
+import { jobsApiProvider } from './jobs';
+import { savedObjectsApiProvider } from './saved_objects';
+import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
+
+export interface MlHasPrivilegesResponse {
+  hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
+  upgradeInProgress: boolean;
+}
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -198,14 +204,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
         path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/_update`,
         method: 'POST',
         body,
-        version: '1',
-      });
-    },
-
-    resetJob({ jobId }: { jobId: string }) {
-      return httpService.http<ResetJobsResponse>({
-        path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/_reset`,
-        method: 'POST',
         version: '1',
       });
     },
@@ -415,7 +413,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     hasPrivileges(obj: any) {
       const body = JSON.stringify(obj);
-      return httpService.http<any>({
+      return httpService.http<MlHasPrivilegesResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_has_privileges`,
         method: 'POST',
         body,
@@ -456,27 +454,36 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    recognizeIndex({ indexPatternTitle }: { indexPatternTitle: string }) {
+    recognizeIndex({
+      indexPatternTitle,
+      filter,
+    }: {
+      indexPatternTitle: string;
+      filter?: string[];
+    }) {
       return httpService.http<RecognizeResult[]>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/${indexPatternTitle}`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 
-    listDataRecognizerModules() {
+    listDataRecognizerModules(filter?: string[]) {
       return httpService.http<any>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/get_module`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 
-    getDataRecognizerModule({ moduleId }: { moduleId: string }) {
+    getDataRecognizerModule({ moduleId, filter }: { moduleId: string; filter?: string[] }) {
       return httpService.http<Module>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/${moduleId}`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 
@@ -781,6 +788,23 @@ export function mlApiServicesProvider(httpService: HttpService) {
       return httpService.http<any>({
         path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}`,
         method: 'DELETE',
+        version: '1',
+      });
+    },
+
+    reindexWithPipeline(pipelineName: string, sourceIndex: string, destinationIndex: string) {
+      return httpService.http<estypes.ReindexResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
+        method: 'POST',
+        body: JSON.stringify({
+          source: {
+            index: sourceIndex,
+          },
+          dest: {
+            index: destinationIndex,
+            pipeline: pipelineName,
+          },
+        }),
         version: '1',
       });
     },

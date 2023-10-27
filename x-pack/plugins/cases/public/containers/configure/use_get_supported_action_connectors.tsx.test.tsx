@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
-import { TestProviders } from '../../common/mock';
+import { noConnectorsCasePermission, TestProviders } from '../../common/mock';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import { useGetSupportedActionConnectors } from './use_get_supported_action_connectors';
 
@@ -58,6 +58,22 @@ describe('useConnectors', () => {
 
     const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    await waitForNextUpdate();
+
+    expect(spyOnFetchConnectors).not.toHaveBeenCalled();
+    expect(result.current.data).toEqual([]);
+  });
+
+  it('does not fetch connectors when the user does not has access to connectors', async () => {
+    const spyOnFetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
+    useApplicationCapabilitiesMock().actions = { crud: true, read: true };
+
+    const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
+      wrapper: ({ children }) => (
+        <TestProviders permissions={noConnectorsCasePermission()}>{children}</TestProviders>
+      ),
     });
 
     await waitForNextUpdate();

@@ -20,8 +20,6 @@ export const getEndpointAuthzInitialStateMock = (
 
       return mockPrivileges;
     }, {} as EndpointAuthz),
-    // this one is currently treated special in that everyone can un-isolate
-    canUnIsolateHost: true,
     ...overrides,
   };
 

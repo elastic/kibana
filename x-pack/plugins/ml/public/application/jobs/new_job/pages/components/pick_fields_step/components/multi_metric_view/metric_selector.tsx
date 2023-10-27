@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Field, AggFieldPair } from '../../../../../../../../../common/types/fields';
+import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
 
 interface Props {

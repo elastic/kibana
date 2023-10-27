@@ -6,6 +6,7 @@
  */
 
 import dateMath, { Unit } from '@kbn/datemath';
+import { TimeRange } from '@kbn/es-query';
 import { chain } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
@@ -306,4 +307,11 @@ function isDateInRange(date: string | number): boolean {
   } catch {
     return false;
   }
+}
+
+export function parseDateRange(dateRange: TimeRange) {
+  const from = dateMath.parse(dateRange.from)?.toISOString();
+  const to = dateMath.parse(dateRange.to, { roundUp: true })?.toISOString();
+
+  return { from, to };
 }

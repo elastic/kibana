@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { ConfigurationPatchRequest } from '../../../../common/api';
-import { CaseConfigureRequestParamsRt, decodeWithExcessOrThrow } from '../../../../common/api';
+import { CaseConfigureRequestParamsRt } from '../../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../../common/api';
 import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { configureApiV1 } from '../../../../common/types/api';
 
 export const patchCaseConfigureRoute = createCasesRoute({
   method: 'patch',
@@ -20,10 +21,14 @@ export const patchCaseConfigureRoute = createCasesRoute({
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const configuration = request.body as ConfigurationPatchRequest;
+      const configuration = request.body as configureApiV1.ConfigurationPatchRequest;
+      const res: configureApiV1.UpdateConfigureResponse = await client.configure.update(
+        params.configuration_id,
+        configuration
+      );
 
       return response.ok({
-        body: await client.configure.update(params.configuration_id, configuration),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

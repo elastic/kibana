@@ -21,23 +21,19 @@ const Subtext = styled.div`
 interface GetRowItemsWithActionsParams {
   values: string[] | null | undefined;
   fieldName: string;
-  fieldType?: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
   maxOverflow?: number;
-  aggregatable: boolean;
 }
 
 export const getRowItemsWithActions = ({
   values,
   fieldName,
-  fieldType = 'keyword',
   idPrefix,
   render,
   displayCount = 5,
   maxOverflow = 5,
-  aggregatable,
 }: GetRowItemsWithActionsParams): JSX.Element => {
   if (values != null && values.length > 0) {
     const visibleItems = values.slice(0, displayCount).map((value, index) => {
@@ -49,11 +45,9 @@ export const getRowItemsWithActions = ({
           visibleCellActions={5}
           showActionTooltips
           triggerId={SecurityCellActionsTrigger.DEFAULT}
-          field={{
-            name: fieldName,
+          data={{
             value,
-            type: fieldType,
-            aggregatable,
+            field: fieldName,
           }}
         >
           <>{render ? render(value) : defaultToEmptyTag(value)}</>
@@ -67,11 +61,9 @@ export const getRowItemsWithActions = ({
         <RowItemOverflow
           fieldName={fieldName}
           values={values}
-          fieldType={fieldType}
           idPrefix={idPrefix}
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
-          isAggregatable={aggregatable}
         />
       </>
     ) : (
@@ -84,8 +76,6 @@ export const getRowItemsWithActions = ({
 
 interface RowItemOverflowProps {
   fieldName: string;
-  fieldType: string;
-  isAggregatable?: boolean;
   values: string[];
   idPrefix: string;
   maxOverflowItems: number;
@@ -95,8 +85,6 @@ interface RowItemOverflowProps {
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   fieldName,
   values,
-  fieldType,
-  isAggregatable,
   idPrefix,
   maxOverflowItems = 5,
   overflowIndexStart = 5,
@@ -109,8 +97,6 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
             <MoreContainer
               fieldName={fieldName}
               idPrefix={idPrefix}
-              isAggregatable={isAggregatable}
-              fieldType={fieldType}
               values={values}
               overflowIndexStart={overflowIndexStart}
               moreMaxHeight="none"

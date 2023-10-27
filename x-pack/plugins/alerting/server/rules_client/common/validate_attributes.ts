@@ -7,7 +7,7 @@
 
 import { KueryNode } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash';
-import { alertMappings } from '../../saved_objects/mappings';
+import { alertMappings } from '../../../common/saved_objects/rules/mappings';
 
 const astFunctionType = ['is', 'range', 'nested'];
 

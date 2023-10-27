@@ -19,7 +19,7 @@ import {
 } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
-export function useMonitorList(query?: string) {
+export function useMonitorList() {
   const dispatch = useDispatch();
   const isInitialMount = useRef(true);
 
@@ -40,11 +40,11 @@ export function useMonitorList(query?: string) {
   // Periodically refresh
   useEffect(() => {
     if (!isInitialMount.current) {
-      dispatch(quietFetchMonitorListAction({ ...pageState, query }));
+      dispatch(quietFetchMonitorListAction({ ...pageState }));
     }
-    // specifically only want to run this on refreshInterval change on query change
+    // specifically only want to run this on refreshInterval change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh, query]);
+  }, [lastRefresh]);
 
   // On initial mount, load the page
   useDebounce(

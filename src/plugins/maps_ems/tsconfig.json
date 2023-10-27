@@ -9,6 +9,8 @@
     "@kbn/licensing-plugin",
     "@kbn/i18n",
     "@kbn/config-schema",
+    "@kbn/config",
+    "@kbn/core-http-common",
   ],
   "exclude": [
     "target/**/*",

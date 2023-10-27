@@ -17,7 +17,8 @@ import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
@@ -75,7 +76,7 @@ export const renderApp = ({
         <LegacyServicesProvider providers={services}>
           <presentationUtil.ContextProvider>
             <I18nProvider>
-              <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+              <KibanaThemeProvider theme={{ theme$: coreStart.theme.theme$ }}>
                 <Provider store={canvasStore}>
                   <App history={params.history} />
                 </Provider>
@@ -151,7 +152,7 @@ export const initializeCanvas = async (
     ],
     content: (domNode, { hideHelpMenu }) => {
       ReactDOM.render(
-        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+        <KibanaThemeProvider theme={{ theme$: coreStart.theme.theme$ }}>
           <Provider store={canvasStore}>
             <HelpMenu hideHelpMenu={hideHelpMenu} />
           </Provider>

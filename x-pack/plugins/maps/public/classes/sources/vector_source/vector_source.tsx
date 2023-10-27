@@ -109,13 +109,10 @@ export interface IVectorSource extends ISource {
   supportsJoins(): boolean;
 
   /*
-   * Vector layer avoids unnecessarily re-fetching source data.
-   * Use getSyncMeta to expose fields that require source data re-fetch when changed.
+   * Use getSyncMeta to expose source configuration changes that require source data re-fetch when changed.
    */
   getSyncMeta(dataFilters: DataFilters): object | null;
 
-  getFieldNames(): string[];
-  createField({ fieldName }: { fieldName: string }): IField;
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
@@ -141,20 +138,8 @@ export interface IVectorSource extends ISource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  getFieldNames(): string[] {
-    return [];
-  }
-
   isMvt() {
     return false;
-  }
-
-  createField({ fieldName }: { fieldName: string }): IField {
-    throw new Error('Not implemented');
-  }
-
-  getFieldByName(fieldName: string): IField | null {
-    return this.createField({ fieldName });
   }
 
   isFilterByMapBounds() {
@@ -178,6 +163,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async getFields(): Promise<IField[]> {
     return [];
+  }
+
+  getFieldByName(fieldName: string): IField | null {
+    throw new Error('Must implement VectorSource#getFieldByName');
   }
 
   async getLeftJoinFields(): Promise<IField[]> {

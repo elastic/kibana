@@ -48,7 +48,9 @@ describe('aggregateMappingAdditions', () => {
     const changes: SavedObjectsModelChange[] = [
       { type: 'mappings_addition', addedMappings: { foo: { type: 'text' } } },
       { type: 'mappings_deprecation', deprecatedMappings: [] },
-      { type: 'data_backfill', transform: jest.fn() },
+      { type: 'data_backfill', backfillFn: jest.fn() },
+      { type: 'unsafe_transform', transformFn: jest.fn() },
+      { type: 'data_removal', removedAttributePaths: [] },
     ];
     const output = aggregateMappingAdditions(changes);
     expect(output).toEqual({

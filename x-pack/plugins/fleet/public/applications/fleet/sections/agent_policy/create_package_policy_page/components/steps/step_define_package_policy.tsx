@@ -203,6 +203,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     }}
                     errors={validationResults?.vars?.[varName] ?? []}
                     forceShowErrors={submitAttempted}
+                    isEditPage={isEditPage}
                   />
                 </EuiFlexItem>
               );
@@ -352,6 +353,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           }}
                           errors={validationResults?.vars?.[varName] ?? []}
                           forceShowErrors={submitAttempted}
+                          isEditPage={isEditPage}
                         />
                       </EuiFlexItem>
                     );

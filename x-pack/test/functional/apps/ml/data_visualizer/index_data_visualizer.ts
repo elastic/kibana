@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
@@ -244,9 +244,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensMetricField.fieldName,
-            'legacyMtrVis'
+            'xyVisChart'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
           (f) => f.type === ML_JOB_FIELD_TYPES.KEYWORD
@@ -255,9 +255,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensNonMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensNonMetricField.fieldName,
-            'legacyMtrVis'
+            'xyVisChart'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
       });
     });

@@ -9,6 +9,7 @@ import querystring from 'querystring';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
+import { switchMap } from 'rxjs';
 
 import type {
   CapabilitiesSetup,
@@ -25,12 +26,6 @@ import type {
   PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 
-import { APPLICATION_PREFIX } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
-import { canRedirectRequest } from '../authentication';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
-import type { SpacesService } from '../plugin';
 import { Actions } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
@@ -49,6 +44,12 @@ import { ResetSessionPage } from './reset_session_page';
 import type { CheckPrivilegesWithRequest, CheckUserProfilesPrivileges } from './types';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
+import { APPLICATION_PREFIX } from '../../common/constants';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser } from '../../common/model';
+import { canRedirectRequest } from '../authentication';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import type { SpacesService } from '../plugin';
 
 export { Actions } from './actions';
 export type { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
@@ -209,18 +210,22 @@ export class AuthorizationService {
     validateFeaturePrivileges(allFeatures);
     validateReservedPrivileges(allFeatures);
 
-    this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
-      try {
-        await registerPrivilegesWithCluster(
-          this.logger,
-          this.privileges,
-          this.applicationName,
-          clusterClient
-        );
-      } catch (err) {
-        scheduleRetry();
-      }
-    });
+    this.statusSubscription = online$
+      .pipe(
+        switchMap(async ({ scheduleRetry }) => {
+          try {
+            await registerPrivilegesWithCluster(
+              this.logger,
+              this.privileges,
+              this.applicationName,
+              clusterClient
+            );
+          } catch (err) {
+            scheduleRetry();
+          }
+        })
+      )
+      .subscribe();
   }
 
   stop() {

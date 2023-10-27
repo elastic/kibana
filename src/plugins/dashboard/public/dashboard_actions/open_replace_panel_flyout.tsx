@@ -14,6 +14,7 @@ import type {
   EmbeddableInput,
   EmbeddableOutput,
 } from '@kbn/embeddable-plugin/public';
+import { tracksOverlays } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { ReplacePanelFlyout } from './replace_panel_flyout';
@@ -33,12 +34,18 @@ export async function openReplacePanelFlyout(options: {
     overlays: { openFlyout },
   } = pluginServices.getServices();
 
+  // send the overlay ref to the root embeddable if it is capable of tracking overlays
+  const rootEmbeddable = embeddable.getRoot();
+  const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+
   const flyoutSession = openFlyout(
     toMountPoint(
       <ReplacePanelFlyout
         container={embeddable}
         onClose={() => {
           if (flyoutSession) {
+            if (overlayTracker) overlayTracker.clearOverlays();
+
             flyoutSession.close();
           }
         }}
@@ -50,6 +57,12 @@ export async function openReplacePanelFlyout(options: {
     {
       'data-test-subj': 'dashboardReplacePanel',
       ownFocus: true,
+      onClose: (overlayRef) => {
+        if (overlayTracker) overlayTracker.clearOverlays();
+        overlayRef.close();
+      },
     }
   );
+
+  overlayTracker?.openOverlay(flyoutSession);
 }

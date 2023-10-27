@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LIGHT_THEME } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
@@ -18,26 +18,23 @@ import moment from 'moment';
 import { useTheme } from '@emotion/react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  AlertAnnotation,
-  getPaddedAlertTimeRange,
-  AlertActiveTimeRangeAnnotation,
-} from '@kbn/observability-alert-details';
-import { useEuiTheme } from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { get } from 'lodash';
+import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
+import { get, identity } from 'lodash';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
+import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
 import {
+  Comparator,
   ComparatorToi18nMap,
   ComparatorToi18nSymbolsMap,
   isRatioRule,
   type PartialCriterion,
 } from '../../../../../common/alerting/logs/log_threshold';
-import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
 import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
-import LogsRatioChart from './components/logs_ratio_chart';
+import { LogRateAnalysis } from './components/log_rate_analysis';
+import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
+import { useLicense } from '../../../../hooks/use_license';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
@@ -47,12 +44,33 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const [selectedSeries, setSelectedSeries] = useState<string>('');
-  const { uiSettings } = useKibanaContextForPlugin().services;
-  const { euiTheme } = useEuiTheme();
+  const { logsShared, observabilityAIAssistant } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+  const interval = `${rule.params.timeSize}${rule.params.timeUnit}`;
+  const thresholdFill = convertComparatorToFill(rule.params.count.comparator);
+  const filter = rule.params.groupBy
+    ? rule.params.groupBy
+        .map((field) => {
+          const value = get(
+            alert.fields[ALERT_CONTEXT],
+            ['groupByKeys', ...field.split('.')],
+            null
+          );
+          return value ? `${field} : "${value}"` : null;
+        })
+        .filter(identity)
+        .join(' AND ')
+    : '';
+
+  const { derivedDataView } = useLogView({
+    initialLogViewReference: rule.params.logView,
+    logViews: logsShared.logViews.client,
+  });
+
+  const { hasAtLeast } = useLicense();
+  const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
 
   useEffect(() => {
     /**
@@ -74,7 +92,6 @@ const AlertDetailsAppSection = ({
         {}
       ) || {};
 
-    setSelectedSeries(getChartGroupNames(Object.values(alertFieldsFromGroupBy)));
     const alertSummaryFields = Object.entries(alertFieldsFromGroupBy).map(([label, value]) => ({
       label,
       value,
@@ -84,6 +101,13 @@ const AlertDetailsAppSection = ({
 
   const getLogRatioChart = () => {
     if (isRatioRule(rule.params.criteria)) {
+      const numeratorKql = rule.params.criteria[0]
+        .map((criteria) => convertCriteriaToKQL(criteria))
+        .join(' AND ');
+      const denominatorKql = rule.params.criteria[1]
+        .map((criteria) => convertCriteriaToKQL(criteria))
+        .join(' AND ');
+
       return (
         <EuiPanel hasBorder={true} data-test-subj="logsRatioChartAlertDetails">
           <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -100,7 +124,6 @@ const AlertDetailsAppSection = ({
           <EuiFlexGroup>
             <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
               <EuiSpacer size="s" />
-
               <Threshold
                 title={`Threshold breached`}
                 chartProps={{ theme, baseTheme: LIGHT_THEME }}
@@ -113,38 +136,22 @@ const AlertDetailsAppSection = ({
             </EuiFlexItem>
             <EuiFlexItem grow={5}>
               <EuiSpacer size="s" />
-
-              <LogsRatioChart
-                buckets={1}
-                logViewReference={{
-                  type: 'log-view-reference',
-                  logViewId: rule.params.logView.logViewId,
-                }}
-                ruleParams={rule.params}
-                filterSeriesByGroupName={selectedSeries}
-                showThreshold={true}
-                threshold={rule.params.count}
-                executionTimeRange={{
-                  gte: Number(moment(timeRange.from).format('x')),
-                  lte: Number(moment(timeRange.to).format('x')),
-                }}
-                annotations={[
-                  <AlertAnnotation
-                    key={`${alert.start}-start-alert-annotation`}
-                    id={`${alert.start}-start-alert-annotation`}
-                    alertStart={alert.start}
-                    color={euiTheme.colors.danger}
-                    dateFormat={uiSettings.get(UI_SETTINGS.DATE_FORMAT)}
-                  />,
-                  <AlertActiveTimeRangeAnnotation
-                    key={`${alert.start}-active-alert-annotation`}
-                    id={`${alert.start}-active-alert-annotation`}
-                    alertStart={alert.start}
-                    alertEnd={alertEnd}
-                    color={euiTheme.colors.danger}
-                  />,
-                ]}
-              />
+              {derivedDataView && (
+                <LogThresholdRatioChart
+                  filter={filter}
+                  numeratorKql={numeratorKql}
+                  denominatorKql={denominatorKql}
+                  threshold={{ value: rule.params.count.value, fill: thresholdFill }}
+                  timeRange={timeRange}
+                  alertRange={{ from: alert.start, to: alertEnd }}
+                  index={{
+                    pattern: derivedDataView.getIndexPattern(),
+                    timestampField: derivedDataView.timeFieldName || '@timestamp',
+                  }}
+                  height={150}
+                  interval={interval}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -154,84 +161,66 @@ const AlertDetailsAppSection = ({
 
   const getLogCountChart = () => {
     if (!!rule.params.criteria && !isRatioRule(rule.params.criteria)) {
-      return rule.params.criteria.map((criteria, idx) => {
-        const chartCriterion = criteria as PartialCriterion;
-        return (
-          <EuiPanel
-            key={`${chartCriterion.field}${idx}`}
-            hasBorder={true}
-            data-test-subj={`logsCountChartAlertDetails-${chartCriterion.field}${idx}`}
-          >
-            <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-              {chartCriterion.comparator && (
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
-                        defaultMessage: 'Logs for {field} {comparator} {value}',
-                        values: {
-                          field: chartCriterion.field,
-                          comparator: ComparatorToi18nMap[chartCriterion.comparator],
-                          value: chartCriterion.value,
-                        },
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup>
-              <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
-                <EuiSpacer size="s" />
-                {chartCriterion.comparator && (
-                  <Threshold
-                    title={`Threshold breached`}
-                    chartProps={{ theme, baseTheme: LIGHT_THEME }}
-                    comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
-                    id={`${chartCriterion.field}-${chartCriterion.value}`}
-                    threshold={rule.params.count.value}
-                    value={Number(alert.fields[ALERT_EVALUATION_VALUE])}
-                    valueFormatter={formatThreshold}
-                  />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={5}>
-                <CriterionPreview
-                  ruleParams={rule.params}
-                  logViewReference={{
-                    type: 'log-view-reference',
-                    logViewId: rule.params.logView.logViewId,
+      const kql = rule.params.criteria
+        .map((criteria) => convertCriteriaToKQL(criteria))
+        .join(' AND ');
+      const criteriaAsText = rule.params.criteria
+        .map((criteria) => {
+          if (!criteria.field || !criteria.comparator || !criteria.value) {
+            return '';
+          }
+          return `${criteria.field}  ${ComparatorToi18nMap[criteria.comparator]} ${criteria.value}`;
+        })
+        .filter((text) => text)
+        .join(' AND ');
+      return (
+        <EuiPanel hasBorder={true} data-test-subj={`logsCountChartAlertDetails`}>
+          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
+                    defaultMessage: 'Logs for {criteria}',
+                    values: { criteria: criteriaAsText },
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
+              <EuiSpacer size="s" />
+              <Threshold
+                title={`Threshold breached`}
+                chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
+                id="logCountThreshold"
+                threshold={rule.params.count.value}
+                value={Number(alert.fields[ALERT_EVALUATION_VALUE])}
+                valueFormatter={formatThreshold}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              {derivedDataView && (
+                <LogThresholdCountChart
+                  filter={filter}
+                  kql={kql}
+                  threshold={{ value: rule.params.count.value, fill: thresholdFill }}
+                  timeRange={timeRange}
+                  alertRange={{ from: alert.start, to: alertEnd }}
+                  index={{
+                    pattern: derivedDataView.getIndexPattern(),
+                    timestampField: derivedDataView.timeFieldName || '@timestamp',
                   }}
-                  chartCriterion={chartCriterion}
-                  showThreshold={true}
-                  executionTimeRange={{
-                    gte: Number(moment(timeRange.from).format('x')),
-                    lte: Number(moment(timeRange.to).format('x')),
-                  }}
-                  annotations={[
-                    <AlertAnnotation
-                      key={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
-                      id={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
-                      alertStart={alert.start}
-                      color={euiTheme.colors.danger}
-                      dateFormat={uiSettings.get(UI_SETTINGS.DATE_FORMAT)}
-                    />,
-                    <AlertActiveTimeRangeAnnotation
-                      key={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
-                      id={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
-                      alertStart={alert.start}
-                      alertEnd={alertEnd}
-                      color={euiTheme.colors.danger}
-                    />,
-                  ]}
-                  filterSeriesByGroupName={[selectedSeries]}
+                  height={150}
+                  interval={interval}
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        );
-      });
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      );
     } else return null;
   };
 
@@ -248,13 +237,60 @@ const AlertDetailsAppSection = ({
     );
   };
 
+  const getLogRateAnalysisSection = () => {
+    return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
+  };
+
   return (
-    <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
-      {getLogRatioChart()}
-      {getLogCountChart()}
-      {getLogsHistoryChart()}
-    </EuiFlexGroup>
+    <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+      <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
+        {getLogRatioChart()}
+        {getLogCountChart()}
+        {getLogRateAnalysisSection()}
+        {getLogsHistoryChart()}
+      </EuiFlexGroup>
+    </ObservabilityAIAssistantProvider>
   );
 };
+
+function convertComparatorToFill(comparator: Comparator) {
+  switch (comparator) {
+    case Comparator.GT:
+    case Comparator.GT_OR_EQ:
+      return 'above';
+    default:
+      return 'below';
+  }
+}
+
+function convertCriteriaToKQL(criteria: PartialCriterion) {
+  if (!criteria.value || !criteria.comparator || !criteria.field) {
+    return '';
+  }
+
+  switch (criteria.comparator) {
+    case Comparator.MATCH:
+    case Comparator.EQ:
+      return `${criteria.field} : "${criteria.value}"`;
+    case Comparator.NOT_MATCH:
+    case Comparator.NOT_EQ:
+      return `NOT ${criteria.field} : "${criteria.value}"`;
+    case Comparator.MATCH_PHRASE:
+      return `${criteria.field} : ${criteria.value}`;
+    case Comparator.NOT_MATCH_PHRASE:
+      return `NOT ${criteria.field} : ${criteria.value}`;
+    case Comparator.GT:
+      return `${criteria.field} > ${criteria.value}`;
+    case Comparator.GT_OR_EQ:
+      return `${criteria.field} >= ${criteria.value}`;
+    case Comparator.LT:
+      return `${criteria.field} < ${criteria.value}`;
+    case Comparator.LT_OR_EQ:
+      return `${criteria.field} <= ${criteria.value}`;
+    default:
+      return '';
+  }
+}
+
 // eslint-disable-next-line import/no-default-export
 export default AlertDetailsAppSection;

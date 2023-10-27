@@ -6,8 +6,7 @@
  */
 
 import React, { PureComponent } from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
@@ -89,10 +88,10 @@ export class CrossClusterReplicationHome extends PureComponent {
 
         <EuiSpacer size="l" />
 
-        <Switch>
+        <Routes>
           <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
           <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
-        </Switch>
+        </Routes>
       </>
     );
   }

@@ -57,7 +57,7 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
         'Provide a question and test how well the model extracts an answer from your input text.',
     }),
   ];
-  public questionText$ = new BehaviorSubject<string>('');
+  private questionText$ = new BehaviorSubject<string>('');
 
   constructor(
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,

@@ -9,8 +9,6 @@ import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { createFleetTestRendererMock } from '../../../../../mock';
 import type { GetAgentPoliciesResponse } from '../../../../../../common';
 
@@ -36,12 +34,6 @@ describe('AgentPolicyListPage', () => {
 
   const render = () => {
     const renderer = createFleetTestRendererMock();
-
-    // todo: this can be removed when agentTamperProtectionEnabled feature flag is enabled/deleted
-    ExperimentalFeaturesService.init({
-      ...allowedExperimentalValues,
-      agentTamperProtectionEnabled: true,
-    });
 
     return renderer.render(<AgentPolicyListPage />);
   };

@@ -17,11 +17,15 @@ const mockGetFieldByName = jest.fn();
 const mockGetLabel = jest.fn();
 const mockGetLabelForPercentile = jest.fn();
 
-jest.mock('../utils', () => ({
-  getFieldNameFromField: jest.fn(() => mockGetFieldNameFromField()),
-  getLabel: jest.fn(() => mockGetLabel()),
-  getLabelForPercentile: jest.fn(() => mockGetLabelForPercentile()),
-}));
+jest.mock('../utils', () => {
+  const utils = jest.requireActual('../utils');
+  return {
+    ...utils,
+    getFieldNameFromField: jest.fn(() => mockGetFieldNameFromField()),
+    getLabel: jest.fn(() => mockGetLabel()),
+    getLabelForPercentile: jest.fn(() => mockGetLabelForPercentile()),
+  };
+});
 
 describe('convertToPercentileColumn', () => {
   const visType = 'heatmap';

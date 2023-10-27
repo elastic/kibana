@@ -9,6 +9,10 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  ObservabilityAIAssistantProvider,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -22,18 +26,29 @@ export const CommonInfraProviders: React.FC<{
   appName: string;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
+}> = ({
+  children,
+  triggersActionsUI,
+  observabilityAIAssistant,
+  setHeaderActionMenu,
+  appName,
+  storage,
+  theme$,
+}) => {
   const darkMode = useIsDarkMode();
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-            <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
-          </HeaderActionMenuProvider>
+          <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+            <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+              <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
+            </HeaderActionMenuProvider>
+          </ObservabilityAIAssistantProvider>
         </DataUIProviders>
       </EuiThemeProvider>
     </TriggersActionsProvider>

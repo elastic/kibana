@@ -5,13 +5,13 @@
  * 2.0.
  */
 import createContainer from 'constate';
-import { useCallback, useEffect, useState } from 'react';
-import DateMath from '@kbn/datemath';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { buildEsQuery, fromKueryExpression, type Query } from '@kbn/es-query';
 import { map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { parseDateRange } from '../../../../utils/datemath';
 import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
@@ -22,6 +22,7 @@ import {
   type HostsState,
   type StringDateRangeTimestamp,
 } from './use_unified_search_url_state';
+import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
@@ -29,10 +30,10 @@ const buildQuerySubmittedPayload = (
   const { panelFilters, filters, parsedDateRange, query: queryObj, limit } = hostState;
 
   return {
-    control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
-    filters: filters.map((filter) => JSON.stringify(filter)),
+    control_filter_fields: retrieveFieldsFromFilter(panelFilters),
+    filter_fields: retrieveFieldsFromFilter(filters),
     interval: telemetryTimeRangeFormatter(parsedDateRange.to - parsedDateRange.from),
-    query: queryObj.query,
+    with_query: !!queryObj.query,
     limit,
   };
 };
@@ -98,24 +99,20 @@ export const useUnifiedSearch = () => {
     [queryStringService, setSearch, validateQuery]
   );
 
-  const getParsedDateRange = useCallback(() => {
+  const parsedDateRange = useMemo(() => {
     const defaults = getDefaultTimestamps();
 
-    const from = DateMath.parse(searchCriteria.dateRange.from)?.toISOString() ?? defaults.from;
-    const to =
-      DateMath.parse(searchCriteria.dateRange.to, { roundUp: true })?.toISOString() ?? defaults.to;
+    const { from = defaults.from, to = defaults.to } = parseDateRange(searchCriteria.dateRange);
 
     return { from, to };
   }, [searchCriteria.dateRange]);
 
   const getDateRangeAsTimestamp = useCallback(() => {
-    const parsedDate = getParsedDateRange();
-
-    const from = new Date(parsedDate.from).getTime();
-    const to = new Date(parsedDate.to).getTime();
+    const from = new Date(parsedDateRange.from).getTime();
+    const to = new Date(parsedDateRange.to).getTime();
 
     return { from, to };
-  }, [getParsedDateRange]);
+  }, [parsedDateRange]);
 
   const buildQuery = useCallback(() => {
     return buildEsQuery(
@@ -177,9 +174,9 @@ export const useUnifiedSearch = () => {
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
-    const parsedDateRange = getDateRangeAsTimestamp();
+    const dateRangeInTimestamp = getDateRangeAsTimestamp();
     telemetry.reportHostsViewQuerySubmitted(
-      buildQuerySubmittedPayload({ ...searchCriteria, parsedDateRange })
+      buildQuerySubmittedPayload({ ...searchCriteria, parsedDateRange: dateRangeInTimestamp })
     );
   }, [getDateRangeAsTimestamp, searchCriteria, telemetry]);
 
@@ -187,7 +184,7 @@ export const useUnifiedSearch = () => {
     error,
     buildQuery,
     onSubmit,
-    getParsedDateRange,
+    parsedDateRange,
     getDateRangeAsTimestamp,
     searchCriteria,
   };

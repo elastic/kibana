@@ -38,8 +38,7 @@ interface OptionalFilterParams {
   /** list of action Ids that should have outputs */
   withOutputs?: string[];
   /** Include automated response actions */
-  withAutomatedActions?: boolean;
-  alertId?: string[];
+  types?: string[];
 }
 
 /**
@@ -60,7 +59,7 @@ export const getActionListByStatus = async ({
   statuses,
   userIds,
   unExpiredOnly = false,
-  withAutomatedActions,
+  types,
   withOutputs,
 }: OptionalFilterParams & {
   statuses: ResponseActionStatus[];
@@ -83,7 +82,7 @@ export const getActionListByStatus = async ({
     startDate,
     userIds,
     unExpiredOnly,
-    withAutomatedActions,
+    types,
     withOutputs,
   });
 
@@ -123,8 +122,7 @@ export const getActionList = async ({
   userIds,
   unExpiredOnly = false,
   withOutputs,
-  withAutomatedActions,
-  alertId,
+  types,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -148,8 +146,7 @@ export const getActionList = async ({
     userIds,
     unExpiredOnly,
     withOutputs,
-    withAutomatedActions,
-    alertId,
+    types,
   });
 
   return {
@@ -185,8 +182,7 @@ const getActionDetailsList = async ({
   userIds,
   unExpiredOnly,
   withOutputs,
-  withAutomatedActions,
-  alertId,
+  types,
 }: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
@@ -208,8 +204,7 @@ const getActionDetailsList = async ({
       size,
       userIds,
       unExpiredOnly,
-      withAutomatedActions,
-      alertId,
+      types,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;
@@ -281,7 +276,7 @@ const getActionDetailsList = async ({
 
     // find the specific response's details using that set of matching responses
     const { isCompleted, completedAt, wasSuccessful, errors, agentState, outputs } =
-      getActionCompletionInfo(action.agents, matchedResponses);
+      getActionCompletionInfo(action, matchedResponses);
 
     const { isExpired, status } = getActionStatus({
       expirationDate: action.expiration,

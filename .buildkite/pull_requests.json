@@ -55,7 +55,7 @@
       "repoName": "kibana",
       "pipelineSlug": "kibana-kme-test",
 
-      "enabled": true,
+      "enabled": false,
       "allow_org_users": true,
       "allowed_repo_permissions": ["admin", "write"],
       "allowed_list": ["barlowm", "renovate[bot]"],

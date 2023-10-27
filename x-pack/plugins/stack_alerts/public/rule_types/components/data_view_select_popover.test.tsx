@@ -8,7 +8,6 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { DataViewSelectPopover, DataViewSelectPopoverProps } from './data_view_select_popover';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
@@ -23,12 +22,6 @@ const selectedDataView = {
   isPersisted: jest.fn(() => true),
   getName: () => 'kibana_sample_data_logs',
 } as unknown as DataView;
-
-const props: DataViewSelectPopoverProps = {
-  onSelectDataView: () => {},
-  onChangeMetaData: () => {},
-  dataView: selectedDataView,
-};
 
 const dataViewIds = ['mock-data-logs-id', 'mock-ecommerce-id', 'mock-test-id', 'mock-ad-hoc-id'];
 
@@ -80,15 +73,15 @@ const mount = () => {
       Promise.resolve(dataViewOptions.find((current) => current.id === id))
     );
   const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+  const props: DataViewSelectPopoverProps = {
+    dependencies: { dataViews: dataViewsMock, dataViewEditor: dataViewEditorMock },
+    onSelectDataView: () => {},
+    onChangeMetaData: () => {},
+    dataView: selectedDataView,
+  };
 
   return {
-    wrapper: mountWithIntl(
-      <KibanaContextProvider
-        services={{ dataViews: dataViewsMock, dataViewEditor: dataViewEditorMock }}
-      >
-        <DataViewSelectPopover {...props} />
-      </KibanaContextProvider>
-    ),
+    wrapper: mountWithIntl(<DataViewSelectPopover {...props} />),
     dataViewsMock,
   };
 };

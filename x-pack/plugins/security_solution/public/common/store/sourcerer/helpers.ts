@@ -104,14 +104,18 @@ interface CheckIfIndicesExistParams {
   patternList: sourcererModel.SourcererDataView['patternList'];
   scopeId: sourcererModel.SourcererScopeName;
   signalIndexName: string | null;
+  isDefaultDataViewSelected: boolean;
 }
 export const checkIfIndicesExist = ({
   patternList,
   scopeId,
   signalIndexName,
+  isDefaultDataViewSelected,
 }: CheckIfIndicesExistParams) =>
   scopeId === SourcererScopeName.detections
     ? patternList.includes(`${signalIndexName}`)
     : scopeId === SourcererScopeName.default
-    ? patternList.filter((i) => i !== signalIndexName).length > 0
+    ? isDefaultDataViewSelected
+      ? patternList.filter((i) => i !== signalIndexName).length > 0
+      : patternList.length > 0
     : patternList.length > 0;

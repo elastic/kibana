@@ -8,10 +8,11 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { Header } from './header';
 
@@ -27,9 +28,9 @@ function mockProps() {
     breadcrumbs$: new BehaviorSubject([]),
     breadcrumbsAppendExtension$: new BehaviorSubject(undefined),
     homeHref: '/',
-    isVisible$: new BehaviorSubject(true),
     customBranding$: new BehaviorSubject({}),
     kibanaDocLink: '/docs',
+    docLinks: docLinksServiceMock.createStartContract(),
     navLinks$: new BehaviorSubject([]),
     customNavLink$: new BehaviorSubject(undefined),
     recentlyAccessed$: new BehaviorSubject([]),
@@ -56,7 +57,6 @@ describe('Header', () => {
   });
 
   it('renders', () => {
-    const isVisible$ = new BehaviorSubject(false);
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
     const navLinks$ = new BehaviorSubject([
@@ -79,7 +79,6 @@ describe('Header', () => {
     const component = mountWithIntl(
       <Header
         {...mockProps()}
-        isVisible$={isVisible$}
         breadcrumbs$={breadcrumbs$}
         navLinks$={navLinks$}
         recentlyAccessed$={recentlyAccessed$}
@@ -87,12 +86,9 @@ describe('Header', () => {
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
+        helpMenuLinks$={of([])}
       />
     );
-    expect(component.find('EuiHeader').exists()).toBeFalsy();
-
-    act(() => isVisible$.next(true));
-    component.update();
     expect(component.find('EuiHeader').exists()).toBeTruthy();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();
 

@@ -133,29 +133,32 @@ describe('Textbased Data Source', () => {
 
   describe('uniqueLabels', () => {
     it('appends a suffix to duplicates', () => {
-      const map = TextBasedDatasource.uniqueLabels({
-        layers: {
-          a: {
-            columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Foo',
-                meta: {
-                  type: 'number',
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'Foo',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Foo',
-                meta: {
-                  type: 'number',
+                {
+                  columnId: 'b',
+                  fieldName: 'Foo',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-            ],
-            index: 'foo',
+              ],
+              index: 'foo',
+            },
           },
-        },
-      } as unknown as TextBasedPrivateState);
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -247,31 +250,6 @@ describe('Textbased Data Source', () => {
         indexPatterns,
       };
       expect(TextBasedDatasource.getDropProps(props)).toBeUndefined();
-    });
-
-    it('should return props if field is allowed to be dropped', () => {
-      const props = {
-        target: {
-          layerId: 'a',
-          groupId: 'groupId',
-          columnId: 'col1',
-          filterOperations: jest.fn(),
-          isMetricDimension: true,
-        },
-        source: {
-          id: 'col1',
-          field: 'Test 1',
-          humanData: {
-            label: 'Test 1',
-          },
-        },
-        state: baseState,
-        indexPatterns,
-      };
-      expect(TextBasedDatasource.getDropProps(props)).toStrictEqual({
-        dropTypes: ['field_add'],
-        nextLabel: 'Test 1',
-      });
     });
   });
 
@@ -387,10 +365,26 @@ describe('Textbased Data Source', () => {
   describe('#getDatasourceSuggestionsForVisualizeField', () => {
     (generateId as jest.Mock).mockReturnValue(`newid`);
     it('should create the correct layers', () => {
+      const textBasedQueryColumns = [
+        {
+          id: 'bytes',
+          name: 'bytes',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'dest',
+          name: 'dest',
+          meta: {
+            type: 'string',
+          },
+        },
+      ];
       const state = {
         layers: {},
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           dataViewSpec: {
             title: 'foo',
@@ -407,18 +401,19 @@ describe('Textbased Data Source', () => {
       );
       expect(suggestions[0].state).toEqual({
         ...state,
+        fieldList: textBasedQueryColumns,
         layers: {
           newid: {
             allColumns: [
               {
-                columnId: 'newid',
+                columnId: 'bytes',
                 fieldName: 'bytes',
                 meta: {
                   type: 'number',
                 },
               },
               {
-                columnId: 'newid',
+                columnId: 'dest',
                 fieldName: 'dest',
                 meta: {
                   type: 'string',
@@ -427,14 +422,14 @@ describe('Textbased Data Source', () => {
             ],
             columns: [
               {
-                columnId: 'newid',
+                columnId: 'bytes',
                 fieldName: 'bytes',
                 meta: {
                   type: 'number',
                 },
               },
               {
-                columnId: 'newid',
+                columnId: 'dest',
                 fieldName: 'dest',
                 meta: {
                   type: 'string',
@@ -453,7 +448,7 @@ describe('Textbased Data Source', () => {
         changeType: 'initial',
         columns: [
           {
-            columnId: 'newid',
+            columnId: 'bytes',
             operation: {
               dataType: 'number',
               isBucketed: false,
@@ -461,7 +456,7 @@ describe('Textbased Data Source', () => {
             },
           },
           {
-            columnId: 'newid',
+            columnId: 'dest',
             operation: {
               dataType: 'string',
               isBucketed: true,
@@ -478,7 +473,22 @@ describe('Textbased Data Source', () => {
       const state = {
         layers: {},
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: [
+            {
+              id: 'bytes',
+              name: 'bytes',
+              meta: {
+                type: 'number',
+              },
+            },
+            {
+              id: 'dest',
+              name: 'dest',
+              meta: {
+                type: 'string',
+              },
+            },
+          ],
           dataViewSpec: {
             title: 'foo',
             id: '1',
@@ -680,9 +690,9 @@ describe('Textbased Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = TextBasedDatasource.initialize();
-      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange)).toEqual(
-        null
-      );
+      expect(
+        TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange, new Date())
+      ).toEqual(null);
     });
 
     it('should generate an expression for an SQL query', async () => {
@@ -732,8 +742,9 @@ describe('Textbased Data Source', () => {
         ],
       } as unknown as TextBasedPrivateState;
 
-      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange))
-        .toMatchInlineSnapshot(`
+      expect(
+        TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange, new Date())
+      ).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {

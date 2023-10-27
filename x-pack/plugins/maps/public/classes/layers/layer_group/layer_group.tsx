@@ -25,7 +25,7 @@ import {
   StyleDescriptor,
   StyleMetaDescriptor,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../../sources/source';
+import { ISource, SourceEditorArgs } from '../../sources/source';
 import { type DataRequestContext } from '../../../actions';
 import { getLayersExtent } from '../../../actions/get_layers_extent';
 import { ILayer, LayerIcon } from '../layer';
@@ -58,7 +58,7 @@ export class LayerGroup implements ILayer {
     };
   }
 
-  constructor({ layerDescriptor }: { layerDescriptor: LayerGroupDescriptor }) {
+  constructor({ layerDescriptor }: { layerDescriptor: Partial<LayerGroupDescriptor> }) {
     this._descriptor = LayerGroup.createDescriptor(layerDescriptor);
   }
 
@@ -263,10 +263,6 @@ export class LayerGroup implements ILayer {
     return null;
   }
 
-  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
-    return [];
-  }
-
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
     return null;
   }
@@ -287,9 +283,9 @@ export class LayerGroup implements ILayer {
     return undefined;
   }
 
-  isLayerLoading(): boolean {
+  isLayerLoading(zoom: number): boolean {
     return this._children.some((child) => {
-      return child.isLayerLoading();
+      return child.isLayerLoading(zoom);
     });
   }
 

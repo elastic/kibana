@@ -6,8 +6,8 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { CaseConnector } from '../../common/api';
 
+import type { CaseConnector } from '../../common/types/domain';
 import { pushCase } from './api';
 import * as i18n from './translations';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -25,10 +25,8 @@ export const usePostPushToService = () => {
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
-    (request: PushToServiceRequest) => {
-      const abortCtrlRef = new AbortController();
-      return pushCase(request.caseId, request.connector.id, abortCtrlRef.signal);
-    },
+    (request: PushToServiceRequest) =>
+      pushCase({ caseId: request.caseId, connectorId: request.connector.id }),
     {
       mutationKey: casesMutationsKeys.pushCase,
       onSuccess: (_, { connector }) => {

@@ -12,7 +12,7 @@ import { pairwise, startWith } from 'rxjs/operators';
 
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
@@ -51,7 +51,7 @@ export class RenderingService {
       });
 
     ReactDOM.render(
-      <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
+      <KibanaRootContextProvider i18n={i18n} theme={theme} globalStyles={true}>
         <>
           {/* Fixed headers */}
           {chromeHeader}
@@ -68,7 +68,7 @@ export class RenderingService {
             {appComponent}
           </AppWrapper>
         </>
-      </CoreContextProvider>,
+      </KibanaRootContextProvider>,
       targetDomElement
     );
   }

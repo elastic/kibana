@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs, EuiBetaBadge } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -31,7 +31,7 @@ const TabNavigationItemComponent = ({
   const handleClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateTo({ path: hrefWithSearch });
+      navigateTo({ path: hrefWithSearch, restoreScroll: true });
       track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
     },
     [navigateTo, hrefWithSearch, id]
@@ -49,7 +49,7 @@ const TabNavigationItemComponent = ({
       isSelected={isSelected}
       href={appHref}
       onClick={handleClick}
-      append={isBeta && <EuiBetaBadge label={betaOptions?.text ?? BETA} size="s" />}
+      append={isBeta && <EuiBadge color={'#E0E5EE'}>{betaOptions?.text ?? BETA}</EuiBadge>}
     >
       {name}
     </EuiTab>

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { Theme } from '@elastic/charts';
+import type { PartialTheme, Theme } from '@elastic/charts';
 import React, { useMemo } from 'react';
 
 import { getFlattenedBuckets } from './helpers';
 import { StorageTreemap } from '../../../storage_treemap';
 import { DEFAULT_MAX_CHART_HEIGHT, StorageTreemapContainer } from '../../../tabs/styles';
 import { PatternRollup, SelectedIndex } from '../../../../types';
+import { useDataQualityContext } from '../../../data_quality_context';
 
 export interface Props {
   formatBytes: (value: number | undefined) => string;
@@ -19,7 +20,8 @@ export interface Props {
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 const StorageDetailsComponent: React.FC<Props> = ({
@@ -29,14 +31,18 @@ const StorageDetailsComponent: React.FC<Props> = ({
   patternRollups,
   patterns,
   theme,
+  baseTheme,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
+
   const flattenedBuckets = useMemo(
     () =>
       getFlattenedBuckets({
         ilmPhases,
+        isILMAvailable,
         patternRollups,
       }),
-    [ilmPhases, patternRollups]
+    [ilmPhases, isILMAvailable, patternRollups]
   );
 
   return (
@@ -49,6 +55,7 @@ const StorageDetailsComponent: React.FC<Props> = ({
         patterns={patterns}
         patternRollups={patternRollups}
         theme={theme}
+        baseTheme={baseTheme}
       />
     </StorageTreemapContainer>
   );

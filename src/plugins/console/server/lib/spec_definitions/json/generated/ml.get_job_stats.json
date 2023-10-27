@@ -1,6 +1,10 @@
 {
   "ml.get_job_stats": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__"
     },
     "methods": [
@@ -10,6 +14,10 @@
       "_ml/anomaly_detectors/_stats",
       "_ml/anomaly_detectors/{job_id}/_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-job-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-job-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -11,7 +11,7 @@ const ROOT_FIELDS = [
   'namespaces',
   'type',
   'references',
-  'migrationVersion',
+  'migrationVersion', // deprecated, see https://github.com/elastic/kibana/pull/150075
   'coreMigrationVersion',
   'typeMigrationVersion',
   'managed',

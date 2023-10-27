@@ -84,6 +84,8 @@ export const Example: Story<Args> = () => {
       transactionId={data.transactionEvent['transaction.id']!}
       traceId={data.transactionEvent['trace.id']!}
       spanLinksCount={{ linkedChildren: 0, linkedParents: 0 }}
+      start="fake-time"
+      end="fake-time"
     />
   );
 };

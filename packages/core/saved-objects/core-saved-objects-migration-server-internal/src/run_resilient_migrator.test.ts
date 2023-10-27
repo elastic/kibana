@@ -10,10 +10,11 @@ import buffer from 'buffer';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { createInitialState } from './initial_state';
-import { Defer } from './kibana_migrator_utils';
+import { waitGroup } from './kibana_migrator_utils';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { next } from './next';
 import { runResilientMigrator, type RunResilientMigratorParams } from './run_resilient_migrator';
@@ -79,6 +80,7 @@ describe('runResilientMigrator', () => {
       typeRegistry: options.typeRegistry,
       docLinks: options.docLinks,
       logger: options.logger,
+      esCapabilities: options.esCapabilities,
     });
 
     // store the created initial state
@@ -128,8 +130,9 @@ const mockOptions = (): RunResilientMigratorParams => {
         },
       },
     },
-    readyToReindex: new Defer(),
-    doneReindexing: new Defer(),
+    readyToReindex: waitGroup(),
+    doneReindexing: waitGroup(),
+    updateRelocationAliases: waitGroup(),
     logger,
     transformRawDocs: jest.fn(),
     preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
@@ -147,10 +150,11 @@ const mockOptions = (): RunResilientMigratorParams => {
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
-        runOnNonMigratorNodes: true,
+        runOnRoles: ['migrator'],
       },
     },
     typeRegistry: savedObjectTypeRegistryMock,
     docLinks: docLinksServiceMock.createSetupContract(),
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
 };

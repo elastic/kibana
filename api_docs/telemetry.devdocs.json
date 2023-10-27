@@ -188,6 +188,19 @@
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.appendServerlessChannelsSuffix",
+            "type": "boolean",
+            "tags": [],
+            "label": "appendServerlessChannelsSuffix",
+            "description": [
+              "Whether to use Serverless-specific channels when reporting Snapshot Telemetry"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -800,7 +813,7 @@
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.ts"
+              "path": "x-pack/plugins/synthetics/server/telemetry/sender.ts"
             },
             {
               "plugin": "fleet",
@@ -809,18 +822,18 @@
             {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/synthetics/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/synthetics/server/telemetry/sender.test.ts"
             },
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.test.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.test.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.test.ts"
             }
           ],
           "children": [],

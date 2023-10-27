@@ -72,11 +72,3 @@
     stroke: transparentize($euiColorPrimary, .25);
   }
 }
-
-.gphNode__text {
-  fill: $euiColorInk;
-
-  &--inverse {
-    fill: $euiColorGhost;
-  }
-}

@@ -88,7 +88,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('bulk reassign agents', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/162545
+    describe.skip('bulk reassign agents', () => {
       it('should allow to reassign multiple agents by id', async () => {
         await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
@@ -201,7 +202,7 @@ export default function (providerContext: FtrProviderContext) {
           const intervalId = setInterval(async () => {
             if (attempts > 2) {
               clearInterval(intervalId);
-              reject('action timed out');
+              reject(new Error('action timed out'));
             }
             ++attempts;
             const {

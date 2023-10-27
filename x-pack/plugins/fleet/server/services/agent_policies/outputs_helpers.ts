@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { AgentPolicySOAttributes, AgentPolicy } from '../../types';
 import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/constants';
-import { policyHasFleetServer } from '../../../common/services';
+import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
 import { appContextService } from '..';
 import { outputService } from '../output';
 import { OutputInvalidError, OutputLicenceError } from '../../errors';
@@ -36,8 +36,11 @@ export async function getDataOutputForAgentPolicy(
 
 /**
  * Validate outputs are valid for a policy using the current kibana licence or throw.
- * @param data
  * @returns
+ * @param soClient
+ * @param newData
+ * @param existingData
+ * @param allowedOutputTypeForPolicy
  */
 export async function validateOutputForPolicy(
   soClient: SavedObjectsClientContract,
@@ -76,6 +79,9 @@ export async function validateOutputForPolicy(
   }
   // Validate output when the policy has fleet server
   if (policyHasFleetServer(data as AgentPolicy)) return;
+
+  // Validate output when the policy has synthetics integration
+  if (policyHasSyntheticsIntegration(data as AgentPolicy)) return;
 
   const hasLicence = appContextService
     .getSecurityLicense()

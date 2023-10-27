@@ -5,7 +5,17 @@
  * 2.0.
  */
 
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginStart {}
+
+export interface StartDependencies {
+  security: SecurityPluginStart;
+}
+export interface SetupDependencies {
+  serverless: ServerlessPluginSetup;
+}

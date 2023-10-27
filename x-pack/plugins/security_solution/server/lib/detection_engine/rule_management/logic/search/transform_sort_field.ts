@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/detection_engine/rule_management';
+import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/api/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 /**

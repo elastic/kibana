@@ -15,8 +15,15 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return {
-    clickSavedViewsButton() {
-      return testSubjects.click('savedViews-openPopover');
+    async clickSavedViewsButton() {
+      const button = await testSubjects.find('savedViews-openPopover');
+
+      await retry.waitFor('Wait for button to be enabled', async () => {
+        const isDisabled = Boolean(await button.getAttribute('disabled'));
+        return !isDisabled;
+      });
+
+      return button.click();
     },
     pressEsc() {
       return browser.pressKeys([Key.ESCAPE]);
@@ -47,7 +54,10 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     async createNewSavedView(name: string) {
       await testSubjects.setValue('savedViewName', name);
       await testSubjects.click('createSavedViewButton');
-      await testSubjects.missingOrFail('savedViews-upsertModal');
+      await testSubjects.missingOrFail('createSavedViewButton', { timeout: 20000 });
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.missingOrFail('savedViews-upsertModal');
+      });
     },
 
     async createView(name: string) {

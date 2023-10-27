@@ -29,7 +29,7 @@ import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 type Config =
-  APIReturnType<'GET /api/apm/settings/agent-configuration 2023-05-22'>['configurations'][0];
+  APIReturnType<'GET /api/apm/settings/agent-configuration 2023-10-31'>['configurations'][0];
 
 interface Props {
   status: FETCH_STATUS;
@@ -202,6 +202,7 @@ export function AgentConfigurationList({
             name: '',
             render: (config: Config) => (
               <EuiButtonIcon
+                data-test-subj="apmColumnsButton"
                 aria-label="Edit"
                 iconType="pencil"
                 href={apmRouter.link('/settings/agent-configuration/edit', {
@@ -218,6 +219,7 @@ export function AgentConfigurationList({
             name: '',
             render: (config: Config) => (
               <EuiButtonIcon
+                data-test-subj="apmColumnsButton"
                 aria-label="Delete"
                 iconType="trash"
                 onClick={() => setConfigToBeDeleted(config)}

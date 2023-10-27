@@ -47,6 +47,7 @@ export const getSharedActions = ({
   openLayerSettings,
   onCloneLayer,
   onRemoveLayer,
+  customRemoveModalText,
 }: {
   onRemoveLayer: () => void;
   onCloneLayer: () => void;
@@ -54,12 +55,12 @@ export const getSharedActions = ({
   layerId: string;
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
-  visualizationState: unknown;
   layerType?: LayerType;
   isTextBasedLanguage?: boolean;
   hasLayerSettings: boolean;
   openLayerSettings: () => void;
   core: Pick<CoreStart, 'overlays' | 'theme'>;
+  customRemoveModalText?: { title?: string; description?: string };
 }) => [
   getOpenLayerSettingsAction({
     hasLayerSettings,
@@ -77,6 +78,7 @@ export const getSharedActions = ({
     layerType,
     isOnlyLayer,
     core,
+    customModalText: customRemoveModalText,
   }),
 ];
 
@@ -129,6 +131,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
           size="s"
           items={props.actions.map((i) => (
             <EuiContextMenuItem
+              key={i.displayName}
               icon={<EuiIcon type={i.icon} title={i.displayName} color={i.color} />}
               data-test-subj={i['data-test-subj']}
               aria-label={i.displayName}
@@ -142,6 +145,9 @@ const InContextMenuActions = (props: LayerActionsProps) => {
                 ? {
                     css: css`
                       color: ${euiTheme.colors[i.color]};
+                      &:hover {
+                        text-decoration-color: ${euiTheme.colors[i.color]} !important;
+                      }
                     `,
                     size: 's', // need to be explicit here as css prop will disable the default small size
                   }
@@ -188,7 +194,7 @@ export const LayerActions = (props: LayerActionsProps) => {
         <EuiFlexItem grow={false}>
           <EuiToolTip content={outsideListAction.displayName}>
             <EuiButtonIcon
-              size="xs"
+              size="s"
               iconType={outsideListAction.icon}
               color={outsideListAction.color ?? 'text'}
               data-test-subj={outsideListAction['data-test-subj']}

@@ -49,13 +49,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
 
       <EuiSpacer size="s" />
 
-      <JsonEditor
-        mode={mode}
-        readOnly={true}
-        value={formattedData}
-        height="200px"
-        syntaxChecking={false}
-      />
+      <JsonEditor mode={mode} readOnly={true} value={formattedData} height="200px" />
     </React.Fragment>
   );
 };

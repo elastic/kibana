@@ -9,7 +9,6 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { RouterProvider } from '@kbn/typed-react-router-config';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
@@ -26,7 +25,6 @@ import {
 } from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
-import { apmRouter } from '../../routing/apm_route_config';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -44,10 +42,8 @@ history.replace(
 function Wrapper({ children }: { children?: React.ReactNode }) {
   return (
     <MemoryRouter>
-      <MockApmPluginContextWrapper value={apmContextMock}>
-        <RouterProvider history={history} router={apmRouter as any}>
-          {children}
-        </RouterProvider>
+      <MockApmPluginContextWrapper value={apmContextMock} history={history}>
+        {children}
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -73,15 +69,18 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 
 const expectInfraLocatorsToBeCalled = () => {
   expect(
-    apmContextMock.infra.locators.nodeLogsLocator.getRedirectUrl
+    apmContextMock.infra?.locators.nodeLogsLocator.getRedirectUrl
   ).toBeCalled();
-  expect(apmContextMock.infra.locators.logsLocator.getRedirectUrl).toBeCalled();
+  expect(
+    apmContextMock.infra?.locators.logsLocator.getRedirectUrl
+  ).toBeCalled();
 };
 
 describe('TransactionActionMenu component', () => {
   beforeAll(() => {
     jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-      data: [],
+      // return as Profiling had been initialized
+      data: { initialized: true },
       status: hooks.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
@@ -255,6 +254,27 @@ describe('TransactionActionMenu component', () => {
     expect(container).toMatchSnapshot();
   });
 
+  describe('Profiling items', () => {
+    it('renders flamegraph item', async () => {
+      const component = await renderTransaction(
+        Transactions.transactionWithHostData
+      );
+      expectTextsInDocument(component, ['Host flamegraph']);
+    });
+    it('renders topN functions item', async () => {
+      const component = await renderTransaction(
+        Transactions.transactionWithHostData
+      );
+      expectTextsInDocument(component, ['Host topN functions']);
+    });
+    it('renders stacktraces item', async () => {
+      const component = await renderTransaction(
+        Transactions.transactionWithHostData
+      );
+      expectTextsInDocument(component, ['Host stacktraces']);
+    });
+  });
+
   describe('Custom links', () => {
     beforeAll(() => {
       // Mocks callApmAPI because it's going to be used to fecth the transaction in the custom links flyout.
@@ -393,5 +413,37 @@ describe('TransactionActionMenu component', () => {
       // Forces component to unmount to prevent to update the state when callApmAPI call returns after the test is finished.
       component.unmount();
     });
+  });
+});
+
+describe('Profiling not initialized', () => {
+  beforeAll(() => {
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      // return as Profiling had not been initialized
+      data: { initialized: false },
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it('does not render flamegraph item', async () => {
+    const component = await renderTransaction(
+      Transactions.transactionWithHostData
+    );
+    expectTextsNotInDocument(component, ['Host flamegraph']);
+  });
+  it('does not render topN functions item', async () => {
+    const component = await renderTransaction(
+      Transactions.transactionWithHostData
+    );
+    expectTextsNotInDocument(component, ['Host topN functions']);
+  });
+  it('does not render stacktraces item', async () => {
+    const component = await renderTransaction(
+      Transactions.transactionWithHostData
+    );
+    expectTextsNotInDocument(component, ['Host stacktraces']);
   });
 });

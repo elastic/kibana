@@ -7,9 +7,9 @@
 
 import React, { FC } from 'react';
 import { EuiIcon } from '@elastic/eui';
+import { timeFormatter } from '@kbn/ml-date-utils';
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
-import { timeFormatter } from '../../../../../../../../common/util/date_utils';
 
 interface Props {
   overlayKey: number;

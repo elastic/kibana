@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.setTime({ from, to });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();

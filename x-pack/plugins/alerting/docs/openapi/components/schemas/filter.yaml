@@ -1,0 +1,36 @@
+type: object
+description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
+properties:
+  meta:  
+    type: object
+    properties:
+      alias:
+        type: string
+        nullable: true
+      controlledBy:
+        type: string
+      disabled:
+        type: boolean
+      field:
+        type: string
+      group:
+        type: string
+      index:
+        type: string
+      isMultiIndex:
+        type: boolean
+      key:
+        type: string
+      negate:
+        type: boolean
+      params:
+        type: object
+      type:
+        type: string
+      value:
+        type: string
+  query:
+    type: object
+  $state:
+    type: object
+   

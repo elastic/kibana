@@ -20,6 +20,7 @@ describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
       Object {
+        "allowFeatureVisibility": true,
         "enabled": true,
         "maxSpaces": 1000,
       }
@@ -27,6 +28,7 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dev: false })).toMatchInlineSnapshot(`
       Object {
+        "allowFeatureVisibility": true,
         "enabled": true,
         "maxSpaces": 1000,
       }
@@ -34,6 +36,7 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dev: true })).toMatchInlineSnapshot(`
       Object {
+        "allowFeatureVisibility": true,
         "enabled": true,
         "maxSpaces": 1000,
       }
@@ -52,5 +55,25 @@ describe('config schema', () => {
 
   it('should not throw error if spaces is disabled in development mode', () => {
     expect(() => ConfigSchema.validate({ enabled: false }, { dev: true })).not.toThrow();
+  });
+
+  it('should throw error if allowFeatureVisibility is disabled in classic offering', () => {
+    expect(() => ConfigSchema.validate({ allowFeatureVisibility: false }, {})).toThrow();
+  });
+
+  it('should not throw error if allowFeatureVisibility is disabled in serverless offering', () => {
+    expect(() =>
+      ConfigSchema.validate({ allowFeatureVisibility: false }, { serverless: true })
+    ).not.toThrow();
+  });
+
+  it('should not throw error if allowFeatureVisibility is enabled in classic offering', () => {
+    expect(() => ConfigSchema.validate({ allowFeatureVisibility: true }, {})).not.toThrow();
+  });
+
+  it('should throw error if allowFeatureVisibility is enabled in serverless offering', () => {
+    expect(() =>
+      ConfigSchema.validate({ allowFeatureVisibility: true }, { serverless: true })
+    ).toThrow();
   });
 });

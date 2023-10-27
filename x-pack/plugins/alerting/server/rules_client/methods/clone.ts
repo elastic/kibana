@@ -15,7 +15,7 @@ import { getDefaultMonitoring } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { parseDuration } from '../../../common/parse_duration';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
+import { getRuleExecutionStatusPendingAttributes } from '../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../saved_objects/migrations/utils';
 import { createNewAPIKeySet, createRuleSavedObject } from '../lib';
 import { RulesClientContext } from '../types';
@@ -114,7 +114,7 @@ export async function clone<Params extends RuleTypeParams = never>(
     snoozeSchedule: [],
     muteAll: false,
     mutedInstanceIds: [],
-    executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
+    executionStatus: getRuleExecutionStatusPendingAttributes(lastRunTimestamp.toISOString()),
     monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     revision: 0,
     scheduledTaskId: null,

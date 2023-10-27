@@ -1,8 +1,14 @@
 {
   "ml.get_calendars": {
     "url_params": {
-      "from": 0,
-      "size": 0
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "size": [
+        "10000"
+      ]
     },
     "methods": [
       "GET",
@@ -12,6 +18,10 @@
       "_ml/calendars",
       "_ml/calendars/{calendar_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-calendar.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-calendar.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

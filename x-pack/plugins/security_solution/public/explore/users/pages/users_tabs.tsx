@@ -6,8 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { UsersTabsProps } from './types';
@@ -35,7 +34,7 @@ export const UsersTabs = memo<UsersTabsProps>(
     };
 
     return (
-      <Switch>
+      <Routes>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>
           <AllUsersQueryTabBody {...tabProps} />
         </Route>
@@ -55,7 +54,7 @@ export const UsersTabs = memo<UsersTabsProps>(
             {...tabProps}
           />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
 );

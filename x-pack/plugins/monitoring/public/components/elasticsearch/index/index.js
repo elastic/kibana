@@ -6,15 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiPage,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageBody,
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGrid,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
@@ -47,7 +39,7 @@ export const Index = ({
         <EuiSpacer size="m" />
         <AlertsCallout alerts={alerts} />
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
@@ -62,7 +54,7 @@ export const Index = ({
           </EuiPanel>
           <EuiSpacer size="m" />
           <ShardAllocation {...props} />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

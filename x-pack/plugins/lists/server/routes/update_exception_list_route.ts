@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  UpdateExceptionListSchemaDecoded,
-  exceptionListSchema,
-  updateExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  UpdateExceptionListRequestDecoded,
+  updateExceptionListRequest,
+  updateExceptionListResponse,
+} from '../../common/api';
 
 import {
   buildRouteValidation,
@@ -24,76 +24,83 @@ import {
 } from './utils';
 
 export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_URL,
-      validate: {
-        body: buildRouteValidation<
-          typeof updateExceptionListSchema,
-          UpdateExceptionListSchemaDecoded
-        >(updateExceptionListSchema),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            body: buildRouteValidation<
+              typeof updateExceptionListRequest,
+              UpdateExceptionListRequestDecoded
+            >(updateExceptionListRequest),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const {
-          _version,
-          tags,
-          name,
-          description,
-          id,
-          list_id: listId,
-          meta,
-          namespace_type: namespaceType,
-          os_types: osTypes,
-          type,
-          version,
-        } = request.body;
-        const exceptionLists = await getExceptionListClient(context);
-        if (id == null && listId == null) {
-          return siemResponse.error({
-            body: 'either id or list_id need to be defined',
-            statusCode: 404,
-          });
-        } else {
-          const list = await exceptionLists.updateExceptionList({
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const {
             _version,
+            tags,
+            name,
             description,
             id,
-            listId,
+            list_id: listId,
             meta,
-            name,
-            namespaceType,
-            osTypes,
-            tags,
+            namespace_type: namespaceType,
+            os_types: osTypes,
             type,
             version,
-          });
-          if (list == null) {
+          } = request.body;
+          const exceptionLists = await getExceptionListClient(context);
+          if (id == null && listId == null) {
             return siemResponse.error({
-              body: getErrorMessageExceptionList({ id, listId }),
+              body: 'either id or list_id need to be defined',
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(list, exceptionListSchema);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
+            const list = await exceptionLists.updateExceptionList({
+              _version,
+              description,
+              id,
+              listId,
+              meta,
+              name,
+              namespaceType,
+              osTypes,
+              tags,
+              type,
+              version,
+            });
+            if (list == null) {
+              return siemResponse.error({
+                body: getErrorMessageExceptionList({ id, listId }),
+                statusCode: 404,
+              });
             } else {
-              return response.ok({ body: validated ?? {} });
+              const [validated, errors] = validate(list, updateExceptionListResponse);
+              if (errors != null) {
+                return siemResponse.error({ body: errors, statusCode: 500 });
+              } else {
+                return response.ok({ body: validated ?? {} });
+              }
             }
           }
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

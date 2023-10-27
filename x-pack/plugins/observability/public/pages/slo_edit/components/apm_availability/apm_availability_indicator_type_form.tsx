@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOInput } from '@kbn/slo-schema';
-
+import React, { useEffect } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
+import { DataPreviewChart } from '../common/data_preview_chart';
+import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { control, setValue, watch } = useFormContext<CreateSLOInput>();
+  const { watch, setValue } = useFormContext<CreateSLOForm>();
   const { data: apmIndex } = useFetchApmIndex();
+
   useEffect(() => {
-    setValue('indicator.params.index', apmIndex);
-  }, [apmIndex, setValue]);
+    if (apmIndex !== '') {
+      setValue('indicator.params.index', apmIndex);
+    }
+  }, [setValue, apmIndex]);
+
+  const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
+    useFetchIndexPatternFields(apmIndex);
+  const partitionByFields = indexFields.filter((field) => field.aggregatable);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -99,7 +108,6 @@ export function ApmAvailabilityIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
           <QueryBuilder
-            control={control}
             dataTestSubj="apmLatencyFilterInput"
             indexPatternString={watch('indicator.params.index')}
             label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
@@ -124,6 +132,31 @@ export function ApmAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <IndexFieldSelector
+        indexFields={partitionByFields}
+        name="groupBy"
+        label={
+          <span>
+            {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
+              defaultMessage: 'Partition by',
+            })}{' '}
+            <EuiIconTip
+              content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
+                defaultMessage: 'Create individual SLOs for each value of the selected field.',
+              })}
+              position="top"
+            />
+          </span>
+        }
+        placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
+          defaultMessage: 'Select an optional field to partition by',
+        })}
+        isLoading={!!apmIndex && isIndexFieldsLoading}
+        isDisabled={!apmIndex}
+      />
+
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
 }

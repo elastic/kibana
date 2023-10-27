@@ -14,6 +14,6 @@ export function plugin() {
   return new ExpressionXyPlugin();
 }
 
-export { LayerTypes } from '../common';
+export { LayerTypes, XYCurveTypes } from '../common';
 
 export type { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';

@@ -4,65 +4,74 @@
      We use this one instead because we want to add the @kbn/ui-shared-deps-* tags here.
   -->
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title><%= htmlWebpackPlugin.options.title || 'Storybook'%></title>
 
-    <% if (htmlWebpackPlugin.files.favicon) { %>
+<head>
+  <meta charset="utf-8" />
+  <title>
+    <%= htmlWebpackPlugin.options.title || 'Storybook' %>
+  </title>
+
+  <% if (htmlWebpackPlugin.files.favicon) { %>
     <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>" />
     <% } %>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
-    <meta name="eui-global" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Added for Kibana shared dependencies -->
-    <script>
-      window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': '', 'kbn-ui-shared-deps-src': '' };
-    </script>
-    <script src="kbn-ui-shared-deps-npm.dll.js"></script>
-    <script src="kbn-ui-shared-deps-src.js"></script>
-    <link href="kbn-ui-shared-deps-src.css" rel="stylesheet" />
-    <link id="eui-theme-css" href="kbn-ui-shared-deps-npm.v8.light.css" rel="stylesheet" />
-    <!--                                      -->
+      <meta name="eui-global" />
+      <meta name="emotion" />
 
-    <meta name="emotion" />
-
-    <% if (typeof headHtmlSnippet !== 'undefined') { %> <%= headHtmlSnippet %> <% } %> <%
-    htmlWebpackPlugin.files.css.forEach(file => { %>
-    <link href="<%= file %>" rel="stylesheet" />
-    <% }); %>
-
-    <style>
-      #root[hidden],
-      #docs-root[hidden] {
-        display: none !important;
-      }
-    </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:slnt,wght@-10,300..700;0,300..700&family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <% if (typeof bodyHtmlSnippet !== 'undefined') { %>
-      <%= bodyHtmlSnippet %>
-    <% } %>
-
-    <div id="root"></div>
-    <div id="docs-root"></div>
-
-    <% if (typeof globals !== 'undefined' && Object.keys(globals).length) { %>
+      <!-- Added for Kibana shared dependencies -->
       <script>
+        window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': '', 'kbn-ui-shared-deps-src': '' };
+      </script>
+      <script src="kbn-ui-shared-deps-npm.dll.js"></script>
+      <script src="kbn-ui-shared-deps-src.js"></script>
+      <link href="kbn-ui-shared-deps-src.css" rel="stylesheet" />
+      <link id="eui-theme-css" href="kbn-ui-shared-deps-npm.v8.light.css" rel="stylesheet" />
+      <!--                                      -->
+
+      <% if (typeof headHtmlSnippet !=='undefined' ) { %>
+        <%= headHtmlSnippet %>
+          <% } %>
+            <% htmlWebpackPlugin.files.css.forEach(file=> { %>
+              <link href="<%= file %>" rel="stylesheet" />
+              <% }); %>
+
+                <style>
+                  #root[hidden],
+                  #docs-root[hidden] {
+                    display: none !important;
+                  }
+                </style>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link
+                  href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap"
+                  rel="stylesheet">
+                <meta name="eui-utilities" />
+</head>
+
+<body>
+  <% if (typeof bodyHtmlSnippet !=='undefined' ) { %>
+    <%= bodyHtmlSnippet %>
+      <% } %>
+
+        <div id="root"></div>
+        <div id="docs-root"></div>
+
+        <% if (typeof globals !=='undefined' && Object.keys(globals).length) { %>
+          <script>
         <% for (var varName in globals) { %>
             <% if (globals[varName] != undefined) { %>
-              window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
+                window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
             <% } %>
         <% } %>
-      </script>
-    <% } %>
+          </script>
+          <% } %>
 
-    <% htmlWebpackPlugin.files.js.forEach(file => { %>
-      <script src="<%= file %>"></script>
-    <% }); %>
-  </body>
+            <% htmlWebpackPlugin.files.js.forEach(file=> { %>
+              <script src="<%= file %>"></script>
+              <% }); %>
+</body>
+
 </html>

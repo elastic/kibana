@@ -8,12 +8,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -23,27 +22,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
+  contentClient,
   uiSettings,
-  http,
-  savedObjectsManagement,
   fixedPageSize = 10,
   checkHasAnnotationGroups,
   onChoose,
   onCreateNew,
 }: {
   uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentClient: ContentClient;
   fixedPageSize?: number;
   checkHasAnnotationGroups: () => Promise<boolean>;
   onChoose: (value: {
     id: string;
     type: string;
     fullName: string;
-    savedObject: SavedObjectCommon<unknown>;
+    savedObject: SavedObjectCommon;
   }) => void;
   onCreateNew: () => void;
 }) => {
@@ -67,35 +64,37 @@ export const EventAnnotationGroupSavedObjectFinder = ({
       direction="column"
       justifyContent="center"
     >
-      <EuiEmptyPrompt
-        titleSize="xs"
-        title={
-          <h2>
-            <FormattedMessage
-              id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptTitle"
-              defaultMessage="Start by adding an annotation layer"
-            />
-          </h2>
-        }
-        body={
-          <EuiText size="s">
-            <p>
+      <EuiFlexItem>
+        <EuiEmptyPrompt
+          titleSize="xs"
+          title={
+            <h2>
               <FormattedMessage
-                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptDescription"
-                defaultMessage="There are currently no annotations available to select from the library. Create a new layer to add annotations."
+                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptTitle"
+                defaultMessage="Start by adding an annotation layer"
               />
-            </p>
-          </EuiText>
-        }
-        actions={
-          <EuiButton onClick={() => onCreateNew()} size="s">
-            <FormattedMessage
-              id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyCTA"
-              defaultMessage="Create annotation layer"
-            />
-          </EuiButton>
-        }
-      />
+            </h2>
+          }
+          body={
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptDescription"
+                  defaultMessage="There are currently no annotations available to select from the library. Create a new layer to add annotations."
+                />
+              </p>
+            </EuiText>
+          }
+          actions={
+            <EuiButton onClick={() => onCreateNew()} size="s">
+              <FormattedMessage
+                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyCTA"
+                defaultMessage="Create annotation layer"
+              />
+            </EuiButton>
+          }
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
     <SavedObjectFinder
@@ -112,11 +111,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
         />
       }
       savedObjectMetaData={savedObjectMetaData}
-      services={{
-        uiSettings,
-        http,
-        savedObjectsManagement,
-      }}
+      services={{ contentClient, uiSettings }}
     />
   );
 };

@@ -70,7 +70,7 @@
             "label": "migration",
             "description": [],
             "signature": [
-              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -137,7 +137,7 @@
                 "label": "rawMigrationConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ discardUnknownObjects?: string | undefined; discardCorruptObjects?: string | undefined; } & { skip: boolean; pollInterval: number; algorithm: \"v2\" | \"zdt\"; zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; batchSize: number; maxBatchSizeBytes: ",
+                  "Readonly<{ discardUnknownObjects?: string | undefined; discardCorruptObjects?: string | undefined; } & { skip: boolean; pollInterval: number; algorithm: \"v2\" | \"zdt\"; zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; batchSize: number; maxBatchSizeBytes: ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -884,8 +884,6 @@
         "description": [],
         "signature": [
           "(mappings: ",
-          "IndexMapping",
-          " | ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
             "scope": "common",
@@ -893,6 +891,8 @@
             "section": "def-common.SavedObjectsFieldMapping",
             "text": "SavedObjectsFieldMapping"
           },
+          " | ",
+          "IndexMapping",
           ", path: string | string[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -915,15 +915,15 @@
             "label": "mappings",
             "description": [],
             "signature": [
-              "IndexMapping",
-              " | ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
                 "section": "def-common.SavedObjectsFieldMapping",
                 "text": "SavedObjectsFieldMapping"
-              }
+              },
+              " | ",
+              "IndexMapping"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,
@@ -1594,7 +1594,7 @@
         "label": "SavedObjectsMigrationConfigType",
         "description": [],
         "signature": [
-          "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+          "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1907,7 +1907,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<number>; runOnNonMigratorNodes: ",
+              "<number>; runOnRoles: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -1915,7 +1915,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<boolean>; }>; }>"
+              "<string[]>; }>; }>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,

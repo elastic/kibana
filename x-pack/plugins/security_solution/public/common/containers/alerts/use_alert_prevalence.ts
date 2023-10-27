@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { useGlobalTime } from '../use_global_time';
@@ -73,14 +73,16 @@ export const useAlertPrevalence = ({
   }
 
   const error = !loading && count === undefined;
-  const alertIds = data?.hits.hits.map(({ _id }) => _id);
 
-  return {
-    loading,
-    count,
-    error,
-    alertIds,
-  };
+  return useMemo(
+    () => ({
+      loading,
+      count,
+      error,
+      alertIds: data?.hits.hits.map(({ _id }) => _id),
+    }),
+    [count, data, error, loading]
+  );
 };
 
 const generateAlertPrevalenceQuery = (

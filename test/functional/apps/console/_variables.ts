@@ -14,9 +14,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/157776
-  describe.skip('Console variables', function testConsoleVariables() {
-    this.tags('includeFirefox');
+  describe('Console variables', function testConsoleVariables() {
+    // FLAKY on firefox: https://github.com/elastic/kibana/issues/157776
+    // this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
