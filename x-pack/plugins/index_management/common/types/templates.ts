@@ -24,6 +24,7 @@ export interface TemplateSerialized {
   priority?: number;
   _meta?: { [key: string]: any };
   data_stream?: {};
+  allow_auto_create?: boolean;
 }
 
 /**
