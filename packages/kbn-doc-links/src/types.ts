@@ -483,6 +483,8 @@ export interface DocLinks {
     datastreamsILM: string;
     datastreamsNamingScheme: string;
     datastreamsManualRollover: string;
+    datastreamsTSDS: string;
+    datastreamsTSDSMetrics: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;

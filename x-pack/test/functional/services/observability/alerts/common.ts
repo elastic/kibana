@@ -20,6 +20,7 @@ const DATE_WITH_DATA = {
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
+const ALERTS_TABLE_ACTIONS_MENU_SELECTOR = 'alertsTableActionsMenu';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
@@ -209,6 +210,7 @@ export function ObservabilityAlertsCommonProvider({
   const openActionsMenuForRow = retryOnStale.wrap(async (rowIndex: number) => {
     const actionsOverflowButton = await getActionsButtonByIndex(rowIndex);
     await actionsOverflowButton.click();
+    await testSubjects.existOrFail(ALERTS_TABLE_ACTIONS_MENU_SELECTOR);
   });
 
   const viewRuleDetailsButtonClick = async () => {

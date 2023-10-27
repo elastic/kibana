@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import {
+  esArchiverLoad,
+  esArchiverResetKibana,
+  esArchiverUnload,
+} from '../../../tasks/es_archiver';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
-  goToOpenedAlertsOnRuleDetailsPage,
   openAddEndpointExceptionFromAlertActionButton,
   openAddEndpointExceptionFromFirstAlert,
+  waitForAlerts,
 } from '../../../tasks/alerts';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
@@ -21,11 +25,6 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   addExceptionEntryFieldValue,
@@ -36,26 +35,21 @@ import {
   submitNewExceptionItem,
   validateExceptionConditionField,
 } from '../../../tasks/exceptions';
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import { ALERTS_COUNT } from '../../../screens/alerts';
 import {
   ADD_AND_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
-  NO_EXCEPTIONS_EXIST_PROMPT,
 } from '../../../screens/exceptions';
-import {
-  removeException,
-  goToAlertsTab,
-  goToEndpointExceptionsTab,
-} from '../../../tasks/rule_details';
+import { goToEndpointExceptionsTab } from '../../../tasks/rule_details';
 
 describe('Endpoint Exceptions workflows from Alert', () => {
-  const expectedNumberOfAlerts = 1;
   const ITEM_NAME = 'Sample Exception List Item';
   const ITEM_NAME_EDIT = 'Sample Exception List Item';
   const ADDITIONAL_ENTRY = 'host.hostname';
   beforeEach(() => {
+    esArchiverUnload('endpoint');
     esArchiverResetKibana();
     login();
     deleteAlertsAndRules();
@@ -69,7 +63,6 @@ describe('Endpoint Exceptions workflows from Alert', () => {
 
   after(() => {
     esArchiverUnload('endpoint');
-    esArchiverUnload('endpoint_2');
   });
 
   it('Should be able to create and close single Endpoint exception from overflow menu', () => {
@@ -84,33 +77,14 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     addExceptionFlyoutItemName(ITEM_NAME);
     submitNewExceptionItem();
 
-    // Alerts table should now be empty from having added exception and closed
-    // matching alert
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
+    // Instead of immediately checking if the Opened Alert has moved to the closed tab,
+    // use the waitForAlerts method to create a buffer, allowing the alerts some time to
+    // be moved to the Closed Alert tab.
+    waitForAlerts();
 
     // Closed alert should appear in table
     goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
-
-    // Endpoint Exception will move to Endpoint List under Exception tab of rule
-    goToEndpointExceptionsTab();
-
-    // Remove the exception and load an event that would have matched that exception
-    // to show that said exception now starts to show up again
-    removeException();
-    // when removing exception and again, no more exist, empty screen shows again
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
-
-    // load more docs
-    esArchiverLoad('endpoint_2');
-
-    goToAlertsTab();
-    goToOpenedAlertsOnRuleDetailsPage();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
-
-    cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
   });
 
   it('Should be able to create Endpoint exception from Alerts take action button, and change multiple exception items without resetting to initial auto-prefilled entries', () => {

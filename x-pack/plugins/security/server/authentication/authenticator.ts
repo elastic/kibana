@@ -259,7 +259,7 @@ export class Authenticator {
               ...providerCommonOptions,
               name,
               logger: options.loggers.get(type, name),
-              urls: { loggedOut: (request) => this.getLoggedOutURL(request, type) },
+              urls: { loggedOut: (request: KibanaRequest) => this.getLoggedOutURL(request, type) },
             }),
             this.options.config.authc.providers[type]?.[name]
           ),
@@ -275,7 +275,8 @@ export class Authenticator {
           name: '__http__',
           logger: options.loggers.get(HTTPAuthenticationProvider.type),
           urls: {
-            loggedOut: (request) => this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
+            loggedOut: (request: KibanaRequest) =>
+              this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
           },
         })
       );

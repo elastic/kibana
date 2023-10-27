@@ -74,9 +74,6 @@ export const UPGRADE_SELECTED_RULES_BUTTON = '[data-test-subj="upgradeSelectedRu
 
 export const GO_BACK_TO_RULES_TABLE_BUTTON = '[data-test-subj="addRulesGoBackToRulesTableBtn"]';
 
-export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
-  '[data-test-subj="initialLoadingPanelAllRulesTable"]';
-
 export const RULES_TABLE_REFRESH_INDICATOR = '[data-test-subj="loading-spinner"]';
 
 export const RULES_TABLE_AUTOREFRESH_INDICATOR = '[data-test-subj="loadingRulesInfoProgress"]';
@@ -169,7 +166,7 @@ export const RULES_SELECTED_TAG = '.euiSelectableListItem[aria-checked="true"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 
-export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+export const AUTO_REFRESH_POPOVER_TRIGGER_BUTTON = '[data-test-subj="autoRefreshButton"]';
 
 export const REFRESH_RULES_TABLE_BUTTON = '[data-test-subj="refreshRulesAction-linkIcon"]';
 

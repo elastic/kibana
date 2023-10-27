@@ -4,10 +4,10 @@
 <titleabbrev>Install with Docker</titleabbrev>
 ++++
 
-:docker-repo:     docker.elastic.co/kibana/kibana
-:docker-image:    {docker-repo}:{version}
-:es-docker-repo:  docker.elastic.co/elasticsearch/elasticsearch
-:es-docker-image: {es-docker-repo}:{version}
+:kib-docker-repo:     docker.elastic.co/kibana/kibana
+:kib-docker-image:    {kib-docker-repo}:{version}
+:es-docker-repo:      docker.elastic.co/elasticsearch/elasticsearch
+:es-docker-image:     {es-docker-repo}:{version}
 
 Docker images for {kib} are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/ubuntu[ubuntu:20.04].
@@ -21,166 +21,153 @@ These images contain both free and subscription features.
 
 [discrete]
 [[run-kibana-on-docker-for-dev]]
-=== Run {kib} on Docker for development
+=== Run {kib} in Docker for development
 
-. Start an {es} container for development or testing:
+Use Docker commands to run {kib} on a single-node {es} cluster for development or
+testing.
+
+TIP: This setup doesn't run multiple {es} nodes by default. To create a
+multi-node cluster with {kib}, use Docker Compose instead. Refer to
+{ref}/docker.html#docker-compose-file[Start a multi-node cluster with Docker
+Compose] in the {es} documentation.
+
+. Install Docker. Visit https://docs.docker.com/get-docker/[Get Docker] to
+install Docker for your environment.
 +
---
-ifeval::["{release-state}"=="unreleased"]
+IMPORTANT: If using Docker Desktop, make sure to allocate at least 4GB of
+memory. You can adjust memory usage in Docker Desktop by going to **Settings >
+Resources**.
 
-NOTE: No Docker images are currently available for {kib} {version}.
-
-endif::[]
-
-ifeval::["{release-state}"!="unreleased"]
-
-.. Create a new Docker network for {es} and {kib}:
+. Create a new Docker network for {es} and {kib}.
 +
 [source,sh,subs="attributes"]
 ----
 docker network create elastic
 ----
 
-.. Pull the {es} Docker image:
+. Pull the {es} Docker image.
 +
+--
+ifeval::["{release-state}"=="unreleased"]
+WARNING: Version {version} has not yet been released.
+No Docker image is currently available for {es} {version}.
+endif::[]
+
 [source,sh,subs="attributes"]
 ----
 docker pull {es-docker-image}
 ----
+--
 
-.. Optional: Verify the {es} Docker image signature::
+. Optional: Install
+https://docs.sigstore.dev/system_config/installation/[Cosign] for your
+environment. Then use Cosign to verify the {es} image's signature.
 +
 [source,sh,subs="attributes"]
 ----
 wget https://artifacts.elastic.co/cosign.pub
-cosign verify --key cosign.pub {docker-repo}:{version}
+cosign verify --key cosign.pub {es-docker-image}
 ----
 +
-For details about this step, refer to {ref}/docker.html#docker-verify-signature[Verify the {es} Docker image signature] in the {es} documentation.
+The `cosign` command prints the check results and the signature payload in JSON format:
++
+[source,sh,subs="attributes"]
+--------------------------------------------
+Verification for {es-docker-image} --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
+--------------------------------------------
 
-.. Start {es} in Docker:
+. Start an {es} container.
 +
 [source,sh,subs="attributes"]
 ----
-docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t {es-docker-image}
+docker run --name es01 --net elastic -p 9200:9200 -it -m 1GB {es-docker-image}
+----
++
+TIP: Use the `-m` flag to set a memory limit for the container. This removes the
+need to {ref}/docker.html#docker-set-heap-size[manually set the JVM size].
++
+The command prints the `elastic` user password and an enrollment token for {kib}.
+
+. Copy the generated `elastic` password and enrollment token. These credentials
+are only shown when you start {es} for the first time. You can regenerate the
+credentials using the following commands.
++
+[source,sh,subs="attributes"]
+----
+docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
+docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
 ----
 
-
-
-endif::[]
-
---
-+
-When you start {es} for the first time, the following security configuration 
-occurs automatically:
-+
-* {ref}/configuring-stack-security.html#stack-security-certificates[Certificates and keys] 
-are generated for the transport and HTTP layers.
-* The Transport Layer Security (TLS) configuration settings are written to
-`elasticsearch.yml`.
-* A password is generated for the `elastic` user.
-* An enrollment token is generated for {kib}.
-+
-NOTE: You might need to scroll back a bit in the terminal to view the password 
-and enrollment token.
-
-. Copy the generated password and enrollment token and save them in a secure 
-location. These values are shown only when you start {es} for the first time.
-You'll use these to enroll {kib} with your {es} cluster and log in.
-
-. In a new terminal session, start {kib} and connect it to your {es} container:
+. Pull the {kib} Docker image.
 +
 --
 ifeval::["{release-state}"=="unreleased"]
-
-NOTE: No Docker images are currently available for {kib} {version}.
-
+WARNING: Version {version} has not yet been released.
+No Docker image is currently available for {kib} {version}.
 endif::[]
 
-ifeval::["{release-state}"!="unreleased"]
-
 [source,sh,subs="attributes"]
 ----
-docker pull {docker-image}
-docker run --name kib-01 --net elastic -p 5601:5601 {docker-image}
+docker pull {kib-docker-image}
 ----
+--
 
-.. Pull the {kib} Docker image:
-+
-[source,sh,subs="attributes"]
-----
-docker pull {docker-image}
-----
-
-.. Optional: Verify the {kib} Docker image signature::
+. Optional: Verify the {kib} image's signature.
 +
 [source,sh,subs="attributes"]
 ----
 wget https://artifacts.elastic.co/cosign.pub
-cosign verify --key cosign.pub {docker-repo}:{version}
+cosign verify --key cosign.pub {kib-docker-image}
 ----
-+
-For details about this step, refer to {ref}/docker.html#docker-verify-signature[Verify the {es} Docker image signature] in the {es} documentation.
 
-.. Start {kib} in Docker:
+. Start a {kib} container.
 +
 [source,sh,subs="attributes"]
 ----
-docker run --name kib-01 --net elastic -p 5601:5601 {docker-image}
+docker run --name kib01 --net elastic -p 5601:5601 {kib-docker-image}
 ----
 
+. When {kib} starts, it outputs a unique generated link to the terminal. To
+access {kib}, open this link in a web browser.
 
-
-
-
-endif::[]
---
+. In your browser, enter the enrollment token that was generated when you started {es}.
 +
-When you start {kib}, a unique link is output to your terminal.
-
-. To access {kib}, click the generated link in your terminal.
-
-  .. In your browser, paste the enrollment token that you copied when starting
-  {es} and click the button to connect your {kib} instance with {es}.
-
-  .. Log in to {kib} as the `elastic` user with the password that was generated
-  when you started {es}.
-
-[[docker-generate]]
-[discrete]
-=== Generate passwords and enrollment tokens
-If you need to reset the password for the `elastic` user or other
-built-in users, run the {ref}/reset-password.html[`elasticsearch-reset-password`]
-tool. This tool is available in the {es} `bin` directory of the Docker container.
-
-For example, to reset the password for the `elastic` user:
-
+To regenerate the token, run:
++
 [source,sh]
 ----
-docker exec -it es-node01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
+docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
 ----
 
-If you need to generate new enrollment tokens for {kib} or {es} nodes, run the
-{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
-This tool is available in the {es} `bin` directory of the Docker container.
-
-For example, to generate a new enrollment token for {kib}:
-
+. Log in to {kib} as the `elastic` user with the password that was generated
+when you started {es}.
++
+To regenerate the password, run:
++
 [source,sh]
 ----
-docker exec -it es-node01 /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
 ----
 
 [discrete]
-=== Remove Docker containers
+==== Remove Docker containers
 
 To remove the containers and their network, run:
 
-[source,sh]
+[source,sh,subs="attributes"]
 ----
+# Remove the Elastic network
 docker network rm elastic
-docker rm es-node01
-docker rm kib-01
+
+# Remove the {es} container
+docker rm es01
+
+# Remove the {kib} container
+docker rm kib01
 ----
 
 [discrete]
@@ -204,7 +191,7 @@ With `docker-compose`, the bind-mount can be specified like this:
 version: '2'
 services:
   kibana:
-    image: {docker-image}
+    image: {kib-docker-image}
     volumes:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
 --------------------------------------------
@@ -215,8 +202,8 @@ By default, {kib} auto-generates a keystore file for secure settings at startup.
 
 ["source","sh",subs="attributes"]
 ----
-docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore create
-docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore add test_keystore_setting
+docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {kib-docker-image} bin/kibana-keystore create
+docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {kib-docker-image} bin/kibana-keystore add test_keystore_setting
 ----
 
 [discrete]
@@ -254,7 +241,7 @@ These variables can be set with +docker-compose+ like this:
 version: '2'
 services:
   kibana:
-    image: {docker-image}
+    image: {kib-docker-image}
     environment:
       SERVER_NAME: kibana.example.org
       ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'

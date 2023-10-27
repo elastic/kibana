@@ -25,7 +25,7 @@ import { isEqual } from 'lodash';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
-import { PreviewLogsComponent } from './preview_logs';
+import { PreviewLogs } from './preview_logs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -274,7 +274,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           timeframeOptions={previewData.timeframeOptions}
         />
       )}
-      <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
+      <PreviewLogs logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
     </>
   );
 };

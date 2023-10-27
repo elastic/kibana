@@ -272,6 +272,7 @@ export const HoverActions: React.FC<Props> = React.memo(
         })}
       >
         <Container
+          data-test-subj="hover-actions-container"
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}

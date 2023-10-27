@@ -53,9 +53,9 @@ const getDiagnosticsRoute = createApmServerRoute({
   ): Promise<{
     esResponses: {
       existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[];
-      fieldCaps: FieldCapsResponse;
-      indices: IndicesGetResponse;
-      ingestPipelines: IngestGetPipelineResponse;
+      fieldCaps?: FieldCapsResponse;
+      indices?: IndicesGetResponse;
+      ingestPipelines?: IngestGetPipelineResponse;
     };
     diagnosticsPrivileges: {
       index: Record<string, SecurityHasPrivilegesPrivileges>;
@@ -77,8 +77,8 @@ const getDiagnosticsRoute = createApmServerRoute({
     kibanaVersion: string;
     elasticsearchVersion: string;
     apmEvents: ApmEvent[];
-    invalidIndices: IndiciesItem[];
-    validIndices: IndiciesItem[];
+    invalidIndices?: IndiciesItem[];
+    validIndices?: IndiciesItem[];
     dataStreams: IndicesDataStream[];
     nonDataStreamIndices: string[];
     indexTemplatesByIndexPattern: Array<{

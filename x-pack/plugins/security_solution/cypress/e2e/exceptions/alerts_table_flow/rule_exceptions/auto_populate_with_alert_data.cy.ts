@@ -4,147 +4,69 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { LOADING_INDICATOR } from '../../../screens/security_header';
-import { getNewRule, getEndpointRule } from '../../../objects/rule';
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import {
+  esArchiverLoad,
+  esArchiverResetKibana,
+  esArchiverUnload,
+} from '../../../../tasks/es_archiver';
+import { LOADING_INDICATOR } from '../../../../screens/security_header';
+import { getEndpointRule } from '../../../../objects/rule';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
 import {
   addExceptionFromFirstAlert,
   expandFirstAlert,
-  goToClosedAlertsOnRuleDetailsPage,
-  goToOpenedAlertsOnRuleDetailsPage,
   openAddRuleExceptionFromAlertActionButton,
-} from '../../../tasks/alerts';
+} from '../../../../tasks/alerts';
 import {
   addExceptionEntryFieldValue,
   addExceptionEntryFieldValueValue,
-  addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
-  selectBulkCloseAlerts,
   submitNewExceptionItem,
-  validateExceptionItemFirstAffectedRuleNameInRulePage,
-  validateExceptionItemAffectsTheCorrectRulesInRulePage,
   validateExceptionConditionField,
   validateExceptionCommentCountAndText,
   editExceptionFlyoutItemName,
   validateHighlightedFieldsPopulatedAsExceptionConditions,
   validateEmptyExceptionConditionField,
-} from '../../../tasks/exceptions';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import {
-  goToAlertsTab,
-  goToExceptionsTab,
-  removeException,
-  waitForTheRuleToBeExecuted,
-} from '../../../tasks/rule_details';
+} from '../../../../tasks/exceptions';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { goToExceptionsTab } from '../../../../tasks/rule_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../../tasks/common';
 import {
   ADD_AND_BTN,
   ENTRY_DELETE_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
-  NO_EXCEPTIONS_EXIST_PROMPT,
-} from '../../../screens/exceptions';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+} from '../../../../screens/exceptions';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-const loadEndpointRuleAndAlerts = () => {
-  esArchiverLoad('endpoint');
-  login();
-  createRule(getEndpointRule());
-  visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-  goToRuleDetails();
-  waitForAlertsToPopulate();
-};
-
-describe('Rule Exceptions workflows from Alert', () => {
-  const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
+describe('Auto populate exception with Alert data', () => {
   const ITEM_NAME = 'Sample Exception Item';
   const ITEM_NAME_EDIT = 'Sample Exception Item Edit';
   const ADDITIONAL_ENTRY = 'host.hostname';
-  const newRule = getNewRule();
 
   beforeEach(() => {
+    esArchiverUnload('endpoint');
     esArchiverResetKibana();
-  });
-  after(() => {
-    esArchiverUnload('exceptions');
-    deleteAlertsAndRules();
-  });
-  afterEach(() => {
-    esArchiverUnload('exceptions_2');
-  });
-
-  it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
-    esArchiverLoad('exceptions');
+    esArchiverLoad('endpoint');
     login();
-    postDataView('exceptions-*');
-    createRule({
-      ...newRule,
-      query: 'agent.name:*',
-      data_view_id: 'exceptions-*',
-      interval: '10s',
-      rule_id: 'rule_testing',
-    });
+    createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForAlertsToPopulate();
-
-    cy.get(LOADING_INDICATOR).should('not.exist');
-    addExceptionFromFirstAlert();
-
-    addExceptionEntryFieldValue('agent.name', 0);
-    addExceptionEntryOperatorValue('is', 0);
-    addExceptionEntryFieldValueValue('foo', 0);
-
-    addExceptionFlyoutItemName(ITEM_NAME);
-    selectBulkCloseAlerts();
-    submitNewExceptionItem();
-
-    // Alerts table should now be empty from having added exception and closed
-    // matching alert
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
-
-    // Closed alert should appear in table
-    goToClosedAlertsOnRuleDetailsPage();
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(ALERTS_COUNT).should('have.text', `${EXPECTED_NUMBER_OF_ALERTS}`);
-
-    // Remove the exception and load an event that would have matched that exception
-    // to show that said exception now starts to show up again
-    goToExceptionsTab();
-
-    // Validate the exception is affecting the correct rule count and name
-    validateExceptionItemAffectsTheCorrectRulesInRulePage(1);
-    validateExceptionItemFirstAffectedRuleNameInRulePage(newRule.name);
-
-    // when removing exception and again, no more exist, empty screen shows again
-    removeException();
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
-
-    // load more docs
-    esArchiverLoad('exceptions_2');
-
-    // now that there are no more exceptions, the docs should match and populate alerts
-    goToAlertsTab();
-    goToOpenedAlertsOnRuleDetailsPage();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
-
-    cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
   });
-  it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
-    loadEndpointRuleAndAlerts();
+  after(() => {
+    esArchiverUnload('endpoint');
+    deleteAlertsAndRules();
+  });
+  afterEach(() => {
+    esArchiverUnload('endpoint');
+  });
 
+  it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 
@@ -176,8 +98,6 @@ describe('Rule Exceptions workflows from Alert', () => {
     submitNewExceptionItem();
   });
   it('Should create a Rule exception from Alerts take action button and change multiple exception items without resetting to initial auto-prefilled entries', () => {
-    loadEndpointRuleAndAlerts();
-
     cy.get(LOADING_INDICATOR).should('not.exist');
 
     // Open first Alert Summary
@@ -234,8 +154,6 @@ describe('Rule Exceptions workflows from Alert', () => {
     cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', 'host.hostname');
   });
   it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
-    loadEndpointRuleAndAlerts();
-
     cy.get(LOADING_INDICATOR).should('not.exist');
 
     // Open first Alert Summary

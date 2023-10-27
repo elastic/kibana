@@ -85,9 +85,9 @@ export const MESSAGE = '[data-test-subj="formatted-field-message"]';
 export const REASON =
   '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.reason"]';
 
-export const RISK_SCORE = '[data-test-subj^=formatted-field][data-test-subj$=risk_score]';
+export const RISK_SCORE = '[data-test-subj$=riskScore]';
 
-export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule\\.name]';
+export const RULE_NAME = '[data-test-subj$=ruleName]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
@@ -99,7 +99,7 @@ export const OPEN_ANALYZER_BTN = '[data-test-subj="view-in-analyzer"]';
 
 export const ANALYZER_NODE = '[data-test-subj="resolver:node"';
 
-export const SEVERITY = '[data-test-subj^=formatted-field][data-test-subj$=severity]';
+export const SEVERITY = '[data-test-subj$=severity]';
 
 export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=source\\.ip]';
 
@@ -201,3 +201,22 @@ export const MIXED_ALERT_TAG = '[data-test-subj="mixed-alert-tag"]';
 export const UNSELECTED_ALERT_TAG = '[data-test-subj="unselected-alert-tag"]';
 
 export const ALERTS_TABLE_ROW_LOADER = '[data-test-subj="row-loader"]';
+
+export const ALERT_TABLE_SUMMARY_VIEW_SELECTABLE = '[data-test-subj="summary-view-selector"]';
+
+export const ALERT_TABLE_GRID_VIEW_OPTION = '[data-test-subj="gridView"]';
+
+export const EVENT_SUMMARY_COLUMN = '[data-gridcell-column-id="eventSummary"]';
+
+export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
+
+export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
+
+export const ALERT_TABLE_ADDITIONAL_CONTROLS = '[data-test-subj="additionalFilters-popover"]';
+
+export const ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
+
+export const ALERT_RENDERER_HOST_NAME =
+  '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
+
+export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');

@@ -76,7 +76,7 @@ describe('getSharingData', () => {
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(searchSourceMock, {}, services);
-    expect(getSearchSource()).toMatchInlineSnapshot(`
+    expect(getSearchSource({})).toMatchInlineSnapshot(`
       Object {
         "fields": Array [
           Object {
@@ -121,7 +121,7 @@ describe('getSharingData', () => {
       },
       services
     );
-    expect(getSearchSource()).toMatchInlineSnapshot(`
+    expect(getSearchSource({})).toMatchInlineSnapshot(`
       Object {
         "index": "the-data-view-id",
         "sort": Array [
@@ -151,7 +151,7 @@ describe('getSharingData', () => {
       },
       services
     );
-    expect(getSearchSource().fields).toStrictEqual([
+    expect(getSearchSource({}).fields).toStrictEqual([
       { field: 'cool-timefield', include_unmapped: 'true' },
       { field: 'cool-field-1', include_unmapped: 'true' },
       { field: 'cool-field-2', include_unmapped: 'true' },

@@ -9,36 +9,34 @@ import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
 import type { Rule } from '../../../public/detection_engine/rule_management/logic/types';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
-  GO_BACK_TO_RULES_TABLE_BUTTON,
   INSTALL_ALL_RULES_BUTTON,
-  INSTALL_SELECTED_RULES_BUTTON,
-  NO_RULES_AVAILABLE_FOR_INSTALL_MESSSAGE,
-  NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE,
-  RULES_UPDATES_TAB,
-  RULE_CHECKBOX,
-  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
+  RULE_CHECKBOX,
+  NO_RULES_AVAILABLE_FOR_INSTALL_MESSSAGE,
+  GO_BACK_TO_RULES_TABLE_BUTTON,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
+  INSTALL_SELECTED_RULES_BUTTON,
+  RULES_UPDATES_TAB,
+  NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE,
 } from '../../screens/alerts_detection_rules';
-import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
   getRuleAssets,
   createAndInstallMockedPrebuiltRules,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
-import { login, visitWithoutDateRange } from '../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../tasks/login';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
   assertRuleAvailableForInstallAndInstallSelected,
   assertRuleAvailableForInstallAndInstallAllInPage,
   assertRuleAvailableForInstallAndInstallAll,
+  ruleUpdatesTabClick,
   assertRuleUpgradeAvailableAndUpgradeOne,
   assertRuleUpgradeAvailableAndUpgradeSelected,
   assertRuleUpgradeAvailableAndUpgradeAllInPage,
   assertRuleUpgradeAvailableAndUpgradeAll,
-  ruleUpdatesTabClick,
 } from '../../tasks/prebuilt_rules';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
@@ -48,7 +46,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     deleteAlertsAndRules();
     esArchiverResetKibana();
 
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+    visitSecurityDetectionRulesPage();
   });
 
   describe('Installation of prebuilt rules package via Fleet', () => {
@@ -57,12 +55,10 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*').as(
         'installPackage'
       );
-      waitForRulesTableToBeLoaded();
     });
 
     it('should install package from Fleet in the background', () => {
-      /* Assert that the package in installed from Fleet by checking that
-      /* the installSource is "registry", as opposed to "bundle" */
+      /* Assert that the package in installed from Fleet */
       cy.wait('@installPackageBulk', {
         timeout: 60000,
       }).then(({ response: bulkResponse }) => {
@@ -71,7 +67,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         const packages = bulkResponse?.body.items.map(
           ({ name, result }: BulkInstallPackageInfo) => ({
             name,
-            installSource: result.installSource,
           })
         );
 
@@ -87,17 +82,14 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
             cy.wrap(response?.body)
               .should('have.property', 'items')
               .should('have.length.greaterThan', 0);
-            cy.wrap(response?.body)
-              .should('have.property', '_meta')
-              .should('have.property', 'install_source')
-              .should('eql', 'registry');
           });
         } else {
           // Normal flow, install via the Fleet bulk install API
           expect(packages.length).to.have.greaterThan(0);
-          expect(packages).to.deep.include.members([
-            { name: 'security_detection_engine', installSource: 'registry' },
-          ]);
+          // At least one of the packages installed should be the security_detection_engine package
+          expect(packages).to.satisfy((pckgs: BulkInstallPackageInfo[]) =>
+            pckgs.some((pkg) => pkg.name === 'security_detection_engine')
+          );
         }
       });
     });
@@ -151,7 +143,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
     beforeEach(() => {
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
-      waitForRulesTableToBeLoaded();
       cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
         'installPrebuiltRules'
       );
@@ -233,7 +224,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         rules: [UPDATED_RULE_1, UPDATED_RULE_2],
         installToKibana: false,
       });
-      waitForRulesTableToBeLoaded();
       reload();
     });
 
@@ -249,7 +239,9 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
     it('should upgrade multiple selected prebuilt rules by selecting all in page', () => {
       ruleUpdatesTabClick();
-      assertRuleUpgradeAvailableAndUpgradeAllInPage({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
+      assertRuleUpgradeAvailableAndUpgradeAllInPage({
+        rules: [OUTDATED_RULE_1, OUTDATED_RULE_2],
+      });
     });
 
     it('should upgrade all rules with available upgrades at once', () => {

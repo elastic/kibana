@@ -34,6 +34,7 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
       tags: [],
       ignoreGlobalFilters: false,
       annotations: [],
+      dataViewSpec: null,
     },
     type: 'event-annotation-group',
     references: [
@@ -573,7 +574,7 @@ describe('Event Annotation Service', () => {
           title: 'newGroupTitle',
           description: 'my description',
           ignoreGlobalFilters: false,
-          dataViewSpec: undefined,
+          dataViewSpec: null,
           annotations,
         },
         options: {
@@ -623,7 +624,7 @@ describe('Event Annotation Service', () => {
           title: 'newTitle',
           description: '',
           annotations: [],
-          dataViewSpec: undefined,
+          dataViewSpec: null,
           ignoreGlobalFilters: false,
         } as EventAnnotationGroupAttributes,
         options: {

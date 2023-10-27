@@ -68,7 +68,7 @@ const packages: Package[] = [
       // * upload the `linux-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'linux-arm64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/linux-arm64-93.gz',
-        sha256: '25409584f76f3d6ed85463d84adf094eb6e256ed1cb0b754b95bcbda6691fc26',
+        sha256: '25610e43ad4852a46345b84e5b1a496c1c80183baeedb877b43b765c1b2ebfc7',
       },
 
       // A similar process is necessary for building on ARM macs:
