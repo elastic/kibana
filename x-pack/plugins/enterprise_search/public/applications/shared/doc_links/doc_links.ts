@@ -151,6 +151,10 @@ class DocLinks {
   public workplaceSearchDropbox: string;
   public workplaceSearchExternalIdentities: string;
   public workplaceSearchExternalSharePointOnline: string;
+  public workplaceSearchGatedFormBlog: string;
+  public workplaceSearchGatedFormDataUse: string;
+  public workplaceSearchGatedFormPrivacyStatement: string;
+  public workplaceSearchGatedFormTermsOfService: string;
   public workplaceSearchGettingStarted: string;
   public workplaceSearchGitHub: string;
   public workplaceSearchGmail: string;
@@ -318,6 +322,10 @@ class DocLinks {
     this.workplaceSearchDropbox = '';
     this.workplaceSearchExternalSharePointOnline = '';
     this.workplaceSearchExternalIdentities = '';
+    this.workplaceSearchGatedFormBlog = '';
+    this.workplaceSearchGatedFormDataUse = '';
+    this.workplaceSearchGatedFormPrivacyStatement = '';
+    this.workplaceSearchGatedFormTermsOfService = '';
     this.workplaceSearchGettingStarted = '';
     this.workplaceSearchGitHub = '';
     this.workplaceSearchGmail = '';
@@ -475,6 +483,7 @@ class DocLinks {
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;
     this.trainedModels = docLinks.links.enterpriseSearch.trainedModels;
     this.textEmbedding = docLinks.links.enterpriseSearch.textEmbedding;
+    this.workplaceSearchGatedFormBlog = docLinks.links.workplaceSearch.gatedFormBlog;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
@@ -492,6 +501,9 @@ class DocLinks {
     this.workplaceSearchExternalSharePointOnline =
       docLinks.links.workplaceSearch.externalSharePointOnline;
     this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
+    this.workplaceSearchGatedFormDataUse = docLinks.links.legal.dataUse;
+    this.workplaceSearchGatedFormPrivacyStatement = docLinks.links.legal.generalPrivacyStatement;
+    this.workplaceSearchGatedFormTermsOfService = docLinks.links.legal.termsOfService;
     this.workplaceSearchGettingStarted = docLinks.links.workplaceSearch.gettingStarted;
     this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
     this.workplaceSearchGmail = docLinks.links.workplaceSearch.gmail;

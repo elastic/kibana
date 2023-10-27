@@ -10,6 +10,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { createGetterSetter, createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { isFilterPinned } from '@kbn/es-query';
 import { getScopedHistory } from '../kibana_services';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../constants';
 import type { DiscoverSetupPlugins } from '../plugin';
@@ -61,13 +62,10 @@ export function initializeKbnUrlTracking(
           filter(
             ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
           ),
-          map(async ({ state }) => {
-            const { isFilterPinned } = await import('@kbn/es-query');
-            return {
-              ...state,
-              filters: state.filters?.filter(isFilterPinned),
-            };
-          })
+          map(({ state }) => ({
+            ...state,
+            filters: state.filters?.filter(isFilterPinned),
+          }))
         ),
       },
     ],
