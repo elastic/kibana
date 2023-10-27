@@ -33,6 +33,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   scopeId,
   truncate,
   asPlainText,
+  context,
 }) => {
   const asPlainTextDefault = useMemo(() => {
     return (
@@ -62,6 +63,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         scopeId,
         truncate,
         values,
+        context,
       })}
     </StyledContent>
   );
