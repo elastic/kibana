@@ -467,7 +467,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid value "undefined" supplied to "threshold"',
+            message: '[request body]: Invalid input',
             statusCode: 400,
           });
         });
@@ -510,7 +510,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid value "0" supplied to "threshold,value"',
+            message: '[request body]: threshold.value: Number must be greater than or equal to 1',
             statusCode: 400,
           });
         });
@@ -574,9 +574,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(rule)
             .expect(400);
 
-          expect(body.message).to.eql(
-            '[request body]: Invalid value "["host.name"]" supplied to "investigation_fields"'
-          );
+          expect(body.message).to.eql('[request body]: Invalid input');
         });
       });
     });

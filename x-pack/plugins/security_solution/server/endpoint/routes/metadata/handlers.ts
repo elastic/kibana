@@ -7,8 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-
 import type {
   MetadataListResponse,
   EndpointSortableField,
@@ -27,9 +25,7 @@ import {
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
   METADATA_TRANSFORMS_PATTERN,
-  METADATA_TRANSFORMS_PATTERN_V2,
 } from '../../../../common/endpoint/constants';
-import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/transforms';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
@@ -103,21 +99,13 @@ export const getMetadataRequestHandler = function (
 };
 
 export function getMetadataTransformStatsHandler(
-  endpointAppContext: EndpointAppContext,
   logger: Logger
 ): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> {
   return async (context, _, response) => {
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const packageClient = endpointAppContext.service.getInternalFleetServices().packages;
-    const installation = await packageClient.getInstallation(FLEET_ENDPOINT_PACKAGE);
-    const transformName =
-      installation?.version && !isEndpointPackageV2(installation.version)
-        ? METADATA_TRANSFORMS_PATTERN
-        : METADATA_TRANSFORMS_PATTERN_V2;
-
     try {
       const transformStats = await esClient.transform.getTransformStats({
-        transform_id: transformName,
+        transform_id: METADATA_TRANSFORMS_PATTERN,
         allow_no_match: true,
       });
       return response.ok({

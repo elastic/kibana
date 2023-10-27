@@ -16,9 +16,7 @@ import {
   METADATA_TRANSFORMS_STATUS_ROUTE,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
-  METADATA_UNITED_TRANSFORM_V2,
   metadataTransformPrefix,
-  METADATA_CURRENT_TRANSFORM_V2,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -46,7 +44,8 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const log = getService('log');
 
-  describe('test metadata apis', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/151854
+  describe.skip('test metadata apis', () => {
     describe('list endpoints GET route', () => {
       const numberOfHostsInFixture = 2;
       let agent1Timestamp: number;
@@ -401,17 +400,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('get metadata transforms', () => {
-      const testRegex = /(endpoint|logs-endpoint)\.metadata_(united|current)-default-*/;
-      let currentTransformName = metadataTransformPrefix;
-      let unitedTransformName = METADATA_UNITED_TRANSFORM;
-
-      before(async () => {
-        const isPackageV2 = await endpointTestResources.isEndpointPackageV2();
-        if (isPackageV2) {
-          currentTransformName = METADATA_CURRENT_TRANSFORM_V2;
-          unitedTransformName = METADATA_UNITED_TRANSFORM_V2;
-        }
-      });
+      const testRegex = /endpoint\.metadata_(united|current)-default-*/;
 
       it('should respond forbidden if no fleet access', async () => {
         await getService('supertestWithoutAuth')
@@ -422,8 +411,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('correctly returns stopped transform stats', async () => {
-        await stopTransform(getService, `${currentTransformName}*`);
-        await stopTransform(getService, `${unitedTransformName}*`);
+        await stopTransform(getService, `${metadataTransformPrefix}*`);
+        await stopTransform(getService, `${METADATA_UNITED_TRANSFORM}*`);
 
         const { body } = await supertest
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
@@ -439,17 +428,17 @@ export default function ({ getService }: FtrProviderContext) {
         expect(transforms.length).to.eql(2);
 
         const currentTransform = transforms.find((transform) =>
-          transform.id.startsWith(currentTransformName)
+          transform.id.startsWith(metadataTransformPrefix)
         );
         expect(currentTransform).to.be.ok();
 
         const unitedTransform = transforms.find((transform) =>
-          transform.id.startsWith(unitedTransformName)
+          transform.id.startsWith(METADATA_UNITED_TRANSFORM)
         );
         expect(unitedTransform).to.be.ok();
 
-        await startTransform(getService, currentTransformName);
-        await startTransform(getService, unitedTransformName);
+        await startTransform(getService, metadataTransformPrefix);
+        await startTransform(getService, METADATA_UNITED_TRANSFORM);
       });
 
       it('correctly returns started transform stats', async () => {
@@ -467,12 +456,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(transforms.length).to.eql(2);
 
         const currentTransform = transforms.find((transform) =>
-          transform.id.startsWith(currentTransformName)
+          transform.id.startsWith(metadataTransformPrefix)
         );
         expect(currentTransform).to.be.ok();
 
         const unitedTransform = transforms.find((transform) =>
-          transform.id.startsWith(unitedTransformName)
+          transform.id.startsWith(METADATA_UNITED_TRANSFORM)
         );
         expect(unitedTransform).to.be.ok();
       });
