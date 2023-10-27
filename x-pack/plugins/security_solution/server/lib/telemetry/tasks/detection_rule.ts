@@ -28,7 +28,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
   return {
     type: 'security:telemetry-detection-rules',
     title: 'Security Solution Detection Rule Lists Telemetry',
-    interval: '2m',
+    interval: '24h',
     timeout: '10m',
     version: '1.0.0',
     runTask: async (
