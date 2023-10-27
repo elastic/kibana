@@ -107,10 +107,10 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString('{{dq}}', variables, 'slack')).toBe(variables.dq);
       expect(renderMustacheString('{{bt}}', variables, 'slack')).toBe(`'`);
       expect(renderMustacheString('{{bs}}', variables, 'slack')).toBe(variables.bs);
-      expect(renderMustacheString('{{st}}', variables, 'slack')).toBe('`*`');
-      expect(renderMustacheString('{{ul}}', variables, 'slack')).toBe('`_`');
+      expect(renderMustacheString('{{st}}', variables, 'slack')).toBe('*');
+      expect(renderMustacheString('{{ul}}', variables, 'slack')).toBe('_');
       // html escapes not needed when using backtic escaping
-      expect(renderMustacheString('{{st_lt}}', variables, 'slack')).toBe('`*<`');
+      expect(renderMustacheString('{{st_lt}}', variables, 'slack')).toBe('*&lt;');
     });
 
     it('handles escape:json with commonly escaped strings', () => {

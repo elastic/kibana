@@ -144,13 +144,6 @@ function escapeSlack(value: unknown): string {
   if (value == null) return '';
 
   const valueString = `${value}`;
-  // if the value contains * or _, escape the whole thing with back tics
-  if (valueString.includes('_') || valueString.includes('*')) {
-    // replace unescapable back tics with single quote
-    return '`' + valueString.replace(/`/g, `'`) + '`';
-  }
-
-  // otherwise, do "standard" escaping
   return (
     valueString
       .replace(/&/g, '&amp;')
