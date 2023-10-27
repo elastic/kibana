@@ -26,9 +26,8 @@ function isUpperCase(val: string) {
 
 export function cleanString(str: string) {
   return str
-    .replace(/\d*/g, '')
     .replace(/```\w*```/g, '')
-    .replace(/[\s\n\r]+/g, ' ')
-    .replace(/[?!@#$%^&*()_+\][{}|/<>,'"]/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/[^a-zA-Z\s]*/g, '')
     .trim();
 }

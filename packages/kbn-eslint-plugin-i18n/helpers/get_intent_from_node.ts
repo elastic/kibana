@@ -8,6 +8,8 @@
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 import { cleanString, lowerCaseFirstLetter, upperCaseFirstLetter } from './utils';
 
+const EXEMPTED_TAG_NAMES = ['EuiCode', 'EuiBetaBadge', 'FormattedMessage'];
+
 export function getIntentFromNode(
   value: string,
   parent: TSESTree.Node | undefined
@@ -29,9 +31,10 @@ export function getIntentFromNode(
     const parentTagName = String(parent.openingElement.name.name);
 
     // Exceptions
-    if (parentTagName === 'EuiCode') {
+    if (EXEMPTED_TAG_NAMES.includes(parentTagName)) {
       return false;
     }
+
     if (parentTagName.includes('Eui')) {
       return `${processedValue}${parentTagName.replace('Eui', '')}Label`;
     }
@@ -49,6 +52,10 @@ export function getIntentFromNode(
     parent.parent.name.type === AST_NODE_TYPES.JSXIdentifier
   ) {
     const parentTagName = String(parent.parent.name.name);
+
+    if (EXEMPTED_TAG_NAMES.includes(parentTagName)) {
+      return false;
+    }
 
     return `${lowerCaseFirstLetter(parentTagName)}.${processedValue}Label`;
   }
