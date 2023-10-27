@@ -67,7 +67,7 @@ export const createAndEnrollEndpointHost = async ({
   const agentDownload = await getAgentDownloadUrl(version, useClosestVersionMatch, log).then<{
     url: string;
     cache?: DownloadedAgentInfo;
-  }>((url) => {
+  }>(({ url }) => {
     if (useCache) {
       cacheCleanupPromise = cleanupDownloads();
 
@@ -234,7 +234,7 @@ const createMultipassVm = async ({
   };
 };
 
-const deleteMultipassVm = async (vmName: string): Promise<void> => {
+export const deleteMultipassVm = async (vmName: string): Promise<void> => {
   if (process.env.CI) {
     await execa.command(`vagrant destroy -f`, {
       env: {
@@ -339,7 +339,10 @@ const enrollHostWithFleet = async ({
     ]);
   }
   log.info(`Waiting for Agent to check-in with Fleet`);
-  const agent = await waitForHostToEnroll(kbnClient, vmName, 240000);
+
+  const agent = await waitForHostToEnroll(kbnClient, vmName, 8 * 60 * 1000);
+
+  log.info(`Agent enrolled with Fleet, status: `, agent.status);
 
   return {
     agentId: agent.id,
