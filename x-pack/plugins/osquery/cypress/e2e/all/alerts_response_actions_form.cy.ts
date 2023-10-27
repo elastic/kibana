@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import {
   cleanupPack,
   cleanupRule,
@@ -31,7 +32,9 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
   let packName: string;
   const packData = packFixture();
   const multiQueryPackData = multiQueryPackFixture();
-
+  before(() => {
+    initializeDataViews();
+  });
   beforeEach(() => {
     loadPack(packData).then((data) => {
       packId = data.saved_object_id;

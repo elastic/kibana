@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import {
   addLiveQueryToCase,
   checkActionItemsInResults,
@@ -18,6 +19,7 @@ describe('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
   before(() => {
+    initializeDataViews();
     loadLiveQuery({
       agent_all: true,
       query: "SELECT * FROM os_version where name='Ubuntu';",

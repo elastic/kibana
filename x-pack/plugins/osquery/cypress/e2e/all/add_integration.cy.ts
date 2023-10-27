@@ -42,7 +42,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
-    navigateTo('/app/osquery');
   });
 
   after(() => {
