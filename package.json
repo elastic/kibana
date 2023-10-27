@@ -1488,7 +1488,7 @@
     "ejs": "^3.1.8",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.2",
-    "esbuild": "^0.19.5",
+    "esbuild": "^0.18.20",
     "eslint": "^8.46.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-module-utils": "^2.8.0",
