@@ -82,9 +82,9 @@ export const enhancedEsSearchStrategyProvider = (
       return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
     };
 
-    const cancel = async () => {
+    const cancel = () => {
       if (id && !options.isStored) {
-        await cancelAsyncSearch(id, esClient);
+        return cancelAsyncSearch(id, esClient);
       }
     };
 
