@@ -488,6 +488,29 @@
           },
           {
             "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [
+              "\nUsage collection."
+            ],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
             "id": "def-public.AiopsAppDependencies.share",
             "type": "CompoundType",
             "tags": [],
@@ -686,6 +709,22 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.embeddingOrigin",
+            "type": "string",
+            "tags": [],
+            "label": "embeddingOrigin",
+            "description": [
+              "Identifier to indicate the plugin utilizing the component"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
