@@ -27,7 +27,7 @@ import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import { SORT_ORDER_VALUES } from '../../../common/ui/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CASES_TABLE_PERPAGE_VALUES } from './types';
-import { parseURLWithFilterOptions } from './utils/parse_url_with_flter_options';
+import { parseURLWithFilterOptions } from './utils/parse_url_with_filter_options';
 
 export const getQueryParamsLocalStorageKey = (appId: string) => {
   const filteringKey = LOCAL_STORAGE_KEYS.casesQueryParams;

@@ -7,7 +7,7 @@
 
 // This file was contributed to by generative AI
 
-import { parseURLWithFilterOptions } from './parse_url_with_flter_options';
+import { parseURLWithFilterOptions } from './parse_url_with_filter_options';
 
 describe('parseURLWithFilterOptions', () => {
   it('parses a url with search=foo', () => {
