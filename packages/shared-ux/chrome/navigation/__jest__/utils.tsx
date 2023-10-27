@@ -48,3 +48,9 @@ export const renderNavigation = async ({
 
   return renderResult;
 };
+
+type ArgsType<T> = T extends (...args: infer A) => any ? A : never;
+
+export function getMockFn<T extends (...args: any[]) => any>() {
+  return jest.fn() as jest.Mock<T, ArgsType<T>>;
+}

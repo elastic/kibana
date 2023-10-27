@@ -15,7 +15,12 @@ import { navLinksMock } from '../mocks/src/navlinks';
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
 
-import { renderNavigation, TestType, type ProjectNavigationChangeListener } from './utils';
+import {
+  getMockFn,
+  renderNavigation,
+  TestType,
+  type ProjectNavigationChangeListener,
+} from './utils';
 
 const errorHandler = (type: TestType) => (e: Error) => {
   const err = new Error(`Failed to run tests for ${type}.`);
@@ -35,8 +40,7 @@ describe('builds navigation tree', () => {
   });
 
   test('render reference UI and build the navigation tree', async () => {
-    const onProjectNavigationChange: jest.MockedFunction<ProjectNavigationChangeListener> =
-      jest.fn();
+    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
     const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
       try {
@@ -372,8 +376,7 @@ describe('builds navigation tree', () => {
       },
     ]);
 
-    const onProjectNavigationChange: jest.MockedFunction<ProjectNavigationChangeListener> =
-      jest.fn();
+    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
     const runTests = (type: TestType) => {
       expect(onProjectNavigationChange).toHaveBeenCalled();
@@ -482,8 +485,7 @@ describe('builds navigation tree', () => {
         href: '',
       },
     ]);
-    const onProjectNavigationChange: jest.MockedFunction<ProjectNavigationChangeListener> =
-      jest.fn();
+    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
     const runTests = (type: TestType, { queryByTestId }: RenderResult) => {
       expect(onProjectNavigationChange).toHaveBeenCalled();
@@ -559,6 +561,76 @@ describe('builds navigation tree', () => {
       });
 
       await runTests('uiComponents', renderResult);
+    }
+  });
+
+  test('should render group preset (analytics, ml...)', async () => {
+    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
+
+    const runTests = async (type: TestType) => {
+      try {
+        expect(onProjectNavigationChange).toHaveBeenCalled();
+        const lastCall =
+          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+        const [navTreeGenerated] = lastCall;
+
+        expect(navTreeGenerated).toEqual({
+          navigationTree: expect.any(Array),
+        });
+      } catch (e) {
+        errorHandler(type)(e);
+      }
+    };
+
+    // -- Default navigation
+    {
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'preset',
+          preset: 'analytics',
+        },
+        {
+          type: 'preset',
+          preset: 'ml',
+        },
+        {
+          type: 'preset',
+          preset: 'devtools',
+        },
+        {
+          type: 'preset',
+          preset: 'management',
+        },
+      ];
+
+      const renderResult = await renderNavigation({
+        navTreeDef: {
+          body: navigationBody,
+        },
+        onProjectNavigationChange,
+      });
+
+      await runTests('treeDef');
+
+      renderResult.unmount();
+      onProjectNavigationChange.mockReset();
+    }
+
+    // -- With UI Components
+    {
+      await renderNavigation({
+        navigationElement: (
+          <Navigation>
+            <Navigation.Group preset="analytics" />
+            <Navigation.Group preset="ml" />
+            <Navigation.Group preset="devtools" />
+            <Navigation.Group preset="management" />
+          </Navigation>
+        ),
+        onProjectNavigationChange,
+      });
+
+      await runTests('uiComponents');
     }
   });
 
