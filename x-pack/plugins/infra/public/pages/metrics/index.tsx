@@ -85,7 +85,9 @@ export const InfrastructurePage = () => {
                           {settingsTabTitle}
                         </EuiHeaderLink>
                         <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                        <MetricsAlertDropdown />
+                        {config.featureFlags.alertsAndRulesDropdownEnabled && (
+                          <MetricsAlertDropdown />
+                        )}
                         <EuiHeaderLink
                           href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
                           color="primary"
