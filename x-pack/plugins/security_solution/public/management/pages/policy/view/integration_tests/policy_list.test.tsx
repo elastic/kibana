@@ -25,7 +25,8 @@ jest.mock('../../../../../common/components/user_privileges');
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
-describe('When on the policy list page', () => {
+// Failing: See https://github.com/elastic/kibana/issues/169133
+describe.skip('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];

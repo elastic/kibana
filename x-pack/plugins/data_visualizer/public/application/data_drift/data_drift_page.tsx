@@ -359,7 +359,6 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
                 reload={forceRefresh}
-                brushSelectionUpdateHandler={brushSelectionUpdate}
                 documentCountStats={documentStatsProd.documentCountStats}
                 documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
                 isBrushCleared={isBrushCleared}

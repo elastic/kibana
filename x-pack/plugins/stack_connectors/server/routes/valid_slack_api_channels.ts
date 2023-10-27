@@ -48,13 +48,7 @@ export const validSlackApiChannelsRoute = (
   ): Promise<IKibanaResponse> {
     const { authToken, channelIds } = req.body;
 
-    const axiosInstance = axios.create({
-      baseURL: SLACK_URL,
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    });
+    const axiosInstance = axios.create();
 
     const validChannelId = (
       channelId: string = ''
@@ -62,9 +56,13 @@ export const validSlackApiChannelsRoute = (
       return request<ValidChannelResponse>({
         axios: axiosInstance,
         configurationUtilities,
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-type': 'application/json; charset=UTF-8',
+        },
         logger,
         method: 'get',
-        url: `conversations.info?channel=${channelId}`,
+        url: `${SLACK_URL}conversations.info?channel=${channelId}`,
       });
     };
 

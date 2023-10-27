@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +18,7 @@ import { css } from '@emotion/react';
 import type { ProductTier } from '../../../common/product';
 import { ProductTierBadge } from './product_tier_badge';
 import { WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE } from './translations';
-import { getCloudUrl } from '../../navigation/links/util';
+import { getProjectDetailsUrl } from '../../navigation/links/util';
 import { useKibana } from '../../common/services';
 
 const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | undefined }) => {
@@ -43,12 +42,11 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
             <ProductTierBadge productTier={productTier} />
             <EuiLink
               className="eui-alignMiddle"
-              id={SecurityPageName.projectSettings}
               css={css`
                 color: ${euiTheme.colors.primaryText};
                 padding-left: ${euiTheme.size.m};
               `}
-              href={getCloudUrl('projects', cloud)}
+              href={getProjectDetailsUrl(cloud)}
               target="_blank"
               external={false}
             >

@@ -41,7 +41,6 @@ export function SloDetailsAlerts({ slo }: Props) {
                 ],
               },
             }}
-            showExpandToDetails={false}
             showAlertStatusWithFlapping
             pageSize={100}
           />

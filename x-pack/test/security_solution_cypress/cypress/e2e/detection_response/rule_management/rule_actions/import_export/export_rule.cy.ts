@@ -33,7 +33,6 @@ import {
   cleanKibana,
   resetRulesTableState,
   deleteAlertsAndRules,
-  reload,
 } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
@@ -56,8 +55,7 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
   });
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   before(() => {
@@ -171,7 +169,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
       const expectedNumberCustomRulesToBeExported = 2;
 
       createAndInstallMockedPrebuiltRules(prebuiltRules);
-      reload();
+      cy.reload();
       selectAllRules();
       bulkExportRules();
 

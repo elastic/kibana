@@ -18963,13 +18963,28 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.upgrade_details",
+            "type": "Object",
+            "tags": [],
+            "label": "upgrade_details",
+            "description": [
+              "\nID of the API key the Elastic Agent must used to contact Fleet Server\n\nUpgrade state of the Elastic Agent"
+            ],
+            "signature": [
+              "AgentUpgradeDetails",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.FleetServerAgent.access_api_key_id",
             "type": "string",
             "tags": [],
             "label": "access_api_key_id",
-            "description": [
-              "\nID of the API key the Elastic Agent must used to contact Fleet Server"
-            ],
+            "description": [],
             "signature": [
               "string | undefined"
             ],

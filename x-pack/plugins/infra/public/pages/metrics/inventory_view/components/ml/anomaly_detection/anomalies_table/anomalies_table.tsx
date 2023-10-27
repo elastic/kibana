@@ -255,20 +255,31 @@ export const AnomaliesTable = ({
     []
   );
 
-  const anomalyParams = useMemo(
-    () => ({
+  const getTimeRange = useCallback(() => {
+    if (hideDatePicker) {
+      return {
+        start: datemathToEpochMillis(dateRange.from) || 0,
+        end: datemathToEpochMillis(dateRange.to, 'up') || 0,
+      };
+    } else {
+      return timeRange;
+    }
+  }, [dateRange.from, dateRange.to, hideDatePicker, timeRange]);
+
+  const anomalyParams = useMemo(() => {
+    const { start, end } = getTimeRange();
+    return {
       sourceId: 'default',
       anomalyThreshold: anomalyThreshold || 0,
-      startTime: timeRange.start,
-      endTime: timeRange.end,
+      startTime: start,
+      endTime: end,
       defaultSortOptions: {
         direction: sorting?.direction || 'desc',
         field: (sorting?.field || 'startTime') as SortField,
       },
       defaultPaginationOptions: { pageSize: 10 },
-    }),
-    [timeRange.start, timeRange.end, sorting?.field, sorting?.direction, anomalyThreshold]
-  );
+    };
+  }, [getTimeRange, anomalyThreshold, sorting?.direction, sorting?.field]);
   const {
     metricsHostsAnomalies,
     getMetricsHostsAnomalies,

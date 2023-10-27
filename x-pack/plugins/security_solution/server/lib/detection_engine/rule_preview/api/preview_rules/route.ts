@@ -284,6 +284,10 @@ export const previewRulesRoute = async (
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
+                getTimeRange: () => {
+                  const date = startedAt.toISOString();
+                  return { dateStart: date, dateEnd: date };
+                },
               })) as { state: TState });
 
               const errors = loggedStatusChanges

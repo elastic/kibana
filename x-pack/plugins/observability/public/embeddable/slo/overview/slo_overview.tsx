@@ -26,7 +26,12 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-  const { isLoading, slo, refetch, isRefetching } = useFetchSloDetails({
+  const {
+    isLoading,
+    data: slo,
+    refetch,
+    isRefetching,
+  } = useFetchSloDetails({
     sloId,
     instanceId: sloInstanceId,
   });

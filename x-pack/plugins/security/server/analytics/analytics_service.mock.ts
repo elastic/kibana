@@ -10,5 +10,7 @@ import type { AnalyticsServiceSetup } from './analytics_service';
 export const analyticsServiceMock = {
   createSetup: (): jest.Mocked<AnalyticsServiceSetup> => ({
     reportAuthenticationTypeEvent: jest.fn(),
+    reportCSPViolation: jest.fn(),
+    reportPermissionsPolicyViolation: jest.fn(),
   }),
 };

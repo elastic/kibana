@@ -54,7 +54,10 @@ export function useProcessList(
       sortBy: parsedSortBy,
       searchFilter,
     }),
-    decodeResponse
+    decodeResponse,
+    undefined,
+    undefined,
+    true
   );
 
   useEffect(() => {

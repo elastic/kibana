@@ -45,6 +45,83 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
 - Kibana should not crash with Out Of Memory exception during package installation.
 - For test purposes, it should be possible to use detection rules package versions lower than the latest.
 
+### Functional requirements
+
+- User should be able to install prebuilt rules with and without previewing what exactly they would install (rule properties).
+- User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
+- If user chooses to preview a prebuilt rule to be installed/upgraded, we currently show this preview in a flyout.
+- In the prebuilt rule preview a tab that doesn't have any sections should not be displayed and a section that doesn't have any properties also should not be displayed.
+
+Examples of rule properties we show in the prebuilt rule preview flyout:
+
+```Gherkin
+Examples:
+| rule_type         | property                          | tab                 | section             |
+│ All rule types    │ Author                            │ Overview            │ About               │
+│ All rule types    │ Building block                    │ Overview            │ About               │
+│ All rule types    │ Severity                          │ Overview            │ About               │
+│ All rule types    │ Severity override                 │ Overview            │ About               │
+│ All rule types    │ Risk score                        │ Overview            │ About               │
+│ All rule types    │ Risk score override               │ Overview            │ About               │
+│ All rule types    │ Reference URLs                    │ Overview            │ About               │
+│ All rule types    │ False positive examples           │ Overview            │ About               │
+│ All rule types    │ Custom highlighted fields         │ Overview            │ About               │
+│ All rule types    │ License                           │ Overview            │ About               │
+│ All rule types    │ Rule name override                │ Overview            │ About               │
+│ All rule types    │ MITRE ATT&CK™                     │ Overview            │ About               │
+│ All rule types    │ Timestamp override                │ Overview            │ About               │
+│ All rule types    │ Tags                              │ Overview            │ About               │
+│ All rule types    │ Type                              │ Overview            │ Definition          │
+│ All rule types    │ Related integrations              │ Overview            │ Definition          │
+│ All rule types    │ Required fields                   │ Overview            │ Definition          │
+│ All rule types    │ Timeline template                 │ Overview            │ Definition          │
+│ All rule types    │ Runs every                        │ Overview            │ Schedule            │
+│ All rule types    │ Additional look-back time         │ Overview            │ Schedule            │
+│ All rule types    │ Setup guide                       │ Overview            │ Setup guide         │
+│ All rule types    │ Investigation guide               │ Investigation guide │ Investigation guide │
+│ Custom Query      │ Index patterns                    │ Overview            │ Definition          │
+│ Custom Query      │ Data view ID                      │ Overview            │ Definition          │
+│ Custom Query      │ Data view index pattern           │ Overview            │ Definition          │
+│ Custom Query      │ Custom query                      │ Overview            │ Definition          │
+│ Custom Query      │ Filters                           │ Overview            │ Definition          │
+│ Custom Query      │ Saved query name                  │ Overview            │ Definition          │
+│ Custom Query      │ Saved query filters               │ Overview            │ Definition          │
+│ Custom Query      │ Saved query                       │ Overview            │ Definition          │
+│ Custom Query      │ Suppress alerts by                │ Overview            │ Definition          │
+│ Custom Query      │ Suppress alerts for               │ Overview            │ Definition          │
+│ Custom Query      │ If a suppression field is missing │ Overview            │ Definition          │
+│ Machine Learning  │ Anomaly score threshold           │ Overview            │ Definition          │
+│ Machine Learning  │ Machine Learning job              │ Overview            │ Definition          │
+│ Threshold         │ Threshold                         │ Overview            │ Definition          │
+│ Threshold         │ Index patterns                    │ Overview            │ Definition          │
+│ Threshold         │ Data view ID                      │ Overview            │ Definition          │
+│ Threshold         │ Data view index pattern           │ Overview            │ Definition          │
+│ Threshold         │ Custom query                      │ Overview            │ Definition          │
+│ Threshold         │ Filters                           │ Overview            │ Definition          │
+│ Event Correlation │ EQL query                         │ Overview            │ Definition          │
+│ Event Correlation │ Filters                           │ Overview            │ Definition          │
+│ Event Correlation │ Index patterns                    │ Overview            │ Definition          │
+│ Event Correlation │ Data view ID                      │ Overview            │ Definition          │
+│ Event Correlation │ Data view index pattern           │ Overview            │ Definition          │
+│ Indicator Match   │ Indicator index patterns          │ Overview            │ Definition          │
+│ Indicator Match   │ Indicator mapping                 │ Overview            │ Definition          │
+│ Indicator Match   │ Indicator filters                 │ Overview            │ Definition          │
+│ Indicator Match   │ Indicator index query             │ Overview            │ Definition          │
+│ Indicator Match   │ Index patterns                    │ Overview            │ Definition          │
+│ Indicator Match   │ Data view ID                      │ Overview            │ Definition          │
+│ Indicator Match   │ Data view index pattern           │ Overview            │ Definition          │
+│ Indicator Match   │ Custom query                      │ Overview            │ Definition          │
+│ Indicator Match   │ Filters                           │ Overview            │ Definition          │
+│ New Terms         │ Fields                            │ Overview            │ Definition          │
+│ New Terms         │ History Window Size               │ Overview            │ Definition          │
+│ New Terms         │ Index patterns                    │ Overview            │ Definition          │
+│ New Terms         │ Data view ID                      │ Overview            │ Definition          │
+│ New Terms         │ Data view index pattern           │ Overview            │ Definition          │
+│ New Terms         │ Custom query                      │ Overview            │ Definition          │
+│ New Terms         │ Filters                           │ Overview            │ Definition          │
+│ ESQL              │ ESQL query                        │ Overview            │ Definition          │
+```
+
 ## Scenarios
 
 ### Package installation
@@ -366,7 +443,7 @@ Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules available to install
 When user opens the Add Rules page
 Then prebuilt rules available for installation should be displayed in the table
-When user installs one individual rule
+When user installs one individual rule without previewing it
 Then success message should be displayed after installation
 And the installed rule should be removed from the table
 When user navigates back to the Rule Management page
@@ -429,6 +506,64 @@ Then user should see a message indicating that all available rules have been ins
 And user should see a CTA that leads to the Rule Management page
 ```
 
+#### **Scenario: User can preview a rule before installing**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there are 2 rules available to install
+When user opens the Add Rules page
+Then all rules available for installation should be displayed in the table
+When user opens the rule preview for the 1st rule
+Then the preview should open
+When user closes the preview
+Then it should disappear
+When user opens the rule preview for the 2nd rule
+Then the preview should open
+When user installs the rule using a CTA in the rule preview
+Then the 2nd rule should be installed
+And a success message should be displayed after installation
+And the 2nd rule should be removed from the Add Rules table
+When user navigates back to the Rule Management page
+Then user should see a CTA to install prebuilt rules
+And user should see the number of rules available to install as 1
+```
+
+#### **Scenario: User can see correct rule information in preview before installing**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there are X prebuilt rules of all types available to install
+When user opens the Add Rules page
+Then all X rules available for installation should be displayed in the table
+When user opens the rule preview for the 1st rule
+Then the preview should open
+And all properties of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
+When user selects the 2nd rule in the table
+Then the preview should be updated
+And all properties of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
+And user should be able to repeat this for all X rules
+```
+
+#### **Scenario: Tabs and sections without content should be hidden in preview before installing**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there is at least 1 rule available to install
+And this rule has neither Setup guide nor Investigation guide
+When user opens the Add Rules page
+Then all rules available for installation should be displayed in the table
+When user opens the rule preview for this rule
+Then the preview should open
+And the Setup Guide section should NOT be displayed in the Overview tab
+And the Investigation Guide tab should NOT be displayed
+```
+
 ### Rule installation workflow: filtering, sorting, pagination
 
 TODO: add scenarios https://github.com/elastic/kibana/issues/166215
@@ -467,7 +602,7 @@ And for Y of the installed rules there are new versions available
 And user is on the Rule Management page
 When user opens the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
-When user upgrades one individual rule
+When user upgrades one individual rule without previewing it
 Then success message should be displayed after upgrade
 And the upgraded rule should be removed from the table
 And user should see the number of rules available to upgrade decreased by 1
@@ -511,6 +646,65 @@ Then success message should be displayed after upgrade
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
 And user should NOT see the Rule Updates table
+```
+
+#### **Scenario: User can preview a rule before upgrading**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given 2 prebuilt rules are installed in Kibana
+And for these 2 installed rules there are new versions available
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then all rules available for upgrade should be displayed in the table
+When user opens the rule preview for the 1st rule
+Then the preview should open
+When user closes the preview
+Then it should disappear
+When user opens the rule preview for the 2nd rule
+Then the preview should open
+When user upgrades the rule using a CTA in the rule preview
+Then the 2nd rule should be upgraded to the latest version
+And a success message should be displayed after upgrade
+And the 2nd rule should be removed from the Rule Updates table
+And user should see the number of rules available to upgrade as 1
+```
+
+#### **Scenario: User can see correct rule information in preview before upgrading**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given X prebuilt rules of all types are installed in Kibana
+And for all of the installed rules there are new versions available
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then all X rules available for upgrade should be displayed in the table
+When user opens the rule preview for the 1st rule
+Then the preview should open
+And all properties of the new version of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
+When user selects the 2nd rule in the table
+Then the preview should be updated
+And all properties of the new version of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
+And user should be able to repeat this for all X rules
+```
+
+#### **Scenario: Tabs and sections without content should be hidden in preview before upgrading**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And the updated version of a rule has neither Setup guide nor Investigation guide
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then all rules available for upgrade should be displayed in the table
+When user opens the rule preview for a rule without Setup guide and Investigation guide
+Then the preview should open
+And the Setup Guide section should NOT be displayed in the Overview tab
+And the Investigation Guide tab should NOT be displayed
 ```
 
 ### Rule upgrade workflow: filtering, sorting, pagination

@@ -37,6 +37,11 @@ describe('OpenAIConnector', () => {
           index: 0,
         },
       ],
+      usage: {
+        prompt_tokens: 4,
+        completion_tokens: 5,
+        total_tokens: 9,
+      },
     },
   };
   beforeEach(() => {
@@ -273,7 +278,8 @@ describe('OpenAIConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual(mockResponseString);
+        expect(response.message).toEqual(mockResponseString);
+        expect(response.usage.total_tokens).toEqual(9);
       });
 
       it('errors during API calls are properly handled', async () => {
