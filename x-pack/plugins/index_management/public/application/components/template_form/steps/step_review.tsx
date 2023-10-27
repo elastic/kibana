@@ -196,6 +196,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
+                {/* TODO: Fix */}
                 {getDescriptionText(allowAutoCreate)}
               </EuiDescriptionListDescription>
 
