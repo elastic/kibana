@@ -39,6 +39,9 @@ xpack.fleet.internal.registry.excludePackages: [
     'endpoint',
     'beaconing',
     'osquery_manager',
+    # synthetics is not enabled yet
+    'synthetics',
+    'synthetics_dashboards',
     # Removed in 8.11 integrations
     'cisco',
     'microsoft',
@@ -52,7 +55,7 @@ xpack.fleet.packages:
     version: latest
 # fleet_server package installed to publish agent metrics
   - name: fleet_server
-    version: latest  
+    version: latest
 ## Disable APM UI components and API calls
 xpack.apm.featureFlags.agentConfigurationAvailable: false
 xpack.apm.featureFlags.configurableIndicesAvailable: false

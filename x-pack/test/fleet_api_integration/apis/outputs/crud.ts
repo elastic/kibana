@@ -20,16 +20,6 @@ export default function (providerContext: FtrProviderContext) {
 
   let pkgVersion: string;
 
-  const getSecrets = async (ids?: string[]) => {
-    const query = ids ? { terms: { _id: ids } } : { match_all: {} };
-    return es.search({
-      index: '.fleet-secrets',
-      body: {
-        query,
-      },
-    });
-  };
-
   const getSecretById = (id: string) => {
     return es.get({
       index: '.fleet-secrets',
@@ -1112,9 +1102,9 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const secretId = res.body.item.secrets.ssl.key.id;
-        const searchRes = await getSecrets([secretId]);
+        const secret = await getSecretById(secretId);
         // @ts-ignore _source unknown type
-        expect(searchRes.hits.hits[0]._source.value).to.equal('KEY');
+        expect(secret._source.value).to.equal('KEY');
       });
 
       it('should create ssl.password secret correctly', async function () {
@@ -1138,9 +1128,9 @@ export default function (providerContext: FtrProviderContext) {
           });
 
         const secretId = res.body.item.secrets.password.id;
-        const searchRes = await getSecrets([secretId]);
+        const secret = await getSecretById(secretId);
         // @ts-ignore _source unknown type
-        expect(searchRes.hits.hits[0]._source.value).to.equal('pass');
+        expect(secret._source.value).to.equal('pass');
       });
     });
 
