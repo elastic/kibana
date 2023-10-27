@@ -10,15 +10,15 @@
     "optionalPlugins": [
       "spaces", 
       "usageCollection",
-      "security"
+      "security",
+      "cloud",
+      "fleet"
     ],
     "requiredPlugins": [
       "charts",
-      "cloud",
       "data",
       "dataViews",
       "features",
-      "fleet",
       "licensing",
       "observability",
       "observabilityShared",
