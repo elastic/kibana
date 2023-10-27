@@ -272,7 +272,6 @@ function DiscoverDocumentsComponent({
             data-test-subj="discoverMainError"
           />
         )}
-        {/* <TechPreviewCallout isPlainRecord={isTextBasedQuery} docLinks={docLinks} /> */}
         <SelectedVSAvailableCallout
           isPlainRecord={isTextBasedQuery}
           textBasedQueryColumns={documents?.textBasedQueryColumns}
@@ -290,8 +289,8 @@ function DiscoverDocumentsComponent({
     [
       dataState.error,
       isTextBasedQuery,
-      documents?.textBasedQueryColumns,
       currentColumns,
+      documents?.textBasedQueryColumns,
       documentState.interceptedWarnings,
     ]
   );
