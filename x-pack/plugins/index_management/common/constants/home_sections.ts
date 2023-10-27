@@ -23,7 +23,7 @@ export enum IndexDetailsSection {
   Stats = 'stats',
 }
 
-export type IndexDetailsTabIds = IndexDetailsSection | 'string';
+export type IndexDetailsTabIds = IndexDetailsSection | string;
 
 export interface IndexDetailsTab {
   // a unique key to identify the tab
