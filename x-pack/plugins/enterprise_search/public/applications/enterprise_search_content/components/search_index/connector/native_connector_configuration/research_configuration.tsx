@@ -44,17 +44,19 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
             )}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href={externalDocsUrl}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
-              {
-                defaultMessage: '{name} documentation',
-                values: { name },
-              }
-            )}
-          </EuiLink>
-        </EuiFlexItem>
+        {externalDocsUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiLink target="_blank" href={externalDocsUrl}>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
+                {
+                  defaultMessage: '{name} documentation',
+                  values: { name },
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

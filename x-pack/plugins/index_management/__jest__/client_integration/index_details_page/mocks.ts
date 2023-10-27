@@ -67,10 +67,13 @@ export const testIndexSettings = {
     },
   },
 };
-export const testIndexEditableSettings = {
+export const testIndexEditableSettingsAll = {
   'index.priority': '1',
   'index.query.default_field': ['*'],
   'index.routing.allocation.include._tier_preference': 'data_content',
+};
+export const testIndexEditableSettingsLimited = {
+  'index.query.default_field': ['*'],
 };
 
 // Mocking partial index stats response

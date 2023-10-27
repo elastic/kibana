@@ -12,6 +12,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
@@ -83,7 +84,11 @@ export const ElasticsearchOverview = () => {
           <WelcomeBanner user={user} assetBasePath={assetBasePath} />
         </EuiText>
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="select-client-section"
+      >
         <SelectClientPanel docLinks={docLinks} http={http}>
           <EuiFlexItem>
             <LanguageGrid
@@ -96,7 +101,11 @@ export const ElasticsearchOverview = () => {
         </SelectClientPanel>
       </EuiPageTemplate.Section>
 
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="install-client-section"
+      >
         <InstallClientPanel
           codeSnippet={getLanguageDefinitionCodeSnippet(
             selectedLanguage,
@@ -112,7 +121,11 @@ export const ElasticsearchOverview = () => {
           sharePlugin={share}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="api-keys-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.apiKey.description', {
             defaultMessage:
@@ -125,7 +138,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="cloud-details-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.cloudIdDetails.description', {
             defaultMessage:
@@ -184,7 +201,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="configure-client-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.configureClient.description', {
             defaultMessage: 'Initialize your client with your unique API key and Cloud ID',
@@ -225,7 +246,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="test-client-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.testConnection.description', {
             defaultMessage:
@@ -253,7 +278,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="ingest-client-section"
+      >
         <IngestData
           codeSnippet={getLanguageDefinitionCodeSnippet(
             selectedLanguage,
@@ -270,7 +299,11 @@ export const ElasticsearchOverview = () => {
           sharePlugin={share}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="search-client-section"
+      >
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.searchQuery.description', {
             defaultMessage:
@@ -298,7 +331,11 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section alignment="top" className="serverlessSearchOverviewFooterSection">
+      <EuiPageTemplate.Section
+        alignment="top"
+        className="serverlessSearchOverviewFooterSection"
+        data-test-subj="footer-section"
+      >
         <OverviewPanel
           title={i18n.translate('xpack.serverlessSearch.overview.footer.title', {
             defaultMessage: 'Do more with your data',
@@ -342,41 +379,22 @@ const OverviewFooter = () => {
             title={i18n.translate('xpack.serverlessSearch.overview.footer.discover.title', {
               defaultMessage: 'Discover',
             })}
-            description={i18n.translate(
-              'xpack.serverlessSearch.overview.footer.discover.description',
-              {
-                defaultMessage:
-                  'Search and filter your data, learn how your fields are structured, and create visualizations.',
-              }
-            )}
-            onClick={() => navigateToApp('discover')}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            layout="horizontal"
-            icon={
-              <EuiAvatar
-                size="xl"
-                color="subdued"
-                type="space"
-                iconType="pipelineApp"
-                iconSize="original"
-                name="pipelines"
-              />
+            description={
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem>
+                  <p>
+                    {i18n.translate('xpack.serverlessSearch.overview.footer.discover.description', {
+                      defaultMessage:
+                        'Search and filter your data, learn how your fields are structured, and create visualizations.',
+                    })}
+                  </p>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="arrowRight" color="subdued" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             }
-            titleSize="xs"
-            title={i18n.translate('xpack.serverlessSearch.overview.footer.pipelines.title', {
-              defaultMessage: 'Pipelines',
-            })}
-            description={i18n.translate(
-              'xpack.serverlessSearch.overview.footer.pipelines.description',
-              {
-                defaultMessage:
-                  'Transform your data before indexing. Remove or rename fields, run custom scripts, and much more.',
-              }
-            )}
-            onClick={() => navigateToApp('management', { path: '/ingest/ingest_pipelines' })}
+            onClick={() => navigateToApp('discover')}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -396,12 +414,24 @@ const OverviewFooter = () => {
             title={i18n.translate('xpack.serverlessSearch.overview.footer.documentation.title', {
               defaultMessage: 'Documentation',
             })}
-            description={i18n.translate(
-              'xpack.serverlessSearch.overview.footer.documentation.description',
-              {
-                defaultMessage: 'Learn more with our references, how-to guides, and tutorials.',
-              }
-            )}
+            description={
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem>
+                  <p>
+                    {i18n.translate(
+                      'xpack.serverlessSearch.overview.footer.documentation.description',
+                      {
+                        defaultMessage:
+                          'Learn more with our references, how-to guides, and tutorials.',
+                      }
+                    )}
+                  </p>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="arrowRight" color="subdued" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             href={docLinks.gettingStartedSearch}
           />
         </EuiFlexItem>

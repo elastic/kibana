@@ -95,7 +95,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
 export const HighlightedFields: FC = () => {
   const { dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const { loading, error, rule: maybeRule } = useRuleWithFallback(ruleId);
+  const { loading, rule: maybeRule } = useRuleWithFallback(ruleId);
 
   const highlightedFields = useHighlightedFields({
     dataFormattedForFieldBrowser,
@@ -121,7 +121,7 @@ export const HighlightedFields: FC = () => {
       <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
         <EuiPanel hasBorder hasShadow={false}>
           <EuiInMemoryTable
-            items={error ? [] : items}
+            items={items}
             columns={columns}
             compressed
             loading={loading}

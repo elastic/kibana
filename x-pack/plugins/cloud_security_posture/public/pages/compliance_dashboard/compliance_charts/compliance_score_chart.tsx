@@ -95,6 +95,7 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         baseTheme={charts.theme.useChartsBaseTheme()}
         showLegend={false}
         legendPosition="right"
+        locale={i18n.getLocale()}
       />
       <AreaSeries
         // EuiChart is using this id in the tooltip label

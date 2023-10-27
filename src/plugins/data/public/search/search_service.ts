@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { handleWarnings } from '@kbn/search-response-warnings';
 import {
   CoreSetup,
   CoreStart,
@@ -15,6 +17,7 @@ import {
   PluginInitializerContext,
   StartServicesAccessor,
 } from '@kbn/core/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -49,7 +52,6 @@ import {
   rangeFilterFunction,
   rangeFunction,
   removeFilterFunction,
-  SearchRequest,
   SearchSourceDependencies,
   SearchSourceService,
   selectFilterFunction,
@@ -66,7 +68,6 @@ import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
-import { handleWarnings } from './warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
@@ -223,7 +224,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, theme, uiSettings, chrome, application }: CoreStart,
+    { http, theme, uiSettings, chrome, application, notifications, i18n: i18nStart }: CoreStart,
     {
       fieldFormats,
       indexPatterns,
@@ -241,6 +242,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
 
+    const warningsServices = {
+      i18n: i18nStart,
+      inspector,
+      notifications,
+      theme,
+    };
+
     const searchSourceDependencies: SearchSourceDependencies = {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
@@ -249,13 +257,28 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
 
+          const requestAdapter = options.inspector?.adapter
+            ? options.inspector?.adapter
+            : new RequestAdapter();
+          if (!options.inspector?.adapter) {
+            const requestResponder = requestAdapter.start(
+              i18n.translate('data.searchService.anonymousRequestTitle', {
+                defaultMessage: 'Request',
+              }),
+              {
+                id: request.id,
+              }
+            );
+            requestResponder.json(request.body);
+            requestResponder.ok({ json: response });
+          }
+
           handleWarnings({
-            request: request.body,
-            response: rawResponse,
-            theme,
+            request: request.body as estypes.SearchRequest,
+            requestAdapter,
             requestId: request.id,
-            inspector: options.inspector,
-            inspectorService: inspector,
+            response: rawResponse,
+            services: warningsServices,
           });
         }
         return response;
@@ -298,17 +321,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             return;
           }
           handleWarnings({
-            request: request.json as SearchRequest,
-            response: rawResponse,
-            theme,
             callback,
+            request: request.json as estypes.SearchRequest,
+            requestAdapter: adapter,
             requestId: request.id,
-            inspector: {
-              adapter,
-              title: request.name,
-              id: request.id,
-            },
-            inspectorService: inspector,
+            response: rawResponse,
+            services: warningsServices,
           });
         });
       },

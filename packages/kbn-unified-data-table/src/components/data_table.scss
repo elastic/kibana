@@ -22,10 +22,6 @@
   font-size: $euiFontSizeS;
 }
 
-.euiDataGridRowCell__definedHeight {
-  white-space: pre-wrap;
-}
-
 .unifiedDataTable__inner {
   display: flex;
   flex-direction: column;
@@ -51,8 +47,12 @@
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
-  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover .euiDataGridRowCell__actions--overlay {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
+  }
+
+  .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight {
+    background-color: transparent; // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
   }
 }
 
@@ -110,14 +110,14 @@
 .unifiedDataTable__rowControl {
   // fine-tuning the vertical alignment with the text for any row height setting
   margin-top: -3px;
-  .euiDataGridRowCell__truncate & { // "Single line" row height setting
+  .euiDataGridRowCell__defaultHeight & { // "Single line" row height setting
     margin-top: 0;
   }
 }
 
 .unifiedDataTable__descriptionList {
   // force the content truncation when "Single line" row height setting is active
-  .euiDataGridRowCell__truncate & {
+  .euiDataGridRowCell__defaultHeight & {
     -webkit-line-clamp: 1;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -160,4 +160,13 @@
   .unifiedDataTable__flyoutDocumentNavigation .euiPagination__compressedText {
     display: none;
   }
+}
+
+// Ensure full screen data grids are not covered by elements with a z-index
+.euiDataGrid__restrictBody *:not(
+.euiDataGrid--fullScreen,
+.euiDataGrid--fullScreen *,
+[data-euiportal='true'],
+[data-euiportal='true'] *) {
+  z-index: unset !important;
 }

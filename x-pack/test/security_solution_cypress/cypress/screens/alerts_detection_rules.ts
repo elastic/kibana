@@ -61,6 +61,14 @@ export const UPGRADE_ALL_RULES_BUTTON = '[data-test-subj="upgradeAllRulesButton"
 
 export const UPGRADE_SELECTED_RULES_BUTTON = '[data-test-subj="upgradeSelectedRulesButton"]';
 
+export const getInstallSingleRuleLoadingSpinnerByRuleId = (ruleId: string) => {
+  return `[data-test-subj="installSinglePrebuiltRuleButton-loadingSpinner-${ruleId}"]`;
+};
+
+export const getUpgradeSingleRuleLoadingSpinnerByRuleId = (ruleId: string) => {
+  return `[data-test-subj="upgradeSinglePrebuiltRuleButton-loadingSpinner-${ruleId}"]`;
+};
+
 export const GO_BACK_TO_RULES_TABLE_BUTTON = '[data-test-subj="addRulesGoBackToRulesTableBtn"]';
 
 export const RULES_TABLE_REFRESH_INDICATOR = '[data-test-subj="loading-spinner"]';
@@ -179,7 +187,7 @@ export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
   return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
 };
 
-export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSSAGE =
+export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE =
   '[data-test-subj="noPrebuiltRulesAvailableForInstall"]';
-export const NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE =
+export const NO_RULES_AVAILABLE_FOR_UPGRADE_MESSAGE =
   '[data-test-subj="noPrebuiltRulesAvailableForUpgrade"]';

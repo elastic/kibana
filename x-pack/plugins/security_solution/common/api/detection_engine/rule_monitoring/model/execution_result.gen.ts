@@ -51,5 +51,5 @@ export const SortFieldOfRuleExecutionResult = z.enum([
   'search_duration_ms',
   'schedule_delay_ms',
 ]);
-export const SortFieldOfRuleExecutionResultEnum = SortFieldOfRuleExecutionResult.enum;
 export type SortFieldOfRuleExecutionResultEnum = typeof SortFieldOfRuleExecutionResult.enum;
+export const SortFieldOfRuleExecutionResultEnum = SortFieldOfRuleExecutionResult.enum;

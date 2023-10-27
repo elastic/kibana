@@ -34,6 +34,7 @@ export const PostActionsConnectorExecuteBody = t.type({
     ]),
     subAction: t.string,
   }),
+  assistantLangChain: t.boolean,
 });
 
 export type PostActionsConnectorExecuteBodyInputs = t.TypeOf<

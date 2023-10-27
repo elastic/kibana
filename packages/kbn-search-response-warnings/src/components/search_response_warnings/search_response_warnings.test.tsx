@@ -11,12 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchResponseWarnings } from './search_response_warnings';
 import { searchResponseIncompleteWarningLocalCluster } from '../../__mocks__/search_response_warnings';
 
-const interceptedWarnings = [
-  {
-    originalWarning: searchResponseIncompleteWarningLocalCluster,
-    action: <button>{`test`}</button>,
-  },
-];
+const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
 
 describe('SearchResponseWarnings', () => {
   it('renders "callout" correctly', () => {

@@ -29,6 +29,7 @@ export const getServicesMock = ({
     navigateToUrl,
     onProjectNavigationChange: jest.fn(),
     activeNodes$: of(activeNodes),
+    isSideNavCollapsed: false,
     cloudLinks: {
       billingAndSub: {
         title: 'Mock Billing & Subscriptions',

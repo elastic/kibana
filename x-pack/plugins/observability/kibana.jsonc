@@ -6,7 +6,10 @@
     "id": "observability",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "observability"],
+    "configPath": [
+      "xpack",
+      "observability"
+    ],
     "requiredPlugins": [
       "aiops",
       "alerting",
@@ -32,9 +35,26 @@
       "unifiedSearch",
       "visualizations",
       "dashboard",
+      "expressions"
     ],
-    "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "stackAlerts", "spaces"],
-    "extraPublicDirs": ["common"]
+    "optionalPlugins": [
+      "discover",
+      "home",
+      "licensing",
+      "usageCollection",
+      "cloud",
+      "spaces"
+    ],
+    "requiredBundles": [
+      "data",
+      "kibanaReact",
+      "kibanaUtils",
+      "unifiedSearch",
+      "stackAlerts",
+      "spaces"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }
