@@ -80,7 +80,6 @@ export const ComponentTemplateForm = ({
   defaultValue = {
     name: '',
     template: {},
-    allow_auto_create: false,
     _meta: {},
     _kbnMeta: {
       usedBy: [],
@@ -173,7 +172,6 @@ export const ComponentTemplateForm = ({
           ...initialTemplate,
           name: wizardData.logistics.name,
           version: wizardData.logistics.version,
-          allow_auto_create: wizardData.logistics.allow_auto_create,
           _meta: wizardData.logistics._meta,
           template: {
             settings: wizardData.settings,

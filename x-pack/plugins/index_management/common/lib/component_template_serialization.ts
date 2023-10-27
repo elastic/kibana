@@ -93,17 +93,11 @@ export function deserializeComponentTemplateList(
 export function serializeComponentTemplate(
   componentTemplateDeserialized: ComponentTemplateDeserialized
 ): ComponentTemplateSerialized {
-  const {
-    version,
-    template,
-    allow_auto_create: allowAutoCreate,
-    _meta,
-  } = componentTemplateDeserialized;
+  const { version, template, _meta } = componentTemplateDeserialized;
 
   return {
     version,
     template,
-    allow_auto_create: allowAutoCreate,
     _meta,
   };
 }
