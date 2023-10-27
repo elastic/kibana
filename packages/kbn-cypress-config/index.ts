@@ -7,7 +7,7 @@
  */
 
 import { defineConfig } from 'cypress';
-import esbuildPreprocessor from './esbuild-preprocessor';
+import esbuildPreprocessor from './esbuild_preprocessor';
 
 export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
   return defineConfig({
