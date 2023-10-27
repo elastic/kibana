@@ -21,20 +21,19 @@ image::images/esql-demo.gif[A short video demo of {esql}]
 
 Here is what you can expect: 
 
-* *Easy start:* To begin using {esql} in Discover, select **Try {esql}** from the data view menu.
+* *Easy start:* To begin using {esql} in **Discover**, select **Try {esql}** from the data view menu.
 * *Efficient and easy query building:* {esql} in Discover offers auto-complete and in-app documentation, making it easy to craft powerful queries right from the query bar. 
-* *Comprehensive and powerful data exploration:* Conduct ad-hoc data exploration within Discover. Create aggregations, transform data, enrich datasets, and more directly from the query builder. Results are presented in a tabular format or as visualizations. It depends on the query you are executing. 
-* *Contextual Visualizations:* When writing {esql} queries in Discover, you’ll receive visual representations powered by the Lens suggestion engine. Your query’s nature determines the type of visualization you get, such as a metric, histogram, heatmap, and so on. 
+* *Comprehensive and powerful data exploration:* Conduct ad-hoc data exploration within **Discover**. Create aggregations, transform data, enrich datasets, and more directly from the query builder. Results are presented in a tabular format or as visualizations. It depends on the query you are executing. 
+* *Contextual visualizations:* When writing {esql} queries in **Discover**, you’ll receive visual representations powered by the **Lens** suggestion engine. Your query’s nature determines the type of visualization you get, such as a metric, histogram, heatmap, and so on. 
 * *Enrichment:* Use the enrich command to enhance your query dataset with fields from another dataset, complete with in-context suggestions for the selected policy, such as hinting the matching field and enriched columns.
-* *In-line visualization editing:* Edit {esql} visualizations directly within Discover and Dashboards. No need to navigate to Lens for quick edits, so you can make changes seamlessly. 
-* *Dashboard integration:* Save your {esql} visualizations to a dashboard directly from Discover once you’re satisfied with the results. 
+* *In-line visualization editing:* Edit {esql} visualizations directly within **Discover** and dashboards. No need to navigate to **Lens** for quick edits, so you can make changes seamlessly. 
+* *Dashboard integration:* Save your {esql} visualizations to a dashboard directly from **Discover** once you’re satisfied with the results. 
 * *Alerting:* Use {esql} for observability and security alerts, setting aggregated values as thresholds. Enhance detection accuracy and receive actionable notifications by emphasizing meaningful trends over isolated incidents, reducing false positives. 
 
-{esql} in Discover brings efficiency and power to your data investigations, streamlining your path to insights. 
+{esql} in **Discover** brings efficiency and power to your data investigations, streamlining your path to insights. 
 
 Learn more about {esql}’s capabilities in the link:{ref-bare}/master/esql.html[{es} {esql} documentation]. 
 
-.Example of an {esql} query with an {observability} use case: 
 
 [role="screenshot"]
 image::images/obvs.png[An example of {esql}]
@@ -42,13 +41,6 @@ image::images/obvs.png[An example of {esql}]
 [role="screenshot"]
 image::images/obv-use-case.png[An example using {esql} in an {observability} use case]
 
-.Example of {esql} query with {observability} use case and using grok: 
-
-[role="screenshot"]
-image::images/grok.png[An example of {esql}]
-
-[role="screenshot"]
-image::images/grok-use-case.gif[An example using {esql} in an {observability} use case]
 
 [discrete]
 === Dashboard 
@@ -56,7 +48,7 @@ image::images/grok-use-case.gif[An example using {esql} in an {observability} us
 [discrete]
 ==== Lens inline editing in dashboards
 
-You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the Lens editor. Open the panel menu and select **Edit visualization**. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. Once happy with your edits, click **Apply and close**. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
+You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the **Lens** editor. Open the panel menu and select **Edit visualization**. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. Once happy with your edits, click **Apply and close**. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
 
 [role="screenshot"]
 image::images/lens-inline-editing.gif[An example of inline editing in Lens]
@@ -125,7 +117,7 @@ Both ELSER model-2 versions, platform-optimized and cross-platform, show improve
 [role="screenshot"]
 image::images/elser-model-2.png[An example of ELSER model 2, width=60%]
 
-Please note that the original version of ELSER (the model available prior to 8.11) will remain in technical preview. 
+NOTE: The original version of ELSER (the model available prior to 8.11) will remain in technical preview. 
 
 [discrete]
 ==== Inference APIs
@@ -162,7 +154,7 @@ image::images/data-drift.png[An example of data drift workflows]
 
 We have improved the UX for attaching anomaly swim lanes and anomaly charts to dashboards. It is now more friendly and consistent with the same functionality from Lens. In addition, you can now attach these ML charts to new dashboards (previously this was only able to be done for existing ones). 
 
-In **Data Frame Analytics** we previously added the ability to link directly to **Discover** and **Dashboards** from the results data grid filtering for the row’s field/values for all visible columns. For improved usability, you can now do this during the job creation as well. We have also made UX improvements for the deployment of trained models from Data Frame Analytics jobs, including an option to reindex your data at the end of the ingest pipeline creation.
+In **Data Frame Analytics**, we previously added the ability to link directly to **Discover** and **Dashboards** from the results data grid filtering for the row’s field/values for all visible columns. For improved usability, you can now do this during the job creation as well. We have also made UX improvements for the deployment of trained models from Data Frame Analytics jobs, including an option to reindex your data at the end of the ingest pipeline creation.
 
 [discrete]
 === ResponseOps
@@ -180,7 +172,7 @@ image::images/esql-rule-type.gif[An example of creating a rule type using {esql}
 [discrete]
 ==== {kib} cases custom field
 
-A new functionality is now available in Kibana cases. Users will be able to add custom fields to the case structure, so they can use it for better classification and case enrichment. As a first step, those fields will be available in the case view only. In the next step, we’re planning to have more field types, dedicated privileges, support filters, and search capabilities in the case table.
+A new functionality is now available in {kib} cases. Users will be able to add custom fields to the case structure, so they can use it for better classification and case enrichment. As a first step, those fields will be available in the case view only. In the next step, we’re planning to have more field types, dedicated privileges, support filters, and search capabilities in the case table.
 
 [role="screenshot"]
 image::images/custom-field.gif[An example of creating a custom case field in {kib}]
@@ -248,8 +240,6 @@ You can now view your {es} endpoint, link:https://www.elastic.co/guide/en/cloud/
 [role="screenshot"]
 image::images/endpoints.png[An example of where to find the endpoints in the UI, width=40%]
 
-//[role="screenshot"]
-//image::images/endpoints-example.png[An example of what the endpoints and cloud ID UI looks like, width=60%]
 
 
 [discrete]
