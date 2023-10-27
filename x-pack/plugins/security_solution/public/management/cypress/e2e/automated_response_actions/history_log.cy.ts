@@ -22,8 +22,6 @@ describe(
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
 
     before(() => {
-      login(ROLE.endpoint_response_actions_access);
-
       indexEndpointHosts({ numResponseActions: 2 }).then((indexEndpoints) => {
         endpointData = indexEndpoints;
       });
@@ -57,6 +55,10 @@ describe(
         alertData.cleanup();
         alertData = undefined;
       }
+    });
+
+    beforeEach(() => {
+      login(ROLE.endpoint_response_actions_access);
     });
 
     it('enable filtering by type', () => {

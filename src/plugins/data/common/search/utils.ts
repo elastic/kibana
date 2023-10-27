@@ -23,9 +23,7 @@ export const isAbortResponse = (response?: IKibanaSearchResponse) => {
 /**
  * @returns true if request is still running
  */
-export const isRunningResponse = (response?: IKibanaSearchResponse) => {
-  return response?.isRunning ?? false;
-};
+export const isRunningResponse = (response?: IKibanaSearchResponse) => response?.isRunning ?? false;
 
 export const getUserTimeZone = (
   getConfig: AggTypesDependencies['getConfig'],

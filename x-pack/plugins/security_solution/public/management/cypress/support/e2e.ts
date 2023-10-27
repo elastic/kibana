@@ -23,11 +23,12 @@
 // ***********************************************************
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-
 import 'cypress-react-selector';
-
 // @ts-ignore
 import registerCypressGrep from '@cypress/grep';
+
+import { login, ROLE } from '../tasks/login';
+import { loadPage } from '../tasks/common';
 
 registerCypressGrep();
 
@@ -100,3 +101,10 @@ Cypress.Commands.add(
 );
 
 Cypress.on('uncaught:exception', () => false);
+
+// Login as a Platform Engineer to properly initialize Security Solution App
+before(() => {
+  login(ROLE.soc_manager);
+  loadPage('/app/security/alerts');
+  cy.getByTestSubj('manage-alert-detection-rules').should('exist');
+});

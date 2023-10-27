@@ -17,13 +17,12 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { UserRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
-import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UsersTableType } from '../../store/model';
 import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
 import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -36,7 +35,6 @@ export const getUserRiskScoreColumns = ({
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
-    width: '35%',
     render: (userName) => {
       if (userName != null && userName.length > 0) {
         const id = escapeDataProviderId(`user-risk-score-table-userName-${userName}`);
@@ -58,19 +56,6 @@ export const getUserRiskScoreColumns = ({
             <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />
           </SecurityCellActions>
         );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    field: RiskScoreFields.timestamp,
-    name: i18n.LAST_UPDATED,
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: true,
-    render: (lastSeen: Maybe<string>) => {
-      if (lastSeen != null) {
-        return <FormattedRelativePreferenceDate value={lastSeen} />;
       }
       return getEmptyTagValue();
     },

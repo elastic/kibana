@@ -17,7 +17,7 @@ import {
   openTableInspectModal,
 } from '../../tasks/inspect';
 import { login } from '../../tasks/login';
-import { visitWithTimeRange } from '../../tasks/navigation';
+import { visit } from '../../tasks/navigation';
 import { postDataView, waitForWelcomePanelToBeLoaded } from '../../tasks/common';
 import { selectDataView } from '../../tasks/sourcerer';
 
@@ -46,7 +46,7 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServ
     it(`inspect ${pageName} page`, () => {
       login();
 
-      visitWithTimeRange(url, {
+      visit(url, {
         visitOptions: {
           onLoad: () => {
             waitForWelcomePanelToBeLoaded();
