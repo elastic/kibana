@@ -7,7 +7,7 @@
  */
 
 import { defineConfig } from 'cypress';
-import createBundler from '@bahmutov/cypress-esbuild-preprocessor'
+import createBundler from '@bahmutov/cypress-esbuild-preprocessor';
 
 export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
   return defineConfig({
@@ -15,8 +15,7 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
     e2e: {
       ...options?.e2e,
       setupNodeEvents(on, config) {
-        on('file:preprocessor', createBundler())
-
+        on('file:preprocessor', createBundler());
 
         const external = options?.e2e?.setupNodeEvents;
         if (external) {
