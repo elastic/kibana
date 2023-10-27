@@ -11,7 +11,7 @@ steps:
       SKIP_KIBANA_HOOKS: 1
     commands:
       - "buildkite-agent annotate --append --context banner --style info \"<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>\""
-      - "buildkite-agent annotate --append --context banner --style info \"<br/>Please follow the steps in the build.\""
+      - "buildkite-agent annotate --append --context banner --style info \"<br/>:guide_dog: Please follow the steps in the build.\""
 
   - label: "Select target commit to deploy"
     command: ts-node .buildkite/scripts/serverless/create_deploy_tag/generate_commit_selector.ts 50
@@ -23,7 +23,6 @@ steps:
     env:
       SKIP_KIBANA_HOOKS: 1
     commands:
-      - "buildkite-agent annotate --append --context banner --style info \"<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>\""
       - "buildkite-agent annotate --append --context banner --style info \"<br/>:hourglass: Please wait while we're collecting info about the commit.\""
 
   - label: "Collect commit info"
