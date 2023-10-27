@@ -427,6 +427,7 @@ describe('builds navigation tree', () => {
       });
 
       const groupChildren = runTests('treeDef');
+      expect(groupChildren.length).toBe(3);
       expect(groupChildren[3]).toBeUndefined(); // Unknown deeplink, has not been rendered
 
       onProjectNavigationChange.mockReset();
@@ -455,6 +456,7 @@ describe('builds navigation tree', () => {
       });
 
       const groupChildren = runTests('uiComponents');
+      expect(groupChildren.length).toBe(4);
       // "item4" has been skipped as it is an unknown deeplink and we have the next item in the list
       expect(groupChildren[3].title).toBe('Title in children');
     }
@@ -664,6 +666,68 @@ describe('builds navigation tree', () => {
           </Navigation>
         ),
         services: { recentlyAccessed$ },
+      });
+
+      await runTests('uiComponents', renderResult);
+    }
+  });
+
+  test('should render the cloud links', async () => {
+    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
+      try {
+        expect(await findByTestId(/nav-item-group1.cloudLink1/)).toBeVisible();
+        expect(await findByTestId(/nav-item-group1.cloudLink2/)).toBeVisible();
+        expect(await findByTestId(/nav-item-group1.cloudLink3/)).toBeVisible();
+
+        expect((await findByTestId(/nav-item-group1.cloudLink1/)).textContent).toBe(
+          'Mock Users & RolesExternal link'
+        );
+        expect((await findByTestId(/nav-item-group1.cloudLink2/)).textContent).toBe(
+          'Mock PerformanceExternal link'
+        );
+        expect((await findByTestId(/nav-item-group1.cloudLink3/)).textContent).toBe(
+          'Mock Billing & SubscriptionsExternal link'
+        );
+      } catch (e) {
+        errorHandler(type)(e);
+      }
+    };
+
+    // -- Default navigation
+    {
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'group1',
+          defaultIsCollapsed: false,
+          children: [
+            { id: 'cloudLink1', cloudLink: 'userAndRoles' },
+            { id: 'cloudLink2', cloudLink: 'performance' },
+            { id: 'cloudLink3', cloudLink: 'billingAndSub' },
+          ],
+        },
+      ];
+
+      const renderResult = renderNavigation({
+        navTreeDef: { body: navigationBody },
+      });
+
+      await runTests('treeDef', renderResult);
+      renderResult.unmount();
+    }
+
+    // -- With UI Components
+    {
+      const renderResult = renderNavigation({
+        navigationElement: (
+          <Navigation>
+            <Navigation.Group id="group1" defaultIsCollapsed={false}>
+              <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
+              <Navigation.Item id="cloudLink2" cloudLink="performance" />
+              <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
+            </Navigation.Group>
+          </Navigation>
+        ),
       });
 
       await runTests('uiComponents', renderResult);

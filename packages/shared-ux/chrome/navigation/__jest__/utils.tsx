@@ -13,7 +13,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { getServicesMock } from '../mocks/src/jest';
 import { NavigationProvider } from '../src/services';
 import { DefaultNavigation } from '../src/ui/default_navigation';
-import type { NavigationTreeDefinition } from '../src/ui/types';
+import type { NavigationTreeDefinition, ProjectNavigationTreeDefinition } from '../src/ui/types';
 import { NavigationServices } from '../types';
 
 const services = getServicesMock();
@@ -23,16 +23,20 @@ export type TestType = 'treeDef' | 'uiComponents';
 
 export const renderNavigation = ({
   navTreeDef,
+  projectNavigationTree,
   navigationElement,
   services: overrideServices = {},
   onProjectNavigationChange = () => undefined,
 }: {
   navTreeDef?: NavigationTreeDefinition;
+  projectNavigationTree?: ProjectNavigationTreeDefinition;
   navigationElement?: React.ReactElement;
   services?: Partial<NavigationServices>;
   onProjectNavigationChange?: ProjectNavigationChangeListener;
 }): RenderResult => {
-  const element = navigationElement ?? <DefaultNavigation navigationTree={navTreeDef} />;
+  const element = navigationElement ?? (
+    <DefaultNavigation projectNavigationTree={projectNavigationTree} navigationTree={navTreeDef} />
+  );
 
   const renderResult = render(
     <EuiThemeProvider>
