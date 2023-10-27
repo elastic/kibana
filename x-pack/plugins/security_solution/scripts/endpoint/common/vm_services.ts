@@ -254,7 +254,7 @@ export const createVagrantHostVmClient = (
   log: ToolingLog = createToolingLogger()
 ): HostVm => {
   const exec = async (command: string): Promise<HostVmExecResponse> => {
-    const execResponse = await execa.command(`vagrant ssh ${name} --command="${command}"`);
+    const execResponse = await execa.command(`vagrant ssh ${name} -- ${command}`);
 
     log.verbose(execResponse);
 
