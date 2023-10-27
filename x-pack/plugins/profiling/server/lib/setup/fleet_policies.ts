@@ -9,12 +9,12 @@ import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services
 import {
   COLLECTOR_PACKAGE_POLICY_NAME,
   ELASTIC_CLOUD_APM_POLICY,
-  SYMBOLIZER_PACKAGE_POLICY_NAME,
   getApmPolicy,
+  SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
 import { omit } from 'lodash';
 import { PackageInputType } from '../..';
-import { ProfilingSetupOptions } from './types';
+import { ProfilingCloudSetupOptions } from './types';
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 
@@ -60,7 +60,7 @@ export async function createCollectorPackagePolicy({
   soClient,
   packagePolicyClient,
   config,
-}: ProfilingSetupOptions) {
+}: ProfilingCloudSetupOptions) {
   const packageName = 'profiler_collector';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
@@ -96,7 +96,7 @@ export async function createSymbolizerPackagePolicy({
   soClient,
   packagePolicyClient,
   config,
-}: ProfilingSetupOptions) {
+}: ProfilingCloudSetupOptions) {
   const packageName = 'profiler_symbolizer';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
@@ -132,7 +132,7 @@ export async function removeProfilingFromApmPackagePolicy({
   client,
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions) {
+}: ProfilingCloudSetupOptions) {
   const apmPackagePolicy = await getApmPolicy({ packagePolicyClient, soClient });
   if (!apmPackagePolicy) {
     throw new Error(`Could not find APM package policy`);
