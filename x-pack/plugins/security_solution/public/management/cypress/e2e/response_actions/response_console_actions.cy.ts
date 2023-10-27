@@ -16,7 +16,7 @@ import {
   waitForEndpointListPageToBeLoaded,
 } from '../../tasks/response_console';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { getEndpointIntegrationVersion, createAgentPolicyTask } from '../../tasks/fleet';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
@@ -188,7 +188,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
   });
 
-  describe('File operations: get-file and execute', () => {
+  describe('File operations: get-file, upload and execute', () => {
     const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
 
     const fileContent = 'This is a test file for the get-file command.';
@@ -270,6 +270,22 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
       submitCommand();
       waitForCommandToBeExecuted('execute');
+    });
+
+    it('"upload --file" - should upload a file', () => {
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(`upload --file`);
+      cy.getByTestSubj('console-arg-file-picker').selectFile(
+        {
+          contents: Cypress.Buffer.from('upload file content here!'),
+          fileName: 'upload_file.txt',
+          lastModified: Date.now(),
+        },
+        { force: true }
+      );
+      submitCommand();
+      waitForCommandToBeExecuted('upload');
     });
   });
 
