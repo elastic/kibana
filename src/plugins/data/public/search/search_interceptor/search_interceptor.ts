@@ -298,11 +298,9 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const sendCancelRequest = once(() => {
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' }).catch((e) => {
-        // Swallow cancellation errors
-      });
-    });
+    const sendCancelRequest = once(() =>
+      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+    );
 
     const cancel = () => id && !isSavedToBackground && sendCancelRequest();
 
