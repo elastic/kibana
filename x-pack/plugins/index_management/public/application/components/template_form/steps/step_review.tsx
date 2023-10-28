@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
-import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
+import { TemplateDeserialized, getTemplateParameter, Aliases } from '../../../../../common';
 import { SimulateTemplate } from '../../index_templates';
 import { WizardSection } from '../template_form';
 
@@ -38,9 +38,8 @@ const NoneDescriptionText = () => (
   />
 );
 
-const getDescriptionText = (data: any) => {
-  // const hasEntries = !!data || (data && Object.entries(data).length > 0);
-  const hasEntries = data && Object.entries(data).length > 0;
+const getDescriptionText = (data: Aliases | boolean | undefined) => {
+  const hasEntries = typeof data === 'boolean' ? data : data && Object.entries(data).length > 0;
 
   return hasEntries ? (
     <FormattedMessage
@@ -196,7 +195,6 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {/* TODO: Fix */}
                 {getDescriptionText(allowAutoCreate)}
               </EuiDescriptionListDescription>
 
