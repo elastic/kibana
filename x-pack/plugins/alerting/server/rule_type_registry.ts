@@ -224,7 +224,7 @@ export class RuleTypeRegistry {
     }
     // validate ruleTypeTimeout here
     if (ruleType.ruleTaskTimeout) {
-      const invalidTimeout = validateDurationSchema(ruleType.ruleTaskTimeout, this.config);
+      const invalidTimeout = validateDurationSchema(ruleType.ruleTaskTimeout);
       if (invalidTimeout) {
         throw new Error(
           i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidTimeoutRuleTypeError', {
