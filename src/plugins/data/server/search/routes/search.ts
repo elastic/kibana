@@ -102,6 +102,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           await search.cancel(id, { strategy });
           return res.ok();
         } catch (err) {
+          // return reportServerError(res, err);
           return reportServerError(res, err);
         }
       }
