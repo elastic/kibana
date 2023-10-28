@@ -106,6 +106,7 @@ describe('<TemplateClone />', () => {
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             priority,
             version,
+            allowAutoCreate: false,
             _kbnMeta,
           }),
         })
