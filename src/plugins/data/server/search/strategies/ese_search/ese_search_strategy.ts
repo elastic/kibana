@@ -43,13 +43,9 @@ export const enhancedEsSearchStrategyProvider = (
   usage?: SearchUsage,
   useInternalUser: boolean = false
 ): ISearchStrategy => {
-  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
-    try {
-      const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-      await client.asyncSearch.delete({ id });
-    } catch (e) {
-      throw getKbnServerError(e);
-    }
+  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    return client.asyncSearch.delete({ id }).then(() => {});
   }
 
   function asyncSearch(
@@ -82,11 +78,7 @@ export const enhancedEsSearchStrategyProvider = (
       return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
     };
 
-    const cancel = async () => {
-      if (id && !options.isStored) {
-        return await cancelAsyncSearch(id, esClient);
-      }
-    };
+    const cancel = () => void (id && !options.isStored && cancelAsyncSearch(id, esClient));
 
     return pollSearch(search, cancel, {
       pollInterval: searchConfig.asyncSearch.pollInterval,
