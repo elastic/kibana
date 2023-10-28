@@ -11,8 +11,11 @@ import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { buildKibanaPath } from '@kbn/reporting-export-types-helpers-public';
-import { ManagementLinkFn } from '../../../common/url';
+import {
+  BaseParams,
+  buildKibanaPath,
+  ManagementLinkFn,
+} from '@kbn/reporting-export-types-helpers-public';
 import {
   getRedirectAppPath,
   INTERNAL_ROUTES,
@@ -20,7 +23,7 @@ import {
   PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import { BaseParams, ReportApiJSON } from '../../../common/types';
+import { ReportApiJSON } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 

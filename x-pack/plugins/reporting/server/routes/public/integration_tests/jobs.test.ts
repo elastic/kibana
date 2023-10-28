@@ -19,7 +19,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../../..';
 import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
-import { ExportType } from '@kbn/reporting-export-types-helpers-server';
+import type { CommonReportingSetup, ExportType } from '@kbn/reporting-export-types-helpers-server';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
 import { reportingMock } from '../../../mocks';
 import {
@@ -73,7 +73,7 @@ describe(`GET ${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}`, () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => reportingMock.createStart()
+      () => reportingMock.createStart() as unknown as CommonReportingSetup
     );
 
     mockSetupDeps = createMockPluginSetup({

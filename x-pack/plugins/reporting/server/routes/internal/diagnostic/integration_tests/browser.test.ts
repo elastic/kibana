@@ -7,6 +7,7 @@
 
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { CommonReportingSetup } from '@kbn/reporting-export-types-helpers-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import * as Rx from 'rxjs';
@@ -48,7 +49,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => reportingMock.createStart()
+      () => reportingMock.createStart() as unknown as CommonReportingSetup
     );
 
     const docLinksSetupMock = docLinksServiceMock.createSetupContract();

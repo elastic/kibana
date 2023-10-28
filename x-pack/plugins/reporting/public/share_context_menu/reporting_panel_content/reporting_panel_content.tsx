@@ -28,10 +28,10 @@ import {
   PNG_REPORT_TYPE,
   PNG_REPORT_TYPE_V2,
 } from '@kbn/reporting-export-types-helpers-public/report_types';
+import type { BaseParams } from '@kbn/reporting-export-types-helpers-public';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
-import { BaseParams } from '../../../common/types';
 
 /**
  * Properties for displaying a share menu with Reporting features, including
