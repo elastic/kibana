@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { AuthenticationServiceStart, SecurityPluginStart } from '@kbn/security-plugin/public';
+import hash from 'object-hash';
 import { getIndexPatternLoad } from './expressions';
 import type { ClientConfigType } from '../common/types';
-import {
+import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
   DataViewsPublicSetupDependencies,
@@ -89,6 +91,7 @@ export class DataViewsPublicPlugin
       http,
       cacheName: SWR_CACHE_NAME,
       cacheEntryLifetimeMs: SWR_CACHE_ENTRY_LIFETIME_MS,
+      getIdentityHash: createGetIdentityHash(core),
       onOpenCacheError: console.error,
     });
 
@@ -117,3 +120,33 @@ export class DataViewsPublicPlugin
 
   public stop() {}
 }
+
+const createGetIdentityHash = (core: CoreStart) => {
+  let authc: AuthenticationServiceStart | undefined;
+  let identityHash: string | undefined;
+
+  const getIdentityHash = async () => {
+    if (!authc) {
+      return '';
+    }
+
+    if (identityHash !== undefined) {
+      return identityHash;
+    }
+
+    try {
+      const user = await authc.getCurrentUser();
+      return (identityHash = hash(user));
+    } catch {
+      return '';
+    }
+  };
+
+  core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
+    if (security.found) {
+      authc = security.contract.authc;
+    }
+  });
+
+  return getIdentityHash;
+};

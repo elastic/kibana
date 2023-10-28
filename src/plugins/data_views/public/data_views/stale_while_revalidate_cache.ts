@@ -7,12 +7,17 @@
  */
 
 import type { HttpFetchOptions, HttpSetup } from '@kbn/core-http-browser';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { format } from 'url';
+
+const IDENTITY_HASH_HEADER = 'x-swr-identity-hash';
+const DATE_HEADER = 'date';
 
 export interface StaleWhileRevalidateCacheDependencies {
   http: HttpSetup;
   cacheName: string;
   cacheEntryLifetimeMs: number;
+  getIdentityHash: () => Promise<string>;
   onOpenCacheError: (e: any) => void;
 }
 
@@ -42,6 +47,7 @@ export class StaleWhileRevalidateCache {
     { forceRefresh, ...fetchOptions }: CachedHttpFetchOptions
   ): Promise<Response> {
     const cache = await this.openCache();
+    const identityHash = await this.deps.getIdentityHash();
     const url = format({
       pathname: this.deps.http.basePath.prepend(path),
       ...fetchOptions,
@@ -55,10 +61,14 @@ export class StaleWhileRevalidateCache {
       const cachedResponse = await cache?.match(url);
 
       if (cachedResponse) {
-        const dateHeader = cachedResponse.headers.get('date');
+        const identityHashHeader = cachedResponse.headers.get(IDENTITY_HASH_HEADER) ?? '';
+        const version = fetchOptions.version ?? '';
+        const versionHeader = cachedResponse.headers.get(ELASTIC_HTTP_VERSION_HEADER) ?? '';
+        const dateHeader = cachedResponse.headers.get(DATE_HEADER);
 
-        // If the response doesn't have a date header, it's invalid
-        if (dateHeader) {
+        // If the identity hash or version doesn't match, or the
+        // response doesn't have a date header, then it's invalid
+        if (identityHash === identityHashHeader && version === versionHeader && dateHeader) {
           const date = new Date(dateHeader);
           const now = new Date();
           const diff = now.getTime() - date.getTime();
@@ -97,8 +107,24 @@ export class StaleWhileRevalidateCache {
         }
 
         if (this.isActiveRequest(url, currentRequest)) {
-          // Clone the response so we can cache it
-          cache?.put(url, response.clone());
+          // Clone the response so we don't consume the original response body stream
+          const clonedResponse = response.clone();
+
+          // Clone the response headers so we can modify them
+          const headers = new Headers(clonedResponse.headers);
+
+          // Add the identity hash to the response headers so we can check it later
+          headers.set(IDENTITY_HASH_HEADER, identityHash);
+
+          // Cache the response
+          cache?.put(
+            url,
+            new Response(clonedResponse.body, {
+              headers,
+              status: response.status,
+              statusText: response.statusText,
+            })
+          );
         }
 
         return response;
