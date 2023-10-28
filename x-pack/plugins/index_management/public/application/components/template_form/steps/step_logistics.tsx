@@ -307,7 +307,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           </FormRow>
 
           {/* Allow auto create */}
-          {isLegacy !== true && (
+          {isLegacy === false && (
             <FormRow title={allowAutoCreate.title} description={allowAutoCreate.description}>
               <UseField
                 path="allowAutoCreate"

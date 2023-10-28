@@ -188,15 +188,19 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
 
               {/* Allow auto create */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
-                  defaultMessage="Allow auto create"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(allowAutoCreate)}
-              </EuiDescriptionListDescription>
+              {isLegacy === false && (
+                <>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
+                      defaultMessage="Allow auto create"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {getDescriptionText(allowAutoCreate)}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
 
               {/* components */}
               {isLegacy !== true && (
