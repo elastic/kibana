@@ -1,5 +1,13 @@
 closure_type:
   $ref: 'closure_types.yaml'
+customFields:
+  type: array
+  x-technical-preview: true
+  description: Custom fields configuration details.
+  items:
+    type: object
+    properties:
+      $ref: 'case_configure_customfields.yaml'
 connector: 
   type: object
   properties:
@@ -10,6 +18,10 @@ created_at:
   example: 2022-06-01T17:07:17.767Z
 created_by:
   type: object
+  required:
+      - email
+      - full_name
+      - username
   properties:
     $ref: 'user_properties.yaml'
 error:
@@ -42,6 +54,10 @@ updated_at:
   example: 2022-06-01T19:58:48.169Z
 updated_by:
   type: object
+  required:
+      - email
+      - full_name
+      - username
   properties:
     $ref: 'user_properties.yaml'
   nullable: true
