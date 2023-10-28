@@ -465,17 +465,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
     await Promise.allSettled(
       Array.from(searchIdMapping).map(async ([searchId, strategyName]) => {
-        try {
-          const searchOptions = {
-            sessionId,
-            strategy: strategyName,
-            isStored: true,
-          };
+        const searchOptions = {
+          sessionId,
+          strategy: strategyName,
+          isStored: true,
+        };
 
-          await this.cancel(deps, searchId, searchOptions);
-        } catch (e) {
-          // Ignore errors while cancelling searches
-        }
+        return this.cancel(deps, searchId, searchOptions);
       })
     );
   };

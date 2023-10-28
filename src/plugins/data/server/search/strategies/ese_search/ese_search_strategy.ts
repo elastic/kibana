@@ -160,9 +160,13 @@ export const enhancedEsSearchStrategyProvider = (
      * @returns `Promise<void>`
      * @throws `KbnServerError`
      */
-    cancel: (id, options, { esClient }) => {
+    cancel: async (id, options, { esClient }) => {
       logger.debug(`cancel ${id}`);
-      return cancelAsyncSearch(id, esClient);
+      try {
+        await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
     },
     /**
      *
