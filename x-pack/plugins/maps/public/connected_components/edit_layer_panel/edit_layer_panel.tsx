@@ -131,11 +131,7 @@ export class EditLayerPanel extends Component<Props, State> {
 
     return this.props.selectedLayer.getErrors().map(({ title, error }, index) => (
       <div key={index}>
-        <EuiCallOut
-          color="danger"
-          iconType="error"
-          title={title}
-        >
+        <EuiCallOut color="danger" iconType="error" title={title}>
           {error}
         </EuiCallOut>
         <EuiSpacer size="m" />

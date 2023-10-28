@@ -276,7 +276,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   getErrors(): LayerError[] {
     const errors = super.getErrors();
 
-    this.getValidJoins().forEach(join => {
+    this.getValidJoins().forEach((join) => {
       const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
       const error = joinDataRequest?.getError();
       if (error) {

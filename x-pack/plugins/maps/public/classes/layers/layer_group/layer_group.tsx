@@ -302,7 +302,7 @@ export class LayerGroup implements ILayer {
           defaultMessage: `An error occurred when loading nested layers`,
         }),
         error: '',
-      }
+      },
     ];
   }
 

@@ -82,11 +82,9 @@ export class TOCEntryButton extends Component<Props, State> {
             color="danger"
           />
         ),
-        tooltipContent: this.props.layer.getErrors().map(({ title }) => (
-          <div key={title}>
-            {title}
-          </div>
-        )),
+        tooltipContent: this.props.layer
+          .getErrors()
+          .map(({ title }) => <div key={title}>{title}</div>),
         footnotes: [],
       };
     }

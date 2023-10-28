@@ -408,10 +408,12 @@ export class AbstractLayer implements ILayer {
     const sourceDataRequest = this.getSourceDataRequest();
     const error = sourceDataRequest?.getError();
     return error
-      ? [{
-          title: this._getSourceErrorTitle(),
-          error
-        }]
+      ? [
+          {
+            title: this._getSourceErrorTitle(),
+            error,
+          },
+        ]
       : [];
   }
 

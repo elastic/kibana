@@ -51,7 +51,7 @@ export function stopDataRequest(
   requestToken: symbol,
   responseMeta?: DataRequestMeta,
   data?: object,
-  errorMessage?: string,
+  errorMessage?: string
 ): MapState {
   const dataRequest = getDataRequest(state, layerId, dataRequestId, requestToken);
   return dataRequest
