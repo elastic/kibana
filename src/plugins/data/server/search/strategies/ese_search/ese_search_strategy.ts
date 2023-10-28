@@ -43,9 +43,9 @@ export const enhancedEsSearchStrategyProvider = (
   usage?: SearchUsage,
   useInternalUser: boolean = false
 ): ISearchStrategy => {
-  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    await client.asyncSearch.delete({ id });
+    return client.asyncSearch.delete({ id }).then(() => {});
   }
 
   function asyncSearch(
