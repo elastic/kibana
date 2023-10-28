@@ -28,9 +28,9 @@ export const sqlSearchStrategyProvider = (
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<SqlSearchStrategyRequest, SqlSearchStrategyResponse> => {
-  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    return client.sql.deleteAsync({ id }).then(() => {});
+    await client.sql.deleteAsync({ id });
   }
 
   function asyncSearch(
@@ -79,7 +79,7 @@ export const sqlSearchStrategyProvider = (
       return toAsyncKibanaSearchResponse(body, startTime, headers?.warning);
     };
 
-    const cancel = () => void (id && !options.isStored && cancelAsyncSearch(id, esClient));
+    const cancel = () => id && !options.isStored && cancelAsyncSearch(id, esClient);
 
     return pollSearch(search, cancel, {
       pollInterval: searchConfig.asyncSearch.pollInterval,

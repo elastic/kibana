@@ -27,9 +27,9 @@ export const eqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
-  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = esClient.asCurrentUser.eql;
-    return client.delete({ id }).then(() => {});
+    await client.delete({ id });
   }
 
   return {
@@ -80,7 +80,7 @@ export const eqlSearchStrategyProvider = (
         return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);
       };
 
-      const cancel = () => void (id && !options.isStored && cancelAsyncSearch(id, esClient));
+      const cancel = () => id && !options.isStored && cancelAsyncSearch(id, esClient);
 
       return pollSearch(search, cancel, {
         pollInterval: searchConfig.asyncSearch.pollInterval,
