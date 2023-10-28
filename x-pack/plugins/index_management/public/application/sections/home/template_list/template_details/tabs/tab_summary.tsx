@@ -195,7 +195,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             </EuiDescriptionListDescription>
 
             {/* Allow auto create */}
-            {isLegacy !== true && (
+            {isLegacy === false && (
               <>
                 <EuiDescriptionListTitle>
                   <FormattedMessage
