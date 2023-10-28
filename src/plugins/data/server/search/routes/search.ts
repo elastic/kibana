@@ -8,7 +8,6 @@
 
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { reportSearchError } from '../report_search_error';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';
@@ -102,7 +101,8 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           await search.cancel(id, { strategy });
           return res.ok();
         } catch (err) {
-          return reportServerError(res, err);
+          // return reportServerError(res, err);
+          return res.ok();
         }
       }
     );
