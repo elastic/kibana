@@ -26,7 +26,7 @@ import {
 import { WARNING_TRANSFORM_STATES } from '../../../../common/constants';
 import { wrapErrorIfNeeded } from '../../utils';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
-import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/transforms';
+import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/package_v2';
 
 const SCOPE = ['securitySolution'];
 const INTERVAL = '2h';

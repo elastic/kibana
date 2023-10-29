@@ -29,7 +29,7 @@ import {
   METADATA_TRANSFORMS_PATTERN,
   METADATA_TRANSFORMS_PATTERN_V2,
 } from '../../../../common/endpoint/constants';
-import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/transforms';
+import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/package_v2';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
