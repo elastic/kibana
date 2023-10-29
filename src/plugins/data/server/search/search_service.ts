@@ -464,14 +464,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private cancelSessionSearches = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
     await Promise.allSettled(
-      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
+      Array.from(searchIdMapping).map(async ([searchId, strategyName]) => {
         const searchOptions = {
           sessionId,
           strategy: strategyName,
           isStored: true,
         };
 
-        return this.cancel(deps, searchId, searchOptions);
+        return this.cancel(deps, searchId, searchOptions).catch(() => {
+          // Some strategies don't support cancellation - swallow these errors
+        });
       })
     );
   };
