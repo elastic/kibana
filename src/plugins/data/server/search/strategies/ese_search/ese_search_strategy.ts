@@ -78,7 +78,7 @@ export const enhancedEsSearchStrategyProvider = (
       return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
     };
 
-    const cancel = () => id && !options.isStored && cancelAsyncSearch(id, esClient);
+    const cancel = () => void (id && !options.isStored && cancelAsyncSearch(id, esClient));
 
     return pollSearch(search, cancel, {
       pollInterval: searchConfig.asyncSearch.pollInterval,
