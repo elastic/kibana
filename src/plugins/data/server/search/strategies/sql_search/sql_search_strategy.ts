@@ -28,9 +28,9 @@ export const sqlSearchStrategyProvider = (
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<SqlSearchStrategyRequest, SqlSearchStrategyResponse> => {
-  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    await client.sql.deleteAsync({ id });
+    return client.sql.deleteAsync({ id });
   }
 
   function asyncSearch(
@@ -79,7 +79,12 @@ export const sqlSearchStrategyProvider = (
       return toAsyncKibanaSearchResponse(body, startTime, headers?.warning);
     };
 
-    const cancel = () => id && !options.isStored && cancelAsyncSearch(id, esClient);
+    const cancel = () => {
+      if (!id || options.isStored) return;
+      cancelAsyncSearch(id, esClient).catch(() => {
+        // Swallow errors from cancellation
+      });
+    };
 
     return pollSearch(search, cancel, {
       pollInterval: searchConfig.asyncSearch.pollInterval,
@@ -112,9 +117,13 @@ export const sqlSearchStrategyProvider = (
      * @returns `Promise<void>`
      * @throws `KbnServerError`
      */
-    cancel: (id, options, { esClient }) => {
+    cancel: async (id, options, { esClient }) => {
       logger.debug(`sql search: cancel async_search_id=${id}`);
-      return cancelAsyncSearch(id, esClient);
+      try {
+        await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
     },
     /**
      *

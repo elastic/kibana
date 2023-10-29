@@ -9,6 +9,7 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs/operators';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { SearchConfigSchema } from '../../../../config';
 import {
   EqlSearchStrategyRequest,
@@ -27,15 +28,19 @@ export const eqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
-  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = esClient.asCurrentUser.eql;
-    await client.delete({ id });
+    return client.delete({ id });
   }
 
   return {
-    cancel: (id, options, { esClient }) => {
+    cancel: async (id, options, { esClient }) => {
       logger.debug(`_eql/delete ${id}`);
-      return cancelAsyncSearch(id, esClient);
+      try {
+        await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
     },
 
     search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
@@ -80,7 +85,12 @@ export const eqlSearchStrategyProvider = (
         return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);
       };
 
-      const cancel = () => id && !options.isStored && cancelAsyncSearch(id, esClient);
+      const cancel = () => {
+        if (!id || options.isStored) return;
+        cancelAsyncSearch(id, esClient).catch(() => {
+          // Swallow errors from cancellation
+        });
+      };
 
       return pollSearch(search, cancel, {
         pollInterval: searchConfig.asyncSearch.pollInterval,

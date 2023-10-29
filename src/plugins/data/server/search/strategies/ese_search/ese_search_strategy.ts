@@ -45,7 +45,7 @@ export const enhancedEsSearchStrategyProvider = (
 ): ISearchStrategy => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    return client.asyncSearch.delete({ id }).then(() => {});
+    return client.asyncSearch.delete({ id });
   }
 
   function asyncSearch(
@@ -79,7 +79,10 @@ export const enhancedEsSearchStrategyProvider = (
     };
 
     const cancel = () => {
-      if (id && !options.isStored) cancelAsyncSearch(id, esClient);
+      if (!id || options.isStored) return;
+      cancelAsyncSearch(id, esClient).catch(() => {
+        // Swallow errors from cancellation
+      });
     };
 
     return pollSearch(search, cancel, {
