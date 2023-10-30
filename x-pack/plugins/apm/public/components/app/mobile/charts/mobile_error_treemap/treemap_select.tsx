@@ -82,7 +82,7 @@ export function TreemapSelect({
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.apm.transactionOverview.treemap.title', {
-              defaultMessage: 'Most used {currentTreemap}',
+              defaultMessage: 'Most affected {currentTreemap}',
               values: { currentTreemap: currentTreemap.value },
             })}
           </h2>
@@ -90,7 +90,7 @@ export function TreemapSelect({
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.apm.transactionOverview.treemap.subtitle', {
             defaultMessage:
-              'Treemap showing the total and most used {currentTreemap}',
+              'Treemap showing the total and most affected {currentTreemap}',
             values: { currentTreemap: currentTreemap.value },
           })}
         </EuiText>

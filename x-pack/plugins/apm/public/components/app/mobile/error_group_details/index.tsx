@@ -33,7 +33,7 @@ import type { APIReturnType } from '../../../../services/rest/create_call_apm_ap
 import { ErrorSampler } from './error_sampler';
 import { ErrorDistribution } from './distribution';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { TopErroneousTransactions } from './top_erroneous_transactions';
+import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
 import { maybe } from '../../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
@@ -235,13 +235,17 @@ export function ErrorGroupDetails() {
             </EuiPanel>
           </EuiFlexItem>
         </ChartPointerEventContextProvider>
-        {!isOpenTelemetryAgent && !isRumAgent && (
-          <EuiFlexItem grow={2}>
-            <EuiPanel hasBorder={true}>
-              <TopErroneousTransactions serviceName={serviceName} />
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={2}>
+          <EuiPanel hasBorder={true}>
+            <MobileErrorTreemap
+              serviceName={serviceName}
+              kuery={kuery}
+              environment={environment}
+              start={start}
+              end={end}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       {showDetails && (

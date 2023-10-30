@@ -160,6 +160,10 @@ export const mobileServiceDetailRoute = {
                   transactionName: t.string,
                   comparisonEnabled: toBooleanRt,
                   showCriticalPath: toBooleanRt,
+                  device: t.string,
+                  osVersion: t.string,
+                  appVersion: t.string,
+                  netConnectionType: t.string,
                 }),
                 t.partial({
                   traceId: t.string,
@@ -199,6 +203,10 @@ export const mobileServiceDetailRoute = {
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
             mobileErrorTabId: t.string,
+            device: t.string,
+            osVersion: t.string,
+            appVersion: t.string,
+            netConnectionType: t.string,
           }),
         }),
         children: {

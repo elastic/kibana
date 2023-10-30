@@ -25,7 +25,10 @@ import {
   MobileErrorGroupMainStatisticsResponse,
   getMobileErrorGroupMainStatistics,
 } from './get_mobile_error_group_main_statistics';
-import { getMobileErrorsTermsByField } from './get_mobile_errors_terms_by_field';
+import {
+  getMobileErrorsTermsByField,
+  MobileErrorTermsByFieldResponse,
+} from './get_mobile_errors_terms_by_field';
 import {
   MobileHttpErrorsTimeseries,
   getMobileHttpErrors,
@@ -122,7 +125,7 @@ const mobileErrorTermsByFieldRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    terms: MobileTermsByFieldResponse;
+    terms: MobileErrorTermsByFieldResponse;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
