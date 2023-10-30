@@ -228,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.assertDetectorResultsExist(jobId, 0);
     });
 
-    it('job cloning fails in the single metric wizard if a matching data view does not exist', async () => {
+    it('job cloning opens in the single metric wizard if a matching data view does not exist', async () => {
       await ml.testExecution.logTestStep('delete data view used by job');
       await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
 
@@ -238,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         'job cloning clicks the clone action and displays an error toast'
       );
-      await ml.jobTable.clickCloneJobActionWhenNoDataViewExists(jobId);
+      await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
     });
 
     it('job cloning opens the existing job in the single metric wizard', async () => {
