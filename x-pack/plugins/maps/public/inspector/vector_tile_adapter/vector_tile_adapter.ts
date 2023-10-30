@@ -23,12 +23,7 @@ export class VectorTileAdapter extends EventEmitter {
   }
 
   hasLayers() {
-    for (const key in this._layers) {
-      if (this._layers.hasOwnProperty(key)) {
-        return true;
-      }
-    }
-    return false;
+    return Object.keys(this._layers).length > 0;
   }
 
   setTiles(tiles: Array<{ x: number; y: number; z: number }>) {
