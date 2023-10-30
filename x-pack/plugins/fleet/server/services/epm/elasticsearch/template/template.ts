@@ -76,7 +76,6 @@ export function getTemplate({
   registryElasticsearch,
   mappings,
   isIndexModeTimeSeries,
-  isILMPolicyDisabled,
   type,
 }: {
   templateIndexPattern: string;
@@ -85,10 +84,9 @@ export function getTemplate({
   templatePriority: number;
   mappings: IndexTemplateMappings;
   type: string;
-  isIndexModeTimeSeries?: boolean;
-  isILMPolicyDisabled?: boolean;
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
+  isIndexModeTimeSeries?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate({
     templateIndexPattern,
@@ -114,11 +112,6 @@ export function getTemplate({
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
-
-  if (isILMPolicyDisabled) {
-    // Explicitly set ILM policy to null when it's disabled globally
-    template.template.settings.index.lifecycle = null;
-  }
 
   return template;
 }

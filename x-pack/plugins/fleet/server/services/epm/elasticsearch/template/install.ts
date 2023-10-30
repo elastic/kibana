@@ -568,11 +568,10 @@ export function prepareTemplate({
     packageName,
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,
-    hidden: !!dataStream.hidden,
+    hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
     mappings,
     isIndexModeTimeSeries,
-    isILMPolicyDisabled,
     type: dataStream.type,
   });
 
