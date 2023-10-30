@@ -9,6 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import {
   LogFilesState,
   ObservabilityOnboardingType,
+  StepPayloadType,
   SystemLogsState,
 } from '../../saved_objects/observability_onboarding_status';
 
@@ -16,10 +17,12 @@ export async function getHasLogs({
   type,
   state,
   esClient,
+  payload,
 }: {
   type: ObservabilityOnboardingType;
   state?: LogFilesState | SystemLogsState;
   esClient: ElasticsearchClient;
+  payload?: StepPayloadType;
 }) {
   if (!state) {
     return false;
