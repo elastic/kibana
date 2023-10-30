@@ -38,11 +38,8 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { useUpdateCase } from '../../containers/use_update_case';
-import {
-  useGetCases,
-  DEFAULT_QUERY_PARAMS,
-  DEFAULT_FILTER_OPTIONS,
-} from '../../containers/use_get_cases';
+import { useGetCases } from '../../containers/use_get_cases';
+import { DEFAULT_QUERY_PARAMS, DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -96,7 +93,7 @@ describe('AllCasesListGeneric', () => {
   };
 
   const defaultColumnArgs = {
-    filterStatus: CaseStatuses.open,
+    filterStatus: [CaseStatuses.open],
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     isSelectorView: false,
@@ -504,7 +501,7 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          searchFields: [],
+          searchFields: ['title', 'description'],
           owner: ['securitySolution'],
           category: ['twix'],
         },
@@ -694,10 +691,10 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: ['all'],
           reporters: [],
-          status: 'all',
+          status: ['all'],
           tags: [],
           assignees: [],
           owner: ['securitySolution', 'observability'],
@@ -721,10 +718,10 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toBeCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: ['all'],
           reporters: [],
-          status: 'all',
+          status: ['all'],
           tags: [],
           assignees: [],
           owner: ['securitySolution'],
@@ -744,10 +741,10 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: ['all'],
           reporters: [],
-          status: 'all',
+          status: ['all'],
           tags: [],
           assignees: [],
           owner: ['securitySolution', 'observability'],
@@ -777,10 +774,10 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: ['all'],
           reporters: [],
-          status: 'all',
+          status: ['all'],
           tags: [],
           assignees: [],
           owner: ['securitySolution'],

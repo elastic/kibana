@@ -156,8 +156,8 @@ export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
 export interface FilterOptions {
   search: string;
   searchFields: string[];
-  severity: CaseSeverityWithAll;
-  status: CaseStatusWithAllStatus;
+  severity: CaseSeverityWithAll[];
+  status: CaseStatusWithAllStatus[];
   tags: string[];
   assignees: Array<string | null> | null;
   reporters: User[];

@@ -87,12 +87,12 @@ export const getCaseUserActionsStats = async (
 
 export const getCases = async ({
   filterOptions = {
-    severity: SeverityAll,
+    severity: [SeverityAll],
     search: '',
     searchFields: [],
     assignees: [],
     reporters: [],
-    status: CaseStatuses.open,
+    status: [CaseStatuses.open],
     tags: [],
     owner: [],
     category: [],
