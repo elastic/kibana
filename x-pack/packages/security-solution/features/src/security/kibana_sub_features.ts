@@ -24,6 +24,16 @@ export const PRIVILEGE_API_TAGS = Object.freeze({
   responseActionsHistoryLogRead: Object.freeze([`${APP_ID}-readActionsLogManagement`]),
 });
 
+/**
+ * List of Kibana privilege IDs
+ */
+export const PRIVILEGE_ID = Object.freeze({
+  hostIsolationAll: 'host_isolation_all',
+  processOperationsAll: 'process_operations_all',
+  endpointListRead: 'endpoint_list_read',
+  responseActionsHistoryLogRead: 'actions_log_management_read',
+});
+
 const endpointListSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -62,7 +72,7 @@ const endpointListSubFeature: SubFeatureConfig = {
         },
         {
           api: PRIVILEGE_API_TAGS.endpointListRead,
-          id: 'endpoint_list_read',
+          id: PRIVILEGE_ID.endpointListRead,
           includeIn: 'none',
           name: 'Read',
           savedObject: {
@@ -389,7 +399,7 @@ const responseActionsHistorySubFeature: SubFeatureConfig = {
         },
         {
           api: PRIVILEGE_API_TAGS.responseActionsHistoryLogRead,
-          id: 'actions_log_management_read',
+          id: PRIVILEGE_ID.responseActionsHistoryLogRead,
           includeIn: 'none',
           name: 'Read',
           savedObject: {
@@ -426,7 +436,7 @@ const hostIsolationSubFeature: SubFeatureConfig = {
       privileges: [
         {
           api: PRIVILEGE_API_TAGS.hostIsolationAll,
-          id: 'host_isolation_all',
+          id: PRIVILEGE_ID.hostIsolationAll,
           includeIn: 'none',
           name: 'All',
           savedObject: {
@@ -466,7 +476,7 @@ const processOperationsSubFeature: SubFeatureConfig = {
       privileges: [
         {
           api: PRIVILEGE_API_TAGS.processOperationsAll,
-          id: 'process_operations_all',
+          id: PRIVILEGE_ID.processOperationsAll,
           includeIn: 'none',
           name: 'All',
           savedObject: {
