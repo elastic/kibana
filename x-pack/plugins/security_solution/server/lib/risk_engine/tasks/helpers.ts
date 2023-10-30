@@ -43,7 +43,7 @@ const buildFakeScopedRequest = ({
     path: '/',
   };
 
-  const request = CoreKibanaRequest.from(rawRequest);
+  const request = CoreKibanaRequest.from(rawRequest, undefined, false);
   const scopedPath = addSpaceIdToPath('/', namespace);
 
   coreStart.http.basePath.set(request, scopedPath);

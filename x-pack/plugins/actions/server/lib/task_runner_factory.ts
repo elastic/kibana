@@ -272,7 +272,7 @@ function getFakeRequest(apiKey?: string) {
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  return CoreKibanaRequest.from(fakeRawRequest);
+  return CoreKibanaRequest.from(fakeRawRequest, undefined, false);
 }
 
 async function getActionTaskParams(

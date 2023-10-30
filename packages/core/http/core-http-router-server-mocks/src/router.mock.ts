@@ -113,7 +113,8 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
       params: validation.params || schema.any(),
       body: validation.body || schema.any(),
       query: validation.query || schema.any(),
-    }
+    },
+    false
   );
 }
 

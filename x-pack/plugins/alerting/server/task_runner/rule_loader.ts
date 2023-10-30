@@ -157,7 +157,7 @@ export function getFakeKibanaRequest(
     path: '/',
   };
 
-  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
+  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest, undefined, false);
   context.basePathService.set(fakeRequest, path);
 
   return fakeRequest;
