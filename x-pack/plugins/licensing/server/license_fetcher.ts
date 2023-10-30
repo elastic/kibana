@@ -36,7 +36,7 @@ export const getLicenseFetcher = ({
   return async () => {
     const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
     try {
-      const response = await client.asInternalUser.xpack.info(undefined, { maxRetries: 3 });
+      const response = await client.asInternalUser.xpack.info();
       const normalizedLicense =
         response.license && response.license.type !== 'missing'
           ? normalizeServerLicense(response.license)
