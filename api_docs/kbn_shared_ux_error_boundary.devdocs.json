@@ -90,6 +90,41 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.ThrowIfError",
+        "type": "Function",
+        "tags": [],
+        "label": "ThrowIfError",
+        "description": [
+          "\nThis component allows errors to be caught outside of a render tree, and re-thrown within a render tree\nwrapped by KibanaErrorBoundary. The purpose is to let KibanaErrorBoundary control the user experience when\nReact can not render due to an error.\n"
+        ],
+        "signature": [
+          "({ error }: React.PropsWithChildren<{ error: Error | null; }>) => null"
+        ],
+        "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.ThrowIfError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ error }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ error: Error | null; }>"
+            ],
+            "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
