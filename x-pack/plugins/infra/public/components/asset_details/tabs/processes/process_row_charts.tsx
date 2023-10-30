@@ -32,6 +32,7 @@ import { createFormatter } from '../../../../../common/formatters';
 import { MetricsExplorerAggregation } from '../../../../../common/http_api';
 import { Process } from './types';
 import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
+import { useRequestObservable } from '../../hooks/use_request_observable';
 import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
 
 interface Props {
@@ -65,7 +66,8 @@ const EmptyChartPlaceholder = ({ metricName }: { metricName: string }) => (
 );
 
 export const ProcessRowCharts = ({ command, hasCpuData, hasMemoryData }: Props) => {
-  const { loading, error, response } = useProcessListRowChart(command);
+  const { request$ } = useRequestObservable();
+  const { loading, error, response } = useProcessListRowChart(command, request$);
 
   const isLoading = loading || !response;
 

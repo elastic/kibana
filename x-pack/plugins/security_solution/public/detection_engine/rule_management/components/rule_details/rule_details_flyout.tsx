@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps } from '@elastic/eui';
 
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
 import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
 
