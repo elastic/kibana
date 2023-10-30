@@ -142,5 +142,6 @@ export async function fetchEsQuery({
       resultLimit: alertLimit,
     }),
     link,
+    index: params.index,
   };
 }
