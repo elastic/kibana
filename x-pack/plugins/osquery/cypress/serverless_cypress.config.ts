@@ -6,7 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import fs from 'fs';
+import { filterCypressVideos } from './support/filter_videos';
 import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 
 // eslint-disable-next-line import/no-default-export
@@ -43,19 +43,7 @@ export default defineCypressConfig({
     numTestsKeptInMemory: 3,
     setupNodeEvents: (on, config) => {
       setupUserDataLoader(on, config, { additionalRoleName: 'viewer' });
-
-      on('after:spec', (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
-        if (results && results.video) {
-          // Do we have failures for any retry attempts?
-          const failures = results.tests.some((test) =>
-            test.attempts.some((attempt) => attempt.state === 'failed')
-          );
-          if (!failures) {
-            // delete the video if the spec passed and no tests retried
-            fs.unlinkSync(results.video);
-          }
-        }
-      });
+      on('after:spec', filterCypressVideos);
 
       return config;
     },

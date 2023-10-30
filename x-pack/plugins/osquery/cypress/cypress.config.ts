@@ -11,6 +11,7 @@ import path from 'path';
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 
+import { filterCypressVideos } from './support/filter_videos';
 import type { YamlRoleDefinitions } from '../../../test_serverless/shared/lib';
 import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 const ROLES_YAML_FILE_PATH = path.join(
@@ -60,6 +61,7 @@ export default defineCypressConfig({
     numTestsKeptInMemory: 3,
     setupNodeEvents(on, config) {
       setupUserDataLoader(on, config, { roleDefinitions, additionalRoleName: 'viewer' });
+      on('after:spec', filterCypressVideos);
 
       return config;
     },
