@@ -109,7 +109,7 @@ export function registerEsqlFunction({
       - wrap a data source in single or double quotes when using FROM
       - use COUNT(*) or COUNT(). A single argument (field name) is
       required, like COUNT(my.field.name).
-      - use the AS keyword. create a new column by using the = operator.
+      - use the AS keyword. Create a new column by using the = operator.
       this is wrong: STATS SUM(field) AS sum_field.
 
       When constructing a query, break it down into the following steps.
