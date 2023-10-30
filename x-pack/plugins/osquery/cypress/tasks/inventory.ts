@@ -9,7 +9,15 @@ export const triggerLoadData = () => {
   cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').should('exist');
   cy.wait(1000);
   cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').click();
-  cy.getBySel('nodeContainer').eq(2, { timeout: 300000 }).should('exist');
+  cy.getBySel('nodeContainer', { multiple: true })
+    .not(':contains("dev-fleet-server")')
+    .first()
+    .should('exist');
   cy.getBySel('infraWaffleTimeControlsStopRefreshingButton').click();
-  cy.getBySel('nodeContainer').eq(2).click();
+  cy.getBySel('nodeContainer', {
+    multiple: true,
+  })
+    .not(':contains("dev-fleet-server")')
+    .first()
+    .click();
 };
