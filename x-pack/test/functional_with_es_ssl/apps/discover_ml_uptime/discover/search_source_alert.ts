@@ -115,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return await supertest
       .post(`/api/data_views/data_view`)
       .set('kbn-xsrf', 'foo')
+      .set('elastic-api-version', '2023-10-31')
       .send({ data_view: { title: dataView, timeFieldName: '@timestamp' } })
       .expect(200);
   };
@@ -337,7 +338,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // should not have data view selected by default
       const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nlogs-*');
+      expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
 
       log.debug('create data views');
       const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
