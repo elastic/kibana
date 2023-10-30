@@ -21,9 +21,7 @@ export const preparePack = (packName: string) => {
 };
 
 export const deactivatePack = (packName: string) => {
-  cy.react('ActiveStateSwitchComponent', {
-    props: { item: { name: packName } },
-  }).click();
+  cy.get(`[aria-label="${packName}"]`).click();
   closeModalIfVisible();
 
   cy.contains(`Successfully deactivated "${packName}" pack`).should('not.exist');
@@ -32,9 +30,7 @@ export const deactivatePack = (packName: string) => {
 };
 
 export const activatePack = (packName: string) => {
-  cy.react('ActiveStateSwitchComponent', {
-    props: { item: { name: packName } },
-  }).click();
+  cy.get(`[aria-label="${packName}"]`).click();
   closeModalIfVisible();
 
   cy.contains(`Successfully activated "${packName}" pack`).should('not.exist');
