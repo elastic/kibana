@@ -506,7 +506,7 @@ Then user should see a message indicating that all available rules have been ins
 And user should see a CTA that leads to the Rule Management page
 ```
 
-#### **Scenario: User can preview a rule before installing**
+#### **Scenario: User can preview rules available for installation**
 
 **Automation**: 1 e2e test
 
@@ -519,15 +519,26 @@ When user opens the rule preview for the 1st rule
 Then the preview should open
 When user closes the preview
 Then it should disappear
-When user opens the rule preview for the 2nd rule
+```
+
+#### **Scenario: User can install a rule using the rule preview**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there are 2 rules available to install
+When user opens the Add Rules page
+Then all rules available for installation should be displayed in the table
+When user opens the rule preview for the rule
 Then the preview should open
 When user installs the rule using a CTA in the rule preview
-Then the 2nd rule should be installed
+Then the rule should be installed
 And a success message should be displayed after installation
-And the 2nd rule should be removed from the Add Rules table
+And the rule should be removed from the Add Rules table
 When user navigates back to the Rule Management page
 Then user should see a CTA to install prebuilt rules
-And user should see the number of rules available to install as 1
+And user should see the number of rules available to install as initial number minus 1
 ```
 
 #### **Scenario: User can see correct rule information in preview before installing**
@@ -648,27 +659,37 @@ And user should NOT see a number of rules available to upgrade
 And user should NOT see the Rule Updates table
 ```
 
-#### **Scenario: User can preview a rule before upgrading**
+#### **Scenario: User can preview rules available for upgrade**
+
+```Gherkin
+Given there is at least one prebuilt rule installed in Kibana
+And for this rule there is a new version available
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then this rule should be displayed in the table
+When user opens the rule preview for this rule
+Then the preview should open
+When user closes the preview
+Then it should disappear
+```
+
+#### **Scenario: User can upgrade a rule using the rule preview**
 
 **Automation**: 1 e2e test
 
 ```Gherkin
-Given 2 prebuilt rules are installed in Kibana
-And for these 2 installed rules there are new versions available
+Given there is at least one prebuilt rule installed in Kibana
+And for this rule there is a new version available
 And user is on the Rule Management page
 When user opens the Rule Updates table
-Then all rules available for upgrade should be displayed in the table
-When user opens the rule preview for the 1st rule
-Then the preview should open
-When user closes the preview
-Then it should disappear
-When user opens the rule preview for the 2nd rule
+Then this rule should be displayed in the table
+When user opens the rule preview for this rule
 Then the preview should open
 When user upgrades the rule using a CTA in the rule preview
-Then the 2nd rule should be upgraded to the latest version
+Then the rule should be upgraded to the latest version
 And a success message should be displayed after upgrade
-And the 2nd rule should be removed from the Rule Updates table
-And user should see the number of rules available to upgrade as 1
+And the rule should be removed from the Rule Updates table
+And user should see the number of rules available to upgrade as initial number minus 1
 ```
 
 #### **Scenario: User can see correct rule information in preview before upgrading**

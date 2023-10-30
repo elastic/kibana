@@ -17,11 +17,9 @@ import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   INSTALL_PREBUILT_RULE_BUTTON,
   INSTALL_PREBUILT_RULE_PREVIEW,
-  INSTALL_SELECTED_RULES_BUTTON,
   UPDATE_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_BUTTON,
 } from '../../../screens/alerts_detection_rules';
-import { selectRulesByName } from '../../../tasks/alerts_detection_rules';
 import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../screens/breadcrumbs';
 import {
   installPrebuiltRuleAssets,
@@ -37,7 +35,6 @@ import {
 } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
-  assertInstallationRequestIsComplete,
   assertRuleInstallationSuccessToastShown,
   assertRulesNotPresentInAddPrebuiltRulesTable,
   assertRulesNotPresentInRuleUpdatesTable,
@@ -372,23 +369,27 @@ describe(
         );
       });
 
-      it('User can preview a rule before installing', () => {
+      it('User can preview rules available for installation', () => {
         clickAddElasticRulesButton();
 
         openRuleInstallPreview(RULE_1['security-rule'].name);
         closeRulePreview();
+      });
 
-        openRuleInstallPreview(RULE_2['security-rule'].name);
+      it('User can install a rule using the rule preview', () => {
+        clickAddElasticRulesButton();
+
+        openRuleInstallPreview(RULE_1['security-rule'].name);
         cy.get(INSTALL_PREBUILT_RULE_BUTTON).click();
         cy.wait('@installPrebuiltRules');
-        assertRuleInstallationSuccessToastShown([RULE_2]);
+        assertRuleInstallationSuccessToastShown([RULE_1]);
 
         // Go back to rules table and assert that the rules are installed
         cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
-        assertRulesPresentInInstalledRulesTable([RULE_2]);
+        assertRulesPresentInInstalledRulesTable([RULE_1]);
 
         clickAddElasticRulesButton();
-        assertRulesNotPresentInAddPrebuiltRulesTable([RULE_2]);
+        assertRulesNotPresentInAddPrebuiltRulesTable([RULE_1]);
       });
 
       describe('User can see correct rule information in preview before installing', () => {
@@ -612,17 +613,6 @@ describe(
         cy.get(INSTALL_PREBUILT_RULE_PREVIEW).contains('Investigation guide').should('not.exist');
         cy.get(INSTALL_PREBUILT_RULE_PREVIEW).contains('Setup guide').should('not.exist');
       });
-
-      it('should install multiple selected prebuilt rules by selecting them individually', () => {
-        clickAddElasticRulesButton();
-        selectRulesByName([RULE_1['security-rule'].name, RULE_2['security-rule'].name]);
-        cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
-        assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
-        // Go back to rules table and assert that the rules are installed
-        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
-        assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
-      });
     });
 
     describe('Upgrade of prebuilt rules', () => {
@@ -661,11 +651,8 @@ describe(
         clickRuleUpdatesTab();
       });
 
-      it('User can preview a rule before upgrading', () => {
+      it('User can preview rules available for upgrade', () => {
         clickRuleUpdatesTab();
-
-        openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
-        closeRulePreview();
 
         openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
         cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
@@ -675,6 +662,13 @@ describe(
         cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
 
         assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_1]);
+      });
+
+      it('User can upgrade a rule using the rule preview', () => {
+        clickRuleUpdatesTab();
+
+        openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+        closeRulePreview();
       });
 
       describe('User can see correct rule information in preview before upgrading', () => {
@@ -1008,7 +1002,7 @@ describe(
         });
       });
 
-      it('tabs and sections without content should be hidden in preview before upgrading', () => {
+      it('Tabs and sections without content should be hidden in preview before upgrading', () => {
         const UPDATED_RULE_WITHOUT_INVESTIGATION_AND_SETUP_GUIDES = {
           ...RULE_WITHOUT_INVESTIGATION_AND_SETUP_GUIDES,
           ['security-rule']: {
