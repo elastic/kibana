@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
-      it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
+      it('@skipInQA should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
         const hookAction = await createNewAction(supertest, log);
         const rule = getSimpleRule();
         await createRule(supertest, log, rule);
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
-      it('should not change properties of immutable rule when applying actions to it', async () => {
+      it('@skipInQA should not change properties of immutable rule when applying actions to it', async () => {
         // actions and throttle to be removed from assertion (it asserted in a separate test case)
         const actionsProps = ['actions', 'throttle'];
 
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(expected.immutable).to.be(true); // It should stay immutable true when returning
       });
 
-      it('should be able to create a new webhook action and attach it to an immutable rule', async () => {
+      it('@skipInQA should be able to create a new webhook action and attach it to an immutable rule', async () => {
         const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
         const ruleToUpdate = getRuleWithWebHookAction(
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare.throttle).to.eql(expectedRuleWithUserUpdated.throttle);
       });
 
-      it('should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
+      it('@skipInQA should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
         const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
         const ruleToUpdate = getRuleWithWebHookAction(
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status.rules_not_installed).to.eql(0);
       });
 
-      it('should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
+      it('@skipInQA should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
         const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
         const ruleToUpdate = getRuleWithWebHookAction(
