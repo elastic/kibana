@@ -84,7 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
-  describe.skip('@ess @serverless endpoint list', function () {
+  describe('@ess @serverless endpoint list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
       before(async () => {
