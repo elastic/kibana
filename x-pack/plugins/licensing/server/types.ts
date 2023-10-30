@@ -14,8 +14,6 @@ export interface ElasticsearchError extends Error {
   status?: number;
 }
 
-export type LicenseFetcher = () => Promise<ILicense>;
-
 /**
  * Result from remote request fetching raw feature set.
  * @internal
