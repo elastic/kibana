@@ -281,7 +281,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     installElasticTrainedModelConfig(modelId: string) {
       return httpService.http<estypes.MlPutTrainedModelResponse>({
-        path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_model/${modelId}`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/${modelId}`,
         method: 'POST',
         version: '1',
       });

@@ -779,13 +779,13 @@ export function trainedModelsRoutes(
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /internal/ml/trained_models/install_elastic_model/:modelId Installs ELSER model
+   * @api {post} /internal/ml/trained_models/install_elastic_trained_model/:modelId Installs ELSER model
    * @apiName InstallElasticTrainedModel
    * @apiDescription Downloads and installs ELSER model.
    */
   router.versioned
     .post({
-      path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_model/{modelId}`,
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/{modelId}`,
       access: 'internal',
       options: {
         tags: ['access:ml:canCreateTrainedModels'],
