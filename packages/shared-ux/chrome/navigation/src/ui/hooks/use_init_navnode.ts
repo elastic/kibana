@@ -59,7 +59,7 @@ function getNodeStatus(
     if (!hasUserAccessToCloudLink()) return 'remove';
   }
 
-  if (deepLink && deepLink.hidden) return 'remove';
+  if (deepLink && deepLink.hidden) return 'hidden';
 
   return sideNavStatus ?? 'visible';
 }

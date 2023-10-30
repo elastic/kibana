@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { merge } from 'lodash';
 import { CspConfigType } from './config';
 
 export type CspDirectiveName =
@@ -65,7 +66,11 @@ export class CspDirectives {
       .join('; ');
   }
 
-  static fromConfig(config: CspConfigType): CspDirectives {
+  static fromConfig(
+    firstConfig: CspConfigType,
+    ...otherConfigs: Array<Partial<CspConfigType>>
+  ): CspDirectives {
+    const config = otherConfigs.length ? merge(firstConfig, ...otherConfigs) : firstConfig;
     const cspDirectives = new CspDirectives();
 
     // combining `default` directive configurations

@@ -85,6 +85,10 @@ const DATABASE_LABEL = i18n.translate('searchConnectors.nativeConnectors.databas
   defaultMessage: 'Database',
 });
 
+const SCHEMA_LABEL = i18n.translate('searchConnectors.nativeConnectors.schemaLabel', {
+  defaultMessage: 'Schema',
+});
+
 const PORT_LABEL = i18n.translate('searchConnectors.nativeConnectors.portLabel', {
   defaultMessage: 'Port',
 });
@@ -2108,6 +2112,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      schema: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: SCHEMA_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
       tables: {
         default_value: '',
         depends_on: [],
@@ -2119,7 +2138,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 6,
+        order: 7,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -2134,7 +2153,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 9,
+        order: 10,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -2149,7 +2168,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 10,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -2169,7 +2188,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 7,
+        order: 8,
         required: false,
         sensitive: false,
         tooltip: '',
@@ -2189,7 +2208,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 8,
+        order: 9,
         required: false,
         sensitive: false,
         tooltip: '',

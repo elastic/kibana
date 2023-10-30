@@ -43,6 +43,7 @@ import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } fro
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../../common/endpoint/data_loaders/utils';
@@ -108,23 +109,18 @@ export const startFleetServer = async ({
 }: StartFleetServerOptions): Promise<StartedFleetServer> => {
   logger.info(`Starting Fleet Server and connecting it to Kibana`);
 
-  const response = await logger.indent(4, async () => {
+  return logger.indent(4, async () => {
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
 
     // Check if fleet already running if `force` is false
-    if (!force) {
-      const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
-
-      if (currentFleetServerUrl && (await isFleetServerRunning(currentFleetServerUrl))) {
-        throw new Error(
-          `Fleet server is already configured for this instance of Kibana and available at: ${currentFleetServerUrl}.\n(Use 'force' option to bypass this error)`
-        );
-      }
+    if (!force && (await isFleetServerRunning(kbnClient))) {
+      throw new Error(
+        `Fleet server is already configured and running for this instance of Kibana.\n(Use 'force' option to bypass this error)`
+      );
     }
 
-    // Only fetch/create a fleet-server policy
     const policyId =
-      policy ?? !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
+      policy || !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
     const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
@@ -140,8 +136,6 @@ export const startFleetServer = async ({
       policyId,
     };
   });
-
-  return response;
 };
 
 const getOrCreateFleetServerAgentPolicyId = async (
@@ -233,6 +227,7 @@ const startFleetServerWithDocker = async ({
     const containerName = `dev-fleet-server.${port}`;
     const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
     let containerId = '';
+    let fleetServerVersionInfo = '';
 
     if (isLocalhost(esURL.hostname)) {
       esURL.hostname = localhostRealIp;
@@ -276,9 +271,10 @@ const startFleetServerWithDocker = async ({
           );
         })
         .catch((error) => {
-          log.verbose(`Attempt to kill currently running fleet-server container (if any) with name [${containerName}] was unsuccessful:
-    ${error}
-  (This is ok if one was not running already)`);
+          if (!/no such container/i.test(error.message)) {
+            log.verbose(`Attempt to kill currently running fleet-server container with name [${containerName}] was unsuccessful:
+      ${error}`);
+          }
         });
 
       log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
@@ -304,6 +300,19 @@ const startFleetServerWithDocker = async ({
 
         log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
       }
+
+      fleetServerVersionInfo = (
+        await execa('docker', [
+          'exec',
+          containerName,
+          '/bin/bash',
+          '-c',
+          './elastic-agent version',
+        ]).catch((err) => {
+          log.verbose(`Failed to retrieve agent version information from running instance.`, err);
+          return { stdout: 'Unable to retrieve version information' };
+        })
+      ).stdout;
     } catch (error) {
       log.error(dump(error));
       throw error;
@@ -311,6 +320,8 @@ const startFleetServerWithDocker = async ({
 
     const info = `Container Name: ${containerName}
 Container Id:   ${containerId}
+Fleet-server version:
+    ${fleetServerVersionInfo.replace(/\n/g, '\n    ')}
 
 View running output:  ${chalk.cyan(`docker attach ---sig-proxy=false ${containerName}`)}
 Shell access:         ${chalk.cyan(`docker exec -it ${containerName} /bin/bash`)}
@@ -592,12 +603,22 @@ const updateFleetElasticsearchOutputHostNames = async (
 };
 
 /**
- * Checks to see if the fleet server at the given URL is up and running by calling
- * the status api
- * @param serverUrl
+ * Checks to see if Fleet Server is setup with Fleet and if so, check to see if that
+ * server is up and running by calling its status api
+ * @param kbnClient
+ * @param log
  */
-export const isFleetServerRunning = async (serverUrl: string): Promise<boolean> => {
-  const url = new URL(serverUrl);
+export const isFleetServerRunning = async (
+  kbnClient: KbnClient,
+  log: ToolingLog = createToolingLogger()
+): Promise<boolean> => {
+  const fleetServerUrl = await fetchFleetServerUrl(kbnClient);
+
+  if (!fleetServerUrl) {
+    return false;
+  }
+
+  const url = new URL(fleetServerUrl);
   url.pathname = '/api/status';
 
   return axios
@@ -608,10 +629,13 @@ export const isFleetServerRunning = async (serverUrl: string): Promise<boolean> 
       // Custom agent to ensure we don't get cert errors
       httpsAgent: new https.Agent({ rejectUnauthorized: false }),
     })
-    .then(() => {
+    .then((response) => {
+      log.verbose(`Fleet server is up and running as [${fleetServerUrl}]`, response.data);
       return true;
     })
-    .catch(() => {
+    .catch(catchAxiosErrorFormatAndThrow)
+    .catch((e) => {
+      log.verbose(`Fleet server not up. Attempt to call [${url.toString()}] failed with:`, e);
       return false;
     });
 };

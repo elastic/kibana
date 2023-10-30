@@ -721,6 +721,7 @@ export class DashboardPageControls extends FtrService {
 
   // Time slider functions
   public async gotoNextTimeSlice() {
+    await this.closeTimeSliderPopover(); // prevents the pin tooltip from getting in the way
     await this.testSubjects.click('timeSlider-nextTimeWindow');
   }
 

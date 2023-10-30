@@ -26,6 +26,10 @@ import {
 } from '../../api/connector/start_incremental_sync_api_logic';
 import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
+  ConnectorConfigurationApiLogic,
+  PostConnectorConfigurationActions,
+} from '../../api/connector/update_connector_configuration_api_logic';
+import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
 } from '../../api/index/cached_fetch_index_api_logic';
@@ -69,6 +73,7 @@ export interface IndexViewActions {
   startSync(): void;
   stopFetchIndexPoll(): CachedFetchIndexApiLogicActions['stopPolling'];
   stopFetchIndexPoll(): void;
+  updateConfigurationApiSuccess: PostConnectorConfigurationActions['apiSuccess'];
 }
 
 export interface IndexViewValues {
@@ -124,6 +129,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         'startPolling as startFetchIndexPoll',
         'stopPolling as stopFetchIndexPoll',
       ],
+      ConnectorConfigurationApiLogic,
+      ['apiSuccess as updateConfigurationApiSuccess'],
       StartSyncApiLogic,
       ['apiSuccess as startSyncApiSuccess', 'makeRequest as makeStartSyncRequest'],
       StartIncrementalSyncApiLogic,
@@ -202,6 +209,14 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     startSync: () => {
       if (isConnectorIndex(values.fetchIndexApiData)) {
         actions.makeStartSyncRequest({ connectorId: values.fetchIndexApiData.connector.id });
+      }
+    },
+    updateConfigurationApiSuccess: ({ configuration }) => {
+      if (isConnectorIndex(values.fetchIndexApiData)) {
+        actions.fetchIndexApiSuccess({
+          ...values.fetchIndexApiData,
+          connector: { ...values.fetchIndexApiData.connector, configuration },
+        });
       }
     },
   }),

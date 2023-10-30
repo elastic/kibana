@@ -23,7 +23,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringPolicy, FilteringRule, FilteringRuleRule } from '@kbn/search-connectors';
+import {
+  filteringPolicyToText,
+  filteringRuleToText,
+  FilteringRule,
+  FilteringRuleRuleValues,
+} from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
@@ -38,11 +43,6 @@ import {
 } from '../../../../../shared/tables/inline_editable_table/types';
 import { ItemWithAnID } from '../../../../../shared/tables/types';
 
-import {
-  filteringPolicyToText,
-  filteringRuleToText,
-} from '../../../../utils/filtering_rule_helpers';
-
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
@@ -50,7 +50,7 @@ import { ConnectorFilteringLogic } from './connector_filtering_logic';
 const instanceId = 'FilteringRulesTable';
 
 function validateItem(filteringRule: FilteringRule): FormErrors {
-  if (filteringRule.rule === FilteringRuleRule.REGEX) {
+  if (filteringRule.rule === 'regex') {
     try {
       new RegExp(filteringRule.value);
       return {};
@@ -97,12 +97,12 @@ export const SyncRulesTable: React.FC = () => {
           onChange={(e) => onChange(e.target.value)}
           options={[
             {
-              text: filteringPolicyToText(FilteringPolicy.INCLUDE),
-              value: FilteringPolicy.INCLUDE,
+              text: filteringPolicyToText('include'),
+              value: 'include',
             },
             {
-              text: filteringPolicyToText(FilteringPolicy.EXCLUDE),
-              value: FilteringPolicy.EXCLUDE,
+              text: filteringPolicyToText('exclude'),
+              value: 'exclude',
             },
           ]}
         />
@@ -140,7 +140,7 @@ export const SyncRulesTable: React.FC = () => {
           fullWidth
           value={filteringRule.rule}
           onChange={(e) => onChange(e.target.value)}
-          options={Object.values(FilteringRuleRule).map((rule) => ({
+          options={Object.values(FilteringRuleRuleValues).map((rule) => ({
             text: filteringRuleToText(rule),
             value: rule,
           }))}
@@ -184,8 +184,8 @@ export const SyncRulesTable: React.FC = () => {
       )}
       columns={columns}
       defaultItem={{
-        policy: FilteringPolicy.INCLUDE,
-        rule: FilteringRuleRule.EQUALS,
+        policy: 'include',
+        rule: 'equals',
         value: '',
       }}
       description={description}

@@ -19,11 +19,13 @@ import {
   type EuiThemeComputed,
   useEuiTheme,
   transparentize,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { NavigateToUrlFn } from '../../../types/internal';
-import { usePanel } from './panel';
 import { nodePathToString } from '../../utils';
+import { useNavigation as useServices } from '../../services';
+import { usePanel } from './panel';
 
 const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   * {
@@ -50,15 +52,27 @@ interface Props {
 export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
+  const { isSideNavCollapsed } = useServices();
   const { title, deepLink, isActive, children } = item;
   const id = nodePathToString(item);
   const href = deepLink?.url ?? item.href;
+  const isNotMobile = useIsWithinMinBreakpoint('s');
+  const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
 
   const itemClassNames = classNames(
     'sideNavItem',
     { 'sideNavItem--isActive': isActive },
     getStyles(euiTheme)
   );
+
+  const dataTestSubj = classNames(`nav-item`, `nav-item-${id}`, {
+    [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+    [`nav-item-id-${id}`]: id,
+    [`nav-item-isActive`]: isActive,
+  });
+  const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${id}`, {
+    [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
+  });
 
   const onLinkClick = useCallback(
     (e: React.MouseEvent) => {
@@ -73,12 +87,16 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
   );
 
   const onIconClick = useCallback(() => {
-    openPanel(item);
-  }, [openPanel, item]);
+    if (selectedNode?.id === item.id) {
+      closePanel();
+    } else {
+      openPanel(item);
+    }
+  }, [openPanel, closePanel, item, selectedNode]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem>
+      <EuiFlexItem style={{ flexBasis: isIconVisible ? '80%' : '100%' }}>
         <EuiListGroup gutterSize="none">
           <EuiListGroupItem
             label={title}
@@ -88,12 +106,12 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
             className={itemClassNames}
             color="text"
             size="s"
-            data-test-subj={`sideNavItemLink-${id}`}
+            data-test-subj={dataTestSubj}
           />
         </EuiListGroup>
       </EuiFlexItem>
-      {!!children && children.length > 0 && (
-        <EuiFlexItem grow={0}>
+      {isIconVisible && (
+        <EuiFlexItem grow={0} style={{ flexBasis: '15%' }}>
           <EuiButtonIcon
             display={nodePathToString(selectedNode) === id ? 'base' : 'empty'}
             size="s"
@@ -104,7 +122,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle panel navigation',
             })}
-            data-test-subj={`solutionSideNavItemButton-${id}`}
+            data-test-subj={buttonDataTestSubj}
           />
         </EuiFlexItem>
       )}
