@@ -6,14 +6,14 @@
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { debug } from '../../common/debug_log';
-import { Asset, AssetFilters } from '../../common/types_api';
+import { Asset, AssetFiltersWithDateRange } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
 import { isStringOrNonEmptyArray } from './utils';
 
 interface GetAssetsOptions extends ElasticsearchAccessorOptions {
   size?: number;
-  filters?: AssetFilters;
+  filters?: AssetFiltersWithDateRange;
   from?: string;
   to?: string;
 }
@@ -30,14 +30,6 @@ export async function getAssets({
   const must: QueryDslQueryContainer[] = [];
 
   if (filters && Object.keys(filters).length > 0) {
-    if (typeof filters.collectionVersion === 'number') {
-      must.push({
-        term: {
-          ['asset.collection_version']: filters.collectionVersion,
-        },
-      });
-    }
-
     if (isStringOrNonEmptyArray(filters.type)) {
       must.push({
         terms: {

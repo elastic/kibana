@@ -166,10 +166,9 @@ export interface K8sCluster extends WithTimestamp {
   };
 }
 
-export const assetFiltersRT = rt.exact(
+export const assetFiltersSingleKindRT = rt.exact(
   rt.partial({
     type: rt.union([assetTypeRT, rt.array(assetTypeRT)]),
-    kind: rt.union([assetKindRT, rt.array(assetKindRT)]),
     ean: rt.union([rt.string, rt.array(rt.string)]),
     id: rt.string,
     typeLike: rt.string,
@@ -180,7 +179,38 @@ export const assetFiltersRT = rt.exact(
   })
 );
 
+export type SingleKindAssetFilters = rt.TypeOf<typeof assetFiltersSingleKindRT>;
+
+export const assetFiltersRT = rt.intersection([
+  assetFiltersSingleKindRT,
+  rt.partial({ kind: rt.union([assetKindRT, rt.array(assetKindRT)]) }),
+]);
+
 export type AssetFilters = rt.TypeOf<typeof assetFiltersRT>;
+
+/**
+ * start asset filters with date range included
+ *
+ * DEPRECATED
+ *
+ * some older GET /assets endpoints accept from and to as part of the asset filters
+ * these endpoints are going away but in the meantime, this type has been separated
+ * out to avoid tangling it with the newer types where filters do not include from/to
+ */
+
+export const assetFiltersWithDateRangeRT = rt.intersection([
+  rt.partial({
+    from: rt.string,
+    to: rt.string,
+  }),
+  assetFiltersRT,
+]);
+
+export type AssetFiltersWithDateRange = rt.TypeOf<typeof assetFiltersWithDateRangeRT>;
+
+/**
+ * end asset filters with date range included
+ */
 
 export const relationRT = rt.union([
   rt.literal('ancestors'),
@@ -203,15 +233,15 @@ export const assetDateRT = rt.union([dateRt, datemathStringRt]);
 /**
  * Hosts
  */
-export const getHostAssetsQueryOptionsRT = rt.exact(
+export const getHostAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
   rt.partial({
-    from: assetDateRT,
     to: assetDateRT,
     size: sizeRT,
     stringFilters: rt.string,
-    filters: assetFiltersRT,
-  })
-);
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
 export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptionsRT>;
 export const getHostAssetsResponseRT = rt.type({
   hosts: rt.array(assetRT),
@@ -219,44 +249,40 @@ export const getHostAssetsResponseRT = rt.type({
 export type GetHostAssetsResponse = rt.TypeOf<typeof getHostAssetsResponseRT>;
 
 /**
+ * Containers
+ */
+export const getContainerAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+export type GetContainerAssetsQueryOptions = rt.TypeOf<typeof getContainerAssetsQueryOptionsRT>;
+export const getContainerAssetsResponseRT = rt.type({
+  containers: rt.array(assetRT),
+});
+export type GetContainerAssetsResponse = rt.TypeOf<typeof getContainerAssetsResponseRT>;
+
+/**
  * Services
  */
-export const getServiceAssetsQueryOptionsRT = rt.exact(
+export const getServiceAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
   rt.partial({
     from: assetDateRT,
     to: assetDateRT,
     size: sizeRT,
     parent: rt.string,
     stringFilters: rt.string,
-    filters: assetFiltersRT,
-  })
-);
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
 
 export type GetServiceAssetsQueryOptions = rt.TypeOf<typeof getServiceAssetsQueryOptionsRT>;
 export const getServiceAssetsResponseRT = rt.type({
   services: rt.array(assetRT),
 });
 export type GetServiceAssetsResponse = rt.TypeOf<typeof getServiceAssetsResponseRT>;
-
-export function isAssetFilters(parsed: object): parsed is AssetFilters {
-  // return true if parsed is {}
-  if (typeof parsed === 'object' && parsed !== null && Object.keys(parsed).length === 0) {
-    return true;
-  }
-  const submittedKeys = Object.keys(parsed);
-  const validated = assetFiltersRT.decode(parsed);
-
-  if (validated._tag === 'Right') {
-    const validatedKeys = Object.keys(validated.right);
-
-    // Manually check for extra keys since iots won't fail in this case
-    const extraSubmittedKeys = submittedKeys.filter((key) => !validatedKeys.includes(key));
-    if (extraSubmittedKeys.length > 0) {
-      return false;
-    }
-
-    return true;
-  } else {
-    return false;
-  }
-}
