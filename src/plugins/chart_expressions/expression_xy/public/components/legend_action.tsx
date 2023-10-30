@@ -28,7 +28,7 @@ export const getLegendAction = (
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   titles: LayersAccessorsTitles,
-  shouldShowLegendAction: () => boolean,
+  shouldShowLegendAction: (actionId: string) => boolean,
   singleTable?: boolean
 ): LegendAction =>
   React.memo(({ series: [xySeries] }) => {

@@ -6,10 +6,17 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+
 import { SecurityPageName } from '../../../../common/constants';
+import { ACTION_ID_TOP_N_FILTER_IN } from '../../../actions/filter/lens/filter_in';
+import { ACTION_ID_TIMELINE_TOP_N_FILTER_IN } from '../../../actions/filter/lens/filter_in_timeline';
+import { ACTION_ID_TOP_N_FILTER_OUT } from '../../../actions/filter/lens/filter_out';
+import { ACTION_ID_TIMELINE_TOP_N_FILTER_OUT } from '../../../actions/filter/lens/filter_out_timeline';
 import type { Request } from './types';
 
 export const VISUALIZATION_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
+export const FILTER_IN_LEGEND_ACTION = `filterIn`;
+export const FILTER_OUT_LEGEND_ACTION = `filterOut`;
 
 const pageFilterFieldMap: Record<string, string> = {
   [SecurityPageName.hosts]: 'host',
@@ -192,3 +199,25 @@ export const parseVisualizationData = <T>(data: string[]): T[] =>
       return acc;
     }
   }, [] as T[]);
+
+export const showLegendActionsByActionId = ({
+  actionId,
+  scopeId,
+}: {
+  actionId: string;
+  scopeId: string;
+}) => {
+  switch (actionId) {
+    case FILTER_IN_LEGEND_ACTION:
+    case FILTER_OUT_LEGEND_ACTION:
+      return false;
+    case ACTION_ID_TOP_N_FILTER_IN:
+    case ACTION_ID_TOP_N_FILTER_OUT:
+      return scopeId !== 'timeline';
+    case ACTION_ID_TIMELINE_TOP_N_FILTER_IN:
+    case ACTION_ID_TIMELINE_TOP_N_FILTER_OUT:
+      return scopeId === 'timeline';
+    default:
+      return true;
+  }
+};

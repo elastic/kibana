@@ -23,6 +23,8 @@ import { TimelineId } from '../../../../common/types';
 import { SecurityCellActionType } from '../../constants';
 import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
+import { ACTION_ID_TOP_N_FILTER_IN } from './filter_in';
+import { ACTION_ID_TOP_N_FILTER_OUT } from './filter_out';
 
 function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   return (
@@ -51,8 +53,8 @@ export const createLensFilterLegendAction = ({
     currentAppId = appId;
   });
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
-  const { filterManager } = services.data.query;
   const { notifications } = services;
+  const { filterManager } = services.data.query;
 
   return createAction<CellValueContext>({
     id,
@@ -87,35 +89,20 @@ export const createLensFilterLegendAction = ({
       if (!field) return;
 
       const timeline = getTimelineById(store.getState(), TimelineId.active);
+      services.topValuesPopover.closePopover();
 
       if (!negate) {
-        if (timeline.show) {
-          addFilterIn({
-            filterManager: timeline.filterManager,
-            fieldName: field,
-            value,
-          });
-        } else {
-          addFilterIn({
-            filterManager,
-            fieldName: field,
-            value,
-          });
-        }
+        addFilterIn({
+          filterManager: id === ACTION_ID_TOP_N_FILTER_IN ? filterManager : timeline.filterManager,
+          fieldName: field,
+          value,
+        });
       } else {
-        if (timeline.show) {
-          addFilterOut({
-            filterManager: timeline.filterManager,
-            fieldName: field,
-            value,
-          });
-        } else {
-          addFilterOut({
-            filterManager,
-            fieldName: field,
-            value,
-          });
-        }
+        addFilterOut({
+          filterManager: id === ACTION_ID_TOP_N_FILTER_OUT ? filterManager : timeline.filterManager,
+          fieldName: field,
+          value,
+        });
       }
     },
   });

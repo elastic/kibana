@@ -105,5 +105,5 @@ export interface IInterpreterRenderHandlers {
   uiState?: unknown;
 
   getExecutionContext(): KibanaExecutionContext | undefined;
-  shouldShowLegendAction: () => boolean;
+  shouldShowLegendAction: (actionId: string) => boolean;
 }

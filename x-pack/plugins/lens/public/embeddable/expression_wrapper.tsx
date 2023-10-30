@@ -47,7 +47,7 @@ export interface ExpressionWrapperProps {
   lensInspector: LensInspector;
   noPadding?: boolean;
   docLinks: CoreStart['docLinks'];
-  shouldShowLegendAction: () => boolean;
+  shouldShowLegendAction: (actionId: string) => boolean;
 }
 
 export function ExpressionWrapper({

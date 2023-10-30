@@ -9,3 +9,7 @@ export { createFilterInCellActionFactory } from './cell_action/filter_in';
 export { createFilterOutCellActionFactory } from './cell_action/filter_out';
 export { createFilterInDiscoverCellActionFactory } from './discover/filter_in';
 export { createFilterOutDiscoverCellActionFactory } from './discover/filter_out';
+export { createFilterInTopNTimelineLegendAction } from './lens/filter_in_timeline';
+export { createFilterInTopNTopNLegendAction } from './lens/filter_in';
+export { createFilterOutTopNTimelineLegendAction } from './lens/filter_out_timeline';
+export { createFilterOutTopNLegendAction } from './lens/filter_out';

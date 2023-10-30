@@ -13,8 +13,12 @@ import type { StartServices } from '../types';
 import {
   createFilterInCellActionFactory,
   createFilterInDiscoverCellActionFactory,
+  createFilterInTopNTimelineLegendAction,
+  createFilterInTopNTopNLegendAction,
   createFilterOutCellActionFactory,
   createFilterOutDiscoverCellActionFactory,
+  createFilterOutTopNLegendAction,
+  createFilterOutTopNTimelineLegendAction,
 } from './filter';
 import {
   createAddToTimelineLensAction,
@@ -38,8 +42,6 @@ import type {
 } from './types';
 import { enhanceActionWithTelemetry } from './telemetry';
 import { registerDiscoverHistogramActions } from './discover_in_timeline/vis_apply_filter';
-import { createFilterInLensTimelineLegendAction } from './filter/lens/filter_in_timeline';
-import { createFilterOutLensTimelineLegendAction } from './filter/lens/filter_out_timeline';
 
 export const registerUIActions = (
   store: SecurityAppStore,
@@ -55,25 +57,39 @@ export const registerUIActions = (
 const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {
   const { uiActions } = services;
 
-  const addToTimelineAction = createAddToTimelineLensAction({ store, order: 1 });
+  const addToTimelineAction = createAddToTimelineLensAction({ store, order: 4 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
 
-  const copyToClipboardAction = createCopyToClipboardLensAction({ order: 2 });
+  const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
 
-  const filterInTimelineLegendActions = createFilterInLensTimelineLegendAction({
+  const filterInTimelineLegendActions = createFilterInTopNTimelineLegendAction({
     store,
     order: 0,
     services,
   });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInTimelineLegendActions);
 
-  const filterOutTimelineLegendActions = createFilterOutLensTimelineLegendAction({
+  const filterOutTimelineLegendActions = createFilterOutTopNTimelineLegendAction({
     store,
     order: 1,
     services,
   });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutTimelineLegendActions);
+
+  const filterInLegendActions = createFilterInTopNTopNLegendAction({
+    store,
+    order: 2,
+    services,
+  });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
+
+  const filterOutLegendActions = createFilterOutTopNLegendAction({
+    store,
+    order: 3,
+    services,
+  });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutLegendActions);
 };
 
 const registerDiscoverCellActions = (store: SecurityAppStore, services: StartServices) => {
