@@ -111,11 +111,6 @@ export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' 
       setHasUserDataView(hasUserDataViewValue);
       setHasESData(hasESDataValue);
 
-      if (!hasUserDataViewValue) {
-        setShowNoDataPage(true);
-        return false;
-      }
-
       let defaultDataViewExists: boolean = false;
       try {
         defaultDataViewExists = await data.dataViews.defaultDataViewExists();

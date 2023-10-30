@@ -234,6 +234,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               title: `Advanced Settings [${version}]`,
               canViewInApp: false,
             },
+            {
+              title: `logs-*`,
+              canViewInApp: true,
+            },
+            {
+              title: `metrics-*`,
+              canViewInApp: true,
+            },
           ]);
         });
 

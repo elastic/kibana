@@ -1159,7 +1159,7 @@ export class DataViewsService {
       defaultId = undefined;
     }
 
-    if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
+    if (!defaultId && patterns.length >= 1) {
       defaultId = patterns[0].id;
       if (await this.getCanSaveAdvancedSettings()) {
         await this.config.set('defaultIndex', defaultId);
